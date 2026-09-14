@@ -6,27 +6,24 @@
   "icon": "🪨",
   "track": "craft-engineering",
   "title": "AI Chisel",
-  "subtitle": "Carving Precision — Intermediate Patterns",
-  "description": "Level up with intermediate algorithmic patterns: two pointers, sliding window, BFS/DFS, and tree traversals. Each pattern tied to real AI/ML applications.",
-  "audience": "Engineers with DSA basics ready for medium-level problems",
-  "prerequisites": "AI Sketch or equivalent fundamentals",
+  "subtitle": "Patterns for solving harder problems",
+  "description": "Practise the algorithmic patterns that recur in production services, search, recommendation, data processing, and technical interviews.",
+  "audience": "Engineers with programming fundamentals",
+  "prerequisites": "AI Sketch or equivalent data-structure knowledge",
   "lessonCount": 10,
-  "estimatedHours": 2,
+  "estimatedHours": 14,
   "topics": [
-    "Bit Manipulation",
-    "Dynamic Programming",
-    "Graph Algorithms",
-    "Hash Tables Deep Dive",
-    "Interval Problems",
-    "Monotonic Stack and Queue",
-    "Trees and Binary Search",
-    "Tries and Prefix Trees",
-    "Two Pointers and Sliding Window",
-    "Union-Find"
+    "Sliding windows and intervals",
+    "Trees, graphs, and union-find",
+    "Heaps, tries, and monotonic structures",
+    "Dynamic programming",
+    "Performance and correctness"
   ],
   "outcomes": [
-    "Apply two pointers and sliding window to optimise solutions",
-    "Traverse trees and graphs with BFS/DFS",
-    "Connect these patterns to AI search and inference"
-  ]
+    "Recognise and apply reusable problem-solving patterns",
+    "Prove correctness and analyse complexity",
+    "Choose practical optimisations without premature complexity",
+    "Communicate a solution clearly under pressure"
+  ],
+  "curriculumVersion": "2026.1"
 }

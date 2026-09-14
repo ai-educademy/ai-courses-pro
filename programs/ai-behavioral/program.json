@@ -6,25 +6,24 @@
   "icon": "🌟",
   "track": "career-ready",
   "title": "Behavioral Mastery",
-  "subtitle": "Stories That Land Offers",
-  "description": "Master behavioral interviews with the STAR framework, leadership narratives, and structured storytelling. Learn to transform your experience into compelling answers that prove your value.",
-  "audience": "Engineers at any level preparing for behavioral rounds",
-  "prerequisites": "Real project experience to draw from",
+  "subtitle": "Tell the story of how you create impact",
+  "description": "Prepare concise, honest stories about ambiguity, delivery, failure, influence, conflict, and responsible AI decisions using evidence rather than rehearsed slogans.",
+  "audience": "Engineers preparing for behavioural and leadership interviews",
+  "prerequisites": "Real project or collaboration experience",
   "lessonCount": 8,
-  "estimatedHours": 4,
+  "estimatedHours": 8,
   "topics": [
-    "The STAR Interview Framework",
-    "Behavioural Interview Mastery",
-    "Leadership Principles",
-    "Conflict Resolution Stories",
-    "Cross-functional Collaboration",
-    "Failure and Growth Narratives",
-    "Managing Up and Stakeholders",
-    "Cultural Fit Conversations"
+    "Evidence-led STAR stories",
+    "Ambiguity and prioritisation",
+    "Failure, learning, and recovery",
+    "Conflict and influence",
+    "Responsible AI judgement"
   ],
   "outcomes": [
-    "Structure compelling STAR stories",
-    "Handle leadership principle questions",
-    "Navigate difficult behavioral scenarios"
-  ]
+    "Build a reusable story bank",
+    "Answer with context, action, and measurable outcome",
+    "Show judgement when technology and people trade-offs collide",
+    "Adapt one experience to different question styles"
+  ],
+  "curriculumVersion": "2026.1"
 }

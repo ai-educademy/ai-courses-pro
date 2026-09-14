@@ -5,28 +5,25 @@
   "color": "#F59E0B",
   "icon": "🌳",
   "title": "AI Branches",
-  "subtitle": "Explore Real-World Applications",
-  "description": "See AI in action across industries — healthcare, finance, creative arts, and more. Start building simple projects and understand the tools professionals use.",
-  "audience": "Learners ready to see AI applied in practice",
-  "prerequisites": "AI Sprouts",
+  "subtitle": "Build with today’s AI capabilities",
+  "description": "Move from concepts to applications. Work across text, vision, speech, and multimodal systems while learning where APIs, open models, structured outputs, and human review fit.",
+  "audience": "Learners who want to build useful AI features",
+  "prerequisites": "AI Sprouts or equivalent foundations",
   "lessonCount": 10,
-  "estimatedHours": 2,
+  "estimatedHours": 10,
   "topics": [
-    "AI in Healthcare",
-    "AI and Robotics",
-    "Autonomous Vehicles",
-    "Computer Vision",
-    "Generative AI",
-    "Multimodal AI",
-    "Natural Language Processing",
-    "Recommendation Systems",
-    "Reinforcement Learning",
-    "Voice AI and Speech Recognition"
+    "Model APIs and structured output",
+    "Prompt and context design",
+    "Vision, speech, and multimodal AI",
+    "Fine-tuning versus retrieval",
+    "Human-in-the-loop product design"
   ],
   "outcomes": [
-    "Build a simple chatbot",
-    "Understand how image recognition works",
-    "Create an AI-powered mini project"
+    "Build a small multimodal AI feature",
+    "Choose between prompting, retrieval, and fine-tuning",
+    "Design clear input and output contracts for model calls",
+    "Explain failure modes to non-technical stakeholders"
   ],
-  "track": "ai-learning"
+  "track": "ai-learning",
+  "curriculumVersion": "2026.1"
 }

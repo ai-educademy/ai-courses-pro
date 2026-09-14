@@ -5,28 +5,25 @@
   "color": "#8B5CF6",
   "icon": "🏕️",
   "title": "AI Canopy",
-  "subtitle": "Deep Dive into AI Systems",
-  "description": "Go deeper into neural networks, large language models, and AI system design. Learn to evaluate AI tools critically and understand the engineering behind modern AI.",
-  "audience": "Intermediate learners ready for technical depth",
-  "prerequisites": "AI Branches",
-  "lessonCount": 10,
-  "estimatedHours": 2,
+  "subtitle": "Engineer reliable GenAI systems",
+  "description": "Design production-minded LLM applications with retrieval, tool use, agent workflows, MCP, evaluation, guardrails, and observability. Learn to optimise for quality, latency, safety, and cost.",
+  "audience": "Developers and technical practitioners building AI applications",
+  "prerequisites": "AI Branches plus basic Python or TypeScript",
+  "lessonCount": 13,
+  "estimatedHours": 18,
   "topics": [
-    "Agentic Workflows",
-    "AI Agents and Autonomous Systems",
-    "AI Safety and Red Teaming",
-    "Attention and Transformers",
-    "Deep Neural Networks",
-    "Fine-Tuning and RAG",
-    "Large Language Models",
-    "Prompt Engineering",
-    "RLHF and Alignment",
-    "Scaling Laws and Training at Scale"
+    "LLM application architecture",
+    "RAG, hybrid retrieval, and reranking",
+    "Tool calling, MCP, and agent workflows",
+    "Golden datasets and agent evaluation",
+    "Guardrails, tracing, latency, and cost"
   ],
   "outcomes": [
-    "Understand how neural networks work",
-    "Master prompt engineering techniques",
-    "Evaluate AI tools and services critically"
+    "Build a grounded RAG assistant with citations",
+    "Design a safe tool-using agent with explicit boundaries",
+    "Create regression evaluations for quality and tool behaviour",
+    "Instrument an AI feature for latency, cost, and failure analysis"
   ],
-  "track": "ai-learning"
+  "track": "ai-learning",
+  "curriculumVersion": "2026.1"
 }

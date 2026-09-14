@@ -1,0 +1,36 @@
+---
+title: "RAG Systems in Practice"
+description: "Design retrieval that improves answers instead of hiding weak data behind a confident model."
+order: 11
+difficulty: intermediate
+duration: 45
+icon: "🔎"
+published: true
+---
+
+## Why retrieval matters
+
+Language models are excellent at transforming context, but they are not a source of truth. Retrieval-augmented generation (RAG) gives a model relevant, current evidence at request time.
+
+## A production retrieval loop
+
+1. **Ingest** documents with ownership, timestamps, permissions, and provenance.
+2. **Chunk** by meaning rather than an arbitrary character count.
+3. **Index** embeddings alongside searchable text and metadata.
+4. **Retrieve** with hybrid search when exact terms and semantic similarity both matter.
+5. **Rerank** the shortlist against the user’s question.
+6. **Generate** an answer that cites the supplied evidence.
+7. **Evaluate** retrieval and answer quality separately.
+
+The important design choice is not the vector database. It is the contract between retrieval and generation: what evidence is allowed into context, how much, from which tenant, and what the model must do when evidence is missing.
+
+## Failure modes to test
+
+- The right document exists but was not retrieved.
+- The retrieved passage is relevant but out of date.
+- A user can retrieve a document they are not authorised to see.
+- The answer sounds plausible but cannot be grounded in the supplied passages.
+
+## Build challenge
+
+Create a small knowledge assistant with five source documents. Add citations, a “not enough evidence” response, document freshness metadata, and a ten-question golden test set. Record retrieval recall and groundedness before changing the prompt.

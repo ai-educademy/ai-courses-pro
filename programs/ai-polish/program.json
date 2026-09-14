@@ -6,27 +6,24 @@
   "icon": "💎",
   "track": "craft-engineering",
   "title": "AI Polish",
-  "subtitle": "Refining Excellence — Behavioral Mastery",
-  "description": "Master the behavioral interview with structured frameworks. STAR method, leadership principles, AI-era scenarios, and communication strategies.",
-  "audience": "Engineers at any level preparing for behavioral rounds",
-  "prerequisites": "Real project experience to draw from",
+  "subtitle": "Communicate and lead in the AI era",
+  "description": "Turn strong engineering into visible impact through technical communication, decision records, stakeholder alignment, responsible leadership, and AI-aware career storytelling.",
+  "audience": "Engineers moving into senior, lead, or AI-focused roles",
+  "prerequisites": "Professional project experience",
   "lessonCount": 10,
-  "estimatedHours": 2,
+  "estimatedHours": 10,
   "topics": [
-    "AI-Era Leadership",
-    "Behavioural Interview Mastery",
-    "Building Your Personal Brand",
-    "Career Transitions to AI",
-    "Communicating Technical Ideas",
-    "Negotiating Your Tech Offer",
-    "Remote Work and Global Teams",
-    "Salary Benchmarking",
-    "The STAR Interview Framework",
-    "Technical Resume Masterclass"
+    "Technical storytelling",
+    "Architecture decision records",
+    "Influence and stakeholder alignment",
+    "Responsible AI leadership",
+    "Interview and promotion narratives"
   ],
   "outcomes": [
-    "Structure compelling stories using STAR",
-    "Communicate technical decisions clearly",
-    "Navigate AI ethics and leadership questions"
-  ]
+    "Explain complex AI trade-offs to different audiences",
+    "Build evidence-based leadership stories",
+    "Lead decisions without hiding uncertainty",
+    "Position engineering impact clearly and credibly"
+  ],
+  "curriculumVersion": "2026.1"
 }

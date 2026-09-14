@@ -6,25 +6,24 @@
   "icon": "💻",
   "track": "career-ready",
   "title": "Technical Interviews",
-  "subtitle": "Code Under Pressure",
-  "description": "Conquer coding interviews, system design rounds, and technical deep dives. From data structures to distributed systems, build the skills and confidence to excel under pressure.",
-  "audience": "Software engineers preparing for technical interview rounds",
-  "prerequisites": "Solid programming fundamentals in at least one language",
+  "subtitle": "Solve, design, and communicate under pressure",
+  "description": "Practise coding, API, debugging, system design, and AI application questions with a repeatable method for clarifying requirements and defending trade-offs.",
+  "audience": "Software engineers preparing for technical interviews",
+  "prerequisites": "Solid programming fundamentals",
   "lessonCount": 8,
-  "estimatedHours": 5,
+  "estimatedHours": 16,
   "topics": [
-    "Data Structures for Interviews",
-    "Algorithm Patterns and Strategies",
-    "System Design Fundamentals",
-    "API Design Interviews",
-    "Code Review Interviews",
-    "Debugging Under Pressure",
-    "Complexity Analysis Mastery",
-    "Live Coding Best Practices"
+    "Coding patterns and complexity",
+    "API and data-contract design",
+    "AI system design",
+    "Debugging and code review",
+    "Communication under pressure"
   ],
   "outcomes": [
-    "Solve coding problems systematically",
-    "Design systems at whiteboard interviews",
-    "Communicate your approach clearly"
-  ]
+    "Solve problems with a repeatable framework",
+    "Design reliable AI-enabled services",
+    "Debug systematically instead of guessing",
+    "Communicate assumptions and trade-offs clearly"
+  ],
+  "curriculumVersion": "2026.1"
 }
