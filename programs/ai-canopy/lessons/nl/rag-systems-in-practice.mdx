@@ -1,0 +1,36 @@
+---
+title: "RAG-systemen in de praktijk"
+description: "Ontwerp retrieval die antwoorden verbetert in plaats van zwakke data te verbergen achter een zelfverzekerd model."
+order: 11
+difficulty: "intermediate"
+duration: 45
+icon: "🔎"
+published: true
+---
+
+## Waarom retrieval ertoe doet
+
+Taalmodellen zijn uitstekend in het bewerken van context, maar ze zijn geen bron van waarheid. Retrieval-augmented generation (RAG) geeft een model relevant, actueel bewijs op het moment van de vraag.
+
+## Een retrievallus in productie
+
+1. **Inlezen** van documenten met eigenaarschap, tijdstempels, permissies en herkomst.
+2. **Opdelen** op betekenis in plaats van op een willekeurig aantal tekens.
+3. **Indexeren** van embeddings naast doorzoekbare tekst en metadata.
+4. **Ophalen** met hybride zoek wanneer zowel exacte termen als semantische gelijkenis meetellen.
+5. **Herordenen** van de shortlist op basis van de vraag van de gebruiker.
+6. **Genereren** van een antwoord dat het aangeleverde bewijs citeert.
+7. **Evalueren** van retrieval- en antwoordkwaliteit afzonderlijk.
+
+De bepalende ontwerpkeuze is niet de vectordatabase. Het is het contract tussen retrieval en generatie: welk bewijs de context in mag, hoeveel, van welke tenant, en wat het model moet doen wanneer bewijs ontbreekt.
+
+## Faalwijzen om te testen
+
+- Het juiste document bestaat, maar werd niet opgehaald.
+- De opgehaalde passage is relevant maar verouderd.
+- Een gebruiker kan een document ophalen dat hij niet mag inzien.
+- Het antwoord klinkt plausibel maar is niet te onderbouwen met de aangeleverde passages.
+
+## Bouwopdracht
+
+Maak een kleine kennisassistent met vijf brondocumenten. Voeg citaties toe, een antwoord "onvoldoende bewijs", metadata over de actualiteit van documenten en een gouden testset van tien vragen. Leg retrieval-recall en onderbouwing vast voordat je de prompt aanpast.

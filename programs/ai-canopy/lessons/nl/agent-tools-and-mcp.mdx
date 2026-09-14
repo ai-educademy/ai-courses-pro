@@ -1,0 +1,33 @@
+---
+title: "Agents met tools en MCP"
+description: "Ga van indrukwekkende demo's naar afgebakende, observeerbare agents die tools veilig gebruiken."
+order: 12
+difficulty: "intermediate"
+duration: 45
+icon: "🧰"
+published: true
+---
+
+## Workflow of agent?
+
+Gebruik een workflow wanneer de stappen bekend zijn en deterministisch moeten blijven. Gebruik een agent wanneer het systeem tussen tools moet kiezen of zich moet aanpassen aan informatie die tijdens de uitvoering naar boven komt. Begin met het eenvoudigste ontwerp dat aan de eis voldoet.
+
+## Een tool is een contract
+
+Elke tool hoort het volgende vast te leggen:
+
+- Een nauw omschreven naam en doel.
+- Een getypeerd invoerschema met validatie.
+- Expliciete autorisatie- en tenantgrenzen.
+- Een bruikbare, compacte vorm van het resultaat.
+- Timeouts, retries, idempotentie en een auditspoor.
+
+Model Context Protocol (MCP) standaardiseert hoe compatibele clients tools en resources ontdekken en aanroepen. Het neemt de noodzaak van authenticatie, minimale rechten, invoervalidatie en menselijke goedkeuring bij ingrijpende acties niet weg.
+
+## Veilige grenzen voor agents
+
+Houd planning en uitvoering gescheiden. Behandel opgehaalde tekst en tooluitvoer als onbetrouwbare data. Beperk het aantal tools en de recursiediepte. Vraag om bevestiging voordat er berichten worden verstuurd, records worden gewijzigd, geld wordt uitgegeven of een onomkeerbare wijziging wordt doorgevoerd.
+
+## Bouwopdracht
+
+Bouw een agent die een kleine documentenset kan doorzoeken, een resultaat kan berekenen en een e-mail kan opstellen (maar niet versturen). Log elke toolaanroep, weiger misvormde argumenten, voeg een timeout toe en test prompt-injectietekst in een opgehaald document.

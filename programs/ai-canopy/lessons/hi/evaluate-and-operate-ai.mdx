@@ -1,0 +1,32 @@
+---
+title: "AI का मूल्यांकन और संचालन"
+description: "किसी AI feature के उपयोगकर्ताओं तक पहुँचने से पहले गुणवत्ता, सुरक्षा, latency और लागत को मापने योग्य बनाएँ।"
+order: 13
+difficulty: "advanced"
+duration: 45
+icon: "📈"
+published: true
+---
+
+## Demos प्रमाण नहीं होते
+
+एक प्रभावशाली demo केवल यह सिद्ध करता है कि एक रास्ता एक बार काम कर गया। Production में चलने वाले AI system के लिए दोहराने योग्य evaluation set, traces, failure taxonomy और release thresholds आवश्यक हैं।
+
+## Evaluation loop बनाएँ
+
+ऐसा golden dataset बनाएँ जो वास्तविक उपयोगकर्ता मंशा, edge cases, adversarial inputs और ज्ञात विफलताओं का प्रतिनिधित्व करे। प्रत्येक आयाम को अलग-अलग मापें:
+
+- **Retrieval:** recall, precision, प्रासंगिकता, freshness और permission शुद्धता।
+- **Generation:** groundedness, तथ्यात्मक शुद्धता, पूर्णता और refusal की गुणवत्ता।
+- **Agent व्यवहार:** tool चयन, arguments की वैधता, कार्य की सफलता, अनावश्यक चरण और recovery।
+- **Operations:** latency, token उपयोग, लागत, error rate और उपयोगकर्ता प्रतिक्रिया।
+
+हर release पर automated checks चलाएँ, फिर प्रतिनिधि विफलताओं की मैन्युअल जाँच करें। LLM-as-a-judge समीक्षा को बड़े पैमाने पर करने में सहायक है, पर उसके लिए एक rubric, calibration उदाहरण और मानवीय निर्णय के विरुद्ध spot checks आवश्यक हैं।
+
+## परिवर्तन को ध्यान में रखकर संचालन
+
+Prompts, models, tools, retrieval settings और evaluation data का versioning करें। संवेदनशील सामग्री को अनावश्यक रूप से संग्रहित किए बिना requests को trace करें। परिवर्तनों को क्रमिक रूप से rollout करें, cohorts की तुलना करें, और rollback का रास्ता हमेशा खुला रखें।
+
+## Build चुनौती
+
+पिछले पाठों का RAG या agent लें। उसमें 20 golden cases, तीन safety cases, latency और लागत के मापन, तथा एक release gate जोड़ें। System को जानबूझकर तोड़ें, विफलताओं का वर्गीकरण करें, और अगले सुधार का दस्तावेज़ीकरण करें।

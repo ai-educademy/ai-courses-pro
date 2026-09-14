@@ -1,0 +1,33 @@
+---
+title: "Agents outillés et MCP"
+description: "Passez des démonstrations impressionnantes à des agents délimités et observables qui utilisent des outils en toute sécurité."
+order: 12
+difficulty: "intermediate"
+duration: 45
+icon: "🧰"
+published: true
+---
+
+## Workflow ou agent ?
+
+Utilisez un workflow lorsque les étapes sont connues et doivent rester déterministes. Utilisez un agent lorsque le système doit choisir parmi plusieurs outils ou s'adapter à des informations découvertes en cours d'exécution. Commencez par la conception la plus simple qui répond au besoin.
+
+## Un outil est un contrat
+
+Chaque outil doit définir :
+
+- Un nom et un objectif précis.
+- Un schéma d'entrée typé avec validation.
+- Des limites d'autorisation et de cloisonnement par client explicites.
+- Un format de résultat utile et compact.
+- Des délais d'expiration, des tentatives, l'idempotence et une trace d'audit.
+
+Le Model Context Protocol (MCP) normalise la façon dont les clients compatibles découvrent et appellent les outils et les ressources. Il ne supprime pas le besoin d'authentification, de moindre privilège, de validation des entrées ni d'approbation humaine pour les actions lourdes de conséquences.
+
+## Des limites d'agent sûres
+
+Séparez la planification de l'exécution. Traitez le texte récupéré et les sorties d'outils comme des données non fiables. Limitez le nombre d'outils et la profondeur de récursion. Exigez une confirmation avant d'envoyer un message, de modifier un enregistrement, de dépenser de l'argent ou de réaliser une action irréversible.
+
+## Défi pratique
+
+Construisez un agent capable de chercher dans un petit corpus de documents, de calculer un résultat et de rédiger (sans l'envoyer) un e-mail. Journalisez chaque appel d'outil, rejetez les arguments mal formés, ajoutez un délai d'expiration et testez un texte d'injection de prompt placé dans un document récupéré.

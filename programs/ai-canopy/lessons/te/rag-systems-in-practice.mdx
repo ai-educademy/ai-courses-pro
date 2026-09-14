@@ -1,0 +1,36 @@
+---
+title: "ఆచరణలో RAG Systems"
+description: "బలహీనమైన data ను ఆత్మవిశ్వాసంతో కూడిన model వెనుక దాచకుండా, సమాధానాలను మెరుగుపరిచే retrieval ను design చేయండి."
+order: 11
+difficulty: "intermediate"
+duration: 45
+icon: "🔎"
+published: true
+---
+
+## Retrieval ఎందుకు ముఖ్యం
+
+Language models context ను మార్చడంలో అత్యుత్తమమైనవి, కానీ అవి సత్యానికి మూలం కావు. Retrieval-augmented generation (RAG) అనేది request సమయంలో model కు సంబంధిత మరియు తాజా ఆధారాలను అందిస్తుంది.
+
+## Production retrieval loop
+
+1. **Ingest** చేయండి documents ను ownership, timestamps, permissions మరియు provenance తో.
+2. **Chunk** చేయండి అర్థం ఆధారంగా, ఏదో ఒక యాదృచ్ఛిక character count ఆధారంగా కాదు.
+3. **Index** చేయండి embeddings ను searchable text మరియు metadata తో పాటు.
+4. **Retrieve** చేయండి hybrid search తో, ఖచ్చితమైన పదాలు మరియు semantic similarity రెండూ ముఖ్యమైనప్పుడు.
+5. **Rerank** చేయండి shortlist ను వినియోగదారు ప్రశ్నకు అనుగుణంగా.
+6. **Generate** చేయండి అందించిన ఆధారాలను ఉటంకించే సమాధానాన్ని.
+7. **Evaluate** చేయండి retrieval నాణ్యతను మరియు సమాధాన నాణ్యతను విడిగా.
+
+అత్యంత కీలకమైన design నిర్ణయం vector database కాదు. అది retrieval మరియు generation మధ్య ఉన్న contract: ఏ ఆధారాలను context లోకి అనుమతించాలి, ఎంత మేరకు, ఏ tenant నుండి, మరియు ఆధారాలు లేనప్పుడు model ఏమి చేయాలి.
+
+## పరీక్షించవలసిన failure modes
+
+- సరైన document ఉంది, కానీ retrieve కాలేదు.
+- Retrieve అయిన భాగం సంబంధితమే, కానీ పాతబడింది.
+- చూడటానికి అనుమతి లేని document ను వినియోగదారు పొందగలుగుతున్నారు.
+- సమాధానం నమ్మశక్యంగా అనిపిస్తుంది, కానీ అందించిన భాగాల ఆధారంగా దానిని నిరూపించలేము.
+
+## Build సవాలు
+
+ఐదు source documents తో ఒక చిన్న knowledge assistant ను రూపొందించండి. అందులో citations, "సరిపడా ఆధారాలు లేవు" అనే సమాధానం, document freshness metadata, మరియు పది ప్రశ్నల golden test set జోడించండి. Prompt మార్చడానికి ముందు retrieval recall మరియు groundedness ను నమోదు చేయండి.

@@ -1,0 +1,33 @@
+---
+title: "Tool का उपयोग करने वाले Agents और MCP"
+description: "प्रभावशाली demos से आगे बढ़कर ऐसे सीमित और observable agents बनाएँ जो tools का सुरक्षित उपयोग करें।"
+order: 12
+difficulty: "intermediate"
+duration: 45
+icon: "🧰"
+published: true
+---
+
+## Workflow या agent?
+
+जब चरण पहले से ज्ञात हों और उन्हें deterministic रहना चाहिए, तब workflow का उपयोग करें। जब system को कई tools में से चुनना हो या execution के दौरान मिली जानकारी के अनुसार ढलना हो, तब agent का उपयोग करें। हमेशा सबसे सरल design से शुरू करें जो आवश्यकता पूरी करता हो।
+
+## हर tool एक contract है
+
+प्रत्येक tool को यह परिभाषित करना चाहिए:
+
+- एक सीमित नाम और स्पष्ट उद्देश्य।
+- validation के साथ typed input schema।
+- स्पष्ट authorisation और tenant सीमाएँ।
+- उपयोगी और संक्षिप्त result structure।
+- Timeouts, retries, idempotency और audit record।
+
+Model Context Protocol (MCP) यह मानकीकृत करता है कि compatible clients tools और resources को कैसे खोजें और call करें। यह authentication, least privilege, input validation या गंभीर परिणाम वाले कार्यों के लिए मानवीय अनुमोदन की आवश्यकता समाप्त नहीं करता।
+
+## सुरक्षित agent सीमाएँ
+
+Planning को execution से अलग रखें। प्राप्त किए गए text और tool output को अविश्वसनीय data मानें। Tools की संख्या और recursion depth सीमित रखें। संदेश भेजने, records बदलने, धन खर्च करने या कोई अपरिवर्तनीय परिवर्तन करने से पहले पुष्टि अनिवार्य करें।
+
+## Build चुनौती
+
+ऐसा agent बनाएँ जो एक छोटे document set में खोज कर सके, कोई परिणाम गणना कर सके और एक email का मसौदा तैयार कर सके (पर भेजे नहीं)। हर tool call को log करें, गलत arguments अस्वीकार करें, timeout जोड़ें, और किसी प्राप्त document के भीतर prompt-injection text का परीक्षण करें।

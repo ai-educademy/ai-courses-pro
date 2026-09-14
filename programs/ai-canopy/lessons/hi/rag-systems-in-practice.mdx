@@ -1,0 +1,36 @@
+---
+title: "व्यवहार में RAG Systems"
+description: "ऐसा retrieval design करें जो उत्तरों को बेहतर बनाए, न कि कमज़ोर data को एक आत्मविश्वासी model के पीछे छिपाए।"
+order: 11
+difficulty: "intermediate"
+duration: 45
+icon: "🔎"
+published: true
+---
+
+## Retrieval क्यों महत्वपूर्ण है
+
+Language models context को रूपांतरित करने में उत्कृष्ट हैं, परंतु वे सत्य का स्रोत नहीं हैं। Retrieval-augmented generation (RAG) model को request के समय प्रासंगिक और वर्तमान प्रमाण उपलब्ध कराता है।
+
+## Production retrieval loop
+
+1. **Ingest** करें documents को ownership, timestamps, permissions और provenance के साथ।
+2. **Chunk** करें अर्थ के आधार पर, न कि किसी मनमाने character count के आधार पर।
+3. **Index** करें embeddings को searchable text और metadata के साथ।
+4. **Retrieve** करें hybrid search से, जब सटीक शब्द और semantic similarity दोनों मायने रखते हों।
+5. **Rerank** करें shortlist को उपयोगकर्ता के प्रश्न के सापेक्ष।
+6. **Generate** करें ऐसा उत्तर जो दिए गए प्रमाणों का हवाला दे।
+7. **Evaluate** करें retrieval और उत्तर की गुणवत्ता को अलग-अलग।
+
+सबसे महत्वपूर्ण design निर्णय vector database नहीं है। वह है retrieval और generation के बीच का contract: कौन-से प्रमाण context में आने दिए जाएँ, कितने, किस tenant से, और प्रमाण उपलब्ध न होने पर model को क्या करना चाहिए।
+
+## परीक्षण योग्य failure modes
+
+- सही document मौजूद था, पर retrieve नहीं हुआ।
+- Retrieve किया गया अंश प्रासंगिक है, पर पुराना है।
+- कोई उपयोगकर्ता ऐसा document प्राप्त कर सकता है जिसे देखने की उसे अनुमति नहीं है।
+- उत्तर विश्वसनीय लगता है, पर दिए गए अंशों से उसकी पुष्टि नहीं होती।
+
+## Build चुनौती
+
+पाँच source documents के साथ एक छोटा knowledge assistant बनाएँ। उसमें citations, "पर्याप्त प्रमाण नहीं" वाला उत्तर, document freshness metadata, और दस प्रश्नों का golden test set जोड़ें। Prompt बदलने से पहले retrieval recall और groundedness दर्ज करें।

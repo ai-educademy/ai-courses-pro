@@ -1,0 +1,32 @@
+---
+title: "Évaluer et exploiter l'IA"
+description: "Rendez la qualité, la sécurité, la latence et le coût mesurables avant qu'une fonctionnalité d'IA n'atteigne les utilisateurs."
+order: 13
+difficulty: "advanced"
+duration: 45
+icon: "📈"
+published: true
+---
+
+## Une démo n'est pas une preuve
+
+Une démonstration convaincante prouve seulement qu'un chemin a fonctionné une fois. Un système d'IA en production exige un jeu d'évaluation reproductible, des traces, une taxonomie des défaillances et des seuils de mise en production.
+
+## Construire une boucle d'évaluation
+
+Créez un jeu de données de référence qui représente les intentions réelles des utilisateurs, les cas limites, les entrées adverses et les défaillances connues. Mesurez chaque dimension séparément :
+
+- **Recherche :** rappel, précision, pertinence, fraîcheur et exactitude des permissions.
+- **Génération :** ancrage, exactitude factuelle, exhaustivité et qualité des refus.
+- **Comportement de l'agent :** choix des outils, validité des arguments, réussite de la tâche, étapes inutiles et capacité de récupération.
+- **Exploitation :** latence, consommation de tokens, coût, taux d'erreur et retours utilisateurs.
+
+Automatisez les contrôles à chaque livraison, puis inspectez manuellement un échantillon représentatif de défaillances. Le LLM-juge aide à passer à l'échelle, mais il lui faut une grille d'évaluation, des exemples de calibrage et des vérifications ponctuelles face au jugement humain.
+
+## Exploiter dans la durée
+
+Versionnez les prompts, les modèles, les outils, les paramètres de recherche et les données d'évaluation. Tracez les requêtes sans stocker inutilement de contenu sensible. Déployez les changements progressivement, comparez les cohortes et gardez toujours une voie de retour arrière.
+
+## Défi pratique
+
+Reprenez le RAG ou l'agent des leçons précédentes. Ajoutez 20 cas de référence, trois cas de sécurité, des mesures de latence et de coût, et une porte de mise en production. Cassez le système délibérément, classez les défaillances et documentez le correctif suivant.

@@ -1,0 +1,33 @@
+---
+title: "Tools ఉపయోగించే Agents మరియు MCP"
+description: "ఆకట్టుకునే demos నుండి ముందుకు సాగి, tools ను సురక్షితంగా వాడే పరిమిత మరియు observable agents ను నిర్మించండి."
+order: 12
+difficulty: "intermediate"
+duration: 45
+icon: "🧰"
+published: true
+---
+
+## Workflow నా లేక agent నా?
+
+దశలు ముందే తెలిసి, అవి deterministic గా ఉండాలనుకుంటే workflow వాడండి. System అనేక tools మధ్య ఎంపిక చేసుకోవాల్సి వచ్చినప్పుడు, లేదా execution సమయంలో తెలిసిన సమాచారానికి అనుగుణంగా మారాల్సి వచ్చినప్పుడు agent వాడండి. అవసరాన్ని తీర్చే అత్యంత సరళమైన design తోనే మొదలుపెట్టండి.
+
+## ప్రతి tool ఒక contract
+
+ప్రతి tool ఈ క్రింది వాటిని నిర్వచించాలి:
+
+- పరిమితమైన పేరు మరియు స్పష్టమైన ఉద్దేశ్యం.
+- Validation తో కూడిన typed input schema.
+- స్పష్టమైన authorisation మరియు tenant సరిహద్దులు.
+- ఉపయోగకరమైన, సంక్షిప్తమైన result structure.
+- Timeouts, retries, idempotency మరియు audit record.
+
+Model Context Protocol (MCP) అనేది compatible clients tools మరియు resources ను ఎలా కనుగొని call చేయాలో ప్రామాణీకరిస్తుంది. అయితే authentication, least privilege, input validation, లేదా తీవ్ర పరిణామాలు కలిగించే చర్యలకు మానవ ఆమోదం అవసరాన్ని ఇది తొలగించదు.
+
+## సురక్షితమైన agent సరిహద్దులు
+
+Planning ను execution నుండి వేరుగా ఉంచండి. Retrieve చేసిన text మరియు tool output ను నమ్మదగని data గా పరిగణించండి. Tools సంఖ్యను, recursion depth ను పరిమితం చేయండి. సందేశాలు పంపే ముందు, records మార్చే ముందు, డబ్బు ఖర్చు చేసే ముందు, లేదా తిరిగి మార్చలేని మార్పు చేసే ముందు నిర్ధారణ తప్పనిసరి చేయండి.
+
+## Build సవాలు
+
+ఒక చిన్న document set లో వెతికి, ఒక ఫలితాన్ని లెక్కించి, ఒక email ను draft చేయగల (కానీ పంపని) agent ను నిర్మించండి. ప్రతి tool call ను log చేయండి, తప్పుగా ఉన్న arguments ను తిరస్కరించండి, timeout జోడించండి, మరియు retrieve చేసిన document లోపల prompt-injection text ను పరీక్షించండి.

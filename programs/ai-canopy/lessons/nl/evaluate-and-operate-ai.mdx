@@ -1,0 +1,32 @@
+---
+title: "AI evalueren en beheren"
+description: "Maak kwaliteit, veiligheid, latency en kosten meetbaar voordat een AI-functie gebruikers bereikt."
+order: 13
+difficulty: "advanced"
+duration: 45
+icon: "📈"
+published: true
+---
+
+## Demo's zijn geen bewijs
+
+Een overtuigende demo bewijst alleen dat één pad één keer werkte. Een AI-systeem in productie heeft een herhaalbare evaluatieset, traces, een faaltaxonomie en releasedrempels nodig.
+
+## Bouw een evaluatielus
+
+Stel een gouden dataset samen die echte gebruikersintentie, randgevallen, vijandige invoer en bekende fouten weerspiegelt. Meet de dimensies afzonderlijk:
+
+- **Retrieval:** recall, precisie, relevantie, actualiteit en correctheid van permissies.
+- **Generatie:** onderbouwing, feitelijke juistheid, volledigheid en de kwaliteit van weigeringen.
+- **Agentgedrag:** toolkeuze, geldigheid van argumenten, taaksucces, overbodige stappen en herstelvermogen.
+- **Operatie:** latency, tokengebruik, kosten, foutpercentage en gebruikersfeedback.
+
+Gebruik geautomatiseerde controles bij elke release en bekijk daarna representatieve fouten handmatig. LLM-as-a-judge helpt de review op te schalen, maar vraagt om een rubriek, kalibratievoorbeelden en steekproeven tegen menselijk oordeel.
+
+## Beheren met het oog op verandering
+
+Voorzie prompts, modellen, tools, retrievalinstellingen en evaluatiedata van versies. Trace verzoeken zonder onnodig gevoelige inhoud te bewaren. Rol wijzigingen geleidelijk uit, vergelijk cohorten en houd altijd een terugweg open.
+
+## Bouwopdracht
+
+Neem de RAG of de agent uit de vorige lessen. Voeg 20 gouden gevallen toe, drie veiligheidsgevallen, metingen van latency en kosten, en een releasepoort. Breek het systeem bewust, classificeer de fouten en documenteer de volgende fix.

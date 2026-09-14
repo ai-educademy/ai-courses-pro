@@ -1,0 +1,36 @@
+---
+title: "Les systèmes RAG en pratique"
+description: "Concevez une recherche qui améliore les réponses au lieu de masquer des données faibles derrière un modèle sûr de lui."
+order: 11
+difficulty: "intermediate"
+duration: 45
+icon: "🔎"
+published: true
+---
+
+## Pourquoi la recherche compte
+
+Les modèles de langage excellent à transformer un contexte, mais ils ne sont pas une source de vérité. La génération augmentée par la recherche (RAG) fournit au modèle des preuves pertinentes et actuelles au moment de la requête.
+
+## Une boucle de recherche en production
+
+1. **Ingérer** les documents avec propriétaire, horodatage, permissions et provenance.
+2. **Découper** selon le sens plutôt que selon un nombre de caractères arbitraire.
+3. **Indexer** les embeddings aux côtés du texte recherchable et des métadonnées.
+4. **Rechercher** en mode hybride lorsque les termes exacts et la similarité sémantique comptent tous les deux.
+5. **Réordonner** la présélection en fonction de la question de l'utilisateur.
+6. **Générer** une réponse qui cite les preuves fournies.
+7. **Évaluer** séparément la qualité de la recherche et celle de la réponse.
+
+Le choix de conception déterminant n'est pas la base de données vectorielle. C'est le contrat entre recherche et génération : quelles preuves sont admises dans le contexte, en quelle quantité, pour quel client, et ce que le modèle doit faire lorsque les preuves manquent.
+
+## Modes de défaillance à tester
+
+- Le bon document existe mais n'a pas été retrouvé.
+- Le passage retrouvé est pertinent mais périmé.
+- Un utilisateur peut retrouver un document qu'il n'est pas autorisé à consulter.
+- La réponse paraît plausible mais ne peut être fondée sur les passages fournis.
+
+## Défi pratique
+
+Créez un petit assistant de connaissances avec cinq documents sources. Ajoutez des citations, une réponse « preuves insuffisantes », des métadonnées de fraîcheur des documents et un jeu de test de référence de dix questions. Mesurez le rappel de la recherche et l'ancrage des réponses avant de modifier le prompt.
