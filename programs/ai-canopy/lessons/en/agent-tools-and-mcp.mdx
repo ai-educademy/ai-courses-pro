@@ -1,0 +1,33 @@
+---
+title: "Tool-Using Agents and MCP"
+description: "Move from impressive demos to bounded, observable agents that use tools safely."
+order: 12
+difficulty: intermediate
+duration: 45
+icon: "🧰"
+published: true
+---
+
+## Workflow or agent?
+
+Use a workflow when the steps are known and should be deterministic. Use an agent when the system must choose among tools or adapt to information discovered during execution. Start with the simplest design that meets the requirement.
+
+## A tool is a contract
+
+Every tool should define:
+
+- A narrow name and purpose.
+- A typed input schema with validation.
+- Explicit authorisation and tenant boundaries.
+- A useful, compact result shape.
+- Timeouts, retries, idempotency, and an audit record.
+
+Model Context Protocol (MCP) standardises how compatible clients discover and call tools and resources. It does not remove the need for authentication, least privilege, input validation, or human approval for consequential actions.
+
+## Safe agent boundaries
+
+Keep planning separate from execution. Treat retrieved text and tool output as untrusted data. Limit tool count and recursion depth. Require confirmation before sending messages, changing records, spending money, or making an irreversible change.
+
+## Build challenge
+
+Build an agent that can search a small document set, calculate a result, and draft (but not send) an email. Log every tool call, reject malformed arguments, add a timeout, and test prompt-injection text inside a retrieved document.

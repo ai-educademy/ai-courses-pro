@@ -6,27 +6,24 @@
   "icon": "🏆",
   "track": "craft-engineering",
   "title": "AI Masterpiece",
-  "subtitle": "Portfolio-Ready — End-to-End Case Studies",
-  "description": "Capstone projects combining DSA, system design, and behavioral skills. Design real systems end-to-end and build your engineering portfolio.",
-  "audience": "Engineers ready for senior+ roles",
-  "prerequisites": "Completed AI Sketch through AI Polish",
+  "subtitle": "Your production AI capstone",
+  "description": "Design, build, evaluate, and present an end-to-end AI product. Combine retrieval or tool use with security, tests, observability, a runbook, and a credible product case.",
+  "audience": "Engineers ready to demonstrate production AI capability",
+  "prerequisites": "AI Canopy plus AI Craft, or equivalent experience",
   "lessonCount": 10,
-  "estimatedHours": 2,
+  "estimatedHours": 30,
   "topics": [
-    "Build Your Own AI Project",
-    "Career Roadmap 2026",
-    "Design Twitter's AI Feed",
-    "End-to-End ML Pipeline",
-    "Engineering Portfolio",
-    "Full Mock Interview",
-    "Kaggle Competition Guide",
-    "Ship an Open-Source AI Project",
-    "Reading Research Papers",
-    "System Design Mock Interview"
+    "Product brief and success metrics",
+    "Architecture and threat model",
+    "RAG or agent implementation",
+    "Evaluation and observability",
+    "Launch review and portfolio case study"
   ],
   "outcomes": [
-    "Complete end-to-end system designs",
-    "Perform confidently in mock interviews",
-    "Build a standout engineering portfolio"
-  ]
+    "Ship a portfolio-ready AI system design and prototype",
+    "Demonstrate evaluation beyond a happy-path demo",
+    "Document risk, operations, and rollback decisions",
+    "Present technical work with clear business and user value"
+  ],
+  "curriculumVersion": "2026.1"
 }

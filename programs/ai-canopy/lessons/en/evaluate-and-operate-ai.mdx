@@ -1,0 +1,32 @@
+---
+title: "Evaluate and Operate AI"
+description: "Make quality, safety, latency, and cost measurable before an AI feature reaches users."
+order: 13
+difficulty: advanced
+duration: 45
+icon: "📈"
+published: true
+---
+
+## Demos are not evidence
+
+A convincing demo proves only that one path worked once. A production AI system needs a repeatable evaluation set, traces, failure taxonomy, and release thresholds.
+
+## Build an evaluation loop
+
+Create a golden dataset that represents real user intent, edge cases, adversarial inputs, and known failures. Measure the dimensions separately:
+
+- **Retrieval:** recall, precision, relevance, freshness, and permission correctness.
+- **Generation:** groundedness, factual correctness, completeness, and refusal quality.
+- **Agent behaviour:** tool selection, argument validity, task success, unnecessary steps, and recovery.
+- **Operations:** latency, token usage, cost, error rate, and user feedback.
+
+Use automated checks for every release, then inspect representative failures manually. LLM-as-a-judge can help scale review, but it needs a rubric, calibration examples, and spot checks against human judgement.
+
+## Operate for change
+
+Version prompts, models, tools, retrieval settings, and evaluation data. Trace requests without storing sensitive content unnecessarily. Roll out changes gradually, compare cohorts, and keep a rollback path.
+
+## Build challenge
+
+Take the RAG or agent from the previous lessons. Add 20 golden cases, three safety cases, latency and cost measurements, and a release gate. Break the system deliberately, classify the failures, and document the next fix.
