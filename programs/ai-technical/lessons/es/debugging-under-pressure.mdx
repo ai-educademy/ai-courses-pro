@@ -1,0 +1,228 @@
+---
+title: "Depuración bajo presión"
+description: "Desarrolle un enfoque de depuración sistemático que funcione incluso cuando el tiempo corre y el entrevistador está mirando."
+order: 6
+difficulty: "intermediate"
+duration: 15
+icon: "🐛"
+published: true
+machineTranslated: true
+---
+# Depuración bajo presión
+
+Hay un tipo especial de estrés que surge al depurar el código mientras alguien te observa y un temporizador cuenta atrás. Te sudan las palmas de las manos, tu mente se queda en blanco y, de repente, no puedes recordar cómo funciona un bucle for. Todos los ingenieros han estado allí. La diferencia entre los candidatos que fracasan y los que brillan no es el talento en bruto: es tener un proceso sistemático que funciona incluso cuando tu cerebro quiere entrar en pánico. Esta lección le brinda ese proceso.
+
+## El marco de depuración RIIFV
+
+Cuando le entreguen un código con errores en una entrevista, resista la tentación de comenzar a buscar el error de inmediato. En su lugar, siga este marco de cinco pasos:
+
+### R - Reproducir
+
+Confirme que el error existe y comprenda sus síntomas.
+
+- ¿Cuál es el comportamiento esperado?
+- ¿Cuál es el comportamiento real?
+- ¿Bajo qué entradas se produce el error?
+
+```python
+# You're told this function should return the second largest element
+def second_largest(nums):
+    first = second = float('-inf')
+    for num in nums:
+        if num > first:
+            second = first
+            first = num
+        elif num > second:
+            second = num
+    return second
+
+# Step 1: Reproduce with test cases
+print(second_largest([3, 1, 4, 1, 5]))  # Expected: 4, Got: 4 ✓
+print(second_largest([5, 5, 5]))         # Expected: 5, Got: -inf ✗ — BUG!
+print(second_largest([1]))               # Expected: None?, Got: -inf — Edge case
+```
+
+### Yo - Aislar
+
+Limita el lugar donde vive el insecto. Utilice el pensamiento de divide y vencerás:
+
+- ¿El error está en el análisis de entrada, en la lógica o en la salida?
+- ¿Qué línea o bloque específico produce un resultado incorrecto?
+- ¿Puedes aislarlo en un caso de prueba mínimo fallido?
+
+### Yo - Identificar
+
+Una vez aislado, determine la causa raíz, no solo el síntoma:
+
+- **Síntoma**: Devuelve `-inf` por `[5, 5, 5]`
+- **Causa raíz**: la condición `elif num > second` no maneja duplicados. Cuando todos los elementos son iguales, `num > first` solo es verdadero una vez y `num > second` nunca es verdadero para los elementos iguales restantes.
+
+### F - Arreglar
+
+Aplique la solución mínima que solucione la causa raíz sin introducir nuevos errores:
+
+```python
+def second_largest(nums):
+    if len(nums) < 2:
+        return None
+    first = second = float('-inf')
+    for num in nums:
+        if num > first:
+            second = first
+            first = num
+        elif num > second and num != first:  # Handle case: distinct second
+            second = num
+    return second if second != float('-inf') else first  # All same → return that value
+```
+
+<ThinkAboutIt>Espera, ¿debería `second_largest([5, 5, 5])` devolver 5 o Ninguno? Esto es ambiguo y, en una entrevista real, este es exactamente el tipo de pregunta que debes hacerle al entrevistador. Aclarar los requisitos es parte de la depuración.</ThinkAboutIt>
+
+### V - Verificar
+
+Confirme que la solución funciona en todos los casos: el caso original fallido, los casos extremos y los casos que ya pasaron:
+
+```python
+assert second_largest([3, 1, 4, 1, 5]) == 4    # Normal case
+assert second_largest([5, 5, 5]) == 5            # Duplicates
+assert second_largest([1, 2]) == 1               # Minimum valid input
+assert second_largest([1]) is None               # Too few elements
+assert second_largest([-1, -2, -3]) == -2        # Negative numbers
+```
+
+<Callout>Vuelva a ejecutar siempre los casos de prueba originales después de corregir un error. Es sorprendentemente común corregir un error mientras se introduce otro. El paso "verificar" detecta regresiones que le costarían la entrevista.</Callout>
+
+## Formatos comunes de entrevistas de depuración
+
+### Formato 1: "Aquí está el código con errores: arréglelo"
+
+Recibe una función con 1-3 errores. Aplicar RIIFV:
+- Leer el código y comprender la intención.
+- Ejecutar casos de prueba mental para encontrar fallas.
+- Corrige cada error y explica tu razonamiento.
+
+### Formato 2: "Este sistema está averiado: diagnosticarlo"
+
+Se le presenta un escenario: "Los usuarios informan que la página de pago a veces muestra el precio incorrecto". Necesitas:
+- Hacer preguntas aclaratorias ("¿A veces? ¿Es aleatorio o sigue un patrón?")
+- Formular hipótesis ("Podría ser un problema de almacenamiento en caché, una condición de carrera o un error de conversión de moneda")
+- Proponer pasos de investigación en orden de prioridad.
+
+### Formato 3: "Depurar este sistema activo" (depuración de pares)
+
+Usted y el entrevistador depuran juntos. Pueden desempeñar el papel de un compañero de equipo o de un sistema:
+- Verbaliza tu proceso de pensamiento.
+- Propón qué comprobarías primero y por qué.
+- Interpretar registros y métricas que proporcionan.
+
+## Pensar en voz alta durante la depuración
+
+La mayor diferencia entre depurar solo y depurar en una entrevista es que es necesario narrar. A continuación le indicamos cómo hacerlo sin que se sienta forzado:
+
+**Exponga sus observaciones**:
+"Veo que la función toma una lista y debería devolver la segunda más grande. Permítanme seguir el ejemplo con un ejemplo simple..."
+
+**Formular hipótesis**:
+"Lo primero que pensé es que podría no manejar casos extremos como valores duplicados. Déjame probar con [5, 5, 5]..."
+
+**Explique su razonamiento**:
+"La condición `num > second` nunca es verdadera cuando todos los valores son iguales porque `first` ya es 5, y los 5 restantes no son mayores que `second`, que también es `-inf`... espera, en realidad `5 > -inf` es verdadero, así que el segundo se convierte en 5 en el segundo elemento... Hmm, déjame rastrear con más cuidado".
+
+**Admite cuando te equivoques**:
+"En realidad, mi hipótesis inicial era incorrecta. Déjame volver sobre esto..."
+
+<FunFact>La investigación realizada por el psicólogo Gary Klein descubrió que los depuradores expertos resuelven problemas hasta 10 veces más rápido que los novatos, no porque sean más inteligentes, sino porque reconocen patrones de experiencias pasadas. Es por eso que practicar con diversos tipos de errores es más importante que la inteligencia bruta.</FunFact>
+
+## Uso estratégico de declaraciones impresas
+
+En una entrevista de codificación, las declaraciones impresas son su depurador. Úsalos estratégicamente:
+
+```python
+def merge_sorted_lists(list1, list2):
+    result = []
+    i = j = 0
+    while i < len(list1) and j < len(list2):
+        print(f"Comparing list1[{i}]={list1[i]} with list2[{j}]={list2[j]}")
+        if list1[i] <= list2[j]:
+            result.append(list1[i])
+            i += 1
+        else:
+            result.append(list2[j])
+            j += 1
+        print(f"Result so far: {result}")
+
+    # Don't forget: add remaining elements
+    result.extend(list1[i:])
+    result.extend(list2[j:])
+    print(f"Final result: {result}")
+    return result
+```
+
+**Consejos para una depuración de impresiones eficaz**:
+- Imprimir en puntos de decisión (antes de si/si no, dentro de bucles)
+- Incluir nombres de variables e índices en la salida.
+- Imprimir antes y después de la ubicación del error sospechoso
+- Elimine o comente las impresiones antes de enviar su solución final.
+
+## Depuración de sistemas distribuidos
+
+Para entrevistas de alto nivel, es posible que le pregunten sobre la depuración de sistemas distribuidos:
+
+### El kit de herramientas de depuración
+
+| Herramienta/Técnica | Lo que revela |
+|---|---|
+| **Registros** (estructurados, con ID de correlación) | Secuencia de eventos, detalles del error |
+| **Métricas** (latencia, tasa de error, rendimiento) | Tendencias y anomalías |
+| **Rastros** (rastreo distribuido) | Flujo de solicitudes entre servicios |
+| **Controles de salud** | ¿Qué componentes se degradan?
+
+### Enfoque sistemático
+
+1. **Consulte los paneles de métricas**: ¿se trata de un pico o de una degradación gradual?
+2. **Reduzca el alcance**: ¿qué servicio, punto final o región se ve afectado?
+3. **Ver implementaciones recientes**: "¿qué cambió?" es la pregunta de mayor señal
+4. **Siga el seguimiento**: utilice ID de correlación para realizar un seguimiento de una solicitud fallida en todos los servicios
+5. **Compruebe las dependencias**: ¿es un servicio posterior (base de datos, caché, API de terceros) la causa principal?
+
+```
+User reports slow checkout
+→ Metrics show p99 latency spike at 14:30
+→ Correlated with deployment of payment-service v2.3.1
+→ Traces show payment-service waiting 10s on database query
+→ Database query plan changed due to missing index after schema migration
+→ Root cause: migration in v2.3.1 dropped an index
+→ Fix: recreate index, add migration test
+```
+
+<Quiz question="Un servicio de producción muestra repentinamente un aumento de 5 veces en la latencia de p99. No se implementó ningún código en las últimas 24 horas. ¿Qué deberías investigar primero?" options="Busque en el código base errores recientes|Comprobar si una dependencia descendente está experimentando problemas|Volver a la versión anterior|Agregue más registros y espere a que el problema vuelva a ocurrir" answer="1" explanation="Cuando no se cambia ningún código, la causa raíz probablemente sea externa: una dependencia posterior (base de datos, caché, API de terceros) puede degradarse o podría haber cambios en la infraestructura (red, DNS, vencimiento del certificado). Verificar primero las dependencias es el paso de investigación de mayor señal." />
+
+## Gestión del tiempo durante las rondas de depuración
+
+Una ronda de depuración típica dura entre 30 y 45 minutos. Presupuesta tu tiempo:
+
+| Fase | Hora | Actividad |
+|---|---|---|
+| **Entender** | 5 minutos | Lea el código, aclare el problema, identifique el comportamiento esperado versus el real |
+| **Reproducir** | 5 minutos | Crear casos de prueba que desencadenen el error |
+| **Aislar e identificar** | 10 minutos | Delimitar la causa raíz mediante el rastreo y la impresión de declaraciones |
+| **Reparar** | 5 minutos | Aplique la solución mínima y correcta |
+| **Verificar** | 5 minutos | Pruebe la solución en todos los casos, incluidos los casos extremos |
+
+<Callout>Si han transcurrido 15 minutos y no has encontrado el error, da un paso atrás y cambia tu enfoque. Vuelva a leer el enunciado del problema; es posible que haya entendido mal el comportamiento esperado. Pruebe un caso de prueba completamente diferente. A veces el error está en tus suposiciones, no en el código.</Callout>
+
+## Qué hacer cuando estás estancado
+
+1. **Vuelva a leer el planteamiento del problema**; es posible que haya hecho una suposición incorrecta
+2. **Pruebe un caso de prueba mínimo**: reduzca la entrada al caso más pequeño que aún falla
+3. **Rastrea línea por línea**: con lápiz y papel, si es necesario, realiza un seguimiento de cada variable
+4. **Compruebe los límites**: primera iteración, última iteración, entrada vacía
+5. **Explique el problema al entrevistador**: la "depuración con pato de goma" funciona incluso con una audiencia humana
+6. **Pide una pista**: esto es mucho mejor que sentarte en silencio durante 10 minutos
+
+## Conclusiones clave
+
+- **Utilice el marco RIIFV**: Reproducir → Aislar → Identificar → Reparar → Verificar. Funciona bajo presión porque le da a tu cerebro un proceso cuando falla el instinto.
+- **Piensa en voz alta continuamente**: narra tus observaciones, hipótesis y razonamientos. El silencio es tu enemigo en una entrevista de depuración.
+- **Priorizar casos extremos**: la mayoría de los errores de entrevista se esconden en entradas vacías, duplicados, números negativos o condiciones de contorno.
+- **Las declaraciones impresas son tus amigas**: úsalas estratégicamente en los puntos de decisión y límpialas antes de finalizarlas.
+- **Sepa cuándo girar**: si su enfoque no funciona después de 10 a 15 minutos, dé un paso atrás y pruebe con un ángulo completamente diferente.

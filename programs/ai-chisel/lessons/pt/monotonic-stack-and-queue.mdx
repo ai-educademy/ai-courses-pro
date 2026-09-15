@@ -1,0 +1,150 @@
+---
+title: "Pilha e fila monotônicas - próximo elemento maior e além"
+description: "Aprenda os padrões monotônicos de pilha e fila para resolver problemas de próximo elemento maior, temperaturas diárias, histograma e janela deslizante em tempo O(n)."
+order: 8
+difficulty: "advanced"
+duration: 19
+icon: "📊"
+published: true
+machineTranslated: true
+---
+## O que torna uma pilha monotônica?
+
+Uma **pilha monotônica** mantém os elementos em ordem estritamente crescente ou decrescente, de baixo para cima. Antes de enviar um novo elemento, você remove tudo que viola o invariante. Esta ideia única desbloqueia soluções O(n) para problemas que parecem exigir O(n²).
+
+```
+Decreasing stack processing [2, 1, 5, 3, 4]:
+
+Push 2 → [2]
+Push 1 → [2, 1]         (1 < 2, invariant holds)
+Pop 1, Pop 2, Push 5 → [5]  (5 > both)
+Push 3 → [5, 3]
+Pop 3, Push 4 → [5, 4]  (4 > 3)
+```
+
+## Próximo Elemento Maior
+
+Para cada elemento, encontre o primeiro elemento maior à sua direita. A força bruta varre para a direita para cada posição - O(n²). Uma pilha decrescente monotônica faz isso em uma passagem.
+
+```python
+def next_greater(nums):
+    result = [-1] * len(nums)
+    stack = []
+    for i, num in enumerate(nums):
+        while stack and nums[stack[-1]] < num:
+            result[stack.pop()] = num
+        stack.append(i)
+    return result
+```
+
+Quando exibimos o índice `j`, o elemento atual é o próximo maior - garantido porque tudo entre era menor (eles foram exibidos antes ou nunca foram bloqueados `j`).
+
+<Quiz
+  question="Para a entrada [4, 2, 1, 5], o que a pilha monotônica contém ANTES do processamento 5?"
+  options="[4, 2, 1]|[4]|[1]|[5]"
+  answer="0"
+  explanation="4 > 2 > 1, então todos os três ficam na pilha decrescente. Quando chega 5, todos são exibidos porque 5 é maior que cada um."
+/>
+
+## Temperaturas Diárias (LeetCode 739)
+
+*Dadas as temperaturas diárias, descubra quantos dias faltam para um dia mais quente.* Este é o próximo elemento maior com índices - a resposta para o índice `j` é `i − j` quando `j` é exibido pelo índice `i`.
+
+## Problema de extensão de estoque
+
+*Para cada dia, quantos dias consecutivos (incluindo hoje) tiveram preço ≤ preço de hoje?* Use uma pilha decrescente monotônica armazenando `(price, index)`. Quando você abre, a lacuna entre o índice atual e o novo topo da pilha fornece a extensão.
+
+<ThinkAboutIt>O problema de estoque processa elementos da esquerda para a direita, mas encontra informações sobre o lado esquerdo. Como a pilha codifica “olhar para trás” enquanto avança?</ThinkAboutIt>
+
+## Maior retângulo no histograma
+
+O **Maior Retângulo no Histograma** do LeetCode é a joia da coroa dos problemas de pilha monotônica.
+
+**Informações importantes:** para cada barra, descubra até que ponto ela pode se estender para a esquerda e para a direita como a barra mais curta. Use uma pilha crescente - quando uma barra é estourada, a barra popping define seu limite direito e o novo topo da pilha define seu limite esquerdo.
+
+```python
+def largest_rectangle(heights):
+    stack, max_area = [], 0
+    for i, h in enumerate(heights + [0]):
+        while stack and heights[stack[-1]] > h:
+            height = heights[stack.pop()]
+            width = i if not stack else i - stack[-1] - 1
+            max_area = max(max_area, height * width)
+        stack.append(i)
+    return max_area
+```
+
+A sentinela `[0]` no final força todas as barras restantes a serem processadas.
+
+<Illustration src="/images/lessons/monotonic-stack-and-queue.svg" alt="Barras do histograma com o maior retângulo destacado" caption="A pilha monotônica encontra o retângulo mais largo que cada barra pode suportar como a barra mais curta." />
+
+## Retenção de água da chuva - abordagem de pilha
+
+Em vez do método clássico de dois ponteiros, uma pilha decrescente monotônica calcula a água retida camada por camada. Quando uma barra mais alta aparecer, coloque as barras mais curtas e calcule a água presa entre a barra estourada, a barra atual e o novo topo da pilha.
+
+```
+Heights:  [3, 1, 2, 1, 3]
+Water:       [2, 1, 2]  → total = 5
+```
+
+<FunFact>Trapping Rain Water tem pelo menos quatro soluções O(n) distintas - dois ponteiros, pilha monotônica, matrizes de prefixo máximo e uma abordagem otimizada de passagem única. Os entrevistadores adoram ver múltiplas estratégias.</FunFact>
+
+## Fila Monotônica - Janela Deslizante Máxima
+
+Uma **deque monotônica** (fila dupla) mantém a ordem decrescente e oferece suporte à remoção eficiente de ambas as extremidades. Para **Máximo de janela deslizante** (LeetCode 239):
+
+1. Antes de adicionar o índice `i`, retire todos os elementos anteriores menores que `nums[i]`
+2. Empurre `i` para trás
+3. A frente é sempre o máximo da janela atual
+4. Remova a frente se ela cair fora da janela
+
+```python
+from collections import deque
+
+def max_sliding_window(nums, k):
+    dq, result = deque(), []
+    for i, num in enumerate(nums):
+        while dq and nums[dq[-1]] <= num:
+            dq.pop()
+        dq.append(i)
+        if dq[0] <= i - k:
+            dq.popleft()
+        if i >= k - 1:
+            result.append(nums[dq[0]])
+    return result
+```
+
+Cada elemento entra e sai do deque no máximo uma vez - **O(n)** total.
+
+<Quiz
+  question="Por que o deque monotônico para janela deslizante remove ao máximo da FRENTE?"
+  options="Para manter a ordem classificada|Para remover o elemento mínimo|Para expulsar elementos que saíram da janela|Para reverter a fila"
+  answer="2"
+  explanation="Os elementos na frente podem ter índices fora da janela atual. Removê-los garante que apenas candidatos válidos permaneçam."
+/>
+
+## O padrão - manter invariante durante o processamento
+
+Todo problema monotônico de pilha/fila segue um modelo:
+
+1. **Defina o invariante** (crescente ou decrescente)
+2. **Violadores de pop** - e extraia informações úteis de cada pop
+3. **Envie o elemento atual**
+4. O *evento pop* é onde a resposta é calculada
+
+<Quiz
+  question="Em uma pilha crescente monotônica, quando o elemento X causa um estouro do elemento Y, qual relacionamento é mantido?"
+  options="X < Y|X > Y|X = Y|Sem relacionamento garantido"
+  answer="0"
+  explanation="Uma pilha crescente aparece quando o elemento recebido é menor, porque Y > X viola o invariante crescente de baixo para cima."
+/>
+
+<ThinkAboutIt>Você poderia resolver o "Próximo Elemento Menor" simplesmente alterando o operador de comparação no modelo do próximo elemento maior? Qual seria o invariante?</ThinkAboutIt>
+
+---
+
+## 📚 Leitura adicional
+
+- [Monotonic Stack - LeetCode Explore](https://leetcode.com/tag/monotonic-stack/) - Conjunto de problemas selecionados para prática
+- [Maior retângulo no histograma - LeetCode 84](https://leetcode.com/problems/largest-rectangle-in-histogram/) - O desafio definitivo da pilha monotônica
+- [Máximo da janela deslizante - LeetCode 239](https://leetcode.com/problems/sliding-window-maximum/) - Aplicativo deque monotônico clássico

@@ -1,0 +1,168 @@
+---
+title: "Kaggle コンペティション ガイド - Kaggle で競争する (そして学ぶ) 方法"
+description: "最初の提出からグランドマスターテクニックまで: EDA ワークフロー、特徴量エンジニアリングのトリック、アンサンブル手法、および常に上位 1% に入る戦略。"
+order: 7
+difficulty: "advanced"
+duration: 20
+icon: "🏆"
+published: true
+machineTranslated: true
+---
+# Kaggle コンペティション ガイド - Kaggle で競争する (そして学ぶ) 方法
+
+Kaggle は単なる競争プラットフォームではなく、世界最大の応用 ML 教室です。 1,500 万人を超えるデータ サイエンティストが、スキルを磨き、ポートフォリオを構築し、雇用を確保するためにこれを使用しています。このレッスンでは、効果的に競争し、あらゆる競争から最大限の学びを引き出す方法を学びます。
+
+## 🎯 Kaggle があなたのキャリアにとって重要な理由
+
+Kaggle の経験は、CV ではできないことを示しています。**乱雑な現実世界のデータで動作するモデルを出荷できる**。 Google、Meta、トップスタートアップ企業の採用マネージャーは、Kaggle リーダーボードから積極的に人材を採用しています。たとえ優勝しなくても、十分に文書化されたノートを備えた強力なプロフィールは、実践的な能力を証明します。
+
+<Illustration src="/images/lessons/kaggle-competition-guide.svg" alt="データ探索から最終提出までの Kaggle コンテストのワークフロー" caption="典型的な Kaggle ワークフロー - 収束するまで EDA、機能エンジニアリング、検証を繰り返します。" />
+
+## 📊 競争の種類と勝利戦略
+
+|タイプ |例 |典型的な勝利のアプローチ |
+|------|-------|----------------------|
+| **表形式** |住宅価格、不正行為の検出 |勾配ブースティング (XGBoost/LightGBM) + 高度な機能エンジニアリング |
+| **コンピュータ ビジョン** |画像分類、セグメンテーション |事前トレーニング済み CNN (EfficientNet、ConvNeXt) + 拡張 |
+| **NLP** |感想、質疑応答 |微調整トランス (DeBERTa、RoBERTa) |
+| **シミュレーション** |ゲーム AI、最適化 |強化学習 + ドメインヒューリスティック |
+
+<FunFact>Kaggle コンペティションの勝者で最も人気のある単一アルゴリズムは LightGBM です。これは、上位の表形式ソリューションの 60% 以上に使用されており、アンサンブルでは CatBoost または XGBoost と組み合わせて使用​​されることがよくあります。</FunFact>
+
+## 🔍 EDA - 最初の 48 時間
+
+データを理解する前にモデリングを開始しないでください。規律ある EDA ワークフロー:
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("train.csv")
+
+# Shape and types - know what you're working with
+print(f"Shape: {df.shape}")
+print(f"Missing values:\n{df.isnull().sum().sort_values(ascending=False).head(10)}")
+
+# Target distribution - is it balanced?
+df["target"].value_counts(normalize=True).plot(kind="bar")
+plt.title("Target Distribution")
+plt.show()
+
+# Correlations - find quick signal
+correlations = df.select_dtypes(include="number").corr()["target"].sort_values()
+print(correlations.head(10))  # Strongest negative correlations
+print(correlations.tail(10))  # Strongest positive correlations
+```
+
+**リークのチェック** - 予測時には存在しない特徴。これは初心者が犯す最大の間違いです。特徴がターゲットと疑わしいほどよく相関している場合は、祝う前に調査してください。
+
+<Quiz question="EDA 中に、ターゲットとの相関が 0.98 である特徴を発見しました。最初の反応は何でしょうか?" options="祝う - この機能はあなたのモデルを支配します|データ漏洩を調査する - この相関関係は疑わしいほど高い|それを削除します - 高い相関は過学習を意味します|ベースラインではなく、アンサンブル内でのみ使用してください" answer="1" explanation="0.98 の相関はほぼ確実にデータ漏洩です。この特徴には、将来の情報が含まれているか、ターゲットから派生した情報が含まれている可能性があります。これを使用すると、検証スコアが膨らみ、プライベート リーダーボードでは崩れてしまいます。" />
+
+## 🛠️ 成功する機能エンジニアリング
+
+上位の競合他社は、モデルのチューニングではなく、機能に時間の 70% を費やしています。実戦でテストされたテクニック:
+
+**集計機能** - さまざまな粒度でのグループ統計:
+```python
+for col in ["category", "store_id", "day_of_week"]:
+    stats = df.groupby(col)["sales"].agg(["mean", "std", "median"])
+    stats.columns = [f"{col}_sales_{s}" for s in ["mean", "std", "median"]]
+    df = df.merge(stats, on=col, how="left")
+```
+
+**ターゲット エンコーディング** - カテゴリを平滑化されたターゲット平均値に置き換えます (漏れを防ぐためにフォールドベースのエンコーディングを使用します)。
+
+**ラグ機能** - 時系列の場合、以前の値はゴールドです。
+```python
+for lag in [1, 7, 14, 28]:
+    df[f"sales_lag_{lag}"] = df.groupby("store_id")["sales"].shift(lag)
+```
+
+## ✅ 相互検証 - ローカルスコアを信頼します
+
+あなたの地元の CV スコアは、公開リーダーボードよりも重要です。堅牢な検証戦略:
+
+```python
+from sklearn.model_selection import StratifiedKFold
+
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+oof_predictions = np.zeros(len(X))
+
+for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
+    X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+    y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+
+    model = lgb.LGBMClassifier(n_estimators=1000, learning_rate=0.05)
+    model.fit(X_train, y_train, eval_set=[(X_val, y_val)],
+              callbacks=[lgb.early_stopping(50)])
+    oof_predictions[val_idx] = model.predict_proba(X_val)[:, 1]
+
+print(f"OOF AUC: {roc_auc_score(y, oof_predictions):.5f}")
+```
+
+**黄金律**: 地元の履歴書と公的 LB の意見が異なる場合は、あなたの履歴書を信頼してください。公開リーダーボードはテスト データの一部のみを使用します。テスト データへの過剰適合は罠です。
+
+<ThinkAboutIt>あなたは公開リーダーボードで 15 位ですが、あなたの地域の履歴書はあなたのモデルが過剰適合していることを示唆しています。最終提出では、最高の LB スコアまたは最高の CV スコアを提出しますか?なぜ?</ThinkAboutIt>
+
+## 🎭 アンサンブルメソッド - 最後のひと押し
+
+ほぼすべての優れたソリューションはアンサンブルを使用します。 3 つの主要なテクニック:
+
+**バギング** - 異なるデータ サブセット、平均予測で同じモデルをトレーニングします。分散を減らします。
+
+**スタッキング** - さまざまな基本モデルからのフォールド外予測に基づいてメタモデルをトレーニングします。
+```python
+# Level 1: diverse base models produce OOF predictions
+base_preds = np.column_stack([lgbm_oof, xgb_oof, catboost_oof, nn_oof])
+
+# Level 2: logistic regression learns optimal combination
+from sklearn.linear_model import LogisticRegression
+meta = LogisticRegression()
+meta.fit(base_preds, y_train)
+```
+
+**ブレンディング** - モデル予測の加重平均。積み重ねるよりも簡単ですが効果的です:
+```python
+final = 0.4 * lgbm_pred + 0.35 * xgb_pred + 0.25 * catboost_pred
+```
+
+<Quiz question="Kaggle のコンペティションでは、アンサンブル手法がほぼ常に単一モデルよりも優れたパフォーマンスを発揮するのはなぜですか?" options="より多くのトレーニング データを使用する|より深いモデルを使用することでバイアスを軽減します|異なるエラーを引き起こす多様なモデルを組み合わせることで分散を削減します。|彼らは訓練するのが速いです" answer="2" explanation="アンサンブルが機能するのは、さまざまなモデルが相関のないエラーを起こすためです。平均化すると、個々の間違いが相殺され、正しい信号が相互に強化され、バイアスを増加させることなく全体の分散が減少します。" />
+
+## 📓 素晴らしい Kaggle ノートブックを書く
+
+公開ノートはあなたの評判を高めます。メダルに値するノートには次のものが含まれます。
+
+1. **明確な説明** - コードだけでなく、推論を説明します
+2. **再現性** - ランダムなシード、ドキュメント ライブラリのバージョンを設定します。
+3. **視覚化** - 単なる装飾ではなく、洞察を明らかにするプロット
+4. **正直な結果** - うまくいかなかったこととうまくいったことを共有する
+
+<Quiz question="Kaggle コントリビューターからエキスパート ランクに昇格する最も効果的な方法は何ですか?" options="注目の大会で単独金メダルを獲得|複数の競技会やノートブックで銅メダルと銀メダルを継続的に獲得|結果に関係なく、できるだけ多くのコンテストに応募する|最高スコアの公開ノートブックをフォークする" answer="1" explanation="競技全体で一貫したパフォーマンスを達成すると、メダルが蓄積されます。競技メダルとノート/ディスカッションメダルが必要です。単一の幸運な結果よりも、貢献の幅広さが重要です。" />
+
+## 📈 Kaggle のランクと進行状況
+
+|ランク |要件 |典型的なタイムライン |
+|------|-----------|------|
+| **初心者** |アカウントを作成する | 1日目 |
+| **寄稿者** |プロフィールを完成させ、ノートブックを実行する |第 1 週 |
+| **専門家** |銅メダル 2 個 (競技) | 3 ～ 6 か月 |
+| **マスター** |金メダル 1 個 + 銀メダル 2 個 | 1 ～ 2 年 |
+| **グランドマスター** |金メダル 5 個 (ソロ 1 個) | 3 ～ 5 年以上 |
+
+<ThinkAboutIt>ランキング以外にも、ML の役割に応募する際に、Kaggle プロフィールをポートフォリオの一部としてどのように使用しますか?採用担当者はあなたの競争履歴の何をチェックしますか?</ThinkAboutIt>
+
+## 🎯 重要なポイント
+
+- 最初に EDA、次にモデリング - データ漏洩を常にチェック
+- 特徴量エンジニアリングは、ハイパーパラメータ調整よりも大きなリフトを実現します
+- 公開リーダーボードよりも地元の履歴書を信頼してください
+- 最後の追い込みのための多様なモデルのアンサンブル
+- 公開ノートに自分の仕事を文書化します - それがあなたのポートフォリオです
+
+---
+
+## 📚 続きを読む
+
+- [Kaggle Book by Konrad Banachewicz & Luca Massaron](https://www.kaggle.com/discussions/general/320744) - グランドマスターからの戦略を実用的なアドバイスに蒸留
+- [データ サイエンス コンペティションに勝つ方法 (Coursera)](https://www.coursera.org/learn/competitive-data-science)] - NRU HSE によるトップダウンの Kaggle 戦略コース
+- [コード付き論文 - ベンチマーク](https://paperswithcode.com/sota) - すべての ML タスクにわたる最先端の結果

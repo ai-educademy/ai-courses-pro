@@ -1,0 +1,118 @@
+---
+title: "RLHF y alineación: cómo ChatGPT aprende los valores humanos"
+description: "Comprenda cómo los modelos de lenguaje sin formato se transforman en asistentes útiles e inofensivos mediante ajustes supervisados, modelos de recompensa y aprendizaje reforzado a partir de comentarios humanos."
+order: 8
+difficulty: "advanced"
+duration: 18
+icon: "🎯"
+published: true
+machineTranslated: true
+---
+# RLHF y alineación: cómo ChatGPT aprende los valores humanos
+
+Un modelo de lenguaje previamente entrenado es un motor potente pero incontrolado. Puede escribir poesía, generar código y razonar sobre física, pero también puede producir contenido tóxico, fabricar hechos con confianza e ignorar las instrucciones del usuario. **Alineación** es el proceso de dirigir esa capacidad bruta hacia ser genuinamente útil, honesto e inofensivo.
+
+## El problema de la alineación
+
+El entrenamiento previo optimiza un único objetivo: **predecir el siguiente token**. Esto le da al modelo un amplio conocimiento pero ninguna comprensión de lo que un ser humano realmente *quiere*. Haga una pregunta a un modelo base y podría completar el texto como si escribiera una publicación en un foro, un anuncio o una teoría de conspiración, porque todos esos patrones existen en sus datos de entrenamiento.
+
+La brecha entre "capaz" y "útil" es el problema de alineación. Un modelo que puede redactar consejos médicos pero no sabe cuándo rechazarlos es potencialmente peligroso. Cerrar esta brecha requiere enseñar el modelo **preferencias humanas** - no sólo lo que *podría* venir después, sino lo que *debería* venir después.
+
+<Illustration src="/images/lessons/rlhf-and-alignment.svg" alt="Proceso de tres etapas: SFT se capacita en demostraciones, el modelo de recompensa aprende preferencias, PPO optimiza la política frente al modelo de recompensa" caption="El proceso RLHF transforma un modelo base en un asistente alineado a través de tres etapas: SFT, modelado de recompensas y optimización de RL." />
+
+## Etapa 1: Ajuste fino supervisado (SFT)
+
+El primer paso es sencillo: recopile miles de **ejemplos de demostración** de alta calidad (conversaciones ideales entre un usuario y un asistente) y ajuste el modelo base a partir de ellos. Esto le enseña al modelo el *formato* de ser útil: responder preguntas directamente, seguir instrucciones, admitir incertidumbre y rechazar solicitudes dañinas.
+
+SFT por sí solo produce un modelo notablemente mejor, pero tiene limitaciones. Los manifestantes humanos solo pueden escribir una cantidad limitada de ejemplos y el modelo aprende a imitar la calidad *promedio* de esas demostraciones en lugar de producir consistentemente la mejor respuesta posible.
+
+## Etapa 2: Entrenamiento del modelo de recompensa
+
+En lugar de escribir respuestas ideales, a los etiquetadores humanos se les dan **pares de resultados del modelo** y se les pide que clasifiquen cuál es mejor. Esto es cognitivamente más fácil (comparar es más sencillo que crear) y permite recopilar muchos más datos de preferencias.
+
+Estos pares clasificados entrenan un **modelo de recompensa (RM)**: una red neuronal separada que toma un mensaje y una respuesta como entrada y genera una puntuación escalar que representa la preferencia humana. El RM aprende patrones como:
+
+- Las respuestas precisas y basadas en fuentes obtienen puntuaciones más altas que las vagas
+- Las respuestas que reconocen la incertidumbre obtienen puntuaciones más altas que las mentiras confiadas.
+- Las negativas útiles obtienen una puntuación más alta que el cumplimiento de solicitudes perjudiciales
+
+<Quiz question="¿Por qué es más fácil y escalable recopilar datos de comparación (clasificar dos resultados) que datos de demostración (escribir resultados ideales)?" options="La comparación requiere menos potencia computacional|Los seres humanos pueden juzgar la calidad relativa mucho más rápido y de manera más consistente de lo que pueden producir texto de nivel experto desde cero.|Los datos de comparación requieren menos etiquetadores|Los datos de demostración no se pueden utilizar para modelos de lenguaje." answer="1" explanation="Escribir una respuesta de asistente perfecta requiere experiencia y mucho tiempo. Comparar dos respuestas y juzgar cuál es mejor es una tarea cognitiva mucho más rápida y produce etiquetas más consistentes entre diferentes anotadores, lo que la hace mucho más escalable." />
+
+## Etapa 3: Aprendizaje por refuerzo (PPO)
+
+Con un modelo de recompensa en mano, el modelo SFT se optimiza aún más utilizando **Optimización de política próxima (PPO)**. El proceso:
+
+1. El modelo genera una respuesta a un mensaje.
+2. El modelo de recompensa puntúa la respuesta.
+3. PPO actualiza los pesos del modelo para aumentar la recompensa esperada.
+4. Una **penalización de divergencia de KL** evita que el modelo se aleje demasiado de la línea base de SFT (evitando la piratería de recompensas)
+
+La pena de KL es crítica. Sin él, el modelo aprendería a explotar las peculiaridades del modelo de recompensa, generando respuestas con puntuaciones altas pero sin sentido o repetitivas. Al limitar hasta qué punto la política puede desviarse del modelo SFT, PPO mantiene los resultados coherentes al tiempo que mejora la alineación.
+
+Este proceso de tres etapas (SFT → Modelo de recompensa → PPO) es precisamente cómo OpenAI transformó GPT-3.5 en ChatGPT, como se describe en su artículo **InstructGPT**.
+
+<FunFact>El artículo de InstructGPT reveló un resultado sorprendente: los jueces humanos prefirieron un modelo de parámetros de 1.3B alineado con RLHF al 175B GPT-3 no alineado, un modelo 100 veces más grande. La alineación puede importar más que la escala bruta.
+</FunFact>
+
+## DPO: Eliminar al intermediario
+
+**Optimización de preferencia directa (DPO)** simplifica el proceso de RLHF al eliminar por completo el modelo de recompensa independiente. En cambio, DPO enmarca la alineación como un problema de clasificación: dada una respuesta preferida y una respuesta rechazada, actualiza directamente los pesos del modelo de lenguaje para aumentar la probabilidad de la preferida.
+
+La función de pérdida de DPO define implícitamente un modelo de recompensa dentro del propio modelo de lenguaje:
+
+```
+L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
+```
+
+Donde `y_w` es la respuesta preferida, `y_l` es la rechazada y `π_ref` es el modelo de referencia (SFT). DPO es más simple, más estable y más económico de entrenar: sin modelo de recompensa, sin bucle RL, sin PPO sensible a hiperparámetros. LLaMA 2 de Meta y muchos modelos de código abierto ahora usan DPO o sus variantes.
+
+<ThinkAboutIt>DPO elimina el modelo de recompensa pero también pierde la capacidad de calificar nuevas respuestas arbitrarias en el momento de la inferencia. ¿En qué escenarios podría ser más valioso tener un modelo de recompensa explícito (el proceso RLHF completo) que la simplicidad de DPO?
+</ThinkAboutIt>
+
+## IA constitucional: autosupervisión a escala
+
+Anthropic introdujo la **IA constitucional (CAI)** para reducir la dependencia de los etiquetadores humanos. El enfoque:
+
+1. Defina un conjunto de principios (una "constitución") - por ejemplo, *"Elija la respuesta que sea más útil y al mismo tiempo sea honesta e inofensiva"*
+2. Genere pares de respuestas y utilice el **modelo** mismo para juzgar qué respuesta se ajusta mejor a la constitución.
+3. Utilice estas preferencias generadas por IA para entrenar el modelo de recompensa (RLAIF - RL de AI Feedback)
+
+CAI aumenta drásticamente la recopilación de preferencias: la IA puede generar y evaluar millones de comparaciones a una fracción del costo del etiquetado humano. It also makes the alignment criteria **explicit and auditable**, encoded in the constitution rather than implicitly learned from labeller biases.
+
+<Quiz question="¿Cuál es la principal innovación de la IA constitucional en comparación con el RLHF estándar?" options="Utiliza un modelo base mucho más grande.|Reemplaza las etiquetas de preferencias humanas con el propio modelo de IA, guiado por principios escritos explícitos.|Elimina la necesidad de realizar cualquier ajuste|Se entrena sólo con datos sintéticos." answer="1" explanation="La IA constitucional utiliza el modelo mismo para generar juicios de preferencia, guiados por un conjunto de principios escritos explícitamente (la constitución). Esto amplía enormemente la recopilación de datos de preferencias y al mismo tiempo hace que los criterios de alineación sean transparentes y modificables." />
+
+## Equipo rojo
+
+Ninguna técnica de alineación es perfecta. **El equipo rojo** implica intentar deliberadamente que el modelo produzca resultados dañinos, sesgados o falsos. Los equipos rojos investigan por:
+
+- Jailbreaks que pasan por alto el entrenamiento de seguridad
+- Sesgos sistemáticos en las respuestas entre grupos demográficos.
+- Errores fácticos en ámbitos de alto riesgo (médico, jurídico)
+- Inconsistencias en los límites de rechazo
+
+Los principales laboratorios ahora realizan extensos equipos rojos antes de lanzar modelos, que a menudo involucran a investigadores de seguridad externos, expertos en el dominio y equipos de pruebas adversarios dedicados.
+
+## El impuesto de alineación
+
+La alineación tiene un costo. Los modelos entrenados por RLHF a veces se vuelven **demasiado cautelosos**: rechazan solicitudes benignas, agregan advertencias innecesarias o producen respuestas insulsas para evitar cualquier riesgo percibido. Este "impuesto de alineación" es un verdadero desafío de ingeniería:
+
+- Muy poca alineación → resultados perjudiciales
+- Demasiada alineación → rechazos inútiles y molestos
+
+La frontera de la investigación de la alineación es encontrar técnicas que maximicen la utilidad manteniendo al mismo tiempo límites de seguridad genuinos, no sólo la comparación de patrones en respuestas superficialmente "seguras".
+
+<Quiz question="¿Qué es el 'impuesto de alineación' en el contexto de los modelos entrenados por RLHF?" options="El costo financiero de contratar etiquetadores humanos para datos de preferencias|La reducción en la utilidad y capacidad del modelo que resulta de la capacitación en seguridad hace que el modelo sea demasiado cauteloso.|El costo computacional de ejecutar la optimización de PPO|El impuesto que los gobiernos imponen a las empresas de IA por el cumplimiento de la seguridad" answer="1" explanation="El impuesto de alineación se refiere a la capacidad o utilidad que se pierde cuando la capacitación en seguridad hace que un modelo sea excesivamente cauteloso: rechazando solicitudes benignas, cubriendo innecesariamente o produciendo respuestas genéricas. Equilibrar la seguridad con la ayuda genuina es uno de los problemas abiertos más difíciles de la alineación." />
+
+<FunFact>OpenAI pasó aproximadamente seis meses en el trabajo de alineación (recopilación de datos SFT, modelado de recompensas y entrenamiento RLHF) para transformar el modelo base de GPT-4 en la versión lanzada al público. La fase de alineación, si bien es una fracción del cálculo previo al entrenamiento, requirió miles de horas de etiquetado humano especializado.
+</FunFact>
+
+<ThinkAboutIt>Los etiquetadores humanos inevitablemente aportan sus propios prejuicios, perspectivas culturales e inconsistencias a los datos de preferencias. Si la alineación es, en última instancia, "aprender lo que los humanos prefieren", ¿qué preferencias deberían contar y cómo manejamos los desacuerdos fundamentales sobre los valores entre culturas?
+</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Entrenamiento de modelos de lenguaje para seguir instrucciones con retroalimentación humana (InstructGPT)](https://arxiv.org/abs/2203.02155) - Documento fundamental de RLHF de OpenAI
+- [Optimización de preferencias directas (Rafailov et al., 2023)](https://arxiv.org/abs/2305.18290) - El artículo de DPO que simplificó el entrenamiento de alineación
+- [IA constitucional: inofensividad de la retroalimentación de la IA (Anthropic)](https://arxiv.org/abs/2212.08073) - El enfoque de Anthropic para la alineación escalable mediante la autosupervisión de la IA

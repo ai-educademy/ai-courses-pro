@@ -1,0 +1,202 @@
+---
+title: "Fondamentaux de la conception de systèmes"
+description: "Maîtrisez l’entretien de conception de système – de la collecte des exigences aux décisions d’architecture – avec des cadres qui fonctionnent à n’importe quelle échelle."
+order: 3
+difficulty: "advanced"
+duration: 25
+icon: "🏗️"
+published: true
+machineTranslated: true
+---
+# Fondamentaux de la conception de systèmes
+
+L’entretien de conception du système est le moment où les ingénieurs seniors sont formés ou brisés. Contrairement aux entretiens de codage avec de bonnes réponses claires, la conception du système teste votre capacité à naviguer dans l'ambiguïté, à faire des compromis et à communiquer les décisions architecturales. La bonne nouvelle ? Il existe un cadre reproductible qui fonctionne pour chaque question. La bonne nouvelle ? Une fois que vous avez compris les éléments de base, vous pouvez concevoir n'importe quoi, du raccourcisseur d'URL à une plate-forme de messagerie à l'échelle mondiale. Construisons cette boîte à outils.
+
+## Le cadre en 4 étapes
+
+Chaque entretien de conception de système doit suivre cette structure. Les enquêteurs s’y attendent, et cela vous évite de sombrer dans des détails prématurés.
+
+### Étape 1 : Clarification des exigences (5 minutes)
+
+Ne commencez jamais à concevoir sans poser de questions. C'est ici que vous démontrez votre réflexion sur le produit.
+
+**Exigences fonctionnelles** — ce que fait le système :
+- « Les utilisateurs devraient-ils pouvoir envoyer des messages à des groupes, ou simplement 1:1 ? »
+- "Avons-nous besoin de notifications en temps réel ?"
+- « Le flux doit-il être chronologique ou classé ? »
+
+**Exigences non fonctionnelles** — dans quelle mesure il le fait :
+- "Quel est le rapport lecture/écriture attendu ?"
+- "Quelle latence est acceptable ?"
+- "Avons-nous besoin d'une forte cohérence ou est-ce qu'une cohérence éventuelle est acceptable ?"
+
+<Callout>Poser des questions de clarification n'est pas un signe de faiblesse : c'est la chose la plus avancée qu'un ingénieur puisse faire. Les enquêteurs laissent intentionnellement les exigences vagues pour voir si vous allez clarifier ou commencer aveuglément à concevoir.</Callout>
+
+### Étape 2 : Estimation au dos de l'enveloppe (3 minutes)
+
+Des calculs rapides ancrent votre conception dans la réalité et évitent une ingénierie excessive ou insuffisante.
+
+```
+Example: Design Twitter
+
+Daily Active Users (DAU): 300M
+Tweets per day: 300M × 2 = 600M tweets/day
+Reads per day: 300M × 100 = 30B reads/day (read-heavy)
+Tweets per second: 600M / 86400 ≈ 7,000 writes/sec
+Reads per second: 30B / 86400 ≈ 350,000 reads/sec
+Storage per tweet: ~300 bytes text + metadata ≈ 500 bytes
+Daily storage: 600M × 500B = 300GB/day ≈ 110TB/year
+```
+
+Ces chiffres vous le disent : ce système est extrêmement gourmand en lecture, nécessite une mise en cache et accumulera un stockage massif.
+
+### Étape 3 : Conception de haut niveau (10 minutes)
+
+Dessinez l’architecture avec les principaux composants. Commencez simplement, puis ajoutez de la complexité si nécessaire.
+
+```
+Client → Load Balancer → API Servers → Service Layer
+                                          ↓
+                              ┌───────────┼───────────┐
+                              ↓           ↓           ↓
+                           Database     Cache      Message Queue
+                                          ↓           ↓
+                                       CDN        Workers
+```
+
+Parcourez les principaux flux d’utilisateurs :
+- "Lorsqu'un utilisateur publie un tweet, le serveur API le valide, écrit dans la base de données et le transmet au service de diffusion..."
+- "Lorsqu'un utilisateur ouvre son flux, nous vérifions d'abord le cache..."
+
+### Étape 4 : Exploration approfondie (15 minutes)
+
+L'intervieweur choisira 1 à 2 domaines à approfondir. Soyez prêt à discuter des compromis en détail.
+
+<ThinkAboutIt>Si vous conceviez un système de notification, enverriez-vous immédiatement des notifications à tous les abonnés (distribution en écriture) ou calculeriez-vous le flux lorsque chaque utilisateur le demande (distribution en lecture) ? Quels sont les compromis pour les utilisateurs comptant des millions de followers ?</ThinkAboutIt>
+
+## Les éléments de base
+
+Considérez-les comme des pièces Lego. Chaque conception de système est une disposition différente des mêmes blocs.
+
+### Équilibreurs de charge
+
+Répartissez le trafic sur plusieurs serveurs. Connaître trois stratégies :
+- **Round Robin** — distribution simple et égale
+- **Least Connections** — envoie au serveur avec le moins de connexions actives
+- **Consistent Hashing** — itinéraires basés sur le contenu de la requête (utile pour la mise en cache)
+
+### Caches
+
+L'optimisation des performances la plus efficace. N'oubliez pas ces modèles de cache :
+
+```
+Write-through:  App → Cache → DB  (consistent, higher write latency)
+Write-back:     App → Cache ... → DB  (fast writes, risk of data loss)
+Cache-aside:    App checks cache → miss → read DB → populate cache
+```
+
+**Expulsion du cache** : LRU (Least Récemment Utilisé) est la réponse par défaut dans les entretiens. Mentionnez TTL (Time-To-Live) pour les données sensibles au temps.
+
+<FunFact>Selon un article célèbre de Jeff Dean, un seul échec de cache qui est transféré sur le disque au lieu de la mémoire ajoute environ 100 fois la latence. C'est pourquoi la stratégie de mise en cache est souvent la décision de conception la plus importante : la lecture à partir du cache (1 ms), la lecture à partir du disque (10 ms) et une lecture inter-centre de données (150 ms) sont des ordres de grandeur différents.</FunFact>
+
+### Bases de données
+
+| Tapez | Utiliser quand | Exemples |
+|---|---|---|
+| **Relationnel (SQL)** | Transactions ACID, requêtes complexes, données structurées | PostgreSQL, MySQL |
+| **Magasin de documents** | Schémas flexibles, données imbriquées, itération rapide | MongoDB, DynamoDB |
+| **Large colonne** | Échelle massive, séries chronologiques, lourdes écritures | Cassandra, HBase |
+| **Graphique** | Données relationnelles, réseaux sociaux | Neo4j, Neptune |
+
+**Mise à l'échelle de la base de données** :
+- **Mise à l'échelle verticale** : machine plus grande (plafond limité)
+- **Répliques en lecture** : trafic de lecture et d'écriture séparé
+- **Partage** : partitionnez les données sur plusieurs bases de données (par ID utilisateur, géographie, etc.)
+
+### Files d'attente de messages
+
+Découpler les producteurs des consommateurs. Indispensable pour :
+- Traitement asynchrone (envoyer un e-mail après l'inscription)
+- Nivellement de charge (absorber les pics de trafic)
+- Architectures événementielles
+
+```
+Producer → [Message Queue] → Consumer
+           (Kafka, SQS,      (Workers that
+            RabbitMQ)          process at
+                               their own pace)
+```
+
+### CDN (réseaux de diffusion de contenu)
+
+Mettez en cache le contenu statique (images, CSS, JS) sur des serveurs Edge proches des utilisateurs. Mentionnez les CDN chaque fois que le système sert des médias ou dispose d'une base d'utilisateurs mondiale.
+
+## Questions de conception de système classique
+
+### Concevoir un raccourcisseur d'URL (par exemple, bit.ly)
+
+**Décisions clés** :
+- Générez des codes courts en utilisant l'encodage base62 (a-z, A-Z, 0-9)
+- Utilisez une approche basée sur un compteur ou un hachage pour l'unicité
+- Lecture lourde → cache les URL populaires de manière agressive
+- Base de données : simple magasin clé-valeur (short_code → original_url)
+
+```
+POST /shorten  { "url": "https://example.com/very/long/path" }
+→ Returns: { "short_url": "https://bit.ly/abc123" }
+
+GET /abc123
+→ 301 Redirect to original URL (301 = permanent, cacheable by browser)
+```
+
+### Concevoir un système de chat (par exemple, WhatsApp)
+
+**Décisions clés** :
+- WebSockets pour une communication bidirectionnelle en temps réel
+- Stockage des messages : base de données optimisée en écriture (Cassandra)
+- Présence en ligne : mécanisme de battement de coeur avec timeout
+- Messages de groupe : diffusion à tous les membres du groupe via la file d'attente des messages
+
+### Concevoir un fil d'actualité (par exemple, Twitter/Facebook)
+
+**Décisions clés** :
+- **Fan-out en écriture** pour les utilisateurs comptant < 10 000 abonnés (flux pré-calculés)
+- **Fan-out en lecture** pour les utilisateurs célèbres (calcul sur demande pour éviter d'écrire sur des millions de flux)
+- Approche hybride : la plupart des systèmes utilisent les deux stratégies
+- Classement : notation de la pertinence basée sur le ML par ordre chronologique pur
+
+<Quiz question="Vous concevez un système dans lequel 95 % des opérations sont des lectures et 5 % des écritures. Quelle stratégie de mise en cache est la plus appropriée ?" options="Cache en écriture directe|Cache de réécriture|Cache-côté (chargement paresseux)|Aucun cache nécessaire" answer="2" explanation="Le cache-aside (chargement paresseux) est idéal pour les systèmes gourmands en lecture. Les données sont chargées dans le cache uniquement sur demande (en cas d'échec du cache), évitant ainsi la mise en cache des données qui ne sont jamais lues. L'écriture directe ajoute une latence d'écriture inutile lorsque la plupart des opérations sont des lectures." />
+
+## Gestion des questions d'estimation
+
+Les enquêteurs adorent demander « de combien de X Y a-t-il besoin ? » Utilisez ces ancres :
+
+| Métrique | Valeur |
+|---|---|
+| QPS pour un seul serveur Web | ~1 000-10 000 |
+| QPS pour une base de données unique | ~1 000-5 000 |
+| Latence de lecture du cache | ~1 ms |
+| Latence de lecture de la base de données | ~5-10 ms |
+| Latence entre centres de données | ~100-150 ms |
+| 1 million de secondes | ~12 jours |
+| 1 milliard de secondes | ~32 ans |
+
+## Conseils de communication lors de la conception du système
+
+Votre communication compte autant que votre design. Adoptez ces habitudes :
+
+1. **Structurez vos pensées** : "Permettez-moi de commencer par les exigences, puis l'estimation, puis la conception de haut niveau."
+2. **Énoncer explicitement les compromis** : "Nous pourrions utiliser SQL pour la cohérence ou NoSQL pour l'évolutivité. Compte tenu de notre charge de travail lourde en lecture, je pencherais pour NoSQL avec une couche de mise en cache."
+3. **Reconnaissez ce que vous ne savez pas** : "Je ne suis pas sûr du facteur de réplication exact pour Kafka, mais je sais qu'il est configurable et généralement défini sur 3."
+4. **Renseignez-vous auprès de l'intervieweur** : "J'ai couvert la conception de haut niveau. Souhaitez-vous que j'approfondisse le schéma de la base de données ou la stratégie de mise en cache ?"
+
+<Callout>La plus grosse erreur lors des entretiens de conception de système est d’aller trop loin et trop tôt. Résistez à l'envie de concevoir le schéma de base de données dans les 5 premières minutes. Commencez largement, puis affinez en fonction de ce que l'intervieweur souhaite explorer.</Callout>
+
+## Points clés à retenir
+
+- **Suivez le cadre en 4 étapes** : exigences → estimation → conception de haut niveau → analyse approfondie. Cela fonctionne à chaque fois.
+- **Connaissez vos éléments de base** : les équilibreurs de charge, les caches, les bases de données, les files d'attente de messages et les CDN constituent le vocabulaire de la conception de systèmes.
+- **Le but est de faire des compromis** : il n'existe pas de conceptions parfaites, seulement des compromis. Articulez-les clairement.
+- **L'estimation fonde votre conception** : des calculs rapides au dos de l'enveloppe vous empêchent de sur-ingénierie ou de sous-ingénierie.
+- **La communication représente la moitié de la note** : structurez vos pensées, énoncez vos hypothèses et vérifiez régulièrement avec l'intervieweur.
+- **Entraînez-vous avec des systèmes réels** : étudiez le fonctionnement réel de Twitter, WhatsApp, YouTube et Uber. Leurs blogs d'ingénierie sont des mines d'or.

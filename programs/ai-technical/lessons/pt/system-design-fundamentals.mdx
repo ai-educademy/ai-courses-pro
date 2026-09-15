@@ -1,0 +1,202 @@
+---
+title: "Fundamentos de design de sistema"
+description: "Domine a entrevista de design do sistema — desde a coleta de requisitos até as decisões de arquitetura — com estruturas que funcionam em qualquer escala."
+order: 3
+difficulty: "advanced"
+duration: 25
+icon: "🏗️"
+published: true
+machineTranslated: true
+---
+# Fundamentos de design de sistema
+
+A entrevista de design do sistema é onde os engenheiros seniores são feitos ou quebrados. Ao contrário da codificação de entrevistas com respostas certas e claras, o design do sistema testa sua capacidade de navegar pela ambiguidade, fazer concessões e comunicar decisões arquitetônicas. A boa notícia? Existe uma estrutura repetível que funciona para todas as perguntas. A grande notícia? Depois de compreender os blocos de construção, você pode projetar qualquer coisa, desde um encurtador de URL até uma plataforma de mensagens em escala global. Vamos construir esse kit de ferramentas.
+
+## A estrutura de 4 etapas
+
+Toda entrevista de design de sistema deve seguir esta estrutura. Os entrevistadores esperam isso, e isso evita que você entre em detalhes prematuros.
+
+### Etapa 1: Esclarecimento de requisitos (5 minutos)
+
+Nunca comece a projetar sem fazer perguntas. É aqui que você demonstra o pensamento do produto.
+
+**Requisitos funcionais** — o que o sistema faz:
+- "Os usuários devem poder enviar mensagens para grupos ou apenas 1:1?"
+- "Precisamos de notificações em tempo real?"
+- "O feed deve ser cronológico ou classificado?"
+
+**Requisitos não funcionais** — quão bem ele funciona:
+- "Qual é a proporção esperada de leitura/gravação?"
+- "Qual latência é aceitável?"
+- "Precisamos de uma consistência forte ou a consistência eventual está correta?"
+
+<Callout>Fazer perguntas esclarecedoras não é um sinal de fraqueza – é a coisa mais importante que um engenheiro sênior pode fazer. Os entrevistadores intencionalmente deixam os requisitos vagos para ver se você vai esclarecer ou começar a projetar cegamente.</Callout>
+
+### Etapa 2: estimativa do verso do envelope (3 minutos)
+
+A matemática rápida fundamenta seu projeto na realidade e evita engenharia excessiva ou insuficiente.
+
+```
+Example: Design Twitter
+
+Daily Active Users (DAU): 300M
+Tweets per day: 300M × 2 = 600M tweets/day
+Reads per day: 300M × 100 = 30B reads/day (read-heavy)
+Tweets per second: 600M / 86400 ≈ 7,000 writes/sec
+Reads per second: 30B / 86400 ≈ 350,000 reads/sec
+Storage per tweet: ~300 bytes text + metadata ≈ 500 bytes
+Daily storage: 600M × 500B = 300GB/day ≈ 110TB/year
+```
+
+Esses números dizem: este sistema é extremamente pesado para leitura, precisa de cache e acumulará armazenamento massivo.
+
+### Etapa 3: Design de alto nível (10 minutos)
+
+Desenhe a arquitetura com os componentes principais. Comece simples e adicione complexidade conforme necessário.
+
+```
+Client → Load Balancer → API Servers → Service Layer
+                                          ↓
+                              ┌───────────┼───────────┐
+                              ↓           ↓           ↓
+                           Database     Cache      Message Queue
+                                          ↓           ↓
+                                       CDN        Workers
+```
+
+Percorra os principais fluxos do usuário:
+- "Quando um usuário publica um tweet, o servidor API o valida, grava no banco de dados e envia para o serviço de distribuição..."
+- "Quando um usuário abre seu feed, primeiro verificamos o cache..."
+
+### Etapa 4: Aprofundamento (15 minutos)
+
+O entrevistador escolherá uma ou duas áreas para se aprofundar. Esteja pronto para discutir as compensações em detalhes.
+
+<ThinkAboutIt>Se você estivesse projetando um sistema de notificação, você enviaria notificações para todos os seguidores imediatamente (disseminação na gravação) ou calcularia o feed quando cada usuário o solicitasse (disseminação na leitura)? Quais são as vantagens e desvantagens para usuários com milhões de seguidores?</ThinkAboutIt>
+
+## Os blocos de construção
+
+Pense nisso como peças de Lego. Cada projeto de sistema é um arranjo diferente dos mesmos blocos.
+
+### Balanceadores de carga
+
+Distribua o tráfego entre vários servidores. Conheça três estratégias:
+- **Round Robin** — distribuição simples e igual
+- **Least Connections** — envia para o servidor com menos conexões ativas
+- **Hashing consistente** — rotas baseadas no conteúdo da solicitação (útil para armazenamento em cache)
+
+### Caches
+
+A otimização de desempenho mais impactante. Lembre-se destes padrões de cache:
+
+```
+Write-through:  App → Cache → DB  (consistent, higher write latency)
+Write-back:     App → Cache ... → DB  (fast writes, risk of data loss)
+Cache-aside:    App checks cache → miss → read DB → populate cache
+```
+
+**Remoção de cache**: LRU (menos usado recentemente) é a resposta padrão nas entrevistas. Mencione TTL (Time-To-Live) para dados sensíveis ao tempo.
+
+<FunFact>De acordo com um famoso artigo de Jeff Dean, uma única falta de cache que vai para o disco em vez da memória adiciona cerca de 100x de latência. É por isso que a estratégia de armazenamento em cache costuma ser a decisão de design mais impactante – leitura do cache (1ms) versus leitura do disco (10ms) versus leitura entre datacenters (150ms) são ordens de magnitude diferentes.</FunFact>
+
+### Bancos de dados
+
+| Tipo | Usar quando | Exemplos |
+|---|---|---|
+| **Relacional (SQL)** | Transações ACID, consultas complexas, dados estruturados | PostgreSQL, MySQL |
+| **Armazém de documentos** | Esquemas flexíveis, dados aninhados, iteração rápida | MongoDB, DynamoDB |
+| **Coluna larga** | Escala massiva, série temporal, muita gravação | Cassandra, HBase |
+| **Gráfico** | Dados pesados ​​de relacionamento, redes sociais | Neo4j, Netuno |
+
+**Escalonamento do banco de dados**:
+- **Escalonamento vertical**: máquina maior (teto limitado)
+- **Réplicas de leitura**: tráfego separado de leitura e gravação
+- **Fragmentação**: particione dados em vários bancos de dados (por ID de usuário, localização geográfica, etc.)
+
+### Filas de mensagens
+
+Separar produtores de consumidores. Essencial para:
+- Processamento assíncrono (enviar email após inscrição)
+- Nivelamento de carga (absorver picos de tráfego)
+- Arquiteturas orientadas a eventos
+
+```
+Producer → [Message Queue] → Consumer
+           (Kafka, SQS,      (Workers that
+            RabbitMQ)          process at
+                               their own pace)
+```
+
+### CDNs (redes de distribuição de conteúdo)
+
+Armazene conteúdo estático em cache (imagens, CSS, JS) em servidores de borda próximos aos usuários. Mencione CDNs sempre que o sistema servir mídia ou tiver uma base de usuários global.
+
+## Perguntas clássicas sobre design de sistema
+
+### Crie um encurtador de URL (por exemplo, bit.ly)
+
+**Principais decisões**:
+- Gere códigos curtos usando codificação base62 (az, AZ, 0-9)
+- Use uma abordagem baseada em contador ou hash para exclusividade
+- Leitura intensa → armazena em cache URLs populares de forma agressiva
+- Banco de dados: armazenamento simples de valores-chave (short_code → original_url)
+
+```
+POST /shorten  { "url": "https://example.com/very/long/path" }
+→ Returns: { "short_url": "https://bit.ly/abc123" }
+
+GET /abc123
+→ 301 Redirect to original URL (301 = permanent, cacheable by browser)
+```
+
+### Projete um sistema de bate-papo (por exemplo, WhatsApp)
+
+**Principais decisões**:
+- WebSockets para comunicação bidirecional em tempo real
+- Armazenamento de mensagens: banco de dados otimizado para gravação (Cassandra)
+- Presença online: mecanismo de pulsação com tempo limite
+- Mensagens de grupo: distribuição para todos os membros do grupo por meio da fila de mensagens
+
+### Crie um feed de notícias (por exemplo, Twitter/Facebook)
+
+**Principais decisões**:
+- **Fan-out na gravação** para usuários com < 10 mil seguidores (feeds pré-cálculo)
+- **Fan-out na leitura** para usuários famosos (cálculo mediante solicitação para evitar gravação em milhões de feeds)
+- Abordagem híbrida: a maioria dos sistemas utiliza ambas as estratégias
+- Classificação: pontuação de relevância baseada em ML em ordem cronológica pura
+
+<Quiz question="Você está projetando um sistema onde 95% das operações são leituras e 5% são gravações. Qual estratégia de cache é mais apropriada?" options="Cache de gravação|Cache de write-back|Cache à parte (carregamento lento)|Não é necessário cache" answer="2" explanation="Cache-aside (carregamento lento) é ideal para sistemas com muita leitura. Os dados são carregados no cache somente quando solicitados (em caso de falha no cache), evitando o armazenamento em cache de dados que nunca são lidos. A gravação adiciona latência de gravação desnecessária quando a maioria das operações são leituras." />
+
+## Lidando com questões de estimativa
+
+Os entrevistadores adoram perguntar "de quantos X Y precisa?" Use estas âncoras:
+
+| Métrica | Valor |
+|---|---|
+| QPS para um único servidor web | ~1.000-10.000 |
+| QPS para um único banco de dados | ~1.000-5.000 |
+| Latência de leitura do cache | ~1ms |
+| Latência de leitura do banco de dados | ~5-10ms |
+| Latência entre datacenters | ~100-150ms |
+| 1 milhão de segundos | ~12 dias |
+| 1 bilhão de segundos | ~32 anos |
+
+## Dicas de comunicação durante o projeto do sistema
+
+Sua comunicação é tão importante quanto seu design. Pratique estes hábitos:
+
+1. **Estruture seus pensamentos**: "Deixe-me começar com os requisitos, depois com a estimativa e depois com o design de alto nível."
+2. **Declarar explicitamente as compensações**: "Poderíamos usar SQL para consistência ou NoSQL para escala. Dada a nossa carga de trabalho de leitura pesada, eu preferiria o NoSQL com uma camada de cache."
+3. **Reconheça o que você não sabe**: "Não tenho certeza sobre o fator de replicação exato do Kafka, mas sei que é configurável e normalmente definido como 3."
+4. **Consulte o entrevistador**: "Abordei o design de alto nível. Gostaria que eu me aprofundasse no esquema do banco de dados ou na estratégia de cache?"
+
+<Callout>O maior erro nas entrevistas de design de sistema é aprofundar-se muito cedo. Resista à tentação de projetar o esquema do banco de dados nos primeiros 5 minutos. Comece amplo e depois restrinja com base no que o entrevistador deseja explorar.</Callout>
+
+## Principais conclusões
+
+- **Siga a estrutura de 4 etapas**: requisitos → estimativa → design de alto nível → aprofundamento. Funciona sempre.
+- **Conheça seus blocos de construção**: balanceadores de carga, caches, bancos de dados, filas de mensagens e CDNs são o vocabulário do design do sistema.
+- **O ponto principal são as compensações**: não existem designs perfeitos – apenas compensações. Articule-os claramente.
+- **A estimativa fundamenta seu projeto**: a matemática rápida evita que você faça engenharia excessiva ou insuficiente.
+- **A comunicação é metade da nota**: estruture seus pensamentos, estabeleça suposições e verifique regularmente com o entrevistador.
+- **Pratique com sistemas reais**: estude como o Twitter, o WhatsApp, o YouTube e o Uber realmente funcionam. Seus blogs de engenharia são minas de ouro.

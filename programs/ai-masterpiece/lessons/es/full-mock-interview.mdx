@@ -1,0 +1,157 @@
+---
+title: "Entrevista simulada completa: simulación de ingeniero senior de 60 minutos"
+description: "Realice una entrevista completa de ingeniería de IA de nivel superior de principio a fin."
+order: 2
+difficulty: "advanced"
+duration: 45
+icon: "🎯"
+published: true
+machineTranslated: true
+---
+# Entrevista simulada completa
+
+Esta lección simula una entrevista completa de 60 minutos de ingeniería senior de IA. Léelo activamente: haz una pausa en cada sección, forma tu propia respuesta antes de leer la respuesta modelo y califícate honestamente.
+
+Trate esto como un ensayo general, no como un deporte para espectadores.
+
+<Illustration src="/images/lessons/full-mock-interview.svg" alt="Cronología que muestra cinco fases de la entrevista: introducción, diseño del sistema, comportamiento, preguntas y resumen" caption="Una entrevista estructurada de 60 minutos dividida en cinco fases distintas." />
+
+## Estructura de la entrevista
+
+| Fase | Duración | Enfoque |
+|-------|----------|-------|
+| Introducción | 5 minutos | Primera impresión, resumen de antecedentes |
+| Diseño de sistemas | 25 minutos | Profundidad técnica, pensamiento arquitectónico |
+| Comportamiento | 15 minutos | Liderazgo, conflicto, crecimiento |
+| Tus preguntas | 10 minutos | Curiosidad, juicio, ajuste cultural |
+| Resumen | 5 minutos | Impresión final, próximos pasos |
+
+<Callout>La gestión del tiempo es en sí misma una señal. Los entrevistadores notan cuando dedicas 20 minutos a los requisitos y dejas cinco a la arquitectura. Practica con un cronómetro.
+</Callout>
+
+## Fase 1: Introducción (5 minutos)
+
+El entrevistador dice: *"Háblame de ti y de lo que te trajo aquí".*
+
+Su respuesta debería ser un **discurso de ascensor de dos minutos** que cubra:
+
+1. Su función actual y un logro principal.
+2. Un breve recorrido por tu carrera: cómo llegaste hasta aquí.
+3. Por qué le entusiasma este puesto y esta empresa específicos.
+
+Evite recitar su CV. Cuente una historia con un hilo claro que conecte el pasado, el presente y el futuro.
+
+## Fase 2: Diseño del sistema (25 minutos)
+
+**La pregunta:** *"Diseñar un sistema de moderación de contenido de IA en tiempo real para una plataforma de redes sociales con 500 millones de usuarios activos diarios".*
+
+### Paso 1: Aclarar los requisitos (3 min)
+
+Antes de dibujar un solo cuadro, haga preguntas:
+
+- ¿Qué tipos de contenido? ¿Texto, imágenes, vídeo o los tres?
+- ¿Qué objetivo de latencia? ¿Debe ocurrir la moderación antes de que el contenido sea visible?
+- ¿Cuál es la tolerancia a falsos positivos? ¿Es peor pasar por alto contenido dañino o eliminar por error contenido seguro?
+- ¿Qué escala? Publicaciones por segundo, ¿patrones de tráfico máximo?
+
+**Supongamos:** Texto e imágenes, menos de 200 ms para texto, menos de 2 segundos para imágenes, 50 000 publicaciones por segundo en su punto máximo.
+
+### Paso 2: Diseño de API (3 min)
+
+```
+POST /moderate
+  Body: { contentId, contentType, text?, imageUrl?, userId, context }
+  Response: { decision: "allow" | "flag" | "block", confidence, categories[] }
+```
+
+Mantenlo simple. Un punto final, contrato claro, extensible con nuevos tipos de contenido.
+
+### Paso 3: Arquitectura de alto nivel (7 min)
+
+El sistema tiene cuatro capas:
+
+1. **Ingestión**: el tema de Kafka recibe cada publicación nueva. Desvincula a los productores de la moderación.
+2. **Tubería de clasificación**: el clasificador de texto (transformador ajustado) y el clasificador de imágenes (modelo de visión) se ejecutan en paralelo.
+3. **Motor de decisiones**: combina los resultados del clasificador con la puntuación de reputación del usuario y las reglas de política de la plataforma.
+4. **Capa de acción**: ejecuta la decisión: permitir, marcar para revisión humana o bloquear inmediatamente.
+
+<Quiz question="¿Por qué es importante desacoplar la ingesta de la clasificación mediante una cola de mensajes?" options="Hace que el sistema parezca más impresionante en los diagramas.|Permite que el proceso de clasificación escale de forma independiente y absorba los picos de tráfico.|Elimina la necesidad de una base de datos.|Garantiza cero falsos positivos" answer="1" explanation="Una cola de mensajes como Kafka permite que la capa de ingesta acepte publicaciones en cualquier caso mientras el canal de clasificación las procesa a su propio ritmo, absorbiendo picos sin descartar solicitudes." />
+
+### Paso 4: Inmersiones profundas (12 min)
+
+**Modelo de moderación de texto:**
+- BERT ajustado o transformador similar en un conjunto de datos etiquetados de categorías de contenido dañino (incitación al odio, spam, autolesiones, etc.).
+- Servido a través de un servidor modelo (Triton o TorchServe) con procesamiento por lotes para rendimiento.
+- Umbral de confianza: bloquear por encima de 0,95, marcar entre 0,7 y 0,95, permitir por debajo de 0,7.
+
+**Moderación de imagen:**
+- Transformador de visión clasificándolo en categorías: explícito, violento, seguro.
+- Preprocesamiento: cambiar tamaño, normalizar. Inferencia sobre instancias de GPU detrás de un grupo de escalado automático.
+- Para casos extremos, diríjase a una cola de revisión humana.
+
+**Consideraciones de escala:**
+- Escalado horizontal de módulos clasificadores detrás de un equilibrador de carga.
+- Control de versiones del modelo con implementaciones canary: primero implemente nuevos modelos para el 5 por ciento del tráfico.
+- Disyuntores: si el clasificador no funciona, el valor predeterminado es "permitir y poner en cola para revisión asincrónica" en lugar de bloquear todo el contenido.
+
+<ThinkAboutIt>El entrevistador pregunta: "¿Qué sucede cuando surge un nuevo tipo de contenido dañino que su modelo nunca ha visto?" Haga una pausa y piense en su respuesta antes de seguir leyendo. Considere respuestas tanto a corto como a largo plazo.
+</ThinkAboutIt>
+
+**Manejo de amenazas novedosas:** A corto plazo, utilice reglas basadas en palabras clave y escalamiento humano. A mediano plazo, implementar un ciclo de aprendizaje activo: los revisores humanos etiquetan nuevos ejemplos, que se retroalimentan al proceso de capacitación para la siguiente versión del modelo.
+
+## Fase 3: Comportamiento (15 Minutos)
+
+### Pregunta 1: *"Cuéntame sobre una ocasión en la que tuviste que tomar una decisión técnica difícil con información incompleta."*
+
+Utilice el marco **STAR**:
+
+- **Situación**: Necesitábamos elegir entre crear un canal de aprendizaje automático personalizado y adoptar un servicio administrado, con una fecha límite de seis semanas.
+- **Tarea**: Yo era el líder técnico responsable de la recomendación.
+- **Acción**: realicé un aumento de una semana comparando ambos enfoques con nuestros datos reales. Documenté las compensaciones en un registro de decisiones y lo presenté al equipo.
+- **Resultado**: Elegimos el servicio gestionado, lo enviamos dos semanas antes y ahorramos aproximadamente £40 000 en tiempo de ingeniería durante el primer año.
+
+### Pregunta 2: *"Describe un momento en el que no estuviste de acuerdo con un compañero de equipo y cómo lo resolviste."*
+
+- **Situación**: un colega quería utilizar un modelo de conjunto complejo; Primero abogué por una línea de base más simple.
+- **Tarea**: Alcanzar la alineación sin dañar la relación.
+- **Acción**: propuse que ambos implementáramos nuestros enfoques en un experimento con un límite de tiempo y dejáramos que las métricas decidieran.
+- **Resultado**: el modelo más simple funcionó dentro del 2 por ciento del conjunto a una décima parte del costo de inferencia. Enviamos el modelo simple y acordamos revisarlo si la precisión se convertía en un cuello de botella.
+
+<Quiz question="¿Cuál es el elemento más importante de una respuesta STAR sólida?" options="Hacerte parecer el héroe de cada historia.|Proporcionar un resultado específico y medible que demuestre el impacto.|Usar tantas palabras técnicas de moda como sea posible|Mantener la respuesta en menos de 30 segundos." answer="1" explanation="Los resultados concretos con números (ahorro de tiempo, reducción de costos, mejora de la precisión) hacen que sus historias sean creíbles y memorables. Resultados vagos como ”todo salió bien” fracasan." />
+
+## Fase 4: Tus preguntas (10 minutos)
+
+Hacer buenas preguntas demuestra juicio e interés genuino. Aquí hay tres ejemplos sólidos:
+
+1. *"¿Cómo es la rotación de guardia para el equipo de la plataforma ML y cómo se manejan los incidentes del modelo?"*: muestra su opinión sobre las realidades de producción.
+2. *"¿Cuál es el mayor desafío técnico que el equipo espera afrontar en los próximos seis meses?"* - Muestra visión de futuro.
+3. *"¿Cómo decide el equipo cuándo construir internamente o comprar una solución administrada?"* - Muestra pragmatismo y sentido de la arquitectura.
+
+**Evite:** Preguntas sobre beneficios, vacaciones o cualquier cosa que se encuentre fácilmente en el sitio web de la empresa.
+
+<FunFact>Un estudio de Harvard Business Review encontró que los candidatos que hicieron preguntas reflexivas obtuvieron una calificación general un 9 por ciento más alta, incluso cuando su desempeño técnico fue idéntico al de los candidatos que no hicieron preguntas.
+</FunFact>
+
+## Fase 5: Resumen (5 minutos)
+
+Agradezca al entrevistador por su nombre. Resuma su entusiasmo en una frase: *"Estoy realmente entusiasmado con los desafíos de moderación de contenido aquí; es exactamente el tipo de trabajo de sistemas de aprendizaje automático a gran escala que quiero hacer".*
+
+Envíe un breve correo electrónico de agradecimiento dentro de las 24 horas haciendo referencia a un tema específico que discutieron.
+
+## Rúbrica de autocalificación
+
+Califícate del 1 al 5 en cada dimensión:
+
+| Dimensión | Cómo se ve el "5" |
+|-----------|-------------------|
+| **Recopilación de requisitos** | Hizo preguntas aclaratorias antes de saltar al diseño |
+| **Claridad de la arquitectura** | Dibujó un sistema limpio y lógico con un flujo de datos claro |
+| **Profundidad de conocimiento** | Profundizó en al menos un componente con compensaciones reales |
+| **Comunicación** | Pensamientos estructurados claramente; fácil de seguir |
+| **Respuestas conductuales** | STAR usado con resultados específicos y mensurables |
+| **Preguntas formuladas** | Mostró curiosidad genuina y buen juicio |
+
+<FunFact>Los datos de las entrevistas internas de Google revelaron que el predictor más fuerte del éxito de un candidato no era su puntuación de algoritmo sino su capacidad para estructurar problemas ambiguos: exactamente lo que prueban las preguntas de diseño de sistemas.
+</FunFact>
+
+<Quiz question="Durante una entrevista de diseño de sistema, ¿qué debe hacer PRIMERO?" options="Comience a dibujar el diagrama de arquitectura inmediatamente.|Hacer preguntas aclaratorias sobre requisitos y restricciones.|Escribir los puntos finales de la API|Elija la tecnología de base de datos" answer="1" explanation="Aclarar primero los requisitos garantiza que se resolverá el problema correcto. Saltar a soluciones sin comprender las limitaciones es el error más común en las entrevistas de diseño de sistemas." />

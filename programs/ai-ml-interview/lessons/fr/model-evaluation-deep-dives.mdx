@@ -1,0 +1,215 @@
+---
+title: "Études approfondies sur l'évaluation des modèles"
+description: "Maîtrisez les métriques, les méthodologies et les compromis de l'évaluation des modèles - le sujet qui sépare les ingénieurs ML des praticiens du ML."
+order: 2
+difficulty: "advanced"
+duration: 20
+icon: "📊"
+published: true
+machineTranslated: true
+---
+# 📊 Études approfondies sur l'évaluation des modèles
+
+"Votre modèle a une précision de 95 % – envoyez-le !" Si cette phrase ne vous met pas immédiatement mal à l’aise, cette leçon est exactement ce dont vous avez besoin. L'évaluation des modèles est le sujet d'entretien qui sépare les candidats qui ont *formé* des modèles de ceux qui les ont *déployés*. Les enquêteurs examinent les connaissances en matière d'évaluation, car elles révèlent si vous comprenez ce que fait réellement un modèle et s'il faut lui faire confiance.
+
+---
+
+## 🎯 Métriques de classification : au-delà de la précision
+
+La précision – le pourcentage de prédictions correctes – est la mesure que tout le monde apprend en premier et la mesure qui induit le plus souvent en erreur. Considérons un modèle de détection de fraude sur un ensemble de données où seulement 0,5 % des transactions sont frauduleuses. Un modèle qui prédit « pas de fraude » pour tout atteint une précision de **99,5 %** tout en détectant zéro fraude.
+
+### Précision, rappel et F1
+
+Ces trois mesures constituent l’épine dorsale de l’évaluation de la classification :
+
+- **Précision** = TP / (TP + FP) — « Parmi tout ce que j'ai signalé comme positif, combien l'était réellement ? »
+- **Rappel** = TP / (TP + FN) — « De tout ce qui était réellement positif, combien ai-je attrapé ? »
+- **Score F1** = 2 × (Précision × Rappel) / (Précision + Rappel) — la moyenne harmonique, équilibrant les deux
+
+```
+              Predicted Positive    Predicted Negative
+Actual Positive       TP                   FN
+Actual Negative       FP                   TN
+```
+
+<ThinkAboutIt>Vous construisez un modèle pour détecter le cancer à partir d'images médicales. Souhaitez-vous optimiser la précision ou le rappel ? Quelles sont les conséquences concrètes d’une erreur dans chaque direction ?
+</ThinkAboutIt>
+
+### Quand utiliser lequel
+
+| Scénario | Optimiser pour | Pourquoi |
+|---|---|---|
+| Filtre anti-spam | Précision | Envoyer de vrais e-mails au spam est pire que de laisser passer du spam |
+| Dépistage du cancer | Rappel | Manquer un cas de cancer est bien pire qu'une fausse alerte |
+| Classement de recherche | Précision@K | Les utilisateurs ne regardent que les meilleurs résultats |
+| Détection de fraude | F1 ou personnalisé | Besoin d'équilibre – trop de faux positifs bloquent les vrais clients |
+
+---
+
+## 📈 AUC-ROC et AUC-PR : le tableau complet
+
+### Courbe ROC
+
+La courbe des caractéristiques de fonctionnement du récepteur représente le **taux de vrais positifs** (rappel) par rapport au **taux de faux positifs** (FP / (FP + TN)) à chaque seuil de classification. L'aire sous cette courbe (**AUC-ROC**) donne une mesure indépendante du seuil de la qualité du modèle.
+
+- **AUC = 1,0** : séparation parfaite
+- **AUC = 0,5** : estimation aléatoire (la ligne diagonale)
+- **AUC < 0,5** : pire qu'aléatoire (vos étiquettes pourraient être inversées !)
+
+### Courbe de rappel de précision
+
+Lorsque les classes sont fortement déséquilibrées, l’AUC-ROC peut se montrer faussement optimiste. La **courbe Précision-Rappel** représente la précision par rapport au rappel et est plus informative pour la détection d'événements rares.
+
+```python
+from sklearn.metrics import precision_recall_curve, auc
+
+precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
+pr_auc = auc(recall, precision)
+```
+
+<Callout>Conseil d'entretien : si l'enquêteur mentionne un ensemble de données déséquilibré, suggérez immédiatement AUC-PR plutôt que AUC-ROC. Cela indique que vous comprenez les limites des courbes ROC dans des contextes déséquilibrés – une distinction qui manque à de nombreux candidats.
+</Callout>
+
+<Quiz
+  question="Un modèle de détection de fraude a un AUC-ROC de 0,98 sur un ensemble de données où 0,1 % des transactions sont frauduleuses. Quelle est la préoccupation la plus valable ?"
+  options="Le modèle est clairement excellent et prêt pour la production|L'AUC-ROC peut être trompeusement élevée sur des données déséquilibrées - vérifiez plutôt l'AUC-PR|Le modèle est surajusté car l'AUC est trop élevée|Vous devez utiliser la précision au lieu de l'AUC"
+  answer="1"
+  explanation="Avec un déséquilibre de classe extrême, un modèle peut atteindre un AUC-ROC élevé en classifiant correctement la classe majoritaire écrasante. AUC-PR se concentre sur les performances de la classe minoritaire (positive) et donne une image plus honnête de la façon dont le modèle détecte la fraude."
+/>
+
+---
+
+## 📐 Métriques de régression
+
+Tout n’est pas classement. Lors de la prévision de valeurs continues, ces métriques sont importantes :
+
+### Erreur quadratique moyenne (MSE)
+
+$$MSE = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2$$
+
+Pénalise lourdement les grosses erreurs (pénalité quadratique). C'est bien lorsque les grosses erreurs sont bien pires que les petites - par exemple, prédire les prix de l'immobilier où une baisse de 100 000 £ est bien pire qu'une baisse de 10 000 £.
+
+### Erreur absolue moyenne (MAE)
+
+$$MAE = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|$$
+
+Traite toutes les erreurs de manière linéaire. Plus robuste aux valeurs aberrantes que MSE. À utiliser lorsque des valeurs aberrantes sont attendues et ne devraient pas dominer votre métrique.
+
+### R² (Coefficient de Détermination)
+
+$$R^2 = 1 - \frac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i - \bar{y})^2}$$
+
+Mesure le degré de variance expliqué par votre modèle par rapport à la simple prédiction de la moyenne. R² = 1 signifie ajustement parfait ; R² = 0 signifie que votre modèle ne vaut pas mieux que prédire la moyenne.
+
+<FunFact>Le R² peut effectivement devenir négatif ! Cela se produit lorsque les prédictions de votre modèle sont pires que la simple prédiction de la moyenne de la variable cible pour chaque entrée. C'est le signe que quelque chose ne va vraiment pas.
+</FunFact>
+
+---
+
+## 🔄 Stratégies de validation croisée
+
+La présentation d'un seul ensemble de tests fonctionne pour de grands ensembles de données, mais la validation croisée donne des estimations plus fiables des performances de généralisation.
+
+### Validation croisée K-Fold
+
+Divisez les données en K plis égaux. Entraînez-vous sur les plis K-1, validez sur le pli restant. Répétez K fois. Signalez la moyenne et l’écart type de votre métrique.
+
+```python
+from sklearn.model_selection import cross_val_score
+
+scores = cross_val_score(model, X, y, cv=5, scoring='f1')
+print(f"F1: {scores.mean():.3f} ± {scores.std():.3f}")
+```
+
+### K-Fold stratifié
+
+Préserve la distribution des classes dans chaque pli – essentiel pour les ensembles de données déséquilibrés.
+
+### Répartition des séries chronologiques
+
+Pour les données temporelles, **n'utilisez jamais** de répartitions aléatoires. Utilisez la validation croisée par fenêtre extensible ou coulissante pour respecter l'ordre temporel :
+
+```
+Fold 1: Train [Jan-Mar]  → Test [Apr]
+Fold 2: Train [Jan-Apr]  → Test [May]
+Fold 3: Train [Jan-May]  → Test [Jun]
+```
+
+<Quiz
+  question="Vous évaluez un modèle de prévision du cours des actions. Quelle stratégie de validation croisée est la plus appropriée ?"
+  options="Pliage en K standard|Laisser-un-dehors|Fractionnement des séries chronologiques|Pliage en K stratifié"
+  answer="2"
+  explanation="Les cours des actions sont des données temporelles. L'utilisation aléatoire de K-Fold permettrait au modèle de « jeter un coup d'œil » aux données futures pendant l'entraînement, donnant ainsi des résultats trop optimistes. Time-Series Split garantit que le modèle est toujours validé sur les données obtenues après la période de formation."
+/>
+
+---
+
+## 🌐 Évaluation hors ligne ou en ligne
+
+Les mesures hors ligne (calculées sur la base de données historiques) ne prédisent pas toujours les performances en ligne. Un modèle avec une meilleure AUC pourrait en fait réduire l'engagement des utilisateurs une fois déployé.
+
+| Aspects | Évaluation hors ligne | Évaluation en ligne (test A/B) |
+|---|---|---|
+| Vitesse | Rapide : exécutez des données enregistrées | Lent – ​​besoin de trafic réel |
+| Coût | Faible | Élevé (ingénierie + coût d'opportunité) |
+| Mesures | Qualité du modèle sur les données historiques | Impact commercial réel |
+| Limitation | Ne capture pas les changements de comportement des utilisateurs | Nécessite une rigueur statistique |
+
+### Tests A/B pour les modèles ML
+
+Lors de l'exécution d'un test A/B pour un nouveau modèle :
+
+1. **Définissez la métrique principale** (par exemple, les revenus par utilisateur) et les métriques de garde-fou (par exemple, latence, taux d'erreur)
+2. **Calculer la taille de l'échantillon requise** pour une signification statistique
+3. **Randomiser correctement** — répartir au niveau de l'utilisateur, pas au niveau de la demande
+4. **Courir assez longtemps** — tenir compte des effets de nouveauté et de la saisonnalité hebdomadaire
+5. **Vérifiez les interférences** — le comportement du groupe de traitement affecte-t-il le groupe témoin ?
+
+<ThinkAboutIt>Votre nouveau modèle de recommandation montre une amélioration de 3 % de l'AUC-ROC hors ligne, mais une *diminution* de 1 % du taux de clics lors des tests A/B. Qu’est-ce qui pourrait expliquer cet écart, et sur quoi enquêteriez-vous ?
+</ThinkAboutIt>
+
+---
+
+## ⚖️ Gérer les ensembles de données déséquilibrés
+
+Des données déséquilibrées affectent à la fois la formation et l’évaluation. Stratégies courantes :
+
+**Pendant la formation :**
+- Suréchantillonner la classe minoritaire (SMOTE)
+- Sous-échantillonner la classe majoritaire
+- Utiliser les poids de classe dans la fonction de perte
+- Générer des exemples synthétiques
+
+**Pendant l'évaluation :**
+- Utiliser la précision, le rappel, F1 au lieu de l'exactitude
+- Utilisez AUC-PR au lieu d'AUC-ROC
+- Rapporter les métriques par classe
+- Utiliser la validation croisée stratifiée
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+# Class weight approach — inversely proportional to class frequency
+model = RandomForestClassifier(class_weight='balanced')
+```
+
+<Quiz
+  question="Quelle métrique est la MOINS adaptée pour évaluer un modèle sur un ensemble de données très déséquilibré ?"
+  options="ASC de rappel de précision|Précision|Score F1|Rappel"
+  answer="1"
+  explanation="La précision traite toutes les classes de la même manière et est dominée par la classe majoritaire. Sur un ensemble de données déséquilibré de 99 : 1, un modèle prédisant à chaque fois la classe majoritaire atteint une précision de 99 % tout en étant totalement inutile pour détecter la classe minoritaire."
+/>
+
+---
+
+## 🔑 Points clés à retenir
+
+- **Ne comptez jamais uniquement sur la précision**, en particulier avec des données déséquilibrées.
+- **Faites correspondre la métrique à l'objectif commercial** : rappel pour les cas critiques pour la sécurité, précision lorsque les faux positifs sont coûteux
+- **AUC-PR sur AUC-ROC** pour les problèmes déséquilibrés — il s'agit d'une astuce d'entretien à signal élevé
+- **Utilisez des répartitions basées sur le temps** pour les données temporelles : les répartitions aléatoires provoquent des fuites de données.
+- **Les métriques hors ligne ne suffisent pas** : prévoyez des tests A/B pour valider l'impact dans le monde réel
+- **Connaître les formules** — les enquêteurs peuvent vous demander de dériver ou d'expliquer la précision, le rappel, F1, MSE et R².
+
+<Callout>Lorsqu'un intervieweur demande « comment évalueriez-vous ce modèle ? », il demande en réalité « comprenez-vous ce dont ce modèle a besoin pour fonctionner correctement, et pouvez-vous le mesurer ? Commencez par le contexte commercial, puis choisissez vos métriques.
+</Callout>

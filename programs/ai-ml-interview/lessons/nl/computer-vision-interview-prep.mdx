@@ -1,0 +1,240 @@
+---
+title: "Voorbereiding op computervisie-interview"
+description: "Bereid je voor op computer vision-interviewrondes - van CNN's tot moderne architecturen, met de theorie en praktische kennis die interviewers testen."
+order: 6
+difficulty: "advanced"
+duration: 20
+icon: "👁️"
+published: true
+machineTranslated: true
+---
+# 👁️Voorbereiding computervisie-interview
+
+Computervisie-interviews hebben een unieke smaak: ze combineren wiskundige grondbeginselen (convoluties, terugpropagatie door ruimtelijke lagen) met praktische techniek (hoe ga je om met een 4K-beeld op een mobiel apparaat?). Of je nu solliciteert voor een autonoom rijteam of een startup voor retailanalyses, deze les behandelt de concepten die interviewers het meest testen – en de praktische kennis waarmee kandidaten zich onderscheiden.
+
+---
+
+## 🧱 Basisprincipes van CV: wat interviewers verwachten dat je weet
+
+### Convoluties
+
+Een convolutionele laag schuift een klein filter (kernel) over een invoerbeeld, berekent elementgewijze vermenigvuldigingen en somt deze op om een ​​feature map te produceren. Dit is de kernbewerking in computer vision.
+
+```
+Input (5×5)      Kernel (3×3)      Output (3×3)
+┌─────────────┐  ┌─────────┐      ┌─────────┐
+│ 1 0 1 0 1   │  │ 1  0  1 │      │ 4 3 4   │
+│ 0 1 0 1 0   │  │ 0  1  0 │  →   │ 2 4 3   │
+│ 1 0 1 0 1   │  │ 1  0  1 │      │ 4 3 4   │
+│ 0 1 0 1 0   │                   └─────────┘
+│ 1 0 1 0 1   │
+└─────────────┘
+```
+
+**Belangrijkste parameters**:
+- **Kernelgrootte**: doorgaans 3×3 of 5×5 — kleinere dieper gestapelde kernels hebben de voorkeur boven één grote kernel
+- **Stride**: stapgrootte van het schuifraam (stap 2 helften ruimtelijke afmetingen)
+- **Opvulling**: voeg nullen toe rond de rand om de ruimtelijke grootte te behouden ('dezelfde' opvulling)
+- **Kanalen**: een 3×3-kernel op een RGB-afbeelding is feitelijk 3×3×3
+
+**Formule van uitvoergrootte**:
+
+$$O = \frac{W - K + 2P}{S} + 1$$
+
+Waar W = invoerbreedte, K = kernelgrootte, P = opvulling, S = pas.
+
+### Poolen
+
+Pooling verkleint de ruimtelijke dimensies terwijl belangrijke informatie behouden blijft:
+- **Max pooling**: neemt de maximale waarde in elk venster (meest gebruikelijk)
+- **Gemiddelde pooling**: neemt het gemiddelde (gebruikt in sommige architecturen vóór de laatste laag)
+- **Globale gemiddelde pooling**: reduceert elke featuremap tot één enkele waarde (vervangt volledig verbonden lagen in moderne netwerken)
+
+### Functiekaarten en receptieve velden
+
+- **Feature maps**: de uitvoer van elke convolutionele laag: vroege lagen detecteren randen en texturen, diepere lagen detecteren complexe patronen (gezichten, objecten)
+- **Ontvangstveld**: het gebied van het invoerbeeld dat een bepaald uitvoerneuron beïnvloedt — groeit dieper in het netwerk
+
+<ThinkAboutIt>Waarom gebruiken moderne architecturen meerdere gestapelde 3×3-convoluties in plaats van een enkele 7×7-convolutie? Denk na over het aantal parameters, niet-lineariteiten en receptieve veldgrootte.
+</ThinkAboutIt>
+
+---
+
+## 🏛️ Belangrijke architecturen die u moet kennen
+
+### ResNet (resterende netwerken)
+
+De architectuur die het ‘degradatieprobleem’ heeft opgelost: diepere netwerken presteren slechter dan ondiepere netwerken.
+
+**Belangrijke innovatie**: sla verbindingen (restverbindingen) over waardoor gradiënten rechtstreeks door het netwerk kunnen stromen:
+
+```python
+# Residual block (simplified)
+def residual_block(x):
+    identity = x
+    out = conv_bn_relu(x)
+    out = conv_bn(out)
+    out = out + identity  # Skip connection
+    return relu(out)
+```
+
+**Waarom het ertoe doet**: verbindingen overslaan maken training van zeer diepe netwerken (meer dan 100 lagen) mogelijk. Dit idee komt in bijna elke moderne architectuur voor.
+
+### YOLO (Je kijkt maar één keer)
+
+De go-to-architectuur voor realtime objectdetectie.
+
+**Belangrijke innovatie**: behandelt detectie als een enkel regressieprobleem: verdeelt het beeld in een raster en voorspelt tegelijkertijd grenskaders en klassenkansen.
+
+| Versie | Belangrijkste kenmerk | Snelheid |
+|---|---|---|
+| YOLOv3 | Detectie op meerdere schaal | ~30 FPS |
+| YOLOv5 | PyTorch-native, gemakkelijk te gebruiken | ~45 FPS |
+| YOLOv8 | Ankervrij, state-of-the-art | ~80 FPS |
+
+### Visietransformers (ViT)
+
+Past de transformatorarchitectuur toe op afbeeldingen door ze in patches te splitsen:
+
+```
+Image (224×224) → Split into 16×16 patches → 196 patch tokens
+→ Linear projection → Add position embeddings → Transformer encoder → Classification
+```
+
+**Belangrijkste interviewpunt**: ViT heeft meer data nodig dan CNN's om goed te kunnen trainen (minder inductieve bias), maar schaalt beter met meer data en rekenkracht.
+
+<Quiz
+  question="Welk probleem lossen resterende (skip)verbindingen in ResNet op?"
+  options="Overfitting in diepe netwerken|Verdwijnende/exploderende gradiënten die het trainen van zeer diepe netwerken verhinderen|Langzame inferentietijd|Hoog geheugengebruik"
+  answer="1"
+  explanation="Zonder overslaande verbindingen worden de gradiënten verdwijnend klein omdat ze zich door vele lagen heen voortplanten, waardoor diepe netwerken erg moeilijk te trainen zijn. Resterende verbindingen bieden een direct pad voor gradiënten, waardoor effectieve training van netwerken met honderden lagen mogelijk wordt."
+/>
+
+---
+
+## ❓ Veelgestelde vragen over sollicitatiegesprekken
+
+### Objectdetectie versus segmentatie
+
+Interviewers vragen u graag om deze taken te onderscheiden:
+
+| Taak | Uitvoer | Voorbeeld |
+|---|---|---|
+| **Classificatie** | Enkel label voor de afbeelding | "Dit is een kat" |
+| **Objectdetectie** | Grenzende dozen + etiketten | "Kat op (x1,y1,x2,y2), hond op (x3,y3,x4,y4)" |
+| **Semantische segmentatie** | Klasselabel per pixel | Elke pixel met het label kat, hond of achtergrond |
+| **Instantiesegmentatie** | Label per pixel + instantie-ID | Onderscheidt cat_1 van cat_2 op pixelniveau |
+
+### Leer leren overdragen
+
+Een van de meest praktische CV-technieken – en een veel voorkomend interviewonderwerp:
+
+1. **Neem een vooraf getraind model** (bijvoorbeeld ResNet-50 getraind op ImageNet)
+2. **Vervang de uiteindelijke classificatiekop** door uw taakspecifieke lagen
+3. **Verfijnen**:
+   - **Functie-extractie**: bevries alle vooraf getrainde lagen, train alleen het nieuwe hoofd (snel, werkt met kleine datasets)
+   - **Volledige afstemming**: ontdooi alle lagen, train end-to-end met een kleine leersnelheid (betere resultaten, heeft meer gegevens nodig)
+
+```python
+import torchvision.models as models
+import torch.nn as nn
+
+# Transfer learning with ResNet-50
+model = models.resnet50(pretrained=True)
+
+# Freeze pre-trained layers
+for param in model.parameters():
+    param.requires_grad = False
+
+# Replace final layer for 10-class problem
+model.fc = nn.Linear(model.fc.in_features, 10)
+```
+
+<Callout>Wanneer u transfer learning in interviews bespreekt, vermeld dan altijd *wanneer dit mogelijk mislukt*: wanneer uw doeldomein heel anders is dan het vooraf getrainde domein (bijvoorbeeld medische röntgenfoto's versus natuurlijke beelden van ImageNet). In deze gevallen heeft u mogelijk een domeinspecifieke vooropleiding nodig.
+</Callout>
+
+### Gegevensvergroting
+
+Cruciaal voor het trainen van robuuste modellen, vooral met beperkte gegevens:
+
+- **Geometrisch**: roteren, spiegelen, bijsnijden, schalen
+- **Kleur**: helderheid, contrast, verzadiging, tintjitter
+- **Geavanceerd**: CutOut (willekeurige patches maskeren), MixUp (twee afbeeldingen combineren), CutMix (patches vervangen door patches van een andere afbeelding)
+- **Testtijdaugmentatie (TTA)**: verhoog de gevolgtrekking en gemiddelde voorspellingen voor een betere nauwkeurigheid
+
+<FunFact>De ImageNet-dataset – de benchmark die de aanzet gaf tot de deep learning-revolutie – bevat meer dan 14 miljoen met de hand gelabelde afbeeldingen in 21.841 categorieën. De jaarlijkse ImageNet-uitdaging (2010-2017) zorgde ervoor dat het foutenpercentage steeg van 28% naar 2,3%, waarmee de menselijke prestaties van ongeveer 5% werden overtroffen.
+</FunFact>
+
+---
+
+## 🖼️ Praktische overwegingen
+
+### Voorbewerking van afbeeldingen
+
+Productie-CV-systemen hebben een robuuste voorbewerking nodig:
+
+- **Formaat wijzigen**: modellen verwachten vaste invoerformaten, maar naïef formaat wijzigen vervormt de beeldverhoudingen. Gebruik opvulling of middenbijsnijden.
+- **Normalisatie**: trek het ImageNet-gemiddelde af en deel het door std (bij gebruik van vooraf getrainde modellen): `mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]`
+- **Omgaan met variabele resoluties**: batchafbeeldingen van vergelijkbare grootte of gebruik adaptieve poolinglagen
+
+### Implementatie: Edge versus cloud
+
+| Factor | Rand (mobiel/IoT) | Wolk |
+|---|---|---|
+| Latentie | Zeer laag (geen netwerkretour) | Hoger (netwerkafhankelijk) |
+| Modelgrootte | Beperkt (MobileNet, EfficientNet-Lite) | Onbeperkt |
+| Privé | Gegevens blijven op apparaat | Gegevens verzonden naar server |
+| Kosten | Geen serverkosten, maar hardware staat vast | Betaal per gevolgtrekking |
+| Updates | Moeilijk (app-update vereist) | Eenvoudig (wisselmodel serverzijde) |
+
+**Modelcompressietechnieken** voor edge-implementatie:
+- **Kwantisering**: verminder de gewichten van FP32 naar INT8 (4× kleinere, snellere gevolgtrekking)
+- **Snoeien**: verwijder gewichten met een lage omvang (gestructureerd snoeien voor daadwerkelijke versnelling)
+- **Kennisdestillatie**: train een klein "studenten"-model om een groot "leraar"-model na te bootsen
+
+<Quiz
+  question="U moet een objectdetectiemodel implementeren op een mobiele telefoon met 30 FPS. Welke aanpak is het meest geschikt?"
+  options="Gebruik een volledige ResNet-152-backbone met FP32-precisie|Gebruik MobileNet-backbone met INT8-kwantisering|Gebruik Vision Transformer met volledige aandacht|Gebruik een ensemble van drie detectiemodellen"
+  answer="1"
+  explanation="MobileNet is specifiek ontworpen voor mobiele apparaten en edge-apparaten, waarbij gebruik wordt gemaakt van in de diepte scheidbare convoluties om het rekenwerk te verminderen. INT8-kwantisering verkleint de modelgrootte verder en versnelt de gevolgtrekking, waardoor realtime detectie mogelijk wordt op mobiele hardware."
+/>
+
+---
+
+## 🌊 Recente trends die de moeite waard zijn om te weten
+
+### Multimodale modellen
+
+Modellen die zowel afbeeldingen als tekst verwerken:
+- **CLIP** (Contrastive Language-Image Pre-training): lijnt afbeeldings- en tekstinsluitingen uit in een gedeelde ruimte. Maakt classificatie van zero-shot-afbeeldingen mogelijk: beschrijf een categorie in tekst en vind overeenkomende afbeeldingen.
+- **SAM** (Segment Anything Model): een basismodel voor segmentatie dat elk object kan segmenteren op basis van een punt, vak of tekstprompt.
+
+### Verspreidingsmodellen
+
+De architectuur achter DALL-E, Stable Diffusion en Midjourney:
+- **Voorwaarts proces**: voeg geleidelijk ruis toe aan een afbeelding totdat het pure ruis wordt
+- **Omgekeerd proces**: leer ruis te verwijderen: voorspel en verwijder de ruis op basis van luidruchtige input
+- **Toepassingen buiten de kunst**: superresolutie van beelden, inschilderen, medische beeldsynthese
+
+### Zelfgestuurd leren in CV
+
+De behoefte aan gelabelde gegevens verminderen:
+- **Contrastief leren** (SimCLR, MoCo): leer representaties door augmented views van dezelfde afbeelding samen te voegen en verschillende afbeeldingen uit elkaar te duwen
+- **Masked image modelling** (MAE): maskeer willekeurige plekken en train het model om ze te reconstrueren (de BERT-aanpak, toegepast op afbeeldingen)
+
+<ThinkAboutIt>CLIP kan afbeeldingen classificeren in categorieën die het tijdens de training nog nooit heeft gezien, eenvoudigweg door afbeeldingen te matchen met tekstbeschrijvingen. Wat zijn de implicaties hiervan voor traditionele CV-pijplijnen die gelabelde trainingsgegevens vereisen voor elke nieuwe categorie?
+</ThinkAboutIt>
+
+---
+
+## 🔑Belangrijkste afhaalrestaurants
+
+- **Beheers de basisprincipes**: convoluties, pooling, functiekaarten en receptieve velden – deze komen in elk CV-interview aan bod
+- **Ken de belangrijkste architecturen**: ResNet (verbindingen overslaan), YOLO (real-time detectie), ViT (transformatoren voor visie)
+- **Begrijp de taakhiërarchie**: classificatie → detectie → segmentatie → instantiesegmentatie
+- **Transferleren is uw standaardaanpak** — het verfijnen van vooraf getrainde modellen is in de meeste praktische scenario's beter dan helemaal opnieuw trainen
+- **Denk na over implementatiebeperkingen**: edge versus cloud, modelcompressie en latentiebudgetten
+- **Blijf actueel**: multimodale modellen (CLIP), funderingsmodellen (SAM) en diffusiemodellen geven het veld opnieuw vorm
+
+<Callout>CV-interviews testen breedte en diepgang. Wees bereid om diepgaand in te gaan op één architectuur (leid de formule voor de uitvoergrootte af, leg de overslaanverbindingen wiskundig uit) EN breed over het veld (vergelijk detectiebenaderingen, bespreek wanneer ViT versus CNN moet worden gebruikt). Bereid beide modi voor.
+</Callout>

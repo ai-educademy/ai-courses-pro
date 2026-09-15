@@ -1,0 +1,281 @@
+---
+title: "إتقان تحليل التعقيد"
+description: "قم بتحليل تعقيد الزمان والمكان بثقة - وهي المهارة التي تفصل بين الحلول الجيدة والحلول المثالية في مقابلات البرمجة."
+order: 7
+difficulty: "intermediate"
+duration: 18
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+# إتقان تحليل التعقيد
+
+"ما هو تعقيد الوقت؟" - أربع كلمات تتبع كل حل تقدمه في مقابلة البرمجة. قم بالأمر بشكل صحيح، وستبدو كمهندس واثق. تتعثر، ويتساءل القائم بالمقابلة عما إذا كنت تفهم الكود الخاص بك حقًا. تحليل التعقيد ليس مجرد نظرية أكاديمية؛ إنها العدسة التي من خلالها يقيم المهندسون ما إذا كان الحل سيعمل على نطاق واسع. يزودك هذا الدرس بتحليل أي حل بثقة - بدءًا من الحلقات البسيطة وحتى الخوارزميات العودية الصعبة.
+
+## أساسيات التدوين الكبير
+
+يصف Big-O الحد الأعلى لكيفية نمو وقت تشغيل الخوارزمية أو استخدام الذاكرة مع نمو حجم الإدخال. فهو يزيل الثوابت والمصطلحات ذات الترتيب الأدنى للتركيز على العامل المهيمن.
+
+| التعقيد | الاسم | مثال | عناصر 1M |
+|---|---|---|---|
+| يا(1) | ثابت | بحث عن خريطة التجزئة | فوري |
+| يا(سجل ن) | لوغاريتمي | بحث ثنائي | ~20 عملية |
+| يا(ن) | خطي | حلقة واحدة من خلال مجموعة | عمليات 1M |
+| يا(ن سجل ن) | الخطي | دمج الفرز، فرز الكومة | ~20 مليون عملية |
+| يا(ن²) | تربيعية | حلقات متداخلة (القوة الغاشمة) | 1 تريليون عملية |
+| يا(٢ⁿ) | الأسي | مجموعات فرعية العودية | حرارة موت الكون |
+| يا(ن!) | مضروب | جميع التباديل | الموت الحراري × الموت الحراري |
+
+<Callout>القاعدة العملية: تتعامل أجهزة الكمبيوتر الحديثة مع ما يقرب من 10⁸ عمليات بسيطة في الثانية. إذا كانت الخوارزمية الخاصة بك هي O(n²) وn = 10⁵، فهذا يعني 10¹⁰ عمليات — حوالي 100 ثانية. بطيء جدًا. تساعدك هذه الرياضيات الذهنية على الحكم بسرعة على ما إذا كان نهجك سيمر خلال الحدود الزمنية المعتادة.</Callout>
+
+## تحليل الحلقات البسيطة
+
+### حلقة واحدة → O(n)
+
+```python
+def find_max(nums):
+    max_val = nums[0]       # O(1)
+    for num in nums:         # Loop runs n times
+        if num > max_val:    # O(1) comparison
+            max_val = num    # O(1) assignment
+    return max_val           # O(1)
+# Total: O(1) + O(n) × O(1) = O(n)
+```
+
+### حلقات متداخلة → اضرب
+
+```python
+def has_duplicate_pair(nums):
+    for i in range(len(nums)):           # n iterations
+        for j in range(i + 1, len(nums)):  # ~n iterations
+            if nums[i] == nums[j]:
+                return True
+    return False
+# Total: O(n) × O(n) = O(n²)
+```
+
+### كتل متسلسلة → إضافة
+
+```python
+def process(nums):
+    # Block 1: O(n)
+    for num in nums:
+        print(num)
+
+    # Block 2: O(n²)
+    for i in range(len(nums)):
+        for j in range(len(nums)):
+            print(i, j)
+
+# Total: O(n) + O(n²) = O(n²)  — drop the lower-order term
+```
+
+### حلقات ذات تكرارات غير واضحة
+
+```python
+# This is O(n), not O(n²)!
+def two_pointer_sum(nums, target):
+    left, right = 0, len(nums) - 1
+    while left < right:    # Each pointer moves at most n times total
+        total = nums[left] + nums[right]
+        if total == target:
+            return True
+        elif total < target:
+            left += 1
+        else:
+            right -= 1
+    return False
+```
+
+<ThinkAboutIt>فكر في حلقة حيث يضاعف المتغير كل تكرار: `i = 1; while i < n: i *= 2`. كم مرة يتم تنفيذ هذه الحلقة؟ ما هو التعقيد؟ (تلميح: إذا تضاعفت في كل مرة، فكم عدد المضاعفة اللازمة للوصول إلى n؟)</ThinkAboutIt>
+
+## تحليل العودية
+
+العودية هي المكان الذي يصبح فيه تحليل التعقيد مثيرًا للاهتمام. الأداة الرئيسية هي **شجرة العودية**.
+
+### العودية الخطية → O(n)
+
+```python
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+# Recursion tree: single chain of n calls
+# factorial(5) → factorial(4) → factorial(3) → factorial(2) → factorial(1)
+# Time: O(n), Space: O(n) — n stack frames
+```
+
+### العودية الثنائية → O(2ⁿ)
+
+```python
+# Naive Fibonacci — the classic exponential example
+def fib(n):
+    if n <= 1:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+# Recursion tree: each call spawns TWO calls
+#                fib(5)
+#              /        \
+#          fib(4)       fib(3)
+#         /     \       /    \
+#      fib(3)  fib(2) fib(2) fib(1)
+#      ...
+# Nodes at each level double → total nodes ≈ 2ⁿ
+# Time: O(2ⁿ), Space: O(n) — max depth of tree
+```
+
+### العودية المحفوظة → O(n)
+
+```python
+def fib_memo(n, memo={}):
+    if n in memo:
+        return memo[n]
+    if n <= 1:
+        return n
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+
+# Each subproblem computed only once → O(n) unique calls
+# Time: O(n), Space: O(n)
+```
+
+<FunFact>الفرق بين فيبوناتشي الساذج والمحفوظ مذهل على نطاق واسع. تتطلب حوسبة fib(50) بسذاجة حوالي 2⁵⁰ ≈ 1 كوادريليون عملية - ما يقرب من 100 يوم على جهاز كمبيوتر حديث. تتطلب النسخة المحفوظة 50 عملية بالضبط، يتم إجراؤها في ميكروثانية. وهذا هو سبب أهمية تحليل التعقيد.</FunFact>
+
+### النظرية الرئيسية (المبسطة)
+
+بالنسبة لتكرارات فرق تسد بالشكل **T(n) = aT(n/b) + O(nᵈ)**:
+
+| الحالة | التعقيد |
+|---|---|
+| د > log_b(أ) | يا(ن) |
+| د = log_b(أ) | O(نᵈ سجل ن) |
+| د <log_b(أ) | O(n^(log_b(a))) |
+
+**أمثلة عملية**:
+- **دمج الفرز**: T(n) = 2T(n/2) + O(n) → a=2, b=2, d=1 → d = log₂2 → **O(n log n)**
+- **البحث الثنائي**: T(n) = T(n/2) + O(1) → a=1, b=2, d=0 → d = log₂1 → **O(log n)**
+- **مصفوفة ستراسن متعددة**: T(n) = 7T(n/2) + O(n²) → a=7, b=2, d=2 → d < log₂7 → **O(n^2.81)**
+
+## تعقيد الفضاء
+
+التعقيد المكاني لا يقل أهمية عن التعقيد الزمني ولكن غالبًا ما يتم تجاهله. عدد:
+
+1. **المساحة المساعدة** — هياكل بيانات إضافية تقوم بإنشائها
+2. **إطارات مكدسة** — تضيف كل مكالمة متكررة إطارًا
+
+```python
+# O(1) space — only a few variables
+def reverse_in_place(nums):
+    left, right = 0, len(nums) - 1
+    while left < right:
+        nums[left], nums[right] = nums[right], nums[left]
+        left += 1
+        right -= 1
+
+# O(n) space — creating a new list
+def reverse_copy(nums):
+    return nums[::-1]
+
+# O(n) space from recursion — n stack frames
+def reverse_recursive(nums, left, right):
+    if left >= right:
+        return
+    nums[left], nums[right] = nums[right], nums[left]
+    reverse_recursive(nums, left + 1, right - 1)
+```
+
+<Callout>في المقابلات، اذكر دائمًا تعقيد الزمان والمكان. المتابعة الشائعة هي "هل يمكنك القيام بذلك في الفضاء O(1)؟" وهذا يعني غالبًا تحويل الحل العودي إلى الحل التكراري، أو العثور على خوارزمية موضعية.</Callout>
+
+## أساسيات التحليل المطفأ
+
+بعض العمليات تكون باهظة الثمن في بعض الأحيان ولكنها رخيصة في المتوسط. حسابات التحليل المطفأة لهذا الغرض.
+
+**مثال كلاسيكي: المصفوفة الديناميكية (ArrayList)**
+
+```python
+# Appending to a dynamic array
+# Most appends are O(1) — just place the element
+# Occasionally (when full), the array doubles: O(n) copy
+# Over n operations: n × O(1) + log(n) × O(n) = O(n) total
+# Amortised cost per operation: O(n) / n = O(1)
+```
+
+أمثلة أخرى مطفأة O(1):
+- إدراجات خريطة التجزئة (إعادة صياغة من حين لآخر)
+- عمليات شجرة سبلاي
+- تنفيذ قائمة انتظار ذات مكدسين
+
+## مصائد التعقيد الشائعة
+
+### الفخ 1: الحلقات المخفية في العمليات المضمنة
+
+```python
+# Looks like O(n), but string concatenation in a loop is O(n²)
+def build_string(chars):
+    result = ""
+    for char in chars:
+        result += char   # Each += creates a new string → O(current length)
+    return result
+# Fix: use ''.join(chars) → O(n)
+
+# list.index() and 'in' on lists are O(n)
+for item in big_list:
+    if item in another_big_list:  # O(n) × O(n) = O(n²)
+        process(item)
+# Fix: convert to set for O(1) lookup
+```
+
+### الفخ 2: يهيمن الفرز
+
+```python
+def find_kth_largest(nums, k):
+    nums.sort()       # O(n log n) — this dominates
+    return nums[-k]   # O(1)
+# Total: O(n log n), not O(1)
+# Better: use a heap for O(n log k)
+```
+
+### الفخ 3: عمق العودية ≠ إجمالي العمل
+
+```python
+# Depth is O(log n), but total work is O(n)
+def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])     # T(n/2)
+    right = merge_sort(arr[mid:])    # T(n/2)
+    return merge(left, right)        # O(n) work at each level
+# log n levels × O(n) work per level = O(n log n)
+```
+
+<Quiz question="ما هو التعقيد الزمني لهذا الكود؟ `for i in range(n): for j in range(i): print(i, j)`" options="على)|يا (ن سجل ن)|يا (ن²)|يا (ن³)" answer="2" explanation="تعمل الحلقة الداخلية 0 + 1 + 2 + ... + (n-1) = n(n-1)/2 مرات إجمالاً. هذا هو مجموع المتسلسلة الحسابية، والذي يمكن تبسيطه إلى O(n²). إنه فخ شائع لأن الحلقة الداخلية لا تعمل دائمًا n مرات، لكن إجمالي العمل لا يزال تربيعيًا." />
+
+## من القوة الغاشمة إلى المثالية
+
+في المقابلات، ستبدأ غالبًا بحل قوي ومن ثم تحسينه. إليك مسار التحسين الشائع:
+
+| الحالي | تقنية التحسين | تحسين إلى |
+|---|---|---|
+| يا(ن²) | خريطة التجزئة لعمليات البحث | يا(ن) |
+| يا(ن²) | فرز + مؤشرين | يا(ن سجل ن) |
+| يا(٢ⁿ) | التذكير / موانئ دبي | O(n²) أو O(n×m) |
+| يا(ن سجل ن) | فرز الجرافة / فرز العد (نطاق محدود) | يا(ن) |
+| يا (ن) الفضاء | التلاعب في المكان | O(1) مساحة |
+
+**تدفق المحادثة في المقابلة**:
+1. "أسلوب القوة الغاشمة الخاص بي هو O(n²) باستخدام الحلقات المتداخلة."
+2. "لاحظت أننا نجري عمليات بحث متكررة - يمكن لخريطة التجزئة أن تقلل البحث الداخلي إلى O(1)."
+3. "الحل الأمثل هو O(n) الوقت وO(n) الفضاء."
+4. "المقايضة هي أننا نستخدم ذاكرة إضافية، ولكن تحسين الوقت مهم."
+
+## الوجبات السريعة الرئيسية
+
+- **تعرف على التسلسل الهرمي**: O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(2ⁿ) < O(n!). ستشير إلى هذا في كل مقابلة.
+- ** ضرب الحلقات المتداخلة، وإضافة كتل متسلسلة **: القاعدتان الأساسيتان لتحليل الحلقات.
+- **رسم أشجار العودية**: فهي تجعل التعقيد العودي مرئيًا ويسهل تحليله بشكل صحيح.
+- **احترس من التكاليف المخفية**: يعتبر تسلسل السلاسل واختبار عضوية القائمة والفرز داخل الحلقات من المصائد الشائعة.
+- **حدد الزمان والمكان**: يغطي تحليل التعقيد الكامل كلا البعدين دائمًا.
+- **الاتصال بالتحسين**: معرفة مدى تعقيد القوة الغاشمة يخبرك بمدى المساحة المتاحة للتحسين.

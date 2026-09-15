@@ -1,0 +1,189 @@
+---
+title: "系统设计模拟面试 - 45 分钟的高级工程师模拟"
+description: "食品配送平台的完整系统设计演练 - 需求、API 设计、架构、深入研究和扩展 - 结构与真正的高级工程师面试完全相同。"
+order: 9
+difficulty: "advanced"
+duration: 25
+icon: "🏗️"
+published: true
+machineTranslated: true
+---
+# 系统设计模拟面试 - 45 分钟的高级工程师模拟
+
+系统设计面试将高级工程师与其他人区分开来。没有单一的正确答案 - 面试官会评估你的**结构化思维**、权衡分析以及驾驭歧义的能力。本课程是一个完整的 45 分钟模拟课程。
+
+## 🎯 问题：设计食品配送系统
+
+*“设计一个像 Uber Eats 或 Deliveroo 这样的食品配送平台，连接顾客、餐厅和送货司机。”*
+
+<Illustration src="/images/lessons/system-design-mock-interview.svg" alt="具有用户、餐厅、订单和司机服务的食品配送系统的高级架构" caption="食品配送平台的四个核心领域 - 每个领域都是一个有自己服务的有界上下文。" />
+
+## 第 1 阶段：需求收集（5 分钟）
+
+**切勿立即开始绘制方框。** 首先提出澄清问题：
+
+**功能要求：**
+- 顾客浏览餐厅、查看菜单、下订单、实时跟踪配送
+- 餐厅管理菜单、接受/拒绝订单、更新准备状态
+- 司机收到送货请求，导航至取货/还车，确认送货
+- 在整个订单生命周期中显示实时预计交货时间 (EDT)
+
+**非功能性要求：**
+- **可用性**：99.99% 的正常运行时间（每年大约 52 分钟的停机时间）
+- **延迟**：搜索 < 200 毫秒，下单 < 500 毫秒，位置更新 < 1 秒
+- **规模**：月活跃用户 5000 万，日订单量 500 万，峰值并发用户数 50 万
+- **一致性**：搜索可接受的最终一致性；支付强一致性
+
+<Quiz question="为什么餐厅搜索可以接受最终一致性，但支付处理却不能接受最终一致性？" options="搜索不如支付重要|显示稍微陈旧的菜单是可以忍受的；向用户收取两次费用并不是|最终一致性总是更快|支付API不支持最终一致性" answer="1" explanation="用户看到一家刚刚关门的餐厅会带来一些小不便 - 重试即可解决该问题。但处理两次付款会造成真正的财务损失。不一致的成本决定了一致性模型。" />
+
+## 第 2 阶段：API 设计（5 分钟）
+
+在架构之前定义核心合约：
+
+```
+# Customer APIs
+GET    /api/v1/restaurants?lat={}&lng={}&cuisine={}  → Restaurant[]
+GET    /api/v1/restaurants/{id}/menu                  → Menu
+POST   /api/v1/orders                                 → Order
+GET    /api/v1/orders/{id}/track                      → OrderStatus + DriverLocation
+
+# Restaurant APIs
+PATCH  /api/v1/restaurants/{id}/menu/items/{itemId}   → MenuItem
+POST   /api/v1/orders/{id}/accept                     → Order
+POST   /api/v1/orders/{id}/ready                      → Order
+
+# Driver APIs
+POST   /api/v1/drivers/{id}/location                  → void (fire-and-forget)
+POST   /api/v1/deliveries/{id}/accept                 → Delivery
+POST   /api/v1/deliveries/{id}/complete               → Delivery
+```
+
+**关键决策**：使用 WebSocket 进行实时驾驶员跟踪，使用 REST 处理其他一切。
+
+## 第 3 阶段：高级架构（10 分钟）
+
+### 核心服务
+
+|服务 |责任|数据库|
+|--------|----------------|----------|
+| **用户服务** |身份验证、个人资料、地址 | PostgreSQL |
+| **餐厅服务** |菜单、供应情况、营业时间 | PostgreSQL + Elasticsearch |
+| **订购服务** |订单生命周期、状态机 | PostgreSQL（强一致性）|
+| **司机服务** |司机位置、可用性、匹配 | Redis（位置）+ PostgreSQL |
+| **支付服务** |收费、退款、餐厅付款 | PostgreSQL（需要 ACID）|
+| **通知服务** |推送、短信、电子邮件通知 |消息队列消费者|
+
+### 沟通模式
+
+- **同步**：API网关→单独服务（REST/gRPC）
+- **异步**：发布到 **Kafka** 的订单事件 - 由支付、通知和分析服务使用
+- **实时**：通过 WebSocket 更新驱动程序位置→使用地理空间索引存储在 **Redis** 中
+
+<FunFact>Uber 在全球范围内每秒处理超过 100 万次位置更新。他们使用六角形分层网格构建了自己的地理空间索引系统 (H3)，因为传统的纬度/经度查询无法跟上规模。</FunFact>
+
+## 第 4 阶段：深入探讨 - 关键组件（15 分钟）
+
+### 驱动匹配算法
+
+当订单准备好取货时，匹配服务必须分配最佳司机：
+
+```
+Score(driver) = w1 × (1 / distance_to_restaurant)
+              + w2 × driver_rating
+              + w3 × (1 / current_active_orders)
+              + w4 × acceptance_rate
+```
+
+**实现**：查询Redis`GEORADIUS`餐厅5公里范围内的司机，对每个候选人进行评分，分配得分最高的可用司机。如果拒绝，请提供给下一位司机，并有 30 秒的暂停时间。
+
+### 实时订单追踪
+
+```
+Client ←→ WebSocket Gateway ←→ Driver Service
+                                    ↑
+                              Redis GEO Store
+                            (GEOADD, GEOPOS)
+```
+
+司机每 4 秒发布一次 GPS 坐标。 WebSocket 网关订阅活动订单的位置更新并将其推送到客户的设备。 **Redis Pub/Sub** 有效地处理扇出。
+
+### 预计交货时间
+
+EDT 是**多阶段预测**：
+
+```
+EDT = restaurant_prep_time + driver_pickup_travel + dropoff_travel + buffer
+
+Where:
+- restaurant_prep_time  → ML model trained on historical order data per restaurant
+- driver_pickup_travel  → distance/traffic API (Google Maps, Mapbox)
+- dropoff_travel        → same routing API
+- buffer                → dynamic, increases during rain/peak hours
+```
+
+<ThinkAboutIt>上面的匹配算法使用固定权重（w1-w4）。您如何将其发展为同时优化送货速度和驾驶员满意度的学习系统？</ThinkAboutIt>
+
+### 付款处理
+
+付款遵循**两阶段模式**：
+
+1. **授权** - 下订单时保留资金（保留，不收费）
+2. **捕获** - 确认发货后按实际金额收取
+
+这可以优雅地处理订单修改、取消和部分退款。在每个付款请求上使用**幂等性密钥**，以防止重试期间重复收费。
+
+<Quiz question="为什么要使用两阶段支付模式（授权然后捕获）而不是立即收费？" options="比单次充电更快|它可以处理取消、修改和退款，无需复杂的撤销逻辑|支付提供商需要它|它降低了交易费用" answer="1" explanation="授权然后捕获让您无需承诺即可持有资金。如果餐厅取消或订单发生变化，您只需释放授权即可 - 无需退款处理。这极大地简化了边缘情况。" />
+
+## 第 5 阶段：扩展和瓶颈（10 分钟）
+
+### 数据库扩展
+
+- **订单服务**：按 `order_id` 分片 - 订单独立，水平扩展简单
+- **餐厅服务**：用于搜索查询的只读副本，用于全文和地理空间搜索的 Elasticsearch
+- **驱动程序位置**：具有地理空间索引的 Redis 集群 - 纯内存中、亚毫秒级读取
+
+### 处理峰值负载（浪涌）
+
+在高峰时段（周五晚上 7 点，主要体育赛事），订单量可能会激增 10 倍：
+
+- **自动缩放**应用程序 Pod 基于队列深度，而不是 CPU
+- **峰时定价**以平衡供需 - 当司机供应不足时增加送货费用
+- **每个用户的速率限制**，以防止高峰期间的滥用
+- **下游服务上的断路器** - 级联故障的优雅降级
+
+### 单点故障
+
+|组件|缓解措施 |
+|------------|------------|
+| API网关|负载均衡器后面的多个实例、运行状况检查 |
+|卡夫卡|复制因子为 3 的多代理集群 |
+| Redis | Redis Sentinel 用于自动故障转移 |
+|支付提供商|具有自动回退功能的辅助提供商 |
+
+<Quiz question="您正在扩展订单服务。哪个分片键提供最佳写入分布？" options="Restaurant_id - 一个分片上一家餐厅的所有订单|user_id - 一个用户在一个分片上的所有订单|order_id - 订单在分片中随机分布|city_id - 一个分片上某个城市的所有订单" answer="2" explanation="由于订单 ID 是随机生成的（UUID 或雪花 ID），因此按 order_id 进行分片会均匀分布写入。按 Restaurant_id 或 city_id 进行分片会创建热点 - 受欢迎的餐厅和城市会收到不成比例的流量。" />
+
+<ThinkAboutIt>面试官会问：“高峰期支付服务中断 30 秒会发生什么？”了解确切的故障模式、订单如何受到影响以及恢复情况如何。</ThinkAboutIt>
+
+## 💡 面试技巧
+
+1. **安排你的时间** - 不要在需求上花费 30 分钟
+2. **明确地说明权衡** - “我选择 X 而不是 Y，因为……”
+3. **从简单开始，然后扩展** - 首先设计 1× 负载，然后寻址 100×
+4. **边说边画** - 视觉传达是评估的一半
+5. **承认未知** - “我需要对此进行基准测试，但我的假设是......”
+
+## 🎯 要点
+
+- 始终从需求开始 - 功能性和非功能性
+- 在架构图之前设计 API 合约
+- 深入研究 2-3 个组件，而不是所有组件都肤浅
+- 每个架构选择都涉及权衡 - 说出它们的名称
+- 带计时器练习：45 分钟，无延长时间
+
+---
+
+## 📚 进一步阅读
+
+- 【系统设计面试Alex Xu](https://www.amazon.co.uk/System-Design-Interview-insiders-guide/dp/B08CMF2CQF) - 最实用的系统设计面试准备书
+- [Uber 工程博客](https://www.uber.com/en-GB/blog/engineering/) - 深入研究大规模的现实世界系统
+- [设计数据密集型应用程序，作者：Martin Kleppmann](https://dataintensive.net/) - 分布式系统基础知识的权威参考

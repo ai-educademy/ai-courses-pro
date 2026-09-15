@@ -1,0 +1,166 @@
+---
+title: "Entwerfen Sie eine Chat-Anwendung – Echtzeitkommunikation im großen Maßstab"
+description: "Entwerfen Sie ein WhatsApp-ähnliches Chat-System, das Millionen gleichzeitiger Benutzer mit Echtzeitzustellung verwaltet."
+order: 3
+difficulty: "advanced"
+duration: 25
+icon: "💬"
+published: true
+machineTranslated: true
+---
+## Die Vorstellungsgesprächsaufforderung
+
+* „Entwerfen Sie eine Chat-Anwendung wie WhatsApp oder Slack, die Einzelnachrichten, Gruppenchats und Online-Präsenzindikatoren unterstützt.“*
+
+Dies ist ein Favorit in Systemdesign-Interviews, da es Echtzeitkommunikation, Verbindungsmanagement, Speicher im großen Maßstab und Kompromisse bei verteilten Systemen testet – alles in einem Problem.
+
+## Schritt 1: Anforderungserfassung
+
+**Funktionale Anforderungen:**
+- Eins-zu-eins-Nachrichtenübermittlung mit Zustellungs- und Lesebestätigungen
+- Gruppenchat (bis zu 500 Mitglieder)
+- Online-/Offline-Präsenzindikatoren
+- Nachrichtenverlauf und Suche
+- Push-Benachrichtigungen für Offline-Benutzer
+
+**Nichtfunktionale Anforderungen:**
+- Geringe Latenz: Nachrichten werden innerhalb von 200 ms zugestellt
+- Hohe Verfügbarkeit: 99,99 % Betriebszeit
+- Garantierte Nachrichtenreihenfolge innerhalb eines Gesprächs
+- Unterstützt 50 Millionen gleichzeitige Verbindungen
+
+<Callout>Quantifizieren Sie Ihre nichtfunktionalen Anforderungen immer mit konkreten Zahlen. „Schnelle Lieferung“ ist vage – „Lieferung unter 200 ms“ zeigt, dass Sie die Domain verstehen.
+</Callout>
+
+## Schritt 2: API-Design
+
+Im Gegensatz zu reinen REST-Systemen erfordert Chat **bidirektionale Kommunikation**. Wir benötigen zwei Protokolle:
+
+**REST-API** (für Nicht-Echtzeitoperationen):
+```
+POST /api/users/login
+GET  /api/conversations
+GET  /api/conversations/:id/messages?before=timestamp&limit=50
+POST /api/groups
+```
+
+**WebSocket** (für Echtzeit-Messaging):
+```
+CONNECT  ws://chat.example.com/ws?token=jwt
+SEND     { type: "message", to: "user_456", content: "Hello!" }
+RECEIVE  { type: "message", from: "user_123", content: "Hello!", ts: 1706000000 }
+SEND     { type: "ack", messageId: "msg_789", status: "read" }
+```
+
+## Schritt 3: WebSocket-Verbindungsverwaltung
+
+Jeder verbundene Benutzer unterhält eine dauerhafte WebSocket-Verbindung. Bei 50 Millionen gleichzeitigen Benutzern ist dies eine erhebliche technische Herausforderung.
+
+**Verbindungsserver** (manchmal auch Gateway-Server genannt) halten WebSocket-Verbindungen. Jeder Server kann etwa 50.000–100.000 gleichzeitige Verbindungen verarbeiten, was bedeutet, dass wir 500–1.000 Verbindungsserver benötigen.
+
+Eine **Verbindungsregistrierung** (Redis-Cluster) ordnet jeden Benutzer seinem Verbindungsserver zu:
+```
+user_123 → ws-server-042
+user_456 → ws-server-187
+```
+
+Wenn Benutzer A eine Nachricht an Benutzer B sendet, ist der Ablauf wie folgt:
+1. Die Nachricht kommt über WebSocket beim Verbindungsserver von A an
+2. Der Server sucht in Redis nach dem Verbindungsserver von B
+3. Die Nachricht wird über interne Nachrichten an den Verbindungsserver von B weitergeleitet
+4. Der Server von B schiebt die Nachricht über den WebSocket von B
+
+<Illustration src="/images/lessons/design-chat-application.svg" alt="Chat-Architektur mit WebSocket-Verbindungsservern, Nachrichtenrouting und Speicherebenen" caption="Nachrichten fließen über Verbindungsserver, wobei Redis verfolgt, welcher Benutzer wo verbunden ist." />
+
+## Schritt 4: Nachrichtenspeicherung
+
+Chat-Anwendungen erzeugen enorme Datenmengen. WhatsApp verarbeitet täglich über 100 Milliarden Nachrichten.
+
+**Speicherstrategie:**
+- **Neueste Nachrichten** – werden in einem schnellen Datenspeicher (Cassandra oder HBase) gespeichert, der nach Konversations-ID partitioniert ist
+- **Nachrichtenindex** – ermöglicht die Suche über Elasticsearch
+- **Mediendateien** – im Objektspeicher (S3) mit CDN-Bereitstellung gespeichert
+
+**Schemadesign (Cassandra):**
+```
+Table: messages
+  partition_key: conversation_id
+  clustering_key: message_timestamp (descending)
+  columns: sender_id, content, type, status
+```
+
+Dieses Design stellt sicher, dass sich alle Nachrichten in einer Konversation auf derselben Partition befinden, wodurch Abfragen zum „Laden älterer Nachrichten“ äußerst effizient sind – nur ein sequentielles Lesen innerhalb einer Partition.
+
+<Quiz question="Warum ist Cassandra eine gute Wahl für die Speicherung von Chat-Nachrichten gegenüber einer relationalen Datenbank wie PostgreSQL?" options="Cassandra unterstützt SQL-Joins für komplexe Abfragen|Cassandra bietet starke ACID-Transaktionen|Cassandra bewältigt einen enormen Schreibdurchsatz und skaliert konstruktionsbedingt horizontal|Cassandra verschlüsselt automatisch alle ruhenden Daten" answer="2" explanation="Chatsysteme sind schreibintensiv (Milliarden Nachrichten täglich). Die verteilte Architektur von Cassandra bewältigt einen enormen Schreibdurchsatz und skaliert durch das Hinzufügen von Knoten horizontal, während PostgreSQL mit diesem Schreibvolumen auf einem einzelnen Primärknoten Probleme haben würde." />
+
+## Schritt 5: Präsenzsystem
+
+Zu zeigen, wer online ist, scheint einfach zu sein, ist aber im großen Maßstab überraschend schwierig. Sie können die Datenbank nicht alle paar Sekunden für jeden Benutzer in Ihrer Kontaktliste abfragen.
+
+**Heartbeat-Ansatz:**
+1. Verbundene Clients senden alle 30 Sekunden einen Heartbeat über WebSocket
+2. Der Server aktualisiert einen Redis-Schlüssel mit einer TTL von 60 Sekunden: `presence:user_123 → online (TTL 60s)`
+3. Wenn kein Heartbeat eintrifft, läuft der Schlüssel ab und der Benutzer erscheint offline
+
+**Fan-out für Statusaktualisierungen:**
+Wenn ein Benutzer online geht, muss sein Status an alle Kontakte weitergegeben werden, die ebenfalls online sind. Für einen Benutzer mit 500 Kontakten bedeutet dies, zu überprüfen, welche Kontakte online sind, und Anwesenheitsaktualisierungen nur an diese zu senden. Durch **Lazy Fan-Out** wird die Übertragung an Offline-Benutzer vermieden.
+
+<FunFact>Die „Zuletzt gesehen“-Funktion von WhatsApp sorgte weltweit für unerwartetes soziales Drama. In einigen Ländern kam es zu einem Anstieg der Beziehungsstreitigkeiten, weil die Partner die genauen Zeitstempel der letzten aktiven Partner des anderen sehen konnten. WhatsApp hat schließlich Datenschutzkontrollen hinzugefügt, um diese Informationen zu verbergen.
+</FunFact>
+
+## Schritt 6: Push-Benachrichtigungen
+
+Wenn ein Benutzer offline ist (kein aktiver WebSocket), müssen Nachrichten ihn weiterhin über Push-Benachrichtigungen erreichen.
+
+Der Nachrichtenfluss ändert sich:
+1. Die Verbindungsregistrierung zeigt, dass Benutzer B offline ist
+2. Nachricht wird in der Datenbank mit dem Status „nicht zugestellt“ gespeichert
+3. Ein Benachrichtigungsdienst sendet einen Push über APNs (iOS) oder FCM (Android)
+4. Wenn Benutzer B erneut eine Verbindung herstellt, werden nicht zugestellte Nachrichten abgerufen und über WebSocket gesendet
+5. Zur Empfangsbestätigung werden Lieferscheine zurückgesendet
+
+<ThinkAboutIt>Gruppenchats mit 500 Mitgliedern stellen eine Fan-Out-Herausforderung dar. Wenn eine Nachricht an eine Gruppe gesendet wird, in der 400 Mitglieder offline sind, sind das 400 Push-Benachrichtigungen. Wie würden Sie diese stapelweise und ratenbegrenzen, um zu vermeiden, dass die Benachrichtigungsdienste zu Spitzenzeiten überlastet werden?
+</ThinkAboutIt>
+
+## Schritt 7: Grundlagen der Ende-zu-Ende-Verschlüsselung
+
+In Interviewgesprächen zeigt die kurze Erwähnung der E2E-Verschlüsselung Sicherheitsbewusstsein:
+
+- Jeder Benutzer generiert auf seinem Gerät ein **öffentliches/privates Schlüsselpaar**
+- Nachrichten werden mit dem öffentlichen Schlüssel des Empfängers verschlüsselt, bevor sie das Gerät des Absenders verlassen
+- Der Server sieht nur Chiffretext – er kann den Nachrichteninhalt nicht lesen
+- Gruppenchats verwenden einen **gemeinsamen Gruppenschlüssel**, der rotiert, wenn Mitglieder beitreten oder gehen
+
+Das bedeutet, dass der Nachrichtenspeicher des Servers nur verschlüsselte Blobs enthält, was aus Sicht der Datencompliance tatsächlich einfacher ist.
+
+## Schritt 8: Skalierung auf Millionen
+
+**Wichtige Skalierungsstrategien:**
+- **Verbindungsserver** skalieren horizontal – fügen Sie weitere Server hinzu, wenn die Benutzerzahl wächst
+- **Nachrichtenrouting** verwendet Kafka oder Redis Pub/Sub für die Kommunikation zwischen Servern
+- **Datenbank-Sharding** nach Konversations-ID verteilt die Speicherlast
+- **Geografische Verteilung** – Stellen Sie Verbindungsserver in mehreren Regionen bereit, um die Latenz zu reduzieren
+- **Pufferung der Nachrichtenwarteschlange** – Absorbiert Spitzen während der Hauptauslastungszeiten
+
+<Quiz question="Ein Benutzer in London sendet eine Nachricht an einen Benutzer in Tokio. Was ist der effektivste Weg, um die Lieferlatenz zu minimieren?" options="Speichern Sie alle Nachrichten in einer einzigen zentralen Datenbank|Stellen Sie Verbindungsserver in beiden Regionen mit regionaler Nachrichtenweiterleitung bereit|Erzwingen Sie alle WebSocket-Verbindungen über Londoner Server|Cachen Sie alle Nachrichten am CDN-Edge" answer="1" explanation="Durch die Bereitstellung von Verbindungsservern in mehreren Regionen stellt jeder Benutzer eine Verbindung zu einem Server in der Nähe her. Nachrichten werden über optimierte interregionale Verbindungen zwischen Regionen weitergeleitet, wodurch die Latenz für jeden Benutzer minimiert wird." />
+
+<Quiz question="Während eines großen Sportereignisses steigt das Nachrichtenvolumen um das Zehnfache. Welche Komponente ist am stärksten gefährdet, zum Engpass zu werden?" options="Das CDN, das statische Assets bereitstellt|Die WebSocket-Verbindungsserver (bereits hergestellte Verbindungen)|Der Nachrichtenspeicher-Schreibpfad (Datenbankschreibvorgänge)|Der Benutzerauthentifizierungsdienst" answer="2" explanation="Spitzen beim Nachrichtenvolumen treffen den Speicherschreibpfad am stärksten. Verbindungen sind bereits hergestellt, das CDN verarbeitet statische Inhalte und die Authentifizierung wird nur bei der Anmeldung ausgeführt. Die Datenbank muss den plötzlichen Anstieg der Schreibvorgänge absorbieren." />
+
+## Interview-Tipps für das Chat-System-Design
+
+1. **Beginnen Sie mit der WebSocket-Entscheidung** – erklären Sie, warum HTTP-Polling in diesem Umfang nicht funktioniert
+2. **Verbindungskapazität quantifizieren** – zeigen Sie, dass Sie die Servergrenzen verstehen (~50–100.000 Verbindungen pro Server)
+3. **Adressieren Sie die Offline-Zustellung** – viele Kandidaten vergessen, dass Benutzer nicht immer verbunden sind
+4. **Erwähnung der Nachrichtenreihenfolge** – zeitstempelbasierte Reihenfolge mit Konfliktlösung
+
+<ThinkAboutIt>Slack und WhatsApp verfolgen sehr unterschiedliche Ansätze für den Nachrichtenverlauf. WhatsApp speichert Nachrichten auf dem Gerät und synchronisiert nicht den vollständigen Verlauf mit neuen Geräten. Slack speichert alles serverseitig und bietet eine vollständige Suche. Was sind die Kompromisse in Bezug auf Datenschutz, Kosten und Benutzererfahrung bei jedem Ansatz?
+</ThinkAboutIt>
+
+## Wichtige Erkenntnisse
+
+- Chat-Systeme erfordern WebSockets für die bidirektionale Kommunikation in Echtzeit
+– Für die skalierte Verbindungsverwaltung ist eine Registrierung erforderlich, die Benutzer den Servern zuordnet
+– Der Schreibdurchsatz und die partitionsbasierten Abfragen von Cassandra eignen sich für die Speicherung von Chatnachrichten
+– Präsenzsysteme verwenden Heartbeats mit TTL-basiertem Ablauf in Redis
+- Push-Benachrichtigungen verwalten die Offline-Nachrichtenzustellung
+- Geografische Verteilung und horizontale Skalierung berücksichtigen globale Latenzanforderungen

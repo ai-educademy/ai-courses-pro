@@ -1,0 +1,281 @@
+---
+title: "Maîtrise de l'analyse de complexité"
+description: "Analysez en toute confiance la complexité du temps et de l’espace – la compétence qui distingue les bonnes solutions des meilleures solutions lors des entretiens de codage."
+order: 7
+difficulty: "intermediate"
+duration: 18
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+# Maîtrise de l'analyse de complexité
+
+"Quelle est la complexité temporelle ?" - quatre mots qui suivent chaque solution que vous présentez lors d'un entretien de codage. Faites les choses correctement et vous aurez l’air d’un ingénieur confiant. Trébuchez et l'intervieweur se demande si vous comprenez vraiment votre propre code. L'analyse de la complexité n'est pas seulement une théorie académique ; c'est le prisme à travers lequel les ingénieurs évaluent si une solution fonctionnera à grande échelle. Cette leçon vous permet d'analyser n'importe quelle solution en toute confiance, des simples boucles aux algorithmes récursifs délicats.
+
+## Principes fondamentaux de la notation Big-O
+
+Big-O décrit la limite supérieure de la façon dont le temps d'exécution ou l'utilisation de la mémoire d'un algorithme augmente à mesure que la taille d'entrée augmente. Il supprime les constantes et les termes d’ordre inférieur pour se concentrer sur le facteur dominant.
+
+| Complexité | Nom | Exemple | 1 million d'éléments |
+|---|---|---|---|
+| O(1) | Constante | Recherche de carte de hachage | Instantané |
+| O(logn) | Logarithmique | Recherche binaire | ~20 opérations |
+| O(n) | Linéaire | Boucle unique à travers le tableau | 1 million d'opérations |
+| O(n journal n) | Linéarithmique | Tri par fusion, tri par tas | ~20M d'opérations |
+| O(n²) | Quadratique | Boucles imbriquées (force brute) | 1 000 milliards d'opérations |
+| O(2ⁿ) | Exponentiel | Sous-ensembles récursifs | Mort thermique de l'univers |
+| O(n!) | Factorielle | Toutes les permutations | Mort par la chaleur × mort par la chaleur |
+
+<Callout>Une règle empirique pratique : les ordinateurs modernes gèrent environ 10⁸ opérations simples par seconde. Si votre algorithme est O(n²) et n = 10⁵, cela représente 10¹⁰ opérations – environ 100 secondes. Trop lent. Ce calcul mental vous aide à juger rapidement si votre approche réussira dans les délais habituels.</Callout>
+
+## Analyse de boucles simples
+
+### Boucle unique → O(n)
+
+```python
+def find_max(nums):
+    max_val = nums[0]       # O(1)
+    for num in nums:         # Loop runs n times
+        if num > max_val:    # O(1) comparison
+            max_val = num    # O(1) assignment
+    return max_val           # O(1)
+# Total: O(1) + O(n) × O(1) = O(n)
+```
+
+### Boucles imbriquées → Multiplier
+
+```python
+def has_duplicate_pair(nums):
+    for i in range(len(nums)):           # n iterations
+        for j in range(i + 1, len(nums)):  # ~n iterations
+            if nums[i] == nums[j]:
+                return True
+    return False
+# Total: O(n) × O(n) = O(n²)
+```
+
+### Blocs séquentiels → Ajouter
+
+```python
+def process(nums):
+    # Block 1: O(n)
+    for num in nums:
+        print(num)
+
+    # Block 2: O(n²)
+    for i in range(len(nums)):
+        for j in range(len(nums)):
+            print(i, j)
+
+# Total: O(n) + O(n²) = O(n²)  — drop the lower-order term
+```
+
+### Boucles avec des itérations non évidentes
+
+```python
+# This is O(n), not O(n²)!
+def two_pointer_sum(nums, target):
+    left, right = 0, len(nums) - 1
+    while left < right:    # Each pointer moves at most n times total
+        total = nums[left] + nums[right]
+        if total == target:
+            return True
+        elif total < target:
+            left += 1
+        else:
+            right -= 1
+    return False
+```
+
+<ThinkAboutIt>Considérons une boucle où la variable double à chaque itération : `i = 1; while i < n: i *= 2`. Combien de fois cette boucle s’exécute-t-elle ? Quelle est la complexité ? (Indice : si je double à chaque fois, combien de doublements faut-il pour atteindre n ?)</ThinkAboutIt>
+
+## Analyse de la récursivité
+
+La récursivité est là où l'analyse de la complexité devient intéressante. L'outil clé est l'**arbre de récursion**.
+
+### Récursion linéaire → O(n)
+
+```python
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+# Recursion tree: single chain of n calls
+# factorial(5) → factorial(4) → factorial(3) → factorial(2) → factorial(1)
+# Time: O(n), Space: O(n) — n stack frames
+```
+
+### Récursion binaire → O(2ⁿ)
+
+```python
+# Naive Fibonacci — the classic exponential example
+def fib(n):
+    if n <= 1:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+# Recursion tree: each call spawns TWO calls
+#                fib(5)
+#              /        \
+#          fib(4)       fib(3)
+#         /     \       /    \
+#      fib(3)  fib(2) fib(2) fib(1)
+#      ...
+# Nodes at each level double → total nodes ≈ 2ⁿ
+# Time: O(2ⁿ), Space: O(n) — max depth of tree
+```
+
+### Récursivité mémorisée → O(n)
+
+```python
+def fib_memo(n, memo={}):
+    if n in memo:
+        return memo[n]
+    if n <= 1:
+        return n
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+
+# Each subproblem computed only once → O(n) unique calls
+# Time: O(n), Space: O(n)
+```
+
+<FunFact>La différence entre Fibonacci naïf et mémorisé est stupéfiante à grande échelle. Le calcul de fib(50) nécessite naïvement environ 2⁵⁰ ≈ 1 quadrillion d'opérations, soit environ 100 jours sur un ordinateur moderne. La version mémorisée nécessite exactement 50 opérations, effectuées en microsecondes. C'est pourquoi l'analyse de la complexité est importante.</FunFact>
+
+### Le théorème principal (simplifié)
+
+Pour les récurrences diviser pour régner de la forme **T(n) = aT(n/b) + O(nᵈ)** :
+
+| État | Complexité |
+|---|---|
+| d > log_b(a) | O(nᵈ) |
+| d = log_b(a) | O(nᵈ log n) |
+| d <log_b(a) | O(n^(log_b(a))) |
+
+**Exemples pratiques** :
+- **Tri par fusion** : T(n) = 2T(n/2) + O(n) → a=2, b=2, d=1 → d = log₂2 → **O(n log n)**
+- **Recherche binaire** : T(n) = T(n/2) + O(1) → a=1, b=2, d=0 → d = log₂1 → **O(log n)**
+- **Matrice de Strassen Mult** : T(n) = 7T(n/2) + O(n²) → a=7, b=2, d=2 → d < log₂7 → **O(n^2,81)**
+
+## Complexité spatiale
+
+La complexité spatiale est tout aussi importante que la complexité temporelle, mais elle est souvent négligée. Compter:
+
+1. **Espace auxiliaire** — structures de données supplémentaires que vous créez
+2. **Stack frames** — chaque appel récursif ajoute une frame
+
+```python
+# O(1) space — only a few variables
+def reverse_in_place(nums):
+    left, right = 0, len(nums) - 1
+    while left < right:
+        nums[left], nums[right] = nums[right], nums[left]
+        left += 1
+        right -= 1
+
+# O(n) space — creating a new list
+def reverse_copy(nums):
+    return nums[::-1]
+
+# O(n) space from recursion — n stack frames
+def reverse_recursive(nums, left, right):
+    if left >= right:
+        return
+    nums[left], nums[right] = nums[right], nums[left]
+    reverse_recursive(nums, left + 1, right - 1)
+```
+
+<Callout>Lors des entretiens, indiquez toujours la complexité temporelle ET spatiale. Un suivi courant est « Pouvez-vous le faire dans l'espace O(1) ? » Cela signifie souvent convertir une solution récursive en solution itérative ou trouver un algorithme sur place.</Callout>
+
+## Bases de l'analyse amortie
+
+Certaines opérations sont parfois coûteuses mais bon marché en moyenne. L'analyse amortie en tient compte.
+
+**Exemple classique : Tableau dynamique (ArrayList)**
+
+```python
+# Appending to a dynamic array
+# Most appends are O(1) — just place the element
+# Occasionally (when full), the array doubles: O(n) copy
+# Over n operations: n × O(1) + log(n) × O(n) = O(n) total
+# Amortised cost per operation: O(n) / n = O(1)
+```
+
+Autres exemples de O(1) amortis :
+- Insertions de cartes de hachage (resuçage occasionnel)
+- Opérations d'arbre évasé
+- Implémentation de file d'attente à deux piles
+
+## Pièges de complexité courants
+
+### Piège 1 : boucles cachées dans les opérations intégrées
+
+```python
+# Looks like O(n), but string concatenation in a loop is O(n²)
+def build_string(chars):
+    result = ""
+    for char in chars:
+        result += char   # Each += creates a new string → O(current length)
+    return result
+# Fix: use ''.join(chars) → O(n)
+
+# list.index() and 'in' on lists are O(n)
+for item in big_list:
+    if item in another_big_list:  # O(n) × O(n) = O(n²)
+        process(item)
+# Fix: convert to set for O(1) lookup
+```
+
+### Piège 2 : le tri domine
+
+```python
+def find_kth_largest(nums, k):
+    nums.sort()       # O(n log n) — this dominates
+    return nums[-k]   # O(1)
+# Total: O(n log n), not O(1)
+# Better: use a heap for O(n log k)
+```
+
+### Piège 3 : Profondeur de récursion ≠ Travail total
+
+```python
+# Depth is O(log n), but total work is O(n)
+def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])     # T(n/2)
+    right = merge_sort(arr[mid:])    # T(n/2)
+    return merge(left, right)        # O(n) work at each level
+# log n levels × O(n) work per level = O(n log n)
+```
+
+<Quiz question="Quelle est la complexité temporelle de ce code ? `for i in range(n): for j in range(i): print(i, j)`" options="Sur)|O (n journal n)|O(n²)|O(n³)" answer="2" explanation="La boucle interne exécute 0 + 1 + 2 + ... + (n-1) = n(n-1)/2 fois au total. Il s'agit de la somme de la série arithmétique, qui se simplifie en O(n²). C'est un piège courant car la boucle interne ne s'exécute pas toujours n fois, mais le travail total est toujours quadratique." />
+
+## De la force brute à l'optimal
+
+Lors des entretiens, vous commencerez souvent par une solution par force brute et vous l'optimiserez. Voici le chemin d'optimisation courant :
+
+| Actuel | Technique d'optimisation | Amélioré vers |
+|---|---|---|
+| O(n²) | Carte de hachage pour les recherches | O(n) |
+| O(n²) | Tri + deux pointeurs | O(n journal n) |
+| O(2ⁿ) | Mémoisation / DP | O(n²) ou O(n×m) |
+| O(n journal n) | Tri par seau / tri par comptage (plage limitée) | O(n) |
+| O(n) espace | Manipulation sur place | O(1) espace |
+
+**Le déroulement de la conversation dans une interview** :
+1. "Mon approche par force brute est O(n²) utilisant des boucles imbriquées."
+2. "Je remarque que nous effectuons des recherches répétées : une carte de hachage peut réduire la recherche interne à O(1)."
+3. "La solution optimisée est le temps O(n) et l'espace O(n)."
+4. "Le compromis est que nous utilisons de la mémoire supplémentaire, mais l'amélioration du temps est significative."
+
+## Points clés à retenir
+
+- **Connaître la hiérarchie** : O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(2ⁿ) < O(n!). Vous y ferez référence dans chaque entretien.
+- **Multiplier les boucles imbriquées, ajouter des blocs séquentiels** : les deux règles fondamentales de l'analyse des boucles.
+- **Dessinez des arbres de récursion** : ils rendent la complexité récursive visuelle et beaucoup plus facile à analyser correctement.
+- **Surveillez les coûts cachés** : la concaténation de chaînes, les tests d'appartenance à des listes et le tri à l'intérieur des boucles sont des pièges courants.
+- **Déclarer à la fois le temps et l'espace** : une analyse complète de la complexité couvre toujours les deux dimensions.
+- **Connectez-vous à l'optimisation** : connaître la complexité de la force brute vous indique la marge d'amélioration qu'il reste.

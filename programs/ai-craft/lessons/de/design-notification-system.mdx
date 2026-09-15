@@ -1,0 +1,147 @@
+---
+title: "Entwerfen Sie ein Benachrichtigungssystem – Push, E-Mail und SMS im Milliardenmaßstab"
+description: "Entwerfen Sie ein skalierbares Mehrkanal-Benachrichtigungssystem, das Push-, E-Mail-, SMS- und In-App-Benachrichtigungen mit Nachrichtenwarteschlangen, Deduplizierung und Benutzerpräferenzverwaltung verarbeitet."
+order: 7
+difficulty: "advanced"
+duration: 22
+icon: "🔔"
+published: true
+machineTranslated: true
+---
+# Entwerfen Sie ein Benachrichtigungssystem – Push, E-Mail und SMS im Milliardenmaßstab
+
+Moderne Anwendungen versenden täglich Milliarden von Benachrichtigungen über mehrere Kanäle. Beim Entwerfen dieses Systems erfahren Sie mehr über Nachrichtenwarteschlangen, Integrationen von Drittanbietern und den eleganten Umgang mit Fehlern im großen Maßstab.
+
+## Schritt 1 – Anforderungserfassung
+
+### Funktionale Anforderungen
+- Unterstützt mehrere Kanäle: Push-Benachrichtigungen, E-Mail, SMS und In-App
+- Benutzer können Benachrichtigungseinstellungen konfigurieren und sich pro Kanal abmelden
+- Nachrichtenvorlagen mit Personalisierung (z. B. „Hallo {Name}, Ihre Bestellung wurde versendet“)
+- Unterstützung für geplante und sofortige Benachrichtigungen
+
+### Nichtfunktionale Anforderungen
+- **Skalierbarkeit** – Verarbeiten Sie mehr als 10 Millionen Benachrichtigungen pro Tag
+- **Zuverlässigkeit** – keine verlorenen Benachrichtigungen; Mindestens einmalige Lieferung
+- **Geringe Latenz** – dringende Benachrichtigungen werden innerhalb von Sekunden zugestellt
+- **Erweiterbar** – einfach neue Kanäle hinzuzufügen (WhatsApp, Slack)
+
+<ThinkAboutIt>Sollte die Benachrichtigungszustellung genau einmal oder mindestens einmal erfolgen? Betrachten Sie die Benutzererfahrung beim Empfang einer doppelten SMS oder beim Verpassen einer kritischen Sicherheitswarnung.</ThinkAboutIt>
+
+## Schritt 2 – High-Level-Architektur
+
+```
+Caller Services → Notification Service → Validation + Preference Check
+                                              ↓
+                                    Message Queue (Kafka)
+                                    ↓       ↓       ↓       ↓
+                                 Push    Email    SMS    In-App
+                                Worker   Worker  Worker  Worker
+                                  ↓        ↓       ↓       ↓
+                                 FCM   SendGrid  Twilio  WebSocket
+```
+
+<Illustration src="/images/lessons/design-notification-system.svg" alt="Benachrichtigungssystemarchitektur mit Anruferdiensten, Benachrichtigungsdienst, Kafka-Nachrichtenwarteschlangen, kanalspezifischen Workern und Drittanbietern" caption="Nachrichtenwarteschlangen entkoppeln den Benachrichtigungsdienst von den Zustellern und ermöglichen so eine unabhängige Skalierung pro Kanal" />
+
+### Kernkomponenten
+1. **Benachrichtigungsdienst** – validiert Anfragen, prüft Benutzereinstellungen, rendert Vorlagen und stellt Nachrichten in die Warteschlange
+2. **Nachrichtenwarteschlangen** – separate Warteschlangen pro Kanal für unabhängige Skalierung und Isolierung
+3. **Delivery Worker** – kanalspezifische Worker, die API-Aufrufe von Drittanbietern bearbeiten
+4. **Vorlagendienst** – speichert und rendert Benachrichtigungsvorlagen mit Variablenersetzung
+
+## Schritt 3 – Tiefer Einblick: Schlüsselkomponenten
+
+### Benutzereinstellungen und Opt-Out
+Shop-Einstellungen pro Benutzer und pro Benachrichtigungstyp:
+
+```
+user_preferences:
+  user_id: "u123"
+  channels:
+    email: { enabled: true, quiet_hours: "22:00-08:00" }
+    push: { enabled: true }
+    sms: { enabled: false }
+  categories:
+    marketing: { enabled: false }
+    security: { enabled: true, override_quiet_hours: true }
+```
+
+Der Benachrichtigungsdienst prüft die Einstellungen **bevor** er in die Warteschlange gestellt wird – sendet niemals, was der Benutzer nicht möchte.
+
+### Prioritätswarteschlangen
+Nicht alle Benachrichtigungen sind gleich. Verwenden Sie Prioritätsstufen:
+- **Kritisch** – Sicherheitswarnungen, OTP-Codes → sofort verarbeitet
+- **Hoch** – Bestellbestätigungen, Zahlungsbelege → Sekunden
+- **Mittel** – soziale Interaktionen, Kommentare → Minuten akzeptabel
+- **Niedrig** – Marketing, Empfehlungen → können gestapelt werden
+
+<Quiz question="Warum sollte das Benachrichtigungssystem separate Nachrichtenwarteschlangen pro Kanal anstelle einer einzigen gemeinsam genutzten Warteschlange verwenden?" options="Um Lagerkosten zu reduzieren|Um eine unabhängige Skalierung zu ermöglichen und zu verhindern, dass ein langsamer Kanal andere blockiert|Weil Kafka separate Themen pro Verbraucher erfordert|Um das System einfacher zu machen" answer="1" explanation="Wenn sich die SMS-Zustellung aufgrund eines Twilio-Ausfalls verlangsamt, würde eine gemeinsame Warteschlange zu einem Rückstand führen, der auch die Push- und E-Mail-Zustellung verzögert. Separate Warteschlangen pro Kanal sorgen für Fehlerisolierung und ermöglichen die unabhängige Skalierung jedes Kanals." />
+
+## Schritt 4 – Zuverlässigkeit und Fehlerbehandlung
+
+### Deduplizierung
+Verhindern Sie doppelte Benachrichtigungen mithilfe eines Idempotenzschlüssels. Überprüfen Sie vor der Verarbeitung, ob die Benachrichtigungs-ID in einem Deduplizierungsspeicher (Redis mit TTL) vorhanden ist:
+
+```
+Key: "dedup:{notification_id}" → TTL: 24 hours
+If key exists → skip (already sent)
+If not → process and set key
+```
+
+### Wiederholen Sie den Versuch mit exponentiellem Backoff
+Dienste von Drittanbietern schlagen fehl. Implementieren Sie Wiederholungsversuche mit zunehmenden Verzögerungen:
+
+```
+Attempt 1: immediate
+Attempt 2: wait 1 second
+Attempt 3: wait 4 seconds
+Attempt 4: wait 16 seconds
+Attempt 5: move to dead-letter queue
+```
+
+### Ratenbegrenzung pro Benutzer
+Schützen Sie Benutzer vor Benachrichtigungsmüdigkeit:
+- Maximal 3 Push-Benachrichtigungen pro Stunde und Benutzer
+- Maximal 1 Marketing-E-Mail pro Tag
+- Sicherheitsbenachrichtigungen umgehen Ratenbeschränkungen
+
+<FunFact>Facebook versendet täglich über 10 Milliarden Push-Benachrichtigungen. Um dies zu bewältigen, haben sie eine benutzerdefinierte Benachrichtigungspipeline erstellt, die Millionen von Nachrichten pro Sekunde verarbeiten kann, mit separaten Zustellungspfaden für iOS (APNs) und Android (FCM).</FunFact>
+
+## Schritt 5 – Integration von Drittanbietern
+
+| Kanal | Anbieter | Protokoll | Herausforderungen |
+|---------|----------|----------|------------|
+| Push (iOS) | APNs | HTTP/2 | Token-Management, stille Push-Limits |
+| Push (Android) | FCM | HTTP | Themenbezogener Rundfunk |
+| E-Mail | SendGrid/SES | SMTP/API | Zustellbarkeit, Spamfilter |
+| SMS | Twilio | REST-API | Kosten pro Nachricht, regionale Compliance |
+| In-App | WebSocket | WS | Verbindungsverwaltung, Offline-Pufferung |
+
+### Analytics-Pipeline
+Verfolgen Sie den Benachrichtigungslebenszyklus für jede Nachricht:
+- **Erstellt** → **In der Warteschlange** → **Gesendet** → **Zugestellt** → **Geöffnet** → **Angeklickt**
+
+Speichern Sie Ereignisse in einer Zeitreihendatenbank oder einem Ereignisstream für Dashboard-Berichte: Zustellraten, Öffnungsraten und Klickraten pro Kanal und Benachrichtigungstyp.
+
+<Quiz question="Ein Benachrichtigungssystem wiederholt einen fehlgeschlagenen SMS-Versand dreimal. Was könnte ohne Deduplizierung passieren, wenn der erste Versuch tatsächlich erfolgreich war, die Bestätigung jedoch verloren ging?" options="Die Nachricht geht dauerhaft verloren|Der Benutzer erhält bis zu 4 Kopien derselben SMS|Das System erkennt das Duplikat automatisch|Der Wiederholungsmechanismus verhindert dieses Szenario" answer="1" explanation="Wenn der Anbieter die Anfrage verarbeitet hat, die Bestätigung jedoch verloren gegangen ist, geht das System davon aus, dass die Anfrage fehlgeschlagen ist, und versucht es erneut. Ohne Deduplizierung auf Anbieterebene oder mit Idempotenzschlüsseln könnte der Benutzer dieselbe SMS mehrmals erhalten." />
+
+## Schritt 6 – Engpässe und Optimierungen
+
+| Engpass | Lösung |
+|-----------|----------|
+| Tarifbegrenzungen Dritter | Warteschlange mit kontrolliertem Durchsatz pro Anbieter |
+| Vorlagenrendering im Maßstab | Allgemeine Vorlagen vorab rendern und zwischenspeichern |
+| Präferenzsuche pro Nachricht | Benutzereinstellungen in Redis zwischenspeichern |
+| Spitzenverkehrsspitzen | Automatische Skalierung von Workern basierend auf der Warteschlangentiefe |
+| Überregionale Lieferung | Stellen Sie Worker in der Nähe von Anbieterendpunkten bereit |
+
+<ThinkAboutIt>Wie würden Sie ein Benachrichtigungssystem entwerfen, das innerhalb von zwei Stunden 50 Millionen personalisierte E-Mails für einen Black Friday-Verkauf versenden kann und gleichzeitig Sicherheitswarnungen in Echtzeit mit einer Latenz von weniger als einer Sekunde liefert?</ThinkAboutIt>
+
+<Quiz question="Welche Komponente soll die Benachrichtigungseinstellungen des Benutzers überprüfen?" options="Der Zustellarbeiter, kurz vor dem Aufruf der Drittanbieter-API|Der Anruferdienst, bevor er an den Benachrichtigungsdienst gesendet wird|Der Benachrichtigungsdienst, bevor die Nachricht in die Warteschlange gestellt wird|Die Nachrichtenwarteschlange während des Routings" answer="2" explanation="Durch Überprüfen der Einstellungen im Benachrichtigungsdienst vor dem Einreihen in die Warteschlange wird vermieden, dass Warteschlangenkapazität und Worker-Verarbeitung für Benachrichtigungen verschwendet werden, die der Benutzer nicht möchte. Dies ist der früheste Punkt, an dem eine zentralisierte Präferenzlogik angewendet werden kann." />
+
+---
+
+## 📚 Weiterführende Literatur
+- [Notification System – System Design Interview Vol. 1, Kap. 10](https://bytebytego.com/) – Alex Xus umfassendes Benachrichtigungssystemdesign
+- [Wie Airbnb eine Benachrichtigungsplattform aufgebaut hat](https://medium.com/airbnb-engineering) – reale Mehrkanal-Benachrichtigungsarchitektur
+- [Firebase Cloud Messaging-Dokumente](https://firebase.google.com/docs/cloud-messaging) – Verständnis der Push-Benachrichtigungsübermittlungsmechanismen

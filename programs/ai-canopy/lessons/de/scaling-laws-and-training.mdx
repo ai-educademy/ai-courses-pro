@@ -1,0 +1,114 @@
+---
+title: "Skalierung von Gesetzen und Schulungen im großen Maßstab – Warum größere Modelle intelligenter werden"
+description: "Entdecken Sie die empirischen Skalierungsgesetze, die die Modellleistung, rechenoptimale Trainingsstrategien und die verteilte Systemtechnik hinter dem Training von Grenzmodellen regeln."
+order: 7
+difficulty: "advanced"
+duration: 18
+icon: "📈"
+published: true
+machineTranslated: true
+---
+# Skalierung von Gesetzen und Schulungen im großen Maßstab – Warum größere Modelle intelligenter werden
+
+Die moderne KI-Revolution ist nicht nur eine algorithmische Geschichte – sie ist eine **Konstruktions- und Skalierungsgeschichte**. Die Forscher fanden heraus, dass die Modellleistung vorhersagbaren Potenzgesetzen über Parameter, Daten und Berechnungen hinweg folgt. Um diese Gesetze auszunutzen, mussten völlig neue verteilte Trainingsparadigmen erfunden werden.
+
+## Kaplan-Skalierungsgesetze
+
+Im Jahr 2020 veröffentlichten OpenAI-Forscher (Kaplan et al.) eine bahnbrechende Erkenntnis: Transformatorverluste folgen **glatten Potenzgesetzbeziehungen** mit drei Variablen:
+
+- **N** – Anzahl der Modellparameter
+- **D** – Datensatzgröße (Tokens)
+- **C** – Budget berechnen (FLOPs)
+
+Das wichtigste Ergebnis: `L(N) ∝ N^(-0.076)` – Verlust nimmt als Potenzgesetz der Parameteranzahl ab. Verdoppeln Sie die Parameter und der Verlust sinkt vorhersehbar. Diese Kurven zeigten keine Anzeichen eines Plateaus über sechs Größenordnungen hinweg, was darauf hindeutet, dass die Skalierung ein zuverlässiger Weg zu einer besseren Leistung war.
+
+Kaplans Empfehlung: Wenn die Rechenleistung begrenzt ist, ist es effizienter, **ein größeres Modell für weniger Schritte zu trainieren** als ein kleineres Modell für mehr Schritte. Dies führte zu der Entscheidung, GPT-3 auf 175 Milliarden Parameter zu skalieren.
+
+<Illustration src="/images/lessons/scaling-laws-and-training.svg" alt="Log-Log-Diagramm, das eine gleichmäßige Potenzgesetz-Abnahme des Verlusts zeigt, wenn Parameter, Daten und Rechenleistung zunehmen" caption="Skalierungsgesetze zeigen, dass der Verlust als Potenzgesetz von Parametern, Daten und Berechnungen vorhersehbar abnimmt." />
+
+## Chinchilla und rechneroptimiertes Training
+
+Im Jahr 2022 stellte DeepMinds **Chinchilla-Artikel** Kaplans Schlussfolgerungen in Frage. Ihre wichtigste Erkenntnis: Die optimale Zuordnung zwischen Parametern und Trainingstokens beträgt ungefähr **1:20** – für jeden Parameter sollten Sie mit ungefähr 20 Token trainieren.
+
+| Modell | Parameter | Trainingstoken | Verhältnis |
+|-------|-----------|----------------|-------|
+| GPT-3 | 175B | 300B | 1,7:1 |
+| Chinchilla | 70B | 1,4T | 20:1 |
+| LLaMA 2 70B | 70B | 2T | 28:1 |
+
+Chinchilla (70B-Parameter) **übertraf** den viel größeren Gopher (280B), indem es mit viermal mehr Daten trainierte. Die Lektion war tiefgreifend: Die meisten großen Modelle waren massiv **überparametrisiert und untertrainiert**.
+
+<Quiz question="Was ist gemäß den Chinchilla-Skalierungsgesetzen das ungefähre rechenoptimale Verhältnis von Trainingstokens zu Parametern?" options="1:1 – gleiche Token und Parameter|1:20 – ungefähr 20 Token pro Parameter|100:1 – 100 Token pro Parameter|Es hängt vollständig von der Modellarchitektur ab, nicht von der Parameteranzahl" answer="1" explanation="Chinchillas wichtigste Erkenntnis war, dass für ein rechenoptimiertes Training etwa 20 Token pro Parameter erforderlich sind. Modelle wie GPT-3 (1,7 Token pro Parameter) waren im Verhältnis zu ihrer Größe stark untertrainiert, wodurch Rechenleistung für überschüssige Parameter statt für ausreichende Daten verschwendet wurde." />
+
+## Warum die Parameteranzahl nicht alles ist
+
+Die Leistungsfähigkeit eines Modells hängt vom Zusammenspiel von Architektur, Daten und Training ab. Halten:
+
+- **Datenqualität** ist wichtiger als das Rohvolumen. Modelle, die auf kuratiertem, dedupliziertem, qualitativ hochwertigem Text trainiert wurden, übertreffen durchweg die Modelle, die auf größeren, aber verrauschteren Datensätzen trainiert wurden. Metas LLaMA zeigte, dass ein 13B-Modell, das auf sorgfältig kuratierten Daten trainiert wurde, bei vielen Benchmarks mit GPT-3 (175B) mithalten konnte.
+- **Architekturentscheidungen** – Aufmerksamkeitsmuster, Aktivierungsfunktionen (SwiGLU vs. ReLU), Normalisierungsplatzierung (Pränorm vs. Postnorm) – alle verschieben die Skalierungskurven.
+- **Tokenisierung** wirkt sich auf das effektive Datenvolumen aus. Ein besserer Tokenisierer komprimiert mehr Informationen pro Token und verändert so das Verhältnis von Parameter zu Token.
+
+<FunFact>Es wird geschätzt, dass das Training von GPT-4 allein für die Rechenleistung über 100 Millionen US-Dollar gekostet hat. Der Stromverbrauch während eines einzelnen Grenzmodell-Trainingslaufs kann den Jahresverbrauch einer Kleinstadt übersteigen – was ernsthafte Fragen zur ökologischen Nachhaltigkeit der Skalierung aufwirft.
+</FunFact>
+
+## Verteilte Trainingsstrategien
+
+Keine einzelne GPU kann ein Grenzmodell unterstützen. Das Training erfordert die Verteilung der Arbeit auf Tausende von Beschleunigern unter Verwendung mehrerer komplementärer Strategien:
+
+**Datenparallelität** – Der einfachste Ansatz: Replizieren Sie das gesamte Modell auf jeder GPU, teilen Sie den Trainingsstapel auf mehrere Geräte auf und ermitteln Sie die durchschnittlichen Farbverläufe nach jedem Schritt. Funktioniert gut, wenn das Modell in den Speicher einer einzelnen GPU passt.
+
+**Modellparallelität (Tensorparallelität)** – Teilen Sie einzelne Schichten auf GPUs auf. Eine einzelne Matrixmultiplikation wird geteilt, sodass jede GPU einen Teil der Ausgabe berechnet. Erfordert Verbindungen mit hoher Bandbreite (NVLink, InfiniBand), da GPUs bei jedem Vorwärts-/Rückwärtsdurchlauf kommunizieren müssen.
+
+**Pipeline-Parallelität** – Weisen Sie verschiedenen GPUs verschiedene Ebenen zu und leiten Sie Aktivierungen vorwärts und Verläufe rückwärts durch die Pipeline weiter. Führt zu **Pipeline-Blasen** (Leerlaufzeit beim Warten auf andere Phasen), die durch Mikrobatchierung gemildert werden.
+
+Moderne Systeme kombinieren alle drei: Tensorparallelität innerhalb eines Knotens (schneller NVLink), Pipeline-Parallelität zwischen Knoten und Datenparallelität zwischen Knotengruppen.
+
+<ThinkAboutIt>Pipeline-Parallelität führt zu Leerlaufzeiten, wenn GPUs auf Aktivierungen aus anderen Phasen warten. Je größer die Pipeline, desto schlimmer ist die Blase darüber. Wie könnten Sie diese Verschwendung minimieren – und welche Kompromisse würde Ihre Lösung mit sich bringen?
+</ThinkAboutIt>
+
+## Gemischte Präzision und Gradientenakkumulation
+
+**Training mit gemischter Präzision** verwendet für die meisten Berechnungen Floats mit halber Genauigkeit (FP16 oder BF16), während eine Masterkopie der Gewichte in FP32 beibehalten wird. Vorteile:
+
+- **2× Speicherreduzierung** für Aktivierungen und Verläufe
+- **2- bis 8-fache Durchsatzsteigerung** auf modernen GPUs mit Tensorkernen
+- BF16 (Brain Float 16) wird gegenüber FP16 bevorzugt, da sein größerer Exponentenbereich Überlaufprobleme vermeidet, die beim FP16-Training häufig auftreten
+
+**Gradientenakkumulation** simuliert große Stapelgrößen ohne proportionale Speicherkosten: Führen Sie mehrere Vorwärts-/Rückwärtsdurchläufe aus, akkumulieren Sie Gradienten und aktualisieren Sie Gewichte erst nach N Mikroschritten. Dadurch können Sie selbst auf begrenzter Hardware effektive Batch-Größen von Millionen von Token erreichen.
+
+## DeepSpeed ​​und FSDP
+
+Zwei Frameworks dominieren das verteilte Training:
+
+- **DeepSpeed ​​(Microsoft)** – Implementiert die ZeRO-Stufen (Zero Redundancy Optimiser) 1–3 und teilt die Zustände, Verläufe und Parameter des Optimierers schrittweise auf alle GPUs auf. ZeRO-3 kann Billionen-Parameter-Modelle trainieren, indem sichergestellt wird, dass keine einzelne GPU eine vollständige Kopie von irgendetwas enthält.
+- **FSDP (PyTorch)** – Fully Sharded Data Parallel, PyTorchs natives Äquivalent zu ZeRO-3. Direkt in das PyTorch-Ökosystem integriert, um es für Forscher zugänglicher zu machen.
+
+<Quiz question="Was teilt ZeRO Stage 3 auf GPUs auf, um das Training extrem großer Modelle zu ermöglichen?" options="Nur die Optimiererzustände (z. B. Adam-Momente)|Optimiererstatus und -verläufe, behält jedoch die vollständigen Parameter auf jeder GPU bei|Optimiererzustände, Verläufe und Modellparameter – nichts wird vollständig repliziert|Nur die Trainingsdaten-Batches" answer="2" explanation="ZeRO Stage 3 eliminiert jegliche Redundanz durch Sharding von Optimiererzuständen, Verläufen und Parametern über GPUs hinweg. Jede GPU enthält nur einen Bruchteil jeder Komponente und erfasst die vollständigen Parameter bei Bedarf während Vorwärts-/Rückwärtsdurchläufen, wodurch Modelle möglich werden, die weitaus größer sind als der Speicher einer einzelnen GPU." />
+
+## Neue Fähigkeiten und abnehmende Erträge
+
+Wenn Modelle skaliert werden, scheinen bestimmte Fähigkeiten „plötzlich aufzutauchen“, anstatt sich allmählich zu verbessern. Beispiele hierfür sind:
+
+- Mehrstufige Arithmetik mit etwa 100 Milliarden Parametern
+- Das Denken in der Gedankenkette verbessert sich im großen Maßstab erheblich
+- Few-Shot-Lernen wird erst ab bestimmten Schwellenwerten zuverlässig
+
+In der jüngsten Forschung wird jedoch darüber debattiert, ob Emergenz real oder ein Artefakt **diskontinuierlicher Bewertungsmetriken** ist. Bei der Verwendung kontinuierlicher Metriken (wie der Protokollwahrscheinlichkeit pro Token) verbessert sich die Leistung häufig reibungslos – der „plötzliche Sprung“ ist eine Illusion der Messung, nicht des Modells.
+
+Auch die **Debatte über sinkende Renditen** nimmt zu. Jede Größenordnung bei der Berechnung führt zu abnehmenden Verbesserungen bei Benchmarks, was einige Forscher zu der Argumentation veranlasst, dass Skalierung allein ohne grundlegende architektonische Innovationen keine künstliche allgemeine Intelligenz erreichen kann.
+
+<Quiz question="Warum argumentieren einige Forscher, dass „emergente Fähigkeiten” in großen Sprachmodellen eine Illusion sein könnten?" options="Denn größere Modelle werden immer auf unterschiedlichen Daten trainiert|Denn die Fähigkeiten wurden heimlich von Forschern programmiert|Denn diskontinuierliche Bewertungsmetriken (wie die Genauigkeit der exakten Übereinstimmung) können dazu führen, dass sanfte zugrunde liegende Verbesserungen als plötzliche Sprünge erscheinen|Weil Emergenz nur in Encoder-Decoder-Modellen auftritt" answer="2" explanation="Schaeffer et al. (2023) zeigten, dass sich die Leistung bei Verwendung glatter, kontinuierlicher Metriken (z. B. Log-Likelihood auf Token-Ebene) vorhersehbar mit der Skalierung verbessert. Eine scharfe „Emergenz” ist häufig ein Artefakt von Metriken, die bei einem Schwellenwert der zugrunde liegenden Leistungsfähigkeit plötzlich von 0 auf 1 umschlagen (z. B. genaue Übereinstimmung bei der Arithmetik)." />
+
+<FunFact>Beim PaLM-Trainingslauf von Google wurden 6.144 TPU v4-Chips gleichzeitig verwendet – verbunden durch ein benutzerdefiniertes optisches Netzwerk, das ein ganzes Rechenzentrum umspannt. Ein einzelner Netzwerkfehler könnte Millionen von Dollar an Rechenleistung verschwenden. Deshalb haben sie ein automatisiertes Checkpointing entwickelt, das alle paar Minuten den Modellstatus speichert.
+</FunFact>
+
+<ThinkAboutIt>Wenn Skalierungsgesetze vorhersagen, dass zehnmal mehr Rechenleistung zu einer vorhersehbaren Verbesserung führt, wie sollten KI-Labore dann die Investitionen in die Skalierung bestehender Architekturen mit der Erforschung grundlegend neuer Ansätze vereinbaren? Was passiert, wenn die Kosten für das nächste 10-fache eine Milliarde Dollar übersteigen?
+</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+
+– [Skalierungsgesetze für neuronale Sprachmodelle (Kaplan et al., 2020)](https://arxiv.org/abs/2001.08361) – Das Originalpapier zu Skalierungsgesetzen von OpenAI
+– [Training rechenoptimaler großer Sprachmodelle (Hoffmann et al., 2022)](https://arxiv.org/abs/2203.15556) – Das Chinchilla-Papier, das die Art und Weise, wie Modelle dimensioniert und trainiert werden, neu gestaltet hat
+– [ZeRO: Memory Optimizations Toward Training Trillion Parameter Models](https://arxiv.org/abs/1910.02054) – Microsofts DeepSpeed ZeRO-Papier zur verteilten Trainingseffizienz

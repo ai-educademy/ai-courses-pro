@@ -1,0 +1,296 @@
+---
+title: "API设计面试"
+description: "在面试压力下设计干净、直观的 API — REST、GraphQL 以及使 API 变得出色的原则。"
+order: 4
+difficulty: "intermediate"
+duration: 18
+icon: "🔌"
+published: true
+machineTranslated: true
+---
+# API 设计访谈
+
+API 是系统之间的契约，良好的设计 API 是区分高级工程师和初级工程师的一项技能。在 API 设计面试中，您不仅要编写端点，还要证明您了解消费者将如何使用您的系统、系统将如何随着时间的推移而演变，以及故障模式在哪里。无论您被要求设计支付网关还是社交媒体平台 API，原则都是相同的。让我们来掌握它们。
+
+## REST API 设计原则
+
+REST 仍然是采访中占主导地位的 API 范例。您必须展示的基础：
+
+### 面向资源的设计
+
+用名词（资源）思考，而不是动词（动作）。 URL 应该代表事物，HTTP 方法应该代表对这些事物的操作。
+
+```
+✅ Good:
+GET    /users/123              — Fetch user 123
+POST   /users                  — Create a new user
+PUT    /users/123              — Replace user 123
+PATCH  /users/123              — Partially update user 123
+DELETE /users/123              — Delete user 123
+
+❌ Bad:
+GET    /getUser?id=123
+POST   /createUser
+POST   /deleteUser/123
+```
+
+<Callout>清晰的资源层次结构讲述了 API 的故事。 `/users/123/orders/456/items`自然地读作：“用户123订购了456的商品。”如果您的 URL 结构读起来不像句子，请重新考虑您的资源设计。</Callout>
+
+### HTTP 方法和状态代码
+
+了解这些冷知识——面试官会测试你的精确度：
+
+|方法|幂等？ |使用案例|
+|---|---|---|
+|获取 |是的 |读取资源（永不变异）|
+|发布 |没有 |创建资源 |
+|放置|是的 |资源全面替换 |
+|补丁|否* |部分更新 |
+|删除 |是的 |删除资源 |
+
+*PATCH 在技术上不保证幂等，尽管实现通常是幂等的。*
+
+**您必须知道的状态代码**：
+- `200 OK` — 响应正文成功
+- `201 Created` — 创建资源（包括 `Location` 标头）
+- `204 No Content` — 成功但没有响应正文（常见于 DELETE）
+- `400 Bad Request` — 客户端发送无效数据
+- `401 Unauthorized` — 需要身份验证
+- `403 Forbidden` — 经过身份验证但未授权
+- `404 Not Found` — 资源不存在
+- `409 Conflict` — 与当前状态冲突（重复、版本不匹配）
+- `429 Too Many Requests` — 限价
+- `500 Internal Server Error` — 我们这边有东西坏了
+
+### 分页
+
+永远不要返回无界列表。三种常见模式：
+
+```json
+// Offset-based (simple but poor for large datasets)
+GET /users?offset=20&limit=10
+
+// Cursor-based (preferred for feeds and large datasets)
+GET /users?cursor=eyJ0aW1lIjoiMjAyNC0wMS0wMSJ9&limit=10
+
+// Response includes pagination metadata
+{
+  "data": [...],
+  "pagination": {
+    "next_cursor": "eyJ0aW1lIjoiMjAyNC0wMS0wMiJ9",
+    "has_more": true
+  }
+}
+```
+
+<ThinkAboutIt>对于大型且频繁更新的数据集，为什么基于游标的分页优于基于偏移量的分页？考虑当用户在结果中分页时插入新项目时会发生什么。</ThinkAboutIt>
+
+### 版本控制
+
+API 不断发展。从第一天起就为其设计。
+
+```
+// URL versioning (most common, explicit)
+GET /v1/users/123
+GET /v2/users/123
+
+// Header versioning (cleaner URLs, less discoverable)
+GET /users/123
+Accept: application/vnd.myapi.v2+json
+```
+
+在面试中，URL 版本控制是安全的答案，除非面试官专门探索替代方案。
+
+### 错误响应
+
+一致、信息丰富的错误响应将出色的 API 与令人沮丧的 API 区分开来：
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "The request body contains invalid fields.",
+    "details": [
+      {
+        "field": "email",
+        "message": "Must be a valid email address."
+      },
+      {
+        "field": "age",
+        "message": "Must be a positive integer."
+      }
+    ],
+    "request_id": "req_abc123"
+  }
+}
+```
+
+始终包含用于调试的 `request_id` 和机器可读的 `code` 以及人类可读的 `message`。
+
+## 面试中的 GraphQL
+
+GraphQL 问题越来越常见，尤其是在前端需求复杂的公司中。
+
+**需要阐明的主要优势**：
+- 客户准确请求他们需要的数据（没有过度获取）
+- 单端点减少往返次数
+- 强类型模式作为文档
+
+```graphql
+# Schema definition
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  orders(first: Int, after: String): OrderConnection!
+}
+
+type Order {
+  id: ID!
+  total: Float!
+  status: OrderStatus!
+  items: [OrderItem!]!
+}
+
+# Query — client specifies exactly what it needs
+query {
+  user(id: "123") {
+    name
+    orders(first: 5) {
+      edges {
+        node {
+          total
+          status
+        }
+      }
+    }
+  }
+}
+```
+
+**需要讨论的权衡**：GraphQL 增加了服务器端的复杂性（解析器链、N+1 查询、缓存更困难）。对于简单的 CRUD API，REST 通常是更好的选择。
+
+<FunFact>GraphQL 于 2012 年在 Facebook 内部开发，旨在解决特定的移动性能问题：News Feed 需要来自许多不同后端服务的数据，而在慢速网络上从移动设备进行多个 REST 调用会降低性能。它于2015年开源。</FunFact>
+
+## API 安全基础知识
+
+每次 API 设计面试都应该涉及安全性。涵盖这些要点：
+
+### 身份验证和授权
+
+```
+Authentication (AuthN): WHO are you?
+→ API Keys, OAuth 2.0, JWT tokens
+
+Authorisation (AuthZ): WHAT can you do?
+→ Role-based (RBAC), Scope-based, Resource-based
+```
+
+```
+// JWT in Authorization header
+GET /users/123/orders
+Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
+
+// API Key (for server-to-server)
+GET /analytics/reports
+X-API-Key: sk_live_abc123...
+```
+
+### 速率限制
+
+保护您的 API 免遭滥用并确保公平使用：
+
+```
+// Rate limit headers in response
+HTTP/1.1 200 OK
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 847
+X-RateLimit-Reset: 1640995200
+
+// When limit is exceeded
+HTTP/1.1 429 Too Many Requests
+Retry-After: 60
+```
+
+讨论速率限制策略：每个用户、每个 IP、每个端点以及不同 API 计划的分层限制。
+
+## 真实面试场景
+
+### 设计支付 API
+
+要求澄清：
+- 什么付款方式？ （卡、银行转账、钱包）
+- 我们需要幂等性吗？ （是的——总是用于付款）
+- 退款和争议怎么办？
+
+```
+POST /v1/payments
+{
+  "amount": 4999,           // Always use smallest currency unit (cents)
+  "currency": "GBP",
+  "payment_method": "pm_card_visa_123",
+  "idempotency_key": "order_789_attempt_1",
+  "metadata": {
+    "order_id": "order_789"
+  }
+}
+
+Response: 201 Created
+{
+  "id": "pay_abc123",
+  "status": "processing",
+  "amount": 4999,
+  "currency": "GBP",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+<Callout>对于支付 API，始终讨论幂等性密钥。网络故障发生时，客户端会重试，如果没有幂等性，您将向客户收取两次费用。幂等性密钥确保重试相同的请求会产生相同的结果。</Callout>
+
+**要讨论的关键设计决策**：
+- 以最小货币单位（美分/便士）表示金额以避免浮点问题
+- 用于安全重试的幂等密钥
+- 用于异步状态更新的 Webhook 回调
+- PCI 合规性注意事项
+
+### 设计社交媒体 API
+
+```
+// Post creation
+POST /v1/posts
+{
+  "content": "Hello world!",
+  "media_ids": ["media_123"],
+  "visibility": "public"
+}
+
+// Feed retrieval with cursor pagination
+GET /v1/feed?cursor=abc&limit=20
+
+// Interactions
+POST /v1/posts/{post_id}/likes
+DELETE /v1/posts/{post_id}/likes
+POST /v1/posts/{post_id}/comments
+```
+
+讨论过滤、搜索以及如何组装提要（拉式模型与推式模型与系统设计相关）。
+
+## API 设计面试中的常见错误
+
+1. **公开内部实现** — 不要让数据库列名称或内部 ID 泄漏到 API 中。使用 DTO。
+2. **命名不一致** — 选择 `snake_case` 或 `camelCase` 并在各处坚持使用。
+3. **缺少分页** — 任何列表端点都必须支持分页。
+4. **没有错误处理讨论** — 展示您对故障模式的思考。
+5. **忽略向后兼容性** - 将必填字段添加到现有端点会破坏客户端。
+6. **在 URL 中使用动词** — `/createUser` 而不是 `POST /users`。
+
+<Quiz question="客户端发送 POST 请求来创建订单，但网络丢弃响应。客户端使用相同的幂等密钥重试。服务器应该返回什么？" options="400 错误请求 — 重复请求|201 Created — 使用原始订单（与第一次的响应相同）|409 冲突 — 订单已存在|200 OK — 有新订单" answer="1" explanation="通过幂等性，服务器可以识别重复的键并返回与原始订单数据相同的 201 Created 响应。这就是幂等性密钥的全部要点——使重试对客户端安全且透明。" />
+
+## 要点
+
+- **思考资源**：围绕名词设计 URL，让 HTTP 方法处理动词。
+- **了解您的状态代码**：精确的状态代码表明您了解 HTTP 语义。
+- **始终分页**：无限制的列表响应是面试中的危险信号。
+- **失败设计**：幂等性、错误响应和速率限制显示了生产就绪思维。
+- **安全性不是可选的**：身份验证、授权和速率限制应该成为每个 API 设计讨论的一部分。
+- **明确权衡**：REST 与 GraphQL、一致性与灵活性、简单性与功能 — 面试官希望听到您的推理。

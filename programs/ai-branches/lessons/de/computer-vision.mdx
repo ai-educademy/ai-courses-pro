@@ -1,0 +1,127 @@
+---
+title: "Computer Vision – Wie KI lernt, die Welt zu sehen"
+description: "Entdecken Sie, wie Maschinen Bilder und Videos interpretieren, von Pixelrastern bis hin zu selbstfahrenden Autos."
+order: 1
+difficulty: "intermediate"
+duration: 18
+icon: "👁️"
+published: true
+machineTranslated: true
+---
+# Computer Vision – Wie KI lernt, die Welt zu sehen
+
+Wenn Sie einen Blick auf ein Foto werfen, wissen Sie sofort, dass es einen Hund am Strand zeigt. Für einen Computer ist dasselbe Bild nichts weiter als ein riesiges Zahlengitter. **Computer Vision** ist der Zweig der KI, der Maschinen beibringt, aus diesen Zahlen Bedeutungen zu extrahieren – und er verändert bereits die Branchen um Sie herum.
+
+## Wie Computer „sehen“
+
+Wenn Sie ein Foto betrachten, erkennt Ihr Gehirn sofort Formen, Farben und Tiefe. Ein Computer
+hat nichts von dieser Intuition. Stattdessen wird mit Rohzahlen gearbeitet.
+
+Ein digitales Bild ist ein Raster aus **Pixeln**. Jedes Pixel speichert Farbwerte – normalerweise drei
+**Kanäle**: Rot, Grün und Blau (RGB). Ein 1920 × 1080 HD-Bild enthält über zwei Millionen Pixel.
+jeweils mit drei Werten im Bereich von 0 bis 255. Multiplizieren Sie diese miteinander und erhalten Sie sogar einen einzelnen Frame
+enthält Millionen von Zahlen.
+
+<Illustration src="/images/lessons/computer-vision.svg" alt="Diagramm, das ein in ein Pixelraster mit RGB-Kanälen unterteiltes Bild zeigt" caption="Jedes Bild ist nur ein Zahlenraster über die roten, grünen und blauen Kanäle." />
+
+**Auflösung** bestimmt, wie viele Details das Raster erfasst. Höhere Auflösung bedeutet mehr Pixel
+und reichere Details – aber auch weit mehr Daten, die die KI verarbeiten kann. Ein 4K-Bild hat das Vierfache
+Pixel von HD, was den vierfachen Rechenaufwand bedeutet.
+
+Graustufenbilder haben nur einen Kanal (Helligkeit), während einige spezielle Formate z
+Satellitenbilder oder medizinische Scans – können über Dutzende Kanäle verfügen, die unsichtbare Wellenlängen erfassen
+für das menschliche Auge.
+
+<FunFact>Das menschliche Auge kann etwa 10 Millionen Farben unterscheiden. Ein standardmäßiges 8-Bit-RGB-Bild kann über 16,7 Millionen einzigartige Farbkombinationen darstellen – mehr, als wir tatsächlich wahrnehmen können!
+</FunFact>
+
+## Faltungs-Neuronale Netze (CNNs)
+
+Frühe Versuche mit Computer Vision beruhten auf handgefertigten Regeln: „Suchen Sie hier nach Kanten, passen Sie diese an.“
+Vorlage dort. Diese brüchigen Ansätze scheiterten bei jedem Szenenwechsel. Moderne Systeme nutzen
+**Convolutional Neural Networks (CNNs)**, die ihre eigenen Regeln aus Tausenden von Labels lernen
+Beispiele.
+
+Stellen Sie sich ein CNN als eine Aneinanderreihung von Musterdetektoren vor, wobei jede Schicht auf der vorherigen aufbaut:
+
+1. **Faltungsschichten** schieben kleine Filter über das Bild und erkennen einfache Muster wie
+   Kanten, Ecken und Texturen.
+2. **Pooling-Ebenen** verkleinern die Daten, behalten nur die wichtigsten Signale bei und verwerfen sie
+   überflüssiges Detail.
+3. **Tiefere Faltungsschichten** kombinieren diese einfachen Muster zu komplexeren Merkmalen – Augen,
+   Räder, Buchstaben.
+4. **Vollständig verbundene Schichten** fassen alle Funktionen zusammen, um eine endgültige Entscheidung zu treffen – „das ist ein.“
+   Katze“ oder „Das ist ein Tumor.“
+
+Das Schöne ist, dass niemand diese Filter von Hand programmiert. Das Netzwerk **lernt** sie während des Trainings, angefangen bei zufälligem Rauschen bis hin zu nützlichen Detektoren.
+
+<ThinkAboutIt>Wenn Sie lernen, das Gesicht eines Freundes zu erkennen, merken Sie sich nicht jedes Pixel – Sie erfassen wichtige Merkmale wie Augenform, Frisur und Ausdruck. CNNs machen etwas bemerkenswert Ähnliches. Welche Funktionen würde ein CNN Ihrer Meinung nach zuerst lernen?
+</ThinkAboutIt>
+
+## Klassifizierung, Erkennung und Segmentierung
+
+Computer Vision bewältigt drei zunehmend schwierigere Aufgaben:
+
+| Aufgabe | Frage, die es beantwortet | Beispiel |
+|------|-----|---------|
+| **Bildklassifizierung** | Was ist in diesem Bild? | „Dieses Röntgenbild zeigt eine Lungenentzündung.“ |
+| **Objekterkennung** | Was ist auf diesem Bild und wo? | Zeichnen Sie Kästchen um jeden Fußgänger in einer Straßenszene. |
+| **Semantische Segmentierung** | Welche Pixel gehören zu welchem ​​Objekt? | Färben Sie jedes Pixel einer Straße, eines Gehwegs, eines Autos und eines Himmels unterschiedlich. |
+
+Selbstfahrende Autos benötigen alle drei gleichzeitig: Objekte klassifizieren, präzise lokalisieren und
+Pixel für Pixel die gesamte Szene verstehen.
+
+Jede Aufgabe erfordert zunehmend mehr Rechenleistung und Trainingsdaten. Klassifizierung war
+bis 2015 weitgehend gelöst; Die Echtzeitsegmentierung von Videos ist auch heute noch ein aktives Forschungsgebiet.
+
+<Quiz question="Welche Computer-Vision-Aufgabe weist jedem einzelnen Pixel in einem Bild eine Beschriftung zu?" options="Bildklassifizierung|Objekterkennung|Semantische Segmentierung|Merkmalsextraktion" answer="2" explanation="Die semantische Segmentierung kennzeichnet jedes Pixel mit seiner entsprechenden Objektklasse und ermöglicht so ein möglichst detailliertes Verständnis einer Szene." />
+
+## Anwendungen aus der Praxis
+
+Computer Vision ist bereits in Branchen verankert, die Sie vielleicht nicht erwarten würden:
+
+- **Tesla Autopilot** verwendet acht Kameras und visionsbasierte KI, um Fahrspuren, Ampeln usw. zu erkennen
+  Hindernisse in Echtzeit – Verarbeitung von Millionen Bildern pro Fahrt.
+- **Medizinische Bildgebung** – KI-Modelle können Radiologen jetzt bei der Erkennung von Brustdrüsen im Frühstadium erreichen oder sogar übertreffen
+  Krebs in Mammographien, manchmal das, was sechs menschliche Experten übersehen haben.
+- **Qualitätskontrolle** – Fabriken verwenden Bildverarbeitungssysteme, um Tausende von Produkten pro Minute zu prüfen.
+  Das Erkennen von Fehlern ist für menschliche Prüfer viel zu subtil oder zu schnell.
+- **Landwirtschaft** – Drohnen mit Computer Vision identifizieren kranke Pflanzen auf riesigen Feldern,
+  Dies ermöglicht eine gezielte Behandlung, die den Pestizideinsatz um bis zu 90 % reduziert.
+- **Einzelhandel** – Amazon Go-Shops nutzen Computer Vision, um zu verfolgen, welche Produkte Käufer abholen,
+  ermöglicht kassenfreies Einkaufen.
+
+<FunFact>Googles DeepMind hat eine KI entwickelt, die über 50 Augenkrankheiten anhand von Netzhautscans genauso genau erkennen kann wie weltweit führende Augenärzte – in Sekunden statt Wochen.
+</FunFact>
+
+## Ethische Bedenken
+
+Computer Vision ist leistungsstark, wirft jedoch ernste Fragen auf, mit denen sich die Gesellschaft immer noch auseinandersetzt:
+
+- **Überwachung** – Gesichtserkennung ermöglicht die Massenverfolgung von Bürgern. Mehrere Städte,
+  einschließlich San Francisco und Teilen der EU, haben den Einsatz durch die Polizei verboten oder eingeschränkt.
+- **Voreingenommenheit** – wegweisende Studien von Joy Buolamwini am MIT haben gezeigt, dass kommerzielle Gesichtserkennung
+  Aufgrund des Trainings waren die Systeme bei dunkelhäutigen Gesichtern und Frauen deutlich ungenauer
+  Daten haben in der Vergangenheit hellhäutige Männer überrepräsentiert.
+- **Einwilligung** – sollte Ihr Gesicht ohne Ihr Wissen in Geschäften, Flughäfen oder in der Öffentlichkeit gescannt werden
+  Leerzeichen? Viele Länder arbeiten immer noch an der Ausarbeitung von Gesetzen, um dieses Problem anzugehen.
+- **Deepfakes** – KI-generierte gefälschte Bilder und Videos können Fehlinformationen verbreiten und Schaden anrichten
+  Rufschädigung, wodurch visuelle Beweise weniger vertrauenswürdig werden.
+
+<ThinkAboutIt>Stellen Sie sich vor, eine Schule installiert Gesichtserkennungskameras, um die Anwesenheit automatisch zu erfassen. Was sind die Vorteile? Was könnte schief gehen? Würden Sie sich mit diesem System wohlfühlen?
+</ThinkAboutIt>
+
+<Quiz question="Warum schneiden manche Gesichtserkennungssysteme bei bestimmten Bevölkerungsgruppen schlechter ab?" options="Diese Gruppen haben komplexere Gesichtszüge|Die verwendeten Kameras sind von geringerer Qualität|Trainingsdatensätze sind häufig voreingenommen und weisen einen Mangel an Diversität auf|Die Algorithmen sind bewusst diskriminierend" answer="2" explanation="Wenn Trainingsdaten bestimmte Gruppen (z. B. hellhäutige Männer) überrepräsentieren, lernt das Modell diese Merkmale am besten und schneidet bei unterrepräsentierten Gruppen schlecht ab." />
+
+## Wichtige Erkenntnisse
+
+- Bilder sind Raster aus Pixelwerten über Farbkanäle hinweg – Computer sehen Zahlen, keine Bilder.
+- CNNs lernen, Features automatisch durch Training zu extrahieren, beginnend mit Kanten und Gebäuden
+  bis hin zu komplexen Objekten.
+- Klassifizierung, Erkennung und Segmentierung stellen ein zunehmendes Maß an visuellem Verständnis dar.
+- Computer Vision treibt Durchbrüche von der Gesundheitsdiagnostik bis hin zu autonomen Fahrzeugen voran
+  Präzisionslandwirtschaft.
+- Voreingenommenheit bei Schulungsdaten und Überwachungsbedenken erfordern einen sorgfältigen, ethischen Einsatz – Technologie
+  Allein reicht ohne verantwortungsvolle Regierungsführung nie aus.
+
+<Quiz question="Was ist der Zweck der Bündelung von Schichten in einem CNN?" options="Um dem Bild Farbe hinzuzufügen|Reduzierung der räumlichen Dimensionen unter Beibehaltung wichtiger Merkmale|Um das Bild in Text umzuwandeln|Um die Anzahl der Pixel zu erhöhen" answer="1" explanation="Durch die Bündelung von Ebenen werden Feature-Maps heruntergerechnet, wodurch die Rechenkosten gesenkt werden und gleichzeitig die wichtigsten von Faltungsfiltern erkannten Informationen erhalten bleiben." />

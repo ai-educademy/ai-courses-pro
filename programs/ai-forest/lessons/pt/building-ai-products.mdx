@@ -1,0 +1,128 @@
+---
+title: "Construindo produtos de IA – do protótipo à produção"
+description: "Domine todo o ciclo de vida do desenvolvimento de produtos de IA, desde a validação de problemas e seleção de modelos até MLOps, monitoramento e otimização de custos."
+order: 1
+difficulty: "advanced"
+duration: 20
+icon: "🚀"
+published: true
+machineTranslated: true
+---
+# Construindo produtos de IA
+
+A maioria dos projetos de IA nunca chega à produção. A lacuna entre um notebook de trabalho e um produto confiável é enorme – abrangendo infraestrutura, monitoramento, processos de equipe e gerenciamento de custos. Esta lição cobre tudo que você precisa para preencher essa lacuna com sucesso.
+
+## A IA é a solução certa?
+
+Antes de escrever uma única linha de código, faça a pergunta mais importante no desenvolvimento de produtos de IA: esse problema realmente precisa de IA? A resposta é “não” com mais frequência do que você imagina.
+
+**IA é a escolha certa quando:**
+- O problema envolve reconhecimento de padrões em escala (detecção de fraude, classificação de imagens)
+- As regras são muito complexas ou numerosas para serem codificadas manualmente
+- Os dados estão disponíveis, são de alta qualidade e representativos das condições do mundo real
+- Uma resposta probabilística (90% de confiança) é aceitável
+- O valor da automação excede significativamente o custo de construção e manutenção do sistema
+
+**IA é a escolha errada quando:**
+- Regras simples ou heurísticas resolvem o problema de forma confiável
+- Você não tem dados de treinamento suficientes
+- As decisões exigem 100% de precisão com total explicabilidade (alguns contextos regulatórios)
+- O custo de manutenção de um sistema de ML supera o benefício
+
+<Callout>**A regra 10x:** Se a IA não fornecer uma melhoria de pelo menos 10x em relação à alternativa sem IA em termos de velocidade, precisão ou custo, a complexidade operacional de manter um sistema de ML raramente vale a pena.
+</Callout>
+
+## Escolhendo o modelo certo
+
+Nem todo problema precisa de um grande modelo de linguagem. Escolher o tipo de modelo errado é um dos erros mais caros no desenvolvimento de produtos de IA. Combine a ferramenta com a tarefa:
+
+| Tipo de problema | Melhor abordagem | Exemplo |
+|---|---|---|
+| Previsão tabular | Árvores com gradiente aumentado (XGBoost, LightGBM) | Previsão de rotatividade, preços |
+| Tarefas de imagem | CNNs ou transformadores de visão | Inspeção de qualidade, OCR |
+| Classificação de texto | BERT ajustado ou LLMs menores | Análise de sentimento, roteamento |
+| Texto gerativo | LLMs (GPT-4, Claude, Llama) | Chatbots, geração de conteúdo |
+| Séries temporais | Profeta, N-BEATS ou CNNs temporais | Previsão de demanda |
+
+<Quiz question="Para uma tarefa tabular de previsão de rotatividade com 50.000 linhas de dados estruturados, qual abordagem normalmente é mais eficaz?" options="GPT-4 com aviso de poucos disparos|Uma rede neural convolucional|Árvores com gradiente aumentado como XGBoost|Uma rede neural recorrente" answer="2" explanation="As árvores com gradiente aumentado superam consistentemente o aprendizado profundo em dados tabulares estruturados, especialmente em tamanhos moderados de conjuntos de dados. Eles treinam mais rápido, exigem menos ajustes e são mais interpretáveis." />
+
+## Prototipagem rápida: o sprint de 3 dias
+
+A velocidade da iteração sempre supera a perfeição. Equipes que passam meses construindo antes de validar desperdiçam recursos com base em suposições. Use esta estrutura para validar ideias rapidamente:
+
+**Dia 1 – Escopo e dados.** Defina a métrica única que importa. Isso não é negociável – sem uma métrica de sucesso clara, você não pode avaliar nada. Reúna ou simule o conjunto de dados mínimo viável. Não limpe perfeitamente - apenas o suficiente para ser utilizável.
+
+**Dia 2 – Crie e teste.** Use um modelo ou API existente. Envolva-o em uma interface mínima (Streamlit, Gradio ou uma API simples). Obtenha algo com o qual um humano possa interagir.
+
+**Dia 3 - Validar.** Apresente-o a usuários ou partes interessadas reais - não a colegas que serão educados, mas a pessoas que realmente pagariam pela solução. Meça em relação à sua métrica de sucesso. Decida: matar, girar ou investir.
+
+<ThinkAboutIt>Pense no último projeto de IA em que você trabalhou. Quanto tempo demorou para que a primeira versão chegasse ao usuário? Um sprint de 3 dias poderia ter validado a ideia central mais rapidamente?
+</ThinkAboutIt>
+
+## Fundamentos de MLOps
+
+O ML de produção exige práticas operacionais rigorosas que a maioria dos cientistas de dados nunca aprende em ambientes acadêmicos. O princípio básico é aparentemente simples: **versionar tudo, automatizar tudo.** A execução, no entanto, requer disciplina e as ferramentas certas.
+
+**Qual versão:**
+- **Código** – fluxos de trabalho padrão do Git
+- **Dados** - use DVC, Delta Lake ou ferramentas semelhantes para rastrear versões de conjuntos de dados
+- **Modelos** – armazena artefatos de modelo com metadados (hiperparâmetros, hash de dados de treinamento, métricas de avaliação e linhagem)
+- **Configurações** – variáveis de ambiente, sinalizadores de recursos, parâmetros de modelo e configurações de serviço
+
+**Automação de pipeline:**
+- Acione o retreinamento dentro do cronograma ou detecção de desvio de dados
+- Automatize a avaliação em relação a um conjunto de testes retido
+- Implantações de controle em limites de desempenho
+- Use implantações azul-verde ou canário para implementações de modelos
+
+<FunFact>A pesquisa do Google descobriu que apenas cerca de 5% do código do sistema de ML do mundo real é o modelo real. Os 95% restantes são pipelines de dados, atendendo infraestrutura, monitoramento e gerenciamento de configuração.
+</FunFact>
+
+<Illustration src="/images/lessons/building-ai-products.svg" alt="Ciclo de vida de MLOps mostrando estágios de dados, treinamento, implantação e monitoramento" caption="O ciclo de vida do MLOps – melhoria contínua, não uma implantação única" />
+
+## Monitoramento: detectando problemas antes que os usuários o façam
+
+A implantação de um modelo não é a linha de chegada – é a linha de partida. Sem o monitoramento adequado, os modelos se degradam silenciosamente e, quando alguém percebe, o dano já está feito.
+
+**Desvio de dados** – A distribuição dos dados de entrada muda com o tempo. Um modelo treinado em dados de compras pré-pandemia falhará nos padrões pós-pandemia. Monitore continuamente as distribuições de recursos e alerte sobre mudanças estatisticamente significativas usando testes como o teste de Kolmogorov-Smirnov ou o Índice de Estabilidade Populacional.
+
+**Degradação do modelo** – Mesmo sem desvio de dados, o desempenho do modelo pode diminuir à medida que o mundo real muda. O comportamento do usuário evolui, os concorrentes mudam o mercado e os padrões sazonais alteram os resultados. Acompanhe continuamente a confiança nas previsões, as taxas de erro e as métricas de negócios.
+
+**Principais práticas de monitoramento:**
+- Registre todas as previsões com entradas, saídas e pontuações de confiança
+- Configure alertas automatizados para quedas de precisão abaixo dos limites definidos
+- Compare o desempenho ao vivo com um modelo de linha de base em uma janela contínua
+- Agende revisões humanas periódicas de casos extremos e previsões de baixa confiança
+- Acompanhe as métricas de negócios juntamente com as métricas do modelo - a precisão não significa nada se as conversões caírem
+
+<Quiz question="O que é 'desvio de dados' no contexto de sistemas de ML de produção?" options="Quando os dados de treinamento são excluídos acidentalmente|Quando a distribuição dos dados de entrada muda ao longo do tempo|Quando os pesos do modelo mudam aleatoriamente|Quando os usuários fornecem dados intencionalmente errados" answer="1" explanation="O desvio de dados ocorre quando a distribuição estatística dos dados de entrada em tempo real diverge da distribuição dos dados de treinamento, fazendo com que o desempenho do modelo seja degradado silenciosamente." />
+
+## Estratégias de otimização de custos
+
+Os custos de inferência de IA podem aumentar rapidamente. Decisões inteligentes de arquitetura os mantêm gerenciáveis.
+
+**Estratégias práticas:**
+1. **Rotear por complexidade** – Use um modelo barato e rápido para consultas simples e escale para modelos caros somente quando necessário. Só isso pode reduzir custos em 60-80%.
+2. **Armazenar em cache agressivamente** - Se consultas iguais ou semelhantes ocorrerem novamente, armazene em cache as respostas. O cache semântico (correspondência por significado, não por texto exato) é especialmente eficaz.
+3. **Inferência em lote** – Processe solicitações não urgentes em lotes fora dos horários de pico para maximizar a utilização da GPU.
+4. **Modelos Quantise** – A quantização de 4 ou 8 bits pode reduzir custos em 50-75% com perda mínima de qualidade para a maioria das aplicações.
+5. **Infraestrutura do tamanho certo** – Use instâncias spot para treinamento, instâncias reservadas para atendimento e escalonamento automático com base na demanda.
+
+<Quiz question="Qual estratégia de otimização de custos envolve o uso de diferentes modelos baseados na complexidade da consulta?" options="Quantização de modelo|Inferência em lote|Roteamento baseado em complexidade|Cache agressivo" answer="2" explanation="O roteamento por complexidade envia consultas simples para modelos mais baratos e mais rápidos e reserva modelos caros para tarefas complexas – reduzindo drasticamente os custos médios de inferência." />
+
+<ThinkAboutIt>Se você recebesse um orçamento de £ 10.000/mês para inferência de IA, como você o alocaria? Considere quais partes do seu sistema precisam de respostas em tempo real versus processamento em lote e onde o cache pode eliminar a computação redundante.
+</ThinkAboutIt>
+
+## Principais conclusões
+
+Construir produtos de IA é fundamentalmente um desafio de produto e engenharia, não apenas um desafio de aprendizado de máquina. Mantenha estes princípios por perto:
+
+- Valide se a IA é genuinamente a solução certa antes de construir
+- Combine o tipo de modelo com o problema - LLMs nem sempre são a resposta
+- Protótipo em dias, não meses, usando modelos existentes e interfaces simples
+- Versão de tudo: código, dados, modelos e configurações
+- Monitore o desvio de dados e a degradação do modelo continuamente na produção
+- Otimize custos por meio de roteamento, cache, lote e quantização
+
+Os melhores produtos de IA são desenvolvidos por equipes que entendem profundamente a tecnologia e os problemas de negócios. A excelência técnica sem pensar no produto leva a demonstrações impressionantes que ninguém usa.
+

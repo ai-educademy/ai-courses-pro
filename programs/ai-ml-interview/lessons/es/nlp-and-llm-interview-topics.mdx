@@ -1,0 +1,215 @@
+---
+title: "Temas de entrevistas de PNL y LLM"
+description: "Prepárese para el tema de entrevista más candente en IA: procesamiento del lenguaje natural y modelos de lenguaje grandes, desde transformadores hasta ingeniería rápida."
+order: 5
+difficulty: "advanced"
+duration: 22
+icon: "💬"
+published: true
+machineTranslated: true
+---
+# 💬 Temas de entrevistas de PNL y LLM
+
+Hace dos años, las preguntas de la entrevista de PNL implicaban explicar la incrustación de palabras y los gradientes de desaparición de LSTM. Hoy en día, es muy probable que el entrevistador pregunte: "¿Cuándo ajustarías un modelo en lugar de utilizar RAG?" El panorama de la PNL ha cambiado drásticamente y las entrevistas han cambiado con él. Esta lección cubre tanto los fundamentos que los entrevistadores aún prueban * como * los temas de la era LLM que ahora dominan la conversación.
+
+---
+
+## 📚 Los entrevistadores todavía esperan los fundamentos de la PNL
+
+Incluso en la era de GPT, es necesario demostrar que comprende *por qué* estos modelos funcionan, no sólo *que* funcionan.
+
+### Tokenización
+
+La tokenización convierte el texto sin formato en unidades discretas que el modelo puede procesar. El enfoque importa:
+
+- **Nivel de palabra**: simple pero no puede manejar palabras sin vocabulario ("antiamabilidad" → desconocido)
+- **Nivel de carácter**: maneja cualquier palabra pero las secuencias son muy largas
+- **Subpalabra (BPE, WordPieza, SentenciaPieza)**: el estándar moderno: divide palabras raras en partes significativas
+
+```
+"unfriendliness" → ["un", "friend", "li", "ness"]  (BPE)
+"playing"        → ["play", "##ing"]                (WordPiece)
+```
+
+<Callout>Consejo para la entrevista: si se le pregunta sobre la tokenización, mencione que las opciones de tokenización afectan el tamaño del vocabulario, la longitud de la secuencia y la capacidad del modelo para manejar palabras raras o mal escritas. Esto demuestra que comprende las implicaciones posteriores, no solo la mecánica.
+</Callout>
+
+### Incrustaciones
+
+Las incrustaciones asignan tokens discretos a vectores continuos densos donde se preservan las relaciones semánticas:
+
+- **Word2Vec / GloVe**: incrustaciones estáticas: cada palabra obtiene un vector independientemente del contexto ("banco" tiene la misma incrustación ya sea que signifique la orilla de un río o una institución financiera)
+- **Incrustaciones contextuales (BERT, GPT)**: la incrustación de cada token depende del contexto circundante: "banco" obtiene diferentes representaciones en diferentes oraciones
+
+### El mecanismo de atención
+
+La atención es la innovación clave que hace que los transformadores funcionen. En esencia:
+
+$$\text{Atención}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+
+En términos sencillos: para cada token, atención calcula un promedio ponderado sobre todos los demás tokens, donde los pesos reflejan qué tan relevante es cada token con respecto al actual. El factor de escala √d_k evita que los productos escalares crezcan demasiado.
+
+La **autoatención** permite que cada token atienda a todos los demás tokens de la secuencia, capturando las dependencias de largo alcance con las que luchan los RNN.
+
+### Arquitectura transformadora
+
+El transformador consta de:
+- **Codificador**: procesa la entrada completa (utilizado en modelos estilo BERT para comprensión)
+- **Decodificador**: genera salida token por token (usado en modelos estilo GPT para generación)
+- **Codificador-Decodificador**: combina ambos (usado en T5, transformador original para traducción)
+
+| Arquitectura | Ejemplos | Mejor para |
+|---|---|---|
+| Sólo codificador | BERT, Roberta | Clasificación, NER, incrustaciones |
+| Sólo decodificador | GPT-4, LLaMA, Mistral | Generación de texto, chat, razonamiento |
+| Codificador-Decodificador | T5, BART | Traducción, resumen |
+
+<Quiz
+  question="¿Por qué los transformadores utilizan atención de múltiples cabezales en lugar de un mecanismo de atención único?"
+  options="Es computacionalmente más barato que la atención única.|Múltiples jefes pueden atender diferentes tipos de relaciones simultáneamente.|Previene el sobreajuste|Reduce la longitud de la secuencia."
+  answer="1"
+  explanation="La atención de múltiples cabezales permite que el modelo atienda de manera conjunta información de diferentes subespacios de representación en diferentes posiciones. Una cabeza podría capturar relaciones sintácticas, otra similitud semántica, otra proximidad posicional, todo en paralelo."
+/>
+
+---
+
+## 🤖 Preguntas de la entrevista específicas de LLM
+
+Estas son las preguntas que han surgido en los últimos dos años y que ahora aparecen en casi todas las entrevistas de ML.
+
+### Ajuste fino frente a indicaciones
+
+| Enfoque | Cuándo utilizar | Ventajas | Contras |
+|---|---|---|---|
+| **Cero/pocas indicaciones de disparo** | Creación rápida de prototipos, tareas generales | No necesita formación, flexible | Control limitado, costos por consulta |
+| **Ingeniería rápida** | Personalización moderada | Iteración rápida, sin costes de GPU | Frágil, difícil de versionar |
+| **Ajuste (completo)** | Tareas específicas de dominio con datos etiquetados | La mejor calidad, modelo más pequeño posible | Caro, necesita datos y GPU |
+| **LoRA/QLoRA** | Ajustes con recursos limitados | Pesas adaptadoras pequeñas y eficientes | Ligeramente menos expresivo que el ajuste completo |
+| **TRAPO** | Se necesita información actualizada y con conocimientos intensivos | Sin reentrenamiento, fuentes citables | Cuello de botella en la calidad de la recuperación |
+
+### Generación aumentada de recuperación (RAG)
+
+RAG combina un sistema de recuperación con un modelo de lenguaje:
+
+```
+User query → Embed query → Search vector DB → Retrieve top-K documents
+    → Construct prompt (query + retrieved docs) → LLM generates answer
+```
+
+**Puntos clave de discusión de la entrevista**:
+- **Estrategia de fragmentación**: la forma en que se dividen los documentos afecta la calidad de recuperación
+- **Elección del modelo de incrustación**: incrustaciones específicas de dominio frente a incrustaciones generales
+- **Reclasificación**: use un codificador cruzado para reclasificar los fragmentos recuperados antes de enviarlos al LLM
+- **Cuando RAG falla**: cuando la respuesta requiere razonamiento en muchos documentos o cuando no existe ningún documento relevante
+
+### RLHF (Aprendizaje reforzado a partir de la retroalimentación humana)
+
+La técnica detrás de la utilidad de ChatGPT:
+
+1. **Ajuste supervisado**: capacítese con pares de respuesta rápida seleccionados
+2. **Entrenamiento del modelo de recompensa**: los humanos clasifican los resultados del modelo; entrenar un modelo de recompensa en estas preferencias
+3. **Optimización de PPO**: utilice el modelo de recompensa para ajustar el LLM mediante el aprendizaje por refuerzo
+
+<FunFact>El artículo original de InstructGPT mostró que los humanos preferían un modelo de parámetros de 1.3B con RLHF a un modelo de parámetros de 175B sin él. Las técnicas de alineación pueden hacer que los modelos pequeños superen a los gigantes en cuanto a utilidad en el mundo real.
+</FunFact>
+
+### Ventanas de contexto y desafíos de contexto largo
+
+- **Ventana de contexto**: la cantidad máxima de tokens que un modelo puede procesar a la vez (por ejemplo, GPT-4 Turbo: 128K, Claude: 200K)
+- **Perdidos en el medio**: los modelos tienden a prestar menos atención a la información en medio de contextos largos
+- **Estrategias**: resumir documentos largos, colocar información crítica al principio/final, utilizar recuperación jerárquica
+
+### Alucinación
+
+Los modelos generan texto plausible pero objetivamente incorrecto. Estrategias de mitigación:
+- **RAG**: respuestas terrestres en evidencia recuperada
+- **Generación restringida**: limita la salida a entidades conocidas o formatos estructurados
+- **Autoconsistencia**: genera múltiples respuestas y verifica el acuerdo
+- **Cita**: requiere que el modelo cite sus fuentes (luego verificarlas)
+
+<ThinkAboutIt>Una empresa de tecnología jurídica quiere crear un asistente de inteligencia artificial que responda preguntas sobre jurisprudencia. La alucinación podría llevar a citar precedentes legales inexistentes. ¿Cómo diseñaría este sistema para minimizar el riesgo de alucinaciones y al mismo tiempo mantener las respuestas útiles?
+</ThinkAboutIt>
+
+---
+
+## 🎯 Selección de modelo: cuándo usar qué
+
+Esta es una de las preguntas favoritas de las entrevistas: "Dado este caso de uso, ¿qué modelo elegiría?"
+
+**Utilice un modelo de frontera grande (GPT-4, Claude) cuando:**
+- La tarea requiere razonamiento general o seguir instrucciones complejas.
+- No tienes datos de entrenamiento etiquetados
+- La velocidad de creación de prototipos importa más que el coste de inferencia
+
+**Utilice un modelo más pequeño ajustado (Mistral 7B, LLaMA 3) cuando:**
+- Tiene datos específicos de un dominio y necesita resultados consistentes y especializados.
+- El costo de inferencia importa (servicio a escala)
+- Los requisitos de latencia son estrictos
+- Debes ejecutarlo localmente para garantizar la privacidad de los datos.
+
+**Utilice un modelo de PNL tradicional (BERT, RoBERTa) cuando:**
+- La tarea es clasificación, NER o extracción (no generación)
+- Necesita una inferencia rápida con un rendimiento muy alto
+- La tarea está bien definida con datos claramente etiquetados.
+
+<Quiz
+  question="Una empresa de atención médica necesita clasificar los mensajes de los pacientes en 15 categorías. Tienen 50.000 ejemplos etiquetados. ¿Qué enfoque es más rentable para la producción?"
+  options="GPT-4 con indicaciones de pocos disparos|Modelo BERT perfeccionado|RAG con una base de datos vectorial|Clasificación de disparo cero con LLaMA 70B"
+  answer="1"
+  explanation="Con 50.000 ejemplos etiquetados y una tarea de clasificación bien definida, un modelo BERT ajustado será rápido, económico y muy preciso. Usar un LLM grande para una tarea de clasificación con abundantes datos de entrenamiento es innecesariamente costoso y más lento."
+/>
+
+---
+
+## 🔬 Evaluación de los resultados del LLM
+
+Evaluar modelos generativos es más difícil que evaluar clasificadores. Enfoques comunes:
+
+- **Métricas automatizadas**: BLEU, ROUGE, BERTScore (útiles pero imperfectas)
+- **LLM-as-juez**: utilice un modelo más sólido para evaluar los resultados de un modelo más débil
+- **Evaluación humana**: estándar de oro pero caro y lento
+- **Evaluación de tareas específicas**: precisión en los puntos de referencia de control de calidad, tasas de aprobación de ejecución de código
+- **Red-teaming**: pruebas contradictorias de seguridad, sesgos y resultados dañinos
+
+```python
+# BERTScore example
+from bert_score import score
+
+precision, recall, f1 = score(
+    cands=["The cat sat on the mat"],
+    refs=["A cat was sitting on a mat"],
+    lang="en"
+)
+```
+
+---
+
+## ⚖️ Consideraciones éticas
+
+Las entrevistas de PNL incluyen cada vez más cuestiones de ética:
+
+- **Sesgo en los datos de formación**: los LLM absorben y amplifican los sesgos de sus corpus de formación
+- **Privacidad**: los modelos pueden memorizar y regurgitar datos de entrenamiento (fuga de PII)
+- **Desinformación**: los modelos generativos pueden crear contenido convincente pero falso a escala
+- **Costo medioambiental**: entrenar modelos grandes tiene una huella de carbono significativa
+
+<Quiz
+  question="¿Cuál es el principal riesgo de utilizar un LLM capacitado en textos de Internet para un sistema de recomendación de contratación?"
+  options="El modelo será demasiado lento para su uso en producción.|El modelo puede perpetuar los sesgos históricos presentes en los datos de entrenamiento.|El modelo hará predicciones aleatorias.|El modelo requiere demasiado almacenamiento."
+  answer="1"
+  explanation="Los LLM capacitados en textos de Internet absorben los prejuicios sociales (género, raciales, socioeconómicos) presentes en sus datos de capacitación. Cuando se utilizan para la contratación, estos sesgos pueden dar lugar a recomendaciones discriminatorias que perpetúan las desigualdades históricas."
+/>
+
+---
+
+## 🔑 Conclusiones clave
+
+- **Conozca sus fundamentos**: la tokenización, las incrustaciones, la atención y la arquitectura del transformador no son negociables
+- **Comprenda el espectro de ajuste fino**: desde la indicación de disparo cero hasta el ajuste fino completo, y cuándo cada uno es apropiado
+- **RAG es el patrón LLM más práctico**: comprenda la fragmentación, la recuperación y la reclasificación
+- **La selección del modelo se trata de compensaciones**: capacidad versus costo versus latencia versus privacidad
+- **La evaluación de modelos generativos es un problema abierto**: conozca múltiples enfoques
+- **La ética no es opcional**: los prejuicios, las alucinaciones y la privacidad son ahora temas estándar en las entrevistas.
+
+<Callout>El campo de la PNL se está moviendo increíblemente rápido. Antes de tu entrevista, consulta qué modelos y técnicas se han lanzado en los últimos tres meses. Ser capaz de discutir los desarrollos recientes (al mismo tiempo que se comprenden los fundamentos) indica que usted está participando activamente en el campo.
+</Callout>

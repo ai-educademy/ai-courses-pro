@@ -1,0 +1,153 @@
+---
+title: "Entwerfen Sie den KI-Feed von Twitter – eine End-to-End-Fallstudie"
+description: "Analysieren Sie die Architektur hinter einer personalisierten Zeitleiste, die Milliarden von Tweets an Hunderte Millionen Benutzer verteilt."
+order: 3
+difficulty: "advanced"
+duration: 30
+icon: "🐦"
+published: true
+machineTranslated: true
+---
+# Entwerfen Sie den KI-Feed von Twitter
+
+Stellen Sie sich vor, Sie erhalten eine Aufgabe: Jedes Mal, wenn ein Benutzer die App öffnet, zeigen Sie ihm in weniger als 200 Millisekunden die Tweets, die er aus Milliarden von Möglichkeiten am wertvollsten findet.
+
+Dies ist eines der schwierigsten Empfehlungsprobleme in der Industrie. Lassen Sie es uns von Grund auf entwerfen.
+
+<Illustration src="/images/lessons/design-twitter-ai-feed.svg" alt="Pipeline-Diagramm, das Tweet-Kandidaten zeigt, die Ranking- und Filterstufen durchlaufen, um einen personalisierten Feed zu erstellen" caption="Der Weg eines Tweets von der Erstellung bis zu Ihrer Timeline" />
+
+## Das Problem im großen Maßstab
+
+Twitter (jetzt X) verarbeitet etwa 500 Millionen Tweets pro Tag. Jeder seiner über 350 Millionen monatlich aktiven Nutzer erwartet einen Feed, der sich **persönlich kuratiert** anfühlt – relevant, aktuell und ansprechend.
+
+Ein chronologischer Feed funktioniert in diesem Maßstab nicht. Wenn Sie 500 Konten folgen, haben Sie möglicherweise 10.000 ungelesene Tweets. Die meisten davon sind irrelevant. Die Aufgabe des KI-Feeds besteht darin, die 50 zu finden, die **für Sie** am wichtigsten sind.
+
+<Callout>Hierbei handelt es sich nicht nur um ein Ranking-Problem – es handelt sich um ein mehrstufiges System, das Kandidatengenerierung, Feature-Engineering, Echtzeitbewertung, Inhaltssicherheit und Bereitstellung in großem Maßstab umfasst.
+</Callout>
+
+## Stufe 1: Kandidatengenerierung
+
+Sie können nicht für jeden Benutzer alle 500 Millionen täglichen Tweets bewerten. Stattdessen **grenzen Sie zunächst das Feld ein**.
+
+### Quellen der Kandidaten:
+- **In-Netzwerk**: Tweets von Konten, denen Sie folgen (höchste Erinnerung, mäßige Relevanz).
+- **Außerhalb des Netzwerks**: Tweets, die von Personen, denen Sie folgen, geliked oder retweetet wurden oder in Ihrem Interessendiagramm im Trend liegen.
+- **Themenbasiert**: Tweets, die zu Themen passen, mit denen Sie sich kürzlich beschäftigt haben.
+
+### So funktioniert es:
+Ein leichtgewichtiges Abrufmodell (häufig auf Einbettung basierend) generiert einen Kandidatensatz von etwa 1.000–5.000 Tweets pro Benutzer. Dies läuft nach einem Zeitplan oder wird ausgelöst, wenn der Benutzer die App öffnet.
+
+<Quiz question="Warum nutzt Twitter die Kandidatengenerierung, anstatt jeden Tweet für jeden Benutzer zu bewerten?" options="Weil es zu schnell wäre, jeden Tweet zu bewerten|Weil es rechnerisch unmöglich ist, ein umfassendes Ranking-Modell für Milliarden von Tweets pro Benutzeranfrage durchzuführen|Weil Benutzer zufällige Tweets bevorzugen|Denn das Ranking-Modell funktioniert nur bei kleinen Datensätzen" answer="1" explanation="Bei 500 Millionen Tweets pro Tag und 350 Millionen Benutzern würde die Bewertung jedes Tweets für jeden Benutzer astronomische Berechnungen erfordern. Durch die Kandidatengenerierung wird die Menge auf eine überschaubare Größe reduziert, bevor das teure Ranking-Modell ausgeführt wird." />
+
+## Stufe 2: Das Ranking-Modell
+
+Sobald Sie ein paar tausend Kandidaten haben, bewertet ein **stark bewertetes Modell** jeden einzelnen. Hier lebt die wahre Intelligenz.
+
+### Funktionen, die das Modell verwendet:
+
+**Benutzerfunktionen:**
+- Aus früheren Interaktionen abgeleitete Interessen (Likes, Retweets, Antworten, Verweildauer).
+- Sozialdiagramm: Mit wem Sie am meisten interagieren.
+- Demografische Daten und Sprachpräferenzen.
+
+**Tweet-Funktionen:**
+- Inhalt: Texteinbettungen, Medientyp, Hashtags.
+- Autor: Follower-Anzahl, Engagement-Rate, Vertrauenswert.
+- Aktualität: Alter des Tweets in Minuten.
+
+**Übergreifende Funktionen:**
+- Benutzer-Autor-Affinität: Wie oft interagieren Sie mit diesem Autor?
+- Nutzer-Themen-Affinität: Passt das Tweet-Thema zu Ihrem Interessenprofil?
+- Sozialer Beweis: Haben sich ähnliche Personen mit diesem Tweet beschäftigt?
+
+### Modellarchitektur:
+Ein tiefes neuronales Netzwerk (häufig ein Multitask-Modell) sagt mehrere Engagement-Typen gleichzeitig voraus:
+
+- Wahrscheinlichkeit eines Likes.
+- Wahrscheinlichkeit eines Retweets.
+- Wahrscheinlichkeit einer Antwort.
+- Wahrscheinlichkeit einer längeren Verweildauer (Messung über mehr als zwei Sekunden).
+
+Das Endergebnis ist eine **gewichtete Kombination** dieser Vorhersagen, die darauf abgestimmt ist, ein Ziel auf Plattformebene wie „gesundes Engagement“ zu optimieren.
+
+<ThinkAboutIt>Wenn Sie ausschließlich auf Klicks und Likes optimieren, riskieren Sie die Werbung für aufsehenerregende oder empörende Inhalte. Wie würden Sie die Bewertungsformel gestalten, um Engagement und Inhaltsqualität in Einklang zu bringen?
+</ThinkAboutIt>
+
+## Stufe 3: Echtzeitfunktionen
+
+Statische Merkmale reichen nicht aus. Der Feed muss auf das reagieren, was **gerade** passiert.
+
+- **Aktualitätsverfall**: Ein Tweet von vor 30 Sekunden erhält einen Boost gegenüber einem Tweet von vor drei Stunden.
+- **Trendthemen**: Wenn sich ein Großereignis abspielt, tauchen relevante Tweets auf, auch wenn sie außerhalb der üblichen Interessen des Benutzers liegen.
+- **Sitzungskontext**: Wenn ein Benutzer zehn Minuten lang gescrollt hat, diversifizieren Sie den Inhalt, um Ermüdungserscheinungen vorzubeugen.
+- **Echtzeit-Engagement-Signale**: Ein Tweet, der in den letzten fünf Minuten viral wird, erhält einen vorübergehenden Schub.
+
+Diese Funktionen erfordern eine **Streaming-Infrastruktur** – häufig wird Apache Kafka in einen Feature Store wie Redis oder Feast eingespeist –, die nahezu in Echtzeit aktualisiert wird.
+
+<FunFact>Das Entwicklerteam von Twitter berichtete, dass das Hinzufügen von Echtzeitfunktionen zu seinem Ranking-Modell das Nutzerengagement um 8 Prozent steigerte – eine enorme Verbesserung in ihrer Größenordnung, die sich in Millionen zusätzlicher täglicher Interaktionen niederschlägt.
+</FunFact>
+
+## Der „Für Sie“-Algorithmus: Entdecken vs. Ausnutzen
+
+Der Feed steht vor einem klassischen **Explorations-Ausbeutungs-Dilemma**:
+
+- **Exploit**: Inhalte anzeigen, die denen ähneln, mit denen der Benutzer zuvor interagiert hat. Sicheres, vorhersehbares, hohes kurzfristiges Engagement.
+- **Erkunden**: Stellen Sie neue Themen, neue Autoren und neue Formate vor. Riskanter, aber für die langfristige Bindung und Inhaltsvielfalt unerlässlich.
+
+Der Ansatz von Twitter vereint beides:
+
+- Ungefähr 80 Prozent des Feeds sind Exploitation-Inhalte, von denen das Model überzeugt ist, dass sie dem Benutzer gefallen werden.
+- Ungefähr 20 Prozent sind Erkundungen – neue Inhalte werden eingefügt, um die sich entwickelnden Interessen des Benutzers zu testen.
+
+Das Explorationsverhältnis selbst ist ein Parameter, der durch A/B-Tests bei Millionen von Benutzern optimiert wird.
+
+<Quiz question="Was ist das Hauptrisiko eines Feeds, der nur „ausnutzt” und niemals „erforscht”?" options="Der Feed wird zu vielfältig und unübersichtlich|Der Benutzer bleibt in einer Filterblase gefangen und die Plattform kann seine sich entwickelnden Interessen nicht erkennen|Das System verbraucht zu viel Rechenleistung|Der Feed wird zu langsam geladen" answer="1" explanation="Durch reine Ausbeutung entstehen Filterblasen – der Nutzer sieht nur, was ihm ohnehin gefällt, die Plattform kann sich nicht an veränderte Geschmäcker anpassen und die Content-Vielfalt bricht zusammen. Erkundung ist für die langfristige Gesundheit unerlässlich." />
+
+## Moderation und Sicherheit von Inhalten
+
+Bevor ein Tweet den Feed erreicht, durchläuft er eine **Sicherheitsschicht**:
+
+1. **Vorranking-Filter**: Bekannter Spam, belästigende und richtlinienverletzende Inhalte werden vor dem Ranking entfernt.
+2. **Post-Ranking-Filter**: Nach dem Ranking werden durch eine sekundäre Prüfung Randfälle erfasst – zum Beispiel ein Tweet, der einzeln akzeptabel, aber schädlich ist, wenn er mit ähnlichen Inhalten geclustert wird.
+3. **Steuerelemente auf Benutzerebene**: Benutzer können Themen stummschalten, Konten sperren und Inhalte als „nicht interessiert“ markieren, was alles in ihr Personalisierungsmodell einfließt.
+
+Die Sicherheitsschicht muss **schnell** (nicht mehr als 10–20 ms Latenz hinzufügen) und **konservativ** sein (im Zweifelsfall herausfiltern und zur menschlichen Überprüfung weiterleiten).
+
+<Callout>Die Moderation von Inhalten ist kein separates System, das nachträglich aufgeschraubt wird. Es ist tief in die Ranking-Pipeline integriert und beeinflusst die Bewertungen und Filterung in jeder Phase.
+</Callout>
+
+## Skalierung: Fan-Out beim Lesen vs. Fan-Out beim Schreiben
+
+Dies ist die architektonische Entscheidung, die die Infrastruktur von Twitter definiert.
+
+### Fan-Out beim Schreiben:
+Wenn ein Benutzer twittert, **schieben** Sie diesen Tweet in den Feed-Cache jedes Followers. Schnelles Lesen, aber teures Schreiben – insbesondere für Konten mit Millionen von Followern.
+
+### Fanout beim Lesen:
+Wenn ein Benutzer die App öffnet, **rufen** Sie** die neuesten Tweets von allen Konten ab, denen er folgt, und bewerten Sie sie im Handumdrehen. Billiges Schreiben, aber teures Lesen.
+
+### Twitters hybrider Ansatz:
+- Für die meisten Benutzer (weniger als 10.000 Follower): Fan-Out beim Schreiben. Berechnen Sie den Feed vorab und speichern Sie ihn im Cache.
+- Für Promi-Accounts (Millionen Follower): Fan-Out beim Lesen. Berechnen Sie den Feed zum Zeitpunkt der Anfrage, um zu vermeiden, dass bei jedem Tweet Millionen von Caches überflutet werden.
+
+Diese Hybridstrategie gleicht die Schreibverstärkung mit der Leselatenz aus und verarbeitet sowohl den Tweet eines normalen Benutzers als auch den viralen Beitrag eines Popstars effizient.
+
+<FunFact>Wenn eine Berühmtheit mit 50 Millionen Followern twittert, wären beim Schreiben 50 Millionen Cache-Einfügungen erforderlich, was Minuten in Anspruch nehmen und enorme Bandbreite verbrauchen würde. Der Hybridansatz bewältigt dies in Millisekunden, indem er die Arbeit auf die Lesezeit verschiebt.
+</FunFact>
+
+## Alles zusammenfügen
+
+Die vollständige Pipeline für eine einzelne Feed-Anfrage:
+
+1. Der Benutzer öffnet die App → die Anfrage gelangt zum Feed-Dienst.
+2. Die Kandidatengenerierung ruft etwa 3.000 Tweets aus Quellen innerhalb und außerhalb des Netzwerks ab.
+3. Der Feature Store bietet Echtzeit- und Batch-Funktionen für jeden Kandidaten.
+4. Das Ranking-Modell bewertet alle Kandidaten in einem einzigen Batch-Inferenzaufruf.
+5. Sicherheitsfilter entfernen Inhalte, die gegen Richtlinien verstoßen.
+6. Die Explorationslogik fügt 20 Prozent vielfältige Inhalte ein.
+7. Die endgültige Rangliste wird in weniger als 200 ms an den Kunden zurückgegeben.
+
+<ThinkAboutIt>In einem Interview werden Sie gefragt: „Wenn Sie ein neues Signal hinzufügen könnten, um den Feed zu verbessern, welches wäre das und warum?“ Berücksichtigen Sie Signale, die nicht häufig diskutiert werden – vielleicht etwas, das mit dem Wohlbefinden des Benutzers oder der Glaubwürdigkeit von Inhalten zusammenhängt.
+</ThinkAboutIt>
+
+<Quiz question="Wie werden in der Hybrid-Fanout-Strategie von Twitter Tweets von Promi-Accounts gehandhabt?" options="Sie werden sofort in den Cache jedes Followers verschoben|Sie werden zum Lesezeitpunkt berechnet, wenn ein Follower seinen Feed öffnet|Sie sind vollständig vom KI-Feed ausgeschlossen|Sie werden nur verifizierten Benutzern angezeigt" answer="1" explanation="Promi-Tweets verwenden Fan-Out beim Lesen – der Feed wird berechnet, wenn ein Follower ihn anfordert, wodurch die enormen Kosten vermieden werden, die entstehen, wenn ein einzelner Tweet in Millionen von Caches verschoben wird." />

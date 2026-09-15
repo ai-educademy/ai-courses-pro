@@ -1,0 +1,129 @@
+---
+title: "Bäume und binäre Suche – Wie KI schnelle Entscheidungen trifft"
+description: "Entdecken Sie Baumstrukturen, die die Entscheidungsfindung unterstützen, von Datenbanken bis hin zu maschinellem Lernen."
+order: 2
+difficulty: "intermediate"
+duration: 18
+icon: "🌲"
+published: true
+machineTranslated: true
+---
+## Bäume sind überall in der KI
+
+Jedes Mal, wenn ein Spamfilter eine E-Mail klassifiziert oder eine Datenbank Ihre Bestellung in Millisekunden abruft, übernimmt eine Baumdatenstruktur die schwere Arbeit. Bäume modellieren **hierarchische Entscheidungen** – jeder Knoten schränkt den Suchraum ein, bis Sie eine Antwort finden.
+
+<Illustration src="/images/lessons/trees-and-binary-search.svg" alt="Ein binärer Suchbaum mit nach Wert beschrifteten Knoten, die links-kleinere und rechts-größere Eigenschaften anzeigen" caption="In einem BST ist jedes linke Kind kleiner und jedes rechte Kind größer als sein Elternteil." />
+
+## Binäre Suchbäume (BSTs)
+
+Ein BST speichert Elemente so, dass für jeden Knoten alle Werte in seinem **linken** Teilbaum kleiner und alle Werte in seinem **rechten** Teilbaum größer sind.
+
+### Suchen
+
+```
+function search(node, target):
+    if node is null: return null
+    if target == node.value: return node
+    if target < node.value: return search(node.left, target)
+    return search(node.right, target)
+```
+
+Bei jedem Vergleich werden etwa die Hälfte der verbleibenden Knoten eliminiert – O(log n) in einem ausgeglichenen Baum.
+
+### Einfügung
+
+```
+function insert(node, value):
+    if node is null: return new Node(value)
+    if value < node.value:
+        node.left = insert(node.left, value)
+    else:
+        node.right = insert(node.right, value)
+    return node
+```
+
+### Löschung
+
+Das Löschen ist der schwierigste Vorgang. Es treten drei Fälle auf:
+
+1. **Blattknoten** – einfach entfernen.
+2. **Ein untergeordnetes Element** – Ersetzen Sie den Knoten durch sein untergeordnetes Element.
+3. **Zwei Kinder** – tauschen Sie den Wert des Knotens mit seinem Nachfolger in der Reihenfolge aus (kleinster Wert im rechten Teilbaum) und löschen Sie dann diesen Nachfolger.
+
+<Quiz question="Was ist der geordnete Nachfolger eines Knotens in einem BST?" options="Das übergeordnete Element des Knotens|Der größte Knoten im linken Teilbaum|Der kleinste Knoten im rechten Teilbaum|Die Wurzel des Baumes" answer="2" explanation="Der Nachfolger in der Reihenfolge ist der kleinste Wert im rechten Teilbaum – er wird gefunden, indem man einmal nach rechts und dann so weit wie möglich nach links geht." />
+
+## Ausgewogen vs. unausgeglichen
+
+Wenn Sie sortierte Daten in eine einfache BST einfügen, degeneriert diese in eine verknüpfte Liste – O(n) pro Operation. **Selbstausgleichende** Bäume beheben dieses Problem:
+
+| Baum | Balance-Regel | Typische Verwendung |
+|------|-------------|-------------|
+| AVL | Höhenunterschied ≤ 1 zwischen Teilbäumen | In-Memory-Suchen |
+| Rot-Schwarz | Farbbasierte Rotationsregeln | Sprachstandardbibliotheken (z. B. Java TreeMap) |
+| B-Baum | Mehrere Schlüssel pro Knoten, alle Blätter in gleicher Tiefe | Datenbanken und Dateisysteme |
+
+<FunFact>PostgreSQL und MySQL verwenden beide B-Tree-Varianten als Standardindexstruktur. Ein B-Baum mit dem Verzweigungsfaktor 100 kann eine Milliarde Zeilen in nur fünf Ebenen indizieren.</FunFact>
+
+## Baumdurchquerungen
+
+Durchquerungen besuchen jeden Knoten genau einmal. Die drei klassischen Reihenfolgen unterscheiden sich nur darin, **wann** Sie den aktuellen Knoten relativ zu seinen untergeordneten Knoten verarbeiten.
+
+| Durchquerung | Bestellen | Anwendungsfall |
+|-----------|-------|----------|
+| **In Ordnung** | Links → Knoten → Rechts | Erzeugt eine sortierte Ausgabe von einem BST |
+| **Vorbestellung** | Knoten → Links → Rechts | Einen Baum serialisieren/klonen |
+| **Nachbestellung** | Links → Rechts → Knoten | Einen Baum sicher löschen; Ausdrucksbäume auswerten |
+
+```
+function inOrder(node):
+    if node is null: return
+    inOrder(node.left)
+    process(node)
+    inOrder(node.right)
+```
+
+<ThinkAboutIt>Ein Compiler analysiert Ihren Code in einen Abstract Syntax Tree (AST). Welche Durchlaufreihenfolge würden Sie verwenden, um den als Baum gespeicherten Ausdruck `(3 + 5) * 2` auszuwerten? Warum?</ThinkAboutIt>
+
+## Heaps und Prioritätswarteschlangen
+
+Ein **Heap** ist ein vollständiger Binärbaum, in dem jedes übergeordnete Element größer (max. Heap) oder kleiner (min. Heap) als seine untergeordneten Elemente ist. Es unterstützt:
+
+- **Einfügen** – am Ende hinzufügen, aufblasen. O(log n).
+- **Min/Max extrahieren** – Wurzel entfernen, letztes Element zur Wurzel verschieben, nach unten sieben. O(log n).
+
+Prioritätswarteschlangen basierend auf Heaps-Leistung:
+- **Dijkstra-Algorithmus** (nächste Lektion!) – Erweitern Sie immer den nächsten nicht besuchten Knoten.
+- **Aufgabenplanung** – Betriebssystemplaner wählen den Prozess mit der höchsten Priorität aus.
+- **Beam-Suche im NLP** – Behalten Sie die Top-k der vielversprechendsten Satzvervollständigungen bei.
+
+```
+function siftUp(heap, index):
+    while index > 0:
+        parent = (index - 1) / 2
+        if heap[index] < heap[parent]:
+            swap(heap, index, parent)
+            index = parent
+        else: break
+```
+
+<Quiz question="Wie hoch ist die zeitliche Komplexität, das minimale Element in einem Min-Heap zu finden?" options="An)|O(log n)|O(1)|O(n log n)" answer="2" explanation="Das Minimum befindet sich immer an der Wurzel eines Min-Heaps, der Zugriff erfolgt also über O(1) – es ist kein Durchlauf erforderlich." />
+
+## Echte KI-Anwendungen
+
+- **Entscheidungsbäume** beim maschinellen Lernen teilen Daten an jedem Knoten auf, indem sie die Funktion verwenden, die Klassen am besten trennt – eine direkte Anwendung der Baumstruktur.
+- **Syntaxbäume** in NLP repräsentieren die grammatikalische Struktur und ermöglichen Aufgaben wie Stimmungsanalyse und maschinelle Übersetzung.
+- **Monte Carlo Tree Search (MCTS)** unterstützt Spiel-KI wie AlphaGo und erkundet mögliche Spielzüge als Baum von Spielzuständen.
+- **Huffman-Bäume** komprimieren Daten, indem sie häufigen Symbolen kürzere Codes zuweisen – werden bei der Modellgewichtungskomprimierung verwendet.
+
+<FunFact>Der Scikit-Learn-Entscheidungsbaumklassifikator erstellt einen Baum, in dem jeder interne Knoten einen Funktionsschwellenwert testet. Ein trainiertes Modell mit Tiefe 20 kann über eine Million verschiedene Entscheidungspfade darstellen.</FunFact>
+
+<ThinkAboutIt>Wenn Sie ein Autovervollständigungssystem erstellen würden, würden Sie einen BST, einen Heap oder eine andere Baumstruktur (z. B. einen Trie) verwenden? Überlegen Sie, welche Vorgänge Sie benötigen, um schnell zu sein.</ThinkAboutIt>
+
+## Wichtige Erkenntnisse
+
+1. BSTs ermöglichen das Suchen, Einfügen und Löschen von O(log n) – jedoch nur, wenn sie ausgeglichen sind.
+2. Die Durchlaufreihenfolge bestimmt, welche Informationen Sie aus einem Baum extrahieren.
+3. Heaps ermöglichen O(1)-Zugriff auf den Extremwert und O(log n)-Einfügung – ideal für prioritätsbasierte KI-Algorithmen.
+4. Bäume unterstützen die Entscheidungsfindung in ML, Datenbanken, Compilern und Spiel-KI.
+
+<Quiz question="Warum führt das Einfügen bereits sortierter Daten in ein einfaches (unausgeglichenes) BST zu Leistungsproblemen?" options="Es werden doppelte Knoten erstellt|Der Baum wird zu einer verknüpften Liste mit O(n) Operationen|Es kommt zu Hash-Kollisionen|Der Wurzelknoten läuft über" answer="1" explanation="Jeder neue Wert ist immer größer (oder kleiner) als der letzte, sodass jede Einfügung auf derselben Seite erfolgt und eine lineare Kette anstelle eines ausgeglichenen Baums entsteht." />

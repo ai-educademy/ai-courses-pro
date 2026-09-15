@@ -1,0 +1,294 @@
+---
+title: "Algorithmusmuster und -strategien"
+description: "Lernen Sie die 10 Algorithmusmuster kennen, die 80 % der Probleme bei der Kodierung von Vorstellungsgesprächen lösen – vom Schiebefenster bis zur dynamischen Programmierung."
+order: 2
+difficulty: "intermediate"
+duration: 25
+icon: "🧩"
+published: true
+machineTranslated: true
+---
+# Algorithmusmuster und -strategien
+
+Bei Programmierinterviews geht es nicht darum, sich 500 LeetCode-Lösungen zu merken. Dabei geht es darum, zu erkennen, welches der etwa zehn Muster auf das vor Ihnen liegende Problem zutrifft. Sobald Sie das Muster identifiziert haben, schreibt sich die Lösungsstruktur von selbst. In dieser Lektion wird jedes Muster aufgeschlüsselt – wann man es verwendet, wie man es erkennt und ein konkretes Beispiel, um Ihr Verständnis zu verankern. Betrachten Sie diese Muster als Linsen: Je mehr Sie üben, durch sie hindurchzuschauen, desto schneller wird jedes neue Problem deutlich.
+
+## Muster 1: Zwei Zeiger
+
+**Erkennen Sie es, wenn**: Die Eingabe sortiert ist (oder sortiert werden kann) und Sie Paare oder Unterarrays finden müssen, die eine bestimmte Bedingung erfüllen.
+
+Zwei Zeiger funktionieren, indem sie einen Zeiger an jedem Ende des Arrays platzieren (oder am Anfang für die „schnell/langsam“-Variante) und sie basierend auf einer Bedingung aufeinander zu bewegen.
+
+```python
+# Three Sum: find all triplets that sum to zero
+def three_sum(nums):
+    nums.sort()
+    result = []
+    for i in range(len(nums) - 2):
+        if i > 0 and nums[i] == nums[i - 1]:
+            continue  # Skip duplicates
+        left, right = i + 1, len(nums) - 1
+        while left < right:
+            total = nums[i] + nums[left] + nums[right]
+            if total < 0:
+                left += 1
+            elif total > 0:
+                right -= 1
+            else:
+                result.append([nums[i], nums[left], nums[right]])
+                while left < right and nums[left] == nums[left + 1]:
+                    left += 1
+                left += 1
+                right -= 1
+    return result
+```
+
+**Zeit**: O(n²) – eine enorme Verbesserung gegenüber der Brute-Force-Methode O(n³).
+
+## Muster 2: Schiebefenster
+
+**Erkennen Sie es, wenn**: Sie ein zusammenhängendes Subarray oder eine Teilzeichenfolge finden müssen, die eine bestimmte Einschränkung erfüllt (maximale Summe, alle Zeichen enthalten usw.).
+
+Das Fenster wird durch Bewegen des rechten Zeigers erweitert und durch Bewegen des linken Zeigers verkleinert. Der Schlüssel liegt darin, zu wissen, wann man schrumpfen muss.
+
+```python
+# Longest substring without repeating characters
+def length_of_longest_substring(s: str) -> int:
+    char_index = {}
+    max_length = 0
+    left = 0
+    for right, char in enumerate(s):
+        if char in char_index and char_index[char] >= left:
+            left = char_index[char] + 1
+        char_index[char] = right
+        max_length = max(max_length, right - left + 1)
+    return max_length
+```
+
+<Callout>Das Schiebefenstermuster hat eine feste Vorlage: Initialisieren Sie zwei Zeiger, erweitern Sie es nach rechts, verkleinern Sie es nach links, wenn die Einschränkung verletzt wird, und verfolgen Sie Ihre Antwort. Sobald Sie diese Vorlage verinnerlicht haben, scheint jedes Schiebefensterproblem beherrschbar zu sein.</Callout>
+
+## Muster 3: BFS (Breadth-First Search)
+
+**Erkennen Sie es, wenn**: Sie den kürzesten Weg in einem ungewichteten Diagramm, eine Durchquerung der Ebenenreihenfolge oder die Erkundung von Nachbarn Schicht für Schicht benötigen.
+
+BFS verwendet eine Warteschlange und verarbeitet Knoten Ebene für Ebene. Es garantiert den kürzesten Weg in ungewichteten Diagrammen.
+
+```python
+from collections import deque
+
+# Number of islands — BFS variant
+def num_islands(grid):
+    if not grid:
+        return 0
+    rows, cols = len(grid), len(grid[0])
+    count = 0
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                count += 1
+                queue = deque([(r, c)])
+                grid[r][c] = '0'
+                while queue:
+                    row, col = queue.popleft()
+                    for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                        nr, nc = row + dr, col + dc
+                        if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == '1':
+                            grid[nr][nc] = '0'
+                            queue.append((nr, nc))
+    return count
+```
+
+## Muster 4: DFS (Tiefensuche)
+
+**Erkennen Sie es, wenn**: Sie alle Pfade erkunden, die Konnektivität überprüfen, Zyklen erkennen müssen oder das Problem eine rekursive/Baumstruktur hat.
+
+DFS geht in die Tiefe, dann in die Breite. Es ist von Natur aus rekursiv und lässt sich wunderbar auf Baumdurchquerungen und Backtracking übertragen.
+
+```python
+# Path sum in a binary tree
+def has_path_sum(root, target_sum):
+    if not root:
+        return False
+    if not root.left and not root.right:
+        return target_sum == root.val
+    return (has_path_sum(root.left, target_sum - root.val) or
+            has_path_sum(root.right, target_sum - root.val))
+```
+
+<ThinkAboutIt>Wann würden Sie BFS gegenüber DFS wählen und umgekehrt? Bedenken Sie: BFS findet kürzeste Pfade, verwendet aber O(Breite)-Speicher. DFS verwendet O(Tiefe)-Speicher, garantiert jedoch keine kürzesten Pfade. Wie beeinflusst die Form des Diagramms Ihre Wahl?</ThinkAboutIt>
+
+## Muster 5: Binäre Suche
+
+**Erkennen Sie es, wenn**: Der Suchraum sortiert oder monoton ist (wenn die Bedingung am Index i wahr ist, gilt sie für alle Indizes > i oder < i).
+
+Die binäre Suche eignet sich nicht nur für sortierte Arrays – sie funktioniert bei jeder monotonen Bedingung. Diese Erkenntnis löst Probleme wie „Mindestkapazität zum Versenden von Paketen“ oder „Spitzenelement finden“.
+
+```python
+# Binary search on answer: minimum days to make m bouquets
+def min_days(bloom_day, m, k):
+    if m * k > len(bloom_day):
+        return -1
+
+    def can_make(days):
+        bouquets = flowers = 0
+        for bloom in bloom_day:
+            if bloom <= days:
+                flowers += 1
+                if flowers == k:
+                    bouquets += 1
+                    flowers = 0
+            else:
+                flowers = 0
+        return bouquets >= m
+
+    lo, hi = min(bloom_day), max(bloom_day)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if can_make(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+```
+
+<FunFact>Obwohl die binäre Suche konzeptionell einer der einfachsten Algorithmen ist, ergab eine Studie von Jon Bentley, dass nur etwa 10 % der professionellen Programmierer sie beim ersten Versuch korrekt implementieren konnten. Der häufigste Fehler? Einzelne Fehler in den Randbedingungen.</FunFact>
+
+## Muster 6: Zurückverfolgen
+
+**Erkennen Sie es, wenn**: Sie alle Kombinationen, Permutationen oder Teilmengen generieren müssen, die Einschränkungen erfüllen. Das Problem lautet oft „Alle finden“, „Alle generieren“ oder „Alle möglichen auflisten“.
+
+Backtracking = DFS mit Beschneidung. Sie erkunden einen Pfad, und wenn er gegen eine Einschränkung verstößt, gehen Sie zurück und versuchen die nächste Option.
+
+```python
+# Generate all valid combinations of n pairs of parentheses
+def generate_parenthesis(n):
+    result = []
+    def backtrack(current, open_count, close_count):
+        if len(current) == 2 * n:
+            result.append(current)
+            return
+        if open_count < n:
+            backtrack(current + '(', open_count + 1, close_count)
+        if close_count < open_count:
+            backtrack(current + ')', open_count, close_count + 1)
+    backtrack('', 0, 0)
+    return result
+```
+
+## Muster 7: Dynamische Programmierung
+
+**Erkennen Sie es, wenn**: Das Problem überlappende Teilprobleme und eine optimale Unterstruktur aufweist. Zu den klassischen Signalen gehören „Mindestkosten“, „Anzahl der Wege“, „längste/kürzeste Sequenz“ oder „Können Sie das Ziel erreichen?“
+
+Das DP-Rezept: Definieren Sie den Zustand, schreiben Sie die Wiederholung, entscheiden Sie zwischen Top-Down (Auswendiglernen) und Bottom-Up (Tabellierung).
+
+```python
+# Longest Increasing Subsequence — O(n²) DP
+def length_of_lis(nums):
+    if not nums:
+        return 0
+    dp = [1] * len(nums)  # dp[i] = length of LIS ending at index i
+    for i in range(1, len(nums)):
+        for j in range(i):
+            if nums[j] < nums[i]:
+                dp[i] = max(dp[i], dp[j] + 1)
+    return max(dp)
+```
+
+<Callout>Wenn Sie bei einem DP-Problem nicht weiterkommen, beginnen Sie zunächst mit der Brute-Force-Rekursion. Fügen Sie dann Memoisierung hinzu. Die Umstellung auf eine Bottom-Up-Tabelle ist ein Optimierungsschritt und nicht der erste Schritt. Dieser Ansatz verhindert, dass man sich in den Tabellenabmessungen verliert.</Callout>
+
+## Muster 8: Gierig
+
+**Erkennen Sie es, wenn**: Das Treffen der lokal optimalen Wahl bei jedem Schritt zur global optimalen Lösung führt. Bei gierigen Problemen geht es häufig um Intervalle, Terminplanung oder das Treffen von Entscheidungen, die nicht noch einmal überdacht werden müssen.
+
+```python
+# Minimum number of meeting rooms (interval scheduling)
+def min_meeting_rooms(intervals):
+    starts = sorted([i[0] for i in intervals])
+    ends = sorted([i[1] for i in intervals])
+    rooms = max_rooms = 0
+    s = e = 0
+    while s < len(starts):
+        if starts[s] < ends[e]:
+            rooms += 1
+            max_rooms = max(max_rooms, rooms)
+            s += 1
+        else:
+            rooms -= 1
+            e += 1
+    return max_rooms
+```
+
+## Muster 9: Topologische Sortierung
+
+**Erkennen Sie es, wenn**: Es gibt Abhängigkeiten zwischen Aufgaben (Kursvoraussetzungen, Erstellungsreihenfolge, Aufgabenplanung). Die Eingabe ist ein gerichteter azyklischer Graph (DAG).
+
+```python
+from collections import deque, defaultdict
+
+def course_order(num_courses, prerequisites):
+    graph = defaultdict(list)
+    in_degree = [0] * num_courses
+    for course, prereq in prerequisites:
+        graph[prereq].append(course)
+        in_degree[course] += 1
+
+    queue = deque([i for i in range(num_courses) if in_degree[i] == 0])
+    order = []
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbour in graph[node]:
+            in_degree[neighbour] -= 1
+            if in_degree[neighbour] == 0:
+                queue.append(neighbour)
+    return order if len(order) == num_courses else []
+```
+
+## Muster 10: Union-Find (Disjunkte Menge)
+
+**Erkennen Sie es, wenn**: Sie Elemente gruppieren, verbundene Komponenten erkennen oder feststellen müssen, ob zwei Elemente zum selben Satz gehören – insbesondere, wenn Verbindungen dynamisch hinzugefügt werden.
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])  # Path compression
+        return self.parent[x]
+
+    def union(self, x, y):
+        px, py = self.find(x), self.find(y)
+        if px == py:
+            return False
+        if self.rank[px] < self.rank[py]:
+            px, py = py, px
+        self.parent[py] = px
+        if self.rank[px] == self.rank[py]:
+            self.rank[px] += 1
+        return True
+```
+
+<Quiz question="Sie erhalten ein Problem: „Finden Sie die minimale Fensterteilzeichenfolge von s, die alle Zeichen in t enthält.” Welches Muster passt am besten?" options="Zwei Hinweise|Schiebefenster|Dynamische Programmierung|Binäre Suche" answer="1" explanation="Dies ist ein klassisches Schiebefensterproblem. Sie erweitern das Fenster, indem Sie den rechten Zeiger bewegen, um Zeichen einzuschließen, und verkleinern es von links, sobald alle Zeichen in t enthalten sind, wobei Sie die minimale Fenstergröße durchgehend verfolgen." />
+
+## So erkennen Sie das richtige Muster
+
+Erstellen Sie einen Entscheidungsbaum in Ihrem Kopf:
+
+1. **Ist die Eingabe sortiert oder kann sie sortiert werden?** → Zwei Zeiger oder binäre Suche
+2. **Benötigen Sie ein zusammenhängendes Subarray/Substring?** → Schiebefenster
+3. **Handelt es sich um eine Graph-/Baumdurchquerung?** → BFS (kürzester Pfad) oder DFS (alle Pfade)
+4. **„Alle Kombinationen/Permutationen finden“?** → Zurückverfolgen
+5. **„Mindestkosten/Anzahl der Wege“?** → Dynamische Programmierung
+6. **Problem mit „Zeitplan/Intervall“?** → Gierig oder Sortierung
+7. **Abhängigkeiten oder Reihenfolge?** → Topologische Sortierung
+8. **Gruppierung / Konnektivität?** → Union-Find
+
+## Wichtige Erkenntnisse
+
+- **Lernen Sie Muster, nicht Probleme**: 10 Muster decken die überwiegende Mehrheit der Interviewfragen ab.
+- **Beginnen Sie mit Brute-Force**: Identifizieren Sie das Muster anhand des Brute-Force-Ansatzes und optimieren Sie es dann.
+- **Üben Sie die Mustererkennung**: Geben Sie für jedes Problem, das Sie lösen, an, welches Muster es verwendet.
+- **Muster kombinieren**: Viele mittlere/schwere Probleme verwenden zwei Muster zusammen (z. B. binäre Suche + Schiebefenster, BFS + topologische Sortierung).
+- **Verbalisieren Sie Ihre Argumentation**: Wenn Sie in Interviews sagen: „Das sieht aus wie ein Sliding-Window-Problem, weil...“ zeigt starkes analytisches Denken.

@@ -1,0 +1,209 @@
+---
+title: "Perguntas de engenharia de recursos"
+description: "Lide com as perguntas da entrevista de engenharia de recursos com confiança, desde dados brutos até recursos prontos para produção."
+order: 3
+difficulty: "intermediate"
+duration: 18
+icon: "🔧"
+published: true
+machineTranslated: true
+---
+# 🔧 Perguntas de engenharia de recursos
+
+Aqui está um segredo que engenheiros experientes de ML conhecem: **o modelo que você escolhe importa muito menos do que os recursos que você alimenta.** Uma regressão logística simples com recursos brilhantes superará uma rede neural profunda com recursos ruins quase sempre. É por isso que os entrevistadores adoram perguntas sobre engenharia de recursos: eles testam se você entende o lado dos *dados* do aprendizado de máquina, não apenas os algoritmos.
+
+---
+
+## 🤔 Por que os entrevistadores se preocupam com a engenharia de recursos
+
+A engenharia de recursos fica na interseção do conhecimento do domínio, da intuição de dados e da habilidade de engenharia. Quando um entrevistador pede que você "projete recursos para um sistema de previsão de ETA de compartilhamento de viagens", ele está testando:
+
+- Você consegue pensar de forma criativa sobre quais sinais existem nos dados?
+- Você entende como os dados brutos se transformam em entradas do modelo?
+- Você consegue antecipar problemas como vazamento, dispersão e escala?
+- Você pensa nas restrições de produção (latência, armazenamento, atualização)?
+
+<Callout>Um padrão de entrevista comum: o entrevistador descreve um problema de negócios e pede que você faça um brainstorming sobre recursos. Comece perguntando sobre as fontes de dados disponíveis – isso mostra que você pensa na viabilidade, não apenas na teoria.
+</Callout>
+
+---
+
+## 📦 Tipos de recursos
+
+### Recursos Numéricos
+
+Números brutos que podem ser inseridos diretamente nos modelos – mas muitas vezes se beneficiam da transformação:
+
+- **Padronização**: centro para média 0, escala para variação de unidade (essencial para modelos baseados em distância como SVM, KNN)
+- **Transformação de log**: compactação de distribuições distorcidas à direita (receita, visualizações de página)
+- **Binning**: converte valores contínuos em intervalos discretos (idade → grupo_idade)
+
+```python
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+
+# Log transform for skewed feature
+df['log_income'] = np.log1p(df['income'])
+
+# Standardisation
+scaler = StandardScaler()
+df[['age_scaled', 'income_scaled']] = scaler.fit_transform(df[['age', 'income']])
+```
+
+### Recursos categóricos
+
+Dados não numéricos, como país, categoria de produto ou segmento de usuário. A estratégia de codificação é importante:
+
+| Método | Quando usar | Prós | Contras |
+|---|---|---|---|
+| Codificação One-Hot | Baixa cardinalidade (<20 categorias) | Simples, sem suposição ordinal | Esparso, de alta dimensão |
+| Codificação de etiqueta | Categorias ordinais (baixa/média/alta) | Compacto | Implica ordem falsa para não ordinal |
+| Codificação de destino | Alta cardinalidade (cidade, código postal) | Captura a relação categoria-alvo | Risco de vazamento de dados |
+| Incorporações | Cardinalidade muito alta, aprendizado profundo | Aprende representações densas | Precisa de rede neural |
+
+<ThinkAboutIt>Você está construindo um modelo de recomendação e um dos seus recursos é `product_id` com 500.000 valores únicos. A codificação one-hot criaria colunas esparsas de 500 mil. Quais estratégias de codificação você consideraria e quais são as compensações?
+</ThinkAboutIt>
+
+### Recursos temporais
+
+Os dados baseados em tempo são ricos em sinais – se você extraí-los corretamente:
+
+- **Codificação cíclica**: hora do dia, dia da semana (use sen/cos para capturar a natureza cíclica)
+- **Recursos de atraso**: valor em t-1, t-7, t-30 (crítico para séries temporais)
+- **Estatísticas contínuas**: média móvel de 7 dias, padrão móvel de 30 dias
+- **Tempo desde o evento**: dias desde a última compra, horas desde o último login
+
+```python
+# Cyclical encoding for hour of day
+df['hour_sin'] = np.sin(2 * np.pi * df['hour'] / 24)
+df['hour_cos'] = np.cos(2 * np.pi * df['hour'] / 24)
+
+# Lag and rolling features
+df['sales_lag_7'] = df['sales'].shift(7)
+df['sales_rolling_mean_7'] = df['sales'].rolling(window=7).mean()
+```
+
+### Recursos de texto
+
+Quando os modelos precisam consumir dados de texto:
+
+- **Bag of Words / TF-IDF**: simples, interpretável, funciona bem com ML tradicional
+- **Embeddings de palavras**: Word2Vec, GloVe — representações densas que capturam significado semântico
+- **Incorporações de frases**: BERT, Sentença-BERT — representações contextuais
+- **Feito à mão**: contagem de palavras, comprimento médio das palavras, pontuação de sentimento, presença de palavras-chave específicas
+
+### Recursos de interação
+
+Combinações de recursos que capturam relacionamentos que o modelo pode não aprender sozinho:
+
+- **Cruzamento de recursos**: `city × device_type` (usuários móveis urbanos se comportam de maneira diferente dos usuários de desktops rurais)
+- **Proporções**: `clicks / impressions` = taxa de cliques
+- **Diferenças**: `current_price - avg_price` = sinal de preço relativo
+
+<Quiz
+  question="Qual codificação é MAIS apropriada para um recurso de 'cidade' com 10.000 valores exclusivos em um modelo de árvore com gradiente aumentado?"
+  options="Codificação One-Hot|Codificação de destino|Codificação Binária|Codificação de etiqueta"
+  answer="1"
+  explanation="Com 10.000 cidades únicas, a codificação one-hot cria uma matriz impraticavelmente esparsa. A codificação de destino mapeia cada cidade para a média da variável de destino, criando um único recurso denso que captura o relacionamento cidade-alvo. Requer uma regularização cuidadosa para evitar vazamento de dados (uso em dobras de validação cruzada)."
+/>
+
+---
+
+## 🧹 Tratamento de dados ausentes
+
+Dados ausentes estão em toda parte na produção. Sua abordagem sinaliza seu nível de experiência:
+
+**Estratégias simples:**
+- Eliminar linhas (somente se os dados ausentes forem raros e aleatórios)
+- Preencher com média/mediana (numérica) ou moda (categórica)
+- Preencha com um valor sentinela (-1 ou "UNKNOWN")
+
+**Melhores estratégias:**
+- Crie um recurso de indicador binário: `is_income_missing` (o *fato* de falta de dados pode ser informativo!)
+- Use imputação baseada em modelo (imputador KNN, imputador iterativo)
+- Para modelos baseados em árvore, muitas implementações lidam com valores ausentes nativamente
+
+```python
+# Indicator feature + median imputation
+df['is_income_missing'] = df['income'].isna().astype(int)
+df['income'] = df['income'].fillna(df['income'].median())
+```
+
+<FunFact>Na famosa competição do Prêmio Netflix, um dos recursos mais poderosos era simplesmente *se um usuário havia avaliado um filme* – e não a classificação em si. O padrão de avaliações ausentes revelou melhor as preferências do usuário do que as próprias avaliações.
+</FunFact>
+
+---
+
+## 🔍 Métodos de seleção de recursos
+
+Mais recursos nem sempre são melhores. A seleção de recursos reduz o overfitting, melhora a latência e torna os modelos interpretáveis.
+
+### Métodos de filtro
+Classifique os recursos por correlação estatística com o alvo - rápido, mas ignora as interações dos recursos:
+- Coeficiente de correlação (metas numéricas)
+- Informações mútuas (funciona para qualquer tipo de recurso)
+- Teste qui-quadrado (características categóricas)
+
+### Métodos de wrapper
+Treine modelos com diferentes subconjuntos de recursos – precisos, mas caros:
+- Seleção direta: comece vazio, adicione o melhor recurso, um de cada vez
+- Eliminação retroativa: comece com todos os recursos, remova o menos útil de cada vez
+
+### Métodos incorporados
+A seleção de recursos está integrada ao processo de treinamento do modelo:
+- **Regularização L1** (Lasso): leva pesos de recursos sem importância a exatamente zero
+- **Importância baseada em árvore**: relatório de árvores com aumento de gradiente apresenta pontuações de importância
+
+```python
+from sklearn.feature_selection import SelectKBest, mutual_info_classif
+
+# Select top 20 features by mutual information
+selector = SelectKBest(mutual_info_classif, k=20)
+X_selected = selector.fit_transform(X, y)
+```
+
+<Quiz
+  question="Você descobre que adicionar um recurso 'current_timestamp' ao seu modelo melhora drasticamente o desempenho do conjunto de testes. Qual é a explicação mais provável?"
+  options="Os carimbos de data e hora ajudam genuinamente o modelo a aprender padrões temporais|Provavelmente é um vazamento de dados – o carimbo de data/hora se correlaciona com a divisão trem/teste|O modelo aprendeu a memorizar os dados de treinamento|Seu conjunto de testes é muito pequeno"
+  answer="1"
+  explanation="Um carimbo de data/hora bruto que aumenta monotonicamente pode atuar como um proxy para a própria divisão de treinamento/teste, vazando informações sobre se uma amostra está no conjunto de treinamento ou teste. Este é um exemplo clássico de vazamento de dados que aumenta o desempenho do teste, mas falha na produção."
+/>
+
+---
+
+## 🏭 Engenharia de Recursos em Produção
+
+A engenharia de recursos em nível de entrevista não para nos notebooks. As considerações de produção incluem:
+
+### Lojas de recursos
+
+Um feature store é um sistema centralizado para gerenciar, armazenar e servir recursos. Isso resolve:
+- **Consistência**: mesma definição de recurso no treinamento e na veiculação
+- **Reutilização**: as equipes compartilham recursos em vez de reimplementá-los
+- **Atualidade**: pipelines programados mantêm os recursos atualizados
+
+Ferramentas populares: **Feast**, **Tecton**, **Hopsworks**, **AWS SageMaker Feature Store**
+
+### Distorção de serviço de treinamento
+
+O bug de produção mais perigoso no ML: recursos calculados de maneira diferente durante o treinamento e a veiculação. Causas comuns:
+- Diferentes caminhos de código para lote (treinamento) e em tempo real (exibição)
+- Valores de recursos obsoletos no caminho de veiculação
+- Diferentes versões de biblioteca entre ambientes
+
+<Callout>Quando um entrevistador perguntar sobre engenharia de recursos em produção, sempre mencione a distorção no atendimento ao treinamento. É o problema que a maioria dos candidatos ignora e que afeta a maioria dos sistemas de ML de produção.
+</Callout>
+
+---
+
+## 🔑 Principais vantagens
+
+- **Recursos superam algoritmos** — invista mais tempo na engenharia de recursos do que na arquitetura do modelo
+- **Corresponder codificação à cardinalidade**: one-hot para baixa, codificação de destino ou embeddings para alta
+- **Dados ausentes são um recurso**, não apenas um problema — crie variáveis indicadoras
+- **Fique atento a vazamentos** — se um recurso parece bom demais para ser verdade, provavelmente é
+- **Pense na produção**: armazenamentos de recursos, distorção no fornecimento de treinamento e restrições de latência
+- **Pratique recursos de brainstorming** para problemas comuns: recomendações, fraude, previsão de ETA, pesquisa
+
+<ThinkAboutIt>Escolha um produto que você usa diariamente (por exemplo, Spotify, Uber, Amazon). Quais recursos você projetaria para prever se usará esse produto amanhã? Pense nos recursos do usuário, nos recursos temporais e nos recursos de interação.
+</ThinkAboutIt>

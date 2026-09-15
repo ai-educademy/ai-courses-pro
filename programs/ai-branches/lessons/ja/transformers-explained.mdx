@@ -1,0 +1,214 @@
+---
+title: "トランスフォーマーの説明: ChatGPT の背後にあるアーキテクチャ"
+description: "ChatGPT、GPT-4、BERT、Gemini を強化する Transformer アーキテクチャを理解します。アテンションのメカニズムを段階的に説明します。"
+order: 12
+difficulty: "intermediate"
+duration: 35
+icon: "🤖"
+published: true
+machineTranslated: true
+---
+# Transformers の説明: ChatGPT の背後にあるアーキテクチャ
+
+2017 年、Google のチームは *「必要なのは注意だけです」* というタイトルの論文を発表しました。 **Transformer** アーキテクチャが導入され、AI は永遠に変わりました。あなたが聞いたことのある主要な言語モデル (ChatGPT、GPT-4、BERT、Gemini、Claude、LLaMA) はすべて、Transformers に基づいて構築されています。
+
+トランスフォーマーがなぜ重要なのかを理解するには、まずトランスフォーマーが何を置き換えたのかを理解する必要があります。
+
+## ⏱️ RNN の問題: テキストの順次処理
+
+Transformers が登場する以前は、シーケンス (テキスト、オーディオ、時系列) を処理するための主要なアプローチは **リカレント ニューラル ネットワーク (RNN)** とその派生である LSTM と GRU でした。
+
+RNN はテキストを **一度に 1 単語ずつ**処理し、情報を転送する「隠れた状態」を維持します。
+
+```
+Input:  "The cat sat on the mat because it was comfortable"
+         ↓    ↓    ↓   ↓    ↓    ↓      ↓      ↓   ↓      ↓
+        h1 → h2 → h3 → h4 → h5 → h6 → h7 → h8 → h9 → h10 → output
+```
+
+これは機能しますが、2 つの大きな問題があります。
+
+**1.長いシーケンスにわたるグラデーションの消失**
+モデルが単語 10 を処理するまでに、単語 1 からの情報は 9 つの隠れ状態更新によって「薄められ」ています。文が長い場合、モデルは「it」(単語 8) を「cat」(単語 2) に接続するのに苦労します。
+
+**2.遅い — 並列化なし**
+各単語は前の非表示状態に依存するため、一度に 1 つずつ単語を処理する必要があります。シーケンス全体で並列化することはできません。長いドキュメントのトレーニングは非常に時間がかかります。
+
+Transformer は、単一のエレガントなメカニズムで両方の問題を解決します。**注意**。
+
+## 👀 自己注意のメカニズム
+
+Transformer の中心的な革新は **自己注意** です。つまり、シーケンス内のすべての単語が、距離に関係なく、他のすべての単語に同時に直接注目できる機能です。
+
+セルフアテンションは、情報を順番に渡すのではなく、**各単語がシーケンス内の他のすべての単語とどの程度関連している**かを一度に計算します。
+
+### クエリ、キー、値 — わかりやすい英語
+
+各単語 (またはトークン) に対して、Transformer は 3 つのベクトルを作成します。
+
+- **クエリ (Q)**: *「何を探していますか?」* — この単語が尋ねている質問
+- **キー (K)**: *「私には何が含まれていますか?」* — 各単語がそれ自体についてブロードキャストする広告
+- **値 (V)**: *「どのような情報を提供しますか?」* — 取得される実際のコンテンツ
+
+2 つの単語間のアテンション スコアは、ある単語のクエリと別の単語のキーの内積を取ることによって計算されます。スコアが高いことは、「これら 2 つの単語の関連性が高い」ことを意味します。
+
+```python
+import torch
+import torch.nn.functional as F
+
+def self_attention(Q, K, V):
+    d_k = Q.shape[-1]  # dimension of key vectors
+    
+    # Compute raw attention scores: how relevant is each word to each other
+    scores = torch.matmul(Q, K.transpose(-2, -1)) / (d_k ** 0.5)
+    
+    # Convert scores to probabilities (weights that sum to 1)
+    attention_weights = F.softmax(scores, dim=-1)
+    
+    # Weighted sum of Value vectors
+    output = torch.matmul(attention_weights, V)
+    
+    return output, attention_weights
+
+# For the sentence "The cat sat on the mat because it was comfortable",
+# "it" will have a high attention score with "cat" (the antecedent)
+# regardless of how many words separate them
+```
+
+結果: **すべてのトークンは、他のすべてのトークンに対して直接視線を向けることになります**。情報のボトルネックも、長いシーケンスにわたる勾配の消失もありません。
+
+### なぜ平方根スケーリングなのか?
+
+上記のコードの `/ (d_k ** 0.5)` は、内積が非常に大きな数になり、ソフトマックスが非常に小さな勾配の領域に押し込まれるのを防ぎます。安定化の秘訣です。
+
+## 🧠 マルチヘッドの注意
+
+Transformers は、アテンションを 1 回だけ計算するのではなく、学習されたさまざまな投影を使用して **並行して複数回** 計算します。これは **多頭注意** と呼ばれます。
+
+```python
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model=512, num_heads=8):
+        super().__init__()
+        self.num_heads = num_heads
+        self.d_k = d_model // num_heads  # 64 per head
+        
+        # Separate linear projections for each head
+        self.W_q = nn.Linear(d_model, d_model)
+        self.W_k = nn.Linear(d_model, d_model)
+        self.W_v = nn.Linear(d_model, d_model)
+        self.W_o = nn.Linear(d_model, d_model)
+    
+    def forward(self, x):
+        # Each head learns to attend to different aspects:
+        # Head 1 might focus on syntactic relationships
+        # Head 2 might focus on semantic similarity
+        # Head 3 might focus on co-reference (it → cat)
+        # ... and so on for all 8 heads
+        pass
+```
+
+各アテンションヘッドは、異なるタイプの関係に特化できます。あるヘッドは構文上の依存関係 (主語と動詞の一致) を追跡し、別のヘッドは共参照 (代名詞とその先行詞) に焦点を当て、別のヘッドは意味上の類似性を捕捉する可能性があります。
+
+<FunFact>GPT-4は96個のアテンションヘッドを使用すると噂されています。それぞれが独立して、コンテキスト ウィンドウ全体にわたるさまざまな言語関係を同時に追跡することを学習できます。</FunFact>
+
+## 📍 位置エンコーディング
+
+自己注意には盲点が 1 つあります。それは、本質的に **順序にとらわれない**ということです。 「犬が人を噛む」と「人が犬を噛む」は、追加情報がなければ同じ注意スコアを生成します。
+
+モデルに語順の感覚を与えるために、Transformers は入力埋め込みに **位置エンコーディング** を追加します。オリジナルの Transformer は正弦関数を使用していました。
+
+```python
+import numpy as np
+
+def positional_encoding(seq_len, d_model):
+    PE = np.zeros((seq_len, d_model))
+    for pos in range(seq_len):
+        for i in range(0, d_model, 2):
+            PE[pos, i]     = np.sin(pos / 10000 ** (2*i / d_model))
+            PE[pos, i + 1] = np.cos(pos / 10000 ** (2*i / d_model))
+    return PE
+
+# Each position gets a unique "fingerprint" added to its embedding
+# Position 0 looks different from position 1, which looks different from position 2
+```
+
+LLaMA のような最新のモデルは **Rotary Position Embeddings (RoPE)** を使用します。これは、相対位置をより効果的にエンコードし、非常に長いコンテキストに適切にスケーリングします。
+
+## 🏗️ 完全なトランス アーキテクチャ
+
+オリジナルの Transformer には 2 つの主要な部分があります。
+
+### エンコーダ
+入力を読み取り、豊富なコンテキスト表現を構築します。各トークンの表現は、自己注意を介して他のすべてのトークンから通知されます。文の分類、固有表現の認識、特定のパッセージに対する質問応答などのタスクに使用されます。
+
+### デコーダ
+エンコーダーの出力と既に生成されたトークンの両方に対応して、出力トークンを一度に 1 つ生成します。用途: 翻訳、要約、テキスト生成。
+
+完全なエンコーダ/デコーダ スタック:
+```
+Input text → Token Embeddings + Positional Encoding
+           → N × [Multi-Head Self-Attention → Add & Norm → Feed-Forward → Add & Norm]
+           → Encoder Output
+
+Encoder Output + Generated tokens so far
+           → N × [Masked Self-Attention → Cross-Attention → Feed-Forward]
+           → Next token prediction
+```
+
+## 🆚 BERT vs GPT: 2 種類のトランスフォーマー
+
+すべての Transformer ベースのモデルが完全なエンコーダー/デコーダー構造を使用しているわけではありません。 2 つの主要な亜種は次のとおりです。
+
+### BERT (エンコーダのみ)
+- **エンコーダー** スタックのみを使用します
+- **マスクされた言語モデリング**でトレーニング済み: 一部の入力トークンは隠されており、BERT がそれらを予測します
+- **テキストの理解**に優れています: 分類、検索、Q&A
+- コンテキスト全体を双方向に読み取ります (すべての単語が他のすべての単語を認識します)
+
+### GPT (デコーダのみ)
+- **デコーダー** スタックのみを使用します  
+- **次のトークン予測**でトレーニング済み: 以前のすべてのトークンを考慮して、次のトークンを予測します
+- **テキストの生成**に優れています: 会話、執筆、コード
+- 因果マスキング: 各トークンは以前のトークンのみに対応できます (将来のトークンには対応できません。これは不正行為になります)。
+
+```
+BERT training:   "The [MASK] sat on the mat"  → predict "cat"
+GPT training:    "The cat sat on the"          → predict "mat"
+```
+
+<ThinkAboutIt>BERT の双方向の注意は、単語の表現を構築するときに将来の単語を参照できることを意味します。 GPTではできません。これにより、生成には GPT が優れているのに、分類タスクには BERT が優れているのはなぜですか?</ThinkAboutIt>
+
+## 📈 スケールが重要な理由
+
+Transformer アーキテクチャは、驚くほどうまく拡張できることがわかりました。より多くのパラメーターを備え、より多くのデータでトレーニングされ、より多くの計算能力を備えた大規模なモデルは、一貫して優れたパフォーマンスを生み出します。これは **スケーリングの法則** で説明される現象です (Kaplan et al., 2020)。
+
+これにより、次のような進展がもたらされました。
+- GPT-1 (2018): 1 億 1,700 万のパラメータ
+- GPT-2 (2019): 1.5B パラメータ
+- GPT-3 (2020): 175B パラメータ
+- GPT-4 (2023): 推定 1 兆以上のパラメーター
+
+それぞれのジャンプは能力の質的な向上をもたらしました。 GPT-2 ではまったく実行できなかったタスク (複雑な推論、コード生成) が GPT-3 スケールで可能になり、GPT-4 スケールでは優れています。
+
+## ⚡ トレーニングと推論
+
+2 つのまったく異なる計算プロファイル:
+
+**トレーニング**: 非常に高価です。数十億のトークンを処理し、勾配を計算し、数千の GPU 全体で数千億のパラメータを数週間または数か月にわたって更新します。 GPT-4の訓練には1億ドル以上の費用がかかると推定されている。
+
+**推論**: はるかに安いです。各トークンを生成するためにネットワークを通過する 1 回の順方向パス。依然として大規模なハードウェア (強力な GPU または特殊な AI チップ) が必要ですが、大規模な場合は管理可能です。
+
+この非対称性が業界を形作ってきました。十分なリソースを備えた少数の組織が基礎モデルをトレーニングしています。他の人は API 経由でアクセスします。
+
+<Quiz question="Transformer のアテンション メカニズムは RNN のどのような問題を解決しましたか?" options="RNN はテキストを処理できませんでした - 画像に対してのみ機能しました|RNN は長距離の依存関係に苦戦し、シーケンス長全体で並列化できませんでした|RNN のトレーニングには大量のラベル付きデータが必要でした|RNN は英語のテキストのみを処理できました" answer="1" explanation="RNN はトークンを順番に処理するため、勾配が消失し、遠く離れた単語を接続することが困難になりました (長距離依存関係)。また、シーケンスの長さ全体で並列化することもできないため、トレーニングが遅くなります。セルフ アテンションは両方を解決します。すべてのトークンが他のトークンに直接アテンションされ、すべてのアテンションの計算は並行して実行できます。" />
+
+## 重要なポイント
+
+- **RNN** はシーケンスを段階的に処理し、長距離の依存関係に苦戦し、並列化できませんでした - トランスフォーマーがそれらを置き換えました
+- **セルフアテンション** により、すべてのトークンがクエリ、キー、値ベクトルを介して他のすべてのトークンに直接対応できるようになり、両方の問題を同時に解決できます
+- **マルチヘッド アテンション** は複数のアテンション計算を並行して実行し、モデルがさまざまなタイプの関係を同時に学習できるようにします。
+- **位置エンコーディング** は、本質的に位置に依存しないアテンション メカニズムに順序情報を追加します。
+- **BERT** (エンコーダのみ) はテキストを双方向で理解するように事前トレーニングされています。分類および検索タスクに最適
+- **GPT** (デコーダーのみ) は、左から右にテキストを生成するように事前トレーニングされています。生成と会話に最適
+- **スケールは非常に重要です**: GPT-1 → GPT-4 の進行が示すように、より多くのデータでトレーニングされた大規模な Transformers は、一貫して新しい機能を解放します。
+- トレーニングには非常に費用がかかります。推論ははるかに安価です - この非対称性が基礎モデルのデプロイ方法を決定します

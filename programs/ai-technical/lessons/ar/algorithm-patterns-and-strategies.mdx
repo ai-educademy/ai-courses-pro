@@ -1,0 +1,294 @@
+---
+title: "أنماط واستراتيجيات الخوارزمية"
+description: "تعرف على أنماط الخوارزمية العشرة التي تحل 80% من مشكلات مقابلات البرمجة - بدءًا من النافذة المنزلقة وحتى البرمجة الديناميكية."
+order: 2
+difficulty: "intermediate"
+duration: 25
+icon: "🧩"
+published: true
+machineTranslated: true
+---
+# أنماط واستراتيجيات الخوارزمية
+
+لا تتعلق مقابلات البرمجة بحفظ 500 حل من حلول LeetCode. إنها تتعلق بالتعرف على أي من الأنماط العشرة تقريبًا ينطبق على المشكلة التي تواجهك. بمجرد تحديد النمط، يكتب هيكل الحل نفسه. يشرح هذا الدرس كل نمط — متى تستخدمه، وكيف تتعرف عليه، ويقدم مثالًا ملموسًا لترسيخ فهمك. فكر في هذه الأنماط كعدسات: كلما تدربت على النظر من خلالها، كلما أصبح التركيز على كل مشكلة جديدة أسرع.
+
+## النموذج 1: مؤشران
+
+**التعرف عليه عندما**: يتم فرز المدخلات (أو يمكن فرزها)، وتحتاج إلى العثور على أزواج أو مصفوفات فرعية تستوفي بعض الشروط.
+
+يعمل المؤشران عن طريق وضع مؤشر واحد في كل طرف من المصفوفة (أو في بداية المتغير "سريع/بطيء") وتحريكهما تجاه بعضهما البعض بناءً على الشرط.
+
+```python
+# Three Sum: find all triplets that sum to zero
+def three_sum(nums):
+    nums.sort()
+    result = []
+    for i in range(len(nums) - 2):
+        if i > 0 and nums[i] == nums[i - 1]:
+            continue  # Skip duplicates
+        left, right = i + 1, len(nums) - 1
+        while left < right:
+            total = nums[i] + nums[left] + nums[right]
+            if total < 0:
+                left += 1
+            elif total > 0:
+                right -= 1
+            else:
+                result.append([nums[i], nums[left], nums[right]])
+                while left < right and nums[left] == nums[left + 1]:
+                    left += 1
+                left += 1
+                right -= 1
+    return result
+```
+
+**الوقت**: O(n²) — تحسن هائل مقارنة بالقوة الغاشمة O(n³).
+
+## النموذج 2: نافذة منزلقة
+
+**التعرف عليه عندما**: تحتاج إلى العثور على مصفوفة فرعية أو سلسلة فرعية متجاورة تفي ببعض القيود (الحد الأقصى للمجموع، يحتوي على جميع الأحرف، وما إلى ذلك).
+
+تتوسع النافذة عن طريق تحريك المؤشر الأيمن وتتقلص عن طريق تحريك المؤشر الأيسر. المفتاح هو معرفة متى تتقلص.
+
+```python
+# Longest substring without repeating characters
+def length_of_longest_substring(s: str) -> int:
+    char_index = {}
+    max_length = 0
+    left = 0
+    for right, char in enumerate(s):
+        if char in char_index and char_index[char] >= left:
+            left = char_index[char] + 1
+        char_index[char] = right
+        max_length = max(max_length, right - left + 1)
+    return max_length
+```
+
+<Callout>يحتوي نمط النافذة المنزلقة على قالب ثابت: قم بتهيئة مؤشرين، وقم بالتوسيع إلى اليمين، والتقليص إلى اليسار عند انتهاك القيد، وتتبع إجابتك. بمجرد استيعاب هذا القالب، تصبح كل مشكلة نافذة منزلقة قابلة للإدارة.</Callout>
+
+## النموذج 3: BFS (بحث العرض الأول)
+
+**التعرف عليه عندما**: تحتاج إلى أقصر مسار في رسم بياني غير مرجح، أو اجتياز ترتيب المستوى، أو لاستكشاف الجيران طبقة تلو الأخرى.
+
+يستخدم BFS قائمة انتظار ويعالج مستوى العقد حسب المستوى. فهو يضمن أقصر مسار في الرسوم البيانية غير المرجحة.
+
+```python
+from collections import deque
+
+# Number of islands — BFS variant
+def num_islands(grid):
+    if not grid:
+        return 0
+    rows, cols = len(grid), len(grid[0])
+    count = 0
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                count += 1
+                queue = deque([(r, c)])
+                grid[r][c] = '0'
+                while queue:
+                    row, col = queue.popleft()
+                    for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                        nr, nc = row + dr, col + dc
+                        if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == '1':
+                            grid[nr][nc] = '0'
+                            queue.append((nr, nc))
+    return count
+```
+
+## النموذج 4: DFS (بحث العمق الأول)
+
+**التعرف عليه عندما**: تحتاج إلى استكشاف جميع المسارات، أو التحقق من الاتصال، أو اكتشاف الدورات، أو أن المشكلة لها بنية متكررة/شجرة.
+
+DFS يتعمق قبل أن يكون واسعًا. إنها متكررة بشكل طبيعي وترسم خرائط بشكل جميل لاجتياز الأشجار والتراجع.
+
+```python
+# Path sum in a binary tree
+def has_path_sum(root, target_sum):
+    if not root:
+        return False
+    if not root.left and not root.right:
+        return target_sum == root.val
+    return (has_path_sum(root.left, target_sum - root.val) or
+            has_path_sum(root.right, target_sum - root.val))
+```
+
+<ThinkAboutIt>متى تختار BFS على DFS، والعكس؟ خذ بعين الاعتبار: يبحث BFS عن أقصر المسارات ولكنه يستخدم ذاكرة O(العرض). يستخدم DFS ذاكرة O (العمق) ولكنه لا يضمن أقصر المسارات. كيف يؤثر شكل الرسم البياني على اختيارك؟</ThinkAboutIt>
+
+## النموذج 5: البحث الثنائي
+
+**التعرف عليه عندما**: مساحة البحث مرتبة أو رتيبة (إذا كان الشرط صحيحًا في الفهرس i، فهو صحيح لجميع الفهارس > i أو < i).
+
+لا يقتصر البحث الثنائي على المصفوفات التي تم فرزها فحسب، بل إنه يعمل في أي حالة رتيبة. تحل هذه الرؤية مشاكل مثل "الحد الأدنى من القدرة على شحن الطرود" أو "العثور على عنصر الذروة".
+
+```python
+# Binary search on answer: minimum days to make m bouquets
+def min_days(bloom_day, m, k):
+    if m * k > len(bloom_day):
+        return -1
+
+    def can_make(days):
+        bouquets = flowers = 0
+        for bloom in bloom_day:
+            if bloom <= days:
+                flowers += 1
+                if flowers == k:
+                    bouquets += 1
+                    flowers = 0
+            else:
+                flowers = 0
+        return bouquets >= m
+
+    lo, hi = min(bloom_day), max(bloom_day)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if can_make(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+```
+
+<FunFact>على الرغم من كون البحث الثنائي أحد أبسط الخوارزميات من الناحية النظرية، إلا أن دراسة أجراها جون بنتلي وجدت أن حوالي 10% فقط من المبرمجين المحترفين يمكنهم تنفيذها بشكل صحيح في المحاولة الأولى. الخلل الأكثر شيوعا؟ أخطاء متفرقة في الشروط الحدودية.</FunFact>
+
+## النموذج 6: التراجع
+
+**التعرف عليه عندما**: تحتاج إلى إنشاء جميع المجموعات أو التباديل أو المجموعات الفرعية التي تستوفي القيود. غالبًا ما تقول المشكلة "البحث عن الكل" أو "إنشاء الكل" أو "سرد كل ما هو ممكن".
+
+التراجع = DFS مع التقليم. أنت تستكشف مسارًا، وإذا انتهك أحد القيود، فإنك تتراجع وتجرب الخيار التالي.
+
+```python
+# Generate all valid combinations of n pairs of parentheses
+def generate_parenthesis(n):
+    result = []
+    def backtrack(current, open_count, close_count):
+        if len(current) == 2 * n:
+            result.append(current)
+            return
+        if open_count < n:
+            backtrack(current + '(', open_count + 1, close_count)
+        if close_count < open_count:
+            backtrack(current + ')', open_count, close_count + 1)
+    backtrack('', 0, 0)
+    return result
+```
+
+## النموذج 7: البرمجة الديناميكية
+
+**التعرف عليها عندما**: تحتوي المشكلة على مشاكل فرعية متداخلة وبنية أساسية مثالية. تتضمن الإشارات الكلاسيكية "الحد الأدنى للتكلفة"، أو "عدد الطرق"، أو "أطول/أقصر تسلسل"، أو "هل يمكنك الوصول إلى الهدف؟"
+
+وصفة DP: تحديد الحالة، وكتابة التكرار، والاختيار بين أعلى إلى أسفل (الحفظ) ومن أسفل إلى أعلى (التبويب).
+
+```python
+# Longest Increasing Subsequence — O(n²) DP
+def length_of_lis(nums):
+    if not nums:
+        return 0
+    dp = [1] * len(nums)  # dp[i] = length of LIS ending at index i
+    for i in range(1, len(nums)):
+        for j in range(i):
+            if nums[j] < nums[i]:
+                dp[i] = max(dp[i], dp[j] + 1)
+    return max(dp)
+```
+
+<Callout>عندما تكون عالقًا في مشكلة DP، ابدأ بتكرار القوة الغاشمة أولاً. ثم قم بإضافة التذكير. يعد التحويل إلى الجدولة من أسفل إلى أعلى خطوة تحسينية، وليس الخطوة الأولى. يمنع هذا الأسلوب الضياع في أبعاد الجدول.</Callout>
+
+## النمط 8: الجشع
+
+**التعرف عليه عندما**: يؤدي اتخاذ الاختيار الأمثل محليًا في كل خطوة إلى الحل الأمثل عالميًا. غالبًا ما تتضمن المشكلات الجشعة فترات زمنية أو جدولة أو اتخاذ اختيارات لا تحتاج إلى إعادة النظر.
+
+```python
+# Minimum number of meeting rooms (interval scheduling)
+def min_meeting_rooms(intervals):
+    starts = sorted([i[0] for i in intervals])
+    ends = sorted([i[1] for i in intervals])
+    rooms = max_rooms = 0
+    s = e = 0
+    while s < len(starts):
+        if starts[s] < ends[e]:
+            rooms += 1
+            max_rooms = max(max_rooms, rooms)
+            s += 1
+        else:
+            rooms -= 1
+            e += 1
+    return max_rooms
+```
+
+## النموذج 9: الفرز الطوبولوجي
+
+**التعرف عليه عندما**: هناك تبعيات بين المهام (متطلبات الدورة التدريبية، ترتيب البناء، جدولة المهام). الإدخال عبارة عن رسم بياني حلقي موجه (DAG).
+
+```python
+from collections import deque, defaultdict
+
+def course_order(num_courses, prerequisites):
+    graph = defaultdict(list)
+    in_degree = [0] * num_courses
+    for course, prereq in prerequisites:
+        graph[prereq].append(course)
+        in_degree[course] += 1
+
+    queue = deque([i for i in range(num_courses) if in_degree[i] == 0])
+    order = []
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbour in graph[node]:
+            in_degree[neighbour] -= 1
+            if in_degree[neighbour] == 0:
+                queue.append(neighbour)
+    return order if len(order) == num_courses else []
+```
+
+## النموذج 10: البحث عن الاتحاد (مجموعة منفصلة)
+
+**التعرف عليه عندما**: تحتاج إلى تجميع العناصر، أو اكتشاف المكونات المتصلة، أو تحديد ما إذا كان العنصران ينتميان إلى نفس المجموعة - خاصة عند إضافة الاتصالات ديناميكيًا.
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])  # Path compression
+        return self.parent[x]
+
+    def union(self, x, y):
+        px, py = self.find(x), self.find(y)
+        if px == py:
+            return False
+        if self.rank[px] < self.rank[py]:
+            px, py = py, px
+        self.parent[py] = px
+        if self.rank[px] == self.rank[py]:
+            self.rank[px] += 1
+        return True
+```
+
+<Quiz question="لقد واجهت مشكلة: ”ابحث عن الحد الأدنى من السلسلة الفرعية للنافذة s التي تحتوي على كافة الأحرف في t.” أي نمط هو الأنسب؟" options="مؤشران|نافذة منزلقة|البرمجة الديناميكية|البحث الثنائي" answer="1" explanation="هذه مشكلة نافذة منزلقة كلاسيكية. يمكنك توسيع النافذة عن طريق تحريك المؤشر الأيمن لتضمين الأحرف، والتقليص من اليسار بمجرد تضمين كافة الأحرف الموجودة في t، وتتبع الحد الأدنى لحجم النافذة طوال الوقت." />
+
+## كيفية التعرف على النمط الصحيح
+
+بناء شجرة القرار في رأسك:
+
+1. **هل تم فرز المدخلات أم يمكن فرزها؟** → مؤشران أو بحث ثنائي
+2. **هل تحتاج إلى مصفوفة فرعية/سلسلة فرعية متجاورة؟** → نافذة منزلقة
+3. **هل هو رسم بياني/اجتياز شجرة؟** → BFS (أقصر مسار) أو DFS (جميع المسارات)
+4. **"البحث عن كافة المجموعات/التباديل"؟** → التراجع
+5. **"الحد الأدنى من التكلفة / عدد الطرق"؟** → البرمجة الديناميكية
+6. **مشكلة "الجدول الزمني/الفاصل الزمني"؟** → الجشع أو الفرز
+7. **التبعيات أم الترتيب؟** → الفرز الطوبولوجي
+8. **التجميع/الاتصال؟** → Union-Find
+
+## الوجبات السريعة الرئيسية
+
+- **تعلم الأنماط، وليس المشكلات**: 10 أنماط تغطي الغالبية العظمى من أسئلة المقابلة.
+- **ابدأ بالقوة الغاشمة**: حدد النمط من أسلوب القوة الغاشمة، ثم قم بتحسينه.
+- **التدرب على التعرف على الأنماط**: لكل مشكلة تحلها، قم بتسمية النمط الذي تستخدمه.
+- **دمج الأنماط**: تستخدم العديد من المسائل المتوسطة/الصعبة نمطين معًا (على سبيل المثال، البحث الثنائي + النافذة المنزلقة، BFS + الفرز الطوبولوجي).
+- **عبّر عن تفكيرك شفهيًا**: في المقابلات، فإن قول "يبدو أن هذه مشكلة نافذة منزلقة لأن..." يُظهر تفكيرًا تحليليًا قويًا.

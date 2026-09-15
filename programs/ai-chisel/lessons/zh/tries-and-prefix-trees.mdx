@@ -1,0 +1,173 @@
+---
+title: "尝试和前缀树 - 自动完成、拼写检查和 IP 路由"
+description: "掌握 trie 数据结构以实现闪电般快速的前缀查找。构建自动完成、通配符搜索，并探索压缩尝试和 IP 路由。"
+order: 6
+difficulty: "advanced"
+duration: 18
+icon: "🌳"
+published: true
+machineTranslated: true
+---
+## 什么是特里树？
+
+**trie**（发音为“try”）是一种树状结构，其中每个节点代表一个字符。从根到标记节点的路径拼出存储的单词。与哈希映射不同，尝试让您查询“共享前缀的所有单词”，而无需扫描每个键。
+
+```
+        root
+       / | \
+      a   b   c
+     /     \
+    p       a
+   / \       \
+  p   e      t
+  |
+  l
+  e
+```
+
+每条路径都编码一个单词：**apple**、**ape**、**bat**、**cat**。
+
+## TrieNode 类
+
+每个节点都包含一个子节点映射和一个指示单词完成的标志。
+
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end = False
+```
+
+完整的 Trie 包含插入、搜索和前缀操作。
+
+## 核心运营
+
+### 插入 - O(m) 其中 m = 字长
+
+一个字符一个字符地走，根据需要创建节点，然后标记最后一个节点。
+
+```python
+def insert(self, word):
+    node = self.root
+    for ch in word:
+        if ch not in node.children:
+            node.children[ch] = TrieNode()
+        node = node.children[ch]
+    node.is_end = True
+```
+
+### 搜索并开始
+
+**搜索**沿着路径并检查`is_end`。 **startsWith** 仅检查路径是否存在 - 它不需要 `is_end = True`。
+
+<Quiz
+  question="当存储”apple”但不存储”app”时，search('app') 与startsWith('app') 有什么区别？"
+  options="search 返回 True，startsWith 返回 False|两者都返回 True|search 返回 False，startsWith 返回 True|两者都返回 False"
+  answer="2"
+  explanation="search 检查 is_end （'app' 为 False），而startsWith 只需要存在的路径。"
+/>
+
+## 使用 DFS 自动完成
+
+要建议前缀的补全，请导航到前缀节点，然后运行 ​​DFS 收集其下方的所有单词。
+
+```python
+def autocomplete(self, prefix):
+    node = self._find(prefix)
+    if not node:
+        return []
+    results = []
+    self._dfs(node, prefix, results)
+    return results
+```
+
+`_dfs` 帮助器通过子级递归，每当 `is_end` 为 `True` 时附加到结果。
+
+<ThinkAboutIt>您如何将自动完成限制为前 k 个最常见的建议？每个节点需要哪些额外数据？</ThinkAboutIt>
+
+## 通配符搜索 - 单词词典
+
+LeetCode 的 **设计添加和搜索单词数据结构** 要求您将 `.` 处理为匹配任何单个字符的通配符。
+
+在搜索过程中，当您点击 `.` 时，分支到*每个*子级并继续递归。这将简单的遍历转变为有界回溯搜索。
+
+```python
+def search_wild(self, node, word, i):
+    if i == len(word):
+        return node.is_end
+    if word[i] == '.':
+        return any(
+            self.search_wild(c, word, i + 1)
+            for c in node.children.values()
+        )
+    if word[i] not in node.children:
+        return False
+    return self.search_wild(
+        node.children[word[i]], word, i + 1
+    )
+```
+
+## 最长公共前缀
+
+从根开始遍历 trie。最长的公共前缀以具有多个子节点或 `is_end` 标志的第一个节点结束。
+
+<Illustration src="/images/lessons/tries-and-prefix-trees.svg" alt="Trie 结构显示突出显示的共享前缀路径" caption="共享前缀路径汇聚成单个分支，直到发生分裂。" />
+
+## IP 路由尝试
+
+路由器将 IP 前缀存储在 **二进制 trie** 中 - 每个位（0 或 1）形成一个分支。最长前缀匹配找到最具体的路由。这就是您的数据包在互联网上找到路径的方式。
+
+<FunFact>互联网骨干路由器使用内置于称为 TCAM 的专用芯片中的硬件优化尝试，每秒执行数十亿次最长前缀匹配查找。</FunFact>
+
+## 压缩尝试（基数树）
+
+标准尝试在独生连锁店上浪费空间。 **基数树**将这些链合并成存储多字符标签的单边。
+
+```
+Standard:  r → u → n → n → i → n → g
+Radix:     r → "unning"
+```
+
+这极大地减少了节点数量，并被 Linux 内核路由表和 HTTP 路由器（如 Go 的 `httprouter`）使用。
+
+## 时间和空间复杂度
+
+|运营|特里树 |哈希映射 |
+|-------------|--------|----------|
+|插入 | O(米) | O(米) |
+|搜索 | O(米) | O(米) |
+|前缀查询| O(m+k) | O(n·m) |
+
+这里 *m* 是字长，*k* 是结果计数，*n* 是总键数。尝试在前缀繁重的工作负载中占主导地位。
+
+<Quiz
+  question="哪种情况从哈希映射中受益最少？"
+  options="自动完成建议|精确的键值查找|具有前缀匹配的拼写检查器|查找所有以 'pre' 开头的单词"
+  answer="1"
+  explanation="对于没有前缀查询的精确查找，哈希映射更简单并且同样快速。"
+/>
+
+## 何时使用 Trie
+
+- 基于前缀的查询（自动完成、预先输入）
+- 字符串上的通配符或类似正则表达式的匹配
+- 集合中最长的公共前缀
+- IP路由/最长前缀匹配
+- 使用编辑距离变化进行拼写检查
+
+<Quiz
+  question="将平均长度为 m 的 n 个单词插入到 trie 中的时间复杂度是多少？"
+  options="在）|氧(米)|O(n×m)|O(n × 平方米)"
+  answer="2"
+  explanation="插入每个单词需要 O(m)，并且执行 n 次，得到 O(n × m)。"
+/>
+
+<ThinkAboutIt>如果内存是您的瓶颈，您什么时候会选择在 trie 上存储完整键的哈希映射，以及什么时候压缩 trie 会获胜？</ThinkAboutIt>
+
+---
+
+## 📚 进一步阅读
+
+- [Trie 数据结构 - 维基百科](https://en.wikipedia.org/wiki/Trie) - trie 变体和历史的全面概述
+- 【实现Trie - LeetCode 208](https://leetcode.com/problems/implement-trie-prefix-tree/) - 经典的trie实现问题
+- [Linux 内核中的基数树](https://lwn.net/Articles/175432/) - 如何压缩尝试增强内核内部结构

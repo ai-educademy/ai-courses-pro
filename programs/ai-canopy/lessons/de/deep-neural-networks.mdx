@@ -1,0 +1,126 @@
+---
+title: "Tiefe neuronale Netze – CNNs, RNNs und Transformatoren erklärt"
+description: "Verstehen Sie die drei wichtigsten Deep-Learning-Architekturen und warum Transformatoren die moderne KI dominierten."
+order: 3
+difficulty: "advanced"
+duration: 20
+icon: "🧠"
+published: true
+machineTranslated: true
+---
+# Deep Neural Networks – CNNs, RNNs und Transformers erklärt
+
+Drei Architekturen haben das moderne Deep Learning geprägt: **CNNs** für räumliche Daten, **RNNs** für Sequenzen und **Transformer** für fast alles. Für jeden fortgeschrittenen KI-Praktiker ist es wichtig, ihre Stärken und Kompromisse zu verstehen.
+
+## Faltungs-Neuronale Netze (CNNs)
+
+CNNs wurden für **räumliche Daten** entwickelt – Bilder, Videobilder und alles mit einer gitterartigen Struktur. Sie funktionieren, indem sie kleine Filter über die Eingabe gleiten lassen, um Muster zu erkennen.
+
+Die Genialität von CNNs liegt in zwei Eigenschaften:
+- **Parameterfreigabe** – Derselbe Filter wird auf das gesamte Bild angewendet, wodurch die Anzahl der Gewichtungen im Vergleich zu vollständig verbundenen Ebenen drastisch reduziert wird.
+- **Lokale Konnektivität** – Jedes Neuron verbindet sich nur mit einem kleinen Bereich der Eingabe, was die Tatsache widerspiegelt, dass benachbarte Pixel stärker miteinander verbunden sind als entfernte.
+
+**Kernoperationen:**
+1. **Faltung** – Ein kleiner Filter (z. B. 3×3) gleitet über das Bild und berechnet an jeder Position ein Skalarprodukt. Jeder Filter lernt, ein bestimmtes Merkmal zu erkennen – Kanten, Texturen oder Formen.
+2. **Pooling** – Reduziert räumliche Dimensionen, indem in kleinen Regionen der Maximal- oder Durchschnittswert verwendet wird. Dadurch wird die Darstellung kompakter und gegenüber kleinen Verschiebungen einigermaßen invariant.
+3. **Feature-Maps** – Jede Faltungsschicht erzeugt mehrere Feature-Maps, die von einfachen Kantendetektoren in frühen Schichten bis hin zu komplexen Objekterkennern in tieferen Schichten reichen.
+
+Ein typisches CNN zur Bildklassifizierung stapelt mehrere Faltungs- und Pooling-Schichten, glättet dann das Ergebnis und leitet es für die endgültige Vorhersage durch vollständig verbundene Schichten.
+
+**Wegweisende CNN-Architekturen:**
+- **LeNet-5** (1998) – Eines der frühesten CNNs, das zur handschriftlichen Ziffernerkennung verwendet wird.
+- **AlexNet** (2012) – Hat ImageNet gewonnen und das Interesse an Deep Learning neu entfacht. Verwendete ReLU-Aktivierungen und -Abbrüche.
+- **ResNet** (2015) – Einführung von Restverbindungen (Überspringen), wodurch Netzwerke mit mehr als 150 Schichten ermöglicht werden. Diese Idee der „Abkürzungsverbindungen“ beeinflusste später das Transformer-Design.
+- **EfficientNet** (2019) – Skaliert systematisch Tiefe, Breite und Auflösung für optimale Leistung pro Rechenbudget.
+
+<FunFact>Die Architektur von CNNs wurde vom visuellen Kortex von Katzen inspiriert. In den 1960er Jahren entdeckten Hubel und Wiesel, dass Neuronen im Gehirn einer Katze auf bestimmte visuelle Muster in bestimmten Regionen des Gesichtsfelds reagieren – fast genau wie Faltungsfilter funktionieren.
+</FunFact>
+
+<Quiz question="Was ist der Hauptzweck der Bündelung von Schichten in einem CNN?" options="Um dem Netzwerk weitere lernbare Parameter hinzuzufügen|Um räumliche Dimensionen zu reduzieren und Übersetzungsinvarianz bereitzustellen|Um Bilder in Textsequenzen umzuwandeln|Um die Auflösung von Feature-Maps zu erhöhen" answer="1" explanation="Durch Pooling wird die räumliche Größe von Feature-Maps reduziert, was den Rechenaufwand senkt und dazu beiträgt, dass das Netzwerk weniger empfindlich auf die genaue Position von Features in der Eingabe reagiert." />
+
+## Wiederkehrende neuronale Netze (RNNs) und LSTMs
+
+RNNs wurden für **sequentielle Daten** entwickelt – Text, Sprache, Zeitreihen und alles, wo es auf die Reihenfolge ankommt. Die Kernidee: Das Netzwerk behält einen **verborgenen Zustand** bei, der bei jedem Zeitschritt aktualisiert wird und so eine Art Gedächtnis schafft.
+
+Bei jedem Schritt nimmt das RNN zwei Eingaben entgegen: das aktuelle Token und den vorherigen verborgenen Zustand. Es erzeugt einen neuen verborgenen Zustand, der alles kodiert, was das Netzwerk bisher „gesehen“ hat. Theoretisch gibt dies RNNs unbegrenzten Speicher. In der Praxis ist die Geschichte komplizierter.
+
+**Das Problem des verschwindenden Gradienten:** In der Praxis haben Standard-RNNs Probleme mit langen Sequenzen. Während der Rückausbreitung über viele Zeitschritte schrumpfen die Gradienten entweder auf nahezu Null (verschwinden) oder explodieren ins Unendliche, was es für das Netzwerk schwierig macht, Abhängigkeiten über große Entfernungen zu lernen.
+
+Um zu verstehen, warum dies wichtig ist, betrachten Sie einen Satz wie: * „Der Autor, der in Paris aufwuchs und später nach London zog, bevor er sich in New York niederließ, schrieb …“* Ein RNN muss die Informationen über „Autor“ durch Dutzende dazwischenliegender Token übertragen, um „schrieb“ korrekt vorherzusagen. In der Praxis verschwindet dieses Signal lange bevor es das Verb erreicht.
+
+**LSTMs (Long Short-Term Memory)** lösen dieses Problem mit einem Gating-Mechanismus:
+- **Gate vergessen** – Entscheidet, welche Informationen aus dem Zellenstatus verworfen werden sollen.
+- **Eingabegatter** – Entscheidet, welche neuen Informationen gespeichert werden sollen.
+- **Ausgabegatter** – Entscheidet basierend auf dem aktuellen Zellenstatus, was ausgegeben werden soll.
+
+Diese Tore ermöglichen es LSTMs, sich Informationen über Hunderte von Zeitschritten hinweg selektiv zu merken oder zu vergessen, was sie weitaus effektiver macht als Vanilla-RNNs.
+
+**GRUs (Gated Recurrent Units)** sind eine vereinfachte Variante von LSTMs mit nur zwei statt drei Gates (Reset und Update). Sie erreichen oft eine ähnliche Leistung mit weniger Parametern, was sie zu einer beliebten Wahl macht, wenn die Rechenressourcen begrenzt sind.
+
+<Callout>Obwohl RNNs und LSTMs für die meisten NLP-Aufgaben weitgehend durch Transformers ersetzt wurden, bleiben sie in Edge-Computing- und Echtzeitanwendungen nützlich, bei denen Modellgrößen- und Latenzbeschränkungen große Transformer-Modelle ausschließen.
+</Callout>
+
+<Illustration src="/images/lessons/deep-neural-networks.svg" alt="Visueller Vergleich von CNN-, RNN- und Transformer-Architekturen mit Darstellung von Datenflussmustern" caption="CNNs verarbeiten räumliche Gitter, RNNs verarbeiten Sequenzen Schritt für Schritt und Transformer verarbeiten ganze Sequenzen parallel." />
+
+<ThinkAboutIt>Wenn ein RNN Token einzeln verarbeitet und Informationen über seinen verborgenen Zustand übertragen muss, was passiert dann, wenn der relevante Kontext vor 500 Token erschien? Wie ist das im Vergleich zum Ansatz eines Transformers?
+</ThinkAboutIt>
+
+## Transformers – Die Architektur hinter allem
+
+Der 2017 eingeführte Transformer ersetzte die Wiederholung durch **Selbstaufmerksamkeit** und ermöglichte es dem Modell, jedes Token in der Eingabe gleichzeitig zu betrachten.
+
+**Schlüsselkomponenten:**
+
+**Selbstaufmerksamkeit** – Jeder Token berechnet die Aufmerksamkeitswerte mit jedem anderen Token. Dies bedeutet, dass ein Wort an Position 1 direkt auf ein Wort an Position 1000 reagieren kann, ohne dass Informationen Zwischenzustände durchlaufen.
+
+**Positionskodierung** – Da Transformer alle Token parallel verarbeiten (kein inhärentes Ordnungsgefühl), werden Positionsinformationen durch Hinzufügen von Sinus- und Kosinusfunktionen unterschiedlicher Frequenz zu den Eingabeeinbettungen eingefügt.
+
+**Multi-Head-Aufmerksamkeit** – Anstelle einer einzelnen Aufmerksamkeitsberechnung führt das Modell mehrere parallel aus. Jeder „Kopf“ kann lernen, sich um verschiedene Arten von Beziehungen zu kümmern – einer erfasst möglicherweise die Syntax, ein anderer erfasst Koreferenzen, ein anderer erfasst semantische Ähnlichkeit.
+
+**Feed-Forward-Schichten** – Nach der Aufmerksamkeit durchläuft jedes Token unabhängig ein kleines neuronales Netzwerk. Hier ist ein Großteil des „Wissens“ des Modells gespeichert.
+
+**Schichtnormalisierung und Restverbindungen** – Diese stabilisieren das Training und ermöglichen den Fluss von Gradienten durch sehr tiefe Netzwerke (moderne LLMs haben mehr als 80 Schichten).
+
+Die Encoder-Decoder-Struktur des ursprünglichen Transformers wurde inzwischen in spezielle Varianten aufgeteilt:
+- **Nur Encoder** (z. B. BERT) – Hervorragend zum Verständnis von Aufgaben wie Klassifizierung und Erkennung benannter Entitäten geeignet.
+- **Nur Decoder** (z. B. GPT, Llama) – Entwickelt für die Textgenerierung, wobei jeweils ein Token vorhergesagt wird.
+- **Encoder-Decoder** (z. B. T5, BART) – Am besten für Sequenz-zu-Sequenz-Aufgaben wie Übersetzung und Zusammenfassung geeignet.
+
+<Quiz question="Warum benötigen Transformer eine Positionskodierung?" options="Um die Anzahl der Parameter im Modell zu reduzieren|Um Token parallel verarbeiten zu können, verfügen sie über kein inhärentes Gespür für die Reihenfolge|Um Text in numerische Vektoren umzuwandeln|Um eine Überanpassung während des Trainings zu verhindern" answer="1" explanation="Im Gegensatz zu RNNs, die Token nacheinander verarbeiten und daher von Natur aus die Token-Reihenfolge kennen, verarbeiten Transformer alle Token gleichzeitig. Die Positionskodierung fügt Ordnungsinformationen ein, sodass das Modell weiß, dass „The cat sat” sich von „sat cat The” unterscheidet." />
+
+## Warum Transformers gewonnen haben
+
+| Eigentum | CNN | RNN/LSTM | Transformator |
+|----------|-----|----------|-------------|
+| **Parallelisierung** | Hoch | Niedrig (sequentiell) | Hoch |
+| **Langstreckenabhängigkeiten** | Begrenzt durch die Kernelgröße | Schwierig (verschwindende Steigungen) | Ausgezeichnet (direkte Aufmerksamkeit) |
+| **Trainingseffizienz** | Gut | Schlecht im Maßstab | Hervorragend im Maßstab |
+| **Vielseitigkeit** | Geodaten | Sequentielle Daten | Nahezu universell |
+
+Der entscheidende Vorteil des Transformers war die Fähigkeit des Transformers, das Training über GPUs hinweg zu **parallelisieren**. RNNs müssen Token einzeln verarbeiten, was sie auf moderner Hardware äußerst langsam macht. Transformer verarbeiten die gesamte Sequenz auf einmal und ermöglichen so das Training mit Milliarden von Token in angemessener Zeit.
+
+Darüber hinaus erfasst die Selbstaufmerksamkeit **langfristige Abhängigkeiten** direkt. Ein RNN muss Informationen durch Hunderte von verborgenen Zuständen transportieren; Ein Transformer kümmert sich einfach um den entsprechenden Token, unabhängig von der Entfernung.
+
+<FunFact>Der Originalartikel „Attention Is All You Need“ wurde über 130.000 Mal zitiert und ist damit einer der einflussreichsten Informatikartikel, die jemals veröffentlicht wurden. Die acht Autoren haben gemeinsam die Entwicklung einer ganzen Branche geprägt.
+</FunFact>
+
+## Moderne Entwicklungen
+
+Transformer dominieren mittlerweile nicht nur die Sprache, sondern auch:
+- **Vision** – Vision Transformers (ViT) erreichen oder übertreffen CNNs bei Bildaufgaben.
+- **Audio** – Whisper und andere Modelle transkribieren Sprache mithilfe von Transformer-Encodern.
+- **Multimodal** – Modelle wie GPT-4o verarbeiten Text, Bilder und Audio in einem einzigen Transformer.
+- **Biologie** – AlphaFold nutzt Aufmerksamkeitsmechanismen, um Proteinstrukturen vorherzusagen.
+
+Die Grenzen zwischen diesen Architekturen verschwimmen. Moderne „CNN“-Modelle umfassen häufig Aufmerksamkeitsebenen, und Transformer übernehmen aus Effizienzgründen manchmal Faltungsideen.
+
+**Zustandsraummodelle (SSMs)** wie Mamba stellen eine aufstrebende Alternative dar, die Sequenzen in linearer Zeit statt quadratisch verarbeitet. Obwohl es noch früh ist, deuten sie darauf hin, dass die Dominanz des Transformers möglicherweise nicht dauerhaft ist – die Suche nach besseren Architekturen geht weiter.
+
+Die Lehre aus dieser Geschichte ist klar: Keine Architektur ist endgültig. Jeder Durchbruch – von CNNs über RNNs bis hin zu Transformers – löste Probleme, die seine Vorgänger nicht lösen konnten. Der nächste Paradigmenwechsel könnte sich bereits heute in Forschungslaboren abzeichnen.
+
+Wenn Sie alle drei Architekturen verstehen, verfügen Sie über das konzeptionelle Vokabular, um neue Ideen sofort zu bewerten – und für jedes Problem, mit dem Sie konfrontiert sind, das richtige Tool auszuwählen.
+
+<Quiz question="Was ist der Hauptgrund dafür, dass RNNs für Sprachaufgaben weitgehend durch Transformers ersetzt wurden?" options="RNNs können überhaupt keinen Text verarbeiten|Transformatoren sind immer kleiner und kostengünstiger im Betrieb|RNNs verarbeiten Token nacheinander, was die Parallelisierung einschränkt und groß angelegte Schulungen unpraktisch macht|Transformatoren wurden zuerst erfunden und haben weitere Forschungsarbeiten hinter sich" answer="2" explanation="Die sequentielle Natur von RNNs bedeutet, dass jeder Token auf die Verarbeitung des vorherigen warten muss. Dies macht das Training großer Datenmengen extrem langsam. Transformer verarbeiten alle Token parallel und ermöglichen so das umfangreiche Training, das moderne LLMs antreibt." />
+
+<ThinkAboutIt>Vision Transformers (ViT) konkurrieren mittlerweile mit CNNs bei Bildaufgaben, obwohl CNNs speziell für Bilder entwickelt wurden. Was sagt dies über den Wert von Allzweckarchitekturen gegenüber spezialisierten Architekturen aus?
+</ThinkAboutIt>

@@ -1,0 +1,173 @@
+---
+title: "Pruebas y árboles de prefijos: autocompletar, revisión ortográfica y enrutamiento IP"
+description: "Domine la estructura de datos trie para realizar búsquedas de prefijos ultrarrápidas. Cree búsquedas con comodines y autocompletado y explore intentos comprimidos y enrutamiento IP."
+order: 6
+difficulty: "advanced"
+duration: 18
+icon: "🌳"
+published: true
+machineTranslated: true
+---
+## ¿Qué es un intento?
+
+Un **trie** (pronunciado "try") es una estructura en forma de árbol donde cada nodo representa un solo carácter. Las rutas desde la raíz hasta los nodos marcados explican las palabras almacenadas. A diferencia de los mapas hash, los intentos te permiten consultar *todas las palabras que comparten un prefijo* sin escanear cada clave.
+
+```
+        root
+       / | \
+      a   b   c
+     /     \
+    p       a
+   / \       \
+  p   e      t
+  |
+  l
+  e
+```
+
+Cada ruta codifica una palabra: **manzana**, **mono**, **murciélago**, **gato**.
+
+## La clase TrieNode
+
+Cada nodo contiene un mapa de niños y una bandera que indica la finalización de palabras.
+
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end = False
+```
+
+Un Trie completo envuelve esto con operaciones de inserción, búsqueda y prefijo.
+
+## Operaciones principales
+
+### Insertar - O(m) donde m = longitud de palabra
+
+Camine personaje por personaje, creando nodos según sea necesario, luego marque el último nodo.
+
+```python
+def insert(self, word):
+    node = self.root
+    for ch in word:
+        if ch not in node.children:
+            node.children[ch] = TrieNode()
+        node = node.children[ch]
+    node.is_end = True
+```
+
+### Busca y comienza con
+
+**Buscar** sigue la ruta y marca `is_end`. **startsWith** solo comprueba si la ruta existe; no requiere `is_end = True`.
+
+<Quiz
+  question="¿Qué distingue la búsqueda ('aplicación') de comienza con ('aplicación') cuando la 'manzana' está almacenada pero la 'aplicación' no?"
+  options="la búsqueda devuelve Verdadero, comienza con devuelve Falso|Ambos devuelven Verdadero|la búsqueda devuelve Falso, comienza con devuelve Verdadero|Ambos devuelven Falso"
+  answer="2"
+  explanation="la búsqueda comprueba is_end (Falso para 'aplicación'), mientras que comienza con solo necesita que exista la ruta."
+/>
+
+## Autocompletar con DFS
+
+Para sugerir terminaciones para un prefijo, navegue hasta el nodo del prefijo y luego ejecute DFS recopilando todas las palabras debajo de él.
+
+```python
+def autocomplete(self, prefix):
+    node = self._find(prefix)
+    if not node:
+        return []
+    results = []
+    self._dfs(node, prefix, results)
+    return results
+```
+
+El ayudante `_dfs` se repite a través de los niños y se agrega a los resultados siempre que `is_end` sea `True`.
+
+<ThinkAboutIt>¿Cómo limitaría el autocompletado a las k sugerencias más frecuentes? ¿Qué datos adicionales necesitaría cada nodo?</ThinkAboutIt>
+
+## Búsqueda con comodines - Diccionario de palabras
+
+La **Estructura de datos de palabras de diseño y búsqueda** de LeetCode le pide que maneje `.` como un comodín que coincida con cualquier carácter.
+
+Durante la búsqueda, cuando llegue a `.`, acceda a *cada* niño y continúe de forma recursiva. Esto convierte un recorrido simple en una búsqueda de retroceso limitada.
+
+```python
+def search_wild(self, node, word, i):
+    if i == len(word):
+        return node.is_end
+    if word[i] == '.':
+        return any(
+            self.search_wild(c, word, i + 1)
+            for c in node.children.values()
+        )
+    if word[i] not in node.children:
+        return False
+    return self.search_wild(
+        node.children[word[i]], word, i + 1
+    )
+```
+
+## Prefijo común más largo
+
+Recorre el intento desde la raíz. El prefijo común más largo termina en el primer nodo con más de un hijo o un indicador `is_end`.
+
+<Illustration src="/images/lessons/tries-and-prefix-trees.svg" alt="Estructura Trie que muestra rutas de prefijos compartidas resaltadas" caption="Las rutas de prefijo compartidas convergen en una única rama hasta que se produce una división." />
+
+## Enrutamiento IP con intentos
+
+Los enrutadores almacenan los prefijos de IP en un **trie binario**: cada bit (0 o 1) forma una rama. La coincidencia de prefijo más larga encuentra la ruta más específica. Así es como sus paquetes llegan a Internet.
+
+<FunFact>Los enrutadores troncales de Internet realizan miles de millones de búsquedas de coincidencias de prefijos más largas por segundo utilizando intentos optimizados por hardware integrados en chips especializados llamados TCAM.</FunFact>
+
+## Intentos comprimidos (árboles Radix)
+
+Standard intenta desperdiciar espacio en cadenas de un solo hijo. Un **árbol de base** fusiona estas cadenas en bordes únicos que almacenan etiquetas de varios caracteres.
+
+```
+Standard:  r → u → n → n → i → n → g
+Radix:     r → "unning"
+```
+
+Esto reduce drásticamente el número de nodos y lo utilizan las tablas de enrutamiento del kernel de Linux y los enrutadores HTTP como el `httprouter` de Go.
+
+## Complejidad temporal y espacial
+
+| Operación | Intenta | Mapa hash |
+|-------------|--------|----------|
+| Insertar | O(metro) | O(metro) |
+| Buscar | O(metro) | O(metro) |
+| Consulta de prefijo| O(metro+k) | O(n·m) |
+
+Aquí *m* es la longitud de la palabra, *k* es el recuento de resultados y *n* es el total de claves. Los intentos dominan para cargas de trabajo con muchos prefijos.
+
+<Quiz
+  question="¿Qué escenario se beneficia MENOS de una prueba sobre un mapa hash?"
+  options="Sugerencias de autocompletar|Búsquedas exactas de valores clave|Corrector ortográfico con coincidencia de prefijos|Buscando todas las palabras que comienzan con 'pre'"
+  answer="1"
+  explanation="Para búsquedas exactas sin consultas de prefijo, un mapa hash es más simple e igualmente rápido."
+/>
+
+## Cuándo alcanzar un Trie
+
+- Consultas basadas en prefijos (autocompletar, escritura anticipada)
+- Coincidencia comodín o expresión regular en cadenas
+- Prefijo común más largo en un conjunto
+- Enrutamiento IP/coincidencia de prefijo más largo
+- Revisión ortográfica con variaciones de distancia de edición.
+
+<Quiz
+  question="¿Qué complejidad temporal tiene insertar n palabras de longitud promedio m en un trie?"
+  options="En)|O(m)|O(norte × metro)|O(n×m²)"
+  answer="2"
+  explanation="Cada palabra requiere O(m) para insertarse, y esto se hace n veces, lo que da O(n × m)."
+/>
+
+<ThinkAboutIt>Si la memoria es su cuello de botella, ¿cuándo elegiría un mapa hash que almacene claves completas en un trie y cuándo ganaría un trie comprimido?</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Estructura de datos de Trie - Wikipedia](https://en.wikipedia.org/wiki/Trie) - Descripción general completa de las variantes y el historial de Trie
+- [Implementar Trie - LeetCode 208](https://leetcode.com/problems/implement-trie-prefix-tree/) - El clásico problema de implementación de trie
+- [Árboles Radix en el kernel de Linux](https://lwn.net/Articles/175432/) - Cómo los intentos comprimidos potencian los componentes internos del kernel

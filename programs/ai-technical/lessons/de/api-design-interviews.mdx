@@ -1,0 +1,296 @@
+---
+title: "API-Design-Interviews"
+description: "Entwerfen Sie saubere, intuitive APIs unter dem Druck von Vorstellungsgesprächen – REST, GraphQL und die Prinzipien, die APIs großartig machen."
+order: 4
+difficulty: "intermediate"
+duration: 18
+icon: "🔌"
+published: true
+machineTranslated: true
+---
+# API-Design-Interviews
+
+APIs sind Verträge zwischen Systemen, und ihre gute Gestaltung ist eine Fähigkeit, die leitende Ingenieure von jüngeren unterscheidet. In einem API-Design-Interview schreiben Sie nicht nur Endpunkte – Sie zeigen, dass Sie verstehen, wie Verbraucher Ihr System nutzen, wie es sich im Laufe der Zeit entwickeln wird und wo die Fehlermöglichkeiten liegen. Unabhängig davon, ob Sie ein Zahlungsgateway oder eine API für eine Social-Media-Plattform entwerfen sollen, sind die Prinzipien dieselben. Lasst uns sie meistern.
+
+## REST-API-Designprinzipien
+
+REST bleibt das vorherrschende API-Paradigma in Interviews. Die Grundlagen, die Sie nachweisen müssen:
+
+### Ressourcenorientiertes Design
+
+Denken Sie in Substantiven (Ressourcen), nicht in Verben (Aktionen). URLs sollten Dinge darstellen und HTTP-Methoden sollten Aktionen für diese Dinge darstellen.
+
+```
+✅ Good:
+GET    /users/123              — Fetch user 123
+POST   /users                  — Create a new user
+PUT    /users/123              — Replace user 123
+PATCH  /users/123              — Partially update user 123
+DELETE /users/123              — Delete user 123
+
+❌ Bad:
+GET    /getUser?id=123
+POST   /createUser
+POST   /deleteUser/123
+```
+
+<Callout>Eine saubere Ressourcenhierarchie erzählt die Geschichte der API. `/users/123/orders/456/items` lautet natürlich: „Benutzer 123 bestellt die Artikel von 456.“ Wenn sich Ihre URL-Struktur nicht wie ein Satz liest, überdenken Sie Ihr Ressourcendesign.</Callout>
+
+### HTTP-Methoden und Statuscodes
+
+Kennen Sie diese Kälte – Interviewer werden Ihre Präzision auf die Probe stellen:
+
+| Methode | Idempotent? | Anwendungsfall |
+|---|---|---|
+| GET | Ja | Eine Ressource lesen (niemals mutieren) |
+| POST | Nein | Erstellen Sie eine Ressource |
+| PUT | Ja | Vollständiger Ersatz einer Ressource |
+| PATCH | Nein* | Teilaktualisierung |
+| LÖSCHEN | Ja | Eine Ressource entfernen |
+
+*PATCH ist technisch gesehen nicht garantiert idempotent, obwohl dies bei Implementierungen häufig der Fall ist.*
+
+**Statuscodes, die Sie kennen müssen**:
+- `200 OK` – Erfolg mit Antworttext
+- `201 Created` – Ressource erstellt (einschließlich `Location`-Header)
+- `204 No Content` – Erfolg ohne Antworttext (üblich für DELETE)
+- `400 Bad Request` – Der Kunde hat ungültige Daten gesendet
+- `401 Unauthorized` – Authentifizierung erforderlich
+- `403 Forbidden` – Authentifiziert, aber nicht autorisiert
+- `404 Not Found` – Ressource existiert nicht
+- `409 Conflict` – Konflikt mit dem aktuellen Status (Duplikat, Versionskonflikt)
+- `429 Too Many Requests` – Preis begrenzt
+- `500 Internal Server Error` — Auf unserer Seite ist etwas kaputt gegangen
+
+### Paginierung
+
+Geben Sie niemals unbegrenzte Listen zurück. Drei häufige Muster:
+
+```json
+// Offset-based (simple but poor for large datasets)
+GET /users?offset=20&limit=10
+
+// Cursor-based (preferred for feeds and large datasets)
+GET /users?cursor=eyJ0aW1lIjoiMjAyNC0wMS0wMSJ9&limit=10
+
+// Response includes pagination metadata
+{
+  "data": [...],
+  "pagination": {
+    "next_cursor": "eyJ0aW1lIjoiMjAyNC0wMS0wMiJ9",
+    "has_more": true
+  }
+}
+```
+
+<ThinkAboutIt>Warum wird bei großen, häufig aktualisierten Datensätzen die Cursor-basierte Paginierung der Offset-basierten vorgezogen? Überlegen Sie, was passiert, wenn neue Elemente eingefügt werden, während ein Benutzer durch die Ergebnisse blättert.</ThinkAboutIt>
+
+### Versionierung
+
+APIs entwickeln sich weiter. Entwerfen Sie vom ersten Tag an dafür.
+
+```
+// URL versioning (most common, explicit)
+GET /v1/users/123
+GET /v2/users/123
+
+// Header versioning (cleaner URLs, less discoverable)
+GET /users/123
+Accept: application/vnd.myapi.v2+json
+```
+
+In Interviews ist die URL-Versionierung die sichere Antwort, es sei denn, der Interviewer prüft gezielt Alternativen.
+
+### Fehlerantworten
+
+Konsistente, informative Fehlerantworten unterscheiden großartige APIs von frustrierenden:
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "The request body contains invalid fields.",
+    "details": [
+      {
+        "field": "email",
+        "message": "Must be a valid email address."
+      },
+      {
+        "field": "age",
+        "message": "Must be a positive integer."
+      }
+    ],
+    "request_id": "req_abc123"
+  }
+}
+```
+
+Fügen Sie immer ein `request_id` zum Debuggen und ein maschinenlesbares `code` neben dem menschenlesbaren `message` ein.
+
+## GraphQL in Interviews
+
+GraphQL-Fragen werden immer häufiger gestellt, insbesondere bei Unternehmen mit komplexen Frontend-Anforderungen.
+
+**Hauptvorteile von articulate**:
+- Kunden fordern genau die Daten an, die sie benötigen (kein übermäßiges Abrufen)
+– Ein einzelner Endpunkt reduziert Roundtrips
+- Stark typisiertes Schema dient der Dokumentation
+
+```graphql
+# Schema definition
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  orders(first: Int, after: String): OrderConnection!
+}
+
+type Order {
+  id: ID!
+  total: Float!
+  status: OrderStatus!
+  items: [OrderItem!]!
+}
+
+# Query — client specifies exactly what it needs
+query {
+  user(id: "123") {
+    name
+    orders(first: 5) {
+      edges {
+        node {
+          total
+          status
+        }
+      }
+    }
+  }
+}
+```
+
+**Zu diskutierende Kompromisse**: GraphQL erhöht die Komplexität auf der Serverseite (Resolverketten, N+1 Abfragen, Caching ist schwieriger). Für einfache CRUD-APIs ist REST oft die bessere Wahl.
+
+<FunFact>GraphQL wurde 2012 intern bei Facebook entwickelt, um ein spezifisches mobiles Leistungsproblem zu lösen: Der News Feed benötigte Daten von vielen verschiedenen Backend-Diensten und mehrere REST-Aufrufe von mobilen Geräten in langsamen Netzwerken führten zu Leistungseinbußen. Es wurde 2015 als Open-Source-Version veröffentlicht.</FunFact>
+
+## Grundlagen der API-Sicherheit
+
+In jedem API-Design-Interview sollte das Thema Sicherheit angesprochen werden. Decken Sie diese wesentlichen Dinge ab:
+
+### Authentifizierung und Autorisierung
+
+```
+Authentication (AuthN): WHO are you?
+→ API Keys, OAuth 2.0, JWT tokens
+
+Authorisation (AuthZ): WHAT can you do?
+→ Role-based (RBAC), Scope-based, Resource-based
+```
+
+```
+// JWT in Authorization header
+GET /users/123/orders
+Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
+
+// API Key (for server-to-server)
+GET /analytics/reports
+X-API-Key: sk_live_abc123...
+```
+
+### Ratenbegrenzung
+
+Schützen Sie Ihre API vor Missbrauch und sorgen Sie für eine faire Nutzung:
+
+```
+// Rate limit headers in response
+HTTP/1.1 200 OK
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 847
+X-RateLimit-Reset: 1640995200
+
+// When limit is exceeded
+HTTP/1.1 429 Too Many Requests
+Retry-After: 60
+```
+
+Besprechen Sie Ratenbegrenzungsstrategien: pro Benutzer, pro IP, pro Endpunkt und abgestufte Limits für verschiedene API-Pläne.
+
+## Echte Interviewszenarien
+
+### Entwerfen Sie eine Zahlungs-API
+
+Anforderungen zur Klärung:
+- Welche Zahlungsmethoden? (Karte, Banküberweisung, Geldbörse)
+- Brauchen wir Idempotenz? (Ja – immer für Zahlungen)
+- Was ist mit Rückerstattungen und Streitigkeiten?
+
+```
+POST /v1/payments
+{
+  "amount": 4999,           // Always use smallest currency unit (cents)
+  "currency": "GBP",
+  "payment_method": "pm_card_visa_123",
+  "idempotency_key": "order_789_attempt_1",
+  "metadata": {
+    "order_id": "order_789"
+  }
+}
+
+Response: 201 Created
+{
+  "id": "pay_abc123",
+  "status": "processing",
+  "amount": 4999,
+  "currency": "GBP",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+<Callout>Besprechen Sie bei Zahlungs-APIs immer Idempotenzschlüssel. Es kommt zu Netzwerkausfällen, Clients versuchen es erneut und ohne Idempotenz berechnen Sie den Kunden das Doppelte. Der Idempotenzschlüssel stellt sicher, dass die Wiederholung derselben Anfrage zum gleichen Ergebnis führt.</Callout>
+
+**Wichtige Designentscheidungen zur Diskussion**:
+- Beträge in der kleinsten Währungseinheit (Cent/Pence), um Fließkommaprobleme zu vermeiden
+- Idempotenzschlüssel für sichere Wiederholungsversuche
+– Webhook-Rückrufe für asynchrone Statusaktualisierungen
+- Überlegungen zur PCI-Konformität
+
+### Entwerfen Sie eine Social-Media-API
+
+```
+// Post creation
+POST /v1/posts
+{
+  "content": "Hello world!",
+  "media_ids": ["media_123"],
+  "visibility": "public"
+}
+
+// Feed retrieval with cursor pagination
+GET /v1/feed?cursor=abc&limit=20
+
+// Interactions
+POST /v1/posts/{post_id}/likes
+DELETE /v1/posts/{post_id}/likes
+POST /v1/posts/{post_id}/comments
+```
+
+Besprechen Sie Filterung, Suche und wie der Feed zusammengestellt wird (Pull- oder Push-Modell verknüpft sich mit dem Systemdesign).
+
+## Häufige Fehler in API-Design-Interviews
+
+1. **Interne Implementierung offenlegen** – Lassen Sie nicht zu, dass Datenbankspaltennamen oder interne IDs in die API gelangen. Verwenden Sie DTOs.
+2. **Inkonsistente Benennung** – Wählen Sie `snake_case` oder `camelCase` und bleiben Sie überall dabei.
+3. **Fehlende Paginierung** – Jeder Listenendpunkt muss Paginierung unterstützen.
+4. **Keine Diskussion zur Fehlerbehandlung** – Zeigen Sie, dass Sie über Fehlermodi nachdenken.
+5. **Abwärtskompatibilität ignorieren** – Das Hinzufügen erforderlicher Felder zu vorhandenen Endpunkten unterbricht Clients.
+6. **Verben in URLs verwenden** – `/createUser` statt `POST /users`.
+
+<Quiz question="Ein Client sendet eine POST-Anfrage, um eine Bestellung zu erstellen, aber das Netzwerk verwirft die Antwort. Der Client versucht es erneut mit demselben Idempotenzschlüssel. Was soll der Server zurückgeben?" options="400 Bad Request – doppelte Anfrage|201 Erstellt – mit der ursprünglichen Bestellung (gleiche Antwort wie beim ersten Mal)|409 Konflikt – Auftrag existiert bereits|200 OK – mit einer neuen Bestellung" answer="1" explanation="Bei Idempotenz erkennt der Server den doppelten Schlüssel und gibt dieselbe 201 Created-Antwort mit den ursprünglichen Bestelldaten zurück. Das ist der Sinn von Idempotenzschlüsseln: Wiederholungsversuche sicher und für den Client transparent zu machen." />
+
+## Wichtige Erkenntnisse
+
+- **In Ressourcen denken**: Entwerfen Sie URLs rund um Substantive, lassen Sie HTTP-Methoden die Verben verarbeiten.
+- **Kennen Sie Ihre Statuscodes**: Präzise Statuscodes zeigen, dass Sie die HTTP-Semantik verstehen.
+- **Immer paginieren**: Unbegrenzte Listenantworten sind in Vorstellungsgesprächen ein Warnsignal.
+- **Design für Fehler**: Idempotenz, Fehlerreaktionen und Ratenbegrenzung zeigen produktionsreifes Denken.
+- **Sicherheit ist nicht optional**: Authentifizierung, Autorisierung und Ratenbegrenzung sollten Teil jeder API-Designdiskussion sein.
+- **Kompromisse artikulieren**: REST vs. GraphQL, Konsistenz vs. Flexibilität, Einfachheit vs. Leistung – Interviewer möchten Ihre Argumentation hören.

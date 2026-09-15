@@ -1,0 +1,132 @@
+---
+title: "Zwei Zeiger und ein Schiebefenster – Wie KI Daten effizient scannt"
+description: "Beherrschen Sie zwei wesentliche Muster zum Scannen von Sequenzen, ohne Rechenaufwand zu verschwenden."
+order: 1
+difficulty: "intermediate"
+duration: 15
+icon: "👆"
+published: true
+machineTranslated: true
+---
+## Warum intelligentes Scannen wichtig ist
+
+Stellen Sie sich eine KI vor, die einen Live-Video-Feed auf verdächtige Aktivitäten überwacht. Es kann nicht jede Sekunde die gesamte Aufnahme erneut ansehen – es muss ein Aufmerksamkeitsfenster über den Stream gleiten lassen und dabei gerade genug Kontext im Auge behalten. Das ist genau das, was die Muster **zwei Zeiger** und **gleitendes Fenster** für sequentielle Daten bewirken.
+
+Beide Techniken verwandeln Brute-Force-O(n²)-Scans in elegante O(n)-Durchläufe.
+
+<Illustration src="/images/lessons/two-pointers-and-sliding-window.svg" alt="Zwei Zeiger, die von beiden Enden eines Arrays zusammenlaufen, und ein Schiebefenster, das sich über einen Datenstrom bewegt" caption="Zwei Zeiger verkleinern den Suchraum; Ein Schiebefenster sorgt für eine laufende Sicht." />
+
+## Die Zwei-Zeiger-Technik
+
+Platzieren Sie zwei Referenzen in einer Sequenz und verschieben Sie sie gemäß einer Regel. Es gibt zwei Hauptgeschmacksrichtungen.
+
+### Konvergierende Zeiger
+
+Beginnen Sie an jedem Ende einen Zeiger und bewegen Sie ihn nach innen. Perfekt für **sortierte** Daten.
+
+**Klassisches Problem – Paarsumme:** Finden Sie bei einem gegebenen sortierten Array zwei Zahlen, die sich zu einem Ziel addieren.
+
+```
+function pairSum(arr, target):
+    left = 0
+    right = arr.length - 1
+    while left < right:
+        sum = arr[left] + arr[right]
+        if sum == target: return (left, right)
+        if sum < target: left += 1
+        else: right -= 1
+    return null
+```
+
+Da das Array sortiert ist, erhöht das Verschieben von `left` nach rechts die Summe und das Verschieben von `right` nach links verringert sie – so wird garantiert, dass wir nie ein gültiges Paar verpassen.
+
+### Zeiger in die gleiche Richtung
+
+Beide Zeiger bewegen sich vorwärts, allerdings mit unterschiedlicher Geschwindigkeit. Nützlich für **Partitionierung** oder **Zykluserkennung**.
+
+**Beispiel – Duplikate direkt entfernen:** Ein langsamer Zeiger markiert die Schreibposition; Ein schneller Zeiger scannt vorwärts.
+
+```
+function removeDuplicates(arr):
+    slow = 0
+    for fast in 1..arr.length - 1:
+        if arr[fast] != arr[slow]:
+            slow += 1
+            arr[slow] = arr[fast]
+    return slow + 1
+```
+
+<Quiz question="Was sollten Sie bei der konvergierenden Zwei-Zeiger-Technik für ein sortiertes Array tun, wenn die aktuelle Summe kleiner als das Ziel ist?" options="Bewegen Sie den rechten Zeiger nach links|Bewegen Sie den linken Zeiger nach rechts|Tauschen Sie die beiden Elemente aus|Beginnen Sie von der Mitte aus" answer="1" explanation="Wenn Sie den linken Zeiger nach rechts bewegen, erhöht sich die Summe, da das Array in aufsteigender Reihenfolge sortiert wird." />
+
+## Das Schiebefenstermuster
+
+Ein Schiebefenster verwaltet eine zusammenhängende Teilsequenz der Größe _k_ (fest) oder variabler Länge und aktualisiert Aggregate inkrementell, anstatt sie von Grund auf neu zu berechnen.
+
+### Fenster mit fester Größe
+
+Schieben Sie ein Fenster mit genau _k_ Elementen über das Array.
+
+**Beispiel – Maximale Summe beliebiger k aufeinanderfolgender Elemente:**
+
+```
+function maxSubarraySum(arr, k):
+    windowSum = sum(arr[0..k-1])
+    best = windowSum
+    for i in k..arr.length - 1:
+        windowSum += arr[i] - arr[i - k]
+        best = max(best, windowSum)
+    return best
+```
+
+Bei jedem Schritt wird das neue Element, das in das Fenster eintritt, hinzugefügt und dasjenige, das es verlässt, subtrahiert – O(1) pro Zug.
+
+### Fenster mit variabler Größe
+
+Erweitern Sie das Fenster, um mehr Daten einzuschließen, und verkleinern Sie es dann, wenn eine Einschränkung verletzt wird.
+
+**Beispiel – Längster Teilstring ohne sich wiederholende Zeichen:**
+
+```
+function longestUnique(s):
+    seen = {}
+    left = 0
+    best = 0
+    for right in 0..s.length - 1:
+        if s[right] in seen and seen[s[right]] >= left:
+            left = seen[s[right]] + 1
+        seen[s[right]] = right
+        best = max(best, right - left + 1)
+    return best
+```
+
+<FunFact>Streaming-Analyseplattformen wie Apache Flink nutzen Schiebe- und Kippfenster als erstklassige Grundelemente – das gleiche Konzept, skaliert auf Millionen von Ereignissen pro Sekunde.</FunFact>
+
+## Echte KI-Anwendungen
+
+| Muster | KI-Anwendungsfall |
+|---------|------------|
+| Festes Fenster | Anomalieerkennung über die letzten _k_ Sensormesswerte |
+| Variables Fenster | Finden der kürzesten Textspanne, die alle Suchbegriffe enthält (Suchmaschinen) |
+| Konvergierende Zeiger | Effiziente Nächste-Nachbarn-Prüfungen in sortierten Einbettungsdimensionen |
+| Gleichsinnige Zeiger | Sortierte Ergebnislisten aus mehreren Retrieval-Modellen zusammenführen |
+
+<ThinkAboutIt>Ein Sprachassistent puffert die letzten 3 Sekunden des Tons, um ein Weckwort zu erkennen. Welches Muster ist das – festes Fenster oder variables Fenster? Was passiert, wenn das Weckwort länger als der Puffer ist?</ThinkAboutIt>
+
+## Wann welche zu verwenden ist
+
+- **Zwei Zeiger (konvergierend):** sortierte Eingabe, Paar-/Triplettsuche, Palindromprüfungen.
+- **Zwei Zeiger (gleiche Richtung):** Änderungen vor Ort, Probleme mit schnellem/langsamem Läufer.
+- **Festes Schiebefenster:** Aggregation über eine bekannte Fenstergröße.
+- **Variables Schiebefenster:** Finden Sie das kleinste oder größte Fenster, das eine Bedingung erfüllt.
+
+<Quiz question="Welches Muster würden Sie wählen, um das kleinste Subarray zu finden, dessen Summe einen bestimmten Wert überschreitet?" options="Konvergenz zweier Zeiger|Festes Schiebefenster|Variables Schiebefenster|Binäre Suche" answer="2" explanation="Ein Fenster variabler Größe wird erweitert, bis die Summe den Wert überschreitet, und wird dann von links verkleinert, um die Mindestlänge zu ermitteln – alles in O(n)." />
+
+<ThinkAboutIt>Könnten Sie zwei Zeiger mit einem Schiebefenster kombinieren? Denken Sie an Probleme, bei denen Sie ein Paar innerhalb eines fortlaufenden Datenfensters finden müssen – zum Beispiel die Erkennung doppelter Transaktionen innerhalb eines Fünf-Minuten-Fensters.</ThinkAboutIt>
+
+## Wichtige Erkenntnisse
+
+1. Zwei Zeiger beseitigen verschachtelte Schleifen, indem sie Ordnung oder Partitionierung nutzen.
+2. Schiebefenster behalten den Betriebszustand bei, sodass jedes Element höchstens zweimal verarbeitet wird.
+3. Beide Muster sind grundlegend für Echtzeit-KI-Pipelines – von der Anomalieerkennung bis zum Suchranking.
+
+<Quiz question="Wie hoch ist die typische Zeitkomplexität, die durch die Umwandlung einer verschachtelten Brute-Force-Schleife in eine Zwei-Zeiger- oder Schiebefensterlösung erreicht wird?" options="O(n log n)|An)|O(n²)|O(1)" answer="1" explanation="Beide Muster verarbeiten jedes Element konstant oft und ergeben insgesamt O(n) – eine deutliche Verbesserung gegenüber dem O(n²)-Brute-Force-Ansatz." />

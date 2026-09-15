@@ -1,0 +1,132 @@
+---
+title: "两个指针和滑动窗口——AI如何高效扫描数据"
+description: "掌握扫描序列的两种基本模式，而不会浪费计算。"
+order: 1
+difficulty: "intermediate"
+duration: 15
+icon: "👆"
+published: true
+machineTranslated: true
+---
+## 为什么智能扫描很重要
+
+想象一下，人工智能正在监视实时视频以发现可疑活动。它无法每秒重新观看整个录音 - 它需要在流中滑动一个注意力窗口，仅跟踪足够的上下文。这正是**两个指针**和**滑动窗口**模式对顺序数据所做的事情。
+
+这两种技术都将强力 O(n²) 扫描转变为优雅的 O(n) 传递。
+
+<Illustration src="/images/lessons/two-pointers-and-sliding-window.svg" alt="从数组两端汇聚的两个指针和在数据流上移动的滑动窗口" caption="两个指针缩小了搜索空间；滑动窗口保持运行视图。" />
+
+## 两指针技术
+
+将两个参考放入一个序列中并根据规则移动它们。主要有两种口味。
+
+### 收敛指针
+
+从两端开始一个指针并向内移动。非常适合**排序**数据。
+
+**经典问题 - 对和：**给定一个排序数组，找到两个与目标相加的数字。
+
+```
+function pairSum(arr, target):
+    left = 0
+    right = arr.length - 1
+    while left < right:
+        sum = arr[left] + arr[right]
+        if sum == target: return (left, right)
+        if sum < target: left += 1
+        else: right -= 1
+    return null
+```
+
+因为数组已排序，所以向右移动 `left` 会增加总和，向左移动 `right` 会减少总和 - 确保我们永远不会错过有效的对。
+
+### 同向指针
+
+两个指针都向前移动，但速度不同。对于**分区**或**循环检测**很有用。
+
+**示例 - 就地删除重复项：** 慢速指针标记写入位置；快速指针向前扫描。
+
+```
+function removeDuplicates(arr):
+    slow = 0
+    for fast in 1..arr.length - 1:
+        if arr[fast] != arr[slow]:
+            slow += 1
+            arr[slow] = arr[fast]
+    return slow + 1
+```
+
+<Quiz question="在排序数组上的收敛两指针技术中，当当前总和小于目标值时该怎么办？" options="将右指针向左移动|将左指针向右移动|交换两个元素|从中间重新开始" answer="1" explanation="向右移动左指针会增加总和，因为数组是按升序排序的。" />
+
+## 滑动窗口模式
+
+滑动窗口维护大小为_k_（固定）或可变长度的连续子序列，增量更新聚合而不是从头开始重新计算。
+
+### 固定大小的窗口
+
+在数组中滑动恰好包含 _k_ 个元素的窗口。
+
+**示例 - 任意 k 个连续元素的最大总和：**
+
+```
+function maxSubarraySum(arr, k):
+    windowSum = sum(arr[0..k-1])
+    best = windowSum
+    for i in k..arr.length - 1:
+        windowSum += arr[i] - arr[i - k]
+        best = max(best, windowSum)
+    return best
+```
+
+每一步都会添加进入窗口的新元素并减去离开的元素 - 每次移动 O(1)。
+
+### 可变大小的窗口
+
+扩大窗口以包含更多数据，然后在违反约束时缩小窗口。
+
+**示例 - 没有重复字符的最长子字符串：**
+
+```
+function longestUnique(s):
+    seen = {}
+    left = 0
+    best = 0
+    for right in 0..s.length - 1:
+        if s[right] in seen and seen[s[right]] >= left:
+            left = seen[s[right]] + 1
+        seen[s[right]] = right
+        best = max(best, right - left + 1)
+    return best
+```
+
+<FunFact>Apache Flink 等流分析平台使用滑动和翻滚窗口作为一流原语 - 同样的概念可扩展到每秒数百万个事件。</FunFact>
+
+## 真实的人工智能应用
+
+|图案|人工智能用例 |
+|---------|------------|
+|固定窗 |最近 _k_ 个传感器读数的异常检测 |
+|可变窗口|查找包含所有查询关键字的最短文本范围（搜索引擎）|
+|收敛指针|排序嵌入维度中的高效最近邻检查 |
+|同向指针 |合并来自多个检索模型的排序结果列表 |
+
+<ThinkAboutIt>语音助手会缓冲最后 3 秒的音频以检测唤醒词。这是哪种模式——固定窗口还是可变窗口？如果唤醒字长于缓冲区会发生什么？</ThinkAboutIt>
+
+## 何时使用哪个
+
+- **两个指针（收敛）：**排序输入、对/三元组搜索、回文检查。
+- **两个指针（同向）：**就地修改，快/慢跑者问题。
+- **固定滑动窗口：** 在已知窗口大小上聚合。
+- **可变滑动窗口：**找到满足某个条件的最小或最大窗口。
+
+<Quiz question="您会选择哪种模式来查找总和超过给定值的最小子数组？" options="收敛两个指针|固定推拉窗|可变滑动窗|二分查找" answer="2" explanation="可变大小的窗口会扩展，直到总和超过该值，然后从左侧收缩以找到最小长度 - 全部时间复杂度为 O(n)。" />
+
+<ThinkAboutIt>你能将两个指针与滑动窗口结合起来吗？考虑一下需要在数据滚动窗口内找到一对的问题 - 例如，在五分钟窗口内检测重复交易。</ThinkAboutIt>
+
+## 要点
+
+1. 两个指针通过利用排序或分区来消除嵌套循环。
+2. 滑动窗口保持运行状态，因此每个元素最多被处理两次。
+3. 这两种模式都是实时人工智能管道的基础——从异常检测到搜索排名。
+
+<Quiz question="将强力嵌套循环转换为两指针或滑动窗口解决方案可实现的典型时间复杂度是多少？" options="O(n log n)|在）|O(n²)|复杂度(1)" answer="1" explanation="两种模式都会对每个元素进行恒定次数的处理，总体上产生 O(n) - 比 O(n²) 暴力方法有显着改进。" />

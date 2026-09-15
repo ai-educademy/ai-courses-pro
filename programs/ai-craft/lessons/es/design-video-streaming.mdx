@@ -1,0 +1,137 @@
+---
+title: "Diseñar una plataforma de transmisión de video: arquitectura de YouTube/Netflix"
+description: "Diseñe una plataforma de transmisión de video escalable que cubra canales de carga, transcodificación de velocidad de bits adaptativa, distribución CDN y arquitectura de transmisión en vivo."
+order: 8
+difficulty: "advanced"
+duration: 25
+icon: "🎬"
+published: true
+machineTranslated: true
+---
+# Diseñe una plataforma de transmisión de video: arquitectura de YouTube/Netflix
+
+La transmisión de vídeo representa más del 65% del tráfico mundial de Internet. El diseño de este sistema abarca canales de procesamiento de archivos, arquitectura CDN y transmisión adaptativa, conceptos que se aplican mucho más allá del video.
+
+## Paso 1: recopilación de requisitos
+
+### Requisitos funcionales
+- Subir vídeos (hasta 1 GB por archivo)
+- Transmita videos con calidad adaptable según las condiciones de la red
+- Buscar videos por título, descripción y etiquetas.
+- Seguimiento del recuento de vistas y métricas de participación.
+
+### Requisitos no funcionales
+- **Disponibilidad** - 99,99 % de tiempo de actividad para streaming
+- **Baja latencia**: la reproducción de vídeo comienza en 2 segundos
+- **Alcance global**: atienda a usuarios de todos los continentes de manera eficiente
+- **Rentable**: optimice el almacenamiento y el ancho de banda (los dos mayores costos)
+
+## Paso 2: Arquitectura de alto nivel
+
+```
+Upload Flow:
+Client → Upload Service → Object Storage (raw)
+                              ↓
+                    Transcoding Pipeline (async)
+                         ↓          ↓
+                   Multiple      Thumbnail
+                   Qualities     Generator
+                         ↓          ↓
+                    CDN Origin Storage → CDN Edge Servers
+
+Streaming Flow:
+Client → CDN Edge → (cache miss) → CDN Origin → Object Storage
+```
+
+<Illustration src="/images/lessons/design-video-streaming.svg" alt="Arquitectura de transmisión de video que muestra el canal de carga con transcodificación, almacenamiento de objetos, distribución CDN y flujo de transmisión a los clientes." caption="Los flujos de carga y transmisión están completamente separados: las cargas son asíncronas y requieren mucha escritura, mientras que la transmisión requiere mucha lectura y es sensible a la latencia." />
+
+## Paso 3: Canal de carga de videos
+
+### Procesamiento paso a paso
+1. **Cargar**: el cliente carga videos sin procesar en el almacenamiento de objetos (por ejemplo, S3) a través de URL prefirmadas con cargas reanudables para archivos grandes.
+2. **Transcodificación**: convierte el vídeo fuente en múltiples resoluciones (1080p, 720p, 480p, 360p) y códecs (H.264, VP9, AV1).
+3. **Embalaje de velocidad de bits adaptable**: divida cada nivel de calidad en segmentos pequeños (de 2 a 10 segundos) para la transmisión HLS/DASH
+4. **Generación de miniaturas**: extrae fotogramas a intervalos regulares para obtener vistas previas en miniatura
+5. **Actualización de metadatos**: marque el video como "listo" en la base de datos una vez que se complete todo el procesamiento.
+
+### Transcodificación a escala
+Un solo vídeo 4K de 10 minutos puede tardar más de 30 minutos en transcodificarse en una máquina. Para manejar miles de cargas simultáneas:
+- Divida videos en fragmentos y transcodificarlos en paralelo usando un flujo de trabajo basado en DAG (como AWS Step Functions)
+- Utilice instancias puntuales o preferentes para reducir los costos informáticos entre un 60 % y un 80 %.
+
+<Quiz question="¿Por qué la transcodificación de vídeo se realiza de forma asincrónica en lugar de durante la carga?" options="Para reducir el tiempo de carga para el usuario.|La transcodificación requiere un uso intensivo de la CPU y bloquearía el servicio de carga, lo que degradaría la disponibilidad.|Para ahorrar espacio de almacenamiento|Porque los navegadores no pueden reproducir formatos de video sin formato" answer="1" explanation="La transcodificación de un único vídeo a múltiples niveles de calidad requiere un uso intensivo de la CPU (de minutos a horas). Hacer esto de forma sincrónica bloquearía el servicio de carga, crearía una experiencia de usuario terrible y requeriría que el servicio de carga tuviera enormes recursos informáticos." />
+
+## Paso 4: Protocolos de transmisión y CDN
+
+### Transmisión de velocidad de bits adaptable
+El reproductor cambia automáticamente la calidad según la velocidad de la red del espectador:
+
+| Protocolo | Utilizado por | Formato de segmento | Manifiesto |
+|----------|---------|----------|----------|
+| SHL | Apple, la mayoría de los navegadores | .ts o .fmp4 | Lista de reproducción .m3u8 |
+| GUIÓN | YouTube, Netflix | segmentos .mp4 | manifiesto .mpd |
+
+El cliente descarga un archivo de manifiesto que enumera todos los niveles de calidad disponibles, luego solicita segmentos uno por uno, cambiando la calidad sin problemas a medida que cambia el ancho de banda.
+
+### Arquitectura CDN
+CDN es el componente más crítico para el rendimiento de la transmisión:
+
+```
+User in London → London Edge PoP (cache hit: 95%)
+                     ↓ (cache miss)
+              European Regional Cache
+                     ↓ (cache miss)
+              Origin Storage (S3)
+```
+
+**Información clave:** los videos populares se almacenan en caché en las ubicaciones más cercanas a los usuarios. El contenido de cola larga solo se puede almacenar en caché en nodos regionales, con búsquedas de origen para contenido poco común.
+
+<FunFact>Netflix ofrece más de 700 millones de horas de vídeo por semana. Su Open Connect CDN coloca dispositivos de hardware personalizados directamente dentro de los centros de datos de los ISP, almacenando en caché el contenido popular en la última milla para reducir el tráfico troncal de Internet en más de un 90 %.</FunFact>
+
+## Paso 5: Servicios de soporte
+
+### Servicio de metadatos de vídeo
+Almacena título, descripción, etiquetas, fecha de carga, recuento de vistas y estado de procesamiento. Utilice una base de datos relacional (PostgreSQL) para consultas estructuradas e indexación de búsqueda.
+
+### Ver conteo a escala
+El enfoque ingenuo (incremento en cada vista) crea un punto de acceso de escritura. En lugar de eso:
+- Ver eventos por lotes en una secuencia (Kafka)
+- Cuenta agregada periódicamente (cada 30 segundos)
+- Utilice recuento aproximado para visualización en tiempo real, recuentos exactos para análisis
+
+<Quiz question="Un vídeo se vuelve viral y recibe 1 millón de visitas por minuto. ¿Cuál es el mayor problema al incrementar un contador de base de datos en cada vista?" options="La base de datos se queda sin almacenamiento.|La contención de escritura en una sola fila crea un cuello de botella y degrada el rendimiento|El contador se desborda|Las consultas de lectura se vuelven lentas" answer="1" explanation="Millones de escrituras simultáneas en una sola fila provocan una contención de bloqueo extrema en la base de datos. Esta es la razón por la que los recuentos de vistas generalmente se almacenan en memoria intermedia o en una secuencia y luego se agregan por lotes a la base de datos periódicamente." />
+
+### Arquitectura de transmisión en vivo
+La transmisión en vivo se diferencia de la transmisión bajo demanda en aspectos clave:
+- **Sin pretranscodificación**: el vídeo debe transcodificarse en tiempo real
+- **Latencia ultrabaja**: los espectadores esperan un retraso inferior a 5 segundos
+- **Protocolo de ingesta**: los streamers envían a través de RTMP; los espectadores reciben a través de HLS/DASH con extensiones de baja latencia
+
+## Paso 6: Desglose de costos y optimizaciones
+
+Las plataformas de vídeo son **extremadamente caras** de operar. Los tres mayores costos:
+
+| Centro de costos | Estimación (10 millones de usuarios diarios) | Optimización |
+|------------|---------------------|--------------|
+| Almacenamiento | ~$200K/mes | Almacenamiento por niveles (caliente/tibio/frío), eliminar cargas fallidas |
+| Ancho de banda CDN | ~$500K/mes | Almacenamiento en caché perimetral, comprimir con códecs modernos (AV1) |
+| Computación de transcodificación | ~$100K/mes | Detecta instancias y salta niveles de calidad raramente vistos |
+
+<ThinkAboutIt>Netflix gasta miles de millones anualmente en entrega de contenido. Si estuviera diseñando su sistema desde cero, ¿construiría su propia CDN (como Netflix Open Connect) o utilizaría una CDN comercial (como CloudFront)? ¿A qué escala resulta rentable construir uno propio?</ThinkAboutIt>
+
+### Protección de contenido (DRM)
+El contenido premium requiere gestión de derechos digitales:
+- **Widevine** (Google) - Chrome, Android
+- **FairPlay** (Apple) - Safari, iOS
+- **PlayReady** (Microsoft) - Borde, Windows
+
+Cada sistema DRM requiere cifrado independiente e integración de servidor de licencias, lo que añade una complejidad significativa.
+
+<ThinkAboutIt>YouTube almacena más de 800 millones de vídeos. Si cada video se transcodifica en 5 niveles de calidad y cada nivel tiene un promedio de 500 MB, calcule el almacenamiento total requerido. ¿Cómo diseñaría una estrategia de almacenamiento rentable?</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+- [Diseño del sistema de YouTube - Entrevista sobre el diseño del sistema, vol. 2, cap. 14](https://bytebytego.com/) - La inmersión profunda de Alex Xu en la arquitectura de plataformas de vídeo
+- [Blog tecnológico de Netflix: entrega de contenido](https://netflixtechblog.com/): cómo Netflix creó Open Connect y atiende el tráfico global
+- [HLS vs DASH Streaming](https://www.cloudflare.com/learning/video/what-is-http-live-streaming/): comprensión de los protocolos de tasa de bits adaptativos

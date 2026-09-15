@@ -1,0 +1,167 @@
+---
+title: "端到端 ML 管道 - 从原始数据到部署模型"
+description: "掌握完整的机器学习生命周期：数据收集、特征工程、模型训练、部署和监控——所有这些都被编排为可重复的管道代码。"
+order: 6
+difficulty: "advanced"
+duration: 22
+icon: "🔄"
+published: true
+machineTranslated: true
+---
+# 端到端 ML 管道 - 从原始数据到部署模型
+
+大多数教程停在`model.fit()`。在生产中，这仅占工作量的 20%。本课程将介绍**整个机器学习生命周期** - Spotify 的推荐引擎、Stripe 的欺诈检测和 Google 的搜索排名采用相同的管道。
+
+## 🗺️ 机器学习生命周期概览
+
+<Illustration src="/images/lessons/end-to-end-ml-pipeline.svg" alt="从数据摄取到监控的 ML 管道阶段图" caption="生产 ML 管道的八个阶段 - 每个阶段都是潜在的故障点。" />
+
+每个生产机器学习系统都会经历以下阶段：
+
+1. **数据收集** - API、数据库、事件流、网络抓取
+2. **数据清理** - 处理空值、重复数据删除、类型强制
+3. **特征工程** - 将原始信号转换为模型就绪特征
+4. **模型选择** - 选择符合您问题的架构
+5. **训练** - GPU/CPU编排、超参数调优
+6. **评估** - 离线指标、A/B 测试、公平性审计
+7. **部署** - 服务基础设施、延迟预算
+8. **监控** - 漂移检测、警报、再训练触发
+
+## 📦 数据收集和版本控制
+
+原始数据是您的基础。将其视为源代码 - **对所有内容进行版本控制**。
+
+```bash
+# Initialise DVC in your repo
+dvc init
+dvc remote add -d storage s3://my-ml-data-bucket
+
+# Track a dataset
+dvc add data/transactions.csv
+git add data/transactions.csv.dvc .gitignore
+git commit -m "Track raw transaction dataset v1"
+dvc push
+```
+
+**DVC**（数据版本控制）可让您`git checkout`任何历史数据集。结合 Git 标签，您可以重现任何时间点的任何实验。
+
+<FunFact>Netflix 每天通过其数据管道处理超过 1.5 万亿个事件 - 每秒大约有 1700 万个事件馈送到其推荐模型。</FunFact>
+
+## 🛠️ 特征工程 - 赢得比赛的地方
+
+特征比算法更重要。具有出色特征的梯度增强树击败了具有较差特征的深度神经网络。
+
+```python
+import pandas as pd
+
+df = pd.read_csv("data/transactions.csv", parse_dates=["timestamp"])
+
+# Temporal features
+df["hour"] = df["timestamp"].dt.hour
+df["is_weekend"] = df["timestamp"].dt.dayofweek >= 5
+
+# Aggregation features
+user_stats = df.groupby("user_id")["amount"].agg(["mean", "std", "count"])
+user_stats.columns = ["user_avg_amount", "user_std_amount", "user_txn_count"]
+df = df.merge(user_stats, on="user_id")
+
+# Ratio features
+df["amount_vs_avg"] = df["amount"] / df["user_avg_amount"]
+```
+
+<Quiz question="哪种特征工程技术通常在表格 ML 问题中提供最强的预测能力？" options="One-hot 编码分类变量|创建现有列之间的交互和比率特征|将所有特征标准化为零均值|应用 PCA 降维" answer="1" explanation="交互和比率特征捕获线性模型无法自行学习的变量之间的关系。顶级 Kaggle 解决方案一致将这些视为影响最大的转型。" />
+
+## 🧪 使用 MLflow 进行实验跟踪
+
+永远不要忘记你尝试过的事情。 MLflow 自动记录参数、指标和工件。
+
+```python
+import mlflow
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import f1_score
+
+mlflow.set_experiment("fraud-detection-v2")
+
+with mlflow.start_run(run_name="gbm-baseline"):
+    params = {"n_estimators": 500, "max_depth": 6, "learning_rate": 0.05}
+    mlflow.log_params(params)
+
+    model = GradientBoostingClassifier(**params)
+    model.fit(X_train, y_train)
+
+    score = f1_score(y_test, model.predict(X_test))
+    mlflow.log_metric("f1_score", score)
+    mlflow.sklearn.log_model(model, "model")
+```
+
+比较 MLflow UI 中的运行情况，然后使用暂存 → 生产生命周期标签将最佳模型提升到 **模型注册表**。
+
+## 🚀 管道即代码 - 编排
+
+手动步骤中断。使用编排框架在代码中对管道进行编码：
+
+|工具|最适合 |关键实力|
+|------|----------|-------------|
+| **Kubeflow 管道** | Kubernetes 原生机器学习 |在现有 K8s 集群上进行扩展 |
+| **阿帕奇气流** |复杂DAG调度|成熟的生态系统，广泛的采用|
+| **完美** |现代 Python 工作流程 | Pythonic API，出色的错误处理 |
+| **ZenML** | MLOps 抽象 |与堆栈无关，可插入任何工具 |
+
+<ThinkAboutIt>您有一个每晚重新训练的管道，但您的数据每小时都会发生变化。在决定再培训频率时，您会权衡哪些因素 - 成本、陈旧性、基础设施复杂性？</ThinkAboutIt>
+
+## 🌐 模型服务和部署
+
+您的模型需要一个 API。两种主要模式：
+
+**REST API** - 简单，基于 HTTP，非常适合中等吞吐量：
+```python
+# FastAPI model server
+from fastapi import FastAPI
+import joblib
+
+app = FastAPI()
+model = joblib.load("model.pkl")
+
+@app.post("/predict")
+async def predict(features: dict):
+    prediction = model.predict([list(features.values())])
+    return {"prediction": int(prediction[0])}
+```
+
+**gRPC** - 二进制协议，比 REST 快 2–10 倍，非常适合内部微服务和高吞吐量场景。
+
+### 金丝雀部署
+
+永远不要将 100% 的流量发送到新模型。使用 **金丝雀发布**：路线 5% → 25% → 50% → 100%，监控每个步骤的错误率。如果指标下降，请立即回滚。
+
+<Quiz question="机器学习模型金丝雀部署的主要优势是什么？" options="他们减少了模型训练时间|它们允许逐步推出，并在指标退化时自动回滚|他们通过 A/B 测试提高模型准确性|它们消除了模型版本控制的需要" answer="1" explanation="金丝雀部署限制了爆炸半径。如果您的新模型表现不佳，则只有一小部分用户受到影响，您可以在发生更广泛的损害之前回滚。" />
+
+## 📊 监控和反馈循环
+
+部署不是终点线，而是发令枪。监控：
+
+- **数据漂移** - 输入分布从训练数据发生变化
+- **概念漂移** - 特征和目标变化之间的关系
+- **性能下降** - 准确性/延迟指标下降
+
+**Evidently AI**、**WhyLabs** 和 **Arize** 等工具提供漂移仪表板。当漂移超过阈值时，使用新的生产数据触发自动重新训练 - 关闭反馈循环。
+
+<Quiz question="三个月内，欺诈检测模型的精度从 95% 下降到 78%，但输入特征分布没有改变。这是什么类型的漂移？" options="数据漂移|概念漂移|模型漂移|特征漂移" answer="1" explanation="当输入分布保持稳定但性能下降时，特征和目标之间的潜在关系发生了变化 - 这就是概念漂移。欺诈者改进了他们的策略，但数据形状看起来是一样的。" />
+
+<ThinkAboutIt>您的监控在周五晚上检测到显着的漂移。您是否会触发自动重新训练、等待周一的手动审核或回滚到之前的模型版本？哪些因素影响您的决定？</ThinkAboutIt>
+
+## 🎯 要点
+
+- 版本**一切**：代码、数据、模型和管道配置
+- 特征工程比架构变更带来更多的投资回报
+- 将管道编码为代码 - 手动步骤是技术债务
+- 使用金丝雀版本进行部署并持续监控
+- 反馈循环（生产数据→再培训）是将演示与生产系统区分开来的
+
+---
+
+## 📚 进一步阅读
+
+- [Made With ML - MLOps 课程](https://madewithml.com/) - 全面、免费的 MLOps 课程，涵盖整个生命周期
+- [设计机器学习系统，作者：Chip Huyen](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/) - 关于生产 ML 系统设计的权威书籍
+- [MLflow 文档](https://mlflow.org/docs/latest/index.html) - 实验跟踪和模型注册的官方指南

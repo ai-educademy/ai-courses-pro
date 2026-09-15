@@ -1,0 +1,132 @@
+---
+title: "Dois ponteiros e uma janela deslizante - como a IA verifica os dados com eficiência"
+description: "Domine dois padrões essenciais para digitalizar sequências sem desperdiçar computação."
+order: 1
+difficulty: "intermediate"
+duration: 15
+icon: "👆"
+published: true
+machineTranslated: true
+---
+## Por que a digitalização inteligente é importante
+
+Imagine uma IA monitorando um feed de vídeo ao vivo em busca de atividades suspeitas. Ele não pode assistir novamente a gravação inteira a cada segundo - ele precisa deslizar uma janela de atenção pelo stream, acompanhando apenas o contexto suficiente. Isso é exatamente o que os padrões de **dois ponteiros** e de **janela deslizante** fazem para dados sequenciais.
+
+Ambas as técnicas transformam varreduras O(n²) de força bruta em passagens O(n) elegantes.
+
+<Illustration src="/images/lessons/two-pointers-and-sliding-window.svg" alt="Dois ponteiros convergindo de ambas as extremidades de uma matriz e uma janela deslizante movendo-se através de um fluxo de dados" caption="Dois ponteiros reduzem o espaço de pesquisa; uma janela deslizante mantém uma visão em execução." />
+
+## A técnica dos dois ponteiros
+
+Coloque duas referências em uma sequência e mova-as de acordo com uma regra. Existem dois sabores principais.
+
+### Ponteiros convergentes
+
+Comece um ponteiro em cada extremidade e mova-os para dentro. Perfeito para dados **classificados**.
+
+**Problema clássico - Soma de pares:** Dada uma matriz ordenada, encontre dois números que somam um destino.
+
+```
+function pairSum(arr, target):
+    left = 0
+    right = arr.length - 1
+    while left < right:
+        sum = arr[left] + arr[right]
+        if sum == target: return (left, right)
+        if sum < target: left += 1
+        else: right -= 1
+    return null
+```
+
+Como a matriz está classificada, mover `left` para a direita aumenta a soma e mover `right` para a esquerda a diminui - garantindo que nunca perderemos um par válido.
+
+### Ponteiros na mesma direção
+
+Ambos os ponteiros avançam, mas em velocidades diferentes. Útil para **particionamento** ou **detecção de ciclo**.
+
+**Exemplo - Remover duplicatas no local:** Um ponteiro lento marca a posição de gravação; um ponteiro rápido avança.
+
+```
+function removeDuplicates(arr):
+    slow = 0
+    for fast in 1..arr.length - 1:
+        if arr[fast] != arr[slow]:
+            slow += 1
+            arr[slow] = arr[fast]
+    return slow + 1
+```
+
+<Quiz question="Na técnica convergente de dois ponteiros em uma matriz classificada, o que você deve fazer quando a soma atual é menor que o alvo?" options="Mova o ponteiro direito para a esquerda|Mova o ponteiro esquerdo para a direita|Troque os dois elementos|Reinicie do meio" answer="1" explanation="Mover o ponteiro esquerdo para a direita aumenta a soma porque a matriz é classificada em ordem crescente." />
+
+## O padrão de janela deslizante
+
+Uma janela deslizante mantém uma subsequência contígua de tamanho _k_ (fixo) ou comprimento variável, atualizando agregados de forma incremental em vez de recalcular do zero.
+
+### Janela de tamanho fixo
+
+Deslize uma janela com exatamente _k_ elementos na matriz.
+
+**Exemplo - Soma máxima de quaisquer k elementos consecutivos:**
+
+```
+function maxSubarraySum(arr, k):
+    windowSum = sum(arr[0..k-1])
+    best = windowSum
+    for i in k..arr.length - 1:
+        windowSum += arr[i] - arr[i - k]
+        best = max(best, windowSum)
+    return best
+```
+
+Cada etapa adiciona o novo elemento que entra na janela e subtrai o que sai - O(1) por movimento.
+
+### Janela de tamanho variável
+
+Expanda a janela para incluir mais dados e reduza-a quando uma restrição for violada.
+
+**Exemplo - Substring mais longa sem caracteres repetidos:**
+
+```
+function longestUnique(s):
+    seen = {}
+    left = 0
+    best = 0
+    for right in 0..s.length - 1:
+        if s[right] in seen and seen[s[right]] >= left:
+            left = seen[s[right]] + 1
+        seen[s[right]] = right
+        best = max(best, right - left + 1)
+    return best
+```
+
+<FunFact>Plataformas de análise de streaming como Apache Flink usam janelas deslizantes e giratórias como primitivas de primeira classe - o mesmo conceito dimensionado para milhões de eventos por segundo.</FunFact>
+
+## Aplicativos reais de IA
+
+| Padrão | Caso de uso de IA |
+|--------|------------|
+| Janela fixa | Detecção de anomalias nas últimas leituras do sensor _k_ |
+| Janela variável | Encontrar o intervalo de texto mais curto contendo todas as palavras-chave de consulta (mecanismos de pesquisa) |
+| Ponteiros convergentes | Verificações eficientes do vizinho mais próximo em dimensões de incorporação classificadas |
+| Ponteiros na mesma direção | Mesclando listas de resultados classificadas de vários modelos de recuperação |
+
+<ThinkAboutIt>Um assistente de voz armazena em buffer os últimos 3 segundos de áudio para detectar uma palavra de ativação. Qual padrão é esse – janela fixa ou janela variável? O que acontece se a palavra de ativação for maior que o buffer?</ThinkAboutIt>
+
+## Quando usar qual
+
+- **Dois ponteiros (convergentes):** entrada classificada, pesquisa de pares/trigêmeos, verificações de palíndromo.
+- **Dois ponteiros (mesma direção):** modificações no local, problemas de corredor rápido/lento.
+- **Janela deslizante fixa:** agregação em um tamanho de janela conhecido.
+- **Janela deslizante variável:** encontre a menor ou maior janela que satisfaça uma condição.
+
+<Quiz question="Qual padrão você escolheria para encontrar o menor subarranjo cuja soma excede um determinado valor?" options="Convergindo dois ponteiros|Janela deslizante fixa|Janela deslizante variável|Pesquisa binária" answer="2" explanation="Uma janela de tamanho variável se expande até que a soma exceda o valor e depois se contrai a partir da esquerda para encontrar o comprimento mínimo - tudo em O(n)." />
+
+<ThinkAboutIt>Você poderia combinar dois ponteiros com uma janela deslizante? Pense em problemas em que você precisa encontrar um par dentro de uma janela contínua de dados - por exemplo, detectando transações duplicadas em uma janela de cinco minutos.</ThinkAboutIt>
+
+## Principais conclusões
+
+1. Dois ponteiros eliminam loops aninhados aproveitando a ordenação ou o particionamento.
+2. As janelas deslizantes mantêm o estado de execução para que cada elemento seja processado no máximo duas vezes.
+3. Ambos os padrões são fundamentais em pipelines de IA em tempo real – desde a detecção de anomalias até a classificação de pesquisa.
+
+<Quiz question="Qual é a complexidade de tempo típica alcançada pela conversão de um loop aninhado de força bruta em uma solução de dois ponteiros ou de janela deslizante?" options="Sobre (n log n)|Sobre)|O(n²)|O(1)" answer="1" explanation="Ambos os padrões processam cada elemento um número constante de vezes, produzindo O(n) no geral - uma melhoria significativa em relação à abordagem de força bruta O(n²)." />

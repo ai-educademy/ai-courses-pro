@@ -1,0 +1,149 @@
+---
+title: "Union-Find – Verbundene Komponenten und Netzwerkerkennung"
+description: "Lernen Sie die Union-Find-Datenstruktur (disjunkte Menge) mit Pfadkomprimierung und Vereinigung nach Rang kennen. Lösen Sie Konnektivitäts-, MST- und Diagrammkomponentenprobleme effizient."
+order: 7
+difficulty: "advanced"
+duration: 17
+icon: "🔗"
+published: true
+machineTranslated: true
+---
+## Das Konnektivitätsproblem
+
+Bei einem Netzwerk von Knoten erhalten Sie ständig zwei Arten von Abfragen: *Verbinden Sie Knoten A mit Knoten B* und *Sind A und B verbunden?* Dies mit BFS/DFS zu tun bedeutet, den Graphen für jede Abfrage zu durchlaufen – viel zu langsam für Millionen von Operationen.
+
+**Union-Find** beantwortet beides in nahezu konstanter Zeit.
+
+## Naiver Ansatz – Schnellsuche
+
+Hinterlegen Sie für jeden Knoten eine Komponenten-ID. Um die Konnektivität zu überprüfen, vergleichen Sie die IDs in O(1). Aber das Zusammenführen zweier Komponenten zwingt Sie dazu, jedes Mitglied einer Gruppe zu aktualisieren – O(n) pro Union.
+
+```
+IDs:  [0, 0, 0, 3, 3]
+       └─group 0─┘ └group 3┘
+union(0, 3) → update all 3s to 0 → O(n)
+```
+
+Wir brauchen etwas Besseres.
+
+## Die Union-Find-Datenstruktur
+
+Jeder Knoten zeigt auf einen **Elternknoten**. Die Wurzel jedes Baums ist der Komponentenvertreter. Zwei Knoten sind genau dann verbunden, wenn sie dieselbe Wurzel haben.
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+```
+
+## Finden mit Pfadkomprimierung
+
+Das Hochlaufen übergeordneter Zeiger kann in einem tiefen Baum langsam sein. **Pfadkomprimierung** flacht den Baum ab, indem jeder besuchte Knoten direkt auf die Wurzel verweist.
+
+```python
+def find(self, x):
+    if self.parent[x] != x:
+        self.parent[x] = self.find(self.parent[x])
+    return self.parent[x]
+```
+
+Vor und nach dem Finden von Knoten 4:
+
+```
+Before:  0←1←2←3←4     After:  0←1
+                                0←2
+                                0←3
+                                0←4
+```
+
+## Union nach Rang
+
+Befestigen Sie immer den kürzeren Baum unter dem höheren. Dies hält die Baumhöhe logarithmisch und verhindert degenerierte Ketten.
+
+```python
+def union(self, x, y):
+    rx, ry = self.find(x), self.find(y)
+    if rx == ry:
+        return False
+    if self.rank[rx] < self.rank[ry]:
+        rx, ry = ry, rx
+    self.parent[ry] = rx
+    if self.rank[rx] == self.rank[ry]:
+        self.rank[rx] += 1
+    return True
+```
+
+<Quiz
+  question="Wie hoch ist die amortisierte Zeit pro Vorgang, wenn sowohl die Pfadkomprimierung als auch die Vereinigung nach Rang erfolgen?"
+  options="O(log n)|An)|O(α(n)) - fast O(1)|O(√n)"
+  answer="2"
+  explanation="Die inverse Ackermann-Funktion α(n) wächst so langsam, dass sie für keine praktische Eingabe den Wert 4 überschreitet, wodurch Operationen effektiv zu O(1) werden."
+/>
+
+<Illustration src="/images/lessons/union-find-and-disjoint-sets.svg" alt="Union-Find-Bäume vor und nach der Pfadkomprimierung" caption="Durch die Pfadkomprimierung werden tiefe Ketten abgeflacht, sodass zukünftige Suchvorgänge schnell erfolgen." />
+
+## Kruskals MST-Algorithmus
+
+Union-Find ermöglicht **Kruskals Algorithmus** für Minimum Spanning Trees:
+
+1. Sortieren Sie alle Kanten nach Gewicht
+2. Für jede Kante (u, v), wenn `find(u) ≠ find(v)`, addiere sie und `union(u, v)`
+3. Stoppen Sie, wenn Sie n − 1 Kanten haben
+
+Der Union-Find verhindert Zyklen, indem er Kanten ablehnt, deren Endpunkte bereits eine gemeinsame Wurzel haben. Gesamtzeit: **O(E log E)** dominiert durch Sortieren.
+
+<ThinkAboutIt>Kruskal's verwendet Union-Find, um Zyklen zu erkennen. Wie würden Sie einen Zyklus stattdessen mithilfe von DFS erkennen und warum ist Union-Find hier natürlicher?</ThinkAboutIt>
+
+## Klassische Probleme
+
+### Anzahl der verbundenen Komponenten
+
+Union-Find mit n Knoten initialisieren. Bearbeiten Sie jede Kante mit `union`. Zählen Sie am Ende die einzelnen Wurzeln.
+
+### Konten zusammenführen (LeetCode 721)
+
+Jedes Konto verfügt über E-Mails. Wenn zwei Konten eine gemeinsame E-Mail-Adresse haben, gehören sie derselben Person. Konten nach gemeinsamen E-Mails zusammenführen, dann gruppieren und sortieren.
+
+### Redundante Verbindung (LeetCode 684)
+
+Finden Sie bei einem gegebenen Baum plus einer zusätzlichen Kante die redundante Kante. Verarbeiten Sie die Kanten der Reihe nach – die erste Kante, bei der `union` `False` zurückgibt (bereits verbunden), ist die Antwort.
+
+<FunFact>Der Beweis, dass Union-Find mit beiden Optimierungen in O(α(n)) läuft, wurde 1975 von Tarjan veröffentlicht und gilt als eine der elegantesten amortisierten Analysen in der Informatik.</FunFact>
+
+## Wann sollte man sich für Union-Find vs. BFS/DFS entscheiden?
+
+| Szenario | Beste Wahl |
+|----------|-------------|
+| Wiederholte Verbindungsabfragen | Union-Find |
+| Einzeldurchquerung / kürzester Weg | BFS/DFS |
+| Inkrementelle Kantenadditionen | Union-Find |
+| Kantenentfernungen (dynamisches Diagramm) | BFS/DFS (oder Offline-UF) |
+| Kruskals MST | Union-Find |
+| Topologische Sortierung/Zyklus im gerichteten Graphen | DFS |
+
+Union-Find glänzt, wenn Sie Kanten *inkrementell* verarbeiten und schnelle Konnektivitätsprüfungen benötigen. Wenn Sie nur einmal fahren oder Pfadinformationen benötigen, bleiben Sie bei BFS/DFS.
+
+<Quiz
+  question="Sie erhalten eine Kante nach der anderen und müssen die erste Kante erkennen, die einen Zyklus erzeugt. Welcher Ansatz ist der Beste?"
+  options="BFS von Grund auf nach jeder Kante|DFS von Grund auf nach jeder Kante|Union-Find – Union gibt am Zyklusrand False zurück|Topologische Sortierung"
+  answer="2"
+  explanation="Union-Find erkennt Zyklen inkrementell in nahezu O(1) pro Kante, während BFS/DFS jedes Mal den gesamten Graphen erneut durchläuft."
+/>
+
+<Quiz
+  question="Was verhindert die Union nach Rang in Union-Find?"
+  options="Doppelte Kanten|Nicht verbundene Komponenten|Entartete lineare Ketten (hohe Bäume)|Negative Kantengewichte"
+  answer="2"
+  explanation="Durch die Rangvereinigung werden die Bäume im Gleichgewicht gehalten, indem immer der kürzere Baum unter dem größeren angehängt wird, wodurch O(n)-Suchoperationen verhindert werden."
+/>
+
+<ThinkAboutIt>Einige Probleme erfordern das *Rückgängigmachen* von Vereinigungen (dynamische Konnektivität mit Löschungen). Warum reicht der Standard-Union-Find nicht aus und welche Modifikationen gibt es?</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+
+- [Disjunkte Datenstruktur – Wikipedia](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) – Theorie, Beweise und Geschichte von Union-Find
+– [Union-Find – Princeton Algorithms](https://algs4.cs.princeton.edu/15uf/) – Sedgewicks maßgebliche Behandlung mit Java-Beispielen
+- [Redundante Verbindung – LeetCode 684](https://leetcode.com/problems/redundant-connection/) – Eine saubere Anwendung der Zykluserkennung mit Union-Find

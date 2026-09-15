@@ -1,0 +1,218 @@
+---
+title: "Entrevistas de revisión de código"
+description: "Sobresalga en las rondas de entrevistas de revisión de código: identifique errores, sugiera mejoras y demuestre su criterio de ingeniería."
+order: 5
+difficulty: "intermediate"
+duration: 15
+icon: "👁️"
+published: true
+machineTranslated: true
+---
+# Entrevistas de revisión de código
+
+Las entrevistas de revisión de código son una de las rondas más subestimadas del proceso de contratación y una de las más reveladoras. Mientras que las entrevistas de codificación prueban si puede escribir código, las entrevistas de revisión de código prueban si puede leerlo, razonar al respecto y mejorarlo. Revelan cómo piensa acerca de la calidad, cómo prioriza la retroalimentación y cómo se comunica con otros ingenieros. Muchos candidatos se preparan durante meses en LeetCode, pero entran en una ronda de revisión de código sin estar preparados. No seas esa persona.
+
+## Qué prueban realmente las entrevistas de revisión de código
+
+Los entrevistadores que evalúan sus habilidades de revisión de código buscan cinco cosas:
+
+1. **Detección de errores**: ¿puedes detectar errores lógicos, casos extremos y condiciones de carrera?
+2. **Sentido del diseño**: ¿Reconoce violaciones de los principios SÓLIDOS, abstracciones deficientes o código que será difícil de mantener?
+3. **Conciencia de seguridad**: ¿Puedes identificar vulnerabilidades de inyección, fallas de autenticación o riesgos de exposición de datos?
+4. **Habilidad de comunicación**: ¿Puedes explicar los problemas de forma clara y constructiva?
+5. **Priorización**: ¿te concentras en lo que más importa o te concentras en los nombres de las variables?
+
+<Callout>El error más común en las entrevistas de revisión de código es dedicar todo el tiempo a cuestiones de estilo (nombramiento, formato) sin detectar errores reales. Los entrevistadores colocan deliberadamente errores críticos junto con problemas de estilo para ver qué priorizas.</Callout>
+
+## El enfoque de revisión sistemática
+
+No escanee el código al azar. Utilice un enfoque estructurado basado en pases:
+
+### Paso 1: Comprender la intención (2 minutos)
+
+Antes de criticar algo, comprenda lo que intenta hacer el código:
+- Leer los nombres y comentarios de funciones/clases.
+- Identificar las entradas y salidas.
+- Comprender la lógica empresarial.
+
+### Pase 2: Corrección (5 minutos)
+
+Aquí es donde encuentras errores. Verifique sistemáticamente:
+- **Casos extremos**: entradas vacías, valores nulos, elementos únicos, valores máximos
+- **Errores uno por uno**: límites de bucle, indexación de matrices
+- **Errores lógicos**: condiciones incorrectas, falta de declaraciones de interrupción, operador incorrecto
+- **Problemas de concurrencia**: estado mutable compartido, condiciones de carrera
+- **Manejo de errores**: excepciones no detectadas, faltan comprobaciones nulas
+
+### Pase 3: Diseño y Mantenibilidad (3 minutos)
+
+Busque problemas estructurales:
+- Funciones que hacen demasiadas cosas (violando la Responsabilidad Única)
+- Acoplamiento estrecho entre componentes.
+- Números mágicos y valores codificados.
+- Abstracciones faltantes o abstracciones innecesarias
+- Duplicación de código
+
+### Pase 4: Rendimiento y seguridad (2 minutos)
+
+- Consultas innecesarias a la base de datos en bucles (problema N+1)
+- Falta validación o desinfección de entradas
+- Datos confidenciales expuestos en registros o respuestas.
+- Algoritmos ineficientes donde existen mejores alternativas.
+
+## Patrones de errores comunes que se deben detectar
+
+Entrena tus ojos para detectar estos errores de alta frecuencia:
+
+### Errores de referencia nula
+
+```java
+// Bug: user could be null
+public String getUserEmail(Long userId) {
+    User user = userRepository.findById(userId);
+    return user.getEmail();  // NullPointerException if user not found
+}
+
+// Fixed
+public String getUserEmail(Long userId) {
+    return userRepository.findById(userId)
+        .map(User::getEmail)
+        .orElseThrow(() -> new UserNotFoundException(userId));
+}
+```
+
+### Errores uno por uno
+
+```python
+# Bug: misses the last element
+def find_max(numbers):
+    max_val = numbers[0]
+    for i in range(1, len(numbers) - 1):  # Should be len(numbers)
+        if numbers[i] > max_val:
+            max_val = numbers[i]
+    return max_val
+```
+
+### Fugas de recursos
+
+```java
+// Bug: connection is never closed if an exception occurs
+public List<User> getUsers() {
+    Connection conn = dataSource.getConnection();
+    Statement stmt = conn.createStatement();
+    ResultSet rs = stmt.executeQuery("SELECT * FROM users");
+    // process results...
+    conn.close();
+    return users;
+}
+
+// Fixed: use try-with-resources
+public List<User> getUsers() {
+    try (Connection conn = dataSource.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery("SELECT * FROM users")) {
+        // process results...
+        return users;
+    }
+}
+```
+
+### Inyección SQL
+
+```python
+# Bug: SQL injection vulnerability
+def get_user(username):
+    query = f"SELECT * FROM users WHERE username = '{username}'"
+    return db.execute(query)
+
+# Fixed: parameterised query
+def get_user(username):
+    query = "SELECT * FROM users WHERE username = %s"
+    return db.execute(query, (username,))
+```
+
+<FunFact>Un estudio de más de 100.000 revisiones de código en Google encontró que alrededor del 25% de todos los comentarios de revisión tienen que ver con la "corrección": errores reales o errores lógicos. Otro 25% tiene que ver con la "comprensión", es decir, hacer que el código sea más fácil de entender. El estilo y el formato representaron menos del 10% de los comentarios sustantivos.</FunFact>
+
+### Errores de concurrencia
+
+```java
+// Bug: race condition — check-then-act is not atomic
+public void transferMoney(Account from, Account to, BigDecimal amount) {
+    if (from.getBalance().compareTo(amount) >= 0) {
+        // Another thread could modify balance here
+        from.setBalance(from.getBalance().subtract(amount));
+        to.setBalance(to.getBalance().add(amount));
+    }
+}
+```
+
+<ThinkAboutIt>¿Cómo solucionarías el error de concurrencia anterior? Considere al menos tres enfoques: sincronización, bloqueo optimista y transacciones a nivel de base de datos. ¿Cuáles son las ventajas y desventajas de cada uno en un sistema de alto rendimiento?</ThinkAboutIt>
+
+## Priorizar sus comentarios
+
+En una entrevista de tiempo limitado, no todos los comentarios son iguales. Utilice este marco de prioridades:
+
+| Prioridad | Categoría | Ejemplo |
+|---|---|---|
+| 🔴 **Crítico** | Errores, vulnerabilidades de seguridad, pérdida de datos | Inyección SQL, condiciones de carrera, desreferencia nula |
+| 🟠 **Alto** | Problemas de diseño, problemas de rendimiento | Consultas N+1, falta de manejo de errores, estrecho acoplamiento |
+| 🟡 **Medio** | Mantenibilidad, legibilidad | Condicionales complejos, documentación faltante, números mágicos |
+| 🟢 **Bajo** | Estilo, mejoras menores | Denominación de variables, ordenamiento de importaciones, refactores menores |
+
+En una entrevista, dedica el 80 % de tu tiempo a los elementos 🔴 y 🟠. Mencione 🟡 elementos brevemente. Solo toca 🟢 elementos si te queda tiempo y ya has encontrado los problemas importantes.
+
+## Comunicación de comentarios de revisión
+
+La forma en que se entregan los comentarios es tan importante como los comentarios en sí. Los entrevistadores están evaluando sus habilidades de colaboración.
+
+**Haz esto**:
+- "Noto que esta consulta está dentro de un bucle, lo que podría causar problemas de rendimiento N+1. Es posible que deseemos agrupar esto en una sola consulta".
+- "Parece que esto podría generar una NullPointerException si no se encuentra al usuario. ¿Podríamos agregar una verificación nula o usar Opcional aquí?"
+- "Buen uso del patrón de estrategia aquí: hace que agregar nuevos tipos de pago sea sencillo".
+
+**Esto no**:
+- "Este código es incorrecto". (demasiado directo, sin explicación)
+- "Nunca lo escribiría de esta manera." (impulsado por el ego)
+- "Cambiar el nombre de esta variable". (despacho de bicicletas en artículos de baja prioridad)
+
+<Callout>Explique siempre el *por qué* detrás de sus comentarios, no solo el *qué*. "Esto debería utilizar consultas parametrizadas" está bien. "Esto debería utilizar consultas parametrizadas porque la concatenación de cadenas actual es vulnerable a ataques de inyección SQL" es mucho mejor.</Callout>
+
+## Tutorial de revisión de código de ejemplo
+
+Aquí hay una función que es posible que le pidan que revise en una entrevista:
+
+```python
+def process_orders(orders):
+    results = []
+    for order in orders:
+        user = db.query(f"SELECT * FROM users WHERE id = {order['user_id']}")
+        if user:
+            total = 0
+            for item in order['items']:
+                price = db.query(f"SELECT price FROM products WHERE id = {item['product_id']}")
+                total = total + price[0] * item['quantity']
+                if item['quantity'] > 100:
+                    total = total * 0.9
+            if total > 0:
+                results.append({'user': user, 'total': total, 'order_id': order['id']})
+    return results
+```
+
+**Una revisión sólida identificaría:**
+
+1. 🔴 **Inyección SQL** (líneas 4, 7): Interpolación de cadenas en consultas SQL. Utilice consultas parametrizadas.
+2. 🔴 **Problema de consulta N+1** (líneas 4, 7): dos consultas de base de datos por pedido, una por artículo. Para 100 pedidos con 10 artículos cada uno, son 1100 consultas. Realizar lotes en consultas individuales.
+3. 🟠 **Sin manejo de errores**: `price[0]` fallará si no se encuentra el producto. `db.query` podría fallar.
+4. 🟠 **La lógica de descuento está oculta**: el descuento del 10% por cantidad > 100 es una regla de negocio enterrada en bucles anidados. Extraerlo.
+5. 🟡 **Número mágico**: `0.9` y `100` deben denominarse constantes (`BULK_DISCOUNT_RATE`, `BULK_THRESHOLD`).
+6. 🟡 **La función hace demasiado**: buscar usuarios, calcular totales, aplicar descuentos: viola la responsabilidad única.
+
+<Quiz question="Durante una entrevista de revisión de código, encuentra un problema menor con el nombre de las variables y una posible vulnerabilidad de inyección SQL. Te quedan 2 minutos. ¿Qué deberías priorizar?" options="Primero arregle el nombre de la variable ya que es rápido.|Centrarse completamente en la vulnerabilidad de inyección SQL|Mencione ambos por igual: demuestre que es minucioso|Omita ambos y busque más problemas." answer="1" explanation="La inyección SQL es una vulnerabilidad de seguridad crítica que podría provocar violaciones de datos. Priorice siempre las cuestiones de seguridad sobre las cuestiones de estilo. Mencione brevemente la cuestión del nombre sólo si el tiempo lo permite después de explicar detalladamente el riesgo de la inyección." />
+
+## Conclusiones clave
+
+- **Utilice un enfoque estructurado**: varias pasadas (intención → corrección → diseño → rendimiento/seguridad) detectan más problemas que el escaneo aleatorio.
+- **Priorizar sin piedad**: los errores críticos y los problemas de seguridad primero, el estilo al final. Los entrevistadores plantan ambos para poner a prueba su juicio.
+- **Comunícate de manera constructiva**: explica el *por qué*, sugiere alternativas y reconoce los buenos patrones que ves.
+- **Conozca los patrones de errores comunes**: referencias nulas, errores uno por uno, fugas de recursos, inyección SQL y condiciones de carrera aparecen en casi todas las entrevistas de revisión de código.
+- **Practique la lectura del código**: dedique tiempo a leer solicitudes de extracción de código abierto en GitHub. La habilidad de leer código es distinta de escribirlo y la mayoría de los ingenieros no la practican lo suficiente.

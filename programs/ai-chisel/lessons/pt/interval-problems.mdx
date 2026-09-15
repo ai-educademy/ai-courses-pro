@@ -1,0 +1,162 @@
+---
+title: "Problemas de intervalo - mesclar, inserir e programar"
+description: "Domine problemas baseados em intervalos, desde mesclagem e inserção até salas de reunião e varredura de linhas. Aprenda as estratégias e padrões de classificação que os entrevistadores esperam."
+order: 9
+difficulty: "advanced"
+duration: 16
+icon: "📅"
+published: true
+machineTranslated: true
+---
+## Representação de intervalo
+
+Um intervalo é um par `[start, end]`. A maioria dos problemas de intervalo começa com uma etapa crítica: **classificar por horário de início**. Isso transforma uma lista caótica em uma sequência que você pode processar da esquerda para a direita com comparações simples.
+
+```
+Unsorted: [3,6] [1,4] [8,10] [2,5]
+Sorted:   [1,4] [2,5] [3,6] [8,10]
+```
+
+## Mesclar intervalos sobrepostos
+
+O problema do intervalo fundamental (LeetCode 56). Após a classificação, dois intervalos consecutivos se sobrepõem se o início atual ≤ o final anterior.
+
+```python
+def merge(intervals):
+    intervals.sort()
+    merged = [intervals[0]]
+    for start, end in intervals[1:]:
+        if start <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], end)
+        else:
+            merged.append([start, end])
+    return merged
+```
+
+Percorra `[1,4] [2,5] [3,6] [8,10]`:
+- `[2,5]` sobrepõe `[1,4]` → mesclar para `[1,5]`
+- `[3,6]` sobrepõe `[1,5]` → mesclar para `[1,6]`
+- `[8,10]` sem sobreposição → novo intervalo
+
+Resultado: `[1,6] [8,10]`
+
+<Quiz
+  question="Depois de classificar os intervalos por início, que condição determina que dois intervalos consecutivos se sobreponham?"
+  options="atual.início > anterior.fim|atual.início == anterior.início|atual.start <= anterior.end|atual.fim < anterior.início"
+  answer="2"
+  explanation="Se o intervalo atual começar antes ou exatamente quando o anterior termina, eles se sobrepõem e devem ser mesclados."
+/>
+
+## Inserir intervalo
+
+Dados intervalos não sobrepostos classificados e um novo intervalo, insira-o e mescle conforme necessário (LeetCode 57). Dividido em três fases:
+
+1. Adicione todos os intervalos que terminam antes do início do novo
+2. Mesclar todos os intervalos sobrepostos com o novo
+3. Adicione os intervalos restantes inalterados
+
+<ThinkAboutIt>O intervalo de inserção é frequentemente apresentado sem que a etapa de mesclagem seja óbvia. Como você reconheceria isso como um problema de mesclagem durante uma entrevista?</ThinkAboutIt>
+
+## Salas de Reuniões I - Posso Participar de Todas?
+
+Classifique por horário de início. Se o início de algum intervalo for anterior ao final do intervalo anterior, há um conflito.
+
+```python
+def can_attend(intervals):
+    intervals.sort()
+    for i in range(1, len(intervals)):
+        if intervals[i][0] < intervals[i - 1][1]:
+            return False
+    return True
+```
+
+## Salas de Reuniões II - Salas Mínimas
+
+É aqui que a **abordagem baseada em eventos** brilha. Separe o início e o fim em duas listas classificadas e, em seguida, varra:
+
+```python
+import heapq
+
+def min_rooms(intervals):
+    intervals.sort()
+    heap = []
+    for start, end in intervals:
+        if heap and heap[0] <= start:
+            heapq.heappop(heap)
+        heapq.heappush(heap, end)
+    return len(heap)
+```
+
+O heap rastreia a primeira reunião final. Se terminar antes do próximo começar, reaproveitamos a sala. O tamanho máximo do heap é a resposta.
+
+<Illustration src="/images/lessons/interval-problems.svg" alt="Linha do tempo mostrando intervalos de reuniões sobrepostos que exigem várias salas" caption="Cada fatia vertical mostra reuniões simultâneas – o pico representa o número mínimo de salas necessárias." />
+
+<FunFact>Salas de Reunião II é essencialmente o mesmo problema que encontrar o número máximo de intervalos sobrepostos em qualquer ponto - um conceito usado no agendamento de threads de CPU, alocação de largura de banda e planejamento de leitos hospitalares.</FunFact>
+
+## Intervalos não sobrepostos - Remoções mínimas
+
+Dados os intervalos, encontre o número mínimo a ser removido para que nenhuma sobreposição (LeetCode 435). Ganancioso: classifique por **horário de término**, mantenha sempre o intervalo que termina mais cedo - isso deixa mais espaço para intervalos futuros.
+
+```python
+def erase_overlap(intervals):
+    intervals.sort(key=lambda x: x[1])
+    count, prev_end = 0, float('-inf')
+    for start, end in intervals:
+        if start >= prev_end:
+            prev_end = end
+        else:
+            count += 1
+    return count
+```
+
+<Quiz
+  question="Por que a classificação por horário de término (não por horário de início) funciona para o problema de intervalos não sobrepostos?"
+  options="Reduz a complexidade do tempo|Terminar mais cedo deixa espaço máximo para intervalos subsequentes|Ele lida melhor com os laços|Evita intervalos negativos"
+  answer="1"
+  explanation="Manter avidamente o intervalo que termina mais cedo maximiza o cronograma restante disponível para futuros intervalos não sobrepostos."
+/>
+
+## Interseções da lista de intervalos
+
+Dadas duas listas de intervalos classificadas, encontre todas as interseções (LeetCode 986). Use dois ponteiros – um por lista. A interseção de `[a1, a2]` e `[b1, b2]` é `[max(a1, b1), min(a2, b2)]` se for válida (início ≤ fim). Avance o ponteiro cujo intervalo termina primeiro.
+
+## A técnica da linha de varredura
+
+Em vez de comparar intervalos aos pares, decomponha cada um em eventos:
+
+```
+[1,4] → +1 at 1, -1 at 4
+[2,6] → +1 at 2, -1 at 6
+```
+
+Classifique os eventos por tempo. Varra da esquerda para a direita, mantendo uma contagem contínua. A contagem de pico responde a perguntas de “sobreposição máxima”. Isso generaliza o Meeting Rooms II para problemas arbitrários de processamento de eventos.
+
+## Reserva de calendário
+
+**My Calendar I** (LeetCode 729): mantém intervalos reservados e rejeita sobreposições. **Meu Calendário II**: permite sobreposições únicas, mas rejeita reservas triplas. A linha de varredura simplifica a detecção de sobreposições multicamadas.
+
+## Reconhecimento de padrões - Quando suspeitar de intervalos
+
+Procure estas pistas nas declarações dos problemas:
+
+- Palavras como "sobreposição", "conflitante", "programação", "intervalo"
+- Pares de valores iniciais/finais
+- Dúvidas sobre “quantos simultâneos” ou “recursos mínimos”
+- Dados que podem ser representados como segmentos em uma reta numérica
+
+<Quiz
+  question="Qual estratégia de classificação é a MELHOR para o problema do 'número mínimo de intervalos para remover'?"
+  options="Ordenar por horário de início crescente|Classificar por horário de término em ordem crescente|Classificar por comprimento de intervalo decrescente|Não é necessária classificação"
+  answer="1"
+  explanation="A classificação por horário de término permite uma abordagem gananciosa: sempre mantenha o intervalo terminando mais cedo para maximizar espaço para outros."
+/>
+
+<ThinkAboutIt>A técnica da linha de varredura converte problemas de intervalo em problemas de processamento de eventos. Você consegue pensar em um sistema do mundo real (fora das entrevistas de codificação) que use exatamente essa abordagem?</ThinkAboutIt>
+
+---
+
+## 📚 Leitura adicional
+
+- [Merge Intervals - LeetCode 56](https://leetcode.com/problems/merge-intervals/) - O problema inicial essencial para o domínio do intervalo
+- [Algoritmo de linha de varredura - Algoritmos CP](https://cp-algorithms.com/geometry/intersecting_segments.html) - Exploração mais aprofundada do paradigma da linha de varredura
+- [Salas de reunião II - LeetCode 253](https://leetcode.com/problems/meeting-rooms-ii/) - O clássico problema de agendamento de intervalo de min-heap

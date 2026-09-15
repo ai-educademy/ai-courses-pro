@@ -1,0 +1,33 @@
+---
+title: "Tool-verwendende Agenten und MCP"
+description: "Gehen Sie von beeindruckenden Demos zu begrenzten, beobachtbaren Agenten über, die Werkzeuge sicher verwenden."
+order: 12
+difficulty: intermediate
+duration: 45
+icon: "🧰"
+published: true
+machineTranslated: true
+---
+## Workflow oder Agent?
+
+Verwenden Sie einen Workflow, wenn die Schritte bekannt sind und deterministisch sein sollten. Verwenden Sie einen Agenten, wenn das System zwischen Tools auswählen oder sich an während der Ausführung ermittelte Informationen anpassen muss. Beginnen Sie mit dem einfachsten Design, das den Anforderungen entspricht.
+
+## Ein Werkzeug ist ein Vertrag
+
+Jedes Tool sollte Folgendes definieren:
+
+- Ein enger Name und Zweck.
+– Ein typisiertes Eingabeschema mit Validierung.
+- Explizite Autorisierungs- und Mietergrenzen.
+- Eine nützliche, kompakte Ergebnisform.
+- Zeitüberschreitungen, Wiederholungsversuche, Idempotenz und ein Prüfdatensatz.
+
+Model Context Protocol (MCP) standardisiert, wie kompatible Clients Tools und Ressourcen entdecken und aufrufen. Es entfällt nicht die Notwendigkeit einer Authentifizierung, der geringsten Berechtigung, einer Eingabevalidierung oder einer menschlichen Genehmigung für Folgemaßnahmen.
+
+## Sichere Agentengrenzen
+
+Halten Sie die Planung getrennt von der Ausführung. Behandeln Sie abgerufenen Text und Werkzeugausgaben als nicht vertrauenswürdige Daten. Begrenzen Sie die Anzahl der Werkzeuge und die Rekursionstiefe. Fordern Sie eine Bestätigung an, bevor Sie Nachrichten senden, Datensätze ändern, Geld ausgeben oder eine unwiderrufliche Änderung vornehmen.
+
+## Bauherausforderung
+
+Erstellen Sie einen Agenten, der einen kleinen Dokumentensatz durchsuchen, ein Ergebnis berechnen und eine E-Mail verfassen (aber nicht senden) kann. Protokollieren Sie jeden Tool-Aufruf, lehnen Sie fehlerhafte Argumente ab, fügen Sie eine Zeitüberschreitung hinzu und testen Sie Eingabeaufforderungstext in einem abgerufenen Dokument.

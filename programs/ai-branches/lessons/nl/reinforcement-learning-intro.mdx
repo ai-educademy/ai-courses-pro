@@ -1,0 +1,237 @@
+---
+title: "Versterkend leren: AI onderwijzen met vallen en opstaan"
+description: "Ontdek hoe versterkend leren werkt: de trainingsaanpak achter AlphaGo, ChatGPT's RLHF, game-playing AI en robotica."
+order: 13
+difficulty: "intermediate"
+duration: 30
+icon: "🎮"
+published: true
+machineTranslated: true
+---
+# Versterkend leren: AI onderwijzen met vallen en opstaan
+
+Hoe leert een kind lopen? Niemand overhandigt hen een gelabelde dataset met voorbeelden van ‘goede stap/slechte stap’. Niemand schrijft de natuurkundige vergelijkingen op voor evenwicht. Ze proberen het, ze vallen, ze proberen het anders, ze verbeteren geleidelijk – geleid door feedback van de wereld om hen heen.
+
+Deze intuïtie (**leren met vallen en opstaan, geleid door beloningen en straffen**) vormt de basis van **Reinforcement Learning (RL)**, de aanpak achter enkele van de meest spectaculaire prestaties van AI: het verslaan van wereldkampioenen met Go en schaken, het trainen van ChatGPT om behulpzaam te zijn en het leren lopen van robots.
+
+## 🎯 Het kernframework: agent, omgeving, beloning
+
+Elk RL-probleem heeft dezelfde fundamentele structuur:
+
+```
+        ┌─────────────────────────────────────────┐
+        │              ENVIRONMENT                 │
+        │   (the world the agent operates in)      │
+        └─────────────────┬───────────────────────┘
+                          │
+         State (s_t)      │      Reward (r_t)
+         What the         │      How good was
+         agent sees ◄─────┤      the last action?
+                          │
+        ┌─────────────────▼───────────────────────┐
+        │                 AGENT                    │
+        │   (the AI that takes actions)            │
+        └─────────────────┬───────────────────────┘
+                          │
+                          │ Action (a_t)
+                          ▼
+              Agent acts on the environment,
+              environment transitions to state s_{t+1}
+```
+
+- **Agent**: het AI-systeem dat beslissingen neemt
+- **Omgeving**: alles waarmee de agent communiceert (een game, een simulatie, de omgeving van een fysieke robot)
+- **Status**: de huidige observatie van de omgeving door de agent
+- **Actie**: wat de agent doet (ga naar links, beweeg een robotarm, kies een woord)
+- **Beloning**: een numeriek signaal dat aangeeft hoe goed de actie was (+1 voor het scoren van een doelpunt, -1 voor het verliezen van een leven, +10 voor het voltooien van een taak)
+- **Beleid**: de strategie van de agent – een mapping van toestanden naar acties
+
+Het doel van de agent is om een ​​**beleid** te leren dat de totale **cumulatieve beloning** in de loop van de tijd maximaliseert, en niet alleen de onmiddellijke beloning.
+
+## 🔍 Exploratie versus uitbuiting: het centrale dilemma
+
+RL-agenten worden geconfronteerd met een voortdurende spanning:
+
+**Exploitatie**: doe wat je al weet dat goed werkt – onderneem de actie die op dat moment het beste lijkt.
+
+**Verkenning**: probeer iets nieuws. Misschien is er een betere strategie die je nog niet hebt ontdekt.
+
+Een robot die alleen maar exploiteert, zal nooit een betere route ontdekken. Een robot die alleen maar verkent, zal nooit ergens betrouwbaar komen.
+
+Een eenvoudige maar effectieve strategie is **ε-greedy**:
+
+```python
+import random
+
+epsilon = 0.1  # 10% exploration rate
+
+def choose_action(state, Q_table, epsilon):
+    if random.random() < epsilon:
+        # Explore: choose a random action
+        return random.choice(available_actions)
+    else:
+        # Exploit: choose the action with highest expected reward
+        return argmax(Q_table[state])
+```
+
+Met ε = 0,1 verkent de agent 10% van de tijd willekeurig en exploiteert hij zijn aangeleerde kennis 90% van de tijd. Normaal gesproken begint ε hoog (veel onderzoek in het begin) en neemt af tijdens de training naarmate de agent meer zelfvertrouwen krijgt.
+
+<FunFact>Het exploratie-exploitatie-dilemma is niet alleen een AI-probleem; het komt ook voor in de menselijke besluitvorming. Moet je naar je favoriete restaurant gaan (exploit) of iets nieuws proberen (explore)? Hetzelfde wiskundige raamwerk is van toepassing.</FunFact>
+
+## 📊 Markov-beslissingsprocessen (MDP's)
+
+De meeste RL-problemen worden geformaliseerd als **Markov-beslissingsprocessen (MDP's)**. De belangrijkste veronderstelling is de **Markov-eigenschap**: de huidige toestand bevat alle informatie die nodig is om de beste actie te kiezen – de geschiedenis uit het verleden doet er niet toe, alleen waar je nu bent.
+
+Een MDP wordt gedefinieerd door:
+- **S**: een reeks mogelijke toestanden
+- **A**: een reeks mogelijke acties
+- **P(s' | s, a)**: overgangswaarschijnlijkheid — gegeven toestand s en actie a, waarschijnlijkheid om in toestand s' te belanden
+- **R(s, a)**: beloningsfunctie — onmiddellijke beloning voor het ondernemen van actie a in staat s
+- **γ (gamma)**: kortingsfactor — hoeveel toekomstige beloningen waard zijn in verhouding tot directe beloningen
+
+De **kortingsfactor** is belangrijk: beloningen in de nabije toekomst zijn meer waard dan beloningen ver weg:
+
+```python
+# Cumulative discounted reward (Return)
+# R = r_0 + γ·r_1 + γ²·r_2 + γ³·r_3 + ...
+# With γ = 0.99: future rewards are nearly as valuable as immediate ones
+# With γ = 0.5:  rewards 10 steps away are worth only 0.1% of immediate reward
+
+gamma = 0.99
+total_return = sum(gamma**t * reward for t, reward in enumerate(rewards))
+```
+
+## 🧮 Q-Learning: op waarden gebaseerde RL
+
+**Q-learning** is een van de fundamentele RL-algoritmen. Het leert een **Q-functie**: Q(s, a) = de verwachte totale toekomstige beloning als je actie onderneemt in toestand s en daarna voor altijd optimaal handelt.
+
+```python
+import numpy as np
+
+# Initialise Q-table to zeros
+n_states  = 16   # e.g., a 4×4 grid world
+n_actions = 4    # up, down, left, right
+Q = np.zeros((n_states, n_actions))
+
+# Q-learning update rule (the Bellman equation)
+def update_Q(Q, state, action, reward, next_state, alpha=0.1, gamma=0.99):
+    """
+    alpha: learning rate — how fast to update Q values
+    gamma: discount factor — how much to value future rewards
+    """
+    # Current estimate
+    current_Q = Q[state, action]
+    
+    # Target: immediate reward + discounted best future value
+    target = reward + gamma * np.max(Q[next_state])
+    
+    # Move current estimate towards target
+    Q[state, action] = current_Q + alpha * (target - current_Q)
+    
+    return Q
+```
+
+Gedurende duizenden afleveringen convergeert Q-learning naar de optimale Q-functie. Eenmaal geleerd, is het beleid eenvoudigweg: onderneem in elke staat de actie met de hoogste Q-waarde.
+
+**Deep Q-Networks (DQN)**, ontwikkeld door DeepMind in 2013, verving de Q-table door een diep neuraal netwerk, waardoor Q-learning kon worden geschaald naar complexe visuele inputs. DQN heeft op beroemde wijze geleerd om 49 Atari-spellen rechtstreeks vanuit pixels te spelen, en op veel daarvan prestaties op menselijk niveau te bereiken.
+
+## 🚀 Beleidsgradiëntmethoden
+
+Q-learning leert indirect de waarde van acties. **Beleidsgradiënt**-methoden optimaliseren direct het beleid: de mapping van staten naar acties.
+
+```python
+# The core idea: if an action led to high reward, make it more likely
+# If an action led to low reward, make it less likely
+
+def policy_gradient_update(policy_network, states, actions, rewards):
+    # Compute discounted returns for each timestep
+    returns = compute_returns(rewards, gamma=0.99)
+    
+    # Normalise returns (reduces variance)
+    returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+    
+    # Policy loss: -log(π(a|s)) × G_t
+    # Maximise log-probability of actions weighted by how good they were
+    log_probs = policy_network.log_prob(states, actions)
+    loss = -(log_probs * returns).mean()
+    
+    # Backpropagate and update
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+```
+
+Moderne beleidsgradiëntvarianten zijn onder meer:
+- **PPO (Proximal Policy Optimization)**: het meest gebruikte algoritme van dit moment, gebruikt in de RLHF-training van ChatGPT
+- **A3C (Asynchronous Advantage Actor-Critic)**: parallelle training in meerdere omgevingen
+- **SAC (Soft Actor-Critic)**: uitstekend voor ruimtes met continue actie (robotica)
+
+## 💬 RLHF: hoe ChatGPT is afgestemd
+
+Een van de meest impactvolle recente toepassingen van RL is **Reinforcement Learning from Human Feedback (RLHF)** – de techniek die wordt gebruikt om ChatGPT en andere LLM's behulpzaam, onschadelijk en eerlijk te maken.
+
+Het proces bestaat uit drie fasen:
+
+**Fase 1: Voortraining**
+Train een groot taalmodel op internettekst om het volgende token te voorspellen. Dit geeft het model een brede kennis en taalvaardigheid, maar geen begrip van wat mensen nuttig vinden.
+
+**Fase 2: Train een beloningsmodel**
+Vraag menselijke annotators om paren modelreacties te beoordelen: "Welke reactie is beter?" Gebruik deze beoordelingen om een ​​**beloningsmodel** te trainen: een neuraal netwerk dat beoordeelt hoe goed een reactie is.
+
+**Fase 3: RL-fijnafstemming met PPO**
+Gebruik het beloningsmodel als omgeving. De LLM is de agent; zijn acties genereren tokens; de beloning komt van de score van het beloningsmodel op het voltooide antwoord.
+
+```
+Human prompt → LLM generates response → Reward model scores it
+                                       → PPO updates LLM to generate
+                                         higher-scoring responses
+```
+
+Deze lus duurt duizenden iteraties totdat de LLM consistent antwoorden genereert die mensen hoog waarderen. Het resultaat: een model dat niet alleen kennis heeft, maar ook echt behulpzaam probeert te zijn.
+
+<ThinkAboutIt>RLHF traint ChatGPT om reacties te genereren die menselijke annotators hoog waarderen. Welke potentiële problemen kunnen zich voordoen als de menselijke annotators vooroordelen hebben, of als 'welke annotators hoog scoren' niet hetzelfde is als 'wat is feitelijk waar en nuttig'?</ThinkAboutIt>
+
+## ♟️ Het AlphaGo-verhaal
+
+Go is een bordspel dat zo complex is (meer mogelijke bordposities dan atomen in het waarneembare universum) dat het werd beschouwd als een van de moeilijkste uitdagingen op het gebied van AI. De meeste deskundigen verwachtten dat menselijke kampioenen tientallen jaren ongeslagen zouden blijven.
+
+In maart 2016 versloeg **AlphaGo** van DeepMind wereldkampioen Lee Sedol met 4-1.
+
+Het systeem maakte gebruik van een combinatie van:
+- Een **beleidsnetwerk** (getraind via begeleid leren over menselijke spelletjes, vervolgens verfijnd met RL) om veelbelovende stappen voor te stellen
+- Een **waardenetwerk** (getraind via RL door middel van zelfspel) om bordposities te evalueren
+- **Monte Carlo Tree Search** om vooruit te plannen, begeleid door beide netwerken
+
+**AlphaZero** (2017) ging nog verder: het leerde Go, schaken en shogi *vanaf nul*, zonder menselijke spelgegevens - alleen de regels en zelfspel via RL. Het overtrof AlphaGo in drie dagen en de beste schaakengine (Stockfish) in vier uur.
+
+## 🤖 Roboticatoepassingen
+
+RL staat centraal in modern robotica-onderzoek:
+
+- **OpenAI's Dactyl** (2019): een robothand die volledig is getraind in simulatie met behulp van RL, die een Rubik's Cube met slechts één hand kan oplossen
+- **Boston Dynamics**: gebruikt RL naast de traditionele besturingstheorie voor de behendige voortbeweging van Spot- en Atlas-robots
+- **Manipulatietaken**: robots die objecten leren kiezen, plaatsen en assembleren in ongestructureerde omgevingen
+- **Autonoom rijden**: RL wordt gebruikt in simulatie om het rijbeleid te trainen voordat het in de echte wereld wordt geïmplementeerd
+
+Een belangrijke uitdaging in robotica RL is de **sim-to-real gap**: beleid dat is getraind in simulatie mislukt vaak in de echte wereld omdat de simulatie de fysica, wrijving, sensorruis en onverwachte objecten niet perfect modelleert.
+
+## ⚠️ Beperkingen van versterkend leren
+
+RL is krachtig, maar heeft echte beperkingen:
+
+- **Voorbeeldefficiëntie**: RL vereist doorgaans miljoenen of miljarden interacties om te leren wat een menselijk kind in uren leert. AlphaGo speelde tijdens de training het equivalent van duizenden jaren menselijke spelletjes
+- **Beloningshacking**: agenten vinden soms slimme manieren om de beloning te maximaliseren die in strijd zijn met de geest van het doel (een schoonmaakrobot die leert rommel te *verbergen* in plaats van deze op te ruimen)
+- **Schaarse beloningen**: wanneer beloningen zeldzaam zijn (alleen aan het einde van het spel), gaat het leren erg langzaam
+- **Veiligheid**: verkennende RL-agenten kunnen gevaarlijke acties ondernemen in de echte wereld – een zelfrijdende auto kan niet willekeurig op verkenning gaan in het verkeer
+
+<Quiz question="Wat is RLHF en waarom wordt het gebruikt om modellen als ChatGPT te trainen?" options="Versterkend leren met menselijke feedback – gebruikt om LLM’s behulpzamer te maken door menselijke voorkeursbeoordelingen als beloningssignaal te gebruiken|Willekeurig leren uit menselijke bestanden – een techniek voor gegevensverzameling|Recursieve taal van menselijke vormen – een techniek die voorafgaat aan de training|Beloon het leren van menselijke eigenschappen – alleen gebruikt voor robotica" answer="0" explanation="RLHF (Reinforcement Learning from Human Feedback) traint een beloningsmodel op basis van menselijke voorkeursoordelen en gebruikt vervolgens PPO om de LLM te verfijnen om reacties te genereren die hoog scoren onder dat beloningsmodel. Het is de belangrijkste techniek die ChatGPT nuttig en gemoedelijk maakt, in plaats van slechts een voorspeller van ruwe tekst." />
+
+## Belangrijkste afhaalrestaurants
+
+- RL is gebouwd op het raamwerk **agent/omgeving/beloning**: een agent onderneemt actie, ontvangt beloningen en leert een beleid dat de cumulatieve beloning maximaliseert
+- Het dilemma **exploratie versus exploitatie** staat centraal: ε-hebzuchtige en meer geavanceerde strategieën balanceren het proberen van nieuwe dingen tegen het doen van wat al werkt
+- **Markov-beslissingsprocessen (MDP's)** formaliseren RL-problemen; de kortingsfactor γ bepaalt hoeveel de agent toekomstige versus onmiddellijke beloningen waardeert
+- **Q-learning** (en Deep Q-Networks) leren waardefuncties; **beleidsgradiënt**-methoden (PPO, A3C) optimaliseren het beleid direct
+- **RLHF** is de techniek achter het behulpzame gedrag van ChatGPT: menselijke voorkeursbeoordelingen trainen een beloningsmodel, dat vervolgens de PPO-verfijning van de LLM begeleidt
+- **AlphaGo/AlphaZero** heeft aangetoond dat RL met zelfspel menselijke wereldkampioenen kan overtreffen in complexe games, en in dagen kan bereiken wat mensen millennia aan opgebouwde kennis kostte
+- De belangrijkste beperkingen van RL zijn onder meer **slechte monsterefficiëntie**, **beloninghacking** en de **sim-to-real kloof** in robotica

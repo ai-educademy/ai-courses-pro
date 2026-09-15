@@ -1,0 +1,189 @@
+---
+title: "Systemdesign-Mock-Interview – eine 45-minütige Simulation eines leitenden Ingenieurs"
+description: "Eine vollständige Komplettlösung für das Systemdesign einer Lebensmittellieferplattform – Anforderungen, API-Design, Architektur, detaillierte Einblicke und Skalierung – genau wie ein echtes Interview mit einem leitenden Ingenieur aufgebaut."
+order: 9
+difficulty: "advanced"
+duration: 25
+icon: "🏗️"
+published: true
+machineTranslated: true
+---
+# System Design Mock Interview – Eine 45-minütige Simulation eines leitenden Ingenieurs
+
+Systemdesign-Interviews unterscheiden leitende Ingenieure von allen anderen. Es gibt keine einzige richtige Antwort – Interviewer bewerten Ihr **strukturiertes Denken**, Ihre Kompromissanalyse und Ihre Fähigkeit, mit Mehrdeutigkeiten umzugehen. Bei dieser Lektion handelt es sich um eine vollständige 45-minütige Simulation.
+
+## 🎯 Das Problem: Entwerfen Sie ein Lebensmittelliefersystem
+
+* „Entwerfen Sie eine Plattform für die Lieferung von Lebensmitteln wie Uber Eats oder Deliveroo, die Kunden, Restaurants und Lieferfahrer verbindet.“*
+
+<Illustration src="/images/lessons/system-design-mock-interview.svg" alt="High-Level-Architektur eines Lebensmittelliefersystems mit Benutzer-, Restaurant-, Bestell- und Fahrerdiensten" caption="Die vier Kernbereiche einer Essenslieferplattform – jeder einzelne ist ein begrenzter Kontext mit seinem eigenen Service." />
+
+## Phase 1: Anforderungserfassung (5 Minuten)
+
+**Beginnen Sie niemals sofort mit dem Zeichnen von Kästchen.** Stellen Sie zunächst klärende Fragen:
+
+**Funktionale Anforderungen:**
+- Kunden durchsuchen Restaurants, sehen sich Menüs an, geben Bestellungen auf und verfolgen die Lieferung in Echtzeit
+- Restaurants verwalten Menüs, akzeptieren/ablehnen Bestellungen und aktualisieren den Vorbereitungsstatus
+- Fahrer erhalten Lieferanfragen, navigieren zur Abholung/Abgabe und bestätigen die Lieferung
+- Geschätzte Lieferzeit (EDT) in Echtzeit, die während des gesamten Bestelllebenszyklus angezeigt wird
+
+**Nichtfunktionale Anforderungen:**
+- **Verfügbarkeit**: 99,99 % Betriebszeit (≈52 Minuten Ausfallzeit pro Jahr)
+- **Latenz**: Suche < 200 ms, Auftragserteilung < 500 ms, Standortaktualisierungen < 1 s
+- **Maßstab**: 50 Millionen monatlich aktive Benutzer, 5 Millionen Bestellungen pro Tag, 500.000 gleichzeitige Benutzer in der Spitze
+- **Konsistenz**: letztendliche Konsistenz, die für die Suche akzeptabel ist; starke Konsistenz für Zahlungen
+
+<Quiz question="Warum ist Eventual Consistency für die Restaurantsuche akzeptabel, aber NICHT für die Zahlungsabwicklung?" options="Die Suche ist weniger wichtig als Zahlungen|Die Anzeige einer etwas veralteten Speisekarte ist tolerierbar; Einen Benutzer zweimal zu belasten, ist nicht der Fall|Die endgültige Konsistenz ist immer schneller|Zahlungs-APIs unterstützen keine Eventual Consistency" answer="1" explanation="Wenn ein Benutzer ein Restaurant sieht, das gerade geschlossen hat, stellt dies eine kleine Unannehmlichkeit dar – ein erneuter Versuch behebt das Problem. Aber die doppelte Bearbeitung einer Zahlung verursacht einen echten finanziellen Schaden. Die Kosten der Inkonsistenz bestimmen das Konsistenzmodell." />
+
+## Phase 2: API-Design (5 Minuten)
+
+Definieren Sie die Kernverträge vor der Architektur:
+
+```
+# Customer APIs
+GET    /api/v1/restaurants?lat={}&lng={}&cuisine={}  → Restaurant[]
+GET    /api/v1/restaurants/{id}/menu                  → Menu
+POST   /api/v1/orders                                 → Order
+GET    /api/v1/orders/{id}/track                      → OrderStatus + DriverLocation
+
+# Restaurant APIs
+PATCH  /api/v1/restaurants/{id}/menu/items/{itemId}   → MenuItem
+POST   /api/v1/orders/{id}/accept                     → Order
+POST   /api/v1/orders/{id}/ready                      → Order
+
+# Driver APIs
+POST   /api/v1/drivers/{id}/location                  → void (fire-and-forget)
+POST   /api/v1/deliveries/{id}/accept                 → Delivery
+POST   /api/v1/deliveries/{id}/complete               → Delivery
+```
+
+**Wichtige Entscheidung**: Verwenden Sie WebSockets für die Echtzeit-Fahrerverfolgung, REST für alles andere.
+
+## Phase 3: High-Level-Architektur (10 Minuten)
+
+### Kerndienstleistungen
+
+| Service | Verantwortung | Datenbank |
+|---------|---------------|----------|
+| **Benutzerservice** | Authentifizierung, Profile, Adressen | PostgreSQL |
+| **Restaurantservice** | Menüs, Verfügbarkeit, Öffnungszeiten | PostgreSQL + Elasticsearch |
+| **Bestellservice** | Auftragslebenszyklus, Zustandsmaschine | PostgreSQL (starke Konsistenz) |
+| **Fahrerservice** | Fahrerstandort, Verfügbarkeit, Übereinstimmung | Redis (Standort) + PostgreSQL |
+| **Zahlungsdienst** | Gebühren, Rückerstattungen, Restaurantauszahlungen | PostgreSQL (ACID erforderlich) |
+| **Benachrichtigungsdienst** | Push-, SMS- und E-Mail-Benachrichtigungen | Verbraucher der Nachrichtenwarteschlange |
+
+### Kommunikationsmuster
+
+- **Synchronous**: API Gateway → einzelne Dienste (REST/gRPC)
+- **Asynchron**: Bestellereignisse werden an **Kafka** veröffentlicht und von Zahlungs-, Benachrichtigungs- und Analysediensten genutzt
+- **Echtzeit**: Treiberstandortaktualisierungen über WebSocket → gespeichert in **Redis** mit Geodatenindizierung
+
+<FunFact>Uber verarbeitet weltweit über 1 Million Standortaktualisierungen pro Sekunde. Sie bauten ihr eigenes Geoindizierungssystem (H3) mit sechseckigen hierarchischen Gittern auf, da herkömmliche Breiten-/Längengradabfragen nicht mit der Skalierung mithalten konnten.</FunFact>
+
+## Phase 4: Deep Dive – Kritische Komponenten (15 Minuten)
+
+### Treiber-Matching-Algorithmus
+
+Wenn eine Bestellung zur Abholung bereitsteht, muss der Matching-Service den optimalen Fahrer zuweisen:
+
+```
+Score(driver) = w1 × (1 / distance_to_restaurant)
+              + w2 × driver_rating
+              + w3 × (1 / current_active_orders)
+              + w4 × acceptance_rate
+```
+
+**Implementierung**: Fragen Sie Redis `GEORADIUS` nach Fahrern im Umkreis von 5 km um das Restaurant ab, bewerten Sie jeden Kandidaten und weisen Sie den verfügbaren Fahrer mit der höchsten Bewertung zu. Wenn Sie abgelehnt werden, bieten Sie es dem nächsten Fahrer mit einer Auszeit von 30 Sekunden an.
+
+### Auftragsverfolgung in Echtzeit
+
+```
+Client ←→ WebSocket Gateway ←→ Driver Service
+                                    ↑
+                              Redis GEO Store
+                            (GEOADD, GEOPOS)
+```
+
+Fahrer veröffentlichen alle 4 Sekunden GPS-Koordinaten. Das WebSocket-Gateway abonniert Standortaktualisierungen für aktive Bestellungen und überträgt sie an das Gerät des Kunden. **Redis Pub/Sub** verarbeitet Fan-Out effizient.
+
+### Geschätzte Lieferzeit
+
+EDT ist eine **mehrstufige Vorhersage**:
+
+```
+EDT = restaurant_prep_time + driver_pickup_travel + dropoff_travel + buffer
+
+Where:
+- restaurant_prep_time  → ML model trained on historical order data per restaurant
+- driver_pickup_travel  → distance/traffic API (Google Maps, Mapbox)
+- dropoff_travel        → same routing API
+- buffer                → dynamic, increases during rain/peak hours
+```
+
+<ThinkAboutIt>Der obige Matching-Algorithmus verwendet feste Gewichte (w1–w4). Wie würden Sie daraus ein lernendes System entwickeln, das gleichzeitig die Liefergeschwindigkeit UND die Zufriedenheit der Fahrer optimiert?</ThinkAboutIt>
+
+### Zahlungsabwicklung
+
+Zahlungen folgen einem **zweiphasigen Muster**:
+
+1. **Autorisieren** – Geld reservieren, wenn die Bestellung aufgegeben wird (halten, nicht belasten)
+2. **Erfassung** – Berechnen Sie den tatsächlichen Betrag nach der Lieferbestätigung
+
+Dadurch werden Bestelländerungen, Stornierungen und teilweise Rückerstattungen reibungslos abgewickelt. Verwenden Sie bei jeder Zahlungsanforderung einen **Idempotenzschlüssel**, um eine doppelte Belastung bei Wiederholungsversuchen zu verhindern.
+
+<Quiz question="Warum ein zweistufiges Zahlungsmuster verwenden (Autorisierung, dann Erfassung), anstatt sofort zu belasten?" options="Es ist schneller als eine einzige Ladung|Es verarbeitet Stornierungen, Änderungen und Rückerstattungen ohne komplexe Stornierungslogik|Zahlungsanbieter verlangen es|Es reduziert die Transaktionsgebühren" answer="1" explanation="Durch die Autorisierung und anschließende Erfassung können Sie Gelder halten, ohne sich dafür zu verpflichten. Wenn das Restaurant storniert oder sich die Bestellung ändert, geben Sie einfach die Autorisierung frei – eine Rückerstattungsbearbeitung ist nicht erforderlich. Dies vereinfacht Randfälle erheblich." />
+
+## Phase 5: Skalierung und Engpässe (10 Minuten)
+
+### Datenbankskalierung
+
+- **Bestellservice**: Shard um `order_id` – Bestellungen sind unabhängig, die horizontale Skalierung ist unkompliziert
+- **Restaurantservice**: Replikate für Suchanfragen lesen, Elasticsearch für Volltext- und Geodatensuche
+- **Treiberstandort**: Redis-Cluster mit Geoindizierung – reine In-Memory-Lesevorgänge im Submillisekundenbereich
+
+### Umgang mit Spitzenlast (Surge)
+
+Zu Spitzenzeiten (Freitag 19 Uhr, große Sportveranstaltungen) kann das Bestellvolumen um das Zehnfache ansteigen:
+
+- **Automatische Skalierung** von Anwendungs-Pods basierend auf der Warteschlangentiefe, nicht der CPU
+- **Preiserhöhungen**, um Angebot und Nachfrage auszugleichen – erhöhen Sie die Liefergebühren, wenn das Fahrerangebot gering ist
+- **Ratenbegrenzung** pro Benutzer, um Missbrauch während der Spitzenzeiten zu verhindern
+- **Leistungsschalter** auf nachgelagerten Diensten – sanfte Verschlechterung bei kaskadierendem Ausfall
+
+### Einzelne Fehlerquellen
+
+| Komponente | Schadensbegrenzung |
+|-----------|-----------|
+| API-Gateway | Mehrere Instanzen hinter einem Load Balancer, Gesundheitsprüfungen |
+| Kafka | Multi-Broker-Cluster mit Replikationsfaktor 3 |
+| Redis | Redis Sentinel für automatisches Failover |
+| Zahlungsanbieter | Zweitanbieter mit automatischem Fallback |
+
+<Quiz question="Sie skalieren den Bestellservice. Welcher Sharding-Schlüssel bietet die BESTE Schreibverteilung?" options="restaurant_id – alle Bestellungen für ein Restaurant auf einem Shard|user_id – alle Bestellungen für einen Benutzer auf einem Shard|order_id – Bestellungen, die zufällig über Shards verteilt sind|city_id – alle Bestellungen in einer Stadt auf einem Shard" answer="2" explanation="Durch Sharding nach order_id werden Schreibvorgänge gleichmäßig verteilt, da Auftrags-IDs zufällig generiert werden (UUIDs oder Snowflake-IDs). Durch das Sharding nach „restaurant_id” oder „city_id” entstehen Hotspots – beliebte Restaurants und Städte erhalten überproportional viel Verkehr." />
+
+<ThinkAboutIt>Ihr Interviewer fragt: „Was passiert, wenn der Zahlungsdienst während einer Spitzenzeit 30 Sekunden lang nicht verfügbar ist?“ Gehen Sie den genauen Fehlermodus durch, wie Aufträge betroffen sind und wie eine Wiederherstellung aussieht.</ThinkAboutIt>
+
+## 💡 Tipps für Vorstellungsgespräche
+
+1. **Strukturieren Sie Ihre Zeit** – verbringen Sie keine 30 Minuten mit Anforderungen
+2. **Kompromisse explizit angeben** – „Ich habe X gegenüber Y gewählt, weil …“
+3. **Einfach beginnen, dann skalieren** – zuerst für 1×-Last entwerfen, dann 100× adressieren
+4. **Zeichnen Sie, während Sie sprechen** – visuelle Kommunikation ist die halbe Bewertung
+5. **Akzeptieren Sie Unbekanntes** – „Ich müsste das vergleichen, aber meine Hypothese ist …“
+
+## 🎯 Wichtige Erkenntnisse
+
+- Beginnen Sie immer mit Anforderungen – funktional und nicht-funktional
+- Entwerfen Sie API-Verträge vor Architekturdiagrammen
+- Tauchen Sie tief in 2–3 Komponenten ein, nicht alle davon oberflächlich
+- Jede architektonische Entscheidung bringt Kompromisse mit sich – nennen Sie sie
+- Üben Sie mit einem Timer: 45 Minuten, keine Verlängerungen
+
+---
+
+## 📚 Weiterführende Literatur
+
+- [System Design Interview von Alex Xu](https://www.amazon.co.uk/System-Design-Interview-insiders-guide/dp/B08CMF2CQF) – Das praktischste Buch zur Vorbereitung von Systemdesign-Interviews
+- [Uber Engineering Blog](https://www.uber.com/en-GB/blog/engineering/) – Tiefe Einblicke in reale Systeme im großen Maßstab
+- [Designing Data-Intensive Applications von Martin Kleppmann](https://dataintensive.net/) – Die definitive Referenz zu den Grundlagen verteilter Systeme

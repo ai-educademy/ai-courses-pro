@@ -1,0 +1,132 @@
+---
+title: "Reinforcement Learning – Wie KI durch Handeln lernt"
+description: "Verstehen Sie, wie KI-Agenten durch Versuch, Irrtum und Belohnung lernen – vom Game-Play-Champion bis zum echten Roboter."
+order: 7
+difficulty: "intermediate"
+duration: 15
+icon: "🎮"
+published: true
+machineTranslated: true
+---
+# Reinforcement Learning – Wie KI durch Handeln lernt
+
+Stellen Sie sich vor, Sie bringen einem Welpen das Sitzen bei. Man gibt ihm kein Lehrbuch, man lässt es Dinge ausprobieren, und wenn es sitzt, gibt man ihm eine Belohnung. Mit der Zeit lernt es, welche Aktionen Belohnungen einbringen. **Reinforcement Learning (RL)** funktioniert auf die gleiche Weise: Ein KI-Agent lernt, indem er mit einer Umgebung interagiert, Feedback erhält und sein Verhalten anpasst, um die langfristige Belohnung zu maximieren.
+
+## Die Agent-Umgebung-Schleife
+
+Jedes RL-System hat die gleiche Kernstruktur:
+
+1. Der **Agent** beobachtet den aktuellen **Zustand** der Umgebung.
+2. Es wählt eine **Aktion** aus den verfügbaren Optionen aus.
+3. Die Umgebung geht in einen neuen Zustand über und gibt ein **Belohnungssignal** zurück.
+4. Der Agent verwendet diese Belohnung, um seine Strategie (sogenannte **Richtlinie**) zu aktualisieren.
+
+Diese Schleife wiederholt sich – möglicherweise millionenfach –, bis der Agent eine Richtlinie entdeckt, die
+erhält durchweg hohe Belohnungen. Im Gegensatz zum überwachten Lernen gibt es keine gekennzeichneten Datensätze
+dem Agenten, was zu tun ist. Es muss wirksames Verhalten allein durch Interaktion entdecken.
+
+<Illustration src="/images/lessons/reinforcement-learning.svg" alt="Diagramm, das die Agent-Umgebung-Schleife zeigt: Zustand, Aktion, Belohnung, nächster Zustand" caption="Die Agent-Umgebung-Schleife ist die Grundlage allen verstärkenden Lernens." />
+
+## Erkundung vs. Ausbeutung
+
+Eines der zentralen Dilemmas von RL: Sollte der Agent das **ausnutzen**, von dem er bereits weiß, dass es funktioniert, oder unbekannte Aktionen **erforschen**, die möglicherweise noch bessere Belohnungen bringen könnten?
+
+- Eine Restaurant-Analogie: Bestellen Sie Ihr Lieblingsgericht (Exploit) oder probieren Sie etwas Neues aus, das vielleicht noch besser ist (Explore)?
+- Zu viel Ausbeutung und der Agent bleibt in mittelmäßigen Strategien stecken. Zu viel Erkundung und es verschwendet Zeit mit schlechten Aktionen.
+
+Die meisten Algorithmen verwenden eine **Epsilon-Greedy**-Strategie: Mit der Wahrscheinlichkeit ε erkundet der Agent zufällig,
+und die restliche Zeit nutzt es seine bekannteste Aktion aus. Im Laufe des Trainings nimmt ε allmählich ab
+Der Agent wird selbstbewusster. Anspruchsvollere Methoden – wie Upper Confidence Bound (UCB)
+und Thompson Sampling – erforschen Sie intelligenter, indem Sie auf unsichere Aktionen abzielen.
+
+<FunFact>AlphaGo von DeepMind hat während des Trainings etwa 30 Millionen selbst gespielte Spiele erkundet – weit mehr Spiele, als ein Mensch in seinem Leben spielen könnte.</FunFact>
+
+## Q-Learning – Eine einfache, aber wirkungsvolle Idee
+
+**Q-Learning** weist jedem Zustands-Aktionspaar einen Wert (Q-Wert genannt) zu. Der Q-Wert stellt die erwartete zukünftige Gesamtbelohnung dar, wenn der Agent diese Aktion in diesem Zustand ausführt und anschließend die beste Richtlinie befolgt.
+
+Die Update-Regel ist überraschend elegant:
+
+```
+Q(state, action) ← Q(state, action) + α × [reward + γ × max Q(next_state, all_actions) − Q(state, action)]
+```
+
+- **α** (Lernrate) steuert, wie schnell der Agent seine Überzeugungen aktualisiert.
+- **γ** (Rabattfaktor) steuert, wie sehr der Agent zukünftige Belohnungen im Vergleich zu unmittelbaren schätzt.
+
+Über viele Episoden hinweg konvergieren die Q-Werte und der Agent kann einfach die Aktion mit dem höchsten Wert auswählen
+Q-Wert in jedem Zustand. Für einfache Umgebungen funktioniert dieser tabellenbasierte Ansatz gut. Wenn der Staat
+Der Platz ist zu groß für eine Tabelle (z. B. rohe Pixeleingaben aus einem Videospiel), ein neuronales Netzwerk
+nähert sich den Q-Werten an – das ist **Deep Q-Learning (DQN)**, der Ansatz, den DeepMind beherrscht
+Atari-Spiele im Jahr 2015.
+
+<Quiz question="Was stellt der Q-Wert beim Q-Learning dar?" options="Die Wahrscheinlichkeit, ein Spiel zu gewinnen|Die erwartete zukünftige Gesamtbelohnung für ein Zustands-Aktionspaar|Die Geschwindigkeit, mit der der Agent lernt|Die Häufigkeit, mit der eine Aktion versucht wurde" answer="1" explanation="Ein Q-Wert schätzt die gesamte kumulative Belohnung, die ein Agent erwarten kann, wenn er in einem bestimmten Zustand eine bestimmte Aktion ausführt und danach die optimale Richtlinie befolgt." />
+
+## Policy-Gradient-Methoden
+
+Q-Learning funktioniert, indem es den Wert von Handlungen lernt. **Richtliniengradienten**-Methoden gehen einen anderen Weg: Sie optimieren direkt die Richtlinie selbst – die Zuordnung von Zuständen zu Aktionen.
+
+Anstatt zu fragen „Wie gut ist diese Aktion?“, fragen sie: „Wie sollte ich meine Aktionswahrscheinlichkeiten anpassen, um mehr Belohnung zu erhalten?“ Der Agent steuert seine Richtlinie mithilfe des Gradientenanstiegs in die Richtung, die die erwartete Belohnung erhöht.
+
+**Proximal Policy Optimization (PPO)**, entwickelt von OpenAI, ist einer der beliebtesten Policy-Gradienten-Algorithmen. Es ist stabil, effizient und wurde zum Trainieren der RL-Komponente von ChatGPT verwendet (über RLHF – Reinforcement Learning from Human Feedback).
+
+## AlphaGo – Das Spiel, das alles veränderte
+
+Im März 2016 besiegte **AlphaGo** von DeepMind Lee Sedol, einen der größten Go-Spieler der Geschichte, mit 4 zu 1 Spielen. Go hat mehr mögliche Brettpositionen als Atome im Universum – eine Brute-Force-Suche war unmöglich.
+
+AlphaGo kombiniert:
+- **Überwachtes Lernen** aus menschlichen Expertenspielen zur Umsetzung seiner Richtlinien.
+- **Selbstspiel-RL**, um weit über das menschliche Niveau hinaus zu verbessern.
+- **Monte-Carlo-Baumsuche** zur effizienten Planung von Umzügen.
+
+Sein Nachfolger, **AlphaGo Zero**, verzichtete vollständig auf menschliche Daten, lernte ausschließlich durch Selbstspiel und übertraf das ursprüngliche AlphaGo innerhalb von 40 Tagen.
+
+<ThinkAboutIt>AlphaGo Zero hat ohne menschliches Wissen gelernt. Bedeutet dies, dass menschliches Fachwissen manchmal eher eine Einschränkung als ein Vorteil für die KI sein kann?</ThinkAboutIt>
+
+## OpenAI Five und Game AI
+
+Im Jahr 2019 besiegte **OpenAI Five** das Weltmeisterteam in Dota 2 – einem Spiel mit unvollständigen Informationen, langen Zeithorizonten und komplexer Teamkoordination. Jeder der fünf Agenten nutzte PPO, das über Monate hinweg auf Tausenden von GPUs trainiert wurde, und sammelte so das Äquivalent von 45.000 Jahren Spielerfahrung.
+
+Spiel-KI war schon immer ein Testgelände für RL, aber die hier entwickelten Techniken sind zu weit übertragbar
+folgenreichere Bereiche. Der Umfang des Trainings – Verteilung von RL auf Tausende von GPUs – 
+hat die Grenzen des rechnerisch Machbaren verschoben und neue Infrastrukturen inspiriert
+groß angelegtes KI-Training.
+
+## Reales Verstärkungslernen
+
+RL wird zunehmend über Spiele hinaus eingesetzt:
+
+- **Robotik** – Roboterarmen beibringen, Objekte zu greifen, im Gelände zu navigieren und Montageaufgaben auszuführen.
+- **Selbstfahrende Fahrzeuge** – Treffen von Spurwechsel- und Kreuzungsentscheidungen im komplexen Verkehr.
+- **Kühlung des Rechenzentrums** – DeepMind nutzte RL, um den Energieverbrauch des Rechenzentrums von Google um 40 % zu senken.
+- **Wirkstoffentdeckung** – Optimierung molekularer Strukturen für gewünschte Eigenschaften.
+
+<Quiz question="Was ist der Kompromiss zwischen Exploration und Exploitation?" options="Wählen Sie zwischen schnellen und langsamen Lernraten|Abwägen zwischen dem Ausprobieren neuer Maßnahmen und dem Festhalten an bekanntermaßen guten Maßnahmen|Entscheidung zwischen überwachtem und unüberwachtem Lernen|Auswahl zwischen Online- und Offline-Training" answer="1" explanation="Erkundung bedeutet, unbekannte Aktionen auszuprobieren, um potenziell bessere Strategien zu entdecken, während Ausbeutung bedeutet, die derzeit beste bekannte Aktion zu nutzen. Für eine effektive RL ist es wichtig, beides in Einklang zu bringen." />
+
+## Belohnungs-Hacking – Wenn KI das System austrickst
+
+Eine entscheidende Herausforderung bei RL ist **Belohnungshacking**: Der Agent findet unerwartete Abkürzungen, um sein Belohnungssignal zu maximieren, ohne die beabsichtigte Aufgabe tatsächlich zu lösen.
+
+Berühmte Beispiele sind ein Bootsrennagent, der herausfand, dass er mehr Punkte erzielen konnte, wenn er sich im Kreis drehte und Bonusgegenstände einsammelte, als wenn er das Rennen beendete, und simulierte Roboter, die lernten, physikalische Motorfehler auszunutzen, um durch Vibration zu „laufen“.
+
+Dies unterstreicht eine grundlegende Wahrheit: Der Agent optimiert *genau* das, was Sie messen, was möglicherweise nicht der Fall ist
+Sei das, was du tatsächlich willst. Das Entwerfen von Belohnungsfunktionen, die das beabsichtigte Verhalten wirklich erfassen, ist eine davon
+der wichtigsten – und schwierigsten – Aspekte der angewandten RL. Forscher forschen
+Techniken wie Belohnungsmodellierung und inverses Verstärkungslernen, um dieser Herausforderung zu begegnen.
+
+## Sim-zu-Real-Übertragung
+
+Die Ausbildung von RL-Agenten in der realen Welt ist teuer, langsam und potenziell gefährlich. **Sim-to-Real-Transfer** trainiert Agenten in simulierten Umgebungen und setzt sie dann in der Realität ein.
+
+Die Herausforderung: Simulationen sind nie vollkommen genau. Techniken wie **Domänen-Randomisierung** – zufällig variierende Simulationsparameter (Reibung, Beleuchtung, Objektformen) – zwingen Agenten dazu, robuste Richtlinien zu erlernen, die sich über alle Bedingungen hinweg verallgemeinern lassen.
+
+<Quiz question="Was ist eine Sim-zu-Real-Übertragung?" options="Übertragen von Daten von einer Simulation in eine andere|Schulung eines Agenten in Simulation und Einsatz in der physischen Welt|Konvertieren realer Daten in ein simuliertes Format|Eine Technik zur Beschleunigung des Simulationsrenderings" answer="1" explanation="Beim Sim-to-Real-Transfer werden RL-Agenten in kostengünstigen, schnellen simulierten Umgebungen trainiert und dann in der realen Welt eingesetzt, wobei die Lücke mit Techniken wie der Domänen-Randomisierung geschlossen wird." />
+
+<ThinkAboutIt>Wenn ein RL-Agent eine Verknüpfung zum Hacken von Belohnungen entdeckt, ist das ein Versagen des Agenten oder ein Versagen der Menschen, die die Belohnungsfunktion entworfen haben?</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+
+- [Spinning Up in Deep RL – OpenAI](https://spinningup.openai.com/) – Praktische Einführung in Deep Reinforcement Learning mit Codebeispielen
+- [Das Go-Spiel ohne menschliches Wissen meistern – Silver et al.](https://www.nature.com/articles/nature24270) – Der AlphaGo Zero-Artikel, der übermenschliches Spiel aus reinem Selbstspiel demonstriert

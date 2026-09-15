@@ -1,0 +1,127 @@
+---
+title: "Visión por computadora: cómo la IA aprende a ver el mundo"
+description: "Descubra cómo las máquinas interpretan imágenes y vídeos, desde cuadrículas de píxeles hasta coches autónomos."
+order: 1
+difficulty: "intermediate"
+duration: 18
+icon: "👁️"
+published: true
+machineTranslated: true
+---
+# Visión por computadora: cómo la IA aprende a ver el mundo
+
+Miras una foto y al instante sabes que muestra a un perro en la playa. Para una computadora, esa misma imagen no es más que una cuadrícula gigante de números. **La visión por computadora** es la rama de la IA que enseña a las máquinas a extraer significado de esos números, y ya está remodelando las industrias a su alrededor.
+
+## Cómo "ven" las computadoras
+
+Cuando miras una fotografía, tu cerebro reconoce instantáneamente formas, colores y profundidad. una computadora
+no tiene nada de esa intuición. En cambio, funciona con números brutos.
+
+Una imagen digital es una cuadrícula de **píxeles**. Cada píxel almacena valores de color (normalmente tres).
+**canales**: rojo, verde y azul (RGB). Una imagen HD de 1920 × 1080 contiene más de dos millones de píxeles,
+cada uno con tres valores que van de 0 a 255. Multiplíquelos juntos e incluso un solo cuadro
+contiene millones de números.
+
+<Illustration src="/images/lessons/computer-vision.svg" alt="Diagrama que muestra una imagen dividida en una cuadrícula de píxeles con canales RGB" caption="Cada imagen es solo una cuadrícula de números en canales rojo, verde y azul." />
+
+**Resolución** determina cuántos detalles captura la cuadrícula. Una resolución más alta significa más píxeles
+y detalles más ricos, pero también muchos más datos para que los procese la IA. Una imagen 4K tiene cuatro veces más
+píxeles de HD, lo que supone cuatro veces el coste computacional.
+
+Las imágenes en escala de grises tienen un solo canal (brillo), mientras que algunos formatos especializados, como
+Imágenes satelitales o exploraciones médicas: pueden tener docenas de canales que capturan longitudes de onda invisibles.
+al ojo humano.
+
+<FunFact>El ojo humano puede distinguir aproximadamente 10 millones de colores. Una imagen RGB estándar de 8 bits puede representar más de 16,7 millones de combinaciones de colores únicas, ¡más de las que realmente podemos percibir!
+</FunFact>
+
+## Redes neuronales convolucionales (CNN)
+
+Los primeros intentos de visión por computadora se basaron en reglas hechas a mano: "busque bordes aquí, haga coincidir esto
+plantilla allí." Estos frágiles enfoques fracasaron cada vez que cambió la escena. Uso de sistemas modernos.
+**Redes neuronales convolucionales (CNN)**, que aprenden sus propias reglas a partir de miles de redes neuronales etiquetadas.
+ejemplos.
+
+Piense en una CNN como una línea de ensamblaje de detectores de patrones, en la que cada capa se basa en la anterior:
+
+1. **Capas convolucionales** deslizan pequeños filtros por la imagen, detectando patrones simples como
+   Bordes, esquinas y texturas.
+2. **Capas de agrupación** reducen los datos, conservando solo las señales más importantes y descartándolas.
+   detalle redundante.
+3. **Capas convolucionales más profundas** combinan esos patrones simples en características más complejas: ojos,
+   ruedas, letras.
+4. **Capas completamente conectadas** reúne todas las características para tomar una decisión final: "esta es una
+   gato" o "esto es un tumor".
+
+Lo bueno es que nadie programa estos filtros a mano. La red los **aprende** durante el entrenamiento, comenzando a partir de ruido aleatorio y agudizándolos gradualmente hasta convertirse en detectores útiles.
+
+<ThinkAboutIt>Cuando aprendes a reconocer la cara de un amigo, no memorizas cada píxel: captas características clave como la forma de los ojos, el peinado y la expresión. Las CNN hacen algo notablemente similar. ¿Qué características crees que una CNN aprendería primero?
+</ThinkAboutIt>
+
+## Clasificación, Detección y Segmentación
+
+La visión por computadora aborda tres tareas cada vez más difíciles:
+
+| Tarea | Pregunta que responde | Ejemplo |
+|------|-------------------|---------|
+| **Clasificación de imágenes** | ¿Qué hay en esta imagen? | "Esta radiografía muestra neumonía". |
+| **Detección de objetos** | ¿Qué hay en esta imagen y dónde? | Dibujar cuadros alrededor de cada peatón en una escena callejera. |
+| **Segmentación semántica** | ¿Qué píxeles pertenecen a qué objeto? | Colorea cada píxel de una carretera, acera, coche y cielo de forma diferente. |
+
+Los coches autónomos necesitan las tres cosas simultáneamente: clasificar objetos, localizarlos con precisión y
+comprender la escena completa píxel a píxel.
+
+Cada tarea requiere progresivamente más potencia computacional y datos de entrenamiento. La clasificación fue
+resuelto en gran medida para 2015; La segmentación en tiempo real en vídeo sigue siendo un área activa de investigación en la actualidad.
+
+<Quiz question="¿Qué tarea de visión por computadora asigna una etiqueta a cada píxel individual de una imagen?" options="Clasificación de imágenes|Detección de objetos|Segmentación semántica|Extracción de características" answer="2" explanation="La segmentación semántica etiqueta cada píxel con su correspondiente clase de objeto, brindando la comprensión más detallada de una escena." />
+
+## Aplicaciones del mundo real
+
+La visión por computadora ya está integrada en industrias que quizás no esperaba:
+
+- **Tesla Autopilot** utiliza ocho cámaras e inteligencia artificial basada en visión para detectar carriles, semáforos y
+  obstáculos en tiempo real: procesando millones de fotogramas por viaje.
+- **Imágenes médicas**: los modelos de IA ahora igualan o superan a los radiólogos en la detección de mamas en etapa temprana
+  cáncer en mamografías, detectando a veces lo que seis expertos humanos pasaron por alto.
+- **Control de calidad**: las fábricas utilizan sistemas de visión para inspeccionar miles de productos por minuto,
+  detectar defectos demasiado sutiles o rápidos para los inspectores humanos.
+- **Agricultura**: drones con visión por computadora identifican cultivos enfermos en vastos campos.
+  permitiendo un tratamiento específico que reduce el uso de pesticidas hasta en un 90%.
+- **Venta minorista**: las tiendas Amazon Go utilizan visión por computadora para rastrear qué productos compran los compradores.
+  permitiendo compras sin pagar.
+
+<FunFact>DeepMind de Google desarrolló una IA que puede detectar más de 50 enfermedades oculares a partir de escáneres de retina con la misma precisión que los oftalmólogos líderes en el mundo, en segundos en lugar de semanas.
+</FunFact>
+
+## Preocupaciones éticas
+
+La visión por computadora es poderosa, pero plantea serias preguntas con las que la sociedad aún está lidiando:
+
+- **Vigilancia**: el reconocimiento facial permite el seguimiento masivo de ciudadanos. Varias ciudades,
+  incluidos San Francisco y partes de la UE, han prohibido o restringido su uso por parte de la policía.
+- **Sesgo**: estudios históricos realizados por Joy Buolamwini en el MIT demostraron que el reconocimiento facial comercial
+  Los sistemas eran significativamente menos precisos para las mujeres y los rostros de piel más oscura, porque la capacitación
+  Históricamente, los datos han sobrerrepresentado a los hombres de piel más clara.
+- **Consentimiento** - en caso de que se escanee su rostro sin su conocimiento en tiendas, aeropuertos o lugares públicos.
+  espacios? Muchos países todavía están redactando leyes para abordar este problema.
+- **Deepfakes**: las imágenes y vídeos falsos generados por IA pueden difundir información errónea y causar daños
+  reputaciones, lo que hace que la evidencia visual sea menos confiable.
+
+<ThinkAboutIt>Imagine que una escuela instala cámaras de reconocimiento facial para registrar la asistencia automáticamente. ¿Cuáles son los beneficios? ¿Qué podría salir mal? ¿Se sentiría cómodo con este sistema?
+</ThinkAboutIt>
+
+<Quiz question="¿Por qué algunos sistemas de reconocimiento facial funcionan peor en ciertos grupos demográficos?" options="Esos grupos tienen rasgos faciales más complejos.|Las cámaras utilizadas son de menor calidad.|Los conjuntos de datos de entrenamiento suelen estar sesgados y carecen de diversidad|Los algoritmos son intencionalmente discriminatorios." answer="2" explanation="Cuando los datos de entrenamiento representan en exceso a ciertos grupos (por ejemplo, hombres de piel más clara), el modelo aprende mejor esas características y tiene un rendimiento deficiente en grupos subrepresentados." />
+
+## Conclusiones clave
+
+- Las imágenes son cuadrículas de valores de píxeles en canales de color: las computadoras ven números, no imágenes.
+- Las CNN aprenden a extraer características automáticamente a través del entrenamiento, comenzando desde los bordes y construyendo
+  hasta objetos complejos.
+- La clasificación, detección y segmentación representan niveles crecientes de comprensión visual.
+- La visión por computadora impulsa avances desde el diagnóstico de atención médica hasta los vehículos autónomos y
+  Agricultura de precisión.
+- El sesgo en los datos de capacitación y las preocupaciones sobre la vigilancia exigen una implementación cuidadosa y ética: tecnología
+  por sí solo nunca es suficiente sin una gobernanza responsable.
+
+<Quiz question="En una CNN, ¿cuál es el propósito de agrupar capas?" options="Para agregar color a la imagen|Reducir las dimensiones espaciales manteniendo las características clave.|Para convertir la imagen en texto|Para aumentar el número de píxeles" answer="1" explanation="La agrupación de capas reduce la muestra de mapas de características, lo que reduce el costo computacional y al mismo tiempo preserva la información más importante detectada por los filtros convolucionales." />

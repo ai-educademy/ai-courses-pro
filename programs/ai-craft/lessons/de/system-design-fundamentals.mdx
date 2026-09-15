@@ -1,0 +1,128 @@
+---
+title: "Grundlagen des Systemdesigns – Die Bausteine ​​skalierbarer Systeme"
+description: "Beherrschen Sie die Kernkomponenten, die Sie in jedem Systemdesign-Interview kennen müssen."
+order: 1
+difficulty: "advanced"
+duration: 20
+icon: "🏗️"
+published: true
+machineTranslated: true
+---
+## Warum Systemdesign wichtig ist
+
+Jede Großanwendung besteht aus denselben Grundbausteinen. Interviewer erwarten nicht, dass Sie neue Technologien erfinden – sie möchten, dass Sie die richtigen Komponenten für ein bestimmtes Problem **auswählen und kombinieren**. Diese Lektion behandelt das Toolkit, nach dem Sie in jedem Design-Interview greifen werden.
+
+## Client-Server-Architektur
+
+Im Kern folgt das Web einem einfachen Modell: **Clients** senden Anfragen, **Server** verarbeiten sie und Antworten fließen zurück. Moderne Systeme fügen jedoch Schichten zwischen diesen beiden Endpunkten hinzu, um Skalierbarkeit, Zuverlässigkeit und Leistung zu gewährleisten.
+
+Eine typische Anfrage könnte Folgendes durchlaufen: Client → CDN → Load Balancer → API-Gateway → Anwendungsserver → Cache → Datenbank. Jede Ebene löst ein spezifisches Problem, und wenn man weiß, wann jede Ebene benötigt wird, unterscheidet man starke Kandidaten von durchschnittlichen.
+
+<Callout>Beginnen Sie in Vorstellungsgesprächen immer damit, den groben Client-Server-Ablauf zu skizzieren, bevor Sie auf Einzelheiten eingehen. Es zeigt strukturiertes Denken.
+</Callout>
+
+## Load Balancer: Traffic verteilen
+
+Ein einzelner Server hat eine begrenzte Kapazität. Load Balancer verteilen eingehende Anfragen auf mehrere Server und verwenden dabei Strategien wie:
+
+- **Round-Robin** – Anfragen durchlaufen die Server nacheinander
+- **Kleinste Verbindungen** – leitet an den Server weiter, der die wenigsten aktiven Anfragen verarbeitet
+- **Konsistentes Hashing** – ordnet Anfragen basierend auf einem Schlüssel bestimmten Servern zu (nützlich für das Caching)
+
+Load Balancer führen auch **Gesundheitsprüfungen** durch und entfernen fehlerhafte Server automatisch aus dem Pool. In Cloud-Umgebungen handhaben Dienste wie AWS ALB oder Azure Front Door dies transparent.
+
+<Quiz question="Ein Social-Media-Feed-Dienst erhält zehnmal mehr Lese- als Schreibvorgänge. Welcher Lastausgleichsansatz stellt am besten sicher, dass Benutzer stets denselben Cache-warmen Server erreichen?" options="Round-Robin|Zufällige Auswahl|Konsistentes Hashing basierend auf der Benutzer-ID|Am wenigsten Verbindungen" answer="2" explanation="Konsistentes Hashing leitet denselben Benutzer an denselben Server weiter und maximiert so die Cache-Trefferraten. Round-Robin und Random würden die Anfragen auf mehrere Server verteilen und so die Cache-Effektivität verringern." />
+
+## Caching: Geschwindigkeit auf jeder Ebene
+
+Durch Caching werden häufig aufgerufene Daten näher am Verbraucher gespeichert. Es existiert auf mehreren Ebenen:
+
+| Schicht | Beispiel | Latenz |
+|-------|---------|---------|
+| Browser-Cache | Statische Assets, API-Antworten | ~0ms |
+| CDN | Bilder, CSS, JS-Dateien | ~10-50ms |
+| Anwendungscache | Redis, Memcached | ~1-5ms |
+| Datenbank-Cache | Abfrageergebnis-Cache | ~5-10ms |
+
+**Cache-Ungültigmachung** ist bekanntermaßen eines der schwierigsten Probleme im Computerbereich. Zu den gängigen Strategien gehören **TTL (Time-to-Live)**, **Write-Through** (Cache bei jedem Schreibvorgang aktualisieren) und **Cache-aside** (Anwendung verwaltet den Cache explizit).
+
+<FunFact>Phil Karltons berühmtes Zitat – „In der Informatik gibt es nur zwei schwierige Dinge: Cache-Ungültigmachung und Benennung von Dingen“ – wird so häufig zitiert, dass es in Systemdesign-Interviews praktisch ein Übergangsritus ist.
+</FunFact>
+
+## Datenbanken: SQL vs. NoSQL
+
+Die Wahl der richtigen Datenbank ist eine der wirkungsvollsten Designentscheidungen:
+
+**SQL-Datenbanken** (PostgreSQL, MySQL) bieten ACID-Transaktionen, starke Konsistenz und strukturierte Schemata. Sie zeichnen sich aus, wenn Daten klare Beziehungen aufweisen und Sie komplexe Abfragen mit Verknüpfungen benötigen.
+
+**NoSQL-Datenbanken** gibt es in verschiedenen Varianten:
+- **Dokumentspeicher** (MongoDB) – flexible Schemata, ideal für unterschiedliche Datenstrukturen
+- **Schlüsselwertspeicher** (DynamoDB, Redis) – blitzschnelle Suchvorgänge nach Schlüssel
+- **Breitspaltige Speicher** (Cassandra) – enormer Schreibdurchsatz, verteilt durch Design
+- **Graphdatenbanken** (Neo4j) – beziehungsintensive Daten wie soziale Netzwerke
+
+<Quiz question="Sie entwerfen ein System, das Benutzerprofile mit sich häufig ändernden, halbstrukturierten Daten (unterschiedliche Felder pro Benutzertyp) speichert. Welcher Datenbanktyp passt am besten?" options="Relational (PostgreSQL)|Dokumentenspeicher (MongoDB)|Breitsäule (Cassandra)|Diagramm (Neo4j)" answer="1" explanation="Dokumentenspeicher wie MongoDB verarbeiten halbstrukturierte, schemaflexible Daten auf natürliche Weise. Jedes Dokument kann ohne kostspielige Schemamigrationen unterschiedliche Felder haben." />
+
+## Nachrichtenwarteschlangen: Asynchrone Verarbeitung
+
+Nicht jede Operation erfordert eine sofortige Reaktion. Nachrichtenwarteschlangen (RabbitMQ, Apache Kafka, AWS SQS) entkoppeln Produzenten von Konsumenten und ermöglichen Folgendes:
+
+- **Asynchrone Verarbeitung** – Senden Sie nach der Anmeldung eine E-Mail, ohne die Antwort zu blockieren
+- **Lastausgleich** – Absorbiert Verkehrsspitzen durch Puffern von Anfragen
+- **Fehlertoleranz** – Wenn ein Verbraucher abstürzt, warten Nachrichten in der Warteschlange
+
+Kafka verdient besondere Erwähnung: Es handelt sich nicht nur um eine Warteschlange, sondern um ein **verteiltes Ereignisprotokoll**, das ereignisgesteuerte Architekturen ermöglicht, in denen mehrere Verbraucher unabhängig voneinander denselben Ereignisstrom verarbeiten können.
+
+<Illustration src="/images/lessons/system-design-fundamentals.svg" alt="Architekturdiagramm mit Darstellung von Client, Load Balancer, Anwendungsservern, Cache-Schicht, Datenbank und Nachrichtenwarteschlange" caption="Die grundlegenden Bausteine ​​eines skalierbaren Systems – jede Schicht befasst sich mit einem bestimmten Anliegen." />
+
+## Microservices vs. Monolith
+
+| Aspekt | Monolith | Microservices |
+|--------|----------|---------------|
+| Bereitstellung | Einzelgerät | Unabhängige Dienstleistungen |
+| Skalierung | Alles zusammen skalieren | Skalieren Sie einzelne Services |
+| Komplexität | Einfacher zu starten | Betriebsaufwand |
+| Daten | Gemeinsame Datenbank | Datenbank pro Dienst |
+
+**Monolith starten, Microservices bei Bedarf extrahieren.** Die meisten Interviewer schätzen Kandidaten, die anerkennen, dass Microservices zu verteilter Systemkomplexität führen (Netzwerkfehler, Datenkonsistenz, Bereitstellungsorchestrierung) und nicht immer die richtige Wahl sind.
+
+<ThinkAboutIt>Netflix ist bekanntermaßen im Laufe mehrerer Jahre von einem Monolithen zu Mikrodiensten migriert. Aber Shopify, das Transaktionen in Milliardenhöhe abwickelt, verfügt immer noch über einen modularen Monolithen. Welche Faktoren könnten dafür sorgen, dass ein Ansatz für ein bestimmtes Unternehmen besser ist als der andere?
+</ThinkAboutIt>
+
+## CAP-Theorem vereinfacht
+
+Das CAP-Theorem besagt, dass ein verteiltes System nur **zwei von drei** Eigenschaften gleichzeitig garantieren kann:
+
+- **Konsistenz** – jeder Lesevorgang gibt den letzten Schreibvorgang zurück
+- **Verfügbarkeit** – jede Anfrage erhält eine Antwort
+- **Partitionstoleranz** – das System läuft trotz Netzwerkausfällen weiter
+
+Da Netzwerkpartitionen in verteilten Systemen unvermeidlich sind, liegt die eigentliche Wahl zwischen **CP** (Konsistenz vor Verfügbarkeit) und **AP** (Verfügbarkeit vor Konsistenz).
+
+- **CP-Systeme** (z. B. HBase, MongoDB mit Mehrheitslesevorgängen) – geben Fehler statt veralteter Daten zurück
+- **AP-Systeme** (z. B. Cassandra, DynamoDB) – reagieren immer, aber die Daten sind möglicherweise etwas veraltet
+
+<Quiz question="Sie entwerfen ein Banktransaktionssystem, bei dem falsche Salden zu finanziellen Verlusten führen können. Welchen GAP-Kompromiss sollten Sie priorisieren?" options="AP – immer verfügbar, letztendlich konsistent|CP – konsistent, kann Anfragen während der Partitionierung ablehnen|CA – konsistent und verfügbar, Partitionen ignorieren|Keine – moderne Systeme vermeiden die GAP vollständig" answer="1" explanation="Finanzsysteme müssen Konsistenz (CP) priorisieren. Es ist besser, eine Anfrage vorübergehend abzulehnen, als einen falschen Kontostand anzuzeigen oder eine doppelte Transaktion zu verarbeiten." />
+
+## Das Interview-Framework
+
+Wenn Sie ein Systemdesign-Interview beginnen, befolgen Sie diese Struktur:
+
+1. **Anforderungen** – funktionale und nichtfunktionale Anforderungen klären (5 Min.)
+2. **API-Design** – Definieren Sie die wichtigsten Endpunkte oder Schnittstellen (5 Min.)
+3. **Datenmodell** – Datenbanken auswählen und Schemata definieren (5 Min.)
+4. **High-Level-Architektur** – Skizzieren Sie das System anhand der heutigen Bausteine (10 Min.)
+5. **Deep Dives** – Engpässe skalieren, Fehler bewältigen, optimieren (15 Min.)
+
+<ThinkAboutIt>Denken Sie an ein System, das Sie täglich nutzen – Instagram, Uber oder Spotify. Können Sie erkennen, welche Bausteine ​​aus dieser Lektion wahrscheinlich verwendet werden? Wo würde der Load Balancer sitzen? Was würde zwischengespeichert werden? Welcher Datenbanktyp passt zu seinem Datenmodell?
+</ThinkAboutIt>
+
+## Wichtige Erkenntnisse
+
+- Jedes skalierbare System nutzt die gleichen Kernbausteine – lernen Sie sie einmal und wenden Sie sie überall an
+– Load Balancer, Caches und Nachrichtenwarteschlangen lösen jeweils unterschiedliche Skalierungsherausforderungen
+- Die Wahl der Datenbank (SQL vs. NoSQL) hängt von der Datenform, den Konsistenzanforderungen und den Zugriffsmustern ab
+- Das CAP-Theorem erzwingt Kompromisse – wissen Sie, welche Seite Ihr System bevorzugen sollte
+- Befolgen Sie das strukturierte Interview-Framework: Anforderungen → API → Daten → Architektur → Tiefe Einblicke
+
+Als nächstes wenden wir diese Grundlagen an, um einen URL-Shortener von Grund auf zu entwerfen.

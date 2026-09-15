@@ -1,0 +1,186 @@
+---
+title: "Diseñe un acortador de URL: su primera entrevista de diseño de sistema"
+description: "Explore un diseño completo de acortador de URL utilizando el marco de entrevista estructurada."
+order: 2
+difficulty: "advanced"
+duration: 25
+icon: "🔗"
+published: true
+machineTranslated: true
+---
+## El mensaje de la entrevista
+
+*"Diseñe un servicio de acortamiento de URL como bit.ly que utilice URL largas y produzca códigos cortos y únicos".*
+
+Esta es la primera pregunta de diseño de sistemas más común porque es engañosamente simple pero cubre conceptos básicos: diseño de API, estrategias de codificación, opciones de bases de datos, almacenamiento en caché y escalado. Trabajemos en ello utilizando el marco estructurado de la Lección 1.
+
+## Paso 1: Recopilación de requisitos (5 minutos)
+
+**Requisitos funcionales:**
+- Dada una URL larga, genere una URL corta y única
+- La redirección a través de la URL corta devuelve la URL larga original
+- Los usuarios pueden opcionalmente configurar códigos cortos personalizados
+- Los enlaces caducan después de un período configurable (predeterminado: 5 años)
+- Análisis básicos: recuento de clics, referente, geografía.
+
+**Requisitos no funcionales:**
+- 100 millones de URL generadas por mes (~40 por segundo)
+- Lectura intensa: relación de lectura y escritura de 100:1 → 4000 redirecciones por segundo
+- Latencia de redirección de URL inferior a 50 ms
+- Las URL cortas deben ser lo más cortas posible.
+- Alta disponibilidad: un enlace roto es una experiencia de usuario terrible
+
+<Callout>Comience cada entrevista de diseño de sistemas haciendo preguntas aclaratorias. Escribir números explícitos (40 escrituras/seg, 4000 lecturas/seg) muestra que puedes razonar cuantitativamente sobre la escala.
+</Callout>
+
+## Paso 2: Diseño de API (5 minutos)
+
+```
+POST /api/shorten
+Body: { "url": "https://example.com/very/long/path", "custom_code": "mylink", "expires_in": "30d" }
+Response: { "short_url": "https://sho.rt/aB3kx9", "expires_at": "2025-02-15T00:00:00Z" }
+
+GET /:code
+Response: HTTP 301 Redirect → Location: https://example.com/very/long/path
+
+GET /api/analytics/:code
+Response: { "clicks": 14523, "created_at": "...", "top_referrers": [...] }
+```
+
+**¿Por qué HTTP 301 frente a 302?**
+- **301 (Redireccionamiento permanente)** - los navegadores lo almacenan en caché, lo que reduce la carga en nuestros servidores
+- **302 (redireccionamiento temporal)**: los navegadores siempre acceden a nuestros servidores, lo que permite realizar análisis precisos
+
+Para un servicio que rastrea los clics, **302 suele ser la mejor opción** ya que cada redireccionamiento pasa por nuestros servidores.
+
+<Quiz question="Su acortador de URL necesita análisis de clics precisos. ¿Qué código de estado de redireccionamiento HTTP debería utilizar y por qué?" options="200 OK: devuelve el contenido de la página directamente|Redireccionamiento permanente 301: los navegadores lo almacenan en caché para mayor velocidad|Redirección temporal 302: garantiza que cada clic llegue a nuestro servidor para contar|404 No encontrado: luego redirige el lado del cliente a través de JavaScript" answer="2" explanation="El redireccionamiento temporal 302 garantiza que el navegador se comunique con nuestro servidor en cada clic, lo que nos permite registrar la visita para realizar análisis. Los navegadores almacenarían en caché un 301, lo que significa que las visitas repetidas no se contarían." />
+
+## Paso 3: Estrategia de codificación
+
+El desafío principal: ¿cómo generamos códigos cortos y únicos?
+
+**Codificación Base62** utiliza `[a-zA-Z0-9]` - 62 caracteres. Un código de 7 caracteres nos da 62⁷ = **3,5 billones** de combinaciones únicas, más que suficiente para nuestra escala.
+
+**Opción A - Basado en contador:**
+- Utilice un contador autoincremental (1, 2, 3, ...) y conviértalo a base62
+- Contador 1000 → `g8` | Contador 1000000 → `4c92`
+- **Pros:** garantizado único, simple y sin colisiones
+- **Contras:** predecible (los usuarios pueden adivinar la siguiente URL), requiere un contador centralizado
+
+**Opción B: basada en hash:**
+- Hash la URL larga con MD5/SHA-256, toma los primeros 7 caracteres de base62
+- **Pros:** apátrida, no se necesita coordinación central
+- **Contras:** posibles colisiones: debe verificar la base de datos y volver a intentarlo
+
+**Opción C: claves pregeneradas (recomendado):**
+- Un servicio en segundo plano genera previamente millones de códigos base62 únicos y los almacena en un grupo de claves.
+- Cuando llegue una nueva URL, obtenga el siguiente código disponible del grupo
+- **Pros:** rápido, sin riesgo de colisión, sin previsibilidad
+- **Contras:** requiere administrar el servicio de generación de claves
+
+<FunFact>El servicio TinyURL original se lanzó en 2002 y todavía se ejecuta en la actualidad. En un momento, generaba más de 1 millón de URL cortas por día. El dominio en sí, tinyurl.com, se ha vuelto tan icónico que "tinyurl" se utiliza como término genérico para acortar URL.
+</FunFact>
+
+## Paso 4: Elección y esquema de la base de datos
+
+Con 100 millones de URL nuevas por mes y una retención de 5 años, almacenaremos aproximadamente **6 mil millones de registros**. Se trata de una carga de trabajo de lectura intensa con búsquedas simples de valores-clave.
+
+**Elección de base de datos: DynamoDB o Cassandra**
+- Las búsquedas se realizan siempre mediante código corto (clave de partición); no se necesitan combinaciones complejas
+- Ambos manejan un rendimiento de lectura masivo con escalado horizontal
+- Ambos ofrecen búsquedas de menos de 10 ms por clave de partición
+
+**Esquema:**
+```
+Table: urls
+  short_code (partition key): "aB3kx9"
+  long_url: "https://example.com/very/long/path"
+  user_id: "user_123"
+  created_at: 1706000000
+  expires_at: 1863000000
+  click_count: 14523
+```
+
+Para análisis, una tabla de series de tiempo separada almacena eventos de clics individuales:
+```
+Table: clicks
+  short_code (partition key): "aB3kx9"
+  timestamp (sort key): 1706000001
+  referrer: "twitter.com"
+  country: "GB"
+  device: "mobile"
+```
+
+<Illustration src="/images/lessons/design-url-shortener.svg" alt="Arquitectura de acortador de URL con servidores API, servicio de generación de claves, caché y base de datos" caption="La arquitectura del acortador de URL: las solicitudes de lectura llegan primero al caché y, si fallan, vuelven a la base de datos." />
+
+## Paso 5: Estrategia de almacenamiento en caché
+
+Con 4.000 lecturas por segundo y una distribución de cola pesada (algunas URL obtienen millones de clics, la mayoría recibe muy pocos), el almacenamiento en caché es esencial.
+
+**Caché de Redis** almacena las asignaciones a las que se accede con más frecuencia:
+```
+Key:   url:aB3kx9
+Value: "https://example.com/very/long/path"
+TTL:   24 hours
+```
+
+**Flujo de aciertos de caché (ruta rápida):**
+1. Llega la solicitud: `GET /aB3kx9`
+2. Verifique Redis → visita de caché → devolver redirección 302
+3. Registre de forma asincrónica el evento de clic en Kafka.
+
+**Flujo de pérdida de caché:**
+1. Verifique Redis → perder
+2. Consultar base de datos → encontrado
+3. Llenar la caché de Redis
+4. Devolver redireccionamiento 302
+
+Con una tasa de aciertos de caché del 80%, sólo 800 de las 4000 solicitudes por segundo llegan realmente a la base de datos.
+
+<Quiz question="Su acortador de URL ofrece 4000 redirecciones por segundo. La tasa de aciertos de la caché es del 80%. ¿Cuántas lecturas de base de datos por segundo necesita manejar la base de datos?" options="4.000|3.200|800|0 - el caché se encarga de todo" answer="2" explanation="Con una tasa de aciertos de caché del 80 %, el 20 % de las solicitudes pierden el caché: 4000 × 0,20 = 800 lecturas de base de datos por segundo." />
+
+## Paso 6: análisis y seguimiento de clics
+
+El seguimiento de clics no debe ralentizar las redirecciones. La respuesta de redireccionamiento debería regresar inmediatamente mientras los análisis se procesan de forma asincrónica.
+
+**Arquitectura:**
+1. El controlador de redireccionamiento publica un evento de clic en **Kafka**
+2. Un servicio de procesamiento de clics consume eventos y:
+   - Incrementa el `click_count` en el registro URL
+   - Escribe datos de clics detallados en la tabla de clics.
+   - Actualiza paneles de control en tiempo real a través de una agregación de transmisión
+
+Este desacoplamiento garantiza que un proceso de análisis lento nunca afecte la latencia de redireccionamiento.
+
+<ThinkAboutIt>A veces se utilizan acortadores de URL para disfrazar enlaces maliciosos. Si estuviera diseñando bit.ly, ¿cómo implementaría una verificación de seguridad que analice las URL de destino en busca de phishing o malware sin agregar una latencia significativa al proceso de acortamiento?
+</ThinkAboutIt>
+
+## Paso 7: Escalar el sistema
+
+**Enfoque de escala horizontal:**
+- **Los servidores API** no tienen estado: escale agregando instancias detrás de un balanceador de carga
+- **Servicio de generación de claves** se ejecuta como un microservicio independiente con su propia base de datos de códigos pregenerados.
+- **Clúster de Redis** maneja la distribución de caché entre nodos usando hash consistente
+- **La fragmentación de la base de datos** mediante el primer carácter del código corto distribuye los datos de manera uniforme
+
+**Manejo de cargas máximas:**
+- Durante eventos virales, una única URL puede recibir millones de visitas por minuto.
+- La caché de Redis absorbe esto de forma natural: una entrada de caché sirve lecturas ilimitadas
+- Kafka amortigua los eventos de clic, suavizando la carga de escritura en la base de datos de análisis
+
+<Quiz question="Una URL se vuelve viral y recibe 500.000 clics por minuto. ¿Qué componente es más probable que no se vea afectado?" options="El caché de Redis (una clave única atiende todas las solicitudes)|Los consumidores de eventos de clic de Kafka|La ruta de escritura de la base de datos de análisis|La CPU del servidor API" answer="0" explanation="Redis maneja millones de lecturas por segundo para una única clave almacenada en caché sin esfuerzo. Los consumidores de Kafka y la base de datos de análisis enfrentan 500 000 escrituras por minuto, y los servidores API manejan 500 000 solicitudes por minuto, todo bajo una carga significativa." />
+
+<ThinkAboutIt>Empresas como bit.ly manejan miles de millones de redirecciones mensualmente. Si se comparte una URL corta en una valla publicitaria o un anuncio de televisión, el tráfico puede aumentar de cero a millones en segundos. Más allá del almacenamiento en caché, ¿qué otras estrategias utilizaría para absorber estas ráfagas de tráfico repentinas e impredecibles?
+</ThinkAboutIt>
+
+<FunFact>En 2009, bit.ly procesaba más de 80 millones de clics por día. Cuando Libia, cuyo código de país es .ly, eliminó brevemente los dominios .ly debido a la inestabilidad política, causó pánico en Internet, ya que millones de enlaces acortados dejaron de funcionar temporalmente.
+</FunFact>
+
+## Conclusiones clave
+
+- Siga el marco: requisitos → API → codificación → modelo de datos → arquitectura → inmersiones profundas
+- Base62 con 7 caracteres produce 3,5 billones de códigos únicos, más que suficiente
+- Los grupos de claves pregenerados evitan problemas de colisión y cuellos de botella en el contador central.
+- Utilice redirecciones 302 (no 301) cuando necesite análisis de clics precisos
+- El almacenamiento en caché de Redis reduce drásticamente la carga de la base de datos para cargas de trabajo con mucha lectura
+- Desacoplar el análisis de la ruta de redireccionamiento usando Kafka para el procesamiento asíncrono

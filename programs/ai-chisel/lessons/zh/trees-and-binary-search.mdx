@@ -1,0 +1,129 @@
+---
+title: "树和二分搜索 - AI 如何快速做出决策"
+description: "探索为从数据库到机器学习的决策提供支持的树结构。"
+order: 2
+difficulty: "intermediate"
+duration: 18
+icon: "🌲"
+published: true
+machineTranslated: true
+---
+## 人工智能中树木无处不在
+
+每当垃圾邮件过滤器对电子邮件进行分类或数据库在几毫秒内检索您的订单时，树形数据结构就会承担繁重的工作。树模型**分层决策** - 每个节点都会缩小搜索空间，直到找到答案。
+
+<Illustration src="/images/lessons/trees-and-binary-search.svg" alt="具有按值标记的节点的二叉搜索树，显示左小右大属性" caption="在 BST 中，每个左子节点都小于其父节点，而每个右子节点都大于其父节点。" />
+
+## 二叉搜索树 (BST)
+
+BST 存储元素，以便对于任何节点，其**左**子树中的所有值都较小，而其**右**子树中的所有值都较大。
+
+＃＃＃ 搜索
+
+```
+function search(node, target):
+    if node is null: return null
+    if target == node.value: return node
+    if target < node.value: return search(node.left, target)
+    return search(node.right, target)
+```
+
+每次比较都会消除平衡树上大约一半的剩余节点 - O(log n)。
+
+### 插入
+
+```
+function insert(node, value):
+    if node is null: return new Node(value)
+    if value < node.value:
+        node.left = insert(node.left, value)
+    else:
+        node.right = insert(node.right, value)
+    return node
+```
+
+### 删除
+
+删除是最棘手的操作。出现三种情况：
+
+1. **叶节点** - 只需将其删除即可。
+2. **一个子节点** - 用其子节点替换该节点。
+3. **两个子节点** - 将节点的值与其有序后继节点（右子树中的最小值）交换，然后删除该后继节点。
+
+<Quiz question="BST 中节点的有序后继是什么？" options="节点的父节点|左子树中最大的节点|右子树中最小的节点|树的根" answer="2" explanation="中序后继是右子树中的最小值 - 通过向右走一次，然后尽可能向左走来找到。" />
+
+## 平衡与不平衡
+
+如果将排序数据插入普通 BST，它会退化为链表 - 每次操作的时间复杂度为 O(n)。 **自平衡**树解决了这个问题：
+
+|树|平衡法则|典型用途|
+|------|-------------|-------------|
+| AVL |子树间高度差≤1 |内存中查找 |
+|红黑|基于颜色的旋转规则 |语言标准库（例如Java TreeMap） |
+| B 树 |每个节点有多个键，所有叶子都处于相同的深度 |数据库和文件系统|
+
+<FunFact>PostgreSQL 和 MySQL 都使用 B 树变体作为默认索引结构。分支因子为 100 的 B 树只需五个级别即可索引十亿行。</FunFact>
+
+## 树遍历
+
+遍历只访问每个节点一次。这三个经典顺序仅在**何时**处理相对于其子节点的当前节点时有所不同。
+
+|遍历 |订单|使用案例|
+|------------|--------|----------|
+| **按顺序** |左→节点→右|从 BST 生成排序输出 |
+| **预购** |节点→左→右|序列化/克隆树 |
+| **订购后** |左→右→节点|安全删除一棵树；评估表达式树 |
+
+```
+function inOrder(node):
+    if node is null: return
+    inOrder(node.left)
+    process(node)
+    inOrder(node.right)
+```
+
+<ThinkAboutIt>编译器将您的代码解析为抽象语法树 (AST)。您将使用哪种遍历顺序来计算存储为树的表达式 `(3 + 5) * 2` ？为什么？</ThinkAboutIt>
+
+## 堆和优先级队列
+
+**堆** 是一个完全二叉树，其中每个父级都大于（最大堆）或小于（最小堆）其子级。它支持：
+
+- **插入** - 添加在最后，冒泡。 O(log n)。
+- **提取最小/最大** - 删除根，将最后一个元素移动到根，向下筛选。 O(log n)。
+
+基于堆能力的优先级队列：
+- **Dijkstra 算法**（下一课！） - 始终展开最近的未访问节点。
+- **任务调度** - 操作系统调度程序选择最高优先级的进程。
+- **NLP 中的束搜索** - 保留 top-k 最有希望的句子完成。
+
+```
+function siftUp(heap, index):
+    while index > 0:
+        parent = (index - 1) / 2
+        if heap[index] < heap[parent]:
+            swap(heap, index, parent)
+            index = parent
+        else: break
+```
+
+<Quiz question="在最小堆中查找最小元素的时间复杂度是多少？" options="在）|O(logn)|复杂度(1)|O(n log n)" answer="2" explanation="最小值始终位于最小堆的根部，因此访问它的时间复杂度为 O(1) - 无需遍历。" />
+
+## 真实的人工智能应用
+
+- 机器学习中的决策树使用最能分离类的功能在每个节点上分割数据 - 树结构的直接应用。
+- NLP 中的**语法树** 代表语法结构，支持情感分析和机器翻译等任务。
+- **蒙特卡罗树搜索 (MCTS)** 为 AlphaGo 等游戏 AI 提供支持，以游戏状态树的形式探索可能的走法。
+- **霍夫曼树** 通过将较短的代码分配给频繁的符号来压缩数据 - 用于模型权重压缩。
+
+<FunFact>scikit-learn 决策树分类器构建一棵树，其中每个内部节点测试特征阈值。深度为 20 的训练模型可以表示超过一百万个不同的决策路径。</FunFact>
+
+<ThinkAboutIt>如果您正在构建一个自动完成系统，您会使用 BST、堆还是不同的树结构（如 trie）？考虑哪些操作需要快速。</ThinkAboutIt>
+
+## 要点
+
+1. BST 提供 O(log n) 搜索、插入和删除 - 但仅限于平衡时。
+2. 遍历顺序决定了从树中提取哪些信息。
+3. 堆提供了 O(1) 访问极值和 O(log n) 插入的能力 - 非常适合基于优先级的 AI 算法。
+4. 树是机器学习、数据库、编译器和游戏人工智能决策的基础。
+
+<Quiz question="为什么将已排序的数据插入普通（不平衡）BST 会导致性能问题？" options="它创建重复的节点|树变成了 O(n) 操作的链表|发生哈希冲突|根节点溢出" answer="1" explanation="每个新值总是大于（或小于）上一个值，因此每次插入都会到同一侧，产生线性链而不是平衡树。" />

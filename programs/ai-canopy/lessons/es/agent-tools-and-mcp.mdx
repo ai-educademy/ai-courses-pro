@@ -1,0 +1,33 @@
+---
+title: "Agentes que utilizan herramientas y MCP"
+description: "Pase de demostraciones impresionantes a agentes acotados y observables que utilizan herramientas de forma segura."
+order: 12
+difficulty: intermediate
+duration: 45
+icon: "🧰"
+published: true
+machineTranslated: true
+---
+## ¿Flujo de trabajo o agente?
+
+Utilice un flujo de trabajo cuando los pasos sean conocidos y deben ser deterministas. Utilice un agente cuando el sistema deba elegir entre herramientas o adaptarse a la información descubierta durante la ejecución. Comience con el diseño más simple que cumpla con el requisito.
+
+## Una herramienta es un contrato
+
+Cada herramienta debe definir:
+
+- Un nombre y un propósito limitados.
+- Un esquema de entrada escrito con validación.
+- Autorización explícita y límites de los inquilinos.
+- Una forma de resultado útil y compacta.
+- Tiempos de espera, reintentos, idempotencia y registro de auditoría.
+
+Model Context Protocol (MCP) estandariza cómo los clientes compatibles descubren y llaman a herramientas y recursos. No elimina la necesidad de autenticación, privilegios mínimos, validación de entradas o aprobación humana para acciones importantes.
+
+## Límites de agentes seguros
+
+Mantenga la planificación separada de la ejecución. Trate el texto recuperado y la salida de la herramienta como datos que no son de confianza. Limite el número de herramientas y la profundidad de recursividad. Exija confirmación antes de enviar mensajes, cambiar registros, gastar dinero o realizar un cambio irreversible.
+
+## Construir desafío
+
+Cree un agente que pueda buscar en un pequeño conjunto de documentos, calcular un resultado y redactar (pero no enviar) un correo electrónico. Registre cada llamada a la herramienta, rechace argumentos con formato incorrecto, agregue un tiempo de espera y pruebe la inyección de texto dentro de un documento recuperado.

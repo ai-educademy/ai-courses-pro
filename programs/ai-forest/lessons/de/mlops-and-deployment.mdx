@@ -1,0 +1,131 @@
+---
+title: "MLOps und Bereitstellung – Modelle vom Notebook in die Produktion bringen"
+description: "Lernen Sie den gesamten MLOps-Lebenszyklus kennen: Modellregister, CI/CD für ML, Containerisierung, Bereitstellungsinfrastruktur, Driftüberwachung und Kostenoptimierung im großen Maßstab."
+order: 6
+difficulty: "advanced"
+duration: 18
+icon: "⚙️"
+published: true
+machineTranslated: true
+---
+# MLOps und Bereitstellung
+
+Ein Jupyter-Notebook mit einer Genauigkeit von 94 % ist kein Produkt. Sobald Sie den Laptop schließen, nützt dieses Modell niemandem mehr. MLOps ist die Disziplin, die die Lücke zwischen Experiment und Produktion schließt – und hier haben die meisten KI-Teams am härtesten zu kämpfen.
+
+## Warum Notebooks keine Produktion sind
+
+Notebooks fördern schreckliche technische Gewohnheiten: versteckter Zustand vor Zellenausführung außerhalb der Reihenfolge, fest codierte Dateipfade, kein Abhängigkeitsmanagement und keine Reproduzierbarkeit. Ein in einem Notebook trainiertes Modell kann nicht automatisch neu trainiert werden, wenn neue Daten eintreffen, es kann nicht zurückgesetzt werden, wenn es kaputt geht, und es kann nicht auf Verschlechterung überwacht werden.
+
+Produktions-ML erfordert **versionierten Code, versionierte Daten, versionierte Modelle und automatisierte Pipelines**. Alles andere ist eine Demo.
+
+## Der MLOps-Lebenszyklus
+
+Der MLOps-Lebenszyklus ist eine kontinuierliche Schleife, keine lineare Pipeline. Jede Phase wirkt sich auf die anderen aus, und der Reifegrad Ihrer Organisation bestimmt, wie automatisiert diese Übergänge ablaufen.
+
+Google definiert drei MLOps-Reifegrade:
+- **Stufe 0** – Manueller, skriptgesteuerter Prozess. Datenwissenschaftler übergeben Modelle an Ingenieure.
+- **Stufe 1** – Automatisierte Trainingspipelines. Die Neuschulung wird automatisch bei neuen Daten ausgelöst.
+- **Stufe 2** – Vollständiges CI/CD für ML. Code-, Daten- und Modelländerungen erfolgen alle über automatisierte Pipelines.
+
+Die Phasen der Schleife:
+
+1. **Datenaufnahme und -validierung** – Sammeln, bereinigen und validieren Sie eingehende Daten anhand von Schemata
+2. **Feature-Engineering** – Rohdaten über einen Feature-Store in modellbereite Features umwandeln
+3. **Training** – Führen Sie reproduzierbare Trainingsjobs mit verfolgten Hyperparametern aus
+4. **Bewertung** – Vergleichen Sie Kandidatenmodelle mit Basislinien unter Verwendung zurückgehaltener Testsätze
+5. **Registrierung** – Speichern Sie genehmigte Modelle mit Metadaten, Abstammung und Genehmigungsstatus
+6. **Bereitstellung** – Stellen Sie das Modell hinter einer API mit Canary- oder Blue-Green-Rollout bereit
+7. **Überwachung** – Verfolgen Sie Vorhersagequalität, Latenz, Durchsatz und Datendrift
+8. **Umschulung** – Lösen Sie neue Trainingsläufe aus, wenn die Leistung nachlässt
+
+<Illustration src="/images/lessons/mlops-and-deployment.svg" alt="MLOps-Lebenszyklusdiagramm, das die kontinuierliche Schleife von den Daten über die Bereitstellung bis zur Überwachung zeigt" caption="Der MLOps-Lebenszyklus ist eine Schleife – die Überwachung fließt in die Umschulung ein." />
+
+## Modellregister
+
+Eine Modellregistrierung ist das Versionskontrollsystem für Ihre trainierten Modelle. Mit Tools wie **MLflow**, **Weights & Biases** und **Neptune** können Sie Modellartefakte zusammen mit ihren Trainingsmetriken, Hyperparametern, Datensatzversionen und dem Promotion-Status (Staging → Produktion → archiviert) speichern.
+
+Die Registry beantwortet kritische Fragen: *Welches Modell ist derzeit in Produktion? Auf welchen Daten wurde trainiert? Wer hat es genehmigt? Was waren die Bewertungsmaßstäbe?*
+
+<Quiz question="Was ist der Hauptzweck eines Modellregisters?" options="Trainingsdaten speichern|Versionierung und Verfolgung trainierter Modelle mit Metadaten|Hyperparameter-Tuning ausführen|Bereitstellung von Modellen für Endbenutzer" answer="1" explanation="Eine Modellregistrierung versioniert trainierte Modelle zusammen mit ihren Metadaten – Metriken, Parameter, Abstammung und Beförderungsstatus – und ermöglicht so Reproduzierbarkeit und Governance." />
+
+## CI/CD für maschinelles Lernen
+
+Herkömmlicher CI/CD-Testcode. ML CI/CD muss drei Dinge testen: **Code, Daten und Modelle**.
+
+- **Codetests** – Unit-Tests für Feature-Engineering-Logik, Datentransformationen und API-Verträge
+- **Datentests** – Schemavalidierung, Verteilungsprüfungen (liegen die neuen Daten innerhalb der erwarteten Bereiche?) und Vollständigkeitsprüfungen (keine fehlenden Spalten)
+- **Modelltests** – Leistungsschwellenwerte für Validierungssätze, Latenzbenchmarks, Bias-Metriken und Vergleich mit dem aktuellen Produktionsmodell
+
+Eine Pull-Anfrage, die eine Feature-Pipeline ändert, sollte automatisch eine erneute Schulung und Bewertung auslösen. Wenn das neue Modell schlechter als die Basisleistung ist, wird die PR blockiert.
+
+## Containerisierung für ML
+
+Docker ist für Produktions-ML nicht verhandelbar. Ihre Trainingsumgebung und Ihre Bereitstellungsumgebung müssen identisch sein – das Problem „Es funktioniert auf meinem Computer“ wird verstärkt, wenn GPU-Treiber, CUDA-Versionen und Python-Abhängigkeiten alle übereinstimmen müssen.
+
+Eine typische ML-Docker-Dateiebene: Basis-CUDA-Image → Python-Abhängigkeiten → Modellartefakte → Serving-Framework. Mehrstufige Builds halten das endgültige Image schlank, indem sie die Build-Umgebung von der Laufzeit trennen.
+
+Wichtige Praktiken für die ML-Containerisierung:
+- **Jede Abhängigkeit anpinnen** - Verwenden Sie genaue Versionen in `requirements.txt`, keine Bereiche
+- **Digest-basierte Basisbilder verwenden** - `nvidia/cuda@sha256:...` statt `:latest`
+– **Getrennte Trainings- und Bereitstellungsbilder** – Trainingsbilder benötigen Compiler und Entwicklungstools; Für das Bereitstellen von Bildern ist nur die Laufzeit erforderlich
+- **Nach Schwachstellen suchen** – ML-Images erben CVEs von tiefen Abhängigkeitsbäumen
+
+<FunFact>Allein das NVIDIA CUDA-Basisimage ist über 3 GB groß. Produktionsteams verbringen routinemäßig Tage damit, Docker-Images zu optimieren, um Kaltstartzeiten und Kosten für die Containerregistrierung zu reduzieren.</FunFact>
+
+## Im Dienste der Infrastruktur
+
+Wie Sie ein Modell bereitstellen, hängt von Ihren Latenz- und Durchsatzanforderungen ab:
+
+| Werkzeug | Am besten für | Hauptmerkmal |
+|------|----------|-------------|
+| **Fackelserve** | PyTorch-Modelle | Integrierte Stapelverarbeitung, Modellversionierung |
+| **Triton-Inferenzserver** | Multi-Framework, GPU | Dynamische Stapelverarbeitung, gleichzeitige Modellausführung |
+| **vLLM** | Große Sprachmodelle | PagedAchtung, kontinuierliche Stapelverarbeitung |
+| **TensorFlow-Bereitstellung** | TF/Keras-Modelle | gRPC + REST, automatisches Neuladen des Modells |
+| **BentoML** | Beliebiger Rahmen | Pythonic API, integrierte Containerisierung |
+
+Speziell für die LLM-Bereitstellung ist **vLLM** zum Branchenstandard geworden, da der PagedAttention-Mechanismus die GPU-Speicherverschwendung im Vergleich zur naiven Bereitstellung um bis zu 90 % reduziert.
+
+<Quiz question="Warum ist vLLM zur bevorzugten Bereitstellungslösung für große Sprachmodelle geworden?" options="Es unterstützt nur PyTorch-Modelle|Sein PagedAttention-Mechanismus reduziert die GPU-Speicherverschwendung drastisch|Es ist die einzige verfügbare Open-Source-Option|Es ist keine GPU-Hardware erforderlich" answer="1" explanation="PagedAttention von vLLM verwaltet den KV-Cache-Speicher effizient, indem Ideen aus dem virtuellen Speicher in Betriebssystemen übernommen werden, wodurch die Speicherverschwendung um bis zu 90 % reduziert wird." />
+
+## Modelldrift überwachen
+
+Ein Modell, das bei der Bereitstellung genau war, wird mit der Zeit an Qualität verlieren. **Datendrift** tritt auf, wenn sich die Eingabeverteilung ändert (z. B. verändert sich das Kundenverhalten nach der Pandemie). **Konzeptdrift** tritt auf, wenn sich die Beziehung zwischen Inputs und Outputs ändert (z. B. entwickeln sich Betrugsmuster).
+
+Überwachen Sie diese Signale:
+- **Prognoseverteilung** - Verschieben sich die Ausgaben? Mehr zuverlässige Vorhersagen als üblich?
+- **Merkmalsverteilungen** - Statistische Tests (KS-Test, PSI), die aktuelle Daten mit Trainingsdaten vergleichen
+- **Ground-Truth-Feedback** – Wenn die Etiketten eintreffen, berechnen Sie die Live-Genauigkeit/F1 und vergleichen Sie sie mit der Basislinie
+- **Latenz- und Fehlerraten** – Der Zustand der Infrastruktur wirkt sich indirekt auf die Modellqualität aus
+
+<ThinkAboutIt>Ihr E-Commerce-Empfehlungsmodell wurde vor der Pandemie trainiert. Die Einkaufsgewohnheiten nach der Pandemie sind völlig anders. Wie würden Sie diese Abweichung automatisch erkennen und wie würde Ihre Umschulungsstrategie aussehen?</ThinkAboutIt>
+
+## Feature-Stores
+
+Ein Feature-Store ist ein zentralisiertes Repository für Feature-Definitionen und -Werte, das beim Training und bei der Bereitstellung gemeinsam genutzt wird. Tools wie **Feast**, **Tecton** und **Hopsworks** lösen das kritische Problem des **Training-Serving-Skew** – wenn Features während des Trainings anders als bei der Inferenz berechnet werden.
+
+Feature-Stores bieten: einen Offline-Store (Batch-Features für das Training), einen Online-Store (Features mit geringer Latenz für die Bereitstellung) und eine Registrierung (Feature-Definitionen, Besitz, Herkunft).
+
+## Batch vs. Echtzeit-Inferenz
+
+Nicht jede Vorhersage muss in Echtzeit erfolgen. Der Kostenunterschied ist enorm:
+
+- **Batch-Inferenz** – Führen Sie Vorhersagen nach einem Zeitplan aus (stündlich, täglich). Günstig, verwendet Spot-Instanzen. Ideal für Empfehlungen, Risikobewertung und Berichtserstellung.
+- **Echtzeit-Inferenz** – Vorhersagen in Sekundenbruchteilen über API. Teuer, erfordert ständig aktive GPU-Instanzen. Erforderlich für Chatbots, Betrugserkennung und autonome Systeme.
+- **Nahezu in Echtzeit (Streaming)** – Verarbeiten Sie Ereignisse, sobald sie über Kafka oder Pub/Sub eintreffen. Gleicht Latenz und Kosten für Anwendungsfälle wie Personalisierung und Anomalieerkennung aus.
+
+Ein gängiges Muster besteht darin, Batch-Vorhersagen für die 95 % der Fälle, die vorhersehbar sind, vorab zu berechnen und nur die restlichen 5 % an einen Echtzeit-Endpunkt weiterzuleiten.
+
+Tipp zur Kostenoptimierung: **Inferenzendpunkte automatisch skalieren** basierend auf der Tiefe der Anforderungswarteschlange, nicht der CPU-Auslastung. ML-Arbeitslasten sind stoßartig – die Skalierung der Warteschlangentiefe verhindert sowohl eine Überbereitstellung als auch Anforderungszeitüberschreitungen bei Datenverkehrsspitzen.
+
+<Quiz question="Wann ist Batch-Inferenz der Echtzeit-Inferenz vorzuziehen?" options="Wenn Vorhersagen in weniger als 100 ms erforderlich sind|Wenn Vorhersagen nach einem Zeitplan vorberechnet werden können und die Latenz nicht kritisch ist|Wenn das Modell für die GPU-Bereitstellung zu klein ist|Wenn Sie gleichzeitige Benutzer verwalten müssen" answer="1" explanation="Batch-Inferenz ist ideal, wenn Vorhersagen im Voraus geplant werden können – sie ist deutlich günstiger, da Sie Spot-Instanzen verwenden können und keine ständig verfügbare GPU-Infrastruktur benötigen." />
+
+<ThinkAboutIt>Sie entwerfen eine ML-Plattform für einen großen Einzelhändler. Welche Komponenten (Feature Store, Modellregistrierung, Bereitstellungsschicht, Überwachung) würden Sie zuerst erstellen und welche würden Sie als verwaltete Dienste übernehmen? Welche Faktoren bestimmen diese Entscheidung?</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+
+- [Designing Machine Learning Systems von Chip Huyen](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/) – Das maßgebliche Buch zum Design von ML-Produktionssystemen
+– [MLOps-Reifemodell von Google](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning) – Googles Framework zur Bewertung der MLOps-Reife von Stufe 0 bis Stufe 2
+- [vLLM: Einfaches, schnelles und günstiges LLM-Serving](https://docs.vllm.ai/) – Offizielle Dokumentation für die führende Open-Source-LLM-Serving-Engine

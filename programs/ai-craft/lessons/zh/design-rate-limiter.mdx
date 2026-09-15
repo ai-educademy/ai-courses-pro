@@ -1,0 +1,137 @@
+---
+title: "设计速率限制器 - 大规模保护 API"
+description: "了解如何使用令牌桶、滑动窗口和 Redis 支持的算法设计分布式速率限制器，以保护 API 免遭滥用并确保公平使用。"
+order: 6
+difficulty: "advanced"
+duration: 20
+icon: "🛡️"
+published: true
+machineTranslated: true
+---
+# 设计速率限制器 - 大规模保护 API
+
+速率限制是最实用的系统设计主题之一。从 GitHub 到 Stripe，每个生产 API 都依赖它来防止滥用、确保公平使用并保护后端服务免遭不堪重负。
+
+## 步骤 1 - 需求收集
+
+### 功能要求
+- 根据可配置规则（每个用户、IP 或 API 密钥）限制请求
+- 当客户端受到限制时返回清晰的反馈（HTTP 429）
+- 同时支持多种限速规则
+
+### 非功能性需求
+- **低延迟** - 限制器不得增加显着的开销
+- **分布式** - 跨多个服务器工作
+- **容错** - 如果限制器发生故障，流量仍应流动（故障开放）
+
+<ThinkAboutIt>速率限制器崩溃时是否应该失败打开（允许流量）或失败关闭（阻止流量）？电子商务网站与银行 API 的权衡是什么？</ThinkAboutIt>
+
+## 步骤 2 - 速率限制算法
+
+### 固定窗口柜台
+将时间划分为固定窗口（例如 60 秒间隔）。每个请求增加一个计数器。在窗口边界重置。 **问题：** 窗口边缘的突发流量可能允许 2 倍的限制。
+
+### 滑动窗口日志
+存储每个请求的时间戳。计算尾随窗口内的条目数。精确但**内存密集型** - 存储每个时间戳在规模上是昂贵的。
+
+### 滑动窗口计数器
+混合：将当前窗口计数与前一个窗口的加权部分相结合。平衡准确性和记忆效率。
+
+### 令牌桶算法（最流行）
+桶可以容纳最大容量的令牌。代币以固定速率添加。每个请求消耗一个令牌。如果桶是空的，则请求被拒绝。
+
+```
+Bucket: capacity=10, refill_rate=2/sec
+
+Time 0s: [🪙🪙🪙🪙🪙🪙🪙🪙🪙🪙] → 10 tokens
+Burst of 8 requests → [🪙🪙] → 2 tokens remain
+Time 1s: refill +2 → [🪙🪙🪙🪙] → 4 tokens
+```
+
+### 算法比较
+
+|算法|内存|准确度|突发处理 |
+|------------|--------|----------|----------------|
+|固定窗|低|低（边缘突发）|可怜|
+|滑动原木|高|准确|好 |
+|滑动柜台|中等|大约|好 |
+|令牌桶|低|好 |优秀|
+
+<Quiz question="哪种算法允许控制突发，同时保持稳定的长期速率？" options="固定窗柜台|滑动窗口日志|令牌桶|推拉窗柜台" answer="2" explanation="令牌桶允许短时间突发达到桶容量，同时通过再填充机制强制执行平均速率。这使其成为需要处理突发流量模式的 API 的理想选择。" />
+
+## 步骤 3 - 高级架构
+
+```
+Client → API Gateway (Rate Limiter Middleware) → Backend Services
+                    ↕
+              Redis Cluster
+         (counters + token buckets)
+```
+
+<Illustration src="/images/lessons/design-rate-limiter.svg" alt="显示客户端的速率限制器架构、具有速率限制中间件的 API 网关、用于分布式状态的 Redis 集群以及后端服务" caption="速率限制器位于API网关中，使用Redis进行分布式计数器存储" />
+
+### 在哪里放置速率限制器
+- **客户端** - 容易欺骗，不可靠
+- **服务器端** - 仅针对每个实例，无法扩展
+- **API网关/中间件** - 分布式系统的最佳方法；在所有实例中集中执行
+
+## 步骤 4 - 深入研究：分布式速率限制
+
+### Redis + Lua 脚本
+在分布式设置中，多个服务器必须共享速率限制状态。 Redis 因其原子操作和亚毫秒级延迟而成为标准选择。
+
+Lua 脚本确保原子性 - 检查和递减发生在单个 Redis 操作中，防止竞争条件：
+
+```
+-- Token Bucket in Redis (pseudocode)
+local tokens = redis.call('GET', key)
+local last_refill = redis.call('GET', key..':time')
+-- Calculate tokens to add based on elapsed time
+-- If tokens > 0: decrement and ALLOW
+-- Else: DENY
+```
+
+### 响应标头
+精心设计的速率限制器将状态传达给客户端：
+- `X-RateLimit-Limit: 100` - 每个窗口的最大请求数
+- `X-RateLimit-Remaining: 42` - 剩余请求
+- `X-RateLimit-Reset: 1672531200` - 窗口重置时的 UTC 纪元
+- HTTP `429 Too Many Requests` 带有 `Retry-After` 标头
+
+<Quiz question="为什么 Lua 脚本与 Redis 一起使用来进行速率限制，而不是单独的 GET 和 SET 命令？" options="Lua 比 Redis 命令更快|Lua 脚本在 Redis 上自动执行，防止竞争条件|Redis 本身不支持 GET/SET|Lua 减少网络带宽" answer="1" explanation="Lua 脚本在 Redis 服务器上自动运行。如果没有原子性，两个并发请求都可以读取相同的令牌计数，都看到可用的令牌，并且都递减 - 允许比限制允许的更多请求。" />
+
+## 步骤 5 - 处理边缘情况
+
+### 竞争条件
+如果没有原子操作，并发请求可以绕过限制。解决方案：Redis Lua 脚本或 Redis `MULTI/EXEC` 事务。
+
+### 速率限制维度
+同时在多个级别应用限制：
+- **每用户** - 经过身份验证的用户每分钟 100 个请求
+- **每个 IP** - 匿名流量每分钟 50 个请求
+- **每个 API 密钥** - 分层计划（免费：10/分钟，专业版：1000/分钟）
+
+### 分布式时钟偏差
+服务器的时钟可能略有不同。使用 Redis 服务器时间作为单一事实来源，而不是依赖应用程序服务器时间戳。
+
+<FunFact>GitHub 的 REST API 允许经过身份验证的用户每小时 5,000 个请求，但未经身份验证的请求每小时仅允许 60 个。 Stripe 使用滑动窗口方法，对实时和测试模式 API 密钥具有单独的限制。</FunFact>
+
+## 步骤 6 - 瓶颈和优化
+
+|瓶颈 |解决方案 |
+|------------|----------|
+| Redis单点故障|具有复制功能的 Redis 集群 |
+| Redis 的网络延迟 |具有定期同步功能的本地内存缓存 |
+|热键（流行的 API 密钥）|跨多个 Redis 节点的分片 |
+|规则评估开销|预编译规则、缓存配置 |
+
+<Quiz question="速率限制器使用 60 秒的固定窗口，限制为 100 个请求。用户在第 59 秒发送了 100 个请求，在第 61 秒又发送了 100 个请求。有多少请求通过？" options="100|150|200|这取决于算法" answer="2" explanation="使用固定窗口计数器，所有 200 个请求都会通过，因为 100 个请求落在窗口 1（秒 0-59）中，100 个请求落在窗口 2（秒 60-119）中。这种边缘突发问题就是为什么首选滑动窗口或令牌桶算法的原因。" />
+
+<ThinkAboutIt>如果您正在为伦敦、纽约和东京数据中心的全球 API 设计速率限制，您会使用单个集中式 Redis 还是区域性 Redis 集群？您会接受什么样的一致性权衡？</ThinkAboutIt>
+
+---
+
+## 📚 进一步阅读
+- [速率限制 - 系统设计访谈，第 1 章4](https://bytebytego.com/) - Alex Xu的分步速率限制器设计
+- [Stripe Rate Limiting](https://stripe.com/blog/rate-limiters) - Stripe 如何处理生产中的速率限制
+- [Kong Rate Limiting Plugin](https://docs.konghq.com/hub/kong-inc/rate-limiting/) - 真实世界的API网关实现

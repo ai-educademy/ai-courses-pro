@@ -1,0 +1,244 @@
+---
+title: "MLOps en productie-ML"
+description: "Demonstreer expertise op het gebied van productie-ML – van modelserving tot monitoring tot de infrastructuur die ML op schaal laat werken."
+order: 4
+difficulty: "advanced"
+duration: 20
+icon: "⚙️"
+published: true
+machineTranslated: true
+---
+# ⚙️ MLOps en Productie ML
+
+Hier is een statistiek die bepalend zou moeten zijn voor de manier waarop u zich voorbereidt op interviews: **87% van de ML-modellen haalt de productie nooit.** De kloof tussen een Jupyter-notebook en een betrouwbare, schaalbare ML-service is enorm – en bedrijven zijn wanhopig op zoek naar technici die deze kunnen overbruggen. MLOps-interviewvragen testen of je een model kunt omzetten van "het werkt op mijn machine" naar "het werkt betrouwbaar voor miljoenen gebruikers, om 3 uur 's nachts op zaterdag."
+
+---
+
+## 🧭 Wat MLOps eigenlijk inhoudt
+
+MLOps is de reeks praktijken die DevOps-discipline naar machine learning brengen. Het omvat de gehele ML-levenscyclus:
+
+```
+Data → Feature Engineering → Training → Evaluation → Deployment → Monitoring → Retraining
+  ↑                                                                              |
+  └──────────────────────────── Feedback Loop ────────────────────────────────────┘
+```
+
+Belangrijke pijlers zijn onder meer:
+- **CI/CD voor ML**: geautomatiseerd testen van gegevens, functies en modellen – niet alleen code
+- **Experimenttracking**: systematische registratie van hyperparameters, statistieken en artefacten
+- **Modelversiebeheer**: bijhouden welke modelversie welk verkeer bedient
+- **Modelweergave**: voorspellingen betrouwbaar en snel naar gebruikers sturen
+- **Monitoring**: detecteren wanneer modellen in productie verslechteren
+
+<Callout>Het grootste verschil tussen MLOps en traditionele DevOps: in software maken codewijzigingen dingen kapot. In ML maken *data*-wijzigingen dingen kapot – vaak stil, zonder foutenlogboeken.
+</Callout>
+
+---
+
+## 🚀 Modelserveerpatronen
+
+Hoe u voorspellingen weergeeft, is afhankelijk van uw latentievereisten, schaal en hoe vaak voorspellingen moeten worden gewijzigd.
+
+### Batch-inferentie
+
+Bereken vooraf voorspellingen volgens een schema (per uur, dagelijks) en sla ze op om ze op te zoeken.
+
+**Best voor**: e-mailaanbevelingen, dagelijkse risicoscores, wekelijkse rapporten
+
+```
+Schedule → Load data → Run model → Write predictions to DB → Serve from DB
+```
+
+**Voordelen**: eenvoudige infrastructuur, kan grote modellen gebruiken, kosteneffectief
+**Nadelen**: voorspellingen kunnen oud zijn en kunnen niet reageren op realtime context
+
+### Realtime inferentie (model-as-a-service)
+
+Het model draait achter een API. Elk verzoek activeert een voorspelling.
+
+**Beste voor**: zoekpositie, fraudedetectie, chatbots
+
+```
+User request → API Gateway → Feature lookup → Model inference → Response
+```
+
+**Voordelen**: nieuwe voorspellingen, kunnen realtime context gebruiken
+**Nadelen**: latentiegevoelig, noodzaak om de modelgrootte en dienstverleningsinfrastructuur te optimaliseren
+
+### Ingebed model
+
+Het model wordt direct in de applicatie of het apparaat gebundeld.
+
+**Beste voor**: mobiele apps, IoT-apparaten, edge computing
+
+**Voordelen**: geen netwerklatentie, werkt offline
+**Nadelen**: moeilijker te updaten, beperkt door apparaatbronnen
+
+<Quiz
+  question="Een app voor het bezorgen van eten moet voor elke bestelling de bezorgtijd schatten. Welk serveerpatroon is het meest geschikt?"
+  options="Batch-inferentie wordt elke nacht berekend|Realtime gevolgtrekking op het moment van bestellen|Ingebed model op de telefoon van de klant|Vooraf berekende opzoektabel"
+  answer="1"
+  explanation="De bezorgtijd is afhankelijk van realtime factoren: de huidige restaurantbelasting, beschikbaarheid van chauffeurs, verkeersomstandigheden en het weer. Deze veranderen van minuut tot minuut, dus batchvoorspellingen zouden verouderd zijn. Dankzij realtime gevolgtrekking kan het model voor elke bestelling de nieuwste context gebruiken."
+/>
+
+---
+
+## 📊 Experimenten volgen
+
+ML-experimenten uitvoeren zonder tracking is als wetenschap bedrijven zonder een laboratoriumnotitieboekje. U moet opnemen:
+
+- **Hyperparameters**: leersnelheid, batchgrootte, architectuurkeuzes
+- **Metrische gegevens**: trainingsverlies, validatiestatistieken voor elk tijdperk
+- **Artefacten**: modelcontrolepunten, plots van functiebelang, verwarringsmatrices
+- **Omgeving**: bibliotheekversies, gebruikte hardware, willekeurige zaden
+
+### Populaire hulpmiddelen
+
+| Gereedschap | Sterke punten | Implementatie |
+|---|---|---|
+| **MLflow** | Open source, modelregistratie, brede acceptatie | Zelf gehost of beheerd |
+| **Gewichten en vooroordelen (W&B)** | Prachtige gebruikersinterface, samenwerkingsfuncties, sweeps | In de cloud gehost |
+| **Neptunus.ai** | Lichtgewicht, goed voor teams | In de cloud gehost |
+| **TensorBoard** | Gratis, nauw geïntegreerd met TensorFlow | Lokaal of ingebed |
+
+```python
+import mlflow
+
+mlflow.set_experiment("fraud-detection-v2")
+
+with mlflow.start_run():
+    mlflow.log_param("learning_rate", 0.001)
+    mlflow.log_param("n_estimators", 500)
+
+    model = train_model(X_train, y_train)
+    metrics = evaluate_model(model, X_test, y_test)
+
+    mlflow.log_metric("auc_roc", metrics["auc_roc"])
+    mlflow.log_metric("precision", metrics["precision"])
+    mlflow.sklearn.log_model(model, "model")
+```
+
+<ThinkAboutIt>Uw team voert al zes maanden experimenten uit zonder enig volgsysteem. Een belanghebbende vraagt: "Waarom zijn de prestaties van het model vorige maand gedaald?" Hoe zou u hierop antwoorden en wat zou u ondernemen om deze situatie in de toekomst te voorkomen?
+</ThinkAboutIt>
+
+---
+
+## 🔍 ML in productie monitoren
+
+Traditionele softwaremonitoring spoort fouten en latentie op. ML-monitoring voegt een kritische laag toe: **maakt het model nog steeds goede voorspellingen?**
+
+### Soorten drift
+
+**Data drift** (covariate shift): de verdeling van invoerkenmerken verandert. Voorbeeld: een e-commercemodel dat is getraind op gegevens van vóór de pandemie ziet een stijging in het aantal zoekopdrachten naar thuiskantoorapparatuur.
+
+**Conceptdrift**: de relatie tussen kenmerken en doelwijzigingen. Voorbeeld: de functie 'werkgelegenheidsstatus' van een kredietscoremodel betekent iets anders tijdens een recessie.
+
+**Voorspellingsdrift**: de verdeling van de modeluitvoer verandert, zelfs als de invoer er hetzelfde uitziet.
+
+### Wat te controleren
+
+| Signaal | Hoe te detecteren | Actie |
+|---|---|---|
+| Distributies van invoerfuncties | Statistische tests (KS-test, PSI) | Onderzoek datapijplijn |
+| Voorspellingsverdeling | Volg gemiddelde, variantie en percentielen in de loop van de tijd | Vergelijken met basisperiode |
+| Modelprestaties (indien labels beschikbaar) | Volgnauwkeurigheid, F1, etc. tegen de grondwaarheid | Activeer herscholing indien onder de drempelwaarde |
+| Latentie | P50, P95, P99 responstijden | Schaal infrastructuur of optimaliseer model |
+| Gegevenskwaliteit | Nultarieven, schemaschendingen, volumeafwijkingen | Waarschuw data-engineeringteam |
+
+```python
+from scipy.stats import ks_2samp
+
+# Kolmogorov-Smirnov test for distribution shift
+def detect_drift(reference_data, current_data, threshold=0.05):
+    statistic, p_value = ks_2samp(reference_data, current_data)
+    return p_value < threshold  # True = drift detected
+```
+
+<FunFact>Toen het Zillow-huisprijsmodel tijdens de ongebruikelijke huizenmarkt van 2021 een conceptverschuiving ondervond, verloor het bedrijf meer dan $500 miljoen aan huizenaankopen op basis van de voorspellingen van zijn eigen model – en stopte uiteindelijk zijn huis-flipping-activiteiten.
+</FunFact>
+
+---
+
+## 🔄CI/CD voor machinaal leren
+
+ML CI/CD gaat verder dan het testen van codes. U moet ook gegevens, functies en modellen valideren.
+
+### De ML-testpiramide
+
+```
+              ┌──────────────┐
+              │  Model Tests  │  ← Does the model meet quality thresholds?
+             ┌┴──────────────┴┐
+             │  Feature Tests  │  ← Are features computed correctly?
+            ┌┴────────────────┴┐
+            │  Data Validation  │  ← Is the data schema correct? Missing values?
+           ┌┴──────────────────┴┐
+           │    Unit Tests       │  ← Does the code work?
+           └────────────────────┘
+```
+
+**Gegevensvalidatie**: controleer schema, nultarieven, waardebereiken, rijtellingen
+**Functietests**: controleer of functietransformaties de verwachte output opleveren
+**Modeltests**: zorg ervoor dat het getrainde model vóór de implementatie de minimale kwaliteitsdrempels overschrijdt
+
+<Quiz
+  question="De klikfrequentie van uw aanbevelingsmodel is in twee weken tijd met 15% gedaald, maar er is geen code gewijzigd. Wat is de meest waarschijnlijke oorzaak?"
+  options="Er is een bug geïntroduceerd in de modelcode|Gegevensdrift: de distributie van invoergegevens is verschoven|De hyperparameters van het model moeten opnieuw worden afgestemd|Het A/B-testframework bevat een bug"
+  answer="1"
+  explanation="Wanneer er geen code is veranderd maar de prestaties achteruitgaan, is de meest waarschijnlijke boosdoener datadrift: de gegevens uit de echte wereld die het model ontvangt, zijn verschoven van datgene waarop het is getraind. Dit kunnen seizoensveranderingen, nieuwe gebruikerssegmenten of veranderingen in upstream datapijplijnen zijn."
+/>
+
+---
+
+## 💰 Overwegingen over de infrastructuur
+
+Productie-ML heeft reële kosten. Interviewers willen kostenbewustzijn zien:
+
+### GPU-beheer
+
+- **Training**: gebruik spot/preemptible instances voor kostenbesparingen (met checkpointing!)
+- **Serveren**: overweeg modeldestillatie of kwantisering om de GPU-vereisten te verminderen
+- **Automatisch schalen**: schaal GPU-instanties op basis van verkeerspatronen, niet op piekcapaciteit
+
+### Strategieën voor kostenoptimalisatie
+
+- **Modelcompressie**: snoeien, kwantisering, kennisdistillatie
+- **Caching**: cachevoorspellingen voor herhaalde invoer
+- **Gedifferentieerde portie**: gebruik een goedkoop model voor de meeste verzoeken, een duur model alleen als het vertrouwen laag is
+- **Juiste dimensionering**: gebruik geen 175B-parametermodel als een verfijnd 7B-model 95% van de kwaliteit behaalt
+
+```
+Cost per prediction ≈ (GPU cost per hour) / (predictions per hour)
+
+Example:
+- GPU instance: $3/hour
+- Model throughput: 1,000 predictions/second
+- Cost per prediction: $3 / 3,600,000 ≈ $0.0000008
+```
+
+---
+
+## 🏗️ Veelgestelde vragen tijdens sollicitatiegesprekken
+
+Hier zijn vragen die u bereid moet zijn te bespreken:
+
+1. "Laat me zien hoe u een nieuw model in productie zou nemen" - beschrijf de volledige pijplijn, van training tot kanarie-implementatie tot volledige uitrol
+2. "Hoe zou je omgaan met een model dat in productie degradeert?" — monitoring, analyse van de hoofdoorzaken, terugdraaien, omscholing
+3. "Wat is het verschil tussen het opnieuw trainen van modellen en het bijwerken van modellen?" — volledige herscholing op het gebied van nieuwe gegevens versus incrementeel/online leren
+4. "Hoe zorg je voor reproduceerbaarheid in ML-experimenten?" — versiebeheer voor code, gegevens en configuratie; vaste zaden; containerisatie
+5. "Beschrijf uw ideale ML-platform" - functiewinkel, experimenttracker, modelregistratie, bedieningsinfrastructuur, monitoringdashboard
+
+<Callout>Koppel bij het beantwoorden van MLOps-interviewvragen altijd technische beslissingen aan de zakelijke impact. "We gebruiken kanarie-implementaties omdat het terugdraaien van een slecht model X aan verloren inkomsten kost" is overtuigender dan alleen het beschrijven van de technische opzet.
+</Callout>
+
+---
+
+## 🔑Belangrijkste afhaalrestaurants
+
+- **MLOps overbrugt de kloof** tussen modelontwikkeling en productie – dit is momenteel de meest gevraagde ML-vaardigheid
+- **Kies verstandig serveerpatronen**: batchgewijs voor kosten, realtime voor versheid, ingebed voor scherpte
+- **Monitor voorbij latentie**: datadrift, conceptdrift en modeldegradatie zijn de stille moordenaars
+- **Volg elk experiment**: parameters, statistieken, artefacten en omgeving
+- **Test de ML-pijplijn**, niet alleen de code: gegevensvalidatie, functietests en modelkwaliteitspoorten
+- **Denk na over de kosten**: modelcompressie, caching en gelaagde dienstverlening verlagen de infrastructuurkosten

@@ -1,0 +1,167 @@
+---
+title: "エンドツーエンドの ML パイプライン - 生データからデプロイされたモデルまで"
+description: "完全な ML ライフサイクルをマスターします。データ収集、特徴エンジニアリング、モデル トレーニング、デプロイ、モニタリングはすべて再現可能なパイプライン コードとして調整されます。"
+order: 6
+difficulty: "advanced"
+duration: 22
+icon: "🔄"
+published: true
+machineTranslated: true
+---
+# エンドツーエンドの ML パイプライン - 生データからデプロイされたモデルまで
+
+ほとんどのチュートリアルは `model.fit()` で終了します。本番環境では、これは作業のわずか 20% にすぎません。このレッスンでは、**ML ライフサイクル全体**、つまり Spotify のレコメンデーション エンジン、Stripe の不正検出、Google の検索ランキングを支える同じパイプラインについて説明します。
+
+## 🗺️ ML ライフサイクルの概要
+
+<Illustration src="/images/lessons/end-to-end-ml-pipeline.svg" alt="データの取り込みから監視までの ML パイプラインの段階の図" caption="本番環境の ML パイプラインの 8 つのステージ - それぞれが潜在的な障害点です。" />
+
+すべての実稼働 ML システムは次の段階を経ます。
+
+1. **データ収集** - API、データベース、イベント ストリーム、Web スクレイピング
+2. **データ クリーニング** - null の処理、重複排除、型強制
+3. **特徴エンジニアリング** - 生の信号をモデル対応の特徴に変換する
+4. **モデルの選択** - 問題に合ったアーキテクチャの選択
+5. **トレーニング** - GPU/CPU オーケストレーション、ハイパーパラメーター調整
+6. **評価** - オフライン指標、A/B テスト、公平性監査
+7. **展開** - サービス提供インフラストラクチャ、レイテンシ バジェット
+8. **モニタリング** - ドリフト検出、アラート、再トレーニングトリガー
+
+## 📦 データの収集とバージョン管理
+
+生データは基盤です。これをソース コードのように扱います - **すべてにバージョンを付けます**。
+
+```bash
+# Initialise DVC in your repo
+dvc init
+dvc remote add -d storage s3://my-ml-data-bucket
+
+# Track a dataset
+dvc add data/transactions.csv
+git add data/transactions.csv.dvc .gitignore
+git commit -m "Track raw transaction dataset v1"
+dvc push
+```
+
+**DVC** (データ バージョン コントロール) を使用すると、任意の履歴データセットを `git checkout` 利用できます。 Git タグと組み合わせると、任意の時点の実験を再現できます。
+
+<FunFact>Netflix は、データ パイプラインを通じて 1 日に 1 兆 5000 億を超えるイベントを処理し、毎秒約 1,700 万のイベントが推奨モデルにフィードされます。</FunFact>
+
+## 🛠️ 特徴エンジニアリング - 競争に勝つ場所
+
+アルゴリズムよりも機能の方が重要です。素晴らしい特徴を持つ勾配ブーストされたツリーは、貧弱な特徴を持つディープ ニューラル ネットワークに勝ちます。
+
+```python
+import pandas as pd
+
+df = pd.read_csv("data/transactions.csv", parse_dates=["timestamp"])
+
+# Temporal features
+df["hour"] = df["timestamp"].dt.hour
+df["is_weekend"] = df["timestamp"].dt.dayofweek >= 5
+
+# Aggregation features
+user_stats = df.groupby("user_id")["amount"].agg(["mean", "std", "count"])
+user_stats.columns = ["user_avg_amount", "user_std_amount", "user_txn_count"]
+df = df.merge(user_stats, on="user_id")
+
+# Ratio features
+df["amount_vs_avg"] = df["amount"] / df["user_avg_amount"]
+```
+
+<Quiz question="通常、表形式の ML 問題で最も高い予測力を提供する特徴量エンジニアリング手法はどれですか?" options="ワンホットエンコーディングのカテゴリ変数|既存の列間の相互作用および比率フィーチャーの作成|すべての特徴をゼロ平均に正規化する|PCA 次元削減の適用" answer="1" explanation="交互作用および比率機能は、線形モデルだけでは学習できない変数間の関係を捕捉します。 Kaggle のトップ ソリューションは、最も影響の大きい変革として一貫してこれらを挙げています。" />
+
+## 🧪 MLflow による実験追跡
+
+自分が試したことを見失うことはありません。 MLflow は、パラメーター、メトリック、アーティファクトを自動的にログに記録します。
+
+```python
+import mlflow
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import f1_score
+
+mlflow.set_experiment("fraud-detection-v2")
+
+with mlflow.start_run(run_name="gbm-baseline"):
+    params = {"n_estimators": 500, "max_depth": 6, "learning_rate": 0.05}
+    mlflow.log_params(params)
+
+    model = GradientBoostingClassifier(**params)
+    model.fit(X_train, y_train)
+
+    score = f1_score(y_test, model.predict(X_test))
+    mlflow.log_metric("f1_score", score)
+    mlflow.sklearn.log_model(model, "model")
+```
+
+MLflow UI で実行を比較し、ステージング → 運用ライフサイクル タグを使用して最適なモデルを **モデル レジストリ**にプロモートします。
+
+## 🚀 コードとしてのパイプライン - オーケストレーション
+
+手動ステップが壊れます。オーケストレーション フレームワークを使用してコードでパイプラインをエンコードします。
+
+|ツール |最適な用途 |主要な強み |
+|------|----------|---------------|
+| **Kubeflow パイプライン** | Kubernetes ネイティブ ML |既存の K8s クラスターでスケール |
+| **Apache エアフロー** |複雑な DAG スケジューリング |成熟したエコシステム、幅広い採用 |
+| **知事** |最新の Python ワークフロー | Pythonic API、優れたエラー処理 |
+| **ZenML** | MLOps の抽象化 |スタックに依存せず、あらゆるツールを接続可能 |
+
+<ThinkAboutIt>毎晩再トレーニングするパイプラインがありますが、データは時間ごとに変化します。再トレーニングの頻度を決定する際に、コスト、古さ、インフラストラクチャの複雑さなど、どのようなトレードオフを考慮しますか?</ThinkAboutIt>
+
+## 🌐 モデルの提供と展開
+
+モデルには API が必要です。 2 つの主なパターン:
+
+**REST API** - シンプル、HTTP ベース、中程度のスループットに最適:
+```python
+# FastAPI model server
+from fastapi import FastAPI
+import joblib
+
+app = FastAPI()
+model = joblib.load("model.pkl")
+
+@app.post("/predict")
+async def predict(features: dict):
+    prediction = model.predict([list(features.values())])
+    return {"prediction": int(prediction[0])}
+```
+
+**gRPC** - バイナリ プロトコル。REST より 2 ～ 10 倍高速で、内部マイクロサービスおよび高スループット シナリオに最適です。
+
+### カナリアのデプロイメント
+
+トラフィックの 100% を新しいモデルに送信しないでください。 **カナリア リリース**を使用: 5% → 25% → 50% → 100% をルートし、各ステップでエラー率を監視します。メトリクスが低下した場合は即座にロールバックします。
+
+<Quiz question="ML モデルのカナリア デプロイメントの主な利点は何ですか?" options="モデルのトレーニング時間を短縮します|メトリック低下時の自動ロールバックによる段階的なロールアウトが可能になります。|A/B テストを通じてモデルの精度を向上させます|モデルのバージョン管理が不要になります" answer="1" explanation="カナリアの展開では爆発範囲が制限されます。新しいモデルのパフォーマンスが低い場合でも、影響を受けるユーザーはごく一部であり、より広範囲の被害が発生する前にロールバックできます。" />
+
+## 📊 モニタリングとフィードバック ループ
+
+展開はゴールではなく、スタート地点です。以下を監視します:
+
+- **データ ドリフト** - トレーニング データからシフトする入力分布
+- **コンセプトドリフト** - 機能とターゲットの変化との関係
+- **パフォーマンスの低下** - 精度/遅延メトリクスの低下
+
+**Evidently AI**、**WhyLabs**、**Arize** などのツールはドリフト ダッシュボードを提供します。ドリフトがしきい値を超えると、新しい本番データを使用して自動再トレーニングがトリガーされ、フィードバック ループが閉じられます。
+
+<Quiz question="不正検出モデルの精度は 3 か月で 95% から 78% に低下しますが、入力特徴の分布は変化していません。これはどのような種類のドリフトですか?" options="データドリフト|コンセプトドリフト|モデルドリフト|特徴ドリフト" answer="1" explanation="入力分布は安定しているがパフォーマンスが低下する場合、機能とターゲットの間の基礎的な関係が変化します。これがコンセプト ドリフトです。詐欺師は戦術を進化させましたが、データの形状は同じように見えます。" />
+
+<ThinkAboutIt>金曜日の夕方にモニタリングにより重大な変動が検出されました。自動再トレーニングをトリガーしますか、月曜日の手動レビューを待つか、それとも以前のモデル バージョンにロールバックしますか?あなたの決定に影響を与える要因は何ですか?</ThinkAboutIt>
+
+## 🎯 重要なポイント
+
+- バージョン **すべて**: コード、データ、モデル、パイプライン構成
+- 機能エンジニアリングは、アーキテクチャの変更よりも高い ROI を実現します
+- パイプラインをコードとしてエンコード - 手動ステップは技術的負債です
+- カナリアリリースを使用してデプロイし、絶え間なく監視します
+- フィードバック ループ (本番データ → 再トレーニング) がデモと本番システムを区別するものです
+
+---
+
+## 📚 続きを読む
+
+- [Made With ML - MLOps コース](https://madewithml.com/)] - ライフサイクル全体をカバーする包括的な無料の MLOps カリキュラム
+- [Designing Machine Learning Systems by Chip Huyen](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/)] - プロダクション ML システム設計に関する決定版の本
+- [MLflow Documentation](https://mlflow.org/docs/latest/index.html) - 実験追跡とモデル レジストリの公式ガイド

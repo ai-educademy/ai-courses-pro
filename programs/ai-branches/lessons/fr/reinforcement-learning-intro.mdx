@@ -1,0 +1,237 @@
+---
+title: "Apprentissage par renforcement : enseigner l'IA par essais et erreurs"
+description: "Découvrez comment fonctionne l'apprentissage par renforcement : l'approche de formation derrière AlphaGo, le RLHF de ChatGPT, l'IA de jeu et la robotique."
+order: 13
+difficulty: "intermediate"
+duration: 30
+icon: "🎮"
+published: true
+machineTranslated: true
+---
+# Apprentissage par renforcement : enseigner l'IA par essais et erreurs
+
+Comment un enfant apprend-il à marcher ? Personne ne leur remet un ensemble de données étiquetées d'exemples de « bonnes / mauvaises étapes ». Personne n’écrit les équations physiques de l’équilibre. Ils essaient, ils tombent, ils essaient différemment, ils s’améliorent progressivement – ​​guidés par les retours du monde qui les entoure.
+
+Cette intuition — **l'apprentissage par essais et erreurs, guidé par des récompenses et des pénalités** — est le fondement de l'**Apprentissage par renforcement (RL)**, l'approche derrière certaines des réalisations les plus spectaculaires de l'IA : battre des champions du monde de Go et d'échecs, entraîner ChatGPT à être utile et apprendre aux robots à marcher.
+
+## 🎯 Le Core Framework : Agent, Environnement, Récompense
+
+Chaque problème RL a la même structure fondamentale :
+
+```
+        ┌─────────────────────────────────────────┐
+        │              ENVIRONMENT                 │
+        │   (the world the agent operates in)      │
+        └─────────────────┬───────────────────────┘
+                          │
+         State (s_t)      │      Reward (r_t)
+         What the         │      How good was
+         agent sees ◄─────┤      the last action?
+                          │
+        ┌─────────────────▼───────────────────────┐
+        │                 AGENT                    │
+        │   (the AI that takes actions)            │
+        └─────────────────┬───────────────────────┘
+                          │
+                          │ Action (a_t)
+                          ▼
+              Agent acts on the environment,
+              environment transitions to state s_{t+1}
+```
+
+- **Agent** : le système d'IA qui prend les décisions
+- **Environnement** : tout ce avec lequel l'agent interagit (un jeu, une simulation, l'environnement d'un robot physique)
+- **État** : l'observation actuelle de l'agent sur l'environnement
+- **Action** : ce que fait l'agent (bouger à gauche, déplacer un bras de robot, choisir un mot)
+- **Récompense** : un signal numérique indiquant la qualité de l'action (+1 pour avoir marqué un but, -1 pour avoir perdu une vie, +10 pour avoir accompli une tâche)
+- **Politique** : la stratégie de l'agent — une cartographie des états aux actions
+
+L'objectif de l'agent est d'apprendre une **politique** qui maximise la **récompense cumulée** totale au fil du temps, et pas seulement la récompense immédiate.
+
+## 🔍 Exploration vs Exploitation : le dilemme central
+
+Les agents RL font face à une tension perpétuelle :
+
+**Exploitation** : faites ce dont vous savez déjà qu'il fonctionne bien : prenez les mesures qui vous semblent actuellement les meilleures.
+
+**Exploration** : essayez quelque chose de nouveau. Il existe peut-être une meilleure stratégie que vous n'avez pas encore découverte.
+
+Un robot qui ne fait qu'exploiter ne découvrira jamais un meilleur itinéraire. Un robot qui se contente d’explorer n’arrivera jamais nulle part de manière fiable.
+
+Une stratégie simple mais efficace est **ε-gourmande** :
+
+```python
+import random
+
+epsilon = 0.1  # 10% exploration rate
+
+def choose_action(state, Q_table, epsilon):
+    if random.random() < epsilon:
+        # Explore: choose a random action
+        return random.choice(available_actions)
+    else:
+        # Exploit: choose the action with highest expected reward
+        return argmax(Q_table[state])
+```
+
+Avec ε = 0,1, l’agent explore aléatoirement 10 % du temps et exploite ses connaissances acquises 90 % du temps. En règle générale, ε commence à un niveau élevé (beaucoup d'exploration au début) et diminue au fil de l'entraînement à mesure que l'agent devient plus confiant.
+
+<FunFact>Le dilemme exploration-exploitation n’est pas seulement un problème d’IA : il apparaît également dans la prise de décision humaine. Devez-vous aller dans votre restaurant préféré (exploiter) ou essayer un nouvel endroit (explorer) ? Le même cadre mathématique s’applique.</FunFact>
+
+## 📊 Processus décisionnels de Markov (MDP)
+
+La plupart des problèmes RL sont formalisés sous la forme de **Processus de décision de Markov (MDP)**. L'hypothèse clé est la **propriété de Markov** : l'état actuel contient toutes les informations nécessaires pour choisir la meilleure action – l'historique passé n'a pas d'importance, seulement où vous vous trouvez actuellement.
+
+Un MDP est défini par :
+- **S** : un ensemble d'états possibles
+- **A** : un ensemble d'actions possibles
+- **P(s' | s, a)** : probabilité de transition — étant donné l'état s et l'action a, probabilité de se retrouver dans l'état s'
+- **R(s, a)** : fonction de récompense — récompense immédiate pour avoir pris une action a dans l'état s
+- **γ (gamma)** : facteur de remise — combien valent les récompenses futures par rapport aux récompenses immédiates
+
+Le **facteur de remise** est important : les récompenses dans un avenir proche valent plus que les récompenses dans un avenir lointain :
+
+```python
+# Cumulative discounted reward (Return)
+# R = r_0 + γ·r_1 + γ²·r_2 + γ³·r_3 + ...
+# With γ = 0.99: future rewards are nearly as valuable as immediate ones
+# With γ = 0.5:  rewards 10 steps away are worth only 0.1% of immediate reward
+
+gamma = 0.99
+total_return = sum(gamma**t * reward for t, reward in enumerate(rewards))
+```
+
+## 🧮 Q-Learning : RL basé sur la valeur
+
+**Q-learning** est l'un des algorithmes RL fondamentaux. Il apprend une **fonction Q** : Q(s, a) = la récompense future totale attendue si vous effectuez l'action a dans l'état s et que vous agissez ensuite de manière optimale pour toujours.
+
+```python
+import numpy as np
+
+# Initialise Q-table to zeros
+n_states  = 16   # e.g., a 4×4 grid world
+n_actions = 4    # up, down, left, right
+Q = np.zeros((n_states, n_actions))
+
+# Q-learning update rule (the Bellman equation)
+def update_Q(Q, state, action, reward, next_state, alpha=0.1, gamma=0.99):
+    """
+    alpha: learning rate — how fast to update Q values
+    gamma: discount factor — how much to value future rewards
+    """
+    # Current estimate
+    current_Q = Q[state, action]
+    
+    # Target: immediate reward + discounted best future value
+    target = reward + gamma * np.max(Q[next_state])
+    
+    # Move current estimate towards target
+    Q[state, action] = current_Q + alpha * (target - current_Q)
+    
+    return Q
+```
+
+Au fil de milliers d'épisodes, le Q-learning converge vers la fonction Q optimale. Une fois apprise, la politique est simple : dans chaque état, effectuez l’action avec la valeur Q la plus élevée.
+
+**Deep Q-Networks (DQN)**, développé par DeepMind en 2013, a remplacé la Q-table par un réseau neuronal profond, permettant au Q-learning de s'adapter à des entrées visuelles complexes. DQN a appris à jouer à 49 jeux Atari directement à partir de pixels, atteignant des performances de niveau humain sur beaucoup.
+
+## 🚀 Méthodes de gradient de politique
+
+Q-learning apprend indirectement la valeur des actions. Les méthodes **Policy gradient** optimisent directement la politique : la cartographie des états aux actions.
+
+```python
+# The core idea: if an action led to high reward, make it more likely
+# If an action led to low reward, make it less likely
+
+def policy_gradient_update(policy_network, states, actions, rewards):
+    # Compute discounted returns for each timestep
+    returns = compute_returns(rewards, gamma=0.99)
+    
+    # Normalise returns (reduces variance)
+    returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+    
+    # Policy loss: -log(π(a|s)) × G_t
+    # Maximise log-probability of actions weighted by how good they were
+    log_probs = policy_network.log_prob(states, actions)
+    loss = -(log_probs * returns).mean()
+    
+    # Backpropagate and update
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+```
+
+Les variantes modernes du gradient politique comprennent :
+- **PPO (Proximal Policy Optimisation)** : l'algorithme le plus utilisé aujourd'hui, utilisé dans la formation RLHF de ChatGPT
+- **A3C (Asynchronous Advantage Actor-Critic)** : parallélise la formation sur plusieurs environnements
+- **SAC (Soft Actor-Critic)** : excellent pour les espaces d'action continue (robotique)
+
+## 💬 RLHF : Comment ChatGPT a été réglé
+
+L'une des applications récentes les plus marquantes de RL est l'**Reinforcement Learning from Human Feedback (RLHF)** — la technique utilisée pour rendre ChatGPT et d'autres LLM utiles, inoffensifs et honnêtes.
+
+Le processus comporte trois étapes :
+
+**Étape 1 : Pré-formation**
+Entraînez un grand modèle de langage sur du texte Internet pour prédire le prochain jeton. Cela donne au modèle de vastes connaissances et capacités linguistiques, mais aucune compréhension de ce que les humains trouvent utile.
+
+**Étape 2 : Former un modèle de récompense**
+Demandez à des annotateurs humains d'évaluer des paires de réponses modèles : « Quelle réponse est la meilleure ? » Utilisez ces évaluations pour former un **modèle de récompense** : un réseau neuronal qui évalue la qualité d'une réponse.
+
+**Étape 3 : Réglage fin du RL avec PPO**
+Utilisez le modèle de récompense comme environnement. Le LLM est l'agent ; ses actions génèrent des jetons ; sa récompense provient du score du modèle de récompense de la réponse complétée.
+
+```
+Human prompt → LLM generates response → Reward model scores it
+                                       → PPO updates LLM to generate
+                                         higher-scoring responses
+```
+
+Cette boucle s'exécute sur des milliers d'itérations jusqu'à ce que le LLM génère systématiquement des réponses très appréciées par les humains. Le résultat : un modèle qui n’est pas seulement compétent, mais qui essaie véritablement d’être utile.
+
+<ThinkAboutIt>RLHF entraîne ChatGPT à générer des réponses très appréciées par les annotateurs humains. Quels problèmes potentiels pourraient survenir si les annotateurs humains ont des préjugés, ou si « ce que les annotateurs notent fortement » n'est pas la même chose que « ce qui est réellement vrai et utile » ?</ThinkAboutIt>
+
+## ♟️ L'histoire d'AlphaGo
+
+Go est un jeu de société si complexe – plus de positions possibles sur le plateau que d’atomes dans l’univers observable – qu’il était considéré comme l’un des défis les plus difficiles de l’IA. La plupart des experts s’attendaient à ce que les champions humains restent invaincus pendant des décennies.
+
+En mars 2016, **AlphaGo** de DeepMind a battu le champion du monde Lee Sedol 4-1.
+
+Le système utilisait une combinaison de :
+- Un **réseau politique** (formé via un apprentissage supervisé sur des jeux humains, puis affiné avec RL) pour suggérer des actions prometteuses
+- Un **réseau de valeurs** (formé via RL via self-play) pour évaluer les positions au sein du conseil d'administration
+- **Monte Carlo Tree Search** pour planifier à l'avance, guidé par les deux réseaux
+
+**AlphaZero** (2017) est allé plus loin : il a appris le Go, les échecs et le shogi *à partir de zéro*, sans données de jeu humaines – uniquement les règles et le jeu personnel via RL. Il a dépassé AlphaGo en trois jours et le meilleur moteur d'échecs (Stockfish) en quatre heures.
+
+## 🤖 Applications robotiques
+
+RL est au cœur de la recherche en robotique moderne :
+
+- **OpenAI's Dactyl** (2019) : une main robotique entièrement entraînée à la simulation par RL, qui pourrait résoudre un Rubik's Cube avec une seule main
+- **Boston Dynamics** : utilise RL parallèlement à la théorie du contrôle traditionnelle pour la locomotion agile des robots Spot et Atlas
+- **Tâches de manipulation** : des robots apprennent à sélectionner, placer et assembler des objets dans des environnements non structurés
+- **Conduite autonome** : RL est utilisé en simulation pour entraîner les politiques de conduite avant leur déploiement dans le monde réel
+
+L'un des principaux défis de la robotique RL est l'**écart entre la simulation et le réel** : les politiques formées en simulation échouent souvent dans le monde réel parce que la simulation ne modélise pas parfaitement la physique, la friction, le bruit des capteurs et les objets inattendus.
+
+## ⚠️ Limites de l'apprentissage par renforcement
+
+RL est puissant mais a de vraies contraintes :
+
+- **Efficacité de l'échantillon** : RL nécessite généralement des millions ou des milliards d'interactions pour apprendre ce qu'un enfant humain apprend en quelques heures. AlphaGo a joué l'équivalent de milliers d'années de jeux humains pendant l'entraînement
+- **Reward hacking** : les agents trouvent parfois des moyens astucieux de maximiser la récompense qui violent l'esprit de l'objectif (un robot de nettoyage qui apprend à *cacher* les dégâts plutôt que de les nettoyer)
+- **Récompenses éparses** : lorsque les récompenses sont rares (uniquement en fin de jeu), l'apprentissage est très lent
+- **Sécurité** : les agents exploratoires RL peuvent entreprendre des actions dangereuses dans le monde réel — une voiture autonome ne peut pas explorer au hasard dans la circulation
+
+<Quiz question="Qu'est-ce que RLHF et pourquoi est-il utilisé pour former des modèles comme ChatGPT ?" options="Apprentissage par renforcement avec feedback humain – utilisé pour rendre les LLM plus utiles en utilisant les évaluations de préférences humaines comme signal de récompense|Apprentissage aléatoire à partir de fichiers humains - une technique de collecte de données|Langage récursif à partir de formes humaines - une technique de pré-formation|Récompenser l'apprentissage à partir des caractéristiques humaines - utilisé uniquement pour la robotique" answer="0" explanation="RLHF (Reinforcement Learning from Human Feedback) entraîne un modèle de récompense sur les jugements de préférence humains, puis utilise PPO pour affiner le LLM afin de générer des réponses qui obtiennent des scores élevés selon ce modèle de récompense. C'est la technique clé qui rend ChatGPT utile et conversationnel plutôt qu'un simple prédicteur de texte brut." />
+
+## Points clés à retenir
+
+- RL est construit sur le framework **agent/environnement/récompense** : un agent entreprend des actions, reçoit des récompenses et apprend une politique qui maximise la récompense cumulée.
+- Le dilemme **exploration vs exploitation** est central : les stratégies ε-gourmandes et plus sophistiquées équilibrent l'essai de nouvelles choses et la réalisation de ce qui fonctionne déjà.
+- Les **Processus de décision de Markov (MDP)** formalisent les problèmes RL ; le facteur de remise γ contrôle dans quelle mesure l'agent valorise les récompenses futures par rapport aux récompenses immédiates
+- **Q-learning** (et Deep Q-Networks) apprend les fonctions de valeur ; Les méthodes **policy gradient** (PPO, A3C) optimisent directement la politique
+- **RLHF** est la technique derrière le comportement utile de ChatGPT : les évaluations de préférences humaines entraînent un modèle de récompense, qui guide ensuite le réglage fin du LLM par le PPO.
+- **AlphaGo/AlphaZero** a démontré que le RL avec jeu autonome peut surpasser les champions du monde humains dans des jeux complexes, réalisant en quelques jours ce qui a nécessité des millénaires de connaissances accumulées par les humains.
+- Les principales limitations de RL incluent la **faible efficacité des échantillons**, le **piratage de récompense** et l'**écart entre la simulation et le réel** en robotique.

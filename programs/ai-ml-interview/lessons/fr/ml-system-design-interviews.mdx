@@ -1,0 +1,183 @@
+---
+title: "Entretiens de conception de systèmes ML"
+description: "Concevez des systèmes d'apprentissage automatique de bout en bout, de la définition du problème au déploiement, en utilisant un cadre structuré que les intervieweurs adorent."
+order: 1
+difficulty: "advanced"
+duration: 25
+icon: "🏗️"
+published: true
+machineTranslated: true
+---
+# 🏗️ Entretiens de conception de systèmes ML
+
+Vous avez réussi les cycles de codage. Maintenant, l'intervieweur fait glisser un marqueur pour tableau blanc sur la table et dit : « Concevez un système de recommandation pour 50 millions d'utilisateurs. » Vos paumes deviennent humides – non pas parce que vous ne connaissez pas le ML, mais parce que vous ne vous êtes jamais entraîné à *penser à voix haute* à des systèmes entiers. Cette leçon vous donne un cadre reproductible qui transforme cette question ouverte en une conversation structurée.
+
+---
+
+## 🗺️ Pourquoi la conception du système ML est différente
+
+La conception de systèmes logiciels traditionnels se concentre sur le flux de données, le stockage et l’évolutivité. La conception du système ML ajoute une dimension supplémentaire : **le modèle est un composant vivant** qui se dégrade avec le temps, dépend de la qualité des données et nécessite une évaluation continue.
+
+Les enquêteurs ne recherchent pas un diagramme d'architecture parfait. Ils veulent voir que vous pouvez :
+
+- Traduire un vague problème commercial en une tâche de ML bien définie
+- Identifier rapidement les exigences en matière de données et les pièges potentiels
+- Raisonnez sur les compromis plutôt que de réciter les réponses des manuels
+- Pensez à ce qui se passe *après* le déploiement du modèle
+
+<Callout>La plus grande erreur que commettent les candidats est de passer directement à la sélection du modèle. Les intervieweurs rapportent systématiquement que la formulation des problèmes et la discussion des données sont les domaines où les candidats se différencient.
+</Callout>
+
+---
+
+## 🧩 Le cadre de conception de système ML en huit étapes
+
+Utilisez ce cadre comme squelette pour chaque question de conception. Vous n'avez pas besoin de consacrer le même temps à chaque étape – adaptez-vous en fonction de la question – mais toucher à chacune d'entre elles est un signe de maturité.
+
+### 1. Définition du problème et mesures commerciales
+
+Commencez par clarifier l’objectif. Demandez : *À quoi ressemble le succès pour l’entreprise ?*
+
+- **Classement dans les recherches** : maximiser le taux de clics ? Délai d'obtention du résultat ?
+- **Détection de fraude** : minimiser les faux négatifs (fraude manquée) tout en contrôlant les faux positifs (utilisateurs légitimes bloqués) ?
+- **Modération du contenu** : donner la priorité au rappel (détecter tout ce qui est nuisible) à la précision ?
+
+Mappez dès le début la métrique commerciale à un objectif compatible avec le ML. Par exemple, « augmenter l'engagement des utilisateurs » peut se traduire par « prédire la probabilité de clic sur chaque élément et classer par score ».
+
+### 2. Pipeline et collecte de données
+
+Discutez de l'origine des données, de la manière dont elles sont collectées et des problèmes que vous prévoyez :
+
+- **Sources de données** : journaux de comportement des utilisateurs, enregistrements de transactions, API tierces
+- **Stratégie d'étiquetage** : étiquettes explicites (évaluations des utilisateurs), signaux implicites (clics, temps d'attente) ou annotation humaine
+- **Fraîcheur des données** : à quelle fréquence les données changent-elles et leur obsolescence nuit-elle aux performances ?
+
+### 3. Ingénierie des fonctionnalités
+
+Décrivez les fonctionnalités que vous extrairiez. Regroupez-les logiquement :
+
+| Groupe de fonctionnalités | Exemples |
+|---|---|
+| Fonctionnalités utilisateur | tranche d'âge, ancienneté, taux de clics historique |
+| Caractéristiques de l'article | catégorie, fourchette de prix, score de popularité |
+| Fonctionnalités contextuelles | heure de la journée, type d'appareil, emplacement |
+| Fonctionnalités d'interaction | cooccurrence utilisateur × élément, profondeur de session |
+
+### 4. Sélection du modèle
+
+Maintenant – et seulement maintenant – discutez des modèles. Justifiez votre choix :
+
+- **Baseline** : régression logistique ou arbres boostés par gradient (rapides à entraîner, interprétables)
+- **Avancé** : apprentissage profond (modèles à deux tours pour la récupération, classements basés sur des transformateurs)
+- **Ensemble** : combinez un modèle de récupération rapide avec un re-ranker plus lent mais plus précis
+
+### 5. Stratégie de formation
+
+Expliquez comment vous vous entraîneriez et valideriez :
+
+- Séparations d'entraînement/validation/test (répartitions basées sur le temps pour les données temporelles)
+- Gestion du déséquilibre des classes (suréchantillonnage, perte de pondération)
+- Approche de réglage des hyperparamètres
+
+### 6. Évaluation hors ligne
+
+Choisissez des mesures qui correspondent à l’objectif commercial. Precision@K pour le classement, AUC-ROC pour la classification binaire, NDCG pour les listes ordonnées.
+
+### 7. Déploiement et service
+
+Discutez de la manière dont le modèle atteint les utilisateurs :
+
+- **Inférence par lots** : précalculez les prédictions tous les soirs (idéal pour les recommandations par e-mail)
+- **Inférence en temps réel** : score à chaque requête (nécessaire pour le classement des recherches)
+- **Hybride** : pré-calculer l'ensemble des candidats, reclasser en temps réel
+
+### 8. Surveillance et itération
+
+Expliquez ce que vous surveillerez après le lancement : dérive des données, changements de distribution des prédictions et métriques en ligne via des tests A/B.
+
+<ThinkAboutIt>Imaginez que vous concevez un système de détection de fraude. L'entreprise dit « attrapez toutes les fraudes ». Pourquoi un rappel à 100 % est-il un objectif dangereux, et comment cadreriez-vous la conversation autour de compromis acceptables ?
+</ThinkAboutIt>
+
+---
+
+## 🎯 Questions courantes sur la conception du ML et comment les aborder
+
+### Système de recommandation
+
+- **Framing** : prédire P (l'utilisateur clique sur l'élément) → classer les éléments par score
+- **Défi clé** : problème de démarrage à froid pour les nouveaux utilisateurs/éléments
+- **Architecture** : génération de candidats (rapide, approximatif) → classement (précis, plus lent) → re-classement (règles métiers, diversité)
+
+### Classement de recherche
+
+- **Framing** : étant donné une requête, classez les documents par pertinence
+- **Défi clé** : équilibrer pertinence, fraîcheur et personnalisation
+- **Architecture** : récupération d'index inversé → modèle d'apprentissage du classement → fusion avec les règles métier
+
+### Détection de fraude
+
+- **Framing** : classification binaire — cette transaction est-elle frauduleuse ?
+- **Défi clé** : déséquilibre extrême des classes (la fraude représente < 0,1 % des transactions)
+- **Architecture** : filtres basés sur des règles → modèle ML → file d'attente de révision humaine pour les cas incertains
+
+<Quiz
+  question="Lors d'un entretien de conception de système ML, que devez-vous faire en PREMIER lorsque vous recevez une invite de conception ?"
+  options="Choisissez une architecture de réseau neuronal|Clarifier le problème et définir les indicateurs commerciaux|Dessinez le pipeline de données|Discuter des métriques d'évaluation du modèle"
+  answer="1"
+  explanation="Commencez toujours par clarifier le problème. Comprendre à quoi ressemble le succès de l'entreprise détermine chaque décision en aval, de la collecte de données à la sélection des mesures en passant par la stratégie de déploiement."
+/>
+
+---
+
+## ⚖️ Discuter des compromis comme un ingénieur senior
+
+Les enquêteurs adorent les discussions de compromis car elles révèlent la profondeur de leur expérience. Voici les compromis qui reviennent le plus :
+
+| Compromis | Quand privilégier la gauche | Quand privilégier la droite |
+|---|---|---|
+| Latence vs précision | Face à l'utilisateur en temps réel (recherche) | Lot hors ligne (reconnaissances par e-mail) |
+| Modèle simple ou complexe | Petites données, besoin d'interprétabilité | Données volumineuses, la précision est essentielle |
+| Service par lots ou en temps réel | Les prédictions ne changent pas rapidement | Les prévisions doivent refléter le contexte le plus récent |
+| Construire ou acheter | Un différenciateur essentiel pour l'entreprise | Capacité de base (par exemple, OCR) |
+
+Lorsque vous discutez d’un compromis, utilisez ce modèle :
+
+> "Nous pourrions opter pour l'**option A** qui nous donne [un avantage], mais l'inconvénient est le [coût]. Alternativement, l'**option B** [un avantage], bien qu'elle introduit un [coût]. Compte tenu de [la contrainte spécifique du problème], je pencherais pour l'**option A** parce que..."
+
+<FunFact>Netflix estime que son système de recommandation permet à l'entreprise d'économiser plus d'un milliard de dollars par an en réduction du taux de désabonnement. La valeur de ce système ML unique dépasse le PIB de certains petits pays.
+</FunFact>
+
+---
+
+## 🛠️ Rassembler tout cela : une mini procédure pas à pas
+
+**Invite** : "Concevez un système de modération de contenu pour une plateforme de médias sociaux."
+
+1. **Problème** : classer le contenu généré par les utilisateurs (texte + images) comme sûr, limite ou nuisible
+2. **Données** : décisions de modération étiquetées provenant d'évaluateurs humains, rapports d'utilisateurs
+3. **Fonctionnalités** : intégration de texte, fonctionnalités d'image (score de nudité, indicateurs de violence), historique des utilisateurs (violations antérieures)
+4. **Modèle** : classificateur multimodal (branche texte + branche image → couche de fusion → tête de classification)
+5. **Formation** : échantillonnage stratifié pour gérer le déséquilibre des classes ; recyclage régulier à mesure que de nouveaux schémas néfastes émergent
+6. **Évaluation** : mémorisation élevée des contenus préjudiciables ; la précision compte pour les limites (éviter la censure excessive)
+7. **Serving** : inférence en temps réel au moment du téléchargement ; mettre en file d'attente les cas limites pour un examen humain
+8. **Surveillance** : suivez le taux de faux positifs via les appels des utilisateurs ; surveiller les nouveaux modèles d’abus
+
+<Quiz
+  question="Pourquoi une approche de service hybride (génération de candidats par lots + classement en temps réel) est-elle courante dans les systèmes de recommandation ?"
+  options="C'est moins cher que le service en temps réel pur|Il équilibre le besoin d'une large couverture avec un classement personnalisé et contextuel.|C'est plus facile à mettre en œuvre que par lots uniquement|Il élimine le besoin de magasins de fonctionnalités"
+  answer="1"
+  explanation="La génération de candidats par lots peut filtrer efficacement des millions d'éléments pour produire une liste restreinte gérable. Le classement en temps réel personnalise ensuite cette liste restreinte en utilisant le contexte le plus récent (heure de la journée, comportement de la session), offrant ainsi le meilleur équilibre entre couverture et pertinence."
+/>
+
+---
+
+## 🔑 Points clés à retenir
+
+- **Utiliser un framework** : problème → données → fonctionnalités → modèle → formation → évaluation → déploiement → suivi
+- **Commencez par le problème commercial**, pas par le modèle : les enquêteurs le remarquent lorsque vous ignorez cela
+- **Discutez explicitement des compromis** — c'est le plus grand différenciateur entre les candidats de niveau intermédiaire et senior
+- **Pensez au-delà de la précision** : la latence, le coût, l'équité et la maintenabilité comptent tous dans la production
+- **Pratiquez-vous à voix haute** — La conception d'un système ML est un exercice de communication autant que technique
+
+<Callout>Les meilleures réponses en matière de conception de systèmes ML ressemblent à une conversation et non à une conférence. Faites une pause pour vérifier avec l'intervieweur, posez des questions de clarification et soyez prêt à pivoter lorsqu'il vous pousse dans une direction différente.
+</Callout>

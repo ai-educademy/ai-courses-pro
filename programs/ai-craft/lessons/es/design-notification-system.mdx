@@ -1,0 +1,147 @@
+---
+title: "Diseñe un sistema de notificación: push, correo electrónico y SMS a escala de mil millones"
+description: "Diseñe un sistema de notificación multicanal escalable que maneje notificaciones push, por correo electrónico, SMS y dentro de la aplicación con colas de mensajes, deduplicación y administración de preferencias del usuario."
+order: 7
+difficulty: "advanced"
+duration: 22
+icon: "🔔"
+published: true
+machineTranslated: true
+---
+# Diseñar un sistema de notificación: push, correo electrónico y SMS a escala de mil millones
+
+Las aplicaciones modernas envían miles de millones de notificaciones diariamente a través de múltiples canales. El diseño de este sistema le enseña sobre colas de mensajes, integraciones de terceros y cómo manejar fallas con elegancia a escala.
+
+## Paso 1: recopilación de requisitos
+
+### Requisitos funcionales
+- Admite múltiples canales: notificaciones push, correo electrónico, SMS y en la aplicación
+- Los usuarios pueden configurar preferencias de notificación y cancelar su suscripción por canal
+- Mensajes con plantilla y personalización (por ejemplo, "Hola, {nombre}, tu pedido se envió")
+- Soporte para notificaciones programadas e inmediatas.
+
+### Requisitos no funcionales
+- **Escalabilidad**: gestiona más de 10 millones de notificaciones al día
+- **Confiabilidad** - no se pierden notificaciones; entrega al menos una vez
+- **Baja latencia**: notificaciones urgentes entregadas en segundos
+- **Extensible**: fácil de agregar nuevos canales (WhatsApp, Slack)
+
+<ThinkAboutIt>¿La entrega de notificaciones debería realizarse exactamente una vez o al menos una vez? Considere la experiencia del usuario al recibir un SMS duplicado versus perderse una alerta de seguridad crítica.</ThinkAboutIt>
+
+## Paso 2: Arquitectura de alto nivel
+
+```
+Caller Services → Notification Service → Validation + Preference Check
+                                              ↓
+                                    Message Queue (Kafka)
+                                    ↓       ↓       ↓       ↓
+                                 Push    Email    SMS    In-App
+                                Worker   Worker  Worker  Worker
+                                  ↓        ↓       ↓       ↓
+                                 FCM   SendGrid  Twilio  WebSocket
+```
+
+<Illustration src="/images/lessons/design-notification-system.svg" alt="Arquitectura del sistema de notificación con servicios de llamadas, servicio de notificación, colas de mensajes de Kafka, trabajadores de canales específicos y proveedores externos." caption="Las colas de mensajes desacoplan el servicio de notificación de los repartidores, lo que permite un escalado independiente por canal." />
+
+### Componentes principales
+1. **Servicio de notificación**: valida solicitudes, verifica las preferencias del usuario, presenta plantillas y pone en cola mensajes
+2. **Colas de mensajes**: colas separadas por canal para escalado y aislamiento independientes
+3. **Trabajadores de entrega**: trabajadores de canales específicos que manejan llamadas API de terceros
+4. **Servicio de plantillas**: almacena y genera plantillas de notificación con sustitución de variables.
+
+## Paso 3 - Análisis profundo: componentes clave
+
+### Preferencias de usuario y exclusión voluntaria
+Almacenar preferencias por usuario y por tipo de notificación:
+
+```
+user_preferences:
+  user_id: "u123"
+  channels:
+    email: { enabled: true, quiet_hours: "22:00-08:00" }
+    push: { enabled: true }
+    sms: { enabled: false }
+  categories:
+    marketing: { enabled: false }
+    security: { enabled: true, override_quiet_hours: true }
+```
+
+El servicio de notificación verifica las preferencias **antes** de poner en cola: nunca envíe lo que el usuario no quiere.
+
+### Colas prioritarias
+No todas las notificaciones son iguales. Utilice niveles de prioridad:
+- **Crítico** - alertas de seguridad, códigos OTP → procesados inmediatamente
+- **Alto** - confirmaciones de pedidos, recibos de pago → segundos
+- **Medio** - interacciones sociales, comentarios → minutos aceptables
+- **Bajo**: marketing, recomendaciones → se pueden agrupar
+
+<Quiz question="¿Por qué el sistema de notificación debería utilizar colas de mensajes separadas por canal en lugar de una única cola compartida?" options="Para reducir los costos de almacenamiento|Para permitir el escalado independiente y evitar que un canal lento bloquee a otros|Porque Kafka requiere temas separados por consumidor|Para simplificar el sistema" answer="1" explanation="Si la entrega de SMS se ralentiza debido a una interrupción de Twilio, una cola compartida crearía un retraso que retrasaría también la entrega push y de correo electrónico. Las colas separadas por canal proporcionan aislamiento de fallas y permiten que cada canal escale de forma independiente." />
+
+## Paso 4: Manejo de fallas y confiabilidad
+
+### Deduplicación
+Evite notificaciones duplicadas mediante una clave de idempotencia. Antes de procesar, verifique si el ID de notificación existe en un almacén de deduplicación (Redis con TTL):
+
+```
+Key: "dedup:{notification_id}" → TTL: 24 hours
+If key exists → skip (already sent)
+If not → process and set key
+```
+
+### Reintentar con retroceso exponencial
+Los servicios de terceros fallan. Implementar reintentos con retrasos crecientes:
+
+```
+Attempt 1: immediate
+Attempt 2: wait 1 second
+Attempt 3: wait 4 seconds
+Attempt 4: wait 16 seconds
+Attempt 5: move to dead-letter queue
+```
+
+### Limitación de tasa por usuario
+Proteja a los usuarios de la fatiga de notificaciones:
+- Máximo 3 notificaciones push por hora por usuario
+- Máximo 1 correo electrónico de marketing por día
+- Las notificaciones de seguridad superan los límites de velocidad
+
+<FunFact>Facebook envía más de 10 mil millones de notificaciones push diariamente. Para manejar esto, crearon un canal de notificación personalizado que puede procesar millones de mensajes por segundo, con rutas de entrega separadas para iOS (APN) y Android (FCM).</FunFact>
+
+## Paso 5: integración de terceros
+
+| Canal | Proveedor | Protocolo | Desafíos |
+|---------|----------|----------|------------|
+| Empujar (iOS) | APN | HTTP/2 | Gestión de tokens, límites de empuje silenciosos |
+| Empujar (Android) | FCM | HTTP | Difusión temática |
+| Correo electrónico | EnviarGrid/SES | SMTP/API | Capacidad de entrega, filtros de spam |
+| SMS | Twilio | API REST | Costo por mensaje, cumplimiento regional |
+| En la aplicación | WebSocket | WS | Gestión de conexiones, almacenamiento en búfer sin conexión |
+
+### Canal de análisis
+Realice un seguimiento del ciclo de vida de las notificaciones de cada mensaje:
+- **Creado** → **En cola** → **Enviado** → **Entregado** → **Abierto** → **Se hizo clic**
+
+Almacene eventos en una base de datos de series temporales o flujo de eventos para generar informes en el panel: tasas de entrega, tasas de apertura y tasas de clics por canal y tipo de notificación.
+
+<Quiz question="Un sistema de notificación vuelve a intentar una entrega de SMS fallida 3 veces. Sin deduplicación, ¿qué podría pasar si el primer intento tuviera éxito pero se perdiera el reconocimiento?" options="El mensaje se pierde permanentemente.|El usuario recibe hasta 4 copias del mismo SMS|El sistema detecta automáticamente el duplicado.|El mecanismo de reintento evita este escenario." answer="1" explanation="Si el proveedor procesó la solicitud pero se perdió el reconocimiento, el sistema cree que falló y vuelve a intentarlo. Sin deduplicación a nivel de proveedor o con claves de idempotencia, el usuario podría recibir el mismo SMS varias veces." />
+
+## Paso 6: cuellos de botella y optimizaciones
+
+| Cuello de botella | Solución |
+|-----------|----------|
+| Límites de tarifas de terceros | Cola con rendimiento controlado por proveedor |
+| Representación de plantillas a escala | Plantillas comunes de renderizado previo y caché |
+| Búsquedas de preferencias por mensaje | Preferencias de usuario en caché en Redis |
+| Picos de tráfico picos | Escalar automáticamente a los trabajadores según la profundidad de la cola |
+| Entrega entre regiones | Implementar trabajadores cerca de los puntos finales del proveedor |
+
+<ThinkAboutIt>¿Cómo diseñaría un sistema de notificación que pueda enviar 50 millones de correos electrónicos personalizados para una oferta del Black Friday en un período de 2 horas y al mismo tiempo ofrecer alertas de seguridad en tiempo real con una latencia inferior a un segundo?</ThinkAboutIt>
+
+<Quiz question="¿Qué componente debería comprobar las preferencias de notificación del usuario?" options="El repartidor, justo antes de llamar a la API de terceros.|El servicio de llamada, antes de enviar al servicio de notificación.|El servicio de notificación, antes de poner en cola el mensaje.|La cola de mensajes, durante el enrutamiento." answer="2" explanation="Verificar las preferencias en el servicio de notificaciones antes de poner en cola evita desperdiciar la capacidad de la cola y el procesamiento de los trabajadores en notificaciones que el usuario no desea. Este es el primer punto en el que se puede aplicar la lógica de preferencias centralizada." />
+
+---
+
+## 📚 Lecturas adicionales
+- [Sistema de notificación - Entrevista sobre el diseño del sistema, vol. 1, cap. 10](https://bytebytego.com/) - Diseño integral del sistema de notificación de Alex Xu
+- [Cómo Airbnb creó una plataforma de notificaciones](https://medium.com/airbnb-engineering): arquitectura de notificaciones multicanal del mundo real
+- [Firebase Cloud Messaging Docs](https://firebase.google.com/docs/cloud-messaging): comprensión de la mecánica de entrega de notificaciones push

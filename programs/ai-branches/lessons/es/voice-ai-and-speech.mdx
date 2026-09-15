@@ -1,0 +1,127 @@
+---
+title: "Inteligencia artificial de voz y reconocimiento de voz: cómo las máquinas aprenden a escuchar"
+description: "Descubra cómo la IA convierte las palabras habladas en texto, potencia los asistentes virtuales y crea voces sintéticas."
+order: 5
+difficulty: "intermediate"
+duration: 15
+icon: "🎙️"
+published: true
+machineTranslated: true
+---
+# Inteligencia artificial de voz y reconocimiento de voz: cómo las máquinas aprenden a escuchar
+
+"Hola Siri, ¿qué tiempo hace hoy?" Dices una frase y en un segundo obtienes una
+respuesta. Detrás de esa respuesta instantánea hay un sofisticado sistema de inteligencia artificial que convierte las ondas sonoras en
+texto, comprende el significado, genera una respuesta y se la responde. **Voz AI** es
+una de las formas más naturales en que los humanos interactúan con las máquinas, y está avanzando a un ritmo impresionante.
+velocidad.
+
+## Cómo funciona el reconocimiento de voz
+
+Convertir palabras habladas en texto escrito es mucho más difícil de lo que parece. La misma frase puede ser
+Se habla de innumerables maneras: diferentes acentos, velocidades, volúmenes y niveles de ruido de fondo. moderno
+El reconocimiento de voz aborda este desafío a través de tres etapas clave:
+
+### 1. Captura de audio
+Un micrófono convierte ondas sonoras en una señal digital: miles de mediciones de amplitud por segundo. El reconocimiento de voz estándar muestrea audio 16.000 veces por segundo.
+
+### 2. Análisis de espectrograma
+El audio sin procesar se transforma en un **espectrograma**: un mapa visual que muestra cómo las frecuencias del sonido cambian con el tiempo. Esta representación similar a una imagen permite a la IA "ver" los patrones del habla.
+
+### 3. Predicción de texto
+Un modelo de aprendizaje profundo (a menudo un transformador, similar a los utilizados en PNL) lee el espectrograma y predice la secuencia de palabras más probable.
+
+<Illustration src="/images/lessons/voice-ai-and-speech.svg" alt="Tubería que muestra ondas sonoras convertidas en espectrograma y luego en texto." caption="El reconocimiento de voz transforma las ondas de audio en un espectrograma visual que los modelos de IA pueden interpretar." />
+
+<FunFact>El modelo Whisper de OpenAI se entrenó con 680.000 horas de audio multilingüe, es decir, más de 77 años de habla continua. Puede transcribir y traducir discursos en casi 100 idiomas.
+</FunFact>
+
+## ASR y TTS: las dos caras de la IA de voz
+
+Voice AI tiene dos tecnologías complementarias:
+
+| Tecnología | Dirección | Ejemplo |
+|-----------|-----------|---------|
+| **ASR** (Reconocimiento automático de voz) | Discurso → Texto | Dictando un mensaje en tu teléfono |
+| **TTS** (Texto a voz) | Texto → Discurso | Tu navegador por satélite leyendo las direcciones en voz alta |
+
+Los sistemas TTS modernos han ido mucho más allá del monótono robótico. Modelos TTS neuronales como los de Google
+WaveNet produce un habla que suena notablemente humana, con ritmo, entonación y emoción naturales.
+variación e incluso pausas respiratorias. Los mejores sistemas son ahora casi indistinguibles de un
+voz humana real en pruebas de escucha a ciegas.
+
+<Quiz question="¿Qué significa ASR en voz AI?" options="Respuesta del sistema automatizado|Reconocimiento automático de voz|Representación de sonido artificial|Enrutamiento de señal avanzado" answer="1" explanation="El reconocimiento automático de voz (ASR) es la tecnología que convierte el lenguaje hablado en texto escrito, formando la base de los asistentes de voz y los sistemas de dictado." />
+
+## Cómo procesan tu voz Siri, Alexa y Google
+
+Cuando hablas con un asistente virtual, se activa un proceso de varios pasos:
+
+1. **Detección de palabras de activación**: un modelo pequeño que siempre escucha espera "Hey Siri" o "Alexa". Esto se ejecuta localmente en el dispositivo para proteger la privacidad.
+2. **Transmisión de audio**: una vez activado, su discurso se envía a servidores en la nube para su procesamiento.
+3. **ASR**: el audio se transcribe a texto.
+4. **NLU (Comprensión del lenguaje natural)**: el sistema determina tu intención: ¿estás preguntando sobre el clima, configurando un cronómetro o reproduciendo música?
+5. **Ejecución de acción**: el asistente recupera datos, controla un dispositivo inteligente o genera una respuesta.
+6. **TTS**: se te responde la respuesta.
+
+Todo esto sucede en menos de dos segundos.
+
+<ThinkAboutIt>Los asistentes virtuales siempre están escuchando su palabra de activación, lo que significa que procesan constantemente el audio ambiental. ¿Qué te parece tener en casa un dispositivo que esté escuchando permanentemente? ¿Qué salvaguardias te harían sentir más cómodo?
+</ThinkAboutIt>
+
+## Clonación de voz y audio deepfake
+
+La IA ahora puede clonar una voz a partir de unos pocos segundos de audio de muestra. Si bien esto tiene usos legítimos (restaurar la voz de personas que han perdido la capacidad de hablar, por ejemplo), también permite un uso indebido alarmante:
+
+- **Llamadas deepfake**: los delincuentes han utilizado voces clonadas por IA para hacerse pasar por ejecutivos y autorizar transferencias bancarias fraudulentas por valor de millones.
+- **Desinformación**: clips de audio falsos de políticos que dicen cosas que nunca dijeron pueden difundirse rápidamente en las redes sociales.
+- **Fraude de identidad**: los sistemas de autenticación de voz utilizados por los bancos son cada vez más vulnerables.
+
+Están surgiendo herramientas de detección, pero la tecnología avanza más rápido que las defensas.
+
+<Quiz question="¿Cuál de los siguientes es un uso positivo legítimo de la tecnología de clonación de voz?" options="Hacerse pasar por alguien para una llamada de broma|Recuperar el habla para personas que han perdido la voz debido a una enfermedad|Crear respaldos falsos de celebridades|Omitir la verificación de voz del banco" answer="1" explanation="La clonación de voz puede sintetizar una voz personalizada para personas que han perdido la capacidad de hablar debido a afecciones como la enfermedad de la neurona motora, preservando su identidad vocal." />
+
+## IA de voz multilingüe
+
+La diversidad lingüística es a la vez una oportunidad apasionante y un importante desafío de ingeniería:
+
+- Los principales idiomas como inglés, mandarín y español tienen amplios conjuntos de datos de entrenamiento y excelentes
+  precisión de reconocimiento: a menudo superior al 95%.
+- Muchos de los más de 7.000 idiomas del mundo tienen pocos o ningún dato digital de voz, lo que deja a miles de millones de
+  oradores desatendidos por la tecnología de voz.
+- **Cambio de código**: cuando los hablantes combinan dos idiomas a mitad de una frase, como es común en la India,
+  Filipinas y muchas comunidades multilingües sigue siendo muy difícil para la mayoría de los sistemas.
+- **Variación de acento**: incluso dentro de un solo idioma, los acentos regionales pueden afectar dramáticamente
+  precisión del reconocimiento.
+
+El proyecto **Massively Multilingual Speech** de Meta tiene como objetivo desarrollar tecnología de voz para más de 1.100 personas
+idiomas, ampliando drásticamente quiénes pueden beneficiarse de la IA de voz.
+
+<FunFact>Sólo la India tiene 22 idiomas oficialmente reconocidos y cientos de dialectos. Google ha creado modelos ASR para varios idiomas indios, pero lograr una alta precisión en todos los dialectos sigue siendo un desafío enorme.
+</FunFact>
+
+## Accesibilidad: cómo la IA de voz cambia vidas
+
+Voice AI es transformadora para las personas con discapacidad:
+
+- **Discapacidades visuales**: los lectores de pantalla con tecnología TTS permiten a los usuarios ciegos navegar por teléfonos, computadoras e Internet.
+- **Discapacidades motoras**: el control por voz permite a las personas operar dispositivos sin usar las manos.
+- **Trastornos del habla**: se están entrenando modelos ASR especializados para comprender patrones atípicos del habla, incluidos aquellos asociados con la parálisis cerebral y la enfermedad de Parkinson.
+- **Sordos y con problemas de audición**: ASR en tiempo real genera subtítulos en vivo para conversaciones, conferencias y reuniones.
+
+<ThinkAboutIt>Las interfaces de voz suelen diseñarse en torno al habla "estándar". Las personas con acento, impedimentos del habla o que hablan idiomas minoritarios frecuentemente descubren que la IA de voz no los entiende. ¿Cómo deberían las empresas priorizar hacer que la IA de voz sea más inclusiva?
+</ThinkAboutIt>
+
+## Conclusiones clave
+
+- El reconocimiento de voz convierte el audio en espectrogramas, que los modelos de aprendizaje profundo interpretan como
+  texto: una canalización que funciona en segundos.
+- ASR (voz a texto) y TTS (texto a voz) son los dos pilares complementarios de la voz AI.
+- Los asistentes virtuales encadenan la detección de palabras de activación, ASR, comprensión del lenguaje natural y TTS
+  en un proceso fluido y en tiempo real.
+- La clonación de voz permite herramientas de accesibilidad que cambian la vida y amenazas peligrosas de falsificaciones profundas.
+  que la sociedad todavía está aprendiendo a contrarrestar.
+- La cobertura multilingüe sigue siendo desigual y muchos de los idiomas del mundo siguen desatendidos.
+- La IA de voz es una fuerza poderosa para la accesibilidad, pero para que sea verdaderamente inclusiva es necesario
+  inversión deliberada en datos de capacitación diversos y comunidades subrepresentadas.
+
+<Quiz question="¿Por qué es útil un espectrograma en el reconocimiento de voz?" options="Comprime archivos de audio para ahorrar almacenamiento.|Convierte el sonido en un mapa de frecuencia visual que los modelos de IA pueden analizar|Traduce el habla directamente a otro idioma.|Elimina el ruido de fondo automáticamente." answer="1" explanation="Un espectrograma transforma el audio en una representación de tiempo-frecuencia (esencialmente una imagen de sonido) que los modelos de aprendizaje profundo pueden procesar utilizando técnicas similares a la visión por computadora." />

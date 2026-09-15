@@ -1,0 +1,218 @@
+---
+title: "代码审查访谈"
+description: "在代码审查面试中表现出色——识别错误、提出改进建议并展示您的工程判断力。"
+order: 5
+difficulty: "intermediate"
+duration: 15
+icon: "👁️"
+published: true
+machineTranslated: true
+---
+# 代码审查访谈
+
+代码审查面试是招聘过程中最被低估的一轮面试，也是最具启发性的一轮面试。编码面试测试您是否可以编写代码，而代码审查面试则测试您是否可以阅读代码、推理代码并改进代码。它们揭示了您如何看待质量、如何优先考虑反馈以及如何与其他工程师沟通。许多候选人在 LeetCode 上准备了几个月，但在完全没有准备的情况下进入代码审查阶段。不要成为那个人。
+
+## 代码审查面试实际测试什么
+
+评估你的代码审查技能的面试官会看重五件事：
+
+1. **错误检测** — 您能发现逻辑错误、边缘情况和竞争条件吗？
+2. **设计感** — 您是否认识到违反 SOLID 原则、糟糕的抽象或难以维护的代码？
+3. **安全意识** - 您能否识别注入漏洞、身份验证缺陷或数据泄露风险？
+4. **沟通技巧**——你能清楚、有建设性地解释问题吗？
+5. **优先级** — 您是否专注于最重要的事情，或者您是否专注于变量名称？
+
+<Callout>代码审查面试中最常见的错误是将所有时间都花在风格问题（命名、格式）上，而忽略了实际的错误。面试官故意将关键错误与风格问题一起植入，以了解您优先考虑的内容。</Callout>
+
+## 系统审查方法
+
+不要随意扫码。使用基于结构化传递的方法：
+
+### 第 1 关：理解意图（2 分钟）
+
+在批评任何内容之前，请先了解代码试图执行的操作：
+- 阅读函数/类名称和注释
+- 识别输入和输出
+- 理解业务逻辑
+
+### 第 2 关：正确性（5 分钟）
+
+这是您发现错误的地方。系统地检查：
+- **边缘情况**：空输入、空值、单个元素、最大值
+- **相差一错误**：循环边界、数组索引
+- **逻辑错误**：不正确的条件、缺少break语句、错误的运算符
+- **并发问题**：共享可变状态、竞争条件
+- **错误处理**：未捕获的异常，缺少空检查
+
+### 第 3 关：设计和可维护性（3 分钟）
+
+寻找结构性问题：
+- 函数做太多事情（违反单一职责）
+- 组件之间的紧密耦合
+- 幻数和硬编码值
+- 缺少抽象或不必要的抽象
+- 代码重复
+
+### 第 4 关：性能和安全性（2 分钟）
+
+- 循环中不必要的数据库查询（N+1问题）
+- 缺少输入验证或清理
+- 暴露日志或响应中的敏感数据
+- 存在更好的替代方案的低效算法
+
+## 发现的常见错误模式
+
+训练你的眼睛捕捉这些高频错误：
+
+### 空引用错误
+
+```java
+// Bug: user could be null
+public String getUserEmail(Long userId) {
+    User user = userRepository.findById(userId);
+    return user.getEmail();  // NullPointerException if user not found
+}
+
+// Fixed
+public String getUserEmail(Long userId) {
+    return userRepository.findById(userId)
+        .map(User::getEmail)
+        .orElseThrow(() -> new UserNotFoundException(userId));
+}
+```
+
+### 差一错误
+
+```python
+# Bug: misses the last element
+def find_max(numbers):
+    max_val = numbers[0]
+    for i in range(1, len(numbers) - 1):  # Should be len(numbers)
+        if numbers[i] > max_val:
+            max_val = numbers[i]
+    return max_val
+```
+
+### 资源泄漏
+
+```java
+// Bug: connection is never closed if an exception occurs
+public List<User> getUsers() {
+    Connection conn = dataSource.getConnection();
+    Statement stmt = conn.createStatement();
+    ResultSet rs = stmt.executeQuery("SELECT * FROM users");
+    // process results...
+    conn.close();
+    return users;
+}
+
+// Fixed: use try-with-resources
+public List<User> getUsers() {
+    try (Connection conn = dataSource.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery("SELECT * FROM users")) {
+        // process results...
+        return users;
+    }
+}
+```
+
+### SQL注入
+
+```python
+# Bug: SQL injection vulnerability
+def get_user(username):
+    query = f"SELECT * FROM users WHERE username = '{username}'"
+    return db.execute(query)
+
+# Fixed: parameterised query
+def get_user(username):
+    query = "SELECT * FROM users WHERE username = %s"
+    return db.execute(query, (username,))
+```
+
+<FunFact>一项针对 Google 超过 100,000 条代码审查的研究发现，所有审查意见中约有 25% 是关于“正确性”的——实际的错误或逻辑错误。另外 25% 是关于“理解”——让代码更容易理解。风格和格式占实质性评论的比例不到 10%。</FunFact>
+
+### 并发错误
+
+```java
+// Bug: race condition — check-then-act is not atomic
+public void transferMoney(Account from, Account to, BigDecimal amount) {
+    if (from.getBalance().compareTo(amount) >= 0) {
+        // Another thread could modify balance here
+        from.setBalance(from.getBalance().subtract(amount));
+        to.setBalance(to.getBalance().add(amount));
+    }
+}
+```
+
+<ThinkAboutIt>您将如何修复上面的并发错误？至少考虑三种方法：同步、乐观锁定和数据库级事务。高通量系统中每种方法的权衡是什么？</ThinkAboutIt>
+
+## 优先考虑您的反馈
+
+在限时采访中，并非所有反馈都是平等的。使用此优先级框架：
+
+|优先|类别 |示例|
+|---|---|---|
+| 🔴 **关键** |错误、安全漏洞、数据丢失 | SQL 注入、竞争条件、空取消引用 |
+| 🟠 **高** |设计问题、性能问题| N+1 查询、缺失错误处理、紧耦合 |
+| 🟡 **中** |可维护性、可读性 |复杂的条件、缺失的文档、幻数 |
+| 🟢 **低** |风格，小改进|变量命名、导入顺序、小重构 |
+
+在面试中，将 80% 的时间花在🔴和🟠项目上。简要提及🟡项目。仅当您还有剩余时间并且已经发现重要问题时才触摸 🟢 项目。
+
+## 传达审核反馈
+
+如何提供反馈与反馈本身一样重要。面试官正在评估你的协作能力。
+
+**这样做**：
+- “我注意到此查询位于循环内，这可能会导致 N+1 性能问题。我们可能希望将其批处理为单个查询。”
+-“如果找不到用户，它看起来可能会抛出 NullPointerException。我们可以在此处添加空检查或使用可选吗？”
+- “这里策略模式的运用很好——它使得添加新的支付类型变得简单。”
+
+**不是这个**：
+- “这个代码是错误的。” （太直白了，不解释）
+- “我永远不会这样写。” （自我驱动）
+- “更改此变量名称。” （低优先级项目的自行车脱落）
+
+<Callout>始终解释反馈背后的*原因*，而不仅仅是*内容*。 “这应该使用参数化查询”是可以的。 “这应该使用参数化查询，因为当前的字符串连接容易受到 SQL 注入攻击”要好得多。</Callout>
+
+## 代码审查示例演练
+
+以下是您在面试中可能会被要求回顾的功能：
+
+```python
+def process_orders(orders):
+    results = []
+    for order in orders:
+        user = db.query(f"SELECT * FROM users WHERE id = {order['user_id']}")
+        if user:
+            total = 0
+            for item in order['items']:
+                price = db.query(f"SELECT price FROM products WHERE id = {item['product_id']}")
+                total = total + price[0] * item['quantity']
+                if item['quantity'] > 100:
+                    total = total * 0.9
+            if total > 0:
+                results.append({'user': user, 'total': total, 'order_id': order['id']})
+    return results
+```
+
+**强有力的审查将确定：**
+
+1. 🔴 **SQL 注入**（第 4、7 行）：SQL 查询中的字符串插值。使用参数化查询。
+2. 🔴 **N+1 查询问题**（第 4、7 行）：每个订单两次数据库查询，每件商品一次。对于 100 个订单，每个订单有 10 个商品，即 1,100 次查询。批处理为单个查询。
+3. 🟠 **无错误处理**：如果找不到产品，`price[0]`将会崩溃。 `db.query` 可能会失败。
+4. 🟠 **折扣逻辑被隐藏**：数量 > 100 的 10% 折扣是隐藏在嵌套循环中的业务规则。提取它。
+5. 🟡 **幻数**：`0.9`和`100`应该命名为常量（`BULK_DISCOUNT_RATE`，`BULK_THRESHOLD`）。
+6. 🟡 **函数做了太多事情**：获取用户、计算总数、应用折扣——违反了单一职责。
+
+<Quiz question="在代码审查面试期间，您发现一个小变量命名问题和一个潜在的 SQL 注入漏洞。您还剩 2 分钟。你应该优先考虑什么？" options="首先修复变量命名，因为它很快|完全关注 SQL 注入漏洞|同样地提及两者——表明你很彻底|跳过这两个并寻找更多问题" answer="1" explanation="SQL 注入是一个严重的安全漏洞，可能导致数据泄露。始终优先考虑安全问题而不是风格问题。仅在彻底解释注入风险后时间允许的情况下才简要提及命名问题。" />
+
+## 要点
+
+- **使用结构化方法**：多次传递（意图→正确性→设计→性能/安全）比随机扫描捕获更多问题。
+- **无情地确定优先级**：首先是关键错误和安全问题，最后是风格。面试官将两者都用来测试你的判断力。
+- **建设性沟通**：解释*原因*，提出替代方案，并承认您看到的良好模式。
+- **了解常见的错误模式**：空引用、差一错误、资源泄漏、SQL 注入和竞争条件几乎出现在每次代码审查访谈中。
+- **练习阅读代码**：花时间阅读 GitHub 上的开源拉取请求。阅读代码的技能与编写代码的技能不同，大多数工程师对此的练习不够。

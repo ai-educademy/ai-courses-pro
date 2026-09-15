@@ -1,0 +1,146 @@
+---
+title: "Programação Dinâmica - Como a IA resolve problemas complexos, dividindo-os"
+description: "Entenda a memorização, a tabulação e os padrões clássicos de DP usados ​​na IA e na ciência da computação."
+order: 4
+difficulty: "intermediate"
+duration: 20
+icon: "🧩"
+published: true
+machineTranslated: true
+---
+## A grande ideia
+
+Alguns problemas parecem incrivelmente complexos até você perceber que são feitos de **subproblemas menores e repetidos**. A programação dinâmica (DP) resolve cada subproblema **uma vez**, armazena o resultado e o reutiliza – trocando um pouco de memória por uma aceleração drástica.
+
+Duas condições sinalizam uma oportunidade de DP:
+
+1. **Subproblemas sobrepostos** - os mesmos cálculos se repetem muitas vezes.
+2. **Subestrutura ideal** - a melhor solução para todo o problema pode ser construída a partir das melhores soluções para suas partes.
+
+<Illustration src="/images/lessons/dynamic-programming.svg" alt="Uma árvore de recursão para Fibonacci mostrando subproblemas repetidos em destaque, ao lado de uma tabela DP preenchida" caption="Sem DP, Fibonacci recalcula os mesmos valores exponencialmente. Com DP, cada valor é calculado uma vez." />
+
+## Fibonacci: o exemplo clássico
+
+### Recursão ingênua - O (2ⁿ)
+
+```
+function fib(n):
+    if n <= 1: return n
+    return fib(n - 1) + fib(n - 2)
+```
+
+Chamar `fib(5)` aciona **15** chamadas de função, muitas delas redundantes. Em `fib(40)` leva segundos; em `fib(100)`, sobreviveria ao universo.
+
+### Memoização (de cima para baixo) - O(n)
+
+Armazene os resultados em um cache. Se você já resolveu um subproblema, retorne a resposta em cache.
+
+```
+memo = {}
+function fib(n):
+    if n in memo: return memo[n]
+    if n <= 1: return n
+    memo[n] = fib(n - 1) + fib(n - 2)
+    return memo[n]
+```
+
+### Tabulação (de baixo para cima) - O(n)
+
+Construa a resposta iterativamente a partir dos casos base para cima.
+
+```
+function fib(n):
+    table = [0, 1]
+    for i in 2..n:
+        table[i] = table[i - 1] + table[i - 2]
+    return table[n]
+```
+
+<Quiz question="O que distingue a memorização da tabulação?" options="A memorização usa uma pilha; tabulação usa uma fila|A memorização funciona de cima para baixo com recursão; tabulação funciona de baixo para cima com iteração|A memorização é sempre mais rápida|São nomes diferentes para a mesma técnica" answer="1" explanation="A memorização começa a partir do problema original e retorna para baixo, armazenando em cache à medida que avança. A tabulação começa nos menores subproblemas e aumenta iterativamente." />
+
+## Problemas clássicos de DP
+
+### Subindo escadas
+
+Você pode dar 1 ou 2 passos de cada vez. Quantas maneiras distintas de alcançar a etapa _n_?
+
+```
+function climbStairs(n):
+    if n <= 2: return n
+    a = 1, b = 2
+    for i in 3..n:
+        a, b = b, a + b
+    return b
+```
+
+Este é Fibonacci disfarçado - a resposta para o passo _n_ é a soma das maneiras de alcançar os passos _n−1_ e _n−2_.
+
+### Mudança de moeda
+
+Dadas as denominações das moedas, encontre o **menor número de moedas** para atingir o valor desejado.
+
+```
+function coinChange(coins, amount):
+    dp = array of size (amount + 1), filled with INF
+    dp[0] = 0
+    for i in 1..amount:
+        for coin in coins:
+            if coin <= i:
+                dp[i] = min(dp[i], dp[i - coin] + 1)
+    return dp[amount] if dp[amount] != INF else -1
+```
+
+### Maior Subsequência Comum (LCS)
+
+Encontre a sequência mais longa de caracteres comuns a duas strings (não necessariamente contíguas).
+
+```
+function lcs(s1, s2):
+    m = s1.length, n = s2.length
+    dp = 2D array of size (m+1) x (n+1), filled with 0
+    for i in 1..m:
+        for j in 1..n:
+            if s1[i-1] == s2[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    return dp[m][n]
+```
+
+<FunFact>A ferramenta `diff` que mostra as alterações entre as versões dos arquivos é desenvolvida pela LCS. O Git usa uma variante dele toda vez que você executa `git diff`.</FunFact>
+
+<ThinkAboutIt>A troca de moedas pede o número mínimo de moedas. E se você quisesse contar o número total de maneiras diferentes de ganhar a quantia? Como a relação de recorrência mudaria?</ThinkAboutIt>
+
+## Aplicativos reais de IA
+
+| Problema | Domínio de IA | Técnica DP |
+|--------|-----------|-------------|
+| **Editar distância** (Levenshtein) | Corretores ortográficos, pesquisa difusa | Tabela 2D comparando caracteres |
+| **Algoritmo de Viterbi** | Reconhecimento de fala, marcação de PDV | Melhor caminho através de um modelo oculto de Markov |
+| **Alinhamento de sequência** | Bioinformática (correspondência de DNA) | Variante do LCS com penalidades de gap |
+| **Decodificação CTC** | Escrita à mão/fala para texto | Mesclando caracteres repetidos de maneira otimizada |
+| **Remoção de pesquisa de feixe** | Tradução automática | Mantendo as principais traduções parciais |
+
+<Quiz question="Qual algoritmo baseado em DP um corretor ortográfico provavelmente usa para sugerir correções?" options="Subsequência comum mais longa|Editar distância (Levenshtein)|Mudança de moeda|Subindo escadas" answer="1" explanation="A distância de edição conta as inserções, exclusões e substituições mínimas para transformar uma palavra em outra - medindo diretamente o quão 'próximo' um erro ortográfico está de uma palavra do dicionário." />
+
+## De cima para baixo versus de baixo para cima
+
+| Aspecto | De cima para baixo (memorização) | De baixo para cima (Tabulação) |
+|--------|----------------------|----------------------|
+| Estilo | Recursivo + cache | Iterativo + tabela |
+| Subproblemas resolvidos | Somente aqueles necessários | Todos os subproblemas até _n_ |
+| Risco de estouro de pilha | Sim, para recursão profunda | Não |
+| Facilidade de otimização | Mais difícil de reduzir espaço | Mais fácil (muitas vezes apenas mantém a última linha) |
+
+**Regra prática:** comece com a memorização para entender a recorrência e, em seguida, converta para tabulação se precisar otimizar o espaço ou evitar limites de pilha.
+
+<ThinkAboutIt>A tabela de troca de moedas tem tamanho O(quantidade). A tabela LCS tem tamanho O(m × n). Você poderia reduzir o espaço LCS para O(min(m, n)) mantendo apenas duas linhas por vez? Que informações você perderia?</ThinkAboutIt>
+
+## Principais conclusões
+
+1. DP transforma força bruta exponencial em tempo polinomial **armazenando em cache o trabalho repetido**.
+2. Identifique subproblemas sobrepostos e subestrutura ideal antes de chegar ao DP.
+3. A memorização é intuitiva; a tabulação é eficiente - aprenda ambos.
+4. Editar distância, Viterbi e alinhamento de sequência mostram DP no centro da IA ​​moderna.
+
+<Quiz question="Um problema possui subproblemas sobrepostos, mas NÃO possui subestrutura ideal. Você pode aplicar DP para encontrar a solução ideal?" options="Sim - DP sempre funciona se os subproblemas se sobrepuserem|Não – ambas as condições são necessárias para que o DP garanta a otimização|Somente se você usar tabulação|Somente para problemas gráficos" answer="1" explanation="DP requer subproblemas sobrepostos (para eficiência) e subestrutura ideal (para correção). Sem uma subestrutura ideal, o cache por si só não garante o ideal global." />

@@ -1,0 +1,281 @@
+---
+title: "複雑さ分析の習得"
+description: "時間と空間の複雑さを自信を持って分析します。これは、コーディング面接で優れたソリューションと最適なソリューションを区別するスキルです。"
+order: 7
+difficulty: "intermediate"
+duration: 18
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+# 複雑さ分析の習得
+
+「時間計算量はどれくらいですか？」 — コーディング面接で提示するすべての解決策に続く 4 つの単語。正しく理解すれば、あなたは自信に満ちたエンジニアのように見えます。つまずくと、面接官はあなたが自分のコードを本当に理解しているかどうかを質問します。複雑さの分析は単なる学術理論ではありません。これは、エンジニアがソリューションが大規模に機能するかどうかを評価するためのレンズです。このレッスンでは、単純なループから複雑な再帰アルゴリズムに至るまで、あらゆるソリューションを自信を持って分析できるようになります。
+
+## Big-O 記法の基礎
+
+Big-O は、入力サイズの増加に伴ってアルゴリズムの実行時間またはメモリ使用量がどのように増加するかの上限を表します。定数と低次の項を取り除き、支配的な要素に焦点を当てます。
+
+|複雑さ |名前 |例 | 100万要素 |
+|---|---|---|---|
+|お(1) |定数 |ハッシュマップ検索 |インスタント |
+| O(log n) |対数 |二分探索 | ~20 の操作 |
+| O(n) |リニア |配列 | による単一ループ100 万操作 |
+| O(n log n) |線形演算 |マージソート、ヒープソート |最大 2,000 万回の操作 |
+| O(n²) |二次関数 |入れ子になったループ (総当たり) | 1兆回のオペレーション |
+| O(2ⁿ) |指数 |再帰的なサブセット |宇宙の熱死 |
+|お(ん!) |階乗 |すべての順列 |熱死×熱死｜
+
+<Callout>実際的な経験則: 最新のコンピューターは 1 秒あたりおよそ 10⁸ の単純な操作を処理します。アルゴリズムが O(n²) で n = 10⁵ の場合、10¹⁰ 回の演算、つまり約 100 秒かかります。遅すぎます。この暗算は、一般的な制限時間内にアプローチが成功するかどうかをすばやく判断するのに役立ちます。</Callout>
+
+## 単純なループの分析
+
+### シングルループ → O(n)
+
+```python
+def find_max(nums):
+    max_val = nums[0]       # O(1)
+    for num in nums:         # Loop runs n times
+        if num > max_val:    # O(1) comparison
+            max_val = num    # O(1) assignment
+    return max_val           # O(1)
+# Total: O(1) + O(n) × O(1) = O(n)
+```
+
+### ネストされたループ → 乗算
+
+```python
+def has_duplicate_pair(nums):
+    for i in range(len(nums)):           # n iterations
+        for j in range(i + 1, len(nums)):  # ~n iterations
+            if nums[i] == nums[j]:
+                return True
+    return False
+# Total: O(n) × O(n) = O(n²)
+```
+
+### 連続ブロック → 追加
+
+```python
+def process(nums):
+    # Block 1: O(n)
+    for num in nums:
+        print(num)
+
+    # Block 2: O(n²)
+    for i in range(len(nums)):
+        for j in range(len(nums)):
+            print(i, j)
+
+# Total: O(n) + O(n²) = O(n²)  — drop the lower-order term
+```
+
+### 非自明な反復を含むループ
+
+```python
+# This is O(n), not O(n²)!
+def two_pointer_sum(nums, target):
+    left, right = 0, len(nums) - 1
+    while left < right:    # Each pointer moves at most n times total
+        total = nums[left] + nums[right]
+        if total == target:
+            return True
+        elif total < target:
+            left += 1
+        else:
+            right -= 1
+    return False
+```
+
+<ThinkAboutIt>変数が各反復を 2 倍にするループ (`i = 1; while i < n: i *= 2`) を考えてみましょう。このループは何回実行されますか?複雑さは何ですか? (ヒント: i が毎回 2 倍になる場合、n に達するまでに何回 2 倍になりますか?)</ThinkAboutIt>
+
+## 再帰の分析
+
+再帰は複雑さの分析が興味深いところです。重要なツールは **再帰ツリー** です。
+
+### 線形再帰 → O(n)
+
+```python
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+# Recursion tree: single chain of n calls
+# factorial(5) → factorial(4) → factorial(3) → factorial(2) → factorial(1)
+# Time: O(n), Space: O(n) — n stack frames
+```
+
+### 二項再帰 → O(2ⁿ)
+
+```python
+# Naive Fibonacci — the classic exponential example
+def fib(n):
+    if n <= 1:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+# Recursion tree: each call spawns TWO calls
+#                fib(5)
+#              /        \
+#          fib(4)       fib(3)
+#         /     \       /    \
+#      fib(3)  fib(2) fib(2) fib(1)
+#      ...
+# Nodes at each level double → total nodes ≈ 2ⁿ
+# Time: O(2ⁿ), Space: O(n) — max depth of tree
+```
+
+### メモ化された再帰 → O(n)
+
+```python
+def fib_memo(n, memo={}):
+    if n in memo:
+        return memo[n]
+    if n <= 1:
+        return n
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+
+# Each subproblem computed only once → O(n) unique calls
+# Time: O(n), Space: O(n)
+```
+
+<FunFact>単純なフィボナッチとメモ化されたフィボナッチの違いは、スケール的には驚くべきものです。 fib(50) を単純に計算するには、約 2⁵⁰ ≈ 1,000 兆回の演算が必要です。現代のコンピューターではおよそ 100 日かかります。メモ化されたバージョンでは、ちょうど 50 の操作が必要で、マイクロ秒単位で実行されます。これが、複雑さの分析が重要な理由です。</FunFact>
+
+### マスター定理 (簡略化)
+
+**T(n) = aT(n/b) + O(nᵈ)** 形式の分割統治反復の場合:
+
+|状態 |複雑さ |
+|---|---|
+| d > log_b(a) | O(nᵈ) |
+| d = log_b(a) | O(nᵈ log n) |
+| d < log_b(a) | O(n^(log_b(a))) |
+
+**実践例**:
+- **マージソート**: T(n) = 2T(n/2) + O(n) → a=2, b=2, d=1 → d = log₂2 → **O(n log n)**
+- **二分探索**: T(n) = T(n/2) + O(1) → a=1、b=2、d=0 → d = log₂1 → **O(log n)**
+- **ストラッセン行列乗算**: T(n) = 7T(n/2) + O(n²) → a=7、b=2、d=2 → d < log₂7 → **O(n^2.81)**
+
+## 空間の複雑さ
+
+空間の複雑さは時間の複雑さと同じくらい重要ですが、見落とされがちです。カウント：
+
+1. **補助スペース** — ユーザーが作成する追加のデータ構造
+2. **フレームをスタックする** — 再帰呼び出しごとにフレームが追加されます
+
+```python
+# O(1) space — only a few variables
+def reverse_in_place(nums):
+    left, right = 0, len(nums) - 1
+    while left < right:
+        nums[left], nums[right] = nums[right], nums[left]
+        left += 1
+        right -= 1
+
+# O(n) space — creating a new list
+def reverse_copy(nums):
+    return nums[::-1]
+
+# O(n) space from recursion — n stack frames
+def reverse_recursive(nums, left, right):
+    if left >= right:
+        return
+    nums[left], nums[right] = nums[right], nums[left]
+    reverse_recursive(nums, left + 1, right - 1)
+```
+
+<Callout>面接では、時間と空間の両方の複雑さを常に述べてください。よくあるフォローアップは「O(1) 空間でできますか?」です。これは多くの場合、再帰的ソリューションを反復的ソリューションに変換するか、インプレース アルゴリズムを見つけることを意味します。</Callout>
+
+## 償却分析の基本
+
+一部の操作は時々高価になりますが、平均すると安価です。これは償却分析によって説明されます。
+
+**典型的な例: 動的配列 (ArrayList)**
+
+```python
+# Appending to a dynamic array
+# Most appends are O(1) — just place the element
+# Occasionally (when full), the array doubles: O(n) copy
+# Over n operations: n × O(1) + log(n) × O(n) = O(n) total
+# Amortised cost per operation: O(n) / n = O(1)
+```
+
+その他の償却された O(1) の例:
+- ハッシュ マップの挿入 (時々再ハッシュ)
+- スプレーツリー操作
+- 2スタックキューの実装
+
+## よくある複雑さの罠
+
+### トラップ 1: 組み込みオペレーションの隠れたループ
+
+```python
+# Looks like O(n), but string concatenation in a loop is O(n²)
+def build_string(chars):
+    result = ""
+    for char in chars:
+        result += char   # Each += creates a new string → O(current length)
+    return result
+# Fix: use ''.join(chars) → O(n)
+
+# list.index() and 'in' on lists are O(n)
+for item in big_list:
+    if item in another_big_list:  # O(n) × O(n) = O(n²)
+        process(item)
+# Fix: convert to set for O(1) lookup
+```
+
+### 罠 2: 並べ替えが優先
+
+```python
+def find_kth_largest(nums, k):
+    nums.sort()       # O(n log n) — this dominates
+    return nums[-k]   # O(1)
+# Total: O(n log n), not O(1)
+# Better: use a heap for O(n log k)
+```
+
+### 罠 3: 再帰の深さ ≠ 総作業量
+
+```python
+# Depth is O(log n), but total work is O(n)
+def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])     # T(n/2)
+    right = merge_sort(arr[mid:])    # T(n/2)
+    return merge(left, right)        # O(n) work at each level
+# log n levels × O(n) work per level = O(n log n)
+```
+
+<Quiz question="このコードの時間計算量はどれくらいですか? `for i in range(n): for j in range(i): print(i, j)`" options="の上）|O(n log n)|O(n²)|O(n3)" answer="2" explanation="内側のループは合計 0 + 1 + 2 + ... + (n-1) = n(n-1)/2 回実行されます。これは等差級数の合計であり、単純化すると O(n²) になります。内側のループが常に n 回実行されるとは限らないため、これは一般的なトラップですが、合計作業量は依然として 2 次です。" />
+
+## ブルートフォースから最適なものへ
+
+面接では、強引な解決策から始めて最適化することがよくあります。一般的な最適化パスは次のとおりです。
+
+|現在 |最適化手法 | |に改善されました
+|---|---|---|
+| O(n²) |ルックアップ用のハッシュ マップ | O(n) |
+| O(n²) |並べ替え + 2 つのポインター | O(n log n) |
+| O(2ⁿ) |メモ化 / DP | O(n²) または O(n×m) |
+| O(n log n) |バケットソート/カウンティングソート(範囲限定) | O(n) |
+| O(n) スペース |インプレース操作 | O(1) スペース |
+
+**面接での会話の流れ**:
+1. 「私の強引なアプローチは、入れ子になったループを使用した O(n²) です。」
+2. 「検索を繰り返していることに気付きました。ハッシュ マップを使用すると、内部検索を O(1) に減らすことができます。」
+3. 「最適化されたソリューションは、O(n) 時間と O(n) 空間です。」
+4. 「トレードオフとして、余分なメモリを使用することになりますが、時間の短縮は大幅です。」
+
+## 重要なポイント
+
+- **階層を理解する**: O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(2ⁿ) < O(n!)。毎回のインタビューでこれを参照します。
+- **ネストされたループを増やす、連続ブロックを追加する**: ループ分析の 2 つの基本ルール。
+- **再帰ツリーを描画**: 再帰の複雑さが視覚的になり、正しく分析しやすくなります。
+- **隠れたコストに注意してください**: 文字列の連結、リストのメンバーシップのテスト、ループ内の並べ替えは一般的な罠です。
+- **時間と空間の両方を記述する**: 完全な複雑さの分析は常に両方の次元をカバーします。
+- **最適化への接続**: ブルート フォースの複雑さを知ることで、改善の余地がどれだけあるかがわかります。

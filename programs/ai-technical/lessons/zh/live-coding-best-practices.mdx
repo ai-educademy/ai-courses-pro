@@ -1,0 +1,248 @@
+---
+title: "实时编码最佳实践"
+description: "掌握在面试官面前编码的艺术——从环境设置到展示你的想法的沟通策略。"
+order: 8
+difficulty: "advanced"
+duration: 20
+icon: "💡"
+published: true
+machineTranslated: true
+---
+# 实时编码最佳实践
+
+你可以在睡梦中解决 LeetCode 媒体问题，但如果将一个人放在屏幕共享的另一端，你的手指就会突然忘记分号的位置。现场编码面试是一种表演——评判你的不仅是最终代码，还有你如何实现这一目标。通过考试的候选人并不总是最快的程序员；他们能够清晰地沟通，优雅地处理挫折，并编写出在压力下可读的代码。本课教您成为那个候选人。
+
+## 设置您的环境
+
+第一印象很重要。当你打开 CoderPad、HackerRank 或 VS Code Live Share 时，面试官已经在形成意见了。
+
+### 特定于平台的提示
+
+**CoderPad**（最常见）：
+- 面试开始前从下拉列表中选择您的语言
+- 使用内置的“运行”按钮 - 知道输出出现在控制台窗格中
+- 提供自动缩进和语法突出显示
+
+**黑客排名**：
+- 仔细阅读问题陈述 - 输入来自标准输入
+- 测试用例自动运行；了解预期的格式
+- 可以在左侧面板中添加自定义测试用例
+
+**VS Code 实时共享/Google 文档**：
+- 没有自动完成或语法突出显示（可能）
+- 手工一致地缩进 — 它显示了纪律
+- 对于 Google 文档：使用等宽字体（Courier New）
+
+<Callout>在进行任何现场编码面试之前，请进行 5 分钟的环境检查。打开平台，写一个“Hello World”，然后运行。面试时摸索平台会浪费宝贵的时间并动摇你的信心。</Callout>
+
+### 语言选择
+
+选择您最流利的语言，而不是您认为听起来令人印象深刻的语言。也就是说，以下是需要考虑的事项：
+
+|语言 |优点 |缺点 |
+|---|---|---|
+| **Python** |简洁、丰富的标准库，编写速度快|运行时间较慢，类型不明确 |
+| **Java** |强类型，面试官期望它用于系统设计 |冗长的样板 |
+| **JavaScript** |适合前端角色，灵活 |奇怪的类型强制，对于算法来说不太常见 |
+| **C++** |快速运行，展示低级技能 |容易出错、冗长的 STL |
+
+## 大声说话协议
+
+这是最有影响力的面试技巧，也是大多数候选人忽视的一项。你的内心独白需要变成外在独白。
+
+### 每个阶段该说什么
+
+**阅读问题**（0-3 分钟）：
+- “让我确保我理解问题：我们需要找到......”
+- “几个澄清问题：输入可以为空吗？可以有负数吗？”
+- “让我想几个例子来验证我的理解。”
+
+**规划你的方法**（3-7 分钟）：
+- “我的第一个想法是使用嵌套循环的强力方法 - 这将是 O(n²)。”
+- “我认为我们可以使用哈希映射来跟踪我们看到的元素做得更好。”
+- “让我考虑一下边缘情况：空输入、单个元素、所有重复项......”
+
+**编写代码**（7-25 分钟）：
+- “我将从设置函数签名和处理边缘情况开始。”
+- “现在我正在遍历数组，并且对于我正在检查的每个元素......”
+- “我在这里选择哈希映射，因为我们需要 O(1) 查找。”
+
+**测试**（25-30 分钟）：
+- “让我通过示例进行追踪：对于目标为 9 的输入 [2, 7, 11, 15]...”
+- “我还应该检查空数组的边缘情况......”
+- “嗯，本例的输出不匹配。让我看看第 5 行……”
+
+<ThinkAboutIt>回想一下你上次默默解决问题是什么时候。您的内部决策过程是怎样的？您将如何具体化每一个微观决策？即使在独自解决问题时，也要练习用语言表达你的想法——这在面试过程中会变得很自然。</ThinkAboutIt>
+
+## 在压力下编写干净的代码
+
+在压力下，代码质量是首当其冲的受害者。用刻意的习惯来对抗这个问题：
+
+### 使用有意义的名字
+
+```python
+# Under pressure (what many candidates write)
+def solve(a, t):
+    d = {}
+    for i, v in enumerate(a):
+        if t - v in d:
+            return [d[t - v], i]
+        d[v] = i
+
+# What you should write
+def two_sum(nums, target):
+    seen = {}
+    for index, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], index]
+        seen[num] = index
+```
+
+第二个版本需要额外花费 10 秒的时间来编写，但调试起来却轻松了 10 倍，并且给面试官留下了深刻的印象。
+
+### 从骨骼开始
+
+在填写逻辑之前，先写一下结构：
+
+```python
+def merge_intervals(intervals):
+    # Edge case
+    if not intervals:
+        return []
+
+    # Sort by start time
+    intervals.sort(key=lambda x: x[0])
+
+    # Merge overlapping intervals
+    merged = [intervals[0]]
+    for current in intervals[1:]:
+        # TODO: merge logic
+        pass
+
+    return merged
+```
+
+这可以在你实施计划之前向面试官展示你的计划。这也意味着即使您没有时间，他们也会看到正确的高层方法。
+
+### 辅助函数是你的朋友
+
+```python
+# Extract reusable logic into named functions
+def is_valid_move(board, row, col):
+    return 0 <= row < len(board) and 0 <= col < len(board[0])
+
+def get_neighbours(row, col):
+    return [(row + dr, col + dc) for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]]
+```
+
+辅助函数可以减少认知负担，使您的代码自我记录，并允许您说“我稍后会实现这个辅助函数 - 现在，假设它有效。”
+
+<FunFact>对结对编程（模拟现场编码面试）的研究表明，结对编程的缺陷比单独程序员少 15%，但花费的时间却多了约 15%。在面试中，与面试官的“搭档”动态实际上对你有利——如果你开诚布公地交流，他们可以发现你独自错过的错误。</FunFact>
+
+## 优雅地处理提示
+
+面试官给出提示。这不是失败的迹象——这是一次对话。你如何回应很重要：
+
+**对提示的良好回应**：
+- “这是一个很好的观点 - 我认为你建议我在这里使用堆栈。让我想想这有什么帮助......”
+- “啊，我明白了——如果我先对输入进行排序，那么两指针方法就成为可能。让我重新构造一下。”
+- “谢谢，我没有考虑这种边缘情况。让我添加对负数的处理。”
+
+**不好的回应**：
+- 忽略提示并继续你的方法
+- “我知道，我正要这么做”（防御）
+- 看起来很失败或慌乱
+
+<Callout>给出提示的面试官是在试图帮助你取得成功。许多候选人在收到多次提示后就被录用了——重要的是你接受提示、适应并表现出你可以合作。在提示后顽固地坚持失败的方法是一个危险信号。</Callout>
+
+## 时间管理：35 分钟计划
+
+对于典型的 35 分钟编码问题：
+
+|相|分钟 |做什么 |
+|---|---|---|
+| **澄清** | 0-5 |阅读问题、提出问题、编写示例 |
+| **计划** | 5-8 |讨论方法和复杂性，获得面试官的支持 |
+| **代码** | 8-25 |通过大声说话编写干净、可读的代码 |
+| **测试** | 25-30 | 25-30手动跟踪示例，检查边缘情况 |
+| **优化** | 30-35 | 30-35讨论可能的改进和替代方法 |
+
+### 常见的计时错误
+
+1. **在没有计划的情况下花费 15 分钟编码** - 最终你会重写
+2. **从不测试** — 提交并说“我认为它有效”是一个危险信号
+3. **在获得可行的解决方案之前进行优化**——先解决，然后改进
+4. **在一种方法上花费太长时间** - 如果 10 分钟后不起作用，请询问面试官是否有更好的方向
+
+## 在说“完成”之前测试您的解决方案
+
+未经测试，切勿说“我完成了”。这是一个系统的方法：
+
+```python
+# Step 1: Trace through the provided example
+# Input: [1, 2, 3, 4, 5], target = 9
+# i=0: complement=9-1=8, not in seen, seen={1:0}
+# i=1: complement=9-2=7, not in seen, seen={1:0, 2:1}
+# ...
+# i=3: complement=9-4=5, not in seen, seen={1:0, 2:1, 3:2, 4:3}
+# i=4: complement=9-5=4, 4 IS in seen at index 3 → return [3, 4] ✓
+
+# Step 2: Test edge cases
+# Empty array: [] → should return [] or None
+# Single element: [5], target=5 → no pair possible
+# Negative numbers: [-1, 2, 3], target=1 → [-1, 2] at indices [0, 1]
+# Duplicates: [3, 3], target=6 → should return [0, 1]
+```
+
+描述这个测试过程。它表现出彻底性，并在面试官之前发现错误。
+
+## 当你陷入困境时该怎么办
+
+陷入困境并不是失败——默默地陷入困境才是失败。这是你的逃跑计划：
+
+1. **重述问题**——有时大声说出可以揭示一个新角度
+2. **通过一个小例子** - 手动解决一个小案例可以揭示算法
+3. **思考相关问题** —“这让我想起了滑动窗口模式……”
+4. **考虑约束** — 如果 n ≤ 1000，则 O(n²) 解决方案可能是可以接受的
+5. **简化问题** — 首先解决更简单的版本，然后增加复杂性
+6. **请求提示** — “我正在考虑使用哈希图来跟踪频率，但我不确定如何处理窗口缩小。你能给我指出正确的方向吗？”
+
+```python
+# When stuck, try the "brute force first" strategy:
+# 1. Write the O(n²) solution — it's usually straightforward
+# 2. Identify the bottleneck (usually the inner loop)
+# 3. Ask: "Can I eliminate this inner loop with a data structure?"
+# 4. This often leads naturally to the optimal solution
+```
+
+<Quiz question="35 分钟的面试进行了 20 分钟，您的解决方案中存在一个您无法发现的错误。下一步最好的做法是什么？" options="用全新的方法重新开始|静静地坐着思考，直到找到它|在关键决策点添加打印语句并通过一个小示例进行跟踪|让面试官告诉你bug在哪里" answer="2" explanation="还剩 15 分钟，添加战略打印语句并通过一个小示例进行跟踪是最有效的调试方法。重新开始会浪费你已经完成的工作。安静地坐着会浪费时间，而且没有信号。直接询问答案说明没有调试能力。" />
+
+## 解决方案后的讨论
+
+当你的解决方案奏效后，面试还没有结束。准备好：
+
+- **“时间和空间复杂度是多少？”** — 始终准备好这个
+- **“你能优化它吗？”** — 即使无法及时实施，也要讨论权衡
+- **“这将如何处理边缘情况？”** — 表明您已经考虑过生产场景
+- **“如果输入是 10 亿个元素怎么办？”** — 这转向系统设计思维
+
+```python
+# Example post-solution discussion:
+# "My solution is O(n) time and O(n) space.
+#  The space is used by the hash map which stores at most n elements.
+#  If memory is a constraint, we could sort the array first and use
+#  two pointers for O(n log n) time and O(1) space — but we'd need
+#  to modify the input array or create a copy.
+#  For 1 billion elements, we might need to partition the data
+#  and process in chunks, or use external sorting."
+```
+
+## 要点
+
+- **连续大声说话**：沉默是你的敌人——从头到尾讲述你解决问题的过程。
+- **编码前澄清**：5 分钟的问题可以节省 15 分钟的错误方向编码。
+- **即使在压力下也能编写干净的代码**：有意义的名称、辅助函数和骨架优先的方法使调试更容易并给面试官留下深刻的印象。
+- **系统测试**：在宣布“完成”之前跟踪示例和边缘情况。
+- **优雅地处理提示和挫折**：陷入困境是正常的 - 如何恢复才是重要的。
+- **管理你的时间**：计划（5分钟）→编码（17分钟）→测试（5分钟）→讨论（5分钟）。根据问题进行调整，但切勿跳过测试。

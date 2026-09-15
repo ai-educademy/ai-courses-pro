@@ -1,0 +1,294 @@
+---
+title: "Patrones y estrategias de algoritmos"
+description: "Conozca los 10 patrones de algoritmos que resuelven el 80% de los problemas de codificación de las entrevistas, desde ventanas deslizantes hasta programación dinámica."
+order: 2
+difficulty: "intermediate"
+duration: 25
+icon: "🧩"
+published: true
+machineTranslated: true
+---
+# Patrones y estrategias de algoritmos
+
+Las entrevistas de codificación no se tratan de memorizar 500 soluciones LeetCode. Se trata de reconocer cuál de aproximadamente diez patrones se aplica al problema que tenemos delante. Una vez que identifica el patrón, la estructura de la solución se escribe sola. Esta lección desglosa cada patrón: cuándo usarlo, cómo reconocerlo y un ejemplo concreto para consolidar su comprensión. Piense en estos patrones como lentes: cuanto más practique mirando a través de ellos, más rápido se enfocará cada nuevo problema.
+
+## Patrón 1: dos consejos
+
+**Reconocerlo cuando**: La entrada está ordenada (o puede ordenarse) y necesita encontrar pares o subarreglos que cumplan alguna condición.
+
+Dos punteros funcionan colocando un puntero en cada extremo de la matriz (o al principio para la variante "rápida/lenta") y moviéndolos uno hacia el otro según una condición.
+
+```python
+# Three Sum: find all triplets that sum to zero
+def three_sum(nums):
+    nums.sort()
+    result = []
+    for i in range(len(nums) - 2):
+        if i > 0 and nums[i] == nums[i - 1]:
+            continue  # Skip duplicates
+        left, right = i + 1, len(nums) - 1
+        while left < right:
+            total = nums[i] + nums[left] + nums[right]
+            if total < 0:
+                left += 1
+            elif total > 0:
+                right -= 1
+            else:
+                result.append([nums[i], nums[left], nums[right]])
+                while left < right and nums[left] == nums[left + 1]:
+                    left += 1
+                left += 1
+                right -= 1
+    return result
+```
+
+**Tiempo**: O(n²): una mejora enorme con respecto a la fuerza bruta O(n³).
+
+## Patrón 2: ventana corrediza
+
+**Reconocerlo cuando**: necesita encontrar un subarreglo o subcadena contiguo que satisfaga alguna restricción (suma máxima, contenga todos los caracteres, etc.).
+
+La ventana se expande moviendo el puntero derecho y se contrae moviendo el puntero izquierdo. La clave es saber cuándo encogerse.
+
+```python
+# Longest substring without repeating characters
+def length_of_longest_substring(s: str) -> int:
+    char_index = {}
+    max_length = 0
+    left = 0
+    for right, char in enumerate(s):
+        if char in char_index and char_index[char] >= left:
+            left = char_index[char] + 1
+        char_index[char] = right
+        max_length = max(max_length, right - left + 1)
+    return max_length
+```
+
+<Callout>El patrón de la ventana deslizante tiene una plantilla fija: inicializa dos punteros, expande hacia la derecha, encoge hacia la izquierda cuando se viola la restricción y realiza un seguimiento de tu respuesta. Una vez que internalices esta plantilla, cada problema de la ventana corrediza parecerá manejable.</Callout>
+
+## Patrón 3: BFS (búsqueda primero en amplitud)
+
+**Reconócelo cuando**: necesitas la ruta más corta en un gráfico no ponderado, un recorrido de orden de nivel o explorar vecinos capa por capa.
+
+BFS utiliza una cola y procesa los nodos nivel por nivel. Garantiza el camino más corto en gráficos no ponderados.
+
+```python
+from collections import deque
+
+# Number of islands — BFS variant
+def num_islands(grid):
+    if not grid:
+        return 0
+    rows, cols = len(grid), len(grid[0])
+    count = 0
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                count += 1
+                queue = deque([(r, c)])
+                grid[r][c] = '0'
+                while queue:
+                    row, col = queue.popleft()
+                    for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                        nr, nc = row + dr, col + dc
+                        if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == '1':
+                            grid[nr][nc] = '0'
+                            queue.append((nr, nc))
+    return count
+```
+
+## Patrón 4: DFS (búsqueda en profundidad)
+
+**Reconócelo cuando**: necesitas explorar todas las rutas, comprobar la conectividad, detectar ciclos o el problema tiene una estructura recursiva/de árbol.
+
+DFS profundiza antes de abrirse. Es naturalmente recursivo y se asigna maravillosamente a recorridos de árboles y retrocesos.
+
+```python
+# Path sum in a binary tree
+def has_path_sum(root, target_sum):
+    if not root:
+        return False
+    if not root.left and not root.right:
+        return target_sum == root.val
+    return (has_path_sum(root.left, target_sum - root.val) or
+            has_path_sum(root.right, target_sum - root.val))
+```
+
+<ThinkAboutIt>¿Cuándo elegirías BFS en lugar de DFS y viceversa? Considere: BFS encuentra las rutas más cortas pero usa memoria O (ancho). DFS usa memoria O (profundidad) pero no garantiza las rutas más cortas. ¿Cómo influye la forma del gráfico en tu elección?</ThinkAboutIt>
+
+## Patrón 5: Búsqueda binaria
+
+**Reconocerlo cuando**: El espacio de búsqueda está ordenado o es monótono (si la condición es verdadera en el índice i, es verdadera para todos los índices > i o < i).
+
+La búsqueda binaria no es sólo para matrices ordenadas: funciona en cualquier condición monótona. Esta información resuelve problemas como "capacidad mínima para enviar paquetes" o "encontrar elemento pico".
+
+```python
+# Binary search on answer: minimum days to make m bouquets
+def min_days(bloom_day, m, k):
+    if m * k > len(bloom_day):
+        return -1
+
+    def can_make(days):
+        bouquets = flowers = 0
+        for bloom in bloom_day:
+            if bloom <= days:
+                flowers += 1
+                if flowers == k:
+                    bouquets += 1
+                    flowers = 0
+            else:
+                flowers = 0
+        return bouquets >= m
+
+    lo, hi = min(bloom_day), max(bloom_day)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if can_make(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+```
+
+<FunFact>A pesar de que la búsqueda binaria es conceptualmente uno de los algoritmos más simples, un estudio realizado por Jon Bentley encontró que sólo alrededor del 10% de los programadores profesionales podían implementarlo correctamente en el primer intento. ¿El error más común? Errores uno por uno en las condiciones de contorno.</FunFact>
+
+## Patrón 6: Retroceso
+
+**Reconócelo cuando**: necesitas generar todas las combinaciones, permutaciones o subconjuntos que satisfagan las restricciones. El problema suele decir "buscar todo", "generar todo" o "enumerar todo lo posible".
+
+Retroceso = DFS con poda. Exploras un camino y, si viola una restricción, retrocedes y pruebas la siguiente opción.
+
+```python
+# Generate all valid combinations of n pairs of parentheses
+def generate_parenthesis(n):
+    result = []
+    def backtrack(current, open_count, close_count):
+        if len(current) == 2 * n:
+            result.append(current)
+            return
+        if open_count < n:
+            backtrack(current + '(', open_count + 1, close_count)
+        if close_count < open_count:
+            backtrack(current + ')', open_count, close_count + 1)
+    backtrack('', 0, 0)
+    return result
+```
+
+## Patrón 7: Programación dinámica
+
+**Reconócelo cuando**: El problema tiene subproblemas superpuestos y una subestructura óptima. Las señales clásicas incluyen "coste mínimo", "número de formas", "secuencia más larga/más corta" o "¿puedes alcanzar el objetivo?".
+
+La receta del DP: definir el estado, escribir la recurrencia, decidir entre de arriba hacia abajo (memorización) y de abajo hacia arriba (tabulación).
+
+```python
+# Longest Increasing Subsequence — O(n²) DP
+def length_of_lis(nums):
+    if not nums:
+        return 0
+    dp = [1] * len(nums)  # dp[i] = length of LIS ending at index i
+    for i in range(1, len(nums)):
+        for j in range(i):
+            if nums[j] < nums[i]:
+                dp[i] = max(dp[i], dp[j] + 1)
+    return max(dp)
+```
+
+<Callout>Cuando esté atrapado en un problema de DP, comience primero con la recursividad de fuerza bruta. Luego agregue memorización. La conversión a tabulación ascendente es un paso de optimización, no el primero. Este enfoque evita perderse en las dimensiones de la mesa.</Callout>
+
+## Patrón 8: Codicioso
+
+**Reconócelo cuando**: Hacer la elección localmente óptima en cada paso conduce a la solución globalmente óptima. Los problemas codiciosos a menudo implican intervalos, programación o toma de decisiones que no necesitan ser revisadas.
+
+```python
+# Minimum number of meeting rooms (interval scheduling)
+def min_meeting_rooms(intervals):
+    starts = sorted([i[0] for i in intervals])
+    ends = sorted([i[1] for i in intervals])
+    rooms = max_rooms = 0
+    s = e = 0
+    while s < len(starts):
+        if starts[s] < ends[e]:
+            rooms += 1
+            max_rooms = max(max_rooms, rooms)
+            s += 1
+        else:
+            rooms -= 1
+            e += 1
+    return max_rooms
+```
+
+## Patrón 9: clasificación topológica
+
+**Reconócelo cuando**: Hay dependencias entre las tareas (requisitos previos del curso, orden de compilación, programación de tareas). La entrada es un gráfico acíclico dirigido (DAG).
+
+```python
+from collections import deque, defaultdict
+
+def course_order(num_courses, prerequisites):
+    graph = defaultdict(list)
+    in_degree = [0] * num_courses
+    for course, prereq in prerequisites:
+        graph[prereq].append(course)
+        in_degree[course] += 1
+
+    queue = deque([i for i in range(num_courses) if in_degree[i] == 0])
+    order = []
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbour in graph[node]:
+            in_degree[neighbour] -= 1
+            if in_degree[neighbour] == 0:
+                queue.append(neighbour)
+    return order if len(order) == num_courses else []
+```
+
+## Patrón 10: Unión-Encontrar (Conjunto disjunto)
+
+**Reconocerlo cuando**: necesita agrupar elementos, detectar componentes conectados o determinar si dos elementos pertenecen al mismo conjunto, especialmente cuando las conexiones se agregan dinámicamente.
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])  # Path compression
+        return self.parent[x]
+
+    def union(self, x, y):
+        px, py = self.find(x), self.find(y)
+        if px == py:
+            return False
+        if self.rank[px] < self.rank[py]:
+            px, py = py, px
+        self.parent[py] = px
+        if self.rank[px] == self.rank[py]:
+            self.rank[px] += 1
+        return True
+```
+
+<Quiz question="Se le plantea un problema: ”Encuentre la subcadena de ventana mínima de s que contenga todos los caracteres en t”. ¿Qué patrón se adapta mejor?" options="Dos consejos|Ventana corrediza|Programación dinámica|Búsqueda binaria" answer="1" explanation="Este es un problema clásico de las ventanas correderas. La ventana se expande moviendo el puntero derecho para incluir caracteres y se reduce desde la izquierda una vez que se incluyen todos los caracteres en t, siguiendo el tamaño mínimo de la ventana en todo momento." />
+
+## Cómo reconocer el patrón correcto
+
+Construye un árbol de decisiones en tu cabeza:
+
+1. **¿La entrada está ordenada o se puede ordenar?** → Dos punteros o búsqueda binaria
+2. **¿Necesita un subarreglo/subcadena contiguo?** → Ventana deslizante
+3. **¿Es un recorrido de gráfico/árbol?** → BFS (ruta más corta) o DFS (todas las rutas)
+4. **¿"Buscar todas las combinaciones/permutaciones"?** → Retroceder
+5. **¿"Costo mínimo/número de formas"?** → Programación dinámica
+6. **¿Problema de "horario/intervalo"?** → Codicioso o de clasificación
+7. **¿Dependencias u ordenamiento?** → Ordenación topológica
+8. **¿Agrupación/conectividad?** → Unión-Buscar
+
+## Conclusiones clave
+
+- **Aprenda patrones, no problemas**: 10 patrones cubren la gran mayoría de las preguntas de la entrevista.
+- **Comience con fuerza bruta**: identifique el patrón desde el enfoque de fuerza bruta y luego optimícelo.
+- **Practica el reconocimiento de patrones**: por cada problema que resuelvas, etiqueta qué patrón utiliza.
+- **Combinar patrones**: muchos problemas medios/difíciles utilizan dos patrones juntos (por ejemplo, búsqueda binaria + ventana deslizante, BFS + clasificación topológica).
+- **Verbaliza tu razonamiento**: en entrevistas, decir "esto parece un problema de ventana deslizante porque..." demuestra un fuerte pensamiento analítico.

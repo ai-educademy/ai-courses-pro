@@ -1,0 +1,248 @@
+---
+title: "Meilleures pratiques de codage en direct"
+description: "Maîtrisez l'art du codage devant un intervieweur, de la configuration de l'environnement aux stratégies de communication qui mettent en valeur votre réflexion."
+order: 8
+difficulty: "advanced"
+duration: 20
+icon: "💡"
+published: true
+machineTranslated: true
+---
+# Meilleures pratiques de codage en direct
+
+Vous pouvez résoudre les médiums LeetCode pendant votre sommeil, mais placez un être humain à l'autre bout d'un partage d'écran et tout à coup vos doigts oublient où vont les points-virgules. Les entretiens de codage en direct sont une performance dans laquelle vous êtes jugé non seulement sur le code final, mais aussi sur la manière dont vous y parvenez. Les candidats qui réussissent ne sont pas toujours les codeurs les plus rapides ; ce sont eux qui communiquent clairement, gèrent les revers avec élégance et écrivent du code lisible sous pression. Cette leçon vous apprend à être ce candidat.
+
+## Configuration de votre environnement
+
+Les premières impressions comptent. Lorsque vous ouvrez CoderPad, HackerRank ou VS Code Live Share, l'intervieweur se fait déjà une opinion.
+
+### Conseils spécifiques à la plateforme
+
+**CoderPad** (le plus courant) :
+- Choisissez votre langue dans la liste déroulante avant le début de l'entretien
+- Utilisez le bouton Exécuter intégré - sachez que la sortie apparaît dans le volet de la console
+- L'indentation automatique et la coloration syntaxique sont disponibles
+
+**Classement des hackers** :
+- Lisez attentivement l'énoncé du problème : les entrées proviennent de stdin
+- Les cas de tests s'exécutent automatiquement ; comprendre le format attendu
+- Des cas de test personnalisés peuvent être ajoutés dans le panneau de gauche
+
+**Partage en direct VS Code / Google Docs** :
+- Pas de saisie semi-automatique ni de coloration syntaxique (éventuellement)
+- Indentez systématiquement à la main – cela montre de la discipline
+- Pour Google Docs : utilisez une police monospace (Courier New)
+
+<Callout>Avant tout entretien de codage en direct, effectuez une vérification de l'environnement de 5 minutes. Ouvrez la plateforme, écrivez un "Hello World" et exécutez-la. Tâtonner avec la plateforme pendant l'entretien vous fait perdre de précieuses minutes et ébranle votre confiance.</Callout>
+
+### Choix de la langue
+
+Choisissez la langue que vous maîtrisez le mieux, pas celle qui vous semble impressionnante. Cela dit, voici ce qu'il faut considérer :
+
+| Langue | Avantages | Inconvénients |
+|---|---|---|
+| **Python** | Bibliothèque standard concise et riche, rapide à écrire | Exécution plus lente, ambiguïté de type |
+| **Java** | Typage fort, les enquêteurs l'attendent pour la conception du système | Verbeux, passe-partout |
+| **JavaScript** | Bon pour les rôles frontend, flexible | Coercition de type bizarre, moins courante pour les algorithmes |
+| **C++** | Exécution rapide, montre des compétences de bas niveau | STL verbeux et sujet aux erreurs |
+
+## Le protocole de conversation à haute voix
+
+Il s’agit de la compétence d’entretien la plus importante et celle que la plupart des candidats négligent. Votre monologue intérieur doit devenir un monologue extérieur.
+
+### Que dire à chaque étape
+
+**Lecture du problème** (minutes 0-3) :
+- "Laissez-moi m'assurer de bien comprendre le problème : nous devons trouver..."
+- "Quelques questions de clarification : la saisie peut-elle être vide ? Peut-il y avoir des nombres négatifs ?"
+- "Laissez-moi réfléchir à quelques exemples pour vérifier ma compréhension."
+
+**Planifier votre approche** (minutes 3 à 7) :
+- "Ma première pensée est une approche par force brute utilisant des boucles imbriquées — ce serait O(n²)."
+- "Je pense que nous pouvons faire mieux avec une carte de hachage pour suivre les éléments que nous avons vus."
+- "Laissez-moi penser aux cas extrêmes : entrée vide, élément unique, tous les doublons..."
+
+**Écriture du code** (minutes 7-25) :
+- "Je vais commencer par configurer la signature de la fonction et gérer les cas extrêmes."
+- "Maintenant, je parcours le tableau, et pour chaque élément que je vérifie..."
+- "Je choisis ici une carte de hachage parce que nous avons besoin de recherches O(1)."
+
+**Tests** (minutes 25-30) :
+- "Laissez-moi suivre l'exemple : pour l'entrée [2, 7, 11, 15] avec la cible 9..."
+- "Je devrais aussi vérifier le cas limite d'un tableau vide..."
+- "Hmm, mon résultat pour ce cas ne correspond pas. Laissez-moi regarder la ligne 5..."
+
+<ThinkAboutIt>Pensez à la dernière fois où vous avez résolu un problème en silence. Quel a été votre processus de décision interne ? Comment externaliseriez-vous chacune de ces micro-décisions ? Entraînez-vous à verbaliser votre réflexion même lorsque vous résolvez des problèmes seul – cela devient naturel pendant l'entretien.</ThinkAboutIt>
+
+## Écrire du code propre sous pression
+
+En cas de stress, la qualité du code est la première victime. Combattez cela avec des habitudes délibérées :
+
+### Utilisez des noms significatifs
+
+```python
+# Under pressure (what many candidates write)
+def solve(a, t):
+    d = {}
+    for i, v in enumerate(a):
+        if t - v in d:
+            return [d[t - v], i]
+        d[v] = i
+
+# What you should write
+def two_sum(nums, target):
+    seen = {}
+    for index, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], index]
+        seen[num] = index
+```
+
+La deuxième version prend 10 secondes supplémentaires à écrire, mais rend le débogage 10 fois plus facile et impressionne l'intervieweur.
+
+### Commencez par le squelette
+
+Avant de remplir la logique, écrivez la structure :
+
+```python
+def merge_intervals(intervals):
+    # Edge case
+    if not intervals:
+        return []
+
+    # Sort by start time
+    intervals.sort(key=lambda x: x[0])
+
+    # Merge overlapping intervals
+    merged = [intervals[0]]
+    for current in intervals[1:]:
+        # TODO: merge logic
+        pass
+
+    return merged
+```
+
+Cela montre à l'intervieweur votre plan avant de le mettre en œuvre. Cela signifie également que même si vous manquez de temps, ils voient une approche correcte de haut niveau.
+
+### Les fonctions d'assistance sont votre amie
+
+```python
+# Extract reusable logic into named functions
+def is_valid_move(board, row, col):
+    return 0 <= row < len(board) and 0 <= col < len(board[0])
+
+def get_neighbours(row, col):
+    return [(row + dr, col + dc) for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]]
+```
+
+Les fonctions d'assistance réduisent la charge cognitive, rendent votre code auto-documenté et vous permettent de dire "J'implémenterai cette aide plus tard - pour l'instant, supposons qu'elle fonctionne".
+
+<FunFact>Des études sur la programmation en binôme (simulée par des entretiens de codage en direct) montrent que les paires produisent du code avec 15 % de défauts en moins que les programmeurs solo, mais prennent environ 15 % de temps en plus. Lors d'un entretien, la dynamique du « duo » avec l'intervieweur joue en votre faveur : il peut détecter les erreurs que vous manqueriez tout seul, si vous communiquez ouvertement.</FunFact>
+
+## Gérer les indices avec élégance
+
+Les enquêteurs donnent des indices. Ce n'est pas un signe d'échec, c'est une conversation. La façon dont vous répondez compte :
+
+**Bonnes réponses aux indices** :
+- "C'est un bon point — je pense que vous suggérez que j'utilise une pile ici. Laissez-moi réfléchir à la façon dont cela aide..."
+- "Ah, je vois — si je trie d'abord les entrées, l'approche à deux points devient possible. Laissez-moi restructurer."
+- "Merci, je n'avais pas envisagé ce cas extrême. Permettez-moi d'ajouter la gestion des nombres négatifs."
+
+**Mauvaises réponses** :
+- Ignorer l'indice et poursuivre votre approche
+- "Je sais, j'étais sur le point de faire ça" (défensif)
+- Avoir l'air vaincu ou troublé
+
+<Callout>Un intervieweur qui donne des indices essaie de vous aider à réussir. De nombreux candidats sont embauchés après avoir reçu plusieurs indices. Ce qui compte, c'est que vous preniez l'indice, que vous vous adaptiez et que vous montriez que vous pouvez collaborer. S’en tenir obstinément à une approche qui échoue après un indice est un signal d’alarme.</Callout>
+
+## Gestion du temps : le plan de 35 minutes
+
+Pour un problème de codage typique de 35 minutes :
+
+| Phases | Procès-verbal | Que faire |
+|---|---|---|
+| **Clarifier** | 0-5 | Lire le problème, poser des questions, écrire des exemples |
+| **Plan** | 5-8 | Discutez de l'approche et de la complexité, obtenez l'adhésion de l'intervieweur |
+| **Code** | 8-25 | Écrivez du code propre et lisible en parlant à haute voix |
+| **Tester** | 25-30 | Parcourez les exemples manuellement, vérifiez les cas extrêmes |
+| **Optimiser** | 30-35 | Discuter des améliorations possibles et des approches alternatives |
+
+### Erreurs de timing courantes
+
+1. **Passer 15 minutes à coder sans plan** — vous finissez par réécrire
+2. **Ne jamais tester** — soumettre et dire « Je pense que ça marche » est un signal d'alarme
+3. **Optimiser avant d'obtenir une solution fonctionnelle** : résolvez-la d'abord, puis améliorez-la
+4. **Passer trop de temps sur une seule approche** — si cela ne fonctionne pas après 10 minutes, demandez à l'intervieweur s'il existe une meilleure direction
+
+## Testez votre solution avant de dire « Terminé »
+
+Ne dites jamais « J’ai terminé » sans tester. Voici une approche systématique :
+
+```python
+# Step 1: Trace through the provided example
+# Input: [1, 2, 3, 4, 5], target = 9
+# i=0: complement=9-1=8, not in seen, seen={1:0}
+# i=1: complement=9-2=7, not in seen, seen={1:0, 2:1}
+# ...
+# i=3: complement=9-4=5, not in seen, seen={1:0, 2:1, 3:2, 4:3}
+# i=4: complement=9-5=4, 4 IS in seen at index 3 → return [3, 4] ✓
+
+# Step 2: Test edge cases
+# Empty array: [] → should return [] or None
+# Single element: [5], target=5 → no pair possible
+# Negative numbers: [-1, 2, 3], target=1 → [-1, 2] at indices [0, 1]
+# Duplicates: [3, 3], target=6 → should return [0, 1]
+```
+
+Verbalisez ce processus de test. Il fait preuve de minutie et détecte les bugs avant l’intervieweur.
+
+## Que faire lorsque vous êtes bloqué
+
+Rester bloqué n’est pas un échec – rester bloqué en silence l’est. Voici votre plan d'évacuation :
+
+1. **Réaffirmez le problème** : parfois, le dire à voix haute révèle un nouvel angle
+2. **Travaillez sur un petit exemple** : la résolution manuelle d'un petit cas peut révéler l'algorithme
+3. **Pensez aux problèmes connexes** — "Cela me rappelle le modèle de fenêtre coulissante..."
+4. **Considérez les contraintes** — si n ≤ 1000, une solution O(n²) pourrait être acceptable
+5. **Simplifiez le problème** : résolvez d'abord une version plus simple, puis ajoutez de la complexité
+6. **Demandez un indice** — "J'envisage d'utiliser une carte de hachage pour suivre les fréquences, mais je ne sais pas comment gérer le rétrécissement de la fenêtre. Pourriez-vous m'indiquer la bonne direction ?"
+
+```python
+# When stuck, try the "brute force first" strategy:
+# 1. Write the O(n²) solution — it's usually straightforward
+# 2. Identify the bottleneck (usually the inner loop)
+# 3. Ask: "Can I eliminate this inner loop with a data structure?"
+# 4. This often leads naturally to the optimal solution
+```
+
+<Quiz question="Vous en êtes à 20 minutes d'un entretien de 35 minutes et votre solution comporte un bug que vous ne trouvez pas. Quelle est la meilleure prochaine étape ?" options="Recommencez avec une toute nouvelle approche|Asseyez-vous tranquillement et réfléchissez jusqu'à ce que vous le trouviez|Ajoutez des instructions d'impression aux points de décision clés et suivez un petit exemple|Demandez à l'intervieweur de vous dire où se trouve le bug" answer="2" explanation="Avec 15 minutes restantes, l'ajout d'instructions d'impression stratégiques et le suivi d'un petit exemple constituent l'approche de débogage la plus efficace. Recommencer gaspille le travail que vous avez fait. Rester assis tranquillement fait perdre du temps et ne fournit aucun signal. Demander la réponse directe ne montre aucune capacité de débogage." />
+
+## La discussion post-solution
+
+Une fois que votre solution fonctionne, l’entretien n’est pas terminé. Soyez prêt pour :
+
+- **"Quelle est la complexité temporelle et spatiale ?"** — ayez toujours ceci à portée de main
+- **"Pouvez-vous l'optimiser ?"** — discutez des compromis même si vous ne pouvez pas les mettre en œuvre à temps
+- **"Comment cela gérerait-il les cas extrêmes ?"** - montre que vous avez réfléchi à des scénarios de production
+- **"Et si l'entrée était d'un milliard d'éléments ?"** — cela s'articule autour de la réflexion sur la conception de systèmes
+
+```python
+# Example post-solution discussion:
+# "My solution is O(n) time and O(n) space.
+#  The space is used by the hash map which stores at most n elements.
+#  If memory is a constraint, we could sort the array first and use
+#  two pointers for O(n log n) time and O(1) space — but we'd need
+#  to modify the input array or create a copy.
+#  For 1 billion elements, we might need to partition the data
+#  and process in chunks, or use external sorting."
+```
+
+## Points clés à retenir
+
+- **Parlez à haute voix en continu** : le silence est votre ennemi – racontez votre processus de résolution de problèmes du début à la fin.
+- **Clarifier avant de coder** : 5 minutes de questions permettent d'économiser 15 minutes de codage dans le mauvais sens.
+- **Écrivez du code propre même sous pression** : des noms significatifs, des fonctions d'assistance et une approche axée sur le squelette facilitent le débogage et impressionnent les enquêteurs.
+- **Testez systématiquement** : parcourez les exemples et les cas extrêmes avant de déclarer « terminé ».
+- **Gérez les indices et les revers avec élégance** : il est normal de rester bloqué ; ce qui compte, c'est la façon dont vous récupérez.
+- **Gérez votre temps** : planifier (5min) → coder (17min) → tester (5min) → discuter (5min). Ajustez en fonction du problème, mais ne sautez jamais les tests.

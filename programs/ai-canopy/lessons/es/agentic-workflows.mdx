@@ -1,0 +1,134 @@
+---
+title: "Flujos de trabajo agentes: creación de sistemas de inteligencia artificial multiagente"
+description: "Descubra cómo los agentes de IA observan, razonan y actúan de forma autónoma mediante el uso de herramientas, la memoria, estrategias de planificación y arquitecturas de múltiples agentes para tareas complejas del mundo real."
+order: 9
+difficulty: "advanced"
+duration: 20
+icon: "🤖"
+published: true
+machineTranslated: true
+---
+# Flujos de trabajo agentes: creación de sistemas de inteligencia artificial multiagente
+
+Un modelo de lenguaje responde preguntas. Un **agente** logra objetivos. La diferencia es el ciclo: los agentes observan su entorno, razonan sobre qué hacer, toman acciones utilizando herramientas y repiten hasta completar la tarea. Esta lección cubre la arquitectura, los patrones y los modos de falla de los sistemas de IA agentes modernos.
+
+## ¿Qué caracteriza a un agente de IA?
+
+Un agente de IA se define por tres capacidades que operan en un bucle continuo:
+
+1. **Observar**: percibe el estado actual: instrucciones del usuario, resultados de la herramienta, datos del entorno, acciones anteriores.
+2. **Razón** - Decide qué hacer a continuación: descomponer el objetivo, planificar los pasos, evaluar las opciones
+3. **Actuar**: ejecutar una acción: llamar a una herramienta, escribir código, enviar una solicitud API, devolver un resultado
+
+La distinción fundamental de las indicaciones simples es la **autonomía en múltiples pasos**. Un agente no sólo responde: itera. Podría buscar en la web, leer los resultados, decidir que necesita más información, volver a buscar con una consulta refinada, sintetizar los hallazgos y luego presentar una respuesta.
+
+<Illustration src="/images/lessons/agentic-workflows.svg" alt="Diagrama circular que muestra el ciclo observar-razonar-actuar con conexiones a herramientas, memoria y entorno." caption="El bucle agente: observar el entorno, razonar sobre el siguiente paso, actuar utilizando herramientas y repetir hasta alcanzar el objetivo." />
+
+## Uso de herramientas y llamadas de funciones
+
+Sin herramientas, un agente se limita a la generación de texto. **El uso de herramientas** brinda a los agentes la capacidad de interactuar con el mundo:
+
+- **Llamadas a funciones**: el LLM genera un JSON estructurado que especifica qué función llamar y con qué argumentos. El tiempo de ejecución ejecuta la función y devuelve los resultados como contexto.
+- **Integración de API**: los agentes pueden consultar bases de datos, llamar a puntos finales REST, enviar correos electrónicos o manipular archivos.
+- **Ejecución de código**: algunos agentes escriben y ejecutan código en un entorno aislado y utilizan el resultado para informar los siguientes pasos.
+
+Los marcos modernos exponen las herramientas como firmas de funciones escritas con descripciones. El modelo aprende qué herramienta invocar en función de la tarea: elegir una calculadora para matemáticas, un motor de búsqueda para eventos actuales o un intérprete de código para análisis de datos.
+
+<Quiz question="¿Cuál es la principal ventaja de las llamadas a funciones en lugar de pedirle al LLM que ”imagine” usando una herramienta?" options="La llamada a funciones utiliza menos cálculo|Las llamadas a funciones producen resultados reales en el mundo real mediante la ejecución de código o llamadas API, en lugar de generar respuestas plausibles pero potencialmente inventadas.|La llamada a funciones no requiere un modelo de lenguaje|La llamada a funciones siempre produce resultados correctos" answer="1" explanation="Cuando un LLM ”imagina” un resultado de búsqueda, puede alucinar información plausible pero incorrecta. La llamada a funciones en realidad ejecuta la búsqueda y devuelve datos reales, basando el razonamiento del agente en resultados reales de sistemas externos." />
+
+## Memoria: a corto y largo plazo
+
+Los agentes necesitan memoria para manejar tareas complejas que exceden una única ventana de contexto:
+
+**La memoria a corto plazo** es el contexto de la conversación: la ventana deslizante de observaciones, acciones y resultados recientes. Está limitado por la longitud del contexto del modelo y se degrada para información que se encuentra muy atrás en la ventana.
+
+**La memoria a largo plazo** utiliza almacenamiento externo, normalmente **bases de datos vectoriales**, para conservar y recuperar información entre sesiones:
+- Incrustar observaciones importantes y almacenarlas en una tienda de vectores.
+- En cada paso, consulta en la tienda experiencias pasadas relevantes.
+- Esto les da a los agentes acceso al conocimiento acumulado a lo largo de muchas interacciones.
+
+La combinación de contexto a corto plazo y recuperación a largo plazo refleja la memoria de trabajo humana y la memoria episódica: mantiene el contexto inmediato disponible y al mismo tiempo recurre a una base de conocimientos más amplia cuando es necesario.
+
+## Estrategias de planificación
+
+La forma en que un agente decide **qué hacer a continuación** determina su eficacia:
+
+**Cadena de pensamiento (CoT)**: el modelo razona paso a paso antes de actuar. Sencillo pero eficaz para problemas sencillos.
+
+**ReAct (Razón + Actuación)**: entrelaza rastros de razonamiento explícito con acciones de herramientas en un formato estructurado: `Thought → Action → Observation → Thought → ...` Esto hace que el proceso de decisión del agente sea transparente y depurable.
+
+**Árbol de pensamiento (ToT)**: el agente explora múltiples caminos de razonamiento simultáneamente, evalúa cada rama y selecciona la más prometedora. Útil para problemas en los que el primer enfoque podría ser incorrecto (por ejemplo, resolución de acertijos, depuración compleja).
+
+**Planificar y luego ejecutar**: el agente primero genera un plan completo y luego ejecuta cada paso. Esto separa la estrategia de alto nivel de la ejecución de bajo nivel, lo que reduce la posibilidad de perder de vista el objetivo general a mitad de la ejecución.
+
+<FunFact>AutoGPT, uno de los primeros experimentos con agentes autónomos, se volvió viral en abril de 2023 y brevemente se convirtió en el repositorio de GitHub de más rápido crecimiento de la historia. A pesar de su popularidad, con frecuencia se quedaba atrapado en bucles infinitos, un problema que resaltaba la enorme brecha entre demostraciones impresionantes y agentes de producción confiables.
+</FunFact>
+
+## Arquitecturas multiagente
+
+Las tareas complejas a menudo se benefician del trabajo conjunto de varios agentes especializados:
+
+**Patrón de supervisor**: un agente "administrador" central descompone la tarea y delega subtareas a agentes trabajadores especializados (un investigador, un codificador, un revisor). El supervisor sintetiza sus resultados y gestiona la coordinación.
+
+**Peer-to-peer**: los agentes se comunican directamente entre sí sin un coordinador central. Cada agente tiene un rol definido y pasa los resultados al siguiente agente en una cadena o red.
+
+**Jerárquico** - Múltiples niveles de supervisión: un planificador de nivel superior delega en coordinadores de nivel medio, que gestionan trabajadores especializados. Esto refleja estructuras organizativas y escalas para tareas muy complejas.
+
+<ThinkAboutIt>Los sistemas multiagente introducen gastos generales de coordinación, costos de comunicación y la posibilidad de que los agentes trabajen con propósitos cruzados. ¿En qué circunstancias los beneficios de la especialización superan la complejidad de la orquestación? ¿Cuándo es la mejor opción un agente único y más capaz?
+</ThinkAboutIt>
+
+## Marcos de agentes modernos
+
+El ecosistema ha madurado rápidamente desde los primeros experimentos:
+
+- **LangGraph**: crea agentes como gráficos con estado con flujo de control explícito, ciclos y persistencia. Favorece la previsibilidad y la depuración sobre la autonomía.
+- **CrewAI**: se centra en la colaboración de múltiples agentes basada en roles con tareas, herramientas y patrones de delegación definidos.
+- **AutoGen (Microsoft)**: permite flujos de trabajo conversacionales de múltiples agentes donde los agentes conversan entre sí para resolver problemas.
+- **SDK de agentes OpenAI**: marco propio con llamadas de funciones integradas, transferencias entre agentes y barreras de seguridad.
+
+## Codificación agente
+
+Quizás la aplicación más transformadora: agentes de IA que escriben, prueban y depuran código de forma autónoma:
+
+- **GitHub Copilot**: modo de agente en el editor que planifica cambios, edita varios archivos y ejecuta comandos de terminal.
+- **Cursor**: IDE creado alrededor de un agente que comprende bases de código completas y realiza ediciones de varios archivos.
+- **Devin (Cognition)**: agente de ingeniería de software autónomo que puede manejar tareas de desarrollo completas, desde el problema hasta la solicitud de extracción.
+
+Estas herramientas representan un cambio de **autocompletado a autonomía**: el agente no solo sugiere la siguiente línea, sino que comprende el objetivo y trabaja para lograrlo en todos los archivos, terminales y navegadores.
+
+## Cuando los agentes fallan
+
+Comprender los modos de falla es esencial para crear agentes confiables:
+
+- **Bucles de alucinación**: el agente fabrica el resultado de una herramienta, razona a partir de ella y profundiza en la ficción con cada iteración.
+- **Recursión infinita**: el agente reintenta repetidamente una acción fallida sin cambiar su enfoque, quemando tokens y computando.
+- **Deriva del objetivo**: a lo largo de muchos pasos, el agente pierde gradualmente de vista el objetivo original y se dedica a subtareas tangenciales.
+- **Hacking de recompensas**: el agente encuentra atajos que satisfacen sus criterios de éxito sin resolver realmente el problema.
+
+<Quiz question="Un agente tiene la tarea de encontrar un error en un código base. Busca el archivo, no lo encuentra y luego vuelve a buscar con la misma consulta, repetidamente. ¿Qué modo de falla es este?" options="Bucle de alucinación|Deriva de objetivos|Recursión infinita: reintentar una acción fallida sin adaptar el enfoque|Hackear recompensas" answer="2" explanation="Se trata de una recursividad infinita: el agente está atrapado en un bucle y vuelve a intentar exactamente la misma acción fallida sin modificar su enfoque. Un agente bien diseñado debería detectar fallos repetidos y probar una estrategia alternativa: diferentes términos de búsqueda, pedir aclaraciones o explorar un camino diferente." />
+
+## Patrones de agentes de producción
+
+Crear agentes que funcionen de manera confiable en producción requiere ingeniería defensiva:
+
+- **Barandillas**: validación de entrada/salida, filtrado de contenido y comprobaciones de límites que evitan que los agentes realicen acciones peligrosas.
+- **Human-in-the-loop**: para acciones de alto riesgo (enviar correos electrónicos, modificar bases de datos, implementar código), se requiere la aprobación humana antes de la ejecución.
+- **Salidas estructuradas**: obliga a los agentes a producir respuestas analizables por máquina (esquemas JSON) en lugar de texto de formato libre, lo que reduce los errores de análisis.
+- **Observabilidad**: registre cada pensamiento, acción y llamada de herramienta. Sin seguimientos completos, depurar una ejecución fallida del agente de 20 pasos es casi imposible.
+- **Disyuntores**: establece recuentos máximos de pasos, presupuestos de tokens y límites de tiempo. Si un agente excede estos límites, deténgase y escale a un humano.
+
+<Quiz question="¿Por qué es fundamental la aprobación humana para los agentes de producción que realizan acciones de alto riesgo?" options="Porque los agentes de IA siempre se equivocan|Porque reduce los costos de computación|Debido a que los agentes pueden alucinar, malinterpretar sus intenciones o tomar acciones irreversibles, la supervisión humana proporciona una red de seguridad para decisiones con consecuencias en el mundo real.|Porque la normativa lo exige en todos los casos" answer="2" explanation="Los agentes pueden malinterpretar objetivos, alucinar información o realizar acciones difíciles de revertir (eliminar datos, enviar comunicaciones, implementar código). Para operaciones de alto riesgo, la aprobación humana actúa como una red de seguridad crítica, detectando errores antes de que tengan impacto en el mundo real." />
+
+<FunFact>Los agentes de navegador (sistemas de inteligencia artificial que navegan por sitios web haciendo clic, escribiendo y leyendo pantallas) se encuentran entre las aplicaciones de agentes más difíciles de construir de manera confiable. Puntos de referencia como WebArena muestran que incluso los mejores agentes completan con éxito solo entre el 15 y el 30 % de las tareas web realistas, en comparación con el desempeño humano casi perfecto.
+</FunFact>
+
+<ThinkAboutIt>A medida que las herramientas de codificación agentes se vuelven más capaces, el papel del ingeniero de software pasa de escribir código a revisar, dirigir y verificar el código generado por IA. ¿Qué nuevas habilidades se vuelven esenciales en este mundo y qué habilidades tradicionales se vuelven menos críticas?
+</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [ReAct: Sinergia del razonamiento y la actuación en modelos de lenguaje (Yao et al., 2023)](https://arxiv.org/abs/2210.03629) - El documento fundamental sobre el patrón del agente ReAct
+- [El panorama de las arquitecturas emergentes de agentes de IA (LangChain)](https://blog.langchain.dev/what-is-an-agent/) - Descripción general completa de los patrones de diseño de agentes modernos
+- [Andrew Ng - Patrones de diseño agente](https://www.deeplearning.ai/the-batch/how-agents-can-improve-llm-performance/) - Cuatro patrones agentes clave: reflexión, uso de herramientas, planificación y colaboración entre múltiples agentes

@@ -1,0 +1,218 @@
+---
+title: "Entretiens de révision du code"
+description: "Excellez lors des entretiens de révision de code : identifiez les bogues, suggérez des améliorations et démontrez votre jugement technique."
+order: 5
+difficulty: "intermediate"
+duration: 15
+icon: "👁️"
+published: true
+machineTranslated: true
+---
+# Entretiens de révision de code
+
+Les entretiens de révision de code sont l’une des étapes les plus sous-estimées du processus d’embauche – et l’une des plus révélatrices. Pendant les entretiens de codage, vous testez si vous pouvez écrire du code, les entretiens de révision de code testent si vous pouvez le lire, le raisonner et l'améliorer. Ils révèlent votre perception de la qualité, la manière dont vous hiérarchisez les commentaires et la manière dont vous communiquez avec les autres ingénieurs. De nombreux candidats se préparent pendant des mois sur LeetCode, mais se lancent dans un cycle de révision de code sans aucune préparation. Ne soyez pas cette personne.
+
+## Ce que les entretiens de révision de code testent réellement
+
+Les enquêteurs évaluant vos compétences en révision de code recherchent cinq choses :
+
+1. **Détection de bogues** — Pouvez-vous repérer les erreurs logiques, les cas extrêmes et les conditions de concurrence ?
+2. **Sens du design** — Reconnaissez-vous des violations des principes SOLID, des abstractions médiocres ou un code qui sera difficile à maintenir ?
+3. **Conscience de la sécurité** — Pouvez-vous identifier les vulnérabilités d'injection, les failles d'authentification ou les risques d'exposition des données ?
+4. **Compétence en communication** — Pouvez-vous expliquer les problèmes de manière claire et constructive ?
+5. **Priorisation** — Vous concentrez-vous sur ce qui compte le plus ou vous concentrez-vous sur les noms de variables ?
+
+<Callout>L'erreur la plus courante lors des entretiens de révision de code est de passer tout votre temps sur des problèmes de style (nommage, formatage) tout en manquant les bogues réels. Les enquêteurs placent délibérément des bogues critiques à côté des problèmes de style pour voir ce que vous donnez la priorité.</Callout>
+
+## L'approche d'examen systématique
+
+Ne scannez pas le code au hasard. Utilisez une approche structurée basée sur les passes :
+
+### Pass 1 : Comprendre l'intention (2 minutes)
+
+Avant de critiquer quoi que ce soit, comprenez ce que le code essaie de faire :
+- Lire les noms de fonctions/classes et les commentaires
+- Identifier les entrées et sorties
+- Comprendre la logique métier
+
+### Passe 2 : Exactitude (5 minutes)
+
+C'est là que vous trouvez des bugs. Vérifiez systématiquement :
+- **Cas extrêmes** : entrées vides, valeurs nulles, éléments uniques, valeurs maximales
+- **Erreurs ponctuelles** : limites de boucle, indexation de tableau
+- **Erreurs logiques** : conditions incorrectes, instructions break manquantes, mauvais opérateur
+- **Problèmes de concurrence** : état mutable partagé, conditions de concurrence
+- **Gestion des erreurs** : exceptions non détectées, vérifications nulles manquantes
+
+### Pass 3 : Conception et maintenabilité (3 minutes)
+
+Recherchez les problèmes structurels :
+- Fonctions faisant trop de choses (violant la responsabilité unique)
+- Couplage étroit entre les composants
+- Nombres magiques et valeurs codées en dur
+- Abstractions manquantes ou abstractions inutiles
+- Duplication de codes
+
+### Pass 4 : Performances et sécurité (2 minutes)
+
+- Requêtes de base de données inutiles dans des boucles (problème N+1)
+- Validation ou désinfection des entrées manquantes
+- Données sensibles exposées dans les journaux ou les réponses
+- Algorithmes inefficaces là où de meilleures alternatives existent
+
+## Modèles de bogues courants à repérer
+
+Entraînez vos yeux à détecter ces bugs à haute fréquence :
+
+### Erreurs de référence nulle
+
+```java
+// Bug: user could be null
+public String getUserEmail(Long userId) {
+    User user = userRepository.findById(userId);
+    return user.getEmail();  // NullPointerException if user not found
+}
+
+// Fixed
+public String getUserEmail(Long userId) {
+    return userRepository.findById(userId)
+        .map(User::getEmail)
+        .orElseThrow(() -> new UserNotFoundException(userId));
+}
+```
+
+### Erreurs ponctuelles
+
+```python
+# Bug: misses the last element
+def find_max(numbers):
+    max_val = numbers[0]
+    for i in range(1, len(numbers) - 1):  # Should be len(numbers)
+        if numbers[i] > max_val:
+            max_val = numbers[i]
+    return max_val
+```
+
+### Fuites de ressources
+
+```java
+// Bug: connection is never closed if an exception occurs
+public List<User> getUsers() {
+    Connection conn = dataSource.getConnection();
+    Statement stmt = conn.createStatement();
+    ResultSet rs = stmt.executeQuery("SELECT * FROM users");
+    // process results...
+    conn.close();
+    return users;
+}
+
+// Fixed: use try-with-resources
+public List<User> getUsers() {
+    try (Connection conn = dataSource.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery("SELECT * FROM users")) {
+        // process results...
+        return users;
+    }
+}
+```
+
+###Injection SQL
+
+```python
+# Bug: SQL injection vulnerability
+def get_user(username):
+    query = f"SELECT * FROM users WHERE username = '{username}'"
+    return db.execute(query)
+
+# Fixed: parameterised query
+def get_user(username):
+    query = "SELECT * FROM users WHERE username = %s"
+    return db.execute(query, (username,))
+```
+
+<FunFact>Une étude portant sur plus de 100 000 révisions de code chez Google a révélé qu'environ 25 % de tous les commentaires de révision concernent « l'exactitude » – de véritables bogues ou erreurs logiques. 25 % supplémentaires concernent la « compréhension », ce qui rend le code plus facile à comprendre. Le style et la mise en forme représentaient moins de 10 % des commentaires de fond.</FunFact>
+
+### Bogues de concurrence
+
+```java
+// Bug: race condition — check-then-act is not atomic
+public void transferMoney(Account from, Account to, BigDecimal amount) {
+    if (from.getBalance().compareTo(amount) >= 0) {
+        // Another thread could modify balance here
+        from.setBalance(from.getBalance().subtract(amount));
+        to.setBalance(to.getBalance().add(amount));
+    }
+}
+```
+
+<ThinkAboutIt>Comment corrigeriez-vous le bug de concurrence ci-dessus ? Considérez au moins trois approches : la synchronisation, le verrouillage optimiste et les transactions au niveau de la base de données. Quels sont les compromis de chacun dans un système à haut débit ?</ThinkAboutIt>
+
+## Prioriser vos commentaires
+
+Lors d’un entretien limité dans le temps, tous les commentaires ne sont pas égaux. Utilisez ce cadre prioritaire :
+
+| Priorité | Catégorie | Exemple |
+|---|---|---|
+| 🔴 **Critique** | Bugs, failles de sécurité, perte de données | Injection SQL, conditions de concurrence critique, déréférencement nul |
+| 🟠 **Élevé** | Problèmes de conception, problèmes de performances | Requêtes N+1, gestion des erreurs manquantes, couplage étroit |
+| 🟡 **Moyen** | Maintenabilité, lisibilité | Conditions complexes, documentation manquante, nombres magiques |
+| 🟢 **Faible** | Style, améliorations mineures | Nommage des variables, ordre d'importation, refactors mineurs |
+
+Lors d'un entretien, consacrez 80% de votre temps aux articles 🔴 et 🟠. Mentionnez brièvement les 🟡 éléments. Ne touchez 🟢 éléments que s'il vous reste du temps et que vous avez déjà trouvé les problèmes importants.
+
+## Communiquer les commentaires sur les avis
+
+La manière dont vous envoyez des commentaires compte autant que les commentaires eux-mêmes. Les intervieweurs évaluent vos compétences en collaboration.
+
+**Faites ceci** :
+- "Je remarque que cette requête se trouve dans une boucle, ce qui pourrait entraîner des problèmes de performances N+1. Nous souhaiterions peut-être regrouper cela en une seule requête."
+- "Il semble que cela pourrait lancer une NullPointerException si l'utilisateur n'est pas trouvé. Pourrions-nous ajouter une vérification nulle ou utiliser Facultatif ici ?"
+- "Belle utilisation du modèle de stratégie ici : cela facilite l'ajout de nouveaux types de paiement."
+
+**Pas ça** :
+- "Ce code est faux." (trop direct, pas d'explication)
+- "Je ne l'écrirais jamais de cette façon." (motivé par l'ego)
+- "Changez le nom de cette variable." (bikeshedding sur les articles peu prioritaires)
+
+<Callout>Expliquez toujours le *pourquoi* derrière vos commentaires, pas seulement le *quoi*. "Cela devrait utiliser des requêtes paramétrées" est correct. "Cela devrait utiliser des requêtes paramétrées car la concaténation de chaînes actuelle est vulnérable aux attaques par injection SQL" est bien mieux.</Callout>
+
+## Exemple de procédure pas à pas pour la révision du code
+
+Voici une fonction que l'on pourrait vous demander d'examiner lors d'un entretien :
+
+```python
+def process_orders(orders):
+    results = []
+    for order in orders:
+        user = db.query(f"SELECT * FROM users WHERE id = {order['user_id']}")
+        if user:
+            total = 0
+            for item in order['items']:
+                price = db.query(f"SELECT price FROM products WHERE id = {item['product_id']}")
+                total = total + price[0] * item['quantity']
+                if item['quantity'] > 100:
+                    total = total * 0.9
+            if total > 0:
+                results.append({'user': user, 'total': total, 'order_id': order['id']})
+    return results
+```
+
+**Un examen approfondi permettrait d'identifier :**
+
+1. 🔴 **SQL Injection** (lignes 4, 7) : Interpolation de chaînes dans les requêtes SQL. Utilisez des requêtes paramétrées.
+2. 🔴 **Problème de requête N+1** (lignes 4, 7) : Deux requêtes de base de données par commande, une par article. Pour 100 commandes de 10 articles chacune, cela représente 1 100 requêtes. Regroupez-vous en requêtes uniques.
+3. 🟠 **Aucune gestion des erreurs** : `price[0]` plantera si le produit n'est pas trouvé. `db.query` pourrait échouer.
+4. 🟠 **La logique de remise est masquée** : La remise de 10 % pour une quantité > 100 est une règle métier enfouie dans des boucles imbriquées. Extrayez-le.
+5. 🟡 **Nombre magique** : `0.9` et `100` doivent être nommés constantes (`BULK_DISCOUNT_RATE`, `BULK_THRESHOLD`).
+6. 🟡 **La fonction en fait trop** : récupérer les utilisateurs, calculer les totaux, appliquer des remises — viole la responsabilité unique.
+
+<Quiz question="Au cours d'un entretien de révision de code, vous découvrez un problème mineur de nom de variable et une vulnérabilité potentielle d'injection SQL. Il vous reste 2 minutes. Que faut-il privilégier ?" options="Corrigez d'abord le nom de la variable car c'est rapide|Concentrez-vous entièrement sur la vulnérabilité de l'injection SQL|Mentionnez les deux de manière égale – montrez que vous êtes minutieux|Ignorez les deux et recherchez d'autres problèmes" answer="1" explanation="L'injection SQL est une vulnérabilité de sécurité critique qui pourrait entraîner des violations de données. Donnez toujours la priorité aux problèmes de sécurité plutôt qu’aux problèmes de style. Mentionnez brièvement le problème de dénomination seulement si le temps le permet après avoir expliqué en détail le risque d’injection." />
+
+## Points clés à retenir
+
+- **Utilisez une approche structurée** : plusieurs passes (intention → exactitude → conception → performances/sécurité) détectent plus de problèmes qu'une analyse aléatoire.
+- **Donner la priorité sans pitié** : les bugs critiques et les problèmes de sécurité en premier, le style en dernier. Les enquêteurs plantent les deux pour tester votre jugement.
+- **Communiquez de manière constructive** : expliquez le *pourquoi*, suggérez des alternatives et reconnaissez les bons modèles que vous voyez.
+- **Connaissez les modèles de bogues courants** : les références nulles, les erreurs ponctuelles, les fuites de ressources, l'injection SQL et les conditions de concurrence apparaissent dans presque tous les entretiens de révision de code.
+- **Entraînez-vous à lire du code** : passez du temps à lire les demandes d'extraction open source sur GitHub. La capacité de lire du code est différente de celle de l'écrire, et la plupart des ingénieurs ne la pratiquent pas suffisamment.

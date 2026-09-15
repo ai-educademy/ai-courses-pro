@@ -1,0 +1,228 @@
+---
+title: "Débogage sous pression"
+description: "Développez une approche de débogage systématique qui fonctionne même lorsque le temps presse et que l'intervieweur regarde."
+order: 6
+difficulty: "intermediate"
+duration: 15
+icon: "🐛"
+published: true
+machineTranslated: true
+---
+# Débogage sous pression
+
+Le débogage du code pendant que quelqu'un vous regarde et qu'un compte à rebours génère un type particulier de stress. Vos paumes deviennent moites, votre esprit devient vide et tout à coup vous ne vous souvenez plus du fonctionnement d'une boucle for. Tous les ingénieurs sont passés par là. La différence entre les candidats qui s'effondrent et ceux qui brillent ne réside pas dans le talent brut, mais dans le fait d'avoir un processus systématique qui fonctionne même lorsque votre cerveau veut paniquer. Cette leçon vous donne ce processus.
+
+## Le framework de débogage RIIFV
+
+Lorsque vous recevez du code de buggy lors d'une interview, résistez à l'envie de commencer immédiatement à rechercher le bug. Suivez plutôt ce cadre en cinq étapes :
+
+### R — Reproduire
+
+Confirmez que le bug existe et comprenez ses symptômes.
+
+- Quel est le comportement attendu ?
+- Quel est le comportement réel ?
+- Sous quelles entrées le bug se produit-il ?
+
+```python
+# You're told this function should return the second largest element
+def second_largest(nums):
+    first = second = float('-inf')
+    for num in nums:
+        if num > first:
+            second = first
+            first = num
+        elif num > second:
+            second = num
+    return second
+
+# Step 1: Reproduce with test cases
+print(second_largest([3, 1, 4, 1, 5]))  # Expected: 4, Got: 4 ✓
+print(second_largest([5, 5, 5]))         # Expected: 5, Got: -inf ✗ — BUG!
+print(second_largest([1]))               # Expected: None?, Got: -inf — Edge case
+```
+
+### I — Isoler
+
+Précisez où vit le bug. Utilisez la pensée diviser pour régner :
+
+- Le bug vient-il de l'analyse des entrées, de la logique ou de la sortie ?
+- Quelle ligne ou quel bloc spécifique produit le mauvais résultat ?
+- Pouvez-vous l'isoler dans un cas de test à échec minimal ?
+
+### I — Identifier
+
+Une fois isolé, déterminez la cause profonde, et pas seulement le symptôme :
+
+- **Symptôme** : renvoie `-inf` pour `[5, 5, 5]`
+- **Cause première** : la condition `elif num > second` ne gère pas les doublons. Lorsque tous les éléments sont égaux, `num > first` n’est vrai qu’une seule fois et `num > second` n’est jamais vrai pour les éléments égaux restants.
+
+### F — Correction
+
+Appliquez le correctif minimal qui corrige la cause première sans introduire de nouveaux bogues :
+
+```python
+def second_largest(nums):
+    if len(nums) < 2:
+        return None
+    first = second = float('-inf')
+    for num in nums:
+        if num > first:
+            second = first
+            first = num
+        elif num > second and num != first:  # Handle case: distinct second
+            second = num
+    return second if second != float('-inf') else first  # All same → return that value
+```
+
+<ThinkAboutIt>Attendez – `second_largest([5, 5, 5])` devrait-il renvoyer 5 ou Aucun ? C’est ambigu, et lors d’un véritable entretien, c’est exactement le genre de question que vous devriez poser à l’intervieweur. La clarification des exigences fait partie du débogage.</ThinkAboutIt>
+
+### V — Vérifier
+
+Confirmez que le correctif fonctionne pour tous les cas : le cas d'échec d'origine, les cas limites et les cas précédents :
+
+```python
+assert second_largest([3, 1, 4, 1, 5]) == 4    # Normal case
+assert second_largest([5, 5, 5]) == 5            # Duplicates
+assert second_largest([1, 2]) == 1               # Minimum valid input
+assert second_largest([1]) is None               # Too few elements
+assert second_largest([-1, -2, -3]) == -2        # Negative numbers
+```
+
+<Callout>Réexécutez toujours vos cas de test d'origine après avoir corrigé un bug. Il est étonnamment courant de corriger un bug tout en en introduisant un autre. L'étape « vérifier » détecte les régressions qui vous coûteraient l'entretien.</Callout>
+
+## Formats d'entretien de débogage courants
+
+### Format 1 : « Voici le code du buggy – Réparez-le »
+
+Vous recevez une fonction avec 1 à 3 bugs. Appliquer le RIIFV :
+- Lire le code et comprendre l'intention
+- Exécuter des cas de tests mentaux pour trouver les échecs
+- Corrigez chaque bug et expliquez votre raisonnement
+
+### Format 2 : « Ce système est en panne – Diagnostiquez-le »
+
+Un scénario vous est proposé : « Les utilisateurs signalent que la page de paiement affiche parfois un prix erroné. » Vous devez :
+- Posez des questions de clarification (« Parfois ? Est-ce aléatoire ou est-ce que cela suit un modèle ? »)
+- Formuler des hypothèses ("Peut être un problème de mise en cache, une condition de concurrence critique ou un bug de conversion de devise")
+- Proposer des étapes d'enquête par ordre de priorité
+
+### Format 3 : « Déboguer ce système en direct » (débogage de paire)
+
+Vous et l'intervieweur déboguez ensemble. Ils peuvent jouer le rôle d’un coéquipier ou d’un système :
+- Verbalisez votre processus de réflexion
+- Proposez ce que vous vérifieriez en premier et pourquoi
+- Interpréter les journaux et les métriques qu'ils fournissent
+
+## Réfléchir à voix haute pendant le débogage
+
+La plus grande différence entre le débogage seul et le débogage dans une interview est que vous devez raconter. Voici comment procéder sans vous sentir forcé :
+
+**Faites part de vos observations** :
+"Je vois que la fonction prend une liste et doit renvoyer la deuxième plus grande. Permettez-moi de suivre avec un exemple simple..."
+
+**Formulaire d'hypothèses** :
+"Ma première pensée est qu'il pourrait ne pas gérer les cas extrêmes tels que les valeurs en double. Laissez-moi tester avec [5, 5, 5]..."
+
+**Expliquez votre raisonnement** :
+"La condition `num > second` n'est jamais vraie lorsque toutes les valeurs sont égales car `first` est déjà 5, et les 5 restants ne sont pas supérieurs à `second` qui est également `-inf`... attendez, en fait `5 > -inf` est vrai, donc la seconde devient 5 sur le deuxième élément... Hmm, permettez-moi de tracer plus attentivement."
+
+**Admettez quand vous avez tort** :
+"En fait, mon hypothèse initiale était incorrecte. Laissez-moi retracer cela..."
+
+<FunFact>Les recherches du psychologue Gary Klein ont révélé que les débogueurs experts résolvent les problèmes jusqu'à 10 fois plus rapidement que les novices, non pas parce qu'ils sont plus intelligents, mais parce qu'ils reconnaissent les modèles de l'expérience passée. C'est pourquoi s'entraîner avec divers types de bogues est plus important que l'intelligence brute.</FunFact>
+
+## Utilisation stratégique des déclarations imprimées
+
+Dans une interview de codage, les instructions d'impression sont votre débogueur. Utilisez-les de manière stratégique :
+
+```python
+def merge_sorted_lists(list1, list2):
+    result = []
+    i = j = 0
+    while i < len(list1) and j < len(list2):
+        print(f"Comparing list1[{i}]={list1[i]} with list2[{j}]={list2[j]}")
+        if list1[i] <= list2[j]:
+            result.append(list1[i])
+            i += 1
+        else:
+            result.append(list2[j])
+            j += 1
+        print(f"Result so far: {result}")
+
+    # Don't forget: add remaining elements
+    result.extend(list1[i:])
+    result.extend(list2[j:])
+    print(f"Final result: {result}")
+    return result
+```
+
+**Conseils pour un débogage d'impression efficace** :
+- Imprimer aux points de décision (avant if/else, à l'intérieur des boucles)
+- Inclure les noms de variables et les index dans la sortie
+- Imprimer avant et après l'emplacement du bug suspecté
+- Supprimez ou commentez les impressions avant de soumettre votre solution finale
+
+## Débogage des systèmes distribués
+
+Pour les entretiens de niveau supérieur, on vous posera peut-être des questions sur le débogage des systèmes distribués :
+
+### La boîte à outils de débogage
+
+| Outil/Technique | Ce qu'il révèle |
+|---|---|
+| **Journaux** (structurés, avec ID de corrélation) | Séquence d'événements, détails de l'erreur |
+| **Metriques** (latence, taux d'erreur, débit) | Tendances et anomalies |
+| **Traces** (traçage distribué) | Flux de demandes entre les services |
+| **Bilans de santé** | Quels composants sont dégradés |
+
+### Approche systématique
+
+1. **Vérifiez les tableaux de bord des métriques** : s'agit-il d'un pic ou d'une dégradation progressive ?
+2. **Réduire la portée** : quel service, point de terminaison ou région est affecté ?
+3. **Vérifiez les déploiements récents** — « Qu'est-ce qui a changé ? » est la question la plus importante
+4. **Suivez la trace** : utilisez les ID de corrélation pour suivre une demande ayant échoué sur l'ensemble des services.
+5. **Vérifiez les dépendances** : un service en aval (base de données, cache, API tierce) est-il la cause première ?
+
+```
+User reports slow checkout
+→ Metrics show p99 latency spike at 14:30
+→ Correlated with deployment of payment-service v2.3.1
+→ Traces show payment-service waiting 10s on database query
+→ Database query plan changed due to missing index after schema migration
+→ Root cause: migration in v2.3.1 dropped an index
+→ Fix: recreate index, add migration test
+```
+
+<Quiz question="Un service de production affiche soudainement une latence p99 multipliée par 5. Aucun code n'a été déployé au cours des dernières 24 heures. Sur quoi devriez-vous enquêter en premier ?" options="Rechercher dans la base de code les bogues récents|Vérifiez si une dépendance en aval rencontre des problèmes|Revenir à la version précédente|Ajoutez plus de journalisation et attendez que le problème se reproduise" answer="1" explanation="Lorsqu'aucun code n'est modifié, la cause première est probablement externe : une dépendance en aval (base de données, cache, API tierce) peut être dégradée, ou des modifications d'infrastructure peuvent survenir (réseau, DNS, expiration du certificat). Vérifier d’abord les dépendances est l’étape d’investigation la plus importante." />
+
+## Gestion du temps pendant les cycles de débogage
+
+Un cycle de débogage typique dure 30 à 45 minutes. Prévoyez votre temps :
+
+| Phases | Temps | Activité |
+|---|---|---|
+| **Comprendre** | 5 minutes | Lire le code, clarifier le problème, identifier le comportement attendu par rapport au comportement réel |
+| **Reproduire** | 5 minutes | Créer des cas de test qui déclenchent le bug |
+| **Isoler et identifier** | 10 minutes | Affinez la cause première à l'aide des instructions de traçage et d'impression |
+| **Corriger** | 5 minutes | Appliquer le correctif minimal et correct |
+| **Vérifier** | 5 minutes | Testez le correctif dans tous les cas, y compris les cas extrêmes |
+
+<Callout>Si vous avez passé 15 minutes et que vous n'avez pas trouvé le bug, prenez du recul et modifiez votre approche. Relisez l'énoncé du problème : vous avez peut-être mal compris le comportement attendu. Essayez un scénario de test complètement différent. Parfois, le bug réside dans vos hypothèses, pas dans le code.</Callout>
+
+## Que faire lorsque vous êtes bloqué
+
+1. ** Relisez l'énoncé du problème ** : vous avez peut-être fait une hypothèse incorrecte
+2. **Essayez un scénario de test minimal** : réduisez l'entrée au plus petit cas qui échoue toujours
+3. **Retracez ligne par ligne** — avec un stylo et du papier si nécessaire, suivez chaque variable
+4. **Vérifiez les limites** — première itération, dernière itération, entrée vide
+5. **Expliquez le problème à l'intervieweur** — le « débogage du canard en caoutchouc » fonctionne même avec un public humain
+6. **Demandez un indice** — c'est bien mieux que de rester assis en silence pendant 10 minutes
+
+## Points clés à retenir
+
+- **Utilisez le framework RIIFV** : Reproduire → Isoler → Identifier → Corriger → Vérifier. Cela fonctionne sous pression car cela donne à votre cerveau un processus lorsque l'instinct échoue.
+- **Réfléchissez à haute voix en continu** : racontez vos observations, hypothèses et raisonnements. Le silence est votre ennemi dans une interview de débogage.
+- **Donner la priorité aux cas extrêmes** : la plupart des bugs d'entretien se cachent dans des entrées vides, des doublons, des nombres négatifs ou des conditions aux limites.
+- **Les déclarations imprimées sont votre amie** : utilisez-les de manière stratégique aux points de décision et nettoyez-les avant de les finaliser.
+- **Sachez quand pivoter** : si votre approche ne fonctionne pas après 10 à 15 minutes, reculez et essayez un angle complètement différent.

@@ -1,0 +1,147 @@
+---
+title: "设计通知系统 - 十亿级的推送、电子邮件和短信"
+description: "设计一个可扩展的多渠道通知系统，通过消息队列、重复数据删除和用户首选项管理来处理推送、电子邮件、短信和应用内通知。"
+order: 7
+difficulty: "advanced"
+duration: 22
+icon: "🔔"
+published: true
+machineTranslated: true
+---
+# 设计一个通知系统 - 十亿级的推送、电子邮件和短信
+
+现代应用程序每天通过多个渠道发送数十亿条通知。设计这个系统会教您有关消息队列、第三方集成以及大规模优雅地处理故障的知识。
+
+## 步骤 1 - 需求收集
+
+### 功能要求
+- 支持多种渠道：推送通知、电子邮件、短信和应用内
+- 用户可以配置通知首选项并选择退出每个频道
+- 具有个性化的模板化消息（例如，“嗨{name}，您的订单已发货”）
+- 支持预定和即时通知
+
+### 非功能性需求
+- **可扩展性** - 每天处理超过 1000 万条通知
+- **可靠性** - 不会丢失通知；至少一次交付
+- **低延迟** - 几秒钟内发送紧急通知
+- **可扩展** - 轻松添加新频道（WhatsApp、Slack）
+
+<ThinkAboutIt>通知传递应该是恰好一次还是至少一次？考虑接收重复短信与错过关键安全警报的用户体验。</ThinkAboutIt>
+
+## 步骤 2 - 高级架构
+
+```
+Caller Services → Notification Service → Validation + Preference Check
+                                              ↓
+                                    Message Queue (Kafka)
+                                    ↓       ↓       ↓       ↓
+                                 Push    Email    SMS    In-App
+                                Worker   Worker  Worker  Worker
+                                  ↓        ↓       ↓       ↓
+                                 FCM   SendGrid  Twilio  WebSocket
+```
+
+<Illustration src="/images/lessons/design-notification-system.svg" alt="具有调用者服务、通知服务、Kafka 消息队列、特定于通道的工作人员和第三方提供商的通知系统架构" caption="消息队列将通知服务与交付工作人员解耦，从而实现每个通道的独立扩展" />
+
+### 核心组件
+1. **通知服务** - 验证请求、检查用户首选项、呈现模板并将消息排队
+2. **消息队列** - 每个通道都有单独的队列，用于独立扩展和隔离
+3. **Delivery Workers** - 处理第三方 API 调用的特定于渠道的工作人员
+4. **模板服务** - 通过变量替换存储和呈现通知模板
+
+## 步骤 3 - 深入探讨：关键组件
+
+### 用户偏好和选择退出
+存储每个用户和每个通知类型的首选项：
+
+```
+user_preferences:
+  user_id: "u123"
+  channels:
+    email: { enabled: true, quiet_hours: "22:00-08:00" }
+    push: { enabled: true }
+    sms: { enabled: false }
+  categories:
+    marketing: { enabled: false }
+    security: { enabled: true, override_quiet_hours: true }
+```
+
+通知服务在入队之前**检查首选项 - 绝不发送用户不想要的内容。
+
+### 优先级队列
+并非所有通知都是平等的。使用优先级：
+- **严重** - 安全警报、OTP 代码 → 立即处理
+- **高** - 订单确认、付款收据 → 秒
+- **中** - 社交互动、评论 → 可接受的分钟数
+- **低** - 营销、推荐 → 可以批量
+
+<Quiz question="为什么通知系统应该为每个通道使用单独的消息队列而不是单个共享队列？" options="降低仓储成本|允许独立缩放并防止一个慢速通道阻塞其他通道|因为 Kafka 需要每个消费者单独的主题|为了让系统更简单" answer="1" explanation="如果 SMS 传送由于 Twilio 中断而减慢，则共享队列会产生积压，从而也会延迟推送和电子邮件传送。每个通道的单独队列提供故障隔离并允许每个通道独立扩展。" />
+
+## 步骤 4 - 可靠性和故障处理
+
+### 重复数据删除
+使用幂等性密钥防止重复通知。在处理之前，检查通知 ID 是否存在于重复数据删除存储（带 TTL 的 Redis）中：
+
+```
+Key: "dedup:{notification_id}" → TTL: 24 hours
+If key exists → skip (already sent)
+If not → process and set key
+```
+
+### 使用指数退避重试
+第三方服务失败。实施增加延迟的重试：
+
+```
+Attempt 1: immediate
+Attempt 2: wait 1 second
+Attempt 3: wait 4 seconds
+Attempt 4: wait 16 seconds
+Attempt 5: move to dead-letter queue
+```
+
+### 每个用户的速率限制
+保护用户免受通知疲劳：
+- 每个用户每小时最多 3 条推送通知
+- 每天最多 1 封营销电子邮件
+- 安全通知绕过速率限制
+
+<FunFact>Facebook 每天发送超过 100 亿条推送通知。为了解决这个问题，他们构建了一个自定义通知管道，每秒可以处理数百万条消息，并为 iOS (APN) 和 Android (FCM) 提供单独的传递路径。</FunFact>
+
+## 步骤 5 - 第三方集成
+
+|频道|供应商|协议|挑战|
+|---------|----------|----------|------------|
+|推送（iOS）| APN | HTTP/2 |代币管理，静默推送限制|
+|推送（安卓）|流式细胞术| HTTP |主题广播|
+|电子邮件 |发送网格/SES | SMTP/API |送达率、垃圾邮件过滤器 |
+|短信|特维利奥 |休息 API |每条消息的成本、区域合规性 |
+|应用内| WebSocket | WS |连接管理、离线缓冲|
+
+### 分析管道
+跟踪每条消息的通知生命周期：
+- **已创建** → **已排队** → **已发送** → **已发送** → **已打开** → **已点击**
+
+将事件存储在时间序列数据库或事件流中以进行仪表板报告：每个渠道和通知类型的送达率、打开率和点击率。
+
+<Quiz question="通知系统重试失败的 SMS 传送 3 次。如果没有重复数据删除，如果第一次尝试确实成功但确认丢失了，会发生什么情况？" options="消息永久丢失|用户最多会收到同一条短信的 4 份副本|系统自动检测重复项|重试机制可以防止这种情况发生" answer="1" explanation="如果提供者处理了请求但确认丢失，系统认为它失败并重试。如果没有提供商级别的重复数据删除或使用幂等密钥，用户可能会多次收到相同的短信。" />
+
+## 步骤 6 - 瓶颈和优化
+
+|瓶颈 |解决方案 |
+|------------|----------|
+|第三方速率限制 |每个提供商的吞吐量受控的队列 |
+|大规模模板渲染 |预渲染和缓存常用模板 |
+|每条消息的首选项查找 |在 Redis 中缓存用户首选项 |
+|高峰流量高峰 |根据队列深度自动缩放工作人员 |
+|跨区域配送|在提供商端点附近部署工作人员 |
+
+<ThinkAboutIt>您将如何设计一个通知系统，使其能够在 2 小时内发送 5000 万封黑色星期五促销个性化电子邮件，同时仍以亚秒级延迟提供实时安全警报？</ThinkAboutIt>
+
+<Quiz question="哪个组件应该检查​​用户通知首选项？" options="送货员，调用第三方API之前|调用者服务，在发送到通知服务之前|消息入队之前的通知服务|路由期间的消息队列" answer="2" explanation="在排队之前检查通知服务中的首选项可以避免浪费队列容量和工作进程处理用户不想要的通知。这是最早可以应用集中式偏好逻辑的点。" />
+
+---
+
+## 📚 进一步阅读
+- [通知系统-系统设计面试卷。 1、第 1 章10](https://bytebytego.com/) - Alex Xu的综合通知系统设计
+- [Airbnb 如何构建通知平台](https://medium.com/airbnb-engineering) - 现实世界的多渠道通知架构
+- [Firebase Cloud Messaging Docs](https://firebase.google.com/docs/cloud-messaging) - 了解推送通知传递机制

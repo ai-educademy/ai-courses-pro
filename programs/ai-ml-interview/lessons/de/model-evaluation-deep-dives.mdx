@@ -1,0 +1,215 @@
+---
+title: "Tiefe Einblicke in die Modellbewertung"
+description: "Beherrschen Sie die Metriken, Methoden und Kompromisse der Modellbewertung – das Thema, das ML-Ingenieure von ML-Praktikern unterscheidet."
+order: 2
+difficulty: "advanced"
+duration: 20
+icon: "📊"
+published: true
+machineTranslated: true
+---
+# 📊 Tiefe Einblicke in die Modellbewertung
+
+„Ihr Modell hat eine Genauigkeit von 95 % – versenden Sie es!“ Wenn Ihnen dieser Satz nicht sofort unangenehm ist, ist diese Lektion genau das Richtige für Sie. Die Modellbewertung ist das Interviewthema, das Kandidaten, die Modelle *trainiert* haben, von denen unterscheidet, die sie *eingesetzt* haben. Interviewer prüfen das Bewertungswissen, weil es Aufschluss darüber gibt, ob Sie verstehen, was ein Modell tatsächlich tut – und ob es vertrauenswürdig ist.
+
+---
+
+## 🎯 Klassifizierungsmetriken: Jenseits der Genauigkeit
+
+Genauigkeit – der Prozentsatz korrekter Vorhersagen – ist die Kennzahl, die jeder zuerst lernt und die am häufigsten in die Irre führt. Stellen Sie sich ein Betrugserkennungsmodell für einen Datensatz vor, bei dem nur 0,5 % der Transaktionen betrügerisch sind. Ein Modell, das für alles „keinen Betrug“ vorhersagt, erreicht eine Genauigkeit von **99,5 %** und erkennt dabei keinen Betrug.
+
+### Präzision, Rückruf und F1
+
+Diese drei Metriken bilden das Rückgrat der Klassifizierungsbewertung:
+
+- **Präzision** = TP / (TP + FP) – „Wie viel war von allem, was ich als positiv markiert habe, tatsächlich?“
+- **Recall** = TP / (TP + FN) – „Wie viel von allem, was tatsächlich positiv war, habe ich gefangen?“
+- **F1-Score** = 2 × (Präzision × Rückruf) / (Präzision + Rückruf) – das harmonische Mittel, das beides ausgleicht
+
+```
+              Predicted Positive    Predicted Negative
+Actual Positive       TP                   FN
+Actual Negative       FP                   TN
+```
+
+<ThinkAboutIt>Sie erstellen ein Modell zur Erkennung von Krebs anhand medizinischer Bilder. Würden Sie auf Präzision oder Rückruf optimieren? Welche Konsequenzen hat es in der realen Welt, wenn man dies in beide Richtungen falsch macht?
+</ThinkAboutIt>
+
+### Wann welche zu verwenden ist
+
+| Szenario | Optimieren für | Warum |
+|---|---|---|
+| Spamfilter | Präzision | Echte E-Mails an Spam zu senden ist schlimmer, als Spam durchzulassen |
+| Krebsvorsorge | Rückruf | Einen Krebsfall zu verpassen ist weitaus schlimmer als ein falscher Alarm |
+| Suchranking | Präzision@K | Benutzer sehen nur Top-Ergebnisse |
+| Betrugserkennung | F1 oder Benutzerdefiniert | Brauchen Sie ein Gleichgewicht – zu viele Fehlalarme blockieren echte Kunden |
+
+---
+
+## 📈 AUC-ROC und AUC-PR: Das Gesamtbild
+
+### ROC-Kurve
+
+Die Receiver Operating Characteristic-Kurve stellt die **True-Positive-Rate** (Recall) gegen die **False-Positive-Rate** (FP / (FP + TN)) bei jedem Klassifizierungsschwellenwert dar. Die Fläche unter dieser Kurve (**AUC-ROC**) liefert ein schwellenwertunabhängiges Maß für die Modellqualität.
+
+- **AUC = 1,0**: perfekte Trennung
+- **AUC = 0,5**: zufällige Schätzung (die diagonale Linie)
+- **AUC < 0,5**: schlimmer als zufällig (Ihre Etiketten könnten vertauscht sein!)
+
+### Precision-Recall-Kurve
+
+Wenn die Klassen stark unausgewogen sind, kann AUC-ROC irreführend optimistisch sein. Die **Präzisions-Rückruf-Kurve** stellt die Präzision im Vergleich zum Rückruf dar und ist für die Erkennung seltener Ereignisse aussagekräftiger.
+
+```python
+from sklearn.metrics import precision_recall_curve, auc
+
+precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
+pr_auc = auc(recall, precision)
+```
+
+<Callout>Interview-Tipp: Wenn der Interviewer einen unausgeglichenen Datensatz erwähnt, schlagen Sie sofort AUC-PR statt AUC-ROC vor. Dies signalisiert, dass Sie die Einschränkungen von ROC-Kurven in unausgeglichenen Umgebungen verstehen – eine Unterscheidung, die viele Kandidaten übersehen.
+</Callout>
+
+<Quiz
+  question="Ein Betrugserkennungsmodell hat einen AUC-ROC von 0,98 für einen Datensatz, bei dem 0,1 % der Transaktionen betrügerisch sind. Was ist die berechtigtste Sorge?"
+  options="Das Modell ist eindeutig ausgezeichnet und serienreif|AUC-ROC kann bei unausgeglichenen Daten irreführend hoch sein – überprüfen Sie stattdessen AUC-PR|Das Modell ist überangepasst, da die AUC zu hoch ist|Sie sollten Genauigkeit anstelle von AUC verwenden"
+  answer="1"
+  explanation="Bei einem extremen Klassenungleichgewicht kann ein Modell durch die korrekte Klassifizierung der überwältigenden Mehrheitsklasse eine hohe AUC-ROC erreichen. AUC-PR konzentriert sich auf die Leistung der Minderheitenklasse (positiv) und vermittelt ein ehrlicheres Bild davon, wie gut das Modell Betrug erkennt."
+/>
+
+---
+
+## 📐 Regressionsmetriken
+
+Nicht alles ist Klassifizierung. Bei der Vorhersage kontinuierlicher Werte sind diese Metriken wichtig:
+
+### Mittlerer quadratischer Fehler (MSE)
+
+$$MSE = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2$$
+
+Große Fehler werden stark bestraft (quadratische Strafe). Gut, wenn große Fehler viel schlimmer sind als kleine – z. B. bei der Vorhersage von Immobilienpreisen, bei denen eine Abweichung von 100.000 £ weitaus schlimmer ist als eine Abweichung von 10.000 £.
+
+### Mittlerer absoluter Fehler (MAE)
+
+$$MAE = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|$$
+
+Behandelt alle Fehler linear. Robuster gegenüber Ausreißern als MSE. Verwenden Sie diese Option, wenn Ausreißer zu erwarten sind und Ihre Metrik nicht dominieren sollten.
+
+### R² (Bestimmungskoeffizient)
+
+$$R^2 = 1 - \frac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i - \bar{y})^2}$$
+
+Misst, wie viel Varianz Ihr Modell im Vergleich zur einfachen Vorhersage des Mittelwerts erklärt. R² = 1 bedeutet perfekte Passform; R² = 0 bedeutet, dass Ihr Modell nicht besser ist als die Vorhersage des Durchschnitts.
+
+<FunFact>R² kann tatsächlich negativ werden! Dies geschieht, wenn die Vorhersagen Ihres Modells schlechter sind als die einfache Vorhersage des Mittelwerts der Zielvariablen für jede Eingabe. Es ist ein Zeichen dafür, dass etwas sehr schief gelaufen ist.
+</FunFact>
+
+---
+
+## 🔄 Kreuzvalidierungsstrategien
+
+Das Zurückhalten eines einzelnen Testsatzes funktioniert bei großen Datensätzen, aber die Kreuzvalidierung liefert zuverlässigere Schätzungen der Generalisierungsleistung.
+
+### K-Fold-Kreuzvalidierung
+
+Teilen Sie die Daten in K gleiche Falten auf. Trainieren Sie auf K-1-Falten und validieren Sie auf der verbleibenden Falte. K-mal wiederholen. Geben Sie den Mittelwert und die Standardabweichung Ihrer Metrik an.
+
+```python
+from sklearn.model_selection import cross_val_score
+
+scores = cross_val_score(model, X, y, cv=5, scoring='f1')
+print(f"F1: {scores.mean():.3f} ± {scores.std():.3f}")
+```
+
+### Geschichtete K-Faltung
+
+Behält die Klassenverteilung in jeder Falte bei – wichtig für unausgeglichene Datensätze.
+
+### Zeitreihenaufteilung
+
+Verwenden Sie für zeitliche Daten **niemals** zufällige Aufteilungen. Verwenden Sie eine Kreuzvalidierung mit expandierendem oder verschiebbarem Fenster, um die Zeitreihenfolge zu berücksichtigen:
+
+```
+Fold 1: Train [Jan-Mar]  → Test [Apr]
+Fold 2: Train [Jan-Apr]  → Test [May]
+Fold 3: Train [Jan-May]  → Test [Jun]
+```
+
+<Quiz
+  question="Sie evaluieren ein Aktienkursvorhersagemodell. Welche Kreuzvalidierungsstrategie ist am besten geeignet?"
+  options="Standard-K-Falz|Leave-One-Out|Zeitreihenaufteilung|Geschichtete K-Faltung"
+  answer="2"
+  explanation="Aktienkurse sind zeitliche Daten. Die Verwendung von zufälligem K-Fold würde es dem Modell ermöglichen, während des Trainings einen Blick auf zukünftige Daten zu werfen, was zu zu optimistischen Ergebnissen führen würde. Time-Series Split stellt sicher, dass das Modell immer anhand von Daten validiert wird, die nach dem Trainingszeitraum stammen."
+/>
+
+---
+
+## 🌐 Offline- vs. Online-Bewertung
+
+Offline-Metriken (berechnet anhand historischer Daten) geben nicht immer Aufschluss über die Online-Leistung. Ein Modell mit besserer AUC könnte nach der Bereitstellung tatsächlich das Benutzerengagement verringern.
+
+| Aspekt | Offline-Bewertung | Online-Bewertung (A/B-Test) |
+|---|---|---|
+| Geschwindigkeit | Schnell – mit gespeicherten Daten ausführen | Langsam – brauche echten Verkehr |
+| Kosten | Niedrig | Hoch (Engineering + Opportunitätskosten) |
+| Maßnahmen | Modellqualität auf historischen Daten | Tatsächliche geschäftliche Auswirkungen |
+| Einschränkung | Erfasst keine Änderungen im Benutzerverhalten | Erfordert statistische Genauigkeit |
+
+### A/B-Tests für ML-Modelle
+
+Wenn Sie einen A/B-Test für ein neues Modell durchführen:
+
+1. **Definieren Sie die primäre Metrik** (z. B. Umsatz pro Benutzer) und Leitplanken (z. B. Latenz, Fehlerrate)
+2. **Berechnen Sie die erforderliche Stichprobengröße** für statistische Signifikanz
+3. **Randomisieren Sie richtig** – Aufteilung auf Benutzerebene, nicht auf Anforderungsebene
+4. **Lange genug laufen** – berücksichtigen Sie Neuheitseffekte und wöchentliche Saisonalität
+5. **Auf Interferenzen prüfen** – Beeinflusst das Verhalten der Behandlungsgruppe die Kontrollgruppe?
+
+<ThinkAboutIt>Ihr neues Empfehlungsmodell zeigt offline eine Verbesserung des AUC-ROC um 3 %, aber einen *Rückgang* der Klickrate um 1 % während des A/B-Tests. Was könnte diese Diskrepanz erklären und was würden Sie untersuchen?
+</ThinkAboutIt>
+
+---
+
+## ⚖️ Umgang mit unausgeglichenen Datensätzen
+
+Unausgeglichene Daten wirken sich sowohl auf das Training als auch auf die Bewertung aus. Gängige Strategien:
+
+**Während des Trainings:**
+- Überabtastung der Minderheitenklasse (SMOTE)
+- Die Mehrheitsklasse unterbewerten
+- Verwenden Sie Klassengewichte in der Verlustfunktion
+- Generieren Sie synthetische Beispiele
+
+**Während der Auswertung:**
+- Verwenden Sie Präzision, Rückruf, F1 anstelle von Genauigkeit
+- Verwenden Sie AUC-PR anstelle von AUC-ROC
+- Berichtsmetriken pro Klasse
+- Verwenden Sie eine geschichtete Kreuzvalidierung
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+# Class weight approach — inversely proportional to class frequency
+model = RandomForestClassifier(class_weight='balanced')
+```
+
+<Quiz
+  question="Welche Metrik eignet sich am wenigsten für die Bewertung eines Modells anhand eines stark unausgeglichenen Datensatzes?"
+  options="Precision-Recall-AUC|Genauigkeit|F1-Ergebnis|Abrufen"
+  answer="1"
+  explanation="Accuracy behandelt alle Klassen gleich und wird von der Mehrheitsklasse dominiert. Bei einem unausgeglichenen Datensatz von 99:1 erreicht ein Modell, das jedes Mal die Mehrheitsklasse vorhersagt, eine Genauigkeit von 99 %, während es für die Erkennung der Minderheitsklasse völlig nutzlos ist."
+/>
+
+---
+
+## 🔑 Wichtige Erkenntnisse
+
+- **Verlassen Sie sich nie allein auf die Genauigkeit** – insbesondere bei unausgeglichenen Daten
+- **Passen Sie die Metrik an das Geschäftsziel an**: Rückruf bei sicherheitskritischen Ereignissen, Präzision, wenn Fehlalarme kostspielig sind
+- **AUC-PR über AUC-ROC** für unausgeglichene Probleme – dies ist ein Interviewtipp mit hohem Signal
+- **Verwenden Sie zeitbasierte Aufteilungen** für zeitliche Daten – zufällige Aufteilungen führen zu Datenlecks
+- **Offline-Metriken reichen nicht aus** – Planen Sie A/B-Tests ein, um die Auswirkungen in der Praxis zu validieren
+- **Kennen Sie die Formeln** – Interviewer bitten Sie möglicherweise, Präzision, Erinnerung, F1, MSE und R² abzuleiten oder zu erklären
+
+<Callout>Wenn ein Interviewer fragt: „Wie würden Sie dieses Modell bewerten?“, fragt er eigentlich: „Verstehen Sie, was dieses Modell braucht, um richtig zu sein, und können Sie das messen?“ Beginnen Sie mit dem Geschäftskontext und wählen Sie dann Ihre Kennzahlen aus.
+</Callout>

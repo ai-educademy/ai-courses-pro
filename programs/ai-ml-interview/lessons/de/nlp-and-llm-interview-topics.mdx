@@ -1,0 +1,215 @@
+---
+title: "NLP- und LLM-Interviewthemen"
+description: "Bereiten Sie sich auf das heißeste Interviewthema im Bereich KI vor – Verarbeitung natürlicher Sprache und große Sprachmodelle, von Transformatoren bis hin zu Prompt Engineering."
+order: 5
+difficulty: "advanced"
+duration: 22
+icon: "💬"
+published: true
+machineTranslated: true
+---
+# 💬 NLP- und LLM-Interviewthemen
+
+Vor zwei Jahren bedeuteten NLP-Interviewfragen, Worteinbettungen und verschwindende LSTM-Gradienten zu erklären. Heutzutage fragt der Interviewer genauso wahrscheinlich: „Wann würden Sie ein Modell verfeinern oder RAG verwenden?“ Die NLP-Landschaft hat sich dramatisch verändert, und mit ihr haben sich auch die Interviews verändert. Diese Lektion behandelt sowohl die Grundlagen, die Interviewer immer noch testen, als auch die Themen aus der LLM-Ära, die jetzt das Gespräch dominieren.
+
+---
+
+## 📚 NLP-Grundlagen, die Interviewer immer noch erwarten
+
+Auch im Zeitalter von GPT müssen Sie nachweisen, dass Sie verstehen, *warum* diese Modelle funktionieren, und nicht nur, *dass* sie funktionieren.
+
+### Tokenisierung
+
+Durch die Tokenisierung wird Rohtext in diskrete Einheiten umgewandelt, die das Modell verarbeiten kann. Auf den Ansatz kommt es an:
+
+- **Wortebene**: einfach, kann aber nicht mit Wörtern umgehen, die außerhalb des Wortschatzes liegen („Unfreundlichkeit“ → unbekannt)
+- **Zeichenebene**: Behandelt jedes Wort, aber die Sequenzen sind sehr lang
+- **Subword (BPE, WordPiece, SentencePiece)**: der moderne Standard – zerlegt seltene Wörter in bedeutungsvolle Teile
+
+```
+"unfriendliness" → ["un", "friend", "li", "ness"]  (BPE)
+"playing"        → ["play", "##ing"]                (WordPiece)
+```
+
+<Callout>Interview-Tipp: Wenn Sie nach der Tokenisierung gefragt werden, erwähnen Sie, dass sich die Auswahl der Tokenisierung auf die Vokabulargröße, die Sequenzlänge und die Fähigkeit des Modells auswirkt, mit seltenen oder falsch geschriebenen Wörtern umzugehen. Dies zeigt, dass Sie die nachgelagerten Auswirkungen verstehen, nicht nur die Mechanik.
+</Callout>
+
+### Einbettungen
+
+Einbettungen ordnen diskrete Token dichten kontinuierlichen Vektoren zu, wobei semantische Beziehungen erhalten bleiben:
+
+- **Word2Vec / GloVe**: statische Einbettungen – jedes Wort erhält unabhängig vom Kontext einen Vektor („Bank“ hat die gleiche Einbettung, unabhängig davon, ob es sich um ein Flussufer oder ein Finanzinstitut handelt)
+- **Kontextuelle Einbettungen (BERT, GPT)**: Die Einbettung jedes Tokens hängt vom umgebenden Kontext ab – „Bank“ erhält unterschiedliche Darstellungen in verschiedenen Sätzen
+
+### Der Aufmerksamkeitsmechanismus
+
+Aufmerksamkeit ist die Schlüsselinnovation, die Transformatoren zum Funktionieren bringt. Im Kern:
+
+$$\text{Achtung}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+
+Im Klartext: Für jeden Token berechnet Attention einen gewichteten Durchschnitt über alle anderen Token, wobei die Gewichte widerspiegeln, wie relevant jeder Token für den aktuellen Token ist. Der Skalierungsfaktor √d_k verhindert, dass die Skalarprodukte zu groß werden.
+
+**Selbstaufmerksamkeit** ermöglicht es jedem Token, sich um jeden anderen Token in der Sequenz zu kümmern und so weitreichende Abhängigkeiten zu erfassen, mit denen RNNs zu kämpfen haben.
+
+### Transformatorarchitektur
+
+Der Transformator besteht aus:
+- **Encoder**: verarbeitet die vollständige Eingabe (wird zum Verständnis in BERT-Modellen verwendet)
+- **Decoder**: generiert die Ausgabe Token für Token (wird in GPT-Modellen zur Generierung verwendet)
+- **Encoder-Decoder**: kombiniert beides (wird in T5 verwendet, Originaltransformator zur Übersetzung)
+
+| Architektur | Beispiele | Am besten für |
+|---|---|---|
+| Nur Encoder | BERT, RoBERTa | Klassifizierung, NER, Einbettungen |
+| Nur Decoder | GPT-4, LLaMA, Mistral | Textgenerierung, Chat, Argumentation |
+| Encoder-Decoder | T5, BART | Übersetzung, Zusammenfassung |
+
+<Quiz
+  question="Warum verwenden Transformatoren Multi-Head-Aufmerksamkeit anstelle eines einzelnen Aufmerksamkeitsmechanismus?"
+  options="Es ist rechnerisch günstiger als eine einzelne Aufmerksamkeit|Mehrere Leiter können sich gleichzeitig um verschiedene Arten von Beziehungen kümmern|Es verhindert eine Überanpassung|Es reduziert die Sequenzlänge"
+  answer="1"
+  explanation="Die Aufmerksamkeit mehrerer Köpfe ermöglicht es dem Modell, Informationen aus verschiedenen Darstellungsunterräumen an verschiedenen Positionen gemeinsam zu berücksichtigen. Ein Kopf könnte syntaktische Beziehungen, ein anderer semantische Ähnlichkeit, ein anderer Positionsnähe erfassen – alles parallel."
+/>
+
+---
+
+## 🤖 LLM-spezifische Interviewfragen
+
+Dies sind die Fragen, die in den letzten zwei Jahren aufgetaucht sind und mittlerweile in fast jedem ML-Interview auftauchen.
+
+### Feinabstimmung vs. Aufforderung
+
+| Ansatz | Wann zu verwenden | Vorteile | Nachteile |
+|---|---|---|---|
+| **Null-/Wenige-Schuss-Eingabeaufforderung** | Schnelles Prototyping, allgemeine Aufgaben | Keine Schulung erforderlich, flexibel | Eingeschränkte Kontrolle, Kosten pro Abfrage |
+| **Prompte Entwicklung** | Moderate Anpassung | Schnelle Iteration, keine GPU-Kosten | Zerbrechlich, schwer zu versionieren |
+| **Feinabstimmung (vollständig)** | Domänenspezifische Aufgaben mit gekennzeichneten Daten | Beste Qualität, kleineres Modell möglich | Teuer, benötigt Daten und GPU |
+| **LoRA / QLoRA** | Feinabstimmung mit begrenzten Ressourcen | Effiziente, kleine Adaptergewichte | Etwas weniger ausdrucksstark als die vollständige Feinabstimmung |
+| **RAG** ​​| Wissensintensive, aktuelle Informationen erforderlich | Keine Umschulung, zitierfähige Quellen | Engpass bei der Abrufqualität |
+
+### Retrieval-Augmented Generation (RAG)
+
+RAG kombiniert ein Retrieval-System mit einem Sprachmodell:
+
+```
+User query → Embed query → Search vector DB → Retrieve top-K documents
+    → Construct prompt (query + retrieved docs) → LLM generates answer
+```
+
+**Wichtige Diskussionspunkte im Vorstellungsgespräch**:
+- **Chunking-Strategie**: Wie Sie Dokumente aufteilen, wirkt sich auf die Abrufqualität aus
+- **Auswahl des Einbettungsmodells**: domänenspezifische vs. allgemeine Einbettungen
+- **Neueinstufung**: Verwenden Sie einen Cross-Encoder, um abgerufene Blöcke neu einzuordnen, bevor sie dem LLM zugeführt werden
+- **Wenn RAG fehlschlägt**: wenn die Antwort eine Begründung über viele Dokumente hinweg erfordert oder wenn kein relevantes Dokument vorhanden ist
+
+### RLHF (Reinforcement Learning from Human Feedback)
+
+Die Technik hinter der Hilfsbereitschaft von ChatGPT:
+
+1. **Überwachte Feinabstimmung**: Trainieren Sie anhand kuratierter Prompt-Response-Paare
+2. **Belohnungsmodelltraining**: Menschen bewerten die Modellergebnisse; Trainieren Sie ein Belohnungsmodell für diese Präferenzen
+3. **PPO-Optimierung**: Verwenden Sie das Belohnungsmodell, um das LLM durch Reinforcement Learning zu optimieren
+
+<FunFact>Das ursprüngliche InstructGPT-Papier zeigte, dass ein 1,3B-Parametermodell mit RLHF von Menschen einem 175B-Parametermodell ohne RLHF vorgezogen wurde. Ausrichtungstechniken können dazu führen, dass kleine Modelle in puncto Praxistauglichkeit die großen Modelle übertreffen.
+</FunFact>
+
+### Kontextfenster und Herausforderungen mit langem Kontext
+
+- **Kontextfenster**: die maximale Anzahl an Token, die ein Modell gleichzeitig verarbeiten kann (z. B. GPT-4 Turbo: 128.000, Claude: 200.000)
+- **Mittendrin verloren**: Modelle tendieren dazu, Informationen in langen Kontexten weniger Aufmerksamkeit zu schenken
+- **Strategien**: Lange Dokumente zusammenfassen, wichtige Informationen am Anfang/Ende platzieren, hierarchisches Abrufen verwenden
+
+### Halluzination
+
+Modelle generieren plausible, aber sachlich falsche Texte. Minderungsstrategien:
+- **RAG**: Bodenreaktionen in abgerufenen Beweismitteln
+- **Eingeschränkte Generierung**: Beschränken Sie die Ausgabe auf bekannte Entitäten oder strukturierte Formate
+- **Selbstkonsistenz**: Mehrere Antworten generieren und Übereinstimmung prüfen
+- **Zitat**: Fordern Sie das Modell auf, seine Quellen zu zitieren (und verifizieren Sie diese dann)
+
+<ThinkAboutIt>Ein Legal-Technology-Unternehmen möchte einen KI-Assistenten entwickeln, der Fragen zur Rechtsprechung beantwortet. Eine Halluzination könnte dazu führen, dass man sich auf nicht existierende rechtliche Präzedenzfälle beruft. Wie würden Sie dieses System gestalten, um das Halluzinationsrisiko zu minimieren und gleichzeitig die Antworten nützlich zu halten?
+</ThinkAboutIt>
+
+---
+
+## 🎯 Modellauswahl: Wann was verwenden
+
+Dies ist eine beliebte Interviewfrage: „Welches Modell würden Sie angesichts dieses Anwendungsfalls wählen?“
+
+**Verwenden Sie ein Large-Frontier-Modell (GPT-4, Claude), wenn:**
+- Die Aufgabe erfordert allgemeine Überlegungen oder die Befolgung komplexer Anweisungen
+- Sie haben keine gekennzeichneten Trainingsdaten
+- Die Prototyping-Geschwindigkeit ist wichtiger als die Inferenzkosten
+
+**Verwenden Sie ein fein abgestimmtes kleineres Modell (Mistral 7B, LLaMA 3), wenn:**
+- Sie verfügen über domänenspezifische Daten und benötigen konsistente, spezialisierte Ausgaben
+- Inferenzkosten sind wichtig (in großem Maßstab)
+- Die Latenzanforderungen sind streng
+- Aus Datenschutzgründen müssen Sie die Lösung lokal ausführen
+
+**Verwenden Sie ein traditionelles NLP-Modell (BERT, RoBERTa), wenn:**
+- Die Aufgabe ist Klassifizierung, NER oder Extraktion (nicht Generierung)
+- Sie benötigen eine schnelle Inferenz bei sehr hohem Durchsatz
+- Die Aufgabe ist mit klar gekennzeichneten Daten klar definiert
+
+<Quiz
+  question="Ein Gesundheitsunternehmen muss Patientennachrichten in 15 Kategorien einteilen. Sie haben 50.000 beschriftete Exemplare. Welcher Ansatz ist für die Produktion am kostengünstigsten?"
+  options="GPT-4 mit Wenig-Schuss-Eingabeaufforderung|Feinabgestimmtes BERT-Modell|RAG mit einer Vektordatenbank|Nullschussklassifizierung mit LLaMA 70B"
+  answer="1"
+  explanation="Mit 50.000 beschrifteten Beispielen und einer klar definierten Klassifizierungsaufgabe ist ein fein abgestimmtes BERT-Modell schnell, kostengünstig in der Bereitstellung und äußerst genau. Die Verwendung eines großen LLM für eine Klassifizierungsaufgabe mit zahlreichen Trainingsdaten ist unnötig teuer und langsamer."
+/>
+
+---
+
+## 🔬 Bewertung der LLM-Ergebnisse
+
+Die Bewertung generativer Modelle ist schwieriger als die Bewertung von Klassifikatoren. Gängige Ansätze:
+
+- **Automatisierte Metriken**: BLEU, ROUGE, BERTScore (nützlich, aber unvollkommen)
+- **LLM-als-Richter**: Verwenden Sie ein stärkeres Modell, um die Ergebnisse eines schwächeren Modells zu bewerten
+- **Menschliche Bewertung**: Goldstandard, aber teuer und langsam
+- **Aufgabenspezifische Bewertung**: Genauigkeit bei QA-Benchmarks, Erfolgsquoten bei der Codeausführung
+- **Red-Teaming**: kontradiktorische Tests auf Sicherheit, Voreingenommenheit und schädliche Ergebnisse
+
+```python
+# BERTScore example
+from bert_score import score
+
+precision, recall, f1 = score(
+    cands=["The cat sat on the mat"],
+    refs=["A cat was sitting on a mat"],
+    lang="en"
+)
+```
+
+---
+
+## ⚖️ Ethische Überlegungen
+
+NLP-Interviews beinhalten zunehmend ethische Fragen:
+
+- **Verzerrungen in Trainingsdaten**: LLMs absorbieren und verstärken Verzerrungen aus ihren Trainingskorpora
+- **Datenschutz**: Modelle können sich Trainingsdaten merken und wiedergeben (PII-Leckage)
+- **Fehlinformationen**: Generative Modelle können in großem Maßstab überzeugende, aber falsche Inhalte erstellen
+- **Umweltkosten**: Das Training großer Modelle hat einen erheblichen CO2-Fußabdruck
+
+<Quiz
+  question="Was ist das Hauptrisiko bei der Verwendung eines auf Online-Texten geschulten LLM für ein Einstellungsempfehlungssystem?"
+  options="Das Modell ist für den Produktionseinsatz zu langsam|Das Modell kann historische Verzerrungen in Trainingsdaten aufrechterhalten|Das Modell wird zufällige Vorhersagen treffen|Das Modell benötigt zu viel Speicherplatz"
+  answer="1"
+  explanation="An Internettexten geschulte LLMs berücksichtigen in ihren Trainingsdaten gesellschaftliche Vorurteile – Geschlecht, Rasse, sozioökonomische Aspekte. Bei der Einstellung von Mitarbeitern können diese Vorurteile zu diskriminierenden Empfehlungen führen, die historische Ungleichheiten aufrechterhalten."
+/>
+
+---
+
+## 🔑 Wichtige Erkenntnisse
+
+- **Kennen Sie Ihre Grundlagen**: Tokenisierung, Einbettungen, Aufmerksamkeit und Transformatorarchitektur sind nicht verhandelbar
+- **Verstehen Sie das Feinabstimmungsspektrum**: von der Null-Schuss-Eingabeaufforderung bis zur vollständigen Feinabstimmung und wann jeweils angemessen
+- **RAG ist das praktischste LLM-Muster** – verstehen Sie Chunking, Retrieval und Reranking
+- **Bei der Modellauswahl geht es um Kompromisse**: Leistungsfähigkeit vs. Kosten vs. Latenz vs. Datenschutz
+- **Die Bewertung generativer Modelle ist ein offenes Problem** – kennen mehrere Ansätze
+- **Ethik ist nicht optional**: Voreingenommenheit, Halluzination und Privatsphäre gehören mittlerweile zu den Standardthemen in Vorstellungsgesprächen
+
+<Callout>Der NLP-Bereich entwickelt sich unglaublich schnell. Prüfen Sie vor Ihrem Vorstellungsgespräch, welche Modelle und Techniken in den letzten drei Monaten veröffentlicht wurden. Die Fähigkeit, aktuelle Entwicklungen zu diskutieren (und gleichzeitig die Grundlagen zu verstehen), signalisiert, dass Sie sich aktiv in diesem Bereich engagieren.
+</Callout>

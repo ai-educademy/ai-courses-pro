@@ -1,0 +1,168 @@
+---
+title: "Kaggle 竞赛指南 - 如何在 Kaggle 上竞争（和学习）"
+description: "从首次提交到大师技术：EDA 工作流程、特征工程技巧、集成方法和策略始终位于前 1%。"
+order: 7
+difficulty: "advanced"
+duration: 20
+icon: "🏆"
+published: true
+machineTranslated: true
+---
+# Kaggle 竞赛指南 - 如何在 Kaggle 上竞争（和学习）
+
+Kaggle 不仅仅是一个竞赛平台，它还是世界上最大的应用 ML 教室。超过 1500 万数据科学家使用它来提高技能、建立投资组合并找到工作。本课程教您如何有效地竞争并从每次比赛中获得最大的学习。
+
+## 🎯 为什么 Kaggle 对你的职业生涯很重要
+
+Kaggle 的经验表明了简历无法做到的事情：**您可以发布适用于混乱的真实数据的模型**。谷歌、Meta 和顶级初创公司的招聘经理积极从 Kaggle 排行榜上招聘。即使没有获胜，拥有记录齐全的笔记本的强大形象也能证明实际能力。
+
+<Illustration src="/images/lessons/kaggle-competition-guide.svg" alt="Kaggle 竞赛从数据探索到最终提交的工作流程" caption="典型的 Kaggle 工作流程 - 在 EDA、特征工程和验证之间迭代直至收敛。" />
+
+## 📊 比赛类型和获胜策略
+
+|类型 |示例|典型的获胜方法|
+|------|---------|------------------------|
+| **表格** |房价、欺诈检测|梯度提升（XGBoost/LightGBM）+重特征工程 |
+| **计算机视觉** |图像分类、分割 |预训练的 CNN（EfficientNet、ConvNeXt）+ 增强 |
+| **自然语言处理** |感悟、问答|微调变压器（DeBERTa、RoBERTa）|
+| **模拟** |游戏AI、优化|强化学习+领域启发法|
+
+<FunFact>Kaggle 竞赛获奖者中最受欢迎的单一算法是 LightGBM - 它出现在超过 60% 的顶级表格解决方案中，通常与 CatBoost 或 XGBoost 组合使用。</FunFact>
+
+## 🔍 EDA - 你的第一个 48 小时
+
+在了解数据之前切勿开始建模。严格的 EDA 工作流程：
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("train.csv")
+
+# Shape and types - know what you're working with
+print(f"Shape: {df.shape}")
+print(f"Missing values:\n{df.isnull().sum().sort_values(ascending=False).head(10)}")
+
+# Target distribution - is it balanced?
+df["target"].value_counts(normalize=True).plot(kind="bar")
+plt.title("Target Distribution")
+plt.show()
+
+# Correlations - find quick signal
+correlations = df.select_dtypes(include="number").corr()["target"].sort_values()
+print(correlations.head(10))  # Strongest negative correlations
+print(correlations.tail(10))  # Strongest positive correlations
+```
+
+**检查泄漏** - 在预测时不存在的功能。这是初学者最容易犯的错误。如果某个功能与目标有可疑的相关性，请在庆祝之前进行调查。
+
+<Quiz question="在 EDA 过程中，您发现一个与目标相关性为 0.98 的特征。您的第一反应应该是什么？" options="庆祝 - 此功能将主导您的模型|调查数据泄露 - 这种相关性非常高|删除它 - 高相关性意味着过度拟合|仅在您的整体中使用它，而不是基线" answer="1" explanation="0.98 的相关性几乎可以肯定是数据泄漏。该特征可能包含来自未来的信息或源自目标的信息。使用它会产生夸大的验证分数，从而在私人排行榜上崩溃。" />
+
+## 🛠️ 获胜的特征工程
+
+顶级竞争对手将 70% 的时间花在功能上，而不是模型调优上。经过实战检验的技术：
+
+**聚合功能** - 不同粒度的分组统计：
+```python
+for col in ["category", "store_id", "day_of_week"]:
+    stats = df.groupby(col)["sales"].agg(["mean", "std", "median"])
+    stats.columns = [f"{col}_sales_{s}" for s in ["mean", "std", "median"]]
+    df = df.merge(stats, on=col, how="left")
+```
+
+**目标编码** - 用平滑的目标均值替换类别（使用基于折叠的编码来防止泄漏）。
+
+**滞后特征** - 对于时间序列，以前的值是黄金：
+```python
+for lag in [1, 7, 14, 28]:
+    df[f"sales_lag_{lag}"] = df.groupby("store_id")["sales"].shift(lag)
+```
+
+## ✅ 交叉验证 - 相信您的本地分数
+
+您当地的简历分数比公共排行榜更重要。稳健的验证策略：
+
+```python
+from sklearn.model_selection import StratifiedKFold
+
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+oof_predictions = np.zeros(len(X))
+
+for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
+    X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+    y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+
+    model = lgb.LGBMClassifier(n_estimators=1000, learning_rate=0.05)
+    model.fit(X_train, y_train, eval_set=[(X_val, y_val)],
+              callbacks=[lgb.early_stopping(50)])
+    oof_predictions[val_idx] = model.predict_proba(X_val)[:, 1]
+
+print(f"OOF AUC: {roc_auc_score(y, oof_predictions):.5f}")
+```
+
+**黄金法则**：如果您当地的简历和公共 LB 不一致，请相信您的简历。公共排行榜仅使用测试数据的一小部分 - 过度拟合是一个陷阱。
+
+<ThinkAboutIt>您在公共排行榜上排名第 15 位，但您当地的简历表明您的模型过度拟合。您是否会在最终提交中提交您的最佳 LB 分数或最佳 CV 分数？为什么？</ThinkAboutIt>
+
+## 🎭 集成方法 - 最后的推动
+
+几乎每个获胜的解决方案都使用集成。三个关键技术：
+
+**Bagging** - 在不同的数据子集上训练相同的模型，平均预测。减少方差。
+
+**堆叠** - 根据不同基础模型的折叠预测训练元模型：
+```python
+# Level 1: diverse base models produce OOF predictions
+base_preds = np.column_stack([lgbm_oof, xgb_oof, catboost_oof, nn_oof])
+
+# Level 2: logistic regression learns optimal combination
+from sklearn.linear_model import LogisticRegression
+meta = LogisticRegression()
+meta.fit(base_preds, y_train)
+```
+
+**混合** - 模型预测的加权平均值。比堆叠简单但有效：
+```python
+final = 0.4 * lgbm_pred + 0.35 * xgb_pred + 0.25 * catboost_pred
+```
+
+<Quiz question="为什么在 Kaggle 竞赛中集成方法几乎总是优于单一模型？" options="他们使用更多的训练数据|他们通过使用更深层次的模型来减少偏差|他们通过组合产生不同错误的不同模型来减少方差|他们训练速度更快" answer="2" explanation="集成之所以有效，是因为不同的模型会产生不相关的错误。进行平均时，个别错误会相互抵消，而正确的信号会相互加强 - 减少总体方差而不增加偏差。" />
+
+## 📓 编写出色的 Kaggle 笔记本
+
+公共笔记本可以建立您的声誉。值得奖牌的笔记本包括：
+
+1. **清晰的叙述** - 解释你的推理，而不仅仅是你的代码
+2. **再现性** - 设置随机种子、文档库版本
+3. **可视化** - 揭示见解的情节，而不仅仅是装饰
+4. **诚实的结果** - 分享无效的内容和有效的内容
+
+<Quiz question="从 Kaggle 贡献者晋升为专家级别的最有效方法是什么？" options="在特色比赛中获得个人金牌|在多项比赛和笔记本电脑中持续获得铜牌和银牌|无论结果如何，参加尽可能多的比赛|分叉得分最高的公共笔记本" answer="1" explanation="在各项比赛中保持一致的表现可以积累奖牌。您需要竞赛奖牌和笔记本/讨论奖牌。贡献的广度比单一的幸运结果更重要。" />
+
+## 📈 Kaggle 排名和进步
+
+|排名|要求 |典型时间表|
+|------|------------|-----------------|
+| **新手** |创建帐户 |第一天 |
+| **贡献者** |完整的配置文件，运行笔记本 |第 1 周 |
+| **专家** | 2 枚铜牌（比赛）| 3-6 个月 |
+| **大师** | 1金+2银| 1–2 年 |
+| **大师** | 5 枚金牌（1 枚独奏）| 3–5 年以上 |
+
+<ThinkAboutIt>除了排名之外，在申请 ML 职位时，您会如何使用您的 Kaggle 个人资料作为作品集？招聘经理会在您​​的竞争历史中寻找什么？</ThinkAboutIt>
+
+## 🎯 要点
+
+- EDA 第一，建模第二 - 始终检查数据泄漏
+- 特征工程比超参数调整提供更多提升
+- 相信你当地的简历而不是公共排行榜
+- 集合多种模型进行最后冲刺
+- 在公共笔记本中记录您的工作 - 这是您的作品集
+
+---
+
+## 📚 进一步阅读
+
+- [Kaggle Book by Konrad Banachewicz 和 Luca Massaron](https://www.kaggle.com/discussions/general/320744) - 来自大师的策略提炼为可行的建议
+- [如何赢得数据科学竞赛 (Coursera)](https://www.coursera.org/learn/competitive-data-science) - NRU HSE 自上而下的 Kaggle 策略课程
+- [带有代码的论文 - 基准](https://paperswithcode.com/sota) - 所有 ML 任务的最新结果

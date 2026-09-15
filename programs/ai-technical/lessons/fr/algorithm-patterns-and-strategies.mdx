@@ -1,0 +1,294 @@
+---
+title: "Modèles d'algorithmes et stratégies"
+description: "Découvrez les 10 modèles d'algorithmes qui résolvent 80 % des problèmes d'entretien de codage, de la fenêtre glissante à la programmation dynamique."
+order: 2
+difficulty: "intermediate"
+duration: 25
+icon: "🧩"
+published: true
+machineTranslated: true
+---
+# Modèles et stratégies d'algorithmes
+
+Les entretiens de codage ne consistent pas à mémoriser 500 solutions LeetCode. Il s’agit de reconnaître lequel, parmi une dizaine de modèles, s’applique au problème auquel vous êtes confronté. Une fois que vous avez identifié le modèle, la structure de la solution s'écrit d'elle-même. Cette leçon décompose chaque modèle : quand l'utiliser, comment le reconnaître et un exemple concret pour ancrer votre compréhension. Considérez ces modèles comme des lentilles : plus vous vous entraînez à les parcourir, plus vite chaque nouveau problème apparaît.
+
+## Modèle 1 : Deux pointeurs
+
+**Reconnaissez-le quand** : l'entrée est triée (ou peut être triée) et vous devez trouver des paires ou des sous-tableaux répondant à certaines conditions.
+
+Deux pointeurs fonctionnent en plaçant un pointeur à chaque extrémité du tableau (ou au début pour la variante "rapide/lent") et en les rapprochant l'un de l'autre en fonction d'une condition.
+
+```python
+# Three Sum: find all triplets that sum to zero
+def three_sum(nums):
+    nums.sort()
+    result = []
+    for i in range(len(nums) - 2):
+        if i > 0 and nums[i] == nums[i - 1]:
+            continue  # Skip duplicates
+        left, right = i + 1, len(nums) - 1
+        while left < right:
+            total = nums[i] + nums[left] + nums[right]
+            if total < 0:
+                left += 1
+            elif total > 0:
+                right -= 1
+            else:
+                result.append([nums[i], nums[left], nums[right]])
+                while left < right and nums[left] == nums[left + 1]:
+                    left += 1
+                left += 1
+                right -= 1
+    return result
+```
+
+**Temps** : O(n²) — une amélioration massive par rapport à la force brute O(n³).
+
+## Modèle 2 : Fenêtre coulissante
+
+**Reconnaissez-le quand** : vous devez trouver un sous-tableau ou une sous-chaîne contigu qui satisfait à une certaine contrainte (somme maximale, contient tous les caractères, etc.).
+
+La fenêtre s'agrandit en déplaçant le pointeur droit et se contracte en déplaçant le pointeur gauche. La clé est de savoir quand rétrécir.
+
+```python
+# Longest substring without repeating characters
+def length_of_longest_substring(s: str) -> int:
+    char_index = {}
+    max_length = 0
+    left = 0
+    for right, char in enumerate(s):
+        if char in char_index and char_index[char] >= left:
+            left = char_index[char] + 1
+        char_index[char] = right
+        max_length = max(max_length, right - left + 1)
+    return max_length
+```
+
+<Callout>Le modèle de fenêtre coulissante a un modèle fixe : initialisez deux pointeurs, développez vers la droite, réduisez à gauche lorsque la contrainte est violée et suivez votre réponse. Une fois que vous avez internalisé ce modèle, chaque problème de fenêtre coulissante semble gérable.</Callout>
+
+## Modèle 3 : BFS (recherche en largeur d'abord)
+
+**Reconnaissez-le quand** : vous avez besoin du chemin le plus court dans un graphique non pondéré, un parcours par ordre de niveau ou pour explorer les voisins couche par couche.
+
+BFS utilise une file d'attente et traite les nœuds niveau par niveau. Il garantit le chemin le plus court dans les graphiques non pondérés.
+
+```python
+from collections import deque
+
+# Number of islands — BFS variant
+def num_islands(grid):
+    if not grid:
+        return 0
+    rows, cols = len(grid), len(grid[0])
+    count = 0
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                count += 1
+                queue = deque([(r, c)])
+                grid[r][c] = '0'
+                while queue:
+                    row, col = queue.popleft()
+                    for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                        nr, nc = row + dr, col + dc
+                        if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == '1':
+                            grid[nr][nc] = '0'
+                            queue.append((nr, nc))
+    return count
+```
+
+## Modèle 4 : DFS (recherche en profondeur)
+
+**Reconnaissez-le lorsque** : vous devez explorer tous les chemins, vérifier la connectivité, détecter les cycles ou le problème a une structure récursive/arborescente.
+
+DFS va en profondeur avant de s’étendre. Il est naturellement récursif et s'adapte parfaitement aux traversées d'arbres et aux retours en arrière.
+
+```python
+# Path sum in a binary tree
+def has_path_sum(root, target_sum):
+    if not root:
+        return False
+    if not root.left and not root.right:
+        return target_sum == root.val
+    return (has_path_sum(root.left, target_sum - root.val) or
+            has_path_sum(root.right, target_sum - root.val))
+```
+
+<ThinkAboutIt>Quand choisiriez-vous BFS plutôt que DFS, et vice versa ? Considérez : BFS trouve les chemins les plus courts mais utilise la mémoire O (largeur). DFS utilise la mémoire O(profondeur) mais ne garantit pas les chemins les plus courts. Comment la forme du graphique influence-t-elle votre choix ?</ThinkAboutIt>
+
+## Modèle 5 : Recherche binaire
+
+**Reconnaissez-le quand** : L'espace de recherche est trié ou monotone (si la condition est vraie à l'index i, elle est vraie pour tous les indices > i ou < i).
+
+La recherche binaire ne concerne pas uniquement les tableaux triés : elle fonctionne dans n'importe quelle condition monotone. Cette idée révèle des problèmes tels que « capacité minimale pour expédier des colis » ou « trouver l'élément de pointe ».
+
+```python
+# Binary search on answer: minimum days to make m bouquets
+def min_days(bloom_day, m, k):
+    if m * k > len(bloom_day):
+        return -1
+
+    def can_make(days):
+        bouquets = flowers = 0
+        for bloom in bloom_day:
+            if bloom <= days:
+                flowers += 1
+                if flowers == k:
+                    bouquets += 1
+                    flowers = 0
+            else:
+                flowers = 0
+        return bouquets >= m
+
+    lo, hi = min(bloom_day), max(bloom_day)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if can_make(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+```
+
+<FunFact>Bien que la recherche binaire soit l'un des algorithmes les plus simples sur le plan conceptuel, une étude de Jon Bentley a révélé que seulement 10 % environ des programmeurs professionnels pouvaient l'implémenter correctement du premier coup. Le bug le plus courant ? Erreurs ponctuelles dans les conditions aux limites.</FunFact>
+
+## Modèle 6 : Retour en arrière
+
+**Reconnaissez-le quand** : vous devez générer toutes les combinaisons, permutations ou sous-ensembles qui satisfont aux contraintes. Le problème dit souvent « tout trouver », « tout générer » ou « lister tous les possibles ».
+
+Backtracking = DFS avec élagage. Vous explorez un chemin, et s'il viole une contrainte, vous revenez en arrière et essayez l'option suivante.
+
+```python
+# Generate all valid combinations of n pairs of parentheses
+def generate_parenthesis(n):
+    result = []
+    def backtrack(current, open_count, close_count):
+        if len(current) == 2 * n:
+            result.append(current)
+            return
+        if open_count < n:
+            backtrack(current + '(', open_count + 1, close_count)
+        if close_count < open_count:
+            backtrack(current + ')', open_count, close_count + 1)
+    backtrack('', 0, 0)
+    return result
+```
+
+## Modèle 7 : Programmation dynamique
+
+**Reconnaissez-le quand** : le problème comporte des sous-problèmes qui se chevauchent et une sous-structure optimale. Les signaux classiques incluent « coût minimum », « nombre de voies », « séquence la plus longue/la plus courte » ou « pouvez-vous atteindre l'objectif ?
+
+La recette DP : définir l'état, écrire la récurrence, choisir entre top-down (mémoïsation) et bottom-up (tabulation).
+
+```python
+# Longest Increasing Subsequence — O(n²) DP
+def length_of_lis(nums):
+    if not nums:
+        return 0
+    dp = [1] * len(nums)  # dp[i] = length of LIS ending at index i
+    for i in range(1, len(nums)):
+        for j in range(i):
+            if nums[j] < nums[i]:
+                dp[i] = max(dp[i], dp[j] + 1)
+    return max(dp)
+```
+
+<Callout>Lorsque vous êtes bloqué sur un problème DP, commencez par la récursivité par force brute. Ajoutez ensuite la mémorisation. La conversion vers une tabulation ascendante est une étape d'optimisation, pas la première étape. Cette approche évite de se perdre dans les dimensions du tableau.</Callout>
+
+## Modèle 8 : Gourmand
+
+**Reconnaissez-le quand** : Faire le choix localement optimal à chaque étape conduit à la solution globalement optimale. Les problèmes gourmands impliquent souvent des intervalles, une planification ou des choix qui n'ont pas besoin d'être revisités.
+
+```python
+# Minimum number of meeting rooms (interval scheduling)
+def min_meeting_rooms(intervals):
+    starts = sorted([i[0] for i in intervals])
+    ends = sorted([i[1] for i in intervals])
+    rooms = max_rooms = 0
+    s = e = 0
+    while s < len(starts):
+        if starts[s] < ends[e]:
+            rooms += 1
+            max_rooms = max(max_rooms, rooms)
+            s += 1
+        else:
+            rooms -= 1
+            e += 1
+    return max_rooms
+```
+
+## Modèle 9 : Tri topologique
+
+**Reconnaissez-le quand** : Il existe des dépendances entre les tâches (prérequis du cours, ordre de construction, planification des tâches). L'entrée est un graphe acyclique orienté (DAG).
+
+```python
+from collections import deque, defaultdict
+
+def course_order(num_courses, prerequisites):
+    graph = defaultdict(list)
+    in_degree = [0] * num_courses
+    for course, prereq in prerequisites:
+        graph[prereq].append(course)
+        in_degree[course] += 1
+
+    queue = deque([i for i in range(num_courses) if in_degree[i] == 0])
+    order = []
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbour in graph[node]:
+            in_degree[neighbour] -= 1
+            if in_degree[neighbour] == 0:
+                queue.append(neighbour)
+    return order if len(order) == num_courses else []
+```
+
+## Modèle 10 : Union-Find (ensemble disjoint)
+
+**Reconnaissez-le quand** : vous devez regrouper des éléments, détecter des composants connectés ou déterminer si deux éléments appartiennent au même ensemble, en particulier lorsque les connexions sont ajoutées dynamiquement.
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])  # Path compression
+        return self.parent[x]
+
+    def union(self, x, y):
+        px, py = self.find(x), self.find(y)
+        if px == py:
+            return False
+        if self.rank[px] < self.rank[py]:
+            px, py = py, px
+        self.parent[py] = px
+        if self.rank[px] == self.rank[py]:
+            self.rank[px] += 1
+        return True
+```
+
+<Quiz question="Un problème vous est posé : ”Trouver la sous-chaîne de fenêtre minimale de s qui contient tous les caractères de t.” Quel modèle convient le mieux ?" options="Deux pointeurs|Fenêtre coulissante|Programmation dynamique|Recherche binaire" answer="1" explanation="Il s’agit d’un problème classique de fenêtre coulissante. Vous agrandissez la fenêtre en déplaçant le pointeur droit pour inclure des caractères, et vous la réduisez à partir de la gauche une fois que tous les caractères de t sont inclus, en suivant la taille minimale de la fenêtre tout au long." />
+
+## Comment reconnaître le bon modèle
+
+Construisez un arbre de décision dans votre tête :
+
+1. **L'entrée est-elle triée ou peut-elle être triée ?** → Deux pointeurs ou recherche binaire
+2. **Avez-vous besoin d'un sous-tableau/sous-chaîne contigu ?** → Fenêtre coulissante
+3. **Est-ce un parcours de graphe/arbre ?** → BFS (chemin le plus court) ou DFS (tous les chemins)
+4. **"Trouver toutes les combinaisons/permutations" ?** → Retour en arrière
+5. **"Coût minimum / nombre de voies" ?** → Programmation dynamique
+6. **Problème « Planification/intervalle » ?** → Gourmand ou Tri
+7. **Dépendances ou classement ?** → Tri topologique
+8. **Regroupement / connectivité ?** → Union-Find
+
+## Points clés à retenir
+
+- **Apprenez des modèles, pas des problèmes** : 10 modèles couvrent la grande majorité des questions d'entretien.
+- **Commencez par la force brute** : identifiez le modèle à partir de l'approche par force brute, puis optimisez.
+- **Pratiquez la reconnaissance de formes** : pour chaque problème que vous résolvez, indiquez le modèle qu'il utilise.
+- **Combiner des modèles** : de nombreux problèmes moyens/difficiles utilisent deux modèles ensemble (par exemple, recherche binaire + fenêtre coulissante, BFS + tri topologique).
+- **Verbalisez votre raisonnement** : lors des entretiens, dire "cela ressemble à un problème de fenêtre glissante parce que..." montre une forte réflexion analytique.

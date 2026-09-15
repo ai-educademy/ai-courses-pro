@@ -1,0 +1,128 @@
+---
+title: "Fundamentos del diseño de sistemas: los componentes básicos de los sistemas escalables"
+description: "Domine los componentes centrales que toda entrevista de diseño de sistemas espera que conozca."
+order: 1
+difficulty: "advanced"
+duration: 20
+icon: "🏗️"
+published: true
+machineTranslated: true
+---
+## Por qué es importante el diseño del sistema
+
+Cada aplicación a gran escala se ensambla a partir de los mismos componentes fundamentales. Los entrevistadores no esperan que usted invente nueva tecnología: quieren verlo **seleccionar y combinar** los componentes correctos para un problema determinado. Esta lección cubre el conjunto de herramientas que utilizará en cada entrevista de diseño.
+
+## Arquitectura cliente-servidor
+
+En esencia, la web sigue un modelo simple: **los clientes** envían solicitudes, los **servidores** las procesan y las respuestas fluyen de regreso. Pero los sistemas modernos agregan capas entre estos dos puntos finales para manejar la escala, la confiabilidad y el rendimiento.
+
+Una solicitud típica podría atravesar: cliente → CDN → balanceador de carga → puerta de enlace API → servidor de aplicaciones → caché → base de datos. Cada capa resuelve un problema específico, y comprender *cuándo* cada capa es necesaria separa a los candidatos fuertes de los promedio.
+
+<Callout>En las entrevistas, comience siempre esbozando el flujo cliente-servidor de alto nivel antes de profundizar en los detalles. Muestra pensamiento estructurado.
+</Callout>
+
+## Equilibradores de carga: distribución del tráfico
+
+Un único servidor tiene una capacidad finita. Los equilibradores de carga distribuyen las solicitudes entrantes entre varios servidores mediante estrategias como:
+
+- **Round-robin**: las solicitudes pasan por los servidores de forma secuencial
+- **Menos conexiones**: rutas al servidor que maneja la menor cantidad de solicitudes activas
+- **Hashing consistente**: asigna solicitudes a servidores específicos según una clave (útil para el almacenamiento en caché)
+
+Los balanceadores de carga también realizan **verificaciones de estado**, eliminando automáticamente los servidores en mal estado del grupo. En entornos de nube, servicios como AWS ALB o Azure Front Door manejan esto de forma transparente.
+
+<Quiz question="Un servicio de alimentación de redes sociales recibe 10 veces más lecturas que escrituras. ¿Qué enfoque de equilibrio de carga garantiza mejor que los usuarios accedan constantemente al mismo servidor con caché?" options="Todos contra todos|Selección aleatoria|Hash consistente basado en la identificación del usuario|Menos conexiones" answer="2" explanation="El hash consistente enruta al mismo usuario al mismo servidor, maximizando las tasas de aciertos de caché. Las operaciones por turnos y aleatorias dispersarían las solicitudes entre los servidores, lo que reduciría la eficacia de la caché." />
+
+## Almacenamiento en caché: velocidad en cada capa
+
+El almacenamiento en caché almacena los datos a los que se accede con frecuencia más cerca del consumidor. Existe en múltiples niveles:
+
+| Capa | Ejemplo | Latencia |
+|-------|---------|---------|
+| Caché del navegador | Activos estáticos, respuestas API | ~0ms |
+| CDN | Imágenes, archivos CSS, JS | ~10-50ms |
+| Caché de aplicaciones | Redis, Memcached | ~1-5ms |
+| Caché de base de datos | Caché de resultados de consulta | ~5-10ms |
+
+**La invalidación de la caché** es famosa por ser uno de los problemas más difíciles en informática. Las estrategias comunes incluyen **TTL (tiempo de vida)**, **escritura directa** (actualizar el caché en cada escritura) y **caché aparte** (la aplicación administra el caché explícitamente).
+
+<FunFact>La famosa cita de Phil Karlton - "Sólo hay dos cosas difíciles en Ciencias de la Computación: invalidación de caché y nombrar cosas" - es tan citada que es prácticamente un rito de iniciación en las entrevistas de diseño de sistemas.
+</FunFact>
+
+## Bases de datos: SQL vs NoSQL
+
+Elegir la base de datos adecuada es una de las decisiones de diseño más impactantes:
+
+**Las bases de datos SQL** (PostgreSQL, MySQL) ofrecen transacciones ACID, gran coherencia y esquemas estructurados. Sobresalen cuando los datos tienen relaciones claras y se necesitan consultas complejas con combinaciones.
+
+**Las bases de datos NoSQL** vienen en varios tipos:
+- **Almacenes de documentos** (MongoDB): esquemas flexibles, ideales para estructuras de datos variadas
+- **Almacenamiento clave-valor** (DynamoDB, Redis): búsquedas increíblemente rápidas por clave
+- **Almacenamiento de columnas anchas** (Cassandra): rendimiento de escritura masivo, distribuido por diseño
+- **Bases de datos gráficas** (Neo4j): datos con muchas relaciones, como redes sociales
+
+<Quiz question="Está diseñando un sistema que almacena perfiles de usuario con datos semiestructurados que cambian con frecuencia (diferentes campos por tipo de usuario). ¿Qué tipo de base de datos es el más adecuado?" options="Relacional (PostgreSQL)|Almacén de documentos (MongoDB)|Columna ancha (Cassandra)|Gráfico (Neo4j)" answer="1" explanation="Los almacenes de documentos como MongoDB manejan datos semiestructurados y con esquemas flexibles de forma natural. Cada documento puede tener diferentes campos sin costosas migraciones de esquemas." />
+
+## Colas de mensajes: procesamiento asíncrono
+
+No todas las operaciones necesitan una respuesta inmediata. Las colas de mensajes (RabbitMQ, Apache Kafka, AWS SQS) desacoplan a los productores de los consumidores, lo que permite:
+
+- **Procesamiento asincrónico**: envíe un correo electrónico después de registrarse sin bloquear la respuesta
+- **Nivelación de carga**: absorbe los picos de tráfico almacenando en búfer las solicitudes
+- **Tolerancia a fallos**: si un consumidor falla, los mensajes esperan en la cola
+
+Kafka merece una mención especial: no es solo una cola sino un **registro de eventos distribuido**, que permite arquitecturas basadas en eventos donde varios consumidores pueden procesar de forma independiente el mismo flujo de eventos.
+
+<Illustration src="/images/lessons/system-design-fundamentals.svg" alt="Diagrama de arquitectura que muestra el cliente, el equilibrador de carga, los servidores de aplicaciones, la capa de caché, la base de datos y la cola de mensajes." caption="Los componentes fundamentales de un sistema escalable: cada capa aborda una preocupación específica." />
+
+## Microservicios vs Monolito
+
+| Aspecto | Monolito | Microservicios |
+|--------|----------|---------------|
+| Implementación | Unidad única | Servicios independientes |
+| Escalado | Escalar todo junto | Escalar servicios individuales |
+| Complejidad | Más sencillo de empezar | Gastos operativos |
+| Datos | Base de datos compartida | Base de datos por servicio |
+
+**Inicie monolito, extraiga microservicios cuando sea necesario.** La mayoría de los entrevistadores aprecian a los candidatos que reconocen que los microservicios introducen complejidad en el sistema distribuido (fallas de red, coherencia de datos, orquestación de implementación) y no siempre son la opción correcta.
+
+<ThinkAboutIt>Netflix migró de un monolito a microservicios a lo largo de varios años. Pero Shopify, que maneja miles de millones en transacciones, todavía ejecuta un monolito modular. ¿Qué factores podrían hacer que un enfoque sea mejor que el otro para una empresa determinada?
+</ThinkAboutIt>
+
+## Teorema CAP simplificado
+
+El teorema CAP establece que un sistema distribuido puede garantizar sólo **dos de tres** propiedades simultáneamente:
+
+- **Consistencia**: cada lectura devuelve la escritura más reciente
+- **Disponibilidad**: cada solicitud recibe una respuesta
+- **Tolerancia de partición**: el sistema continúa funcionando a pesar de las fallas de la red
+
+Dado que las particiones de red son inevitables en los sistemas distribuidos, la verdadera elección es entre **CP** (coherencia sobre disponibilidad) y **AP** (disponibilidad sobre coherencia).
+
+- **Sistemas CP** (por ejemplo, HBase, MongoDB con lecturas mayoritarias): devuelve errores en lugar de datos obsoletos
+- **Sistemas AP** (p. ej., Cassandra, DynamoDB): siempre responden, pero los datos pueden estar ligeramente obsoletos
+
+<Quiz question="Estás diseñando un sistema de transacciones bancarias donde los saldos incorrectos podrían causar pérdidas financieras. ¿Qué compensación de la PAC debería priorizar?" options="AP: siempre disponible, eventualmente consistente|CP: consistente, puede rechazar solicitudes durante las particiones|CA: consistente y disponible, ignora las particiones|Ninguno: los sistemas modernos evitan la PAC por completo" answer="1" explanation="Los sistemas financieros deben priorizar la coherencia (CP). Es mejor rechazar temporalmente una solicitud que mostrar un saldo incorrecto o procesar una transacción duplicada." />
+
+## El marco de la entrevista
+
+Cuando ingrese a una entrevista de diseño de sistema, siga esta estructura:
+
+1. **Requisitos**: aclarar los requisitos funcionales y no funcionales (5 min)
+2. **Diseño de API**: defina los puntos finales o interfaces clave (5 min)
+3. **Modelo de datos**: elija bases de datos y defina esquemas (5 min)
+4. **Arquitectura de alto nivel**: esboce el sistema utilizando los componentes básicos actuales (10 min)
+5. **Inmersiones profundas**: escalar cuellos de botella, manejar fallas, optimizar (15 min)
+
+<ThinkAboutIt>Piense en un sistema que utiliza a diario: Instagram, Uber o Spotify. ¿Puedes identificar qué componentes básicos de esta lección probablemente utilice? ¿Dónde se ubicaría el balanceador de carga? ¿Qué se almacenaría en caché? ¿Qué tipo de base de datos se ajusta a su modelo de datos?
+</ThinkAboutIt>
+
+## Conclusiones clave
+
+- Cada sistema escalable utiliza los mismos componentes básicos: apréndalos una vez y aplíquelos en todas partes.
+- Los balanceadores de carga, las cachés y las colas de mensajes resuelven distintos desafíos de escalamiento.
+- La elección de la base de datos (SQL frente a NoSQL) depende de la forma de los datos, las necesidades de coherencia y los patrones de acceso.
+- El teorema CAP obliga a hacer concesiones: sepa qué lado debería favorecer su sistema
+- Siga el marco de entrevista estructurada: requisitos → API → datos → arquitectura → inmersiones profundas
+
+A continuación: aplicaremos estos fundamentos para diseñar un acortador de URL desde cero.

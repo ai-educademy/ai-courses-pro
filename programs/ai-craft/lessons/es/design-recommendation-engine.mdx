@@ -1,0 +1,163 @@
+---
+title: "Diseñe un motor de recomendación: personalización a escala impulsada por IA"
+description: "Diseñe un sistema de recomendación de producción que combine filtrado colaborativo, incorporaciones y servicio en tiempo real."
+order: 4
+difficulty: "advanced"
+duration: 25
+icon: "🎯"
+published: true
+machineTranslated: true
+---
+## El mensaje de la entrevista
+
+*"Diseñar un motor de recomendaciones para una plataforma de comercio electrónico que ofrezca sugerencias de productos personalizadas a 100 millones de usuarios."*
+
+Esta pregunta pone a prueba su capacidad para combinar **canales de aprendizaje automático** con **diseño de sistemas escalables**, una combinación cada vez más común en entrevistas de alto nivel.
+
+## Paso 1: Recopilación de requisitos
+
+**Requisitos funcionales:**
+- "Recomendado para usted" personalizado en la página de inicio (top 20 productos)
+- "Los clientes que compraron esto también compraron" en las páginas de productos
+- "Tendencias en su área" según la actividad regional
+- Actualizaciones en tiempo real: las recomendaciones reflejan la navegación reciente en cuestión de minutos
+
+**Requisitos no funcionales:**
+- Ofrecer recomendaciones en menos de 100 ms (p99)
+- Manejar 50.000 solicitudes por segundo en el pico
+- Admite 100 millones de usuarios y 10 millones de productos
+- Degradación elegante: muestra elementos populares si falla la personalización
+
+<Callout>Defina siempre una estrategia alternativa. A los entrevistadores les encanta escuchar "si el modelo de aprendizaje automático falla, nos degradamos elegantemente a recomendaciones basadas en la popularidad": muestra el pensamiento de producción.
+</Callout>
+
+## Paso 2: Enfoques de recomendación
+
+Tres técnicas centrales impulsan la mayoría de los sistemas de recomendación:
+
+**Filtrado colaborativo**: "a usuarios similares a usted les gustaron estos elementos"
+- Analizar matrices de interacción usuario-artículo (vistas, compras, calificaciones)
+- Encuentre usuarios similares o elementos similares usando factorización matricial
+- Funciona bien con suficientes datos de interacción
+
+**Filtrado basado en contenido**: "porque te gustaron los artículos con estas características"
+- Utilice atributos del producto (categoría, marca, rango de precios, descripción)
+- Generar incrustaciones a partir de descripciones de productos utilizando modelos de transformadores.
+- Calcular la similitud entre elementos en el espacio de incrustación.
+
+**Enfoque híbrido**: combine ambas señales para obtener recomendaciones más sólidas
+- La mayoría de los sistemas de producción utilizan un híbrido: señales colaborativas para la personalización, señales de contenido para la diversidad y cobertura en frío.
+
+<Quiz question="Un nuevo usuario se registra y no tiene historial de compras ni de navegación. ¿Qué enfoque de recomendación maneja mejor este escenario de ”arranque en frío”?" options="Filtrado colaborativo basado en usuarios similares|Filtrado basado en contenido utilizando las preferencias indicadas por el usuario.|Factorización matricial de la matriz de interacción.|Solo recomendaciones basadas en popularidad" answer="1" explanation="El filtrado basado en contenido puede aprovechar señales iniciales como preferencias declaradas, categorías seleccionadas o datos demográficos para recomendar elementos con atributos coincidentes, incluso sin un historial de interacción." />
+
+## Paso 3: El canal de recomendaciones
+
+Los sistemas de recomendación de producción suelen utilizar una **arquitectura de dos etapas**:
+
+**Etapa 1: Generación de candidatos (fuera de línea/casi en tiempo real)**
+- Reducir 10 millones de productos a ~1000 candidatos por usuario
+- Utiliza modelos ligeros: filtrado colaborativo, incorporación de similitudes.
+- Se ejecuta como trabajos por lotes (cada hora/diario) o casi en tiempo real con transmisión
+
+**Etapa 2: Clasificación (en tiempo real)**
+- Califique a los ~1000 candidatos utilizando un modelo más completo
+- Considera el contexto: hora del día, dispositivo, actividad reciente, contenido del carrito
+- Devuelve los 20 artículos mejor clasificados
+- Debe ejecutarse dentro del presupuesto de latencia de 100 ms.
+
+<Illustration src="/images/lessons/design-recommendation-engine.svg" alt="Canal de recomendaciones de dos etapas que muestra las capas de generación, clasificación y servicio de candidatos" caption="La generación de candidatos reduce el catálogo; el modelo de ranking personaliza la selección final." />
+
+## Paso 4: Modelo de datos y almacén de características
+
+Las recomendaciones dependen de funciones enriquecidas calculadas a partir de múltiples fuentes de datos:
+
+**Características del usuario:** historial de compras, patrones de navegación, segmento demográfico, categorías favoritas
+**Características del artículo:** categoría, precio, calificaciones, incrustaciones de descripción, velocidad de ventas
+**Funciones de interacción:** tasas de clics, tiempo dedicado a la visualización, tasas de agregar al carrito
+
+Una **tienda de funciones** (por ejemplo, Feast, Tecton) proporciona:
+- **Funciones sin conexión**: funciones por lotes precalculadas para el entrenamiento de modelos
+- **Funciones en línea**: recuperación de funciones de baja latencia para clasificación en tiempo real
+- **Consistencia**: las mismas definiciones de funciones utilizadas en la capacitación y el servicio
+
+```
+Feature Store Schema:
+  user_features:    { user_id → [purchase_vector, category_prefs, avg_price, ...] }
+  item_features:    { item_id → [embedding, category, price, popularity_score, ...] }
+  interaction_features: { (user_id, item_id) → [clicks, views, last_interaction, ...] }
+```
+
+<FunFact>Netflix estima que su sistema de recomendación le ahorra a la compañía mil millones de dólares al año al reducir la rotación de suscriptores. Los usuarios que reciben sugerencias relevantes tienen muchas menos probabilidades de cancelar sus suscripciones.
+</FunFact>
+
+## Paso 5: Recomendaciones en tiempo real frente a recomendaciones por lotes
+
+| Aspecto | Lote | Tiempo real |
+|--------|-------|-----------|
+| Frescura | Horas de antigüedad | Segundos de edad |
+| Calcular costo | Inferior (trabajos programados) | Mayor (inferencia por solicitud) |
+| Complejidad | Tubería más sencilla | Requiere infraestructura de streaming |
+| Caso de uso | Página de inicio "para ti" | "Porque acabas de ver X" |
+
+**Enfoque híbrido práctico:**
+- Precalcular listas de candidatos por lotes cada pocas horas
+- Vuelva a clasificar en tiempo real utilizando el contexto de la sesión más reciente
+- Utilice la transmisión (Kafka) para actualizar las funciones del usuario casi en tiempo real a medida que ocurren los eventos.
+
+<ThinkAboutIt>Cuando buscas un producto en Amazon, las recomendaciones se actualizan casi instantáneamente. Pero entrenar modelos de filtrado colaborativo lleva horas. ¿Cómo crees que Amazon cierra esta brecha entre la capacitación en modelos por lotes y la personalización en tiempo real?
+</ThinkAboutIt>
+
+## Paso 6: Marco de pruebas A/B
+
+Los sistemas de recomendación necesitan una experimentación rigurosa:
+
+- **División del tráfico**: dirige un porcentaje de usuarios al nuevo modelo
+- **Métricas**: tasa de clics (CTR), tasa de conversión, ingresos por sesión, diversidad
+- **Significancia estadística**: ejecute pruebas durante el tiempo suficiente para llegar a conclusiones confiables
+- **Métricas de Guardrail**: asegúrese de que los nuevos modelos no degraden los ingresos o la participación generales
+
+Una configuración típica utiliza un **servicio de indicador de funciones** para asignar usuarios a grupos de experimentos de manera consistente (el mismo usuario siempre ve la misma variante durante una prueba).
+
+<Quiz question="Implementa un nuevo modelo de recomendación que aumenta el CTR en un 15 % pero reduce la conversión de compra en un 5 %. ¿Qué deberías hacer?" options="Envíelo: un CTR más alto significa una mejor participación|Revertirlo: la conversión es más importante que los clics|Investigar: el modelo puede estar recomendando clickbait en lugar de productos genuinamente relevantes|Realice la prueba por más tiempo: los resultados aún no son significativos" answer="2" explanation="Un CTR más alto con una conversión más baja sugiere que el modelo recomienda artículos que llamen la atención en los que los usuarios hacen clic pero no compran. La investigación de la desconexión revela si el modelo se optimiza para la métrica incorrecta." />
+
+## Paso 7: Soluciones de arranque en frío
+
+El problema de arranque en frío aparece tanto para usuarios nuevos como para elementos nuevos:
+
+**Nuevos usuarios:**
+- Mostrar recomendaciones basadas en popularidad inicialmente
+- Haga preguntas de incorporación ("Seleccione las categorías que le interesan")
+- Utilizar señales demográficas o geográficas como características iniciales.
+- Transición a recomendaciones personalizadas después de 5 a 10 interacciones
+
+**Nuevos artículos:**
+- Utilice funciones basadas en contenido (descripción, categoría, precio) para colocar elementos en el espacio de inserción
+- Impulsar nuevos artículos en una sección dedicada a "Novedades"
+- Ejecutar estrategias de exploración/explotación (mostrar nuevos elementos a un subconjunto de usuarios para recopilar datos de interacción)
+
+## Paso 8: Escalar el sistema
+
+**Arquitectura para 50.000 solicitudes por segundo:**
+- **API gateway** - limitación de velocidad, autenticación, enrutamiento de solicitudes
+- **Servicio de recomendación**: sin estado, escalado horizontalmente detrás de un equilibrador de carga
+- **Tienda de funciones** - Clúster de Redis para recuperación de funciones de baja latencia
+- **Servicio de modelos**: modelos precargados en la memoria (TensorFlow Serving, Triton)
+- **Caché precalculada** - Caché de Redis con las principales recomendaciones por usuario, actualizado mediante trabajos por lotes
+- **Retroceso**: si se pierde el caché y se agota el tiempo de espera del modelo, se devuelven los valores predeterminados basados en la popularidad.
+
+<Quiz question="Su servicio de recomendación tiene una latencia promedio de 40 ms, pero aumenta a 500 ms bajo carga máxima. ¿Cuál es la primera optimización más efectiva?" options="Actualice a GPU más rápidas para la inferencia de modelos|Agregue una capa de caché de Redis para recomendaciones calculadas previamente|Reescribir el modelo de clasificación en un lenguaje más rápido|Aumentar el tamaño del grupo de generación de candidatos" answer="1" explanation="El almacenamiento en caché de recomendaciones precalculadas para la mayoría de los usuarios elimina por completo la inferencia en tiempo real durante la carga máxima. Solo los errores de caché (nueva actividad, TTL caducado) requieren inferencia del modelo en vivo." />
+
+<FunFact>La lista de reproducción Discover Weekly de Spotify se genera todos los lunes mediante un proceso de recomendación por lotes que analiza los hábitos de escucha de más de 100 millones de usuarios. La función tuvo tanto éxito que se convirtió en la principal forma en que los usuarios descubren música nueva.
+</FunFact>
+
+<ThinkAboutIt>Los motores de recomendación pueden crear "burbujas de filtro" donde los usuarios sólo ven elementos similares a los que ya han consumido. ¿Cómo diseñaría un sistema de recomendación que equilibrara la personalización con la diversidad y la serendipia?
+</ThinkAboutIt>
+
+## Conclusiones clave
+
+- Utilice una arquitectura de dos etapas: generación de candidatos (amplia) → clasificación (precisa)
+- Los enfoques híbridos (colaborativos + basados en contenidos) superan a los sistemas de método único
+- Los almacenes de funciones garantizan la coherencia entre el entrenamiento del modelo y el servicio en tiempo real.
+- Las pruebas A/B son esenciales: optimice las métricas comerciales, no solo las métricas de aprendizaje automático.
+- Las estrategias de arranque en frío evitan malas experiencias para nuevos usuarios y artículos
+- Almacenar en caché agresivamente y degradar con gracia para manejar el tráfico pico

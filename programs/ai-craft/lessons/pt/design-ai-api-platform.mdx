@@ -1,0 +1,171 @@
+---
+title: "Projete uma plataforma de API de IA – servindo modelos para milhões"
+description: "Arquitete uma plataforma como a API da OpenAI que atende vários modelos de IA com autenticação, limitação de taxa e escalonamento automático."
+order: 5
+difficulty: "advanced"
+duration: 25
+icon: "🚀"
+published: true
+machineTranslated: true
+---
+## O prompt da entrevista
+
+*"Projete uma plataforma de API de IA que sirva vários modelos de aprendizado de máquina para desenvolvedores por meio de uma API REST - semelhante a como OpenAI ou Hugging Face servem modelos em escala."*
+
+Essa pergunta é cada vez mais popular em entrevistas porque combina **design de plataforma de API** com **desafios de infraestrutura de GPU** exclusivos para cargas de trabalho de IA.
+
+## Passo 1: Levantamento de Requisitos
+
+**Requisitos funcionais:**
+- Servir vários modelos de IA (geração de texto, classificação de imagens, incorporações) via REST API
+- Autenticação de chave API com cotas de uso por chave
+- Acompanhamento de uso e cobrança por chamada de API
+- Suporte a múltiplas versões de modelos com testes A/B
+- Streaming de respostas para tarefas de geração de longa duração
+
+**Requisitos não funcionais:**
+- Latência: p50 abaixo de 500ms para modelos incorporados, p50 abaixo de 2s para modelos generativos
+- Taxa de transferência: 10.000 solicitações por segundo em todos os modelos
+Disponibilidade: 99,9% de tempo de atividade com degradação elegante
+- Eficiência de custos: GPUs são caras - maximize a utilização
+
+<Callout>As plataformas de IA têm latência exclusivamente variável. Uma solicitação de conclusão de texto pode levar 200 ms ou 30 segundos, dependendo da duração da saída. Sempre discuta como seu projeto lida com essa variação.
+</Callout>
+
+## Etapa 2: Design da API
+
+```
+POST /v1/completions
+Headers: Authorization: Bearer sk-abc123
+Body: { "model": "gpt-4", "prompt": "Explain caching", "max_tokens": 200 }
+
+POST /v1/embeddings
+Headers: Authorization: Bearer sk-abc123
+Body: { "model": "text-embedding-3", "input": "Hello world" }
+
+GET  /v1/models                    - list available models
+GET  /v1/usage?start=2024-01-01    - usage and billing data
+
+SSE: POST /v1/completions (stream: true)
+     → returns Server-Sent Events with incremental tokens
+```
+
+O streaming via **Eventos enviados pelo servidor (SSE)** é fundamental para modelos generativos: os usuários veem os tokens aparecerem progressivamente, em vez de esperar pela resposta completa.
+
+## Etapa 3: API Gateway e autenticação
+
+O gateway da API é a porta de entrada da plataforma:
+
+- **Autenticação** - valida chaves de API em um armazenamento de chaves (Redis para velocidade, banco de dados para persistência)
+- **Limitação de taxa** - impõe limites por chave (por exemplo, 60 solicitações/minuto para nível gratuito)
+- **Roteamento de solicitações**: direciona solicitações para o cluster de serviço de modelo correto
+- **Solicitar validação** - verificar esquema de carga útil, disponibilidade de modelo, limites de token
+
+**Implementação de limitação de taxa:**
+Use um **contador de janela deslizante** no Redis:
+```
+Key:   rate:{api_key}:{window_minute}
+Value: request count
+TTL:   120 seconds
+```
+
+Cada solicitação incrementa o contador. Se exceder o limite, retorne HTTP 429.
+
+<Quiz question="A chave de API de um cliente tem uma taxa limitada a 100 solicitações por minuto. Eles enviam 80 solicitações nos primeiros 30 segundos e mais 40 nos próximos 30 segundos. Sob uma abordagem de janela fixa, o que acontece?" options="Todas as 120 solicitações foram bem-sucedidas – elas estão dentro do limite por minuto|As últimas 20 solicitações foram rejeitadas - 100 por minuto foram excedidos|Todas as 120 solicitações foram bem-sucedidas na primeira janela, mas a cota do minuto seguinte é reduzida|O sistema trava devido ao excesso de capacidade" answer="1" explanation="A limitação da taxa de janela fixa é redefinida em limites de minuto. Se 80 chegarem na segunda metade do minuto 1 e 40 na primeira metade do minuto 2, todas serão bem-sucedidas - mesmo que 120 solicitações tenham chegado em um intervalo de 60 segundos. É por isso que os algoritmos de janela deslizante são preferidos." />
+
+<Illustration src="/images/lessons/design-ai-api-platform.svg" alt="Arquitetura da plataforma AI API mostrando gateway, roteamento, clusters de GPU e monitoramento" caption="As solicitações fluem pelo gateway para clusters de GPU específicos do modelo, com monitoramento e cobrança em todas as camadas." />
+
+## Etapa 4: exibição de modelo e alocação de GPU
+
+É aqui que as plataformas de IA diferem fundamentalmente dos serviços web tradicionais. As GPUs são escassas, caras e exigem orquestração especializada.
+
+**Camada de veiculação do modelo:**
+- Os modelos são carregados na memória da GPU usando estruturas como **Triton Inference Server** ou **vLLM**
+- Cada versão do modelo é executada em um pool dedicado de instâncias de GPU
+- Grandes modelos de linguagem (LLMs) podem exigir **paralelismo de modelo** em várias GPUs
+
+**Solicitar lote:**
+Solicitações de inferência individuais são ineficientes em GPUs. **Lote dinâmico** agrupa várias solicitações e as processa juntas:
+- Colete solicitações por até 10ms ou até o lote atingir 32 solicitações
+- Processe o lote inteiro em uma passagem direta de GPU
+- Retornar respostas individuais para cada chamador
+
+Isso pode melhorar o rendimento em 5 a 10 vezes em comparação com o processamento de solicitações individualmente.
+
+<FunFact>Uma única GPU NVIDIA H100 custa cerca de £ 25.000 e consome 700 watts de energia. A execução de um cluster de 1.000 GPUs para atendimento de modelo custa mais de £ 2 milhões por mês apenas em eletricidade e hardware - e é por isso que o lote e a utilização eficientes são extremamente importantes.
+</FunFact>
+
+## Etapa 5: Teste A/B entre versões do modelo
+
+Ao implantar uma nova versão de modelo, você precisa de uma implementação controlada:
+
+- **Divisão de tráfego** - encaminha 5% das solicitações para o novo modelo, 95% para o atual
+- **Modo sombra** - execute o novo modelo no tráfego de produção sem retornar seus resultados aos usuários
+- **Comparação de métricas** - latência, índices de qualidade de saída, taxas de erro, custo por solicitação
+- **Lançamento gradual** - aumente o tráfego para a nova versão à medida que a confiança aumenta
+
+A lógica de roteamento reside no gateway da API:
+```
+model: "gpt-4"  →  95% → gpt-4-v2.1 (current)
+                →   5% → gpt-4-v2.2 (candidate)
+```
+
+<ThinkAboutIt>Avaliar se uma nova versão do LLM é “melhor” é surpreendentemente difícil – diferentemente dos modelos de classificação, não existe uma métrica de precisão simples. Como você projetaria um sistema automatizado de avaliação de qualidade para modelos generativos de IA?
+</ThinkAboutIt>
+
+## Etapa 6: Rastreamento de uso e cobrança
+
+As APIs de IA normalmente cobram por token (tokens de entrada + saída para LLMs, por solicitação para outros modelos).
+
+**Pipeline de faturamento baseado em eventos:**
+1. Cada resposta da API inclui um cabeçalho de uso: `x-usage-tokens: 847`
+2. Um evento de cobrança é publicado no Kafka: `{ api_key, model, input_tokens, output_tokens, timestamp }`
+3. Um serviço de agregação de cobrança consome eventos e atualiza totais em execução
+4. Painéis de uso consultam dados agregados de um banco de dados de série temporal
+
+**Por que Kafka?** O faturamento deve ser confiável, mas não precisa ser síncrono. Se o serviço de cobrança estiver temporariamente inativo, os eventos serão enfileirados no Kafka e serão processados ​​quando ele se recuperar – nenhum dado de uso será perdido.
+
+<Quiz question="Seu pipeline de cobrança processa eventos de uso de forma assíncrona por meio do Kafka. Um cliente verifica seu painel de uso e vê um número menor do que o esperado. Qual é a causa mais provável?" options="Os eventos foram perdidos devido a uma falha na partição Kafka|O serviço de agregação tem atraso no processamento – os eventos ainda não foram consumidos|O gateway de API não conseguiu emitir eventos de uso|A chave de API do cliente tinha taxa limitada" answer="1" explanation="Pipelines assíncronos apresentam atraso inerentemente. Os eventos publicados no Kafka podem levar segundos ou minutos para serem consumidos e agregados, portanto, o painel mostra uma visão um pouco atrasada do uso." />
+
+## Etapa 7: Monitoramento e Observabilidade
+
+As plataformas de IA exigem monitoramento além dos serviços web padrão:
+
+| Métrica | Por que é importante |
+|--------|----------------|
+| Latência de inferência (p50, p95, p99) | Experiência do usuário e conformidade com SLA |
+| Utilização de GPU | Eficiência de custos – GPUs ociosas desperdiçam dinheiro |
+| Tokens por segundo | Capacidade de transferência e sinais de escala |
+| Taxa de erro por modelo | Detectar falhas específicas do modelo |
+| Profundidade da fila | Gatilho de escalonamento – filas profundas significam que a demanda excede a capacidade |
+| Índices de qualidade de produção | Detectar degradação do modelo (por meio de avaliação automatizada) |
+
+**Limites de alerta:** utilização da GPU abaixo de 40% aciona redução de escala; profundidade da fila acima de 100 aciona aumento de escala.
+
+## Etapa 8: escalonamento automático
+
+As cargas de trabalho de IA têm demanda altamente variável. O escalonamento automático deve equilibrar a capacidade de resposta com o custo:
+
+- **Escalonamento horizontal** - adicione mais instâncias de GPU quando a profundidade ou latência da fila exceder os limites
+- **Escalonamento preditivo** - use padrões históricos de tráfego para pré-provisionar capacidade antes dos picos esperados
+- **Escalar até zero** - para modelos raramente usados, reduza a rotação de todas as instâncias e inicialize a frio sob demanda
+- **Pools quentes** – mantenha um pequeno número de instâncias com modelos pré-carregados para evitar latência de inicialização a frio
+
+A estratégia de escala até zero é particularmente importante para plataformas que hospedam centenas de modelos – você não pode manter todos os modelos carregados na memória da GPU o tempo todo.
+
+<Quiz question="Um modelo que recebe 2 solicitações por hora atualmente é executado em uma instância de GPU sempre ativa, custando £ 3/hora. A partida a frio do zero leva 45 segundos. Qual é a melhor estratégia de escalonamento?" options="Mantenha a instância sempre ligada – 45 segundos é muito tempo para esperar|Dimensione para zero e aceite partidas a frio de 45 segundos para a primeira solicitação|Use um pool quente de uma instância de CPU que transfere para GPU sob demanda|Agrupe as 2 solicitações em um único trabalho agendado" answer="1" explanation="Com 2 solicitações por hora, a GPU fica ociosa 99,9% do tempo. Escalar para zero e aceitar uma inicialização a frio de 45 segundos economiza quase £ 2.100/mês por modelo - vale a pena o atraso ocasional para um modelo de baixo tráfego." />
+
+<ThinkAboutIt>A plataforma OpenAI atende modelos que vão desde modelos de incorporação rápida até modelos de raciocínio lento. Cada um tem características de latência, requisitos de GPU e preços diferentes. Como você projetaria a camada de roteamento para compartilhar com eficiência um cluster finito de GPU entre modelos com perfis tão diferentes?
+</ThinkAboutIt>
+
+<FunFact>A OpenAI supostamente processa mais de 100 milhões de solicitações de API diariamente. Com uma média estimada de 500 tokens por solicitação, são 50 bilhões de tokens por dia – exigindo milhares de GPUs em execução contínua.
+</FunFact>
+
+## Principais conclusões
+
+- As plataformas de API de IA combinam design de API tradicional com desafios de infraestrutura específicos de GPU
+- O lote de solicitações melhora drasticamente o rendimento da GPU e a eficiência de custos
+- A limitação de taxas protege a plataforma e os clientes contra custos excessivos
+- O faturamento assíncrono via Kafka garante rastreamento de uso confiável sem bloquear solicitações
+- O escalonamento automático deve equilibrar a capacidade de resposta com o custo - escalar até zero para modelos de baixo tráfego
+- O monitoramento da utilização da GPU e da profundidade da fila impulsiona decisões inteligentes de escalabilidade

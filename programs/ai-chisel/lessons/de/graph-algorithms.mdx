@@ -1,0 +1,143 @@
+---
+title: "Graphalgorithmen – Wie KI durch Netzwerke navigiert"
+description: "Lernen Sie die Traversal- und Shortest-Path-Algorithmen kennen, die Karten, soziale Netzwerke und Webcrawler unterstützen."
+order: 3
+difficulty: "intermediate"
+duration: 20
+icon: "🗺️"
+published: true
+machineTranslated: true
+---
+## Diagramme modellieren die vernetzte Welt
+
+Freundschaften, Straßennetze, Hyperlinks, Nervenbahnen – wann immer Entitäten durch Beziehungen verbunden sind, entsteht ein **Diagramm**. Formal besteht ein Graph G = (V, E) aus Ecken (Knoten) und Kanten (Verbindungen).
+
+Diagramme können **gerichtet** (Einbahnstraßen) oder **ungerichtet** (zweiseitig) sein, und Kanten können **Gewichte** (Entfernungen, Kosten, Latenzen) tragen.
+
+<Illustration src="/images/lessons/graph-algorithms.svg" alt="Ein gerichteter gewichteter Graph mit sechs Knoten und beschrifteten Kanten, der einen kürzesten Pfad hervorgehoben zeigt" caption="Diagramme erfassen Beziehungen zwischen Entitäten; Kantengewichte quantifizieren die Kosten der Durchquerung." />
+
+## Darstellung von Diagrammen
+
+Zwei gängige Darstellungen:
+
+| Darstellung | Raum | Kantensuche | Am besten für |
+|---------------|-------|-------------|----------|
+| **Adjazenzliste** | O(V + E) | O(Grad) | Spärliche Diagramme (die meisten realen Netzwerke) |
+| **Adjazenzmatrix** | O(V²) | O(1) | Dichte Graphen, schnelle Kantenexistenzprüfungen |
+
+```
+// Adjacency list example
+graph = {
+    A: [(B, 4), (C, 1)],
+    B: [(D, 1)],
+    C: [(B, 2), (D, 5)],
+    D: []
+}
+```
+
+## Breitensuche (BFS)
+
+BFS erkundet **Ebene für Ebene** und besucht alle Nachbarn, bevor es tiefer geht. Es verwendet eine **Warteschlange**.
+
+```
+function bfs(graph, start):
+    visited = {start}
+    queue = [start]
+    while queue is not empty:
+        node = queue.dequeue()
+        process(node)
+        for neighbour in graph[node]:
+            if neighbour not in visited:
+                visited.add(neighbour)
+                queue.enqueue(neighbour)
+```
+
+**Schlüsseleigenschaft:** BFS findet den **kürzesten Pfad** in ungewichteten Diagrammen, da es Knoten in der Reihenfolge ihrer Entfernung von der Quelle verarbeitet.
+
+### KI-Anwendungsfälle für BFS
+
+- **Vorschläge von Freunden aus sozialen Netzwerken** – Finden Sie Personen im Umkreis von 2–3 Verbindungen.
+- **Webcrawler** – indizieren Seiten Schicht für Schicht von einer Seed-URL.
+- **Rätsellöser** – Finden Sie die Mindestanzahl an Zügen (z. B. Zauberwürfelzustände).
+
+<Quiz question="Warum garantiert BFS den kürzesten Weg in einem ungewichteten Diagramm?" options="Es wird immer die hellste Kante ausgewählt|Es untersucht Knoten in der Reihenfolge zunehmender Entfernung von der Quelle|Es verwendet einen Stapel zum Zurückverfolgen|Es sortiert alle Kanten vor dem Durchlaufen" answer="1" explanation="BFS verarbeitet alle Knoten im Abstand d vor jedem Knoten im Abstand d+1, sodass es einen Knoten zum ersten Mal über den kürzesten Weg erreicht." />
+
+## Tiefensuche (DFS)
+
+DFS geht **so tief wie möglich**, bevor es zurückgeht. Es verwendet einen **Stapel** (oder eine Rekursion).
+
+```
+function dfs(graph, node, visited):
+    visited.add(node)
+    process(node)
+    for neighbour in graph[node]:
+        if neighbour not in visited:
+            dfs(graph, neighbour, visited)
+```
+
+### Anwendungen von DFS
+
+- **Topologische Sortierung** – Aufgaben so anordnen, dass jede Abhängigkeit an erster Stelle steht (Build-Systeme, Kursvoraussetzungen).
+- **Zykluserkennung** – wenn DFS einen Knoten erneut aufruft, der sich derzeit im Aufrufstapel befindet, liegt ein Zyklus vor.
+- **Labyrinthlösung** – erkunden Sie einen Pfad vollständig, bevor Sie Alternativen ausprobieren.
+- **Verbundene Komponenten** – Führen Sie DFS von jedem nicht besuchten Knoten aus, um separate Cluster zu identifizieren.
+
+<ThinkAboutIt>Ein Paketmanager muss Abhängigkeiten in der richtigen Reihenfolge installieren. Sollte es eine BFS- oder DFS-basierte topologische Sortierung verwenden? Was passiert, wenn im Abhängigkeitsdiagramm ein Zyklus vorhanden ist?</ThinkAboutIt>
+
+## Dijkstras Algorithmus – Kürzester Weg mit Gewichten
+
+Wenn Kanten unterschiedliche Kosten haben, reicht BFS nicht mehr aus. Der Dijkstra-Algorithmus findet den kürzesten gewichteten Pfad von einer Quelle zu allen anderen Knoten.
+
+**Kernidee:** Erweitern Sie immer den **günstigsten nicht besuchten Knoten** mithilfe eines Min-Heaps (Prioritätswarteschlange).
+
+```
+function dijkstra(graph, source):
+    dist = {source: 0}          // all others: infinity
+    pq = MinHeap([(0, source)])
+    while pq is not empty:
+        (cost, node) = pq.extractMin()
+        if cost > dist[node]: continue
+        for (neighbour, weight) in graph[node]:
+            newDist = cost + weight
+            if newDist < dist.getOrDefault(neighbour, INF):
+                dist[neighbour] = newDist
+                pq.insert((newDist, neighbour))
+    return dist
+```
+
+**Zeitliche Komplexität:** O((V + E) log V) mit einem binären Heap.
+
+<FunFact>Google Maps führt nicht die reine Dijkstra auf dem gesamten Straßennetz aus. Es verwendet Kontraktionshierarchien und A*-Suche – aber beide bauen auf Dijkstras grundlegender Erkenntnis der gierigen Expansion um die kürzeste bekannte Distanz auf.</FunFact>
+
+### KI-Anwendungsfälle für Dijkstra
+
+- **Routenplanung** – Navigations-Apps finden die schnellste Fahrt.
+- **Netzwerkrouting** – Internetpakete wählen den Pfad mit der niedrigsten Latenz.
+- **Wissensgraphen** – Finden der kürzesten semantischen Verbindung zwischen Konzepten.
+
+<Quiz question="Welche Datenstruktur benötigt der Dijkstra-Algorithmus, um den nächsten zu besuchenden Knoten effizient auszuwählen?" options="Stapel|Warteschlange|Min-Heap (Prioritätswarteschlange)|Hash-Tabelle" answer="2" explanation="Ein Min-Heap ermöglicht es Dijkstra, den nicht besuchten Knoten mit der kleinsten vorläufigen Entfernung in O(log V)-Zeit zu extrahieren." />
+
+## Zykluserkennung und verbundene Komponenten
+
+### Zykluserkennung
+
+Verfolgen Sie in einem **gerichteten Diagramm** Knoten in drei Zuständen: nicht besucht, in Bearbeitung (auf dem aktuellen DFS-Pfad) und abgeschlossen. Wenn Sie auf einen laufenden Knoten stoßen, bedeutet dies, dass ein Zyklus vorhanden ist.
+
+In einem **ungerichteten Diagramm** liegt ein Zyklus vor, wenn DFS einen besuchten Knoten erreicht, der nicht der unmittelbare übergeordnete Knoten ist.
+
+### Verbundene Komponenten
+
+Führen Sie BFS oder DFS von jedem nicht besuchten Knoten aus. Bei jedem Lauf wird eine verbundene Komponente entdeckt. In sozialen Netzwerken offenbaren Komponenten isolierte Gemeinschaften.
+
+<ThinkAboutIt>Ein KI-System zur Betrugserkennung modelliert Transaktionen als Diagramm, in dem Konten Knoten und Überweisungen Kanten sind. Wie könnten vernetzte Komponenten dabei helfen, Geldwäscheringe zu identifizieren?</ThinkAboutIt>
+
+## Wichtige Erkenntnisse
+
+1. **BFS** erforscht Ebene für Ebene – ideal für kürzeste Pfade in ungewichteten Diagrammen und nachbarschaftsbasierte Entdeckung.
+2. **DFS** taucht tief ein – das Rückgrat der topologischen Sortierung, Zykluserkennung und Komponentenanalyse.
+3. **Dijkstra** erweitert BFS mithilfe einer Prioritätswarteschlange auf gewichtete Diagramme – die Grundlage moderner Routenplanung.
+4. Graphalgorithmen sind der Motor hinter Karten, sozialen Netzwerken, Paketmanagern und Wissensgraphen.
+
+<FunFact>Das World Wide Web enthält über 50 Milliarden indizierte Seiten. Suchmaschinen-Crawler verwenden Variationen von BFS, um Seiten zu entdecken und neu zu indizieren, wobei sie nach Seitenwichtigkeit (PageRank) priorisieren.</FunFact>
+
+<Quiz question="Welchen Algorithmus würden Sie verwenden, um zu erkennen, ob ein gerichteter Aufgabenabhängigkeitsgraph eine zirkuläre Abhängigkeit enthält?" options="Dijkstras Algorithmus|BFS kürzester Weg|DFS mit laufender Nachverfolgung|Binäre Suche" answer="2" explanation="DFS mit Drei-Status-Verfolgung (nicht besucht, in Bearbeitung, abgeschlossen) erkennt Rückkanten – ein erneut angetroffener laufender Knoten bedeutet einen Zyklus." />

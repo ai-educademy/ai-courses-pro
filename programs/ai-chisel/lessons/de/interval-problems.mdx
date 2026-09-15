@@ -1,0 +1,162 @@
+---
+title: "Intervallprobleme – Zusammenführen, Einfügen und Planen"
+description: "Meistern Sie intervallbasierte Probleme vom Zusammenführen und Einfügen bis hin zu Besprechungsräumen und Sweep-Linien. Lernen Sie die Sortierstrategien und -muster kennen, die Interviewer erwarten."
+order: 9
+difficulty: "advanced"
+duration: 16
+icon: "📅"
+published: true
+machineTranslated: true
+---
+## Intervalldarstellung
+
+Ein Intervall ist ein Paar `[start, end]`. Die meisten Intervallprobleme beginnen mit einem entscheidenden Schritt: **Sortieren nach Startzeit**. Dadurch wird eine chaotische Liste in eine Sequenz umgewandelt, die Sie mit einfachen Vergleichen von links nach rechts verarbeiten können.
+
+```
+Unsorted: [3,6] [1,4] [8,10] [2,5]
+Sorted:   [1,4] [2,5] [3,6] [8,10]
+```
+
+## Überlappende Intervalle zusammenführen
+
+Das grundlegende Intervallproblem (LeetCode 56). Nach der Sortierung überlappen sich zwei aufeinanderfolgende Intervalle, wenn der aktuelle Anfang ≤ das vorherige Ende ist.
+
+```python
+def merge(intervals):
+    intervals.sort()
+    merged = [intervals[0]]
+    for start, end in intervals[1:]:
+        if start <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], end)
+        else:
+            merged.append([start, end])
+    return merged
+```
+
+Gehen Sie durch `[1,4] [2,5] [3,6] [8,10]`:
+- `[2,5]` überlappt `[1,4]` → verschmelzen zu `[1,5]`
+- `[3,6]` überlappt `[1,5]` → verschmelzen zu `[1,6]`
+- `[8,10]` keine Überlappung → neues Intervall
+
+Ergebnis: `[1,6] [8,10]`
+
+<Quiz
+  question="Welche Bedingung bestimmt nach dem Sortieren der Intervalle nach Beginn, dass sich zwei aufeinanderfolgende Intervalle überlappen?"
+  options="aktueller.Start > vorheriges.Ende|current.start == previous.start|current.start <= previous.end|current.end < previous.start"
+  answer="2"
+  explanation="Wenn das aktuelle Intervall vor oder genau mit dem Ende des vorherigen beginnt, überlappen sie sich und sollten zusammengeführt werden."
+/>
+
+## Intervall einfügen
+
+Wenn sortierte, nicht überlappende Intervalle und ein neues Intervall vorhanden sind, fügen Sie es ein und führen Sie es nach Bedarf zusammen (LeetCode 57). Aufgeteilt in drei Phasen:
+
+1. Addieren Sie alle Intervalle, die enden, bevor das neue beginnt
+2. Alle überlappenden Intervalle mit dem neuen zusammenführen
+3. Restliche Intervalle unverändert hinzufügen
+
+<ThinkAboutIt>Das Einfügeintervall wird häufig angezeigt, ohne dass der Zusammenführungsschritt offensichtlich ist. Woran würden Sie während eines Vorstellungsgesprächs erkennen, dass es sich um ein Zusammenführungsproblem handelt?</ThinkAboutIt>
+
+## Besprechungsräume, an denen ich teilnehmen kann?
+
+Sortieren nach Startzeit. Wenn der Beginn eines Intervalls vor dem Ende des vorherigen Intervalls liegt, liegt ein Konflikt vor.
+
+```python
+def can_attend(intervals):
+    intervals.sort()
+    for i in range(1, len(intervals)):
+        if intervals[i][0] < intervals[i - 1][1]:
+            return False
+    return True
+```
+
+## Besprechungsräume II – Mindestanzahl an Räumen
+
+Hier glänzt der **ereignisbasierte Ansatz**. Trennen Sie Starts und Enden in zwei sortierte Listen und führen Sie dann einen Sweep durch:
+
+```python
+import heapq
+
+def min_rooms(intervals):
+    intervals.sort()
+    heap = []
+    for start, end in intervals:
+        if heap and heap[0] <= start:
+            heapq.heappop(heap)
+        heapq.heappush(heap, end)
+    return len(heap)
+```
+
+Der Heap verfolgt das früheste Endtreffen. Wenn es endet, bevor das nächste beginnt, verwenden wir den Raum erneut. Die maximale Größe des Heaps ist die Antwort.
+
+<Illustration src="/images/lessons/interval-problems.svg" alt="Zeitleiste mit überlappenden Besprechungsintervallen, die mehrere Räume erfordern" caption="Jeder vertikale Schnitt zeigt gleichzeitige Besprechungen – der Höhepunkt ist der minimal benötigte Raum." />
+
+<FunFact>Bei Meeting Rooms II handelt es sich im Wesentlichen um das gleiche Problem wie das Finden der maximalen Anzahl überlappender Intervalle an jedem Punkt – ein Konzept, das bei der CPU-Thread-Planung, der Bandbreitenzuweisung und der Krankenhausbettenplanung verwendet wird.</FunFact>
+
+## Nicht überlappende Intervalle – Mindestentfernungen
+
+Ermitteln Sie bei gegebenen Intervallen die Mindestanzahl, die entfernt werden muss, damit keine Überlappungen auftreten (LeetCode 435). Gierig: Sortieren Sie nach **Endzeit**, behalten Sie immer das Intervall bei, das am frühesten endet – das lässt den meisten Raum für zukünftige Intervalle.
+
+```python
+def erase_overlap(intervals):
+    intervals.sort(key=lambda x: x[1])
+    count, prev_end = 0, float('-inf')
+    for start, end in intervals:
+        if start >= prev_end:
+            prev_end = end
+        else:
+            count += 1
+    return count
+```
+
+<Quiz
+  question="Warum funktioniert die Sortierung nach END-Zeit (nicht nach Startzeit) für das Problem der nicht überlappenden Intervalle?"
+  options="Es reduziert die zeitliche Komplexität|Das früheste Ende lässt maximalen Spielraum für nachfolgende Intervalle|Es geht besser mit Bindungen um|Es vermeidet negative Intervalle"
+  answer="1"
+  explanation="Durch die sorgfältige Beibehaltung des Intervalls, das am schnellsten endet, wird die verbleibende Zeitachse maximiert, die für zukünftige, sich nicht überschneidende Intervalle verfügbar ist."
+/>
+
+## Intervalllisten-Schnittpunkte
+
+Finden Sie anhand zweier sortierter Intervalllisten alle Schnittpunkte (LeetCode 986). Verwenden Sie zwei Zeiger – einen pro Liste. Der Schnittpunkt von `[a1, a2]` und `[b1, b2]` ist `[max(a1, b1), min(a2, b2)]`, wenn er gültig ist (Anfang ≤ Ende). Bewegen Sie den Zeiger weiter, dessen Intervall zuerst endet.
+
+## Die Sweep-Line-Technik
+
+Anstatt Intervalle paarweise zu vergleichen, zerlegen Sie jedes in Ereignisse:
+
+```
+[1,4] → +1 at 1, -1 at 4
+[2,6] → +1 at 2, -1 at 6
+```
+
+Sortieren Sie Ereignisse nach Zeit. Streichen Sie von links nach rechts und zählen Sie dabei fortlaufend mit. Die Spitzenzahl beantwortet Fragen zur „maximalen Überlappung“. Dies verallgemeinert Meeting Rooms II auf beliebige Ereignisverarbeitungsprobleme.
+
+## Kalenderbuchung
+
+**Mein Kalender I** (LeetCode 729): Gebuchte Intervalle beibehalten und Überschneidungen ablehnen. **Mein Kalender II**: Einzelüberschneidungen zulassen, Dreifachbuchungen jedoch ablehnen. Die Sweep-Linie erleichtert die Erkennung mehrschichtiger Überlappungen.
+
+## Mustererkennung – Wann sind Intervalle zu vermuten?
+
+Suchen Sie in Problemstellungen nach diesen Hinweisen:
+
+– Wörter wie „überlappend“, „widersprüchlich“, „Zeitplan“, „Bereich“
+- Paare von Start-/Endwerten
+- Fragen zu „Wie viele gleichzeitig“ oder „Mindestressourcen“
+– Daten, die als Segmente auf einer Zahlengeraden dargestellt werden können
+
+<Quiz
+  question="Welche Sortierstrategie eignet sich am besten für das Problem „Mindestanzahl zu entfernender Intervalle”?"
+  options="Sortierung nach Startzeit aufsteigend|Sortierung nach Endzeit aufsteigend|Sortierung nach Intervalllänge absteigend|Keine Sortierung erforderlich"
+  answer="1"
+  explanation="Das Sortieren nach Endzeit ermöglicht einen gierigen Ansatz: Stellen Sie sicher, dass das Intervall immer am frühesten endet, um den Platz für andere zu maximieren."
+/>
+
+<ThinkAboutIt>Die Sweep-Line-Technik wandelt Intervallprobleme in Ereignisverarbeitungsprobleme um. Können Sie sich ein reales System (außerhalb der Codierung von Interviews) vorstellen, das genau diesen Ansatz verwendet?</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+
+- [Intervalle zusammenführen – LeetCode 56](https://leetcode.com/problems/merge-intervals/) – Das wesentliche Startproblem für die Intervallbeherrschung
+- [Sweep-Line-Algorithmus – CP-Algorithmen](https://cp-algorithms.com/geometry/intersecting_segments.html) – Tiefergehende Untersuchung des Sweep-Line-Paradigmas
+– [Meeting Rooms II – LeetCode 253](https://leetcode.com/problems/meeting-rooms-ii/) – Das klassische Min-Heap-Intervall-Planungsproblem

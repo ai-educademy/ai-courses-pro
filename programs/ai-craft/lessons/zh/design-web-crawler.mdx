@@ -1,0 +1,158 @@
+---
+title: "设计网络爬虫 - Google 如何索引互联网"
+description: "设计一个分布式网络爬虫，涵盖 URL 边界管理、礼貌策略、SimHash 的内容重复数据删除以及使用一致哈希的分布式爬行。"
+order: 9
+difficulty: "advanced"
+duration: 22
+icon: "🕷️"
+published: true
+machineTranslated: true
+---
+# 设计一个网络爬虫 - Google 如何索引互联网
+
+网络爬虫系统地浏览互联网以下载和索引网页。它是每个搜索引擎的基础，设计一个搜索引擎可以教会您分布式系统、图形遍历以及处理真实网络的混乱情况。
+
+## 步骤 1 - 需求收集
+
+### 功能要求
+- 从一组种子 URL 开始抓取网页
+- 提取并跟踪超链接以发现新页面
+- 存储下载的内容以进行索引和处理
+- 尊重robots.txt并抓取礼貌规则
+
+### 非功能性需求
+- **规模** - 每月抓取 10 亿页
+- **礼貌** - 永远不会压垮单个网络服务器
+- **新鲜度** - 定期重新抓取重要页面
+- **稳健性** - 处理格式错误的 HTML、无限循环和蜘蛛陷阱
+
+## 步骤 2 - 高级架构
+
+```
+Seed URLs → URL Frontier (priority queue)
+                  ↓
+            URL Scheduler (politeness + priority)
+                  ↓
+         Fetcher (HTTP client pool)
+                  ↓
+         HTML Parser → Extract URLs → URL Filter
+              ↓                           ↓
+       Content Store              URL Dedup (Bloom Filter)
+       (S3 / HDFS)                      ↓
+                                 URL Frontier (loop)
+```
+
+<Illustration src="/images/lessons/design-web-crawler.svg" alt="Web 爬虫架构显示了从 URL 前沿到获取器、解析器、URL 提取、重复数据删除，然后返回前沿的爬行循环" caption="爬虫以连续循环的方式运行：获取页面、提取新 URL、删除重复数据以及排队以供将来爬行" />
+
+## 步骤 3 - 爬行循环
+
+### BFS 与 DFS 爬行
+- **BFS（广度优先）** - 网络爬行的首选。快速发现广泛的域并避免深陷单一站点
+- **DFS（深度优先）** - 在发现其他域之前无限深入动态生成的页面的风险
+
+### URL前沿设计
+边界不是一个简单的队列 - 它是一个复杂的优先级系统，具有两个子组件：
+
+1. **优先级队列（前面）** - 按重要性对 URL 进行排名。因素包括 PageRank、更新频率和域权限
+2. **礼貌队列（后）** - 确保每个域都有自己的 FIFO 队列。调度程序从不同的域队列中进行选择，以避免对任何单个服务器造成影响
+
+```
+Front (Priority):       Back (Politeness):
+┌──────────────┐       ┌─── bbc.co.uk queue ───┐
+│ High Priority │ ───→  │ url1 → url4 → url7    │
+│ Med Priority  │ ───→  ├─── github.com queue ──┤
+│ Low Priority  │ ───→  │ url2 → url5 → url8    │
+└──────────────┘       ├─── wikipedia.org queue ┤
+                        │ url3 → url6 → url9    │
+                        └───────────────────────┘
+```
+
+<Quiz question="为什么网络爬虫使用 BFS 而不是 DFS 进行通用爬行？" options="BFS 使用更少的内存|BFS 更快地发现更多独特的域，并避免陷入单一网站的深渊|BFS 比 DFS 更快|DFS 不适用于 URL" answer="1" explanation="BFS 逐级探索，这意味着它可以快速发现跨许多不同域的页面。 DFS 可以在访问另一个域之前跟踪深入到单个站点的链接 - 可能会访问数百万个动态生成的页面。" />
+
+## 步骤 4 - 礼貌和 Robots.txt
+
+### 尊重机器人.txt
+在抓取任何域之前，请获取并缓存其 `robots.txt` 文件：
+
+```
+# Example robots.txt
+User-agent: *
+Disallow: /admin/
+Disallow: /private/
+Crawl-delay: 2
+```
+
+使用 TTL（24 小时）缓存每个域​​的 robots.txt。始终遵守 `Disallow` 规则和 `Crawl-delay` 指令。
+
+### 抓取速率限制
+即使没有明确的`Crawl-delay`，也要保持礼貌：
+- 每个域每秒最多 1 个请求（可配置）
+- 每个域使用单独的下载队列
+- 跟踪响应时间 - 如果服务器速度变慢，则会自动退出
+
+<FunFact>Google 的网络爬虫 (Googlebot) 爬行了数千亿个页面。礼貌地说，它会监视服务器响应时间，并在网站开始响应缓慢时降低其爬网速度 - 有效地让网站“推回”爬网程序。</FunFact>
+
+## 步骤 5 - 重复数据删除
+
+### URL 重复数据删除（布隆过滤器）
+对于数十亿个 URL，检查某个 URL 是否以前见过需要高效的数据结构。布隆过滤器以较小的内存占用提供 O(1) 查找：
+
+- **空间：** 10 亿个 URL 约 1 GB，误报率为 1%
+- **权衡：**可能偶尔会重新抓取页面（误报），但绝不会错过新的 URL（无误报）
+
+在检查之前规范化 URL：删除片段 (#)、对查询参数进行排序、将主机名小写并解析相对路径。
+
+### 内容重复数据删除 (SimHash)
+不同的 URL 可以提供相同的内容（镜像、复制的文章）。 SimHash 生成页面内容的指纹 - 具有相似指纹（小汉明距离）的页面可能是重复的：
+
+```
+Page A content → SimHash → 10110010...
+Page B content → SimHash → 10110011...
+Hamming distance = 1 → likely duplicate, skip storing
+```
+
+<Quiz question="布隆过滤器报告某个 URL 之前已被见过。你能得出什么结论？" options="该网址肯定已被抓取|该 URL 可能已被抓取，但有很小的可能是误报|该网址尚未被抓取|布隆过滤器需要重建" answer="1" explanation="布隆过滤器的误报率很小 - 它们可能会对未见过的 URL 说”是，已看到”，但它们绝不会对实际添加的 URL 说”不”。这意味着偶尔会重新抓取页面，这对于大多数爬虫来说是可以接受的。" />
+
+## 步骤 6 - 分布式爬取
+
+### 水平缩放
+一台机器无法每月抓取十亿个页面。分配工作：
+
+- 域名上的**一致散列**将每个域分配给特定的爬虫节点。这确保了礼貌 - 只有一个节点抓取给定的域
+- **URL边界**基于哈希环在节点之间进行分区
+- **协调** 通过轻量级服务管理节点分配并在节点加入或离开时重新平衡
+
+### DNS解析缓存
+DNS 查找每个请求会增加 10-100 毫秒。从规模上看，这是一个主要瓶颈：
+- 维护每个爬虫节点的本地 DNS 缓存
+- 对排队的 URL 进行批量 DNS 预解析
+- 使用专用 DNS 解析器以避免公共 DNS 服务器不堪重负
+
+### 蜘蛛陷阱检测
+恶意或质量较差的网站可能会创建无限的 URL 空间：
+- `/page/1/page/1/page/1/...` - 重复路径模式
+- 日历页面为每个未来日期生成 URL
+- URL 中的会话 ID 为相同内容创建唯一的 URL
+
+**防御：**最大 URL 长度、每个域的最大爬网深度、重复 URL 结构的模式检测以及域级页面计数限制。
+
+<ThinkAboutIt>如果您需要保持搜索索引最新，您将如何决定首先重新抓取哪些页面？考虑每小时更新的新闻网站与每月更新的维基百科文章。您将使用哪些信号来确定重新抓取计划的优先级？</ThinkAboutIt>
+
+## 步骤 7 - 瓶颈和优化
+
+|瓶颈 |解决方案 |
+|------------|----------|
+| DNS 解析延迟 |本地DNS缓存，批量预解析|
+|服务器缓慢/无响应 |超时（30 秒）、异步 I/O、重试后跳过 |
+|已爬网内容的存储 |压缩页面，仅存储更改的内容 |
+| URL前沿记忆|磁盘支持的优先级队列（RocksDB）|
+|重复内容 | SimHash 指纹识别、规范 URL 检测 |
+
+<ThinkAboutIt>搜索引擎必须在抓取新鲜度（频繁重新抓取页面）与发现（查找新页面）之间取得平衡。如果您的爬虫的固定预算为每天 100 万页，您将如何在重新爬行现有页面和发现新页面之间分配预算？</ThinkAboutIt>
+
+---
+
+## 📚 进一步阅读
+- [网络爬虫 - 系统设计访谈卷。 1、第 1 章9](https://bytebytego.com/) - Alex Xu 详细的网络爬虫设计演练
+- [Mercator: A Scalable Web Crawler](https://courses.cs.washington.edu/courses/cse454/15wi/papers/mercator.pdf) - 关于可扩展爬虫架构的基础论文
+- [布隆过滤器示例](https://llimllib.github.io/bloomfilter-tutorial/) - 关于布隆过滤器如何工作的交互式教程

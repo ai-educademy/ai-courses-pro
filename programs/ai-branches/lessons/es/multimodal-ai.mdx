@@ -1,0 +1,130 @@
+---
+title: "IA multimodal: cuando la IA ve, oye y lee simultáneamente"
+description: "Descubra cómo los sistemas de inteligencia artificial modernos combinan visión, lenguaje y audio para comprender el mundo más como lo hacen los humanos."
+order: 8
+difficulty: "intermediate"
+duration: 14
+icon: "🔗"
+published: true
+machineTranslated: true
+---
+# IA multimodal: cuando la IA ve, oye y lee simultáneamente
+
+Los humanos no experimentamos el mundo a través de un solo sentido. Lees un menú, miras una foto del plato y escuchas la recomendación del camarero, combinando texto, visión y audio a la perfección. Durante décadas, los sistemas de IA estuvieron confinados a una modalidad a la vez: solo texto, solo imagen, solo audio. La **IA multimodal** rompe esos muros, permitiendo modelos que procesan y razonan a través de múltiples tipos de datos simultáneamente.
+
+## ¿Qué significa multimodal?
+
+Una **modalidad** es un tipo de datos de entrada: texto, imágenes, audio, vídeo o incluso lecturas de sensores. Un **modelo multimodal** puede aceptar dos o más modalidades y producir resultados que reflejen la comprensión entre todas ellas.
+
+Esto es fundamentalmente más difícil que manejar una modalidad. El modelo debe aprender a **alinearse**
+representaciones - entendiendo que la palabra "perro" y una foto de un perro se refieren a lo mismo
+concepto. También debe aprender cuándo las modalidades se contradicen entre sí y cómo sopesar las situaciones conflictivas.
+señales.
+
+<Illustration src="/images/lessons/multimodal-ai.svg" alt="Diagrama que muestra entradas de texto, imágenes y audio que fluyen hacia un modelo multimodal unificado" caption="La IA multimodal fusiona información de texto, imágenes, audio y más en un entendimiento compartido." />
+
+## CLIP - Conectando imágenes y texto
+
+**CLIP** (Preentrenamiento de imagen y lenguaje contrastante) de OpenAI, lanzado en 2021, fue un gran avance en la conexión de la visión y el lenguaje. Fue entrenado con 400 millones de pares de imágenes y texto extraídos de Internet.
+
+### Cómo funciona CLIP
+
+1. Un **codificador de imágenes** convierte imágenes en vectores numéricos.
+2. Un **codificador de texto** convierte descripciones de texto en vectores en el mismo espacio.
+3. Durante el entrenamiento, CLIP aprende a acercar los pares de imagen y texto coincidentes y a separar los pares que no coinciden.
+
+El resultado: CLIP comprende conceptos visuales a través del lenguaje. Puede describir una imagen con palabras y CLIP encontrará la mejor coincidencia, incluso para categorías en las que nunca se entrenó explícitamente. Esta capacidad de **disparo cero** fue notable.
+
+CLIP se convirtió en un elemento fundamental. Impulsa la guía de texto en Difusión Estable, permite
+motores de búsqueda visual y sustenta muchos sistemas multimodales modernos. Su lanzamiento abierto provocó una
+ola de investigaciones y aplicaciones que continúa expandiéndose.
+
+<FunFact>CLIP puede clasificar imágenes en categorías que nunca había visto durante el entrenamiento, simplemente con solo decirle los nombres de las categorías en inglés sencillo.</FunFact>
+
+## GPT-4V y GPT-4o: la visión se encuentra con la conversación
+
+**GPT-4V** (Vision) de OpenAI amplió el modelo de lenguaje GPT-4 para aceptar imágenes junto con texto. Puedes subir una fotografía y hacer preguntas al respecto, solicitar explicaciones de diagramas o hacer que el modelo lea e interprete notas escritas a mano.
+
+**GPT-4o** ("omni") fue más allá y procesó de forma nativa texto, imágenes y audio en un solo modelo. En lugar de enrutar diferentes modalidades a través de sistemas separados, GPT-4o fue entrenado de extremo a extremo en los tres, lo que permitió interacciones más rápidas y naturales.
+
+Esto es importante porque un modelo unificado puede capturar sutiles relaciones intermodales: el tono de
+la voz de alguien que coincide con su expresión facial, o el diseño visual de un gráfico que refuerza los datos
+descrito en el texto circundante. También reduce la latencia: un único paso hacia adelante a través de un modelo
+es más rápido que enrutar datos a través de múltiples sistemas especializados.
+
+<Quiz question="¿Qué hizo que CLIP fuera un gran avance para la IA multimodal?" options="Fue el primer modelo en generar imágenes a partir de texto.|Aprendió a alinear representaciones de imágenes y texto en un espacio vectorial compartido.|Podría traducir entre 100 idiomas.|Fue el primer modelo entrenado con datos de video." answer="1" explanation="CLIP aprendió a mapear imágenes y texto en el mismo espacio de incrustación, lo que permitió la clasificación de imágenes sin disparo y potenciando sistemas posteriores como Stable Diffusion." />
+
+## Gemini - Multimodalidad nativa de Google
+
+La familia de modelos **Gemini** de Google fue diseñada como multimodal desde cero, no como un modelo de lenguaje con visión incorporada. Gemini procesa de forma nativa texto, imágenes, audio, vídeo y código.
+
+Las capacidades clave incluyen:
+- Razonamiento a través de vídeos largos (comprensión de la trama, identificación de objetos, lectura de texto en pantalla).
+- Procesar horas de audio con comprensión matizada.
+- Interpretar diagramas y gráficos científicos complejos.
+
+La decisión arquitectónica de entrenar multimodalmente desde cero, en lugar de combinar modelos especializados, le da a Gemini una integración más estrecha entre las modalidades.
+
+## Subtítulos de imágenes y respuesta visual a preguntas
+
+Dos tareas multimodales clásicas ilustran el progreso del campo:
+
+**Subtítulos de imágenes**: dada una imagen, genera una descripción en lenguaje natural. Primeros modelos
+produjo frases forzadas; Los sistemas modernos generan descripciones ricas y contextualmente apropiadas que
+capturar el estado de ánimo, la acción y las relaciones entre objetos. Modelos como BLIP-2 y CoCa pueden subtitular
+imágenes con fluidez casi humana.
+
+**Respuesta visual de preguntas (VQA)**: dada una imagen y una pregunta, proporcione una respuesta. Por ejemplo: *"¿Cuántas personas llevan sombreros?"* requiere que el modelo comprenda la pregunta (lenguaje), ubique a las personas (visión), identifique sombreros (visión + conocimiento) y cuente (razonamiento).
+
+<ThinkAboutIt>Cuando una IA multimodal describe una fotografía, podría pasar por alto el contexto cultural que un humano captaría instantáneamente. ¿Cómo podríamos medir y mejorar la conciencia cultural en estos sistemas?</ThinkAboutIt>
+
+## Modelos audiovisuales
+
+Algunos sistemas multimodales combinan audio y visión:
+
+- **Lectura de labios** - Modelos que predicen el habla a partir de un vídeo del rostro de un hablante, incluso sin audio.
+- **Separación de fuentes audiovisuales** - Identificar qué persona en un video está hablando haciendo coincidir los movimientos de los labios con las señales de audio.
+- **Reconocimiento de emociones** - Combina expresiones faciales, lenguaje corporal y tono vocal para un análisis de sentimientos más preciso.
+
+Estas capacidades son particularmente valiosas en herramientas de accesibilidad, sistemas de seguridad e interacción persona-computadora.
+
+## Comprensión del documento
+
+La IA multimodal moderna sobresale en la comprensión de documentos complejos (facturas, artículos científicos, contratos legales) que combinan texto, tablas, figuras y diseños.
+
+Modelos como **Document AI** de Google y **Layout LM** de Microsoft procesan la estructura visual de un
+documento (dónde se ubican los bloques de texto, cómo se formatean las tablas) junto con el contenido del texto en sí. esto
+permite la extracción precisa de información que los modelos de texto puro pasarían por alto porque el diseño conlleva
+significado. Los informes financieros, los formularios de seguros y los registros médicos se benefician de este enfoque.
+
+<Quiz question="¿Qué es la respuesta visual a preguntas (VQA)?" options="Generando imágenes a partir de preguntas.|Responder preguntas en lenguaje natural sobre el contenido de una imagen.|Traducir imágenes a diferentes idiomas|Crear preguntas sobre un pasaje de texto" answer="1" explanation="VQA requiere un modelo para comprender tanto una entrada visual (imagen) como una entrada textual (pregunta), y luego razonar sobre ambas para producir una respuesta." />
+
+## Comprensión del vídeo
+
+El vídeo añade una dimensión temporal: los modelos multimodales deben rastrear objetos, acciones y narrativas a través de fotogramas. Los sistemas actuales pueden:
+
+- Resume vídeos largos en descripciones concisas.
+- Responder preguntas sobre eventos que abarcan minutos de metraje.
+- Detectar anomalías en metraje de vigilancia o fabricación.
+
+Gemini 1.5 Pro de Google demostró la capacidad de razonar en vídeos de una hora de duración: un avance significativo
+salte de modelos que solo podían procesar un puñado de fotogramas. Esto abre las puertas a aplicaciones como
+análisis deportivo automatizado, monitoreo de seguridad y moderación de contenido a escala.
+
+## Por qué el multimodal es el futuro
+
+El mundo real es inherentemente multimodal. Un médico examina radiografías (visión), lee notas de pacientes (texto) y escucha los síntomas (audio). Un conductor observa la carretera (visión), escucha las bocinas (audio) y lee las señales (texto). Los sistemas de IA que operan en una sola modalidad son fundamentalmente limitados.
+
+La tendencia es inconfundible: los sistemas de IA más capaces que se construyen hoy en día (GPT-4o, Gemini, Claude) son todos multimodales. Los modelos monomodales se convertirán cada vez más en herramientas especializadas dentro de oleoductos multimodales más grandes.
+
+<Quiz question="¿Por qué se considera ventajosa la multimodalidad nativa (entrenamiento en todas las modalidades desde cero) en lugar de incorporar modalidades a un modelo de texto?" options="Requiere menos datos de entrenamiento|Permite una comprensión intermodal más estricta y una inferencia más rápida.|Elimina la necesidad de GPU|Hace que los modelos sean más pequeños." answer="1" explanation="La capacitación multimodal nativa permite que el modelo aprenda relaciones profundas entre modalidades desde el principio, en lugar de depender de sistemas separados que se conectan después del hecho." />
+
+<ThinkAboutIt>A medida que los sistemas de inteligencia artificial mejoran en el procesamiento simultáneo de lo que usted dice, su apariencia y lo que escribe, ¿qué nuevas preocupaciones sobre la privacidad surgen?</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Aprendizaje de modelos visuales transferibles a partir de la supervisión del lenguaje natural (documento CLIP)](https://arxiv.org/abs/2103.00020): el documento CLIP original de OpenAI
+- [Informe técnico de Gemini - Google DeepMind](https://arxiv.org/abs/2312.11805) - Arquitectura y capacidades de la familia de modelos multimodales nativos de Google
+- [Tarjeta del sistema GPT-4o - OpenAI](https://openai.com/index/gpt-4o-system-card/) - Análisis de seguridad y capacidad del modelo omni

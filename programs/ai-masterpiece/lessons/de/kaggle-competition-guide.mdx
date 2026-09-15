@@ -1,0 +1,168 @@
+---
+title: "Kaggle-Wettbewerbsleitfaden – Wie man auf Kaggle an Wettbewerben teilnimmt (und lernt)."
+description: "Von der ersten Einreichung bis hin zu Grandmaster-Techniken: EDA-Workflows, Feature-Engineering-Tricks, Ensemble-Methoden und Strategien, die durchweg zu den Top 1 % gehören."
+order: 7
+difficulty: "advanced"
+duration: 20
+icon: "🏆"
+published: true
+machineTranslated: true
+---
+# Kaggle-Wettbewerbsleitfaden – Wie man auf Kaggle an Wettbewerben teilnimmt (und lernt).
+
+Kaggle ist nicht nur eine Wettbewerbsplattform – es ist das weltweit größte Klassenzimmer für angewandtes ML. Über 15 Millionen Datenwissenschaftler nutzen es, um ihre Fähigkeiten zu verbessern, Portfolios aufzubauen und Arbeitsplätze zu finden. In dieser Lektion erfahren Sie, wie Sie effektiv an Wettkämpfen teilnehmen und aus jedem Wettbewerb das Maximum herausholen.
+
+## 🎯 Warum Kaggle für Ihre Karriere wichtig ist
+
+Kaggle-Erfahrung signalisiert etwas, was Lebensläufe nicht können: **Sie können Modelle ausliefern, die mit chaotischen, realen Daten arbeiten**. Einstellungsmanager bei Google, Meta und Top-Startups rekrutieren aktiv über die Kaggle-Bestenlisten. Auch ohne Sieg zeugt ein starkes Profil mit gut dokumentierten Notizbüchern von praktischer Kompetenz.
+
+<Illustration src="/images/lessons/kaggle-competition-guide.svg" alt="Kaggle-Wettbewerbsworkflow von der Datenanalyse bis zur endgültigen Einreichung" caption="Der typische Kaggle-Workflow – Iteration zwischen EDA, Feature-Engineering und Validierung bis zur Konvergenz." />
+
+## 📊 Wettbewerbsarten und Gewinnstrategien
+
+| Geben Sie | ein Beispiel | Typischer Erfolgsansatz |
+|------|---------|---------|
+| **Tabellarisch** | Immobilienpreise, Betrugserkennung | Gradient Boosting (XGBoost/LightGBM) + umfangreiches Feature-Engineering |
+| **Computer Vision** | Bildklassifizierung, Segmentierung | Vorab trainierte CNNs (EfficientNet, ConvNeXt) + Erweiterung |
+| **NLP** | Stimmung, Fragebeantwortung | Feinabgestimmte Transformatoren (DeBERTa, RoBERTa) |
+| **Simulation** | Spiel-KI, Optimierung | Verstärkungslernen + Domänenheuristik |
+
+<FunFact>Der beliebteste Einzelalgorithmus bei den Gewinnern des Kaggle-Wettbewerbs ist LightGBM – er kommt in über 60 % der Tabellenlösungen mit den höchsten Platzierungen vor, oft kombiniert mit CatBoost oder XGBoost in Ensembles.</FunFact>
+
+## 🔍EDA – Deine ersten 48 Stunden
+
+Beginnen Sie niemals mit der Modellierung, bevor Sie Ihre Daten verstanden haben. Ein disziplinierter EDA-Workflow:
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("train.csv")
+
+# Shape and types - know what you're working with
+print(f"Shape: {df.shape}")
+print(f"Missing values:\n{df.isnull().sum().sort_values(ascending=False).head(10)}")
+
+# Target distribution - is it balanced?
+df["target"].value_counts(normalize=True).plot(kind="bar")
+plt.title("Target Distribution")
+plt.show()
+
+# Correlations - find quick signal
+correlations = df.select_dtypes(include="number").corr()["target"].sort_values()
+print(correlations.head(10))  # Strongest negative correlations
+print(correlations.tail(10))  # Strongest positive correlations
+```
+
+**Auf Lecks prüfen** – Funktionen, die zum Vorhersagezeitpunkt nicht vorhanden wären. Das ist der häufigste Fehler, den Anfänger machen. Wenn ein Merkmal verdächtig gut mit dem Ziel korreliert, untersuchen Sie es, bevor Sie feiern.
+
+<Quiz question="Während der EDA entdecken Sie ein Merkmal mit einer Korrelation von 0,98 zum Ziel. Was sollte Ihre ERSTE Reaktion sein?" options="Feiern Sie – diese Funktion wird Ihr Modell dominieren|Suchen Sie nach Datenlecks – dieser Zusammenhang ist verdächtig hoch|Entfernen Sie es – eine hohe Korrelation bedeutet eine Überanpassung|Verwenden Sie es nur in Ihrem Ensemble, nicht in der Grundlinie" answer="1" explanation="Eine Korrelation von 0,98 ist mit ziemlicher Sicherheit ein Datenleck. Das Merkmal enthält wahrscheinlich Informationen aus der Zukunft oder wurde vom Ziel abgeleitet. Die Verwendung würde zu überhöhten Validierungswerten führen, die auf der privaten Bestenliste zusammenbrechen würden." />
+
+## 🛠️ Feature Engineering, das gewinnt
+
+Top-Konkurrenten verbringen 70 % ihrer Zeit mit Funktionen und nicht mit Modelltuning. Kampferprobte Techniken:
+
+**Aggregationsfunktionen** – Gruppieren Sie Statistiken mit unterschiedlicher Granularität:
+```python
+for col in ["category", "store_id", "day_of_week"]:
+    stats = df.groupby(col)["sales"].agg(["mean", "std", "median"])
+    stats.columns = [f"{col}_sales_{s}" for s in ["mean", "std", "median"]]
+    df = df.merge(stats, on=col, how="left")
+```
+
+**Zielkodierung** – Ersetzen Sie Kategorien durch geglättete Zielmittelwerte (verwenden Sie faltenbasierte Kodierung, um Lecks zu verhindern).
+
+**Lag-Funktionen** – für Zeitreihen sind vorherige Werte Gold wert:
+```python
+for lag in [1, 7, 14, 28]:
+    df[f"sales_lag_{lag}"] = df.groupby("store_id")["sales"].shift(lag)
+```
+
+## ✅ Kreuzvalidierung – Vertrauen Sie Ihrem lokalen Score
+
+Ihr lokaler Lebenslauf-Score ist wichtiger als die öffentliche Bestenliste. Eine robuste Validierungsstrategie:
+
+```python
+from sklearn.model_selection import StratifiedKFold
+
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+oof_predictions = np.zeros(len(X))
+
+for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
+    X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+    y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+
+    model = lgb.LGBMClassifier(n_estimators=1000, learning_rate=0.05)
+    model.fit(X_train, y_train, eval_set=[(X_val, y_val)],
+              callbacks=[lgb.early_stopping(50)])
+    oof_predictions[val_idx] = model.predict_proba(X_val)[:, 1]
+
+print(f"OOF AUC: {roc_auc_score(y, oof_predictions):.5f}")
+```
+
+**Goldene Regel**: Wenn Ihr lokaler Lebenslauf und Ihr öffentlicher Arbeitgeber nicht übereinstimmen, vertrauen Sie Ihrem Lebenslauf. Die öffentliche Bestenliste verwendet nur einen Bruchteil der Testdaten – eine Überanpassung daran ist eine Falle.
+
+<ThinkAboutIt>Sie sind auf der öffentlichen Bestenliste auf Platz 15, aber Ihr lokaler Lebenslauf deutet darauf hin, dass Ihr Modell überfit ist. Reichen Sie für die endgültige Einreichung Ihr bestes LB-Ergebnis oder Ihr bestes Lebenslauf-Ergebnis ein? Warum?</ThinkAboutIt>
+
+## 🎭 Ensemble-Methoden – Der letzte Schub
+
+Fast jede erfolgreiche Lösung verwendet Ensembles. Drei Schlüsseltechniken:
+
+**Bagging** – Trainieren Sie dasselbe Modell anhand verschiedener Datenteilmengen und durchschnittlicher Vorhersagen. Reduziert die Varianz.
+
+**Stacking** – Trainieren Sie ein Metamodell auf Out-of-Fold-Vorhersagen aus verschiedenen Basismodellen:
+```python
+# Level 1: diverse base models produce OOF predictions
+base_preds = np.column_stack([lgbm_oof, xgb_oof, catboost_oof, nn_oof])
+
+# Level 2: logistic regression learns optimal combination
+from sklearn.linear_model import LogisticRegression
+meta = LogisticRegression()
+meta.fit(base_preds, y_train)
+```
+
+**Blending** – gewichteter Durchschnitt der Modellvorhersagen. Einfacher als Stapeln, aber effektiv:
+```python
+final = 0.4 * lgbm_pred + 0.35 * xgb_pred + 0.25 * catboost_pred
+```
+
+<Quiz question="Warum übertreffen Ensemble-Methoden bei Kaggle-Wettbewerben fast immer einzelne Modelle?" options="Sie verwenden mehr Trainingsdaten|Sie reduzieren Verzerrungen durch die Verwendung tieferer Modelle|Sie reduzieren die Varianz, indem sie verschiedene Modelle kombinieren, die unterschiedliche Fehler machen|Sie sind schneller zu trainieren" answer="2" explanation="Ensembles funktionieren, weil unterschiedliche Modelle unkorrelierte Fehler machen. Bei der Mittelung heben sich einzelne Fehler auf, während korrekte Signale sich gegenseitig verstärken – wodurch die Gesamtvarianz verringert wird, ohne dass die Verzerrung zunimmt." />
+
+## 📓 Tolle Kaggle-Notizbücher schreiben
+
+Öffentliche Notizbücher stärken Ihren Ruf. Ein medaillenwürdiges Notizbuch enthält:
+
+1. **Klare Erzählung** – Erläutern Sie Ihre Argumentation, nicht nur Ihren Code
+2. **Reproduzierbarkeit** – Legen Sie zufällige Seeds und Dokumentbibliotheksversionen fest
+3. **Visualisierungen** – Plots, die Erkenntnisse offenbaren, nicht nur schmücken
+4. **Ehrliche Ergebnisse** – teilen Sie mit, was nicht funktioniert hat und was funktioniert hat
+
+<Quiz question="Was ist der effektivste Weg, vom Kaggle-Mitwirkenden zum Experten-Rang aufzusteigen?" options="Gewinnen Sie eine Solo-Goldmedaille in einem besonderen Wettbewerb|Kontinuierlicher Gewinn von Bronze- und Silbermedaillen in zahlreichen Wettbewerben und Notebooks|Unabhängig vom Ergebnis an so vielen Wettbewerben wie möglich teilnehmen|Forking der am besten bewerteten öffentlichen Notizbücher" answer="1" explanation="Durch konstante Leistungen in allen Wettbewerben erhält man Medaillen. Sie benötigen Wettkampfmedaillen UND Notizbuch-/Diskussionsmedaillen. Die Breite des Beitrags ist wichtiger als ein einzelnes glückliches Ergebnis." />
+
+## 📈 Kaggle-Ränge und Fortschritt
+
+| Rang | Anforderung | Typische Zeitleiste |
+|------|------------|-----------------|
+| **Anfänger** | Konto erstellen | Tag 1 |
+| **Mitwirkender** | Vollständiges Profil, Führen Sie ein Notizbuch aus | Woche 1 |
+| **Experte** | 2 Bronzemedaillen (Wettbewerbe) | 3–6 Monate |
+| **Meister** | 1 Gold- und 2 Silbermedaillen | 1–2 Jahre |
+| **Großmeister** | 5 Goldmedaillen (1 Solo) | 3–5+ Jahre |
+
+<ThinkAboutIt>Wie würden Sie Ihr Kaggle-Profil über Rankings hinaus als Portfolioelement verwenden, wenn Sie sich für ML-Rollen bewerben? Worauf würde ein Personalmanager in Ihrer Wettbewerbshistorie achten?</ThinkAboutIt>
+
+## 🎯 Wichtige Erkenntnisse
+
+- Zuerst EDA, dann Modellierung - immer auf Datenlecks prüfen
+– Feature-Engineering bietet mehr Auftrieb als Hyperparameter-Tuning
+- Vertrauen Sie Ihrem lokalen Lebenslauf und nicht der öffentlichen Bestenliste
+- Kombiniere verschiedene Modelle für den Endspurt
+- Dokumentieren Sie Ihre Arbeit in öffentlichen Notizbüchern – es ist Ihr Portfolio
+
+---
+
+## 📚 Weiterführende Literatur
+
+- [Kaggle-Buch von Konrad Banachewicz & Luca Massaron](https://www.kaggle.com/discussions/general/320744) – Strategien von Großmeistern, zusammengefasst in umsetzbare Ratschläge
+- [So gewinnen Sie einen Data Science-Wettbewerb (Coursera)](https://www.coursera.org/learn/competitive-data-science) – Top-Down-Kaggle-Strategiekurs von NRU HSE
+- [Papiere mit Code – Benchmarks](https://paperswithcode.com/sota) – Neueste Ergebnisse für alle ML-Aufgaben

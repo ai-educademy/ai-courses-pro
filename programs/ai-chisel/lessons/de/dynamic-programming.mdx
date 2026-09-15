@@ -1,0 +1,146 @@
+---
+title: "Dynamische Programmierung – Wie KI komplexe Probleme löst, indem sie sie aufschlüsselt"
+description: "Verstehen Sie Memoisierung, Tabellierung und klassische DP-Muster, die in der KI und Informatik verwendet werden."
+order: 4
+difficulty: "intermediate"
+duration: 20
+icon: "🧩"
+published: true
+machineTranslated: true
+---
+## Die große Idee
+
+Manche Probleme sehen unglaublich komplex aus, bis Sie bemerken, dass sie aus **kleineren, sich wiederholenden Teilproblemen** bestehen. Dynamische Programmierung (DP) löst jedes Teilproblem **einmal**, speichert das Ergebnis und verwendet es wieder – was ein wenig Speicher gegen eine dramatische Beschleunigung eintauscht.
+
+Zwei Bedingungen signalisieren eine DP-Chance:
+
+1. **Überlappende Teilprobleme** – dieselben Berechnungen wiederholen sich viele Male.
+2. **Optimale Unterkonstruktion** – die beste Lösung für das Gesamtproblem kann aus den besten Lösungen seiner Teile aufgebaut werden.
+
+<Illustration src="/images/lessons/dynamic-programming.svg" alt="Ein Rekursionsbaum für Fibonacci, der neben einer gefüllten DP-Tabelle wiederholte Teilprobleme hervorgehoben zeigt" caption="Ohne DP berechnet Fibonacci dieselben Werte exponentiell neu. Bei DP wird jeder Wert einmal berechnet." />
+
+## Fibonacci: Das klassische Beispiel
+
+### Naive Rekursion – O(2ⁿ)
+
+```
+function fib(n):
+    if n <= 1: return n
+    return fib(n - 1) + fib(n - 2)
+```
+
+Der Aufruf von `fib(5)` löst **15** Funktionsaufrufe aus, von denen viele redundant sind. Bei `fib(40)` dauert es Sekunden; bei `fib(100)` würde es das Universum überdauern.
+
+### Auswendiglernen (von oben nach unten) – O(n)
+
+Speichern Sie die Ergebnisse in einem Cache. Wenn Sie ein Teilproblem bereits gelöst haben, geben Sie die zwischengespeicherte Antwort zurück.
+
+```
+memo = {}
+function fib(n):
+    if n in memo: return memo[n]
+    if n <= 1: return n
+    memo[n] = fib(n - 1) + fib(n - 2)
+    return memo[n]
+```
+
+### Tabellierung (von unten nach oben) – O(n)
+
+Bauen Sie die Antwort iterativ von den Basisfällen aufwärts auf.
+
+```
+function fib(n):
+    table = [0, 1]
+    for i in 2..n:
+        table[i] = table[i - 1] + table[i - 2]
+    return table[n]
+```
+
+<Quiz question="Was unterscheidet Memoisieren von Tabellieren?" options="Beim Auswendiglernen wird ein Stapel verwendet. Die Tabellierung verwendet eine Warteschlange|Das Auswendiglernen funktioniert von oben nach unten mit Rekursion; Die Tabellierung erfolgt von unten nach oben mit Iteration|Das Auswendiglernen geht immer schneller|Es sind unterschiedliche Namen für dieselbe Technik" answer="1" explanation="Das Auswendiglernen beginnt beim ursprünglichen Problem und wird nach unten wiederholt, wobei es im Laufe der Zeit zwischengespeichert wird. Die Tabellierung beginnt bei den kleinsten Teilproblemen und baut sich iterativ auf." />
+
+## Klassische DP-Probleme
+
+### Treppensteigen
+
+Sie können 1 oder 2 Schritte gleichzeitig ausführen. Wie viele verschiedene Wege gibt es, um Schritt _n_ zu erreichen?
+
+```
+function climbStairs(n):
+    if n <= 2: return n
+    a = 1, b = 2
+    for i in 3..n:
+        a, b = b, a + b
+    return b
+```
+
+Das ist Fibonacci in der Verkleidung – die Antwort für Schritt _n_ ist die Summe der Wege, um die Schritte _n−1_ und _n−2_ zu erreichen.
+
+### Münzwechsel
+
+Finden Sie anhand der Münzwerte die **wenigsten Münzen**, um einen Zielbetrag zu erreichen.
+
+```
+function coinChange(coins, amount):
+    dp = array of size (amount + 1), filled with INF
+    dp[0] = 0
+    for i in 1..amount:
+        for coin in coins:
+            if coin <= i:
+                dp[i] = min(dp[i], dp[i - coin] + 1)
+    return dp[amount] if dp[amount] != INF else -1
+```
+
+### Längste gemeinsame Teilsequenz (LCS)
+
+Finden Sie die längste Zeichenfolge, die zwei Zeichenfolgen gemeinsam hat (nicht unbedingt zusammenhängend).
+
+```
+function lcs(s1, s2):
+    m = s1.length, n = s2.length
+    dp = 2D array of size (m+1) x (n+1), filled with 0
+    for i in 1..m:
+        for j in 1..n:
+            if s1[i-1] == s2[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    return dp[m][n]
+```
+
+<FunFact>Das `diff`-Tool, das Änderungen zwischen Dateiversionen anzeigt, wird von LCS unterstützt. Git verwendet jedes Mal eine Variante davon, wenn Sie `git diff`.</FunFact> ausführen.
+
+<ThinkAboutIt>Beim Münzwechsel wird die Mindestanzahl an Münzen verlangt. Was wäre, wenn Sie die Gesamtzahl der verschiedenen Möglichkeiten zählen würden, um den Betrag zu erhalten? Wie würde sich die Wiederholungsbeziehung ändern?</ThinkAboutIt>
+
+## Echte KI-Anwendungen
+
+| Problem | AI-Domäne | DP-Technik |
+|---------|-----------|-------------|
+| **Entfernung bearbeiten** (Levenshtein) | Rechtschreibprüfung, Fuzzy-Suche | 2D-Tabelle zum Vergleichen von Zeichen |
+| **Viterbi-Algorithmus** | Spracherkennung, POS-Tagging | Bester Weg durch ein Hidden-Markov-Modell |
+| **Sequenzausrichtung** | Bioinformatik (DNA-Matching) | Variante von LCS mit Lückenstrafen |
+| **CTC-Dekodierung** | Handschrift / Speech-to-Text | Wiederholte Zeichen optimal zusammenführen |
+| **Strahlsuchbeschneidung** | Maschinelle Übersetzung | Top-K-Teilübersetzungen beibehalten |
+
+<Quiz question="Welchen DP-basierten Algorithmus verwendet eine Rechtschreibprüfung am wahrscheinlichsten, um Korrekturen vorzuschlagen?" options="Längste gemeinsame Teilsequenz|Entfernung bearbeiten (Levenshtein)|Münzwechsel|Treppensteigen" answer="1" explanation="Der Bearbeitungsabstand zählt die minimalen Einfügungen, Löschungen und Ersetzungen, um ein Wort in ein anderes umzuwandeln – und misst direkt, wie „nah” ein Rechtschreibfehler einem Wörterbuchwort ist." />
+
+## Top-Down vs. Bottom-Up
+
+| Aspekt | Top-Down (Memoisierung) | Bottom-Up (Tabellarische Darstellung) |
+|--------|--------|--------|
+| Stil | Rekursiv + Cache | Iterativ + Tabelle |
+| Teilprobleme gelöst | Nur die benötigten | Alle Teilprobleme bis _n_ |
+| Risiko eines Stapelüberlaufs | Ja, für tiefe Rekursion | Nein |
+| Einfache Optimierung | Schwieriger, Platz zu reduzieren | Einfacher (oft einfach die letzte Reihe beibehalten) |
+
+**Faustregel:** Beginnen Sie mit der Memoisierung, um die Wiederholung zu verstehen, und wechseln Sie dann zur Tabellierung, wenn Sie den Platz optimieren oder Stapelbeschränkungen vermeiden müssen.
+
+<ThinkAboutIt>Der Münzwechseltisch hat die Größe O (Betrag). Die LCS-Tabelle hat die Größe O(m × n). Könnten Sie den LCS-Speicherplatz auf O(min(m, n)) reduzieren, indem Sie jeweils nur zwei Zeilen behalten? Welche Informationen würden Sie verlieren?</ThinkAboutIt>
+
+## Wichtige Erkenntnisse
+
+1. DP wandelt exponentielle Brute-Force in Polynomzeit um, indem es wiederholte Arbeit zwischenspeichert.
+2. Identifizieren Sie überlappende Teilprobleme und die optimale Unterstruktur, bevor Sie zur DP greifen.
+3. Das Auswendiglernen ist intuitiv; Tabellierung ist effizient – ​​lernen Sie beides.
+4. Bearbeiten Sie Distanz, Viterbi und Sequenzausrichtung und zeigen Sie, dass DP das Herzstück der modernen KI ist.
+
+<Quiz question="Ein Problem hat überlappende Teilprobleme, aber KEINE optimale Unterstruktur. Können Sie DP anwenden, um die optimale Lösung zu finden?" options="Ja – DP funktioniert immer, wenn sich Teilprobleme überschneiden|Nein – beide Bedingungen sind erforderlich, damit DP die Optimalität garantiert|Nur wenn Sie die Tabellierung verwenden|Nur für Grafikprobleme" answer="1" explanation="DP erfordert sowohl überlappende Teilprobleme (aus Effizienzgründen) als auch eine optimale Unterstruktur (aus Gründen der Korrektheit). Ohne optimale Unterstruktur garantiert Caching allein nicht das globale Optimum." />

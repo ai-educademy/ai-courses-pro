@@ -1,0 +1,177 @@
+---
+title: "发布开源 AI 项目 - 您的杰作"
+description: "从想法到发布：规划、构建、记录、发布和推广开源人工智能项目，使其成为职业催化剂和您的投资组合的核心。"
+order: 10
+difficulty: "advanced"
+duration: 24
+icon: "🚀"
+published: true
+machineTranslated: true
+---
+# 发布一个开源人工智能项目 - 你的杰作
+
+这就是最后一课。您所学到的一切都汇聚于此：机器学习管道、研究实施、系统设计和工程工艺。您将**发布一个真正的开源人工智能项目**，该项目解决真正的问题并在本课程之外继续存在。
+
+## 💡 选择您的项目想法
+
+最好的 OSS 项目始于**个人挫折**。不要用 AI 构建另一个 TODO 应用程序 - 寻找差距：
+
+- **抓自己的痒** - 您希望日常工作流程中存在的工具
+- **改进现有工具** - 找到流行库的限制并解决它
+- **实施论文** - 将研究突破转化为可用的图书馆
+- **弥合差距** - 连接两个互不通信的生态系统
+
+<Illustration src="/images/lessons/open-source-ai-project.svg" alt="开源项目生命周期从创意到发布再到社区发展" caption="OSS 生命周期 - 运输是中点，而不是终点线。" />
+
+**构建前验证**：搜索 GitHub、PyPI 和 npm。如果存在类似的东西，您的项目需要一个明显的差异化因素 - 更快、更简单的 API、更好的文档或新颖的方法。
+
+<FunFact>Hugging Face 最初是一家面向青少年的聊天机器人公司。当他们将 Transformers 库作为一个副项目开源时，它变得非常受欢迎，以至于他们将整个公司围绕它进行发展 - 现在价值超过 45 亿美元。</FunFact>
+
+## 📋 项目规划 - MVP 范围
+
+无情地定义你的**最小可行项目**：
+
+```markdown
+## MVP Scope (Week 1-2)
+- Core functionality: ONE thing, done well
+- CLI or Python API interface
+- 3 working examples
+- Basic README with installation and quickstart
+
+## V1.0 Scope (Week 3-4)
+- Comprehensive documentation
+- Test coverage > 80%
+- CI/CD pipeline
+- Published to PyPI/npm
+- Demo deployed
+```
+
+**反模式**：花费数月时间完善没人见过的代码。尽早发货，根据反馈进行迭代。
+
+<ThinkAboutIt>想想您最近安装的三个工具。是什么让您选择它们​​而不是其他选择？是自述文件、API 设计、星级计数还是其他什么？将这些见解应用到您自己的项目中。</ThinkAboutIt>
+
+## 🏗️ 存储库设置
+
+第一印象很重要。专业的存储库需要： `src/` 代码布局、`tests/`、`examples/`、`docs/`、`.github/workflows/ci.yml`，以及根文件 - `LICENSE`（MIT 或 Apache 2.0）、`README.md`、`CONTRIBUTING.md`、`CODE_OF_CONDUCT.md` 和 `pyproject.toml`。
+
+### 自述文件 - 您最重要的文件
+
+您的自述文件是一个销售页面。它必须具有：**一行描述**、**安装** (`pip install my-project`)、**快速入门**（少于 10 行的工作代码）、**关键功能**（要点）、**比较表** 与替代方案以及 **文档链接**。
+
+<Quiz question="开源项目的自述文件中最重要的元素是什么？" options="详细架构图|用户可以复制粘贴并立即运行的快速入门示例|所有功能的综合列表|该项目的星级数和贡献者徽章" answer="1" explanation="用户在 30 秒内决定是否尝试您的项目。可复制粘贴的快速入门可立即将浏览器转换为用户。与第一次成功的经验相比，其他一切都是次要的。" />
+
+## 📦 发布到 PyPI
+
+使用 `pyproject.toml` 进行现代 Python 打包：
+
+```toml
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "my-ai-project"
+version = "0.1.0"
+description = "One-line description of your project"
+requires-python = ">=3.9"
+license = "MIT"
+dependencies = ["torch>=2.0", "numpy>=1.24"]
+
+[project.urls]
+Documentation = "https://my-ai-project.readthedocs.io"
+Repository = "https://github.com/username/my-ai-project"
+```
+
+```bash
+# Build and publish
+pip install build twine
+python -m build
+twine upload dist/*
+```
+
+**自动发布**：使用 GitHub Actions 在每个标记版本上发布到 PyPI - 首次发布后不再手动发布。
+
+## 🎨 创建演示
+
+演示将怀疑者转变为用户。三个优秀平台：
+
+|平台|最适合 |部署 |
+|----------|----------|------------|
+| **拥抱脸部空间** |机器学习模型演示 | Git 推送，免费 GPU 层 |
+| **流光** |数据应用程序、仪表板 | Streamlit Cloud，免费套餐 |
+| **广播** |快速机器学习界面 |拥抱脸部空间或独立 |
+
+```python
+# Gradio demo - 8 lines to a shareable interface
+import gradio as gr
+from my_ai_project import predict
+
+demo = gr.Interface(
+    fn=predict,
+    inputs=gr.Textbox(label="Enter text"),
+    outputs=gr.Label(label="Prediction"),
+    title="My AI Project Demo"
+)
+demo.launch()
+```
+
+<Quiz question="哪个演示平台对于获得 ML 项目的初步吸引力最有效？" options="部署在 Vercel 上的自定义 React 前端|Hugging Face Spaces - 可由 ML 社区通过内置社交功能发现|存储库中的 Jupyter 笔记本|README 中的命令行演示" answer="1" explanation="Hugging Face Spaces 可以被数百万机器学习从业者发现，支持点赞和评论，并出现在搜索结果中。它将部署简单性与内置分发结合在一起 - 您的演示找到用户，而不是相反。" />
+
+## 📖 编写文档
+
+遵循 **Diátaxis 框架** - 四种类型的文档：**教程**（面向学习、分步）、**操作指南**（面向任务、实用）、**参考**（完整的 API 文档）和 **解释**（概念理解）。使用 **MkDocs** 或 **Docusaurus** 从 Markdown 生成网站。在 GitHub Pages 上免费部署或阅读文档。
+
+## 📣 营销您的项目
+
+构建它就成功了一半。让人们使用它是另一半：
+
+1. **黑客新闻** - 发布当天发布“显示 HN：[描述]”帖子
+2. **Reddit** - r/MachineLearning、r/Python、相关 subreddits
+3. **Twitter/X** - 线程解释问题和您的解决方案，并带有 GIF 演示
+4. **产品搜寻** - 如果您的项目有网络界面
+5. **博客文章** - 您的个人网站或 Medium/Dev.to 上的详细技术文章
+
+**时间很重要**：周二至周四早上（格林威治标准时间）启动。避开周末和节假日。
+
+<FunFact>FastAPI、LangChain 和 Streamlit 的创建者都将恰逢其时的黑客新闻“Show HN”帖子视为他们最初采用浪潮的最大推动力。</FunFact>
+
+<ThinkAboutIt>您的项目在第一周就获得了 500 个 GitHub star，但来自外部贡献者的问题或 PR 为零。这算成功吗？您会采取哪些不同的措施将被动的观星者转变为主动的贡献者？</ThinkAboutIt>
+
+## 🔧 维护您的项目
+
+可持续性比病毒式传播更重要：
+
+- **标签问题**为 `good-first-issue`、`help-wanted`、`bug`、`enhancement`
+- **在 48 小时内回复问题** - 即使是“谢谢，我会调查这个问题”也能建立信任
+- **编写 CONTRIBUTING.md** ，其中包含设置说明、编码标准和 PR 指南
+- **使用语义版本控制** - 重大更改会带来主要版本提升
+- **自动化一切** - CI、发布、变更日志生成、依赖项更新
+
+## 💰 盈利路径
+
+开源并不意味着永远免费劳动力。可持续模式：**GitHub 赞助商**（省力、经常性捐赠）、**咨询**（付费设置和培训）、**SaaS 包装器**（具有企业功能的托管版本 - 最努力但最可持续）、**双重许可**（开源 + 商业）和 **企业赞助**（付费公司的优先功能）。
+
+<Quiz question="对于流行的开源人工智能库来说，最可持续的长期盈利策略是什么？" options="依靠 GitHub 赞助商的捐款|构建具有企业功能和支持的托管 SaaS 版本|将项目出售给一家大公司|在文档中放置广告" answer="1" explanation="SaaS 包装器（具有企业功能、SLA 和支持的托管版本）创造与用户收到的价值相关的经常性收入。捐赠是不可预测的，收购是一次性事件，广告会侵蚀信任。" />
+
+## 🎯 你的杰作清单
+
+在您称其已发货之前：
+
+- [ ] 核心功能有效并经过测试
+- [ ] 自述文件包含安装、快速入门和功能概述
+- [ ] 发布到 PyPI 或 npm
+- [ ] Hugging Face Spaces 或 Streamlit 的现场演示
+- [ ] CI/CD 管道对每个 PR 运行测试
+- [ ] 文档涵盖教程和 API 参考
+- [ ] LICENSE、CONTRIBUTING.md 和 CODE_OF_CONDUCT.md 存在
+- [ ] 在至少两个平台上发布（HN、Reddit、Twitter）
+
+**这个项目是你的作品集。** 当面试官问“你构建了什么？”时，你将得到一个实时的、记录在案的、已发布的答案。
+
+---
+
+## 📚 进一步阅读
+
+- [Diátaxis 文档框架](https://diataxis.fr/) - 编写更好的技术文档的系统方法
+- [GitHub 的开源指南](https://opensource.guide/) - 有关启动、发展和维持 OSS 项目的官方指南
+- [在公共场所工作，作者：Nadia Eghbal](https://www.amazon.co.uk/Working-Public-Making-Maintenance-Software/dp/0578675862) - 开源维护的经济学和社会学

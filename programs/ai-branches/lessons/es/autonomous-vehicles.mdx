@@ -1,0 +1,133 @@
+---
+title: "Vehículos autónomos: cómo piensan los coches autónomos"
+description: "Explore la IA detrás de los vehículos autónomos, desde la fusión de sensores y la percepción hasta los casos extremos que hacen que la autonomía total sea tan difícil."
+order: 10
+difficulty: "intermediate"
+duration: 16
+icon: "🚗"
+published: true
+machineTranslated: true
+---
+# Vehículos autónomos: cómo piensan los coches autónomos
+
+Un conductor humano mira la carretera, mira los espejos, escucha las sirenas y toma docenas de microdecisiones cada segundo, la mayoría de ellas de forma inconsciente. Replicar esto en una máquina es uno de los problemas más difíciles de la IA. Los vehículos autónomos deben percibir un mundo caótico, predecir lo que harán los demás usuarios de la carretera y actuar de forma segura, todo en tiempo real.
+
+## Niveles de automatización SAE
+
+La **Sociedad de Ingenieros Automotrices (SAE)** define seis niveles de automatización de la conducción:
+
+| Nivel | Nombre | Descripción |
+|-------|------|-------------|
+| 0 | Sin automatización | El humano lo hace todo |
+| 1 | Asistencia al conductor | Una función automatizada (por ejemplo, control de crucero adaptativo) |
+| 2 | Automatización Parcial | Dirección y aceleración automatizadas; monitores humanos en todo momento |
+| 3 | Automatización condicional | El coche soporta la mayor parte de la conducción; el ser humano debe hacerse cargo cuando se le solicite |
+| 4 | Alta automatización | El coche se conduce solo en condiciones definidas; no se necesita intervención humana |
+| 5 | Automatización completa | El coche se conduce a cualquier lugar, en cualquier condición, sin necesidad de volante |
+
+La mayoría de los sistemas disponibles comercialmente en la actualidad, incluidos Tesla Autopilot y GM Super Cruise, funcionan en **Nivel 2**. Los robotaxis de Waymo operan en **Nivel 4** dentro de áreas geocercadas. Ningún vehículo de producción ha alcanzado el nivel 5.
+
+<Illustration src="/images/lessons/autonomous-vehicles.svg" alt="Diagrama que muestra los niveles de autonomía SAE de 0 (completamente humano) a 5 (completamente autónomo)" caption="Los niveles SAE definen un espectro que va desde el control humano total hasta la autonomía total del vehículo." />
+
+## Fusión de sensores: ver el mundo en capas
+
+Los coches autónomos no dependen de un solo sensor. Combinan varios tipos para crear una imagen rica y redundante del medio ambiente:
+
+- **Cámaras** - Proporciona color, textura y alta resolución. Sobresalir en la lectura de señales, detectando
+  marcas de carril y reconocimiento de semáforos. Lucha con poca iluminación y fuertes lluvias.
+- **LiDAR** (detección y alcance de luz): dispara pulsos láser y mide reflejos para crear
+  Nubes de puntos 3D precisas. Excelente para medir distancias y detectar obstáculos. Caro y
+  afectado por el mal tiempo.
+- **Radar**: utiliza ondas de radio para detectar objetos y medir la velocidad. Funciona en todo clima
+  condiciones. Menor resolución que LiDAR pero altamente confiable.
+- **Sensores ultrasónicos** - Sensores de corto alcance utilizados para estacionamiento y maniobras a baja velocidad.
+
+**Fusión de sensores** combina todas estas entradas en un modelo único y coherente del entorno. si
+un sensor se degrada (por ejemplo, la cámara queda cegada por el sol), otros lo compensan. El algoritmo de fusión debe
+manejar diferencias en sincronización, resolución y sistemas de coordenadas entre tipos de sensores: un
+importante desafío de ingeniería en sí mismo.
+
+<FunFact>Un solo robotaxi Waymo lleva 29 cámaras, 6 unidades LiDAR, 6 unidades de radar y una serie de micrófonos, procesando más de 1 terabyte de datos por hora de conducción.</FunFact>
+
+## El canal de percepción
+
+Los datos brutos de los sensores son inútiles hasta que la IA los convierte en conocimientos prácticos. El proceso de percepción normalmente incluye:
+
+1. **Detección de objetos**: identificación de automóviles, peatones, ciclistas, señales de tráfico y límites de carriles mediante datos de cámara y LiDAR.
+2. **Seguimiento de objetos**: sigue cada objeto detectado a través de fotogramas para comprender las trayectorias de movimiento.
+3. **Clasificación** - Distinguir un peatón de un ciclista, un coche aparcado de uno en marcha.
+4. **Predicción**: pronostica dónde estará cada objeto en los próximos 1 a 5 segundos según su trayectoria, velocidad y contexto.
+
+Aquí es donde brilla el aprendizaje profundo. Las redes neuronales convolucionales procesan datos de cámaras; nube de puntos
+Las redes (como PointNet) procesan datos LiDAR. Las arquitecturas basadas en transformadores se utilizan cada vez más
+para fusionar información entre tipos de sensores. Las predicciones alimentan directamente el sistema de planificación,
+y cualquier error en la percepción cae en cascada a través de toda la pila, lo que hace que esta etapa sea crítica para la seguridad.
+
+<Quiz question="¿Por qué los coches autónomos utilizan varios tipos de sensores en lugar de sólo cámaras?" options="Las cámaras son demasiado caras|Diferentes sensores compensan las debilidades de los demás, proporcionando redundancia|Usar más sensores hace que el coche parezca más avanzado|Las regulaciones requieren LiDAR" answer="1" explanation="Cada tipo de sensor tiene fortalezas y debilidades. Las cámaras tienen problemas en la oscuridad, el LiDAR tiene problemas cuando llueve intensamente y el radar tiene baja resolución. Combinarlos proporciona una percepción sólida y redundante." />
+
+## Mapas HD y localización
+
+La mayoría de los vehículos autónomos dependen de **mapas de alta definición**: mapas 3D de carreteras, marcas de carriles, bordillos, señales de tráfico y señales con una precisión de centímetros. Estos mapas se construyen de antemano mediante vehículos cartográficos y se actualizan continuamente.
+
+El vehículo autónomo utiliza sus sensores para **localizar** dentro del mapa HD, determinando su posición precisa con una precisión de unos pocos centímetros. Esto es mucho más preciso que el GPS solo, que puede desviarse varios metros.
+
+Los mapas HD dan al vehículo una gran ventaja: ya conoce el trazado de la carretera antes de arrancar
+percibir el entorno vivo. Sin embargo, su construcción y mantenimiento son costosos y no pueden
+tener en cuenta cambios temporales como obras viales. Algunas empresas, en particular Tesla, apuestan a que pueden
+elimine por completo la dependencia de los mapas HD y confíe únicamente en la percepción en tiempo real.
+
+## Planificación de movimiento: decidir qué hacer
+
+Una vez que el coche sabe dónde está y qué lo rodea, el **planificador de movimiento** decide cómo actuar. Esto implica:
+
+- **Planificación de ruta** - La ruta de alto nivel de A a B.
+- **Planificación comportamental** - Decidir maniobras: cambiar de carril, ceder el paso en una rotonda, detenerse ante un peatón.
+- **Planificación de trayectoria** - Calcula la trayectoria exacta y el perfil de velocidad, suave y cómodo, que ejecuta el comportamiento elegido.
+
+El planificador debe equilibrar la seguridad, la eficiencia, la comodidad y las normas de tráfico, a menudo en tiempos ajustados.
+restricciones. Genera planes muchas veces por segundo y se ajusta a medida que el mundo cambia. Pasajeros
+Debe sentir que la marcha es suave y predecible, incluso cuando el vehículo realiza maniobras complejas.
+
+<ThinkAboutIt>Un automóvil autónomo a veces debe elegir entre dos opciones imperfectas: por ejemplo, desviarse hacia un carril vacío para evitar a un peatón imprudente, o frenar bruscamente y arriesgarse a una colisión trasera. ¿Cómo deberían programarse estas compensaciones?</ThinkAboutIt>
+
+## El problema del tranvía en la práctica
+
+Los filósofos han debatido el **problema de los tranvías** durante décadas: si un tranvía fuera de control se dirige hacia cinco personas, ¿debería desviarlo hacia una vía con una sola persona? Los coches autónomos se enfrentan a versiones reales de estos dilemas.
+
+En la práctica, los ingenieros se centran en **evitar colisiones** en lugar de elegir a quién dañar. El sistema está diseñado para minimizar el riesgo continuamente: manteniendo distancias seguras, planificando rutas de escape y reaccionando más rápido que cualquier humano. La lógica explícita de "a quién sacrificar" no está programada, pero las cuestiones éticas subyacentes siguen siendo profundamente importantes para la regulación y la confianza pública.
+
+## Piloto automático Tesla frente a Waymo frente a crucero
+
+Tres enfoques ilustran diferentes filosofías:
+
+- **Tesla** - Se basa principalmente en cámaras (se eliminaron radares y sensores ultrasónicos en los modelos más nuevos), apostando a que la visión por computadora por sí sola, entrenada en miles de millones de kilómetros de datos de la flota, puede lograr una autonomía total. Actualmente Nivel 2 (La Beta de conducción autónoma completa requiere supervisión humana constante).
+- **Waymo** (Alfabeto): utiliza un conjunto completo de sensores (LiDAR, cámaras, radar) y opera robotaxis de nivel 4 en ciudades geocercadas como Phoenix, San Francisco y Los Ángeles. En muchos vehículos no hay ningún conductor de seguridad humana.
+- **Cruise** (GM) - Siguió un enfoque rico en sensores similar al de Waymo, pero detuvo las operaciones a fines de 2023 después de un incidente de seguridad de peatones, lo que resalta cuán frágil puede ser la confianza pública.
+
+<Quiz question="¿A qué nivel SAE opera actualmente el servicio de robotaxi de Waymo?" options="Nivel 2: el ser humano debe monitorear en todo momento|Nivel 3: el humano asume el control cuando se le solicita|Nivel 4: totalmente autónomo dentro de áreas geocercadas|Nivel 5: totalmente autónomo en cualquier lugar" answer="2" explanation="Waymo opera en el Nivel 4: sus robotaxis se conducen de forma autónoma dentro de áreas geográficas definidas (geocercas) sin necesidad de un conductor humano, pero aún no operan en todas partes." />
+
+## Por qué la conducción autónoma es tan difícil
+
+La brecha entre el Nivel 2 y el Nivel 5 es enorme. Los principales desafíos:
+
+- **Casos extremos** - Las situaciones inusuales (un colchón en la autopista, un niño persiguiendo una pelota, vehículos de emergencia) son raras individualmente pero colectivamente infinitas. No se pueden preprogramar todos los escenarios.
+- **Clima** - La nieve cubre las marcas de los carriles, la lluvia distorsiona las imágenes de la cámara y la niebla limita el alcance del LiDAR.
+- **Imprevisibilidad humana** - Los peatones cruzan imprudentemente. Los ciclistas tejen. Los conductores ignoran las reglas. El coche debe anticipar comportamientos irracionales.
+- **Construcción y cambios temporales** - El diseño de las carreteras cambia a diario. Los mapas quedan obsoletos en cuestión de horas.
+- **Reglamentación y responsabilidad** - ¿Quién es responsable cuando un coche autónomo provoca un accidente? Las leyes varían según el país y aún están evolucionando.
+
+La larga cola de acontecimientos raros es la barrera fundamental. Un sistema que maneja perfectamente el 99,9% de las situaciones puede causar daños graves en el 0,1% restante.
+
+<Quiz question="¿Cuál es la mayor barrera técnica para lograr la autonomía total del nivel 5?" options="Potencia informática insuficiente|La variedad casi infinita de casos extremos raros en la conducción en el mundo real|Falta de tecnología de cámara.|Gama de baterías de vehículos eléctricos." answer="1" explanation="La ”larga cola” de casos extremos raros e impredecibles (objetos inusuales, comportamiento humano inesperado, clima adverso) es la razón principal por la que la autonomía de nivel 5 sigue fuera de nuestro alcance." />
+
+<FunFact>Los vehículos autónomos de Waymo han recorrido más de 20 millones de millas en vías públicas sin un conductor humano de seguridad: más datos de conducción autónoma del mundo real que cualquier otra empresa.</FunFact>
+
+<ThinkAboutIt>La tecnología de conducción autónoma podría reducir drásticamente las muertes en carretera (más de 1,3 millones en todo el mundo cada año). ¿En qué momento es "imperfecto pero más seguro que los humanos" lo suficientemente bueno como para desplegarlo ampliamente?</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Informe de seguridad de Waymo](https://waymo.com/safety/): descripción detallada del enfoque de Waymo para la seguridad de los vehículos autónomos
+- [SAE J3016 - Niveles de automatización de la conducción](https://www.sae.org/standards/content/j3016_202104/) - El estándar oficial SAE que define los niveles de autonomía
+- [Cómo funciona el FSD de Tesla - AI DRIVR](https://www.aidrivr.com/) - Análisis comunitario del sistema de conducción autónoma total de Tesla con imágenes del mundo real

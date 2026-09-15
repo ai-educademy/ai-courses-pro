@@ -1,0 +1,126 @@
+---
+title: "Processamento de linguagem natural – como a IA entende a linguagem humana"
+description: "Explore como as máquinas leem, escrevem e interpretam a complexidade confusa da linguagem humana."
+order: 2
+difficulty: "intermediate"
+duration: 18
+icon: "💬"
+published: true
+machineTranslated: true
+---
+# Processamento de linguagem natural – como a IA entende a linguagem humana
+
+Você provavelmente já fez uma pergunta a um assistente de voz, usou o Google Tradutor ou viu as legendas automáticas do YouTube aparecerem em tempo real. Por trás de cada uma dessas experiências está o **Processamento de Linguagem Natural (PNL)** – o ramo da IA ​​que ajuda as máquinas a trabalhar com a linguagem humana.
+
+## Por que a linguagem é difícil para máquinas
+
+A linguagem parece fácil para nós, mas é espetacularmente confusa para os computadores:
+
+- **Ambiguidade** - "Eu vi o pato dela" - ela se agachou ou você viu o pássaro de estimação dela?
+- **Contexto** - "Isso é doentio!" pode significar que algo é nojento ou algo é brilhante,
+  dependendo inteiramente de quem está falando e quando.
+- **Sarcasmo** - "Oh, ótimo, outra segunda-feira" carrega o oposto de seu significado literal, mas
+  não há nenhum marcador explícito para sinalizar isso.
+- **Estrutura** - as mesmas palavras reorganizadas podem mudar completamente o significado: "Cachorro morde homem" versus
+  "Homem morde cachorro."
+- **Gírias em evolução** - novas palavras e significados surgem constantemente, criando dicionários estáticos
+  insuficiente.
+
+As máquinas não podem confiar na intuição ou na experiência de vida como os humanos fazem. Os sistemas de PNL devem aprender
+padrões de enormes volumes de texto, muitas vezes bilhões de frases.
+
+<Illustration src="/images/lessons/natural-language-processing.svg" alt="Pipeline mostrando o texto fluindo através dos estágios de tokenização, incorporação e modelo" caption="A PNL transforma o texto bruto em vários estágios antes que a IA possa entendê-lo." />
+
+## Principais tarefas de PNL
+
+| Tarefa | O que faz | Exemplo |
+|------|-------------|---------|
+| **Tokenização** | Divide o texto em palavras ou subpalavras | "Estou aprendendo" → ["Eu", "estou", "aprendendo"] |
+| **Análise de sentimento** | Detecta emoção ou opinião | "Este filme foi brilhante!" → Positivo |
+| **Reconhecimento de entidade nomeada** | Encontra nomes, lugares, datas | "Marie Curie trabalhou em Paris" → Pessoa, Localização |
+| **Tradução automática** | Converte entre idiomas | Inglês → Francês |
+| **Resumo** | Condensa texto longo | Um relatório de 10 páginas → um pequeno parágrafo |
+
+<Quiz question="Qual tarefa da PNL identificaria que 'Londres' é um local em uma frase?" options="Tokenização|Análise de sentimento|Reconhecimento de entidade nomeada|Resumo" answer="2" explanation="O reconhecimento de entidade nomeada (NER) identifica e classifica entidades como pessoas, organizações e locais dentro do texto." />
+
+## Transformando palavras em números
+
+As máquinas trabalham com números, não com palavras. Então, como você representa a riqueza da linguagem
+matematicamente? A descoberta inovadora foi representar palavras como **vetores** – listas de números
+que capturam significado e relacionamentos.
+
+**Word2Vec** (2013) mostrou que palavras usadas em contextos semelhantes obtêm vetores semelhantes. Notoriamente, a matemática funcionou de modo que:
+
+> *rei* − *homem* + *mulher* ≈ *rainha*
+
+Isso provou que os embeddings de palavras capturam relações semânticas genuínas.
+
+**BERT** (2018) foi além ao tornar os embeddings **contextuais** - o vetor para “banco” muda dependendo se a frase é sobre rios ou finanças.
+
+<FunFact>O BERT foi treinado em toda a Wikipédia em inglês e no BookCorpus – cerca de 3,3 bilhões de palavras. No entanto, o modelo em si tem “apenas” 340 milhões de parâmetros, o que significa que comprime uma vasta biblioteca de conhecimento humano em padrões muito menores do que o texto original.
+</FunFact>
+
+## Como funciona o ChatGPT (a versão curta)
+
+O ChatGPT é baseado em uma arquitetura **transformer**, a mesma família de modelos por trás do Google
+Traduza, GitHub Copilot e muitas outras ferramentas de IA. Aqui está o pipeline simplificado:
+
+1. **Tokenize** sua mensagem em subpalavras.
+2. Use **mecanismos de atenção** para descobrir quais palavras se relacionam com quais - mesmo em palavras muito longas
+   passagens com milhares de fichas.
+3. Preveja a próxima palavra, uma ficha de cada vez, com base em tudo o que veio antes dela.
+4. O modelo foi ajustado usando **Aprendizagem por Reforço a partir de Feedback Humano (RLHF)** - real
+   as pessoas avaliaram os resultados para ensinar a utilidade, precisão e segurança do modelo.
+
+A ideia da “atenção” é o ingrediente mágico. Permite que o modelo se concentre nas partes mais relevantes
+da entrada, não importa quão distantes eles apareçam no texto. Antes dos transformadores, modelos
+lutou com documentos longos porque as palavras anteriores desapareceram da memória.
+
+<ThinkAboutIt>Quando ChatGPT escreve um parágrafo, ele gera uma palavra por vez, sempre prevendo a próxima palavra mais provável. Isso significa que ele realmente “entende” o que está dizendo ou está realizando uma forma incrivelmente sofisticada de correspondência de padrões? Onde você traçaria o limite?
+</ThinkAboutIt>
+
+## Aplicativos do mundo real
+
+- **Filtros de spam** - O Gmail usa PNL para bloquear mais de 10 milhões de e-mails de spam a cada minuto.
+- **Chatbots** – bots de atendimento ao cliente lidam com consultas de rotina, liberando agentes humanos para problemas complexos.
+- **Mecanismos de pesquisa** - A pesquisa do Google agora entende perguntas completas, não apenas correspondências de palavras-chave.
+- **Tecnologia jurídica** - A IA analisa milhares de documentos jurídicos em horas, uma tarefa que antes levava semanas para os advogados.
+- **Acessibilidade** - as legendas em tempo real ajudam usuários surdos e com deficiência auditiva a acompanhar eventos ao vivo.
+
+<FunFact>O Google Tradutor processa mais de 100 bilhões de palavras por dia em 133 idiomas. Antes da PNL neural, ela dependia de tabelas de frases e produzia traduções notoriamente estranhas. A tradução moderna baseada em transformadores é notavelmente fluente.
+</FunFact>
+
+<Quiz question="Qual é a principal inovação da arquitetura do transformador usada em modelos como o ChatGPT?" options="Ele usa reconhecimento de imagem baseado em pixels|Ele emprega mecanismos de atenção para relacionar palavras em passagens longas|Ele converte todo o texto em código binário primeiro|Não requer dados de treinamento" answer="1" explanation="O mecanismo de atenção permite que os transformadores avaliem a relevância de cada palavra em relação a todas as outras palavras, capturando dependências de longo alcance com as quais os modelos anteriores lutavam." />
+
+## Limitações e Desafios
+
+Apesar do progresso notável, a PNL está longe de ser um problema resolvido:
+
+- **Alucinações** - os modelos de linguagem podem gerar textos que soam confiantes e são factualmente
+  errado. Eles não têm uma maneira integrada de verificar a verdade.
+- **Preconceito** - modelos treinados em texto da Internet absorvem preconceitos sociais presentes nesses dados,
+  às vezes produzindo resultados sexistas, racistas ou de outra forma prejudiciais.
+- **Idiomas com poucos recursos** - PNL funciona melhor para inglês; muitos dos mais de 7.000 idiomas do mundo
+  têm muito pouco texto digital para treinamento.
+- **Privacidade** - o processamento de mensagens pessoais, e-mails e documentos aumenta a proteção de dados
+  preocupações sob regulamentações como o GDPR.
+- **Custo de energia** - o treinamento de grandes modelos de linguagem requer enormes recursos computacionais,
+  levantando questões de sustentabilidade ambiental.
+
+<ThinkAboutIt>Se uma IA escreve um artigo de notícias que contém um erro factual e milhares de pessoas o leem, quem é o responsável – a empresa de IA, o editor ou o leitor que não verificou os factos?
+</ThinkAboutIt>
+
+## Principais conclusões
+
+- A linguagem humana está cheia de ambiguidade, contexto, gírias e nuances - tornando-a uma das mais difíceis da IA
+  desafios.
+- Os embeddings de palavras convertem a linguagem em vetores matemáticos que capturam a semântica genuína
+  relações entre palavras.
+- Transformadores e mecanismos de atenção alimentam os modelos de linguagem mais capazes da atualidade, do ChatGPT
+  para a Pesquisa Google.
+- A PNL impulsiona ferramentas diárias, incluindo mecanismos de pesquisa, filtros de spam, chatbots e tradução
+  serviços.
+- Alucinações, preconceitos, custos de energia e privacidade de dados continuam a ser problemas em aberto significativos que
+  pesquisadores e empresas estão trabalhando ativamente para resolver.
+
+<Quiz question="O que a equação rei − homem + mulher ≈ rainha demonstra sobre incorporações de palavras?" options="Palavras são armazenadas como imagens|Embeddings capturam relações semânticas entre palavras|Todas as palavras têm o mesmo vetor|A tradução acontece automaticamente" answer="1" explanation="Este famoso exemplo mostra que os vetores de palavras codificam relações significativas - a direção de 'homem' para 'mulher' é semelhante à direção de 'rei' para 'rainha', provando que o modelo aprendeu uma estrutura semântica genuína." />

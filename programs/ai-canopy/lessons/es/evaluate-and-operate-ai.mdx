@@ -1,0 +1,32 @@
+---
+title: "Evaluar y operar IA"
+description: "Haga que la calidad, la seguridad, la latencia y los costos sean mensurables antes de que una función de IA llegue a los usuarios."
+order: 13
+difficulty: advanced
+duration: 45
+icon: "📈"
+published: true
+machineTranslated: true
+---
+## Las demostraciones no son evidencia
+
+Una demostración convincente sólo demuestra que un camino funcionó una vez. Un sistema de IA de producción necesita un conjunto de evaluación repetible, seguimientos, taxonomía de fallas y umbrales de liberación.
+
+## Construya un ciclo de evaluación
+
+Cree un conjunto de datos valioso que represente la intención real del usuario, casos extremos, entradas adversas y fallas conocidas. Mida las dimensiones por separado:
+
+- **Recuperación:** recuperación, precisión, relevancia, actualidad y corrección de permisos.
+- **Generación:** fundamentación, exactitud fáctica, integridad y calidad de rechazo.
+- **Comportamiento del agente:** selección de herramientas, validez de argumentos, éxito de la tarea, pasos innecesarios y recuperación.
+- **Operaciones:** latencia, uso de tokens, costo, tasa de error y comentarios de los usuarios.
+
+Utilice comprobaciones automáticas para cada versión y luego inspeccione las fallas representativas manualmente. LLM como juez puede ayudar a escalar la revisión, pero necesita una rúbrica, ejemplos de calibración y verificaciones aleatorias del juicio humano.
+
+## Operar por el cambio
+
+Solicitudes de versión, modelos, herramientas, configuraciones de recuperación y datos de evaluación. Realice un seguimiento de las solicitudes sin almacenar contenido confidencial innecesariamente. Implemente los cambios gradualmente, compare cohortes y mantenga una ruta de retroceso.
+
+## Construir desafío
+
+Tome el RAG o agente de las lecciones anteriores. Agregue 20 casos dorados, tres casos de seguridad, mediciones de costos y latencia, y una puerta de liberación. Romper el sistema deliberadamente, clasificar las fallas y documentar la siguiente solución.

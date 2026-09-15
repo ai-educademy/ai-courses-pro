@@ -1,0 +1,143 @@
+---
+title: "Algoritmos Gráficos - Como a IA navega nas redes"
+description: "Aprenda os algoritmos de travessia e de caminho mais curto que alimentam mapas, redes sociais e rastreadores da web."
+order: 3
+difficulty: "intermediate"
+duration: 20
+icon: "🗺️"
+published: true
+machineTranslated: true
+---
+## Gráficos modelam o mundo conectado
+
+Amizades, redes rodoviárias, hiperlinks, caminhos neurais – sempre que entidades estão ligadas por relacionamentos, você tem um **gráfico**. Formalmente, um grafo G = (V, E) consiste em vértices (nós) e arestas (conexões).
+
+Os gráficos podem ser **direcionados** (ruas de mão única) ou **não direcionados** (duas vias), e as arestas podem carregar **pesos** (distâncias, custos, latências).
+
+<Illustration src="/images/lessons/graph-algorithms.svg" alt="Um gráfico ponderado direcionado com seis nós e arestas rotuladas, mostrando um caminho mais curto destacado" caption="Os gráficos capturam relacionamentos entre entidades; os pesos das arestas quantificam o custo da travessia." />
+
+## Representando Gráficos
+
+Duas representações comuns:
+
+| Representação | Espaço | Pesquisa de borda | Melhor para |
+|---------------|-------|------------|----------|
+| **Lista de adjacências** | O(V + E) | O(grau) | Gráficos esparsos (a maioria das redes do mundo real) |
+| **Matriz de adjacência** | O(V²) | O(1) | Gráficos densos, verificações rápidas de existência de arestas |
+
+```
+// Adjacency list example
+graph = {
+    A: [(B, 4), (C, 1)],
+    B: [(D, 1)],
+    C: [(B, 2), (D, 5)],
+    D: []
+}
+```
+
+## Pesquisa em amplitude (BFS)
+
+O BFS explora **nível por nível**, visitando todos os vizinhos antes de se aprofundar. Ele usa uma **fila**.
+
+```
+function bfs(graph, start):
+    visited = {start}
+    queue = [start]
+    while queue is not empty:
+        node = queue.dequeue()
+        process(node)
+        for neighbour in graph[node]:
+            if neighbour not in visited:
+                visited.add(neighbour)
+                queue.enqueue(neighbour)
+```
+
+**Propriedade chave:** O BFS encontra o **caminho mais curto** em gráficos não ponderados porque processa nós em ordem de distância da origem.
+
+### Casos de uso de IA para BFS
+
+- **Sugestões de amigos em redes sociais** - encontre pessoas em 2 a 3 conexões.
+- **Rastreadores da Web** – indexam páginas camada por camada a partir de um URL inicial.
+- **Solucionadores de quebra-cabeças** - encontre o número mínimo de movimentos (por exemplo, estados do cubo de Rubik).
+
+<Quiz question="Por que o BFS garante o caminho mais curto em um gráfico não ponderado?" options="Ele sempre escolhe a borda mais clara|Ele explora os nós em ordem crescente de distância da fonte|Ele usa uma pilha para retroceder|Ele classifica todas as arestas antes da travessia" answer="1" explanation="O BFS processa todos os nós à distância d antes de qualquer nó à distância d+1, portanto, a primeira vez que ele alcança um nó é pelo caminho mais curto." />
+
+## Pesquisa em profundidade (DFS)
+
+O DFS vai **o mais fundo possível** antes de voltar atrás. Ele usa uma **pilha** (ou recursão).
+
+```
+function dfs(graph, node, visited):
+    visited.add(node)
+    process(node)
+    for neighbour in graph[node]:
+        if neighbour not in visited:
+            dfs(graph, neighbour, visited)
+```
+
+### Aplicações de DFS
+
+- **Classificação topológica** - ordena tarefas para que cada dependência venha primeiro (sistemas de construção, pré-requisitos do curso).
+- **Detecção de ciclo** - se o DFS revisitar um nó atualmente na pilha de chamadas, existe um ciclo.
+- **Resolução de labirintos** - explore um caminho completamente antes de tentar alternativas.
+- **Componentes conectados** - execute o DFS de cada nó não visitado para identificar clusters separados.
+
+<ThinkAboutIt>Um gerenciador de pacotes precisa instalar dependências na ordem correta. Deveria usar classificação topológica baseada em BFS ou DFS? O que acontece se houver um ciclo no gráfico de dependência?</ThinkAboutIt>
+
+## Algoritmo de Dijkstra - Caminho mais curto com pesos
+
+Quando as arestas têm custos diferentes, o BFS não é mais suficiente. O algoritmo de Dijkstra encontra o caminho ponderado mais curto de uma fonte para todos os outros nós.
+
+**Ideia principal:** Sempre expanda o **nó não visitado mais barato** usando um heap mínimo (fila de prioridade).
+
+```
+function dijkstra(graph, source):
+    dist = {source: 0}          // all others: infinity
+    pq = MinHeap([(0, source)])
+    while pq is not empty:
+        (cost, node) = pq.extractMin()
+        if cost > dist[node]: continue
+        for (neighbour, weight) in graph[node]:
+            newDist = cost + weight
+            if newDist < dist.getOrDefault(neighbour, INF):
+                dist[neighbour] = newDist
+                pq.insert((newDist, neighbour))
+    return dist
+```
+
+**Complexidade de tempo:** O((V + E) log V) com um heap binário.
+
+<FunFact>O Google Maps não executa Dijkstra simples em toda a rede rodoviária. Ele usa hierarquias de contração e pesquisa A* - mas ambas se baseiam na visão fundamental de Dijkstra de expansão gananciosa pela menor distância conhecida.</FunFact>
+
+### Casos de uso de IA para Dijkstra
+
+- **Planejamento de rotas** - aplicativos de navegação que encontram a direção mais rápida.
+- **Roteamento de rede** - pacotes de internet escolhendo o caminho de menor latência.
+- **Gráficos de conhecimento** - encontrar a conexão semântica mais curta entre conceitos.
+
+<Quiz question="O algoritmo de Dijkstra requer qual estrutura de dados para selecionar com eficiência o próximo nó a visitar?" options="Pilha|Fila|Heap mínimo (fila de prioridade)|Tabela hash" answer="2" explanation="Um min-heap permite que Dijkstra extraia o nó não visitado com a menor distância provisória em tempo O (log V)." />
+
+## Detecção de ciclo e componentes conectados
+
+### Detecção de ciclo
+
+Em um **gráfico direcionado**, rastreie nós em três estados: não visitados, em andamento (no caminho DFS atual) e concluídos. Encontrar um nó em andamento significa que existe um ciclo.
+
+Em um **gráfico não direcionado**, existe um ciclo se o DFS atingir um nó visitado que não seja o pai imediato.
+
+### Componentes conectados
+
+Execute BFS ou DFS de cada nó não visitado. Cada execução descobre um componente conectado. Nas redes sociais, os componentes revelam comunidades isoladas.
+
+<ThinkAboutIt>Um sistema de detecção de fraudes de IA modela as transações como um gráfico onde as contas são nós e as transferências são bordas. Como os componentes conectados podem ajudar a identificar redes de lavagem de dinheiro?</ThinkAboutIt>
+
+## Principais conclusões
+
+1. **BFS** explora nível por nível - ideal para caminhos mais curtos em gráficos não ponderados e descoberta baseada em vizinhos.
+2. **DFS** se aprofunda – a espinha dorsal da classificação topológica, detecção de ciclo e análise de componentes.
+3. **Dijkstra** estende o BFS para gráficos ponderados usando uma fila de prioridade – a base do planejamento de rotas moderno.
+4. Algoritmos gráficos são o motor por trás de mapas, redes sociais, gerenciadores de pacotes e gráficos de conhecimento.
+
+<FunFact>A World Wide Web contém mais de 50 bilhões de páginas indexadas. Os rastreadores de mecanismos de pesquisa usam variações do BFS para descobrir e reindexar páginas, priorizando por importância da página (PageRank).</FunFact>
+
+<Quiz question="Qual algoritmo você usaria para detectar se um gráfico de dependência de tarefa direcionada contém uma dependência circular?" options="Algoritmo de Dijkstra|Caminho mais curto do BFS|DFS com rastreamento em andamento|Pesquisa binária" answer="2" explanation="O DFS com rastreamento de três estados (não visitado, em andamento, concluído) detecta bordas posteriores - um nó em andamento encontrado novamente significa um ciclo." />

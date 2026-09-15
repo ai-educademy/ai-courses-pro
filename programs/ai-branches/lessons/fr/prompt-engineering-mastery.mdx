@@ -1,0 +1,249 @@
+---
+title: "Prompt Engineering : l’art de parler à l’IA"
+description: "Maîtrisez l'art de rédiger des invites qui obtiennent des résultats brillants"
+order: 11
+difficulty: "intermediate"
+duration: 15
+icon: "🎯"
+published: true
+machineTranslated: true
+---
+# Prompt Engineering : L'art de parler à l'IA 🎯
+
+La différence entre une réponse médiocre de l’IA et une réponse brillante n’a souvent rien à voir avec l’IA elle-même – elle a tout à voir avec la façon dont vous avez demandé.
+
+L'ingénierie rapide consiste à créer des entrées pour des modèles de langage d'IA qui produisent de manière fiable des sorties utiles et de haute qualité. Il s'agit en partie de compétences en communication, en partie de pensée systémique et en partie d'expérimentation structurée.
+
+La bonne nouvelle : vous n’avez pas besoin d’être ingénieur pour devenir bon dans ce domaine.
+
+---
+
+## 🧠 Pourquoi les invites sont plus importantes que vous ne le pensez
+
+Les LLM sont remarquablement capables mais aussi remarquablement littéraux. Ils ne savent pas ce que vous *vouliez* demander – ils savent seulement ce que vous avez *réellement* demandé.
+
+Une invite est essentiellement un exercice de mise en contexte. Vous ne posez pas simplement une question ; vous façonnez :
+- Quel rôle le modèle devrait jouer
+- Quel format de sortie attendez-vous
+- Dans quelle mesure être détaillé et technique
+- Quelles contraintes respecter
+- Quel est le but de la réponse
+
+Maîtrisez cela, et le même modèle sous-jacent se sentira plus puissant sur plusieurs générations.
+
+---
+
+## 🎯 Invite Zero-Shot : il suffit de demander
+
+La forme d'invite la plus simple est le tir zéro : vous décrivez votre tâche et demandez au modèle de la faire, sans aucun exemple.
+
+**Avant :**
+```
+Summarise this article.
+
+[article text]
+```
+
+**Après :**
+```
+Summarise the following article in 3 bullet points. Each bullet should be 
+one sentence. Focus on the main argument, the key evidence, and the 
+conclusion. Avoid jargon.
+
+[article text]
+```
+
+La version « après » spécifie le format (3 puces), la longueur (une phrase chacune), les priorités (argument, preuve, conclusion) et le style (pas de jargon). Le modèle a un objectif beaucoup plus clair.
+
+**Erreurs courantes de tir zéro :**
+- Poser une question vague et attendre une réponse précise
+- Oublier de spécifier le format de sortie
+- Ne pas préciser votre audience (technique vs générale)
+- Omettre les contraintes de longueur
+
+<FunFact>Des recherches d'OpenAI et d'autres ont montré que le simple fait d'ajouter « Réfléchissons étape par étape » à une invite de raisonnement peut augmenter la précision des problèmes mathématiques et logiques de 40 à 50 %. Il s’agit d’une chaîne de réflexion dans sa forme la plus simple – et elle fonctionne car elle encourage le modèle à montrer son travail plutôt que de passer directement à une réponse.
+</FunFact>
+
+---
+
+## 📚 Guide en quelques étapes : apprendre par l'exemple
+
+Parfois, dire le modèle n'est pas aussi efficace que le montrer. **L'invite en quelques étapes** fournit 2 à 5 exemples du modèle d'entrée-sortie que vous souhaitez avant de présenter votre tâche réelle.
+
+**Exemple — Classification des sentiments :**
+```
+Classify the sentiment of each customer review as Positive, Negative, or Neutral.
+
+Review: "The delivery was fast but the product was broken."
+Sentiment: Negative
+
+Review: "Absolutely love this! Will buy again."
+Sentiment: Positive
+
+Review: "It arrived on time."
+Sentiment: Neutral
+
+Review: "The quality exceeded my expectations but the packaging was wasteful."
+Sentiment: [complete this]
+```
+
+Le modèle a maintenant déterminé quel format vous souhaitez, comment gérer les signaux mixtes et quelle granularité d'analyse est attendue. Sans ces exemples, vous pourriez obtenir un paragraphe au lieu d'un seul mot.
+
+**Quand utiliser quelques plans :**
+- Formats de sortie inhabituels que le modèle pourrait ne pas produire naturellement
+- Tâches de classification spécifiques au domaine
+- Correspondance de style (écriture avec la voix d'un auteur spécifique)
+- Sorties structurées complexes (schémas JSON, tableaux)
+
+---
+
+## 🔗 Chaîne de pensée : faire réfléchir le modèle à voix haute
+
+**Invitation de chaîne de pensée (CoT)** demande au modèle de raisonner sur un problème étape par étape avant de donner sa réponse finale. Cela améliore considérablement les performances en matière de raisonnement, de mathématiques et de tâches en plusieurs étapes.
+
+**Sans CoT :**
+```
+A shop sells apples for £0.50 each. If I buy 7 apples and pay with a £5 note, 
+how much change do I get?
+
+Answer: £1.50
+```
+(Parfois correct, parfois non – et vous ne pouvez pas voir le fonctionnement)
+
+**Avec CoT :**
+```
+A shop sells apples for £0.50 each. If I buy 7 apples and pay with a £5 note, 
+how much change do I get? Work through this step by step.
+
+Step 1: Cost of 7 apples = 7 × £0.50 = £3.50
+Step 2: Change = £5.00 - £3.50 = £1.50
+Answer: £1.50
+```
+
+Le raisonnement visible vous permet de repérer les erreurs, et le fait d'écrire les étapes rend le modèle moins susceptible de les commettre.
+
+Pour les **problèmes très complexes**, vous pouvez aller plus loin avec « Zero-shot CoT » — ajoutez simplement : *« Réfléchissez étape par étape, en montrant clairement votre raisonnement avant de donner votre réponse finale. »*
+
+---
+
+## 🎭 Invite de rôle : personnalité et expertise
+
+L’une des techniques les plus puissantes consiste à attribuer au modèle un rôle ou une personnalité spécifique. Cela active des connaissances pertinentes, donne le ton approprié et améliore souvent la précision dans des domaines spécialisés.
+
+**Sans rôle :**
+```
+Explain photosynthesis.
+```
+
+**Avec rôle :**
+```
+You are a science teacher explaining photosynthesis to a 12-year-old who 
+loves video games. Use gaming analogies where helpful. Be enthusiastic 
+and encouraging.
+```
+
+La deuxième invite produira une explication fondamentalement différente et (pour ce public) bien plus utile.
+
+**L'invite de rôle fonctionne particulièrement bien pour :**
+- Explications techniques au bon niveau
+- Questions juridiques, médicales ou financières (ajoutez toujours les clauses de non-responsabilité appropriées)
+- Écriture créative dans un style spécifique
+- Révision du code ("agir en tant que développeur Python senior révisant ce code")
+- Pratique d'entretien ("vous êtes un intervieweur difficile dans une entreprise FAANG")
+
+**Un modèle d'invite système complet :**
+```
+You are [role] with expertise in [domain].
+Your audience is [description of user].
+Your goal is to [specific objective].
+Always [constraint 1].
+Never [constraint 2].
+Format your response as [format specification].
+```
+
+---
+
+## ⛓️ Chaînage d'invites : décomposer les tâches complexes
+
+Pour les tâches complexes en plusieurs étapes, une seule invite ne suffit souvent pas. Le **Chaînage d'invites** divise la tâche en étapes, en utilisant le résultat d'une invite comme entrée de la suivante.
+
+**Exemple : rédaction d'un article de blog :**
+
+Au lieu d'une invite de monstre, enchaînez :
+1. **Invite 1** : "Générez 5 angles possibles pour un article de blog sur [sujet]. Pour chacun, donnez une description sur une ligne."
+2. **Invite 2** : "En utilisant l'angle n° 3 vu d'en haut, rédigez un plan détaillé avec 5 sections et des sous-points."
+3. **Invite 3** : "Développez la section 2 du plan en un brouillon complet de 300 mots, en écrivant sur un ton conversationnel mais faisant autorité."
+4. **Invite 4** : "Examinez le projet pour plus de clarté, supprimez toutes les phrases redondantes et assurez-vous qu'il se termine par un appel à l'action clair."
+
+Cela produit des résultats bien meilleurs que de demander un article de blog terminé en une seule fois : chaque étape attire toute l'attention du modèle sur une tâche ciblée.
+
+<ThinkAboutIt>Le chaînage d’invites reflète le fonctionnement des experts humains. Un bon auteur ne se contente pas de commencer à écrire : il réfléchit, décrit, rédige et révise. Un bon ingénieur ne code pas à partir de zéro : il conçoit, prototype, teste, refactorise. Pourquoi s’attendrait-on à ce que l’IA saute ces étapes et produise un chef-d’œuvre du premier coup ?
+</ThinkAboutIt>
+
+---
+
+## 🚫 Erreurs courantes et comment les corriger
+
+### Erreur 1 : demander tout à la fois
+❌ *"Rédigez un guide complet sur l'apprentissage automatique comprenant l'historique, les techniques, les applications, les outils, les cheminements de carrière et les tendances futures."*
+
+✅ Divisez-le en invites ciblées, un sujet à la fois.
+
+### Erreur 2 : instructions négatives uniquement
+❌ *"Ne soyez pas trop technique. N'écrivez pas trop. N'incluez pas de jargon."*
+
+✅ *"Écrivez à un niveau de 9e année, en 200 mots, en utilisant le langage de tous les jours."* - dites-lui quoi faire.
+
+### Erreur 3 : ne pas spécifier le format de sortie
+❌ *"Listez les avantages et les inconvénients des véhicules électriques."*
+
+✅ *"Créez un tableau comparant les véhicules électriques et essence. Utilisez les colonnes : Facteur, Électrique, Essence. Incluez 6 lignes couvrant le coût, l'environnement, l'autonomie, la recharge, l'entretien et la valeur de revente."*
+
+### Erreur 4 : Oublier le contexte
+❌ *"Réécrivez ceci pour être meilleur."*
+
+✅ *"Ce paragraphe est issu d'un rapport technique destiné aux cadres non techniques. Réécrivez-le pour supprimer le jargon, réduisez la longueur de 30 % et ajoutez un résumé d'une phrase au début."*
+
+### Erreur 5 : Accepter la première réponse
+Les meilleurs ingénieurs prompts itèrent. Si la première réponse n'est pas tout à fait correcte, indiquez exactement au modèle ce qu'il doit changer : *"Le ton est trop formel – rendez-le plus conversationnel. Et déplacez les statistiques vers une barre latérale plutôt que dans le texte principal."*
+
+---
+
+## 🔬 Technique avancée : sortie structurée
+
+Pour une utilisation programmatique (API, workflows, pipelines), vous avez souvent besoin d'une sortie structurée. Demandez-le simplement explicitement :
+
+```
+Analyse the following job description and return a JSON object with this 
+exact structure:
+{
+  "required_skills": ["skill1", "skill2"],
+  "nice_to_have_skills": ["skill3"],
+  "seniority_level": "junior|mid|senior",
+  "remote_friendly": true|false,
+  "key_responsibilities": ["resp1", "resp2", "resp3"]
+}
+
+Job description:
+[text here]
+```
+
+Les LLM modernes sont remarquablement bons dans ce domaine. De nombreuses API proposent désormais un « mode JSON » qui applique une sortie JSON valide, ce qui la rend encore plus fiable.
+
+---
+
+## 🏆 Développez votre pratique d'incitation
+
+L’ingénierie rapide est une compétence qui se compose. Commencez par ces habitudes :
+
+1. **Conservez une bibliothèque d'invites** : enregistrez les invites qui fonctionnent bien pour les tâches récurrentes
+2. **Test A/B** : essayez la même tâche avec deux invites différentes et comparez les résultats
+3. ** Diagnostiquer les échecs ** — lorsqu'une réponse est médiocre, demandez : quel contexte manquait ? Qu’est-ce qui était ambigu ?
+4. **Lire des recherches** — OpenAI, Anthropic et Google DeepMind publient régulièrement des articles sur les techniques d'invite
+5. **Enseigner aux autres** : expliquer pourquoi une invite fonctionne renforce votre propre compréhension
+
+Les modèles s'améliorent rapidement, tout comme le plafond de ce qu'un ingénieur rapide et compétent peut en extraire. Les principes fondamentaux ici – clarté, spécificité, contexte, itération – resteront précieux quel que soit le modèle que vous utilisez.
+
+<Quiz question="Quel est le principal avantage de l'invite à quelques tirs par rapport au zéro tir ?" options={["Le modèle répond plus rapidement", "Vous pouvez fournir des exemples du format d'entrée-sortie exact souhaité, guidant plus précisément la réponse du modèle.", "Il utilise moins la fenêtre contextuelle", "Le modèle est autorisé à poser des questions de clarification"]} correct={1} explanation="Les invites en quelques étapes fournissent 2 à 5 exemples du modèle souhaité avant de présenter votre tâche réelle. Ceci est particulièrement puissant pour les formats de sortie inhabituels, les classifications spécifiques à un domaine ou la correspondance de styles, cas où indiquer le modèle n'est pas aussi efficace que de le montrer." />
+
+<Quiz question="Pourquoi l’incitation à la chaîne de pensée améliore-t-elle la précision des tâches de raisonnement ?" options={["Cela rend l'invite plus courte et plus claire", "En faisant en sorte que le modèle montre son raisonnement étape par étape, les erreurs sont plus visibles et le modèle est moins susceptible de sauter des étapes logiques.", "Il donne au modèle plus d'exemples de formation", "Il réduit la température des sorties du modèle"]} correct={1} explanation="Lorsqu'un modèle raisonne étape par étape, deux choses se produisent : premièrement, un raisonnement visible vous permet de repérer les erreurs ; Deuxièmement, le fait de générer chaque étape réduit en fait la probabilité de faire des sauts logiques qui ignorent un raisonnement important. C'est similaire à la façon dont les humains font moins d'erreurs lorsqu'ils rédigent leurs travaux de mathématiques." />

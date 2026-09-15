@@ -1,0 +1,159 @@
+---
+title: "Projete um cache distribuído - Arquitetura Redis do zero"
+description: "Projete um sistema de cache distribuído que cubra estratégias de cache, hashing consistente, políticas de despejo, prevenção de debandada de cache e arquitetura Redis Cluster."
+order: 10
+difficulty: "advanced"
+duration: 23
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+# Projete um cache distribuído - Arquitetura Redis do zero
+
+O cache é a técnica mais eficaz para melhorar o desempenho do sistema. Um cache distribuído bem projetado pode reduzir a carga do banco de dados em mais de 90% e reduzir os tempos de resposta de centenas de milissegundos para menos de milissegundos.
+
+## Passo 1 – Levantamento de Requisitos
+
+### Requisitos Funcionais
+- Armazene pares de valores-chave com TTL opcional (time-to-live)
+- Suporta operações comuns: GET, SET, DELETE e operações em massa
+- Distribua dados entre vários nós para escalabilidade horizontal
+
+### Requisitos Não Funcionais
+- **Baixa latência** - leituras de menos de milissegundos para ocorrências de cache
+- **Alta produtividade** - Mais de 100 mil operações por segundo por nó
+- **Alta disponibilidade** – falhas de cache não devem derrubar o sistema
+- **Escalabilidade** – adicione nós sem tempo de inatividade
+
+### Quando armazenar em cache
+- **Cargas de trabalho com uso intenso de leitura** - quando as leituras superam em muito o número de gravações
+- **Cálculos caros** - Resultados de inferência de modelo de ML, agregações complexas
+- **Dados acessados com frequência** - sessões de usuário, catálogos de produtos, configuração
+
+## Etapa 2 - Estratégias de cache
+
+### Cache-Aside (carregamento lento)
+O padrão mais comum. O aplicativo verifica primeiro o cache; em caso de erro, ele lê o banco de dados e preenche o cache:
+
+```
+GET user:123 → Cache HIT → return cached data
+GET user:456 → Cache MISS → query DB → SET cache → return data
+```
+
+**Prós:** armazena em cache apenas o que é realmente solicitado. **Contras:** falhas no cache geram latência; os dados podem ficar obsoletos.
+
+### Leitura completa
+O próprio cache lida com leituras de banco de dados em caso de falha. A aplicação se comunica apenas com a camada de cache, que abstrai a fonte de dados.
+
+### Gravação
+Cada gravação vai para o cache e para o banco de dados de forma síncrona. Garante que o cache seja sempre consistente, mas adiciona latência de gravação.
+
+### Write-Behind (escrever de volta)
+As gravações vão para o cache imediatamente; o cache é liberado de forma assíncrona para o banco de dados em lotes. Menor latência de gravação, mas há risco de perda de dados se o nó de cache travar antes da liberação.
+
+| Estratégia | Consistência | Latência de leitura | Latência de gravação | Caso de uso |
+|----------|------------|-------------|---------------|----------|
+| Cache-Aside | Eventual | Faltar pênalti | N/A | Finalidade geral |
+| Leitura | Eventual | Faltar pênalti | N/A | Leituras simplificadas |
+| Gravação | Forte | Rápido | Mais lento | Crítica à consistência |
+| Escreva atrás | Eventual | Rápido | Rápido | Cargas de trabalho com gravação pesada |
+
+<Quiz question="Um site de comércio eletrônico precisa armazenar em cache os preços dos produtos que mudam com pouca frequência, mas devem ser precisos em 5 minutos. Qual estratégia é mais apropriada?" options="Write-Behind com intervalo de liberação de 1 hora|Cache-Aside com TTL de 5 minutos|Write-Through para cada atualização de preço|Sem cache - sempre leia do banco de dados" answer="1" explanation="Cache-Aside com TTL de 5 minutos garante que dados obsoletos nunca persistam além da janela aceitável. Write-Through funcionaria, mas adicionaria latência de gravação desnecessária para atualizações pouco frequentes. Cache-Aside é mais simples e se encaixa perfeitamente no padrão de 'leitura pesada, ocasionalmente atualizada'." />
+
+## Etapa 3 - Políticas de despejo
+
+Quando o cache está cheio, quais entradas removemos?
+
+- **LRU (menos usado recentemente)** - despeja a entrada que não foi acessada há mais tempo. Melhor política de uso geral
+- **LFU (Least Frequently Used)** - remove a entrada acessada com menos frequência. Melhor para padrões de acesso distorcidos
+- **Baseado em TTL** - as entradas expiram após um tempo definido, independentemente do acesso. Essencial para atualização de dados
+- **Aleatório** - surpreendentemente eficaz e muito simples de implementar
+
+<FunFact>O Redis usa um algoritmo LRU aproximado que amostra um pequeno número de chaves (padrão: 5) e despeja a menos usada recentemente entre elas. Isso é quase tão preciso quanto o LRU verdadeiro, mas não requer nenhuma sobrecarga de memória adicional para rastrear a ordem de acesso.</FunFact>
+
+## Etapa 4 - Hashing consistente para distribuição
+
+### O problema com hash simples
+Com `hash(key) % N` nós, adicionar ou remover um nó remapeia quase todas as chaves, causando uma enorme tempestade de erros de cache.
+
+### Hashing consistente com nós virtuais
+O hash consistente mapeia chaves e nós em um anel. Cada chave é atribuída ao próximo nó no sentido horário no anel:
+
+```
+Hash Ring (0 to 2^32):
+     Node A (3 virtual nodes: A1, A2, A3)
+     Node B (3 virtual nodes: B1, B2, B3)
+     Node C (3 virtual nodes: C1, C2, C3)
+
+Key "user:123" → hash → lands between B2 and A1 → assigned to Node A
+```
+
+**Nós virtuais** resolvem o problema de distribuição desigual. Cada nó físico obtém múltiplas posições no anel, garantindo carga equilibrada mesmo com poucos nós físicos.
+
+Quando um nó é adicionado ou removido, apenas as chaves adjacentes a ele no anel são remapeadas - aproximadamente `K/N` chaves (onde K é o total de chaves e N é a contagem de nós), nem todas elas.
+
+<Illustration src="/images/lessons/design-distributed-cache.svg" alt="Anel de hashing consistente mostrando nós físicos mapeados para nós virtuais, com chaves atribuídas ao nó mais próximo no sentido horário" caption="O hashing consistente garante que a adição ou remoção de um nó remapeie apenas uma pequena fração de chaves, evitando debandadas de cache" />
+
+<Quiz question="Um cluster de cache possui 4 nós. O nó 3 falha. Com hashing de módulo simples (chave % 4 → chave % 3), qual porcentagem de chaves é remapeada?" options="25% (apenas chaves do Nó 3)|50%|75% – quase todas as chaves são remapeadas|100%" answer="2" explanation="Mudar do mod 4 para o mod 3 remapeia aproximadamente 75% de todas as chaves para nós diferentes. Por exemplo, uma chave com hash 7 estava no nó 3 (7%4=3), mas agora vai para o nó 1 (7%3=1). Isso causa um grande aumento nas perdas de cache. O hash consistente resolve isso remapeando apenas as chaves ~K/N." />
+
+## Etapa 5 - Prevenção de estouro de cache
+
+Uma **debandada de cache** ocorre quando uma entrada popular em cache expira e centenas de solicitações simultâneas perdem simultaneamente o cache e atingem o banco de dados.
+
+### Soluções
+
+**Mutex/Locking:** Quando ocorre uma falha no cache, adquira um bloqueio distribuído. Apenas uma solicitação é buscada no banco de dados; outros esperam que o cache seja preenchido novamente.
+
+**Expiração Antecipada Probabilística:** Cada solicitação tem uma pequena chance aleatória de atualizar o cache antes que o TTL realmente expire. Isso distribui a carga de atualização ao longo do tempo, em vez de criar um rebanho estrondoso no vencimento.
+
+**Atualização em segundo plano:** um processo em segundo plano atualiza entradas de cache populares antes que elas expirem. O cache nunca fica vazio para teclas de atalho.
+
+<ThinkAboutIt>Considere uma venda relâmpago em que a página de um produto recebe 100.000 solicitações por segundo. A entrada do cache de detalhes do produto expira. Sem a prevenção de debandada, todas as 100 mil solicitações chegam ao banco de dados simultaneamente. Qual estratégia de prevenção você escolheria e por quê?</ThinkAboutIt>
+
+## Etapa 6 - Arquitetura de Cluster Redis
+
+Redis Cluster é o cache distribuído mais amplamente implantado:
+
+- **16.384 slots de hash** distribuídos entre nós mestres
+- Cada chave é mapeada para um slot via `CRC16(key) % 16384`
+- **Replicação:** cada mestre possui uma ou mais réplicas para failover
+- **Failover automático:** se um mestre falhar, sua réplica será promovida em segundos
+
+```
+Slots 0-5460:     Master A ←→ Replica A'
+Slots 5461-10922: Master B ←→ Replica B'
+Slots 10923-16383: Master C ←→ Replica C'
+```
+
+### Monitorando as principais métricas
+- **Taxa de acerto** - meta de 95%+; abaixo de 80% indica um problema de cache
+- **Uso de memória** - fique abaixo de 80% para evitar despejos
+- **Taxa de despejo** - despejos altos significam que o cache está subdimensionado
+- **Percentis de latência** - p99 deve estar abaixo de 1 ms para ocorrências de cache
+
+## Etapa 7 - Padrões de cache do mundo real
+
+| Padrão | Implementação | TTL |
+|--------|---------------|-----|
+| Armazenamento de sessão | `SET session:{id} {data}` | 30 minutos |
+| Cache de resposta da API | `SET api:/users/123 {json}` | 5 minutos |
+| Cache de consulta de banco de dados | `SET query:{hash} {result}` | 1 minuto |
+| Contador limitador de taxa | `INCR ratelimit:{user}:{window}` | Duração da janela |
+| Sinalizadores de recursos | `HSET features {flag} {value}` | 10 segundos |
+
+### Invalidação de cache
+O problema mais difícil da ciência da computação (além de nomear coisas):
+- **Baseado em TTL** - simples, tolera obsolescência durante a duração do TTL
+- ** Orientado a eventos ** - publicar eventos de invalidação quando os dados forem alterados (via Kafka ou Redis Pub/Sub)
+- **Baseado em versão** - inclui uma versão na chave de cache; incrementar versão em gravações para invalidar efetivamente entradas antigas
+
+<Quiz question="Qual abordagem de invalidação de cache oferece a garantia de consistência mais forte?" options="Expiração baseada em TTL com janela de 5 minutos|Invalidação orientada a eventos acionada por gravações no banco de dados|Despejo aleatório|Atualização em segundo plano a cada 10 segundos" answer="1" explanation="A invalidação orientada a eventos reage às alterações reais dos dados, invalidando o cache imediatamente quando os dados de origem são atualizados. As abordagens baseadas em TTL sempre têm uma janela de inatividade, enquanto a atualização em segundo plano apresenta lacunas entre os ciclos de atualização." />
+
+<ThinkAboutIt>Phil Karlton disse a famosa frase: 'Existem apenas duas coisas difíceis na Ciência da Computação - invalidação de cache e nomeação de coisas.' Por que a invalidação de cache é tão difícil em sistemas distribuídos? Pense no que acontece quando uma gravação no banco de dados é bem-sucedida, mas a mensagem de invalidação do cache é perdida.</ThinkAboutIt>
+
+---
+
+## 📚 Leitura adicional
+- [Hashing consistente - ByteByteGo](https://bytebytego.com/courses/system-design-interview/design-consistent-hashing) - explicação visual de hashing consistente e nós virtuais
+- [Especificação do Redis Cluster](https://redis.io/docs/reference/cluster-spec/) - documentação oficial da arquitetura do Redis Cluster
+- [Estratégias de cache - AWS](https://aws.amazon.com/caching/best-practices/) - padrões práticos de cache para aplicativos em nuvem

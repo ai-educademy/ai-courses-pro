@@ -1,0 +1,211 @@
+---
+title: "Structures de données pour les entretiens"
+description: "Maîtrisez les structures de données essentielles qui apparaissent dans 90 % des entretiens de codage : tableaux, arbres, graphiques, cartes de hachage et quand les utiliser."
+order: 1
+difficulty: "intermediate"
+duration: 20
+icon: "📊"
+published: true
+machineTranslated: true
+---
+# Structures de données pour les entretiens
+
+Voici un secret que les meilleurs coachs d'entretien ne vous factureront pas 500 $ pour l'apprendre : environ 90 % des problèmes d'entretien de codage tournent autour de seulement sept structures de données. Si vous comprenez profondément quand et pourquoi atteindre chacun d’eux, vous avez déjà gagné la moitié de la bataille. L’autre moitié est la pratique – mais sans les bons modèles mentaux, la pratique n’est qu’une simple mémorisation. Cette leçon vous donne la carte pour que chaque problème que vous rencontrez ressemble à un territoire familier.
+
+## Les 7 structures de données incontournables
+
+Chaque entretien technique puise dans le même puits. Voici les structures que vous rencontrerez, classées par fréquence :
+
+| Structure des données | Fréquence des entretiens | Opérations de base | Quand les enquêteurs s'y attendent |
+|---|---|---|---|
+| **Tableaux / Chaînes** | ★★★★★ | Accéder à O(1), rechercher O(n), insérer O(n) | Presque tous les problèmes commencent ici |
+| **Cartes/ensembles de hachage** | ★★★★★ | Insérer O(1), Rechercher O(1), Supprimer O(1) | "Optimisez cela de O(n²) à O(n)" |
+| **Listes liées** | ★★★★☆ | Insérer O(1), Supprimer O(1), Accéder O(n) | Manipulation du pointeur, détection de cycle |
+| ** Piles et files d'attente ** | ★★★★☆ | Push/Pop O(1), Mise en file d'attente/Suppression de la file d'attente O(1) | Analyse, BFS, opérations d'annulation |
+| **Arbres (binaire, BST)** | ★★★★☆ | Rechercher O (log n), Insérer O (log n) | Données hiérarchiques, opérations triées |
+| **Graphiques** | ★★★☆☆ | Dépend de la représentation | Relations, chemins, connectivité |
+| **Des tas** | ★★★☆☆ | Insérer O (log n), Extraire-min O (log n) | "Trouver le k le plus grand/le plus petit" |
+
+<Callout>Si vous n'avez qu'une semaine pour vous préparer, concentrez-vous sur les tableaux, les cartes de hachage et les arbres. Ces trois questions représentent la majorité des questions d'entretien dans les entreprises au niveau FAANG.</Callout>
+
+## Tableaux et chaînes – Votre fondation
+
+Les tableaux sont le point de départ de presque tous les problèmes d’entretien. L'idée clé est que la plupart des problèmes liés aux tableaux ne concernent pas vraiment les tableaux, mais plutôt la reconnaissance de modèles tels que deux pointeurs, une fenêtre coulissante ou des sommes de préfixes.
+
+```python
+# Two Sum — the most classic interview problem
+# "Given an array and target, find two numbers that add to target"
+def two_sum(nums, target):
+    seen = {}  # Hash map to store complement
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+    return []
+
+# Time: O(n), Space: O(n) — trading space for time
+```
+
+Remarquez que même ce problème de « tableau » est en réalité un problème de carte de hachage. Ce modèle se répète constamment : la force brute utilise des boucles imbriquées sur un tableau et la solution optimale introduit une carte de hachage.
+
+## Hash Maps — Le couteau suisse de l'interview
+
+Si vous êtes bloqué sur un problème et que la force brute est O(n²), demandez-vous : « Une carte de hachage peut-elle réduire cela à O(n) ? La réponse est oui, étonnamment souvent.
+
+Les cartes de hachage brillent lorsque vous avez besoin de :
+- **Fréquences de comptage** — nombre de caractères, nombre de mots, fréquences d'éléments
+- **Suivre les éléments vus** — détection des doublons, problèmes de style à deux sommes
+- **Éléments de groupe** — regroupement d'anagrammes, catégorisation
+- **Calculs de cache** — mémoïsation en programmation dynamique
+
+```java
+// Group Anagrams — a classic hash map problem
+public List<List<String>> groupAnagrams(String[] strs) {
+    Map<String, List<String>> map = new HashMap<>();
+    for (String s : strs) {
+        char[] chars = s.toCharArray();
+        Arrays.sort(chars);
+        String key = new String(chars);
+        map.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
+    }
+    return new ArrayList<>(map.values());
+}
+```
+
+<ThinkAboutIt>Lorsque vous voyez un problème vous demandant de « trouver », de « compter » ou de « vérifier s'il existe », quelle structure de données doit immédiatement vous venir à l'esprit ? Comment expliqueriez-vous le compromis entre la recherche O(1) d'une carte de hachage et la recherche binaire O(log n) d'un tableau trié ?</ThinkAboutIt>
+
+## Listes liées – Maîtrise du pointeur
+
+Les problèmes de liste chaînée testent votre capacité à manipuler des pointeurs sans perdre la trace des nœuds. Les trois techniques dont vous avez besoin sont :
+
+1. **Deux pointeurs (rapide/lent)** — détection de cycle, recherche du nœud central
+2. **Nœud de tête factice** — simplifie les cas extrêmes où la tête peut changer
+3. **Inversion** — l'inversion itérative est un élément constitutif de nombreux problèmes
+
+```python
+# Detect a cycle in a linked list (Floyd's Algorithm)
+def has_cycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow == fast:
+            return True
+    return False
+```
+
+<FunFact>L'algorithme de détection du cycle de Floyd, également connu sous le nom d'algorithme « tortue et lièvre », a été publié en 1967. C'est l'un des algorithmes les plus anciens encore couramment demandés dans les entretiens de codage modernes – plus de 55 ans et ce n'est pas fini.</FunFact>
+
+## Piles et files d'attente – La commande est importante
+
+Les piles (LIFO) et les files d'attente (FIFO) sont des structures plus simples, mais elles débloquent des catégories entières de problèmes :
+
+- **Stacks** : parenthèses valides, évaluation d'expression, problèmes de pile monotone, annuler/rétablir
+- **Files d'attente** : parcours BFS, fenêtre glissante maximale (avec deque), planification des tâches
+
+```python
+# Valid Parentheses — classic stack problem
+def is_valid(s: str) -> bool:
+    stack = []
+    matching = {')': '(', '}': '{', ']': '['}
+    for char in s:
+        if char in matching:
+            if not stack or stack[-1] != matching[char]:
+                return False
+            stack.pop()
+        else:
+            stack.append(char)
+    return len(stack) == 0
+```
+
+## Arbres — Pensée hiérarchique
+
+Les problèmes d'arbre impliquent généralement la récursivité et l'un des trois ordres de parcours (dans l'ordre, pré-ordre, post-ordre). Le modèle mental à développer est le suivant : « De quoi ai-je besoin du sous-arbre de gauche, du sous-arbre de droite, et comment puis-je les combiner au niveau du nœud actuel ? »
+
+```python
+# Maximum depth of a binary tree — the template for tree recursion
+def max_depth(root):
+    if not root:
+        return 0
+    left_depth = max_depth(root.left)
+    right_depth = max_depth(root.right)
+    return 1 + max(left_depth, right_depth)
+```
+
+Les problèmes BST (Binary Search Tree) ajoutent une propriété cruciale : le parcours dans l'ordre produit des éléments triés. Si vous voyez « trié » et « arbre » dans le même problème, pensez immédiatement à BST.
+
+## Graphiques — Modélisation des relations
+
+Les problèmes de graphiques semblent intimidants, mais la plupart se réduisent à BFS ou DFS une fois que vous avez construit la liste de contiguïté. Les compétences clés sont :
+
+- **Construire le graphique** à partir de listes de bords ou de matrices
+- **BFS** pour le chemin le plus court dans les graphiques non pondérés
+- **DFS** pour la connectivité, la détection de cycles, le tri topologique
+
+```python
+# BFS shortest path in an unweighted graph
+from collections import deque
+
+def shortest_path(graph, start, end):
+    queue = deque([(start, 0)])
+    visited = {start}
+    while queue:
+        node, distance = queue.popleft()
+        if node == end:
+            return distance
+        for neighbour in graph[node]:
+            if neighbour not in visited:
+                visited.add(neighbour)
+                queue.append((neighbour, distance + 1))
+    return -1  # Not reachable
+```
+
+## Heaps — Le signal « Top K »
+
+Chaque fois qu'un problème dit "trouver les K les plus grands", "les K les plus proches" ou "fusionner les K listes triées", un tas (file d'attente prioritaire) est presque certainement la réponse. En Python, `heapq` fournit un min-heap ; pour un tas maximum, annulez les valeurs.
+
+```python
+import heapq
+
+# Find the K largest elements in an array
+def k_largest(nums, k):
+    return heapq.nlargest(k, nums)  # Uses a min-heap of size k internally
+```
+
+<Quiz question="Vous devez trouver la médiane d'un flux de nombres en O(log n) par insertion. Quelle combinaison de structures de données est la plus appropriée ?" options="Deux tableaux triés|Un seul BST équilibré|Deux tas (max-heap + min-heap)|Une carte de hachage avec des totaux cumulés" answer="2" explanation="L'approche à deux tas utilise un tas maximum pour la moitié inférieure et un tas min pour la moitié supérieure. Les équilibrer après chaque insertion prend O(log n), et la médiane est toujours disponible en O(1) à partir des sommets du tas." />
+
+## Aide-mémoire sur la complexité temporelle et spatiale
+
+| Structure | Accès | Rechercher | Insérer | Supprimer | Espace |
+|---|---|---|---|---|---|
+| Tableau | O(1) | O(n) | O(n) | O(n) | O(n) |
+| Carte de hachage | — | O(1)* | O(1)* | O(1)* | O(n) |
+| Liste liée | O(n) | O(n) | O(1) | O(1) | O(n) |
+| Pile/File d'attente | O(n) | O(n) | O(1) | O(1) | O(n) |
+| BST (équilibré) | O(logn) | O(logn) | O(logn) | O(logn) | O(n) |
+| Tas | — | O(n) | O(logn) | O(logn) | O(n) |
+
+*\* Cas moyen ; le pire des cas est O(n) en raison de collisions de hachage.*
+
+## Reconnaissance de formes - Choisir la bonne structure
+
+Développez cette liste de contrôle mentale lors de la lecture d’un problème :
+
+- **Besoin d'une recherche rapide ?** → Hash Map
+- **Besoin d'un ordre trié ?** → BST ou tableau trié + recherche binaire
+- **Besoin d'un traitement FIFO ?** → File d'attente (BFS)
+- **Besoin de LIFO / backtracking ?** → Stack (DFS)
+- **Besoin de top-K ou de priorité ?** → Tas
+- **Besoin de modéliser les connexions ?** → Graphique
+- **Besoin d'un accès O(1) par index ?** → Tableau
+
+<Callout>Lors de votre entretien, indiquez explicitement quelle structure de données vous choisissez et pourquoi. Dire « Je vais utiliser une carte de hachage ici parce que nous avons besoin de recherches O(1) pour éviter la boucle imbriquée » démontre exactement la pensée technique que les enquêteurs veulent voir.</Callout>
+
+## Points clés à retenir
+
+- **Sept structures couvrent 90 % des entretiens** : tableaux, cartes de hachage, listes chaînées, piles/files d'attente, arbres, graphiques et tas.
+- **Les cartes de hachage sont votre meilleur ami** : en cas de doute, une carte de hachage est probablement utile.
+- **Connaissez à froid vos complexités** : les enquêteurs demanderont : "quelle est la complexité temporelle ?" après chaque solution.
+- **La reconnaissance de formes bat la mémorisation** : apprenez à mapper les signaux problématiques ("top K" → tas, "shortest path" → BFS) vers la bonne structure.
+- **Entraînez-vous délibérément** : résolvez 3 à 5 problèmes par structure de données, en vous concentrant sur la compréhension plutôt que sur la vitesse. La vitesse vient de la compréhension.

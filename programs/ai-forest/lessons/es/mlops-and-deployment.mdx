@@ -1,0 +1,131 @@
+---
+title: "MLOps e implementación: llevar modelos del portátil a la producción"
+description: "Conozca el ciclo de vida completo de MLOps: registros de modelos, CI/CD para ML, contenedorización, infraestructura de servicio, monitoreo de deriva y optimización de costos a escala."
+order: 6
+difficulty: "advanced"
+duration: 18
+icon: "⚙️"
+published: true
+machineTranslated: true
+---
+# MLOps e implementación
+
+Una computadora portátil Jupyter con una precisión del 94% no es un producto. En el momento en que cierras el portátil, ese modelo no le sirve a nadie. MLOps es la disciplina que cierra la brecha entre la experimentación y la producción, y es donde la mayoría de los equipos de IA luchan más.
+
+## Por qué los portátiles no son de producción
+
+Los portátiles fomentan hábitos de ingeniería terribles: estado oculto ante la ejecución de celdas fuera de orden, rutas de archivos codificadas, sin gestión de dependencias y reproducibilidad cero. Un modelo entrenado en un cuaderno no se puede volver a entrenar automáticamente cuando llegan nuevos datos, no se puede revertir cuando se rompe y no se puede monitorear su degradación.
+
+El aprendizaje automático de producción requiere **código versionado, datos versionados, modelos versionados y canalizaciones automatizadas**. Todo lo demás es una demostración.
+
+## El ciclo de vida de MLOps
+
+El ciclo de vida de MLOps es un bucle continuo, no un proceso lineal. Cada etapa se retroalimenta con las demás y la madurez de su organización determina qué tan automatizadas están estas transiciones.
+
+Google define tres niveles de madurez de MLOps:
+- **Nivel 0** - Proceso manual basado en scripts. Los científicos de datos entregan modelos a los ingenieros.
+- **Nivel 1** - Canales de capacitación automatizados. El reentrenamiento se activa automáticamente con nuevos datos.
+- **Nivel 2** - CI/CD completo para ML. Los cambios de código, datos y modelos fluyen a través de canales automatizados.
+
+Las etapas del bucle:
+
+1. **Ingestión y validación de datos**: recopile, limpie y valide datos entrantes con respecto a esquemas
+2. **Ingeniería de funciones**: transforme datos sin procesar en funciones listas para el modelo a través de un almacén de funciones
+3. **Entrenamiento**: ejecute trabajos de entrenamiento reproducibles con hiperparámetros rastreados
+4. **Evaluación**: compare los modelos candidatos con las líneas de base utilizando conjuntos de prueba disponibles
+5. **Registro**: almacena modelos aprobados con metadatos, linaje y estado de aprobación.
+6. **Implementación**: sirva el modelo detrás de una API con implementación canary o azul-verde
+7. **Monitoreo**: realice un seguimiento de la calidad de la predicción, la latencia, el rendimiento y la deriva de datos
+8. **Reentrenamiento**: activa nuevas ejecuciones de entrenamiento cuando el rendimiento se degrada
+
+<Illustration src="/images/lessons/mlops-and-deployment.svg" alt="Diagrama del ciclo de vida de MLOps que muestra el ciclo continuo desde los datos hasta la implementación y el monitoreo." caption="El ciclo de vida de MLOps es un bucle: el monitoreo retroalimenta el reentrenamiento." />
+
+## Registros de modelos
+
+Un registro de modelos es el sistema de control de versiones para sus modelos entrenados. Herramientas como **MLflow**, **Weights & Biases** y **Neptune** le permiten almacenar artefactos del modelo junto con sus métricas de entrenamiento, hiperparámetros, versiones de conjuntos de datos y estado de promoción (puesta en escena → producción → archivado).
+
+El registro responde preguntas críticas: *¿Qué modelo está actualmente en producción? ¿Con qué datos se entrenó? ¿Quién lo aprobó? ¿Cuáles fueron sus métricas de evaluación?*
+
+<Quiz question="¿Cuál es el propósito principal de un registro modelo?" options="Almacenamiento de datos de entrenamiento|Versionado y seguimiento de modelos entrenados con metadatos|Ejecución de ajuste de hiperparámetros|Sirviendo modelos a usuarios finales" answer="1" explanation="Un registro de modelos versiona los modelos entrenados junto con sus metadatos (métricas, parámetros, linaje y estado de promoción) lo que permite la reproducibilidad y la gobernanza." />
+
+## CI/CD para aprendizaje automático
+
+Código de pruebas CI/CD tradicional. ML CI/CD debe probar tres cosas: **código, datos y modelos**.
+
+- **Pruebas de código** - Pruebas unitarias para lógica de ingeniería de funciones, transformaciones de datos y contratos API
+- **Pruebas de datos** - Validación de esquemas, comprobaciones de distribución (¿están los nuevos datos dentro de los rangos esperados?) y comprobaciones de integridad (no faltan columnas)
+- **Pruebas de modelo** - Umbrales de rendimiento en conjuntos de validación, puntos de referencia de latencia, métricas de sesgo y comparación con el modelo de producción actual
+
+Una solicitud de extracción que cambia una canalización de funciones debería activar el reentrenamiento y la evaluación automáticamente. Si el nuevo modelo tiene un rendimiento inferior al de referencia, el RP se bloquea.
+
+## Contenedorización para ML
+
+Docker no es negociable para ML de producción. Su entorno de entrenamiento y su entorno de servicio deben ser idénticos: el problema de "funciona en mi máquina" se amplifica cuando los controladores de GPU, las versiones de CUDA y las dependencias de Python deben coincidir.
+
+Capas típicas de ML Dockerfile: imagen CUDA base → dependencias de Python → artefactos del modelo → marco de servicio. Las compilaciones de varias etapas mantienen la imagen final optimizada al separar el entorno de compilación del tiempo de ejecución.
+
+Prácticas clave para la contenedorización de ML:
+- **Fijar cada dependencia** - Usar versiones exactas en `requirements.txt`, no rangos
+- **Utilice imágenes base basadas en resúmenes** - `nvidia/cuda@sha256:...` en lugar de `:latest`
+- **Imágenes de entrenamiento y entrega separadas** - Las imágenes de entrenamiento necesitan compiladores y herramientas de desarrollo; servir imágenes solo necesita el tiempo de ejecución
+- **Buscar vulnerabilidades** - Las imágenes de ML heredan CVE de árboles de dependencia profundos
+
+<FunFact>La imagen base de NVIDIA CUDA por sí sola tiene más de 3 GB. Los equipos de producción habitualmente pasan días optimizando imágenes de Docker para reducir los tiempos de inicio en frío y los costos de registro de contenedores.</FunFact>
+
+## Infraestructura de servicio
+
+La forma en que sirve un modelo depende de sus requisitos de latencia y rendimiento:
+
+| Herramienta | Mejor para | Característica clave |
+|------|----------|-------------|
+| **Servicio de antorcha** | Modelos PyTorch | Procesamiento por lotes integrado, control de versiones de modelos |
+| **Servidor de inferencia Triton** | Marco múltiple, GPU | Lotes dinámicos, ejecución simultánea de modelos |
+| **vLLM** | Grandes modelos de lenguaje | PagedAttention, procesamiento por lotes continuo |
+| **Servicio de TensorFlow** | Modelos TF/Keras | gRPC + REST, recarga automática de modelo |
+| **BentoML** | Cualquier marco | API Pythonic, contenedorización integrada |
+
+Específicamente para el servicio LLM, **vLLM** se ha convertido en el estándar de la industria porque su mecanismo PagedAttention reduce el desperdicio de memoria de la GPU hasta en un 90 % en comparación con el servicio ingenuo.
+
+<Quiz question="¿Por qué vLLM se ha convertido en la solución de servicio preferida para modelos de lenguajes grandes?" options="Solo es compatible con modelos PyTorch.|Su mecanismo PagedAttention reduce drásticamente el desperdicio de memoria de la GPU|Es la única opción de código abierto disponible.|No requiere hardware GPU" answer="1" explanation="PagedAttention de vLLM administra la memoria caché KV de manera eficiente tomando prestadas ideas de la memoria virtual en los sistemas operativos, lo que reduce el desperdicio de memoria hasta en un 90%." />
+
+## Monitoreo de la deriva del modelo
+
+Un modelo que fue preciso en el momento de su implementación se degradará con el tiempo. La **desviación de datos** ocurre cuando la distribución de los insumos cambia (por ejemplo, el comportamiento del cliente cambia después de una pandemia). La **derivación de conceptos** ocurre cuando la relación entre entradas y salidas cambia (por ejemplo, los patrones de fraude evolucionan).
+
+Monitoree estas señales:
+- **Distribución de la predicción** - ¿Están cambiando los resultados? ¿Más predicciones de alta confianza de lo habitual?
+- **Distribuciones de características** - Pruebas estadísticas (prueba KS, PSI) que comparan los datos actuales con los datos de entrenamiento
+- **Retroalimentación de la verdad sobre el terreno** - Cuando lleguen las etiquetas, calcule la precisión en vivo/F1 y compárela con la línea de base
+- **Tasas de latencia y error** - El estado de la infraestructura afecta indirectamente la calidad del modelo
+
+<ThinkAboutIt>Su modelo de recomendación de comercio electrónico fue entrenado antes de la pandemia. Los patrones de compra pospandemia son completamente diferentes. ¿Cómo detectaría esta desviación automáticamente y cómo sería su estrategia de reentrenamiento?</ThinkAboutIt>
+
+## Tiendas de funciones
+
+Un almacén de funciones es un depósito centralizado de definiciones y valores de funciones, compartido durante la capacitación y el servicio. Herramientas como **Feast**, **Tecton** y **Hopsworks** resuelven el problema crítico del **desvío entre el servicio y la capacitación**: cuando las características se calculan de manera diferente durante el entrenamiento versus la inferencia.
+
+Las tiendas de funciones proporcionan: una tienda fuera de línea (funciones por lotes para capacitación), una tienda en línea (funciones de baja latencia para servicio) y un registro (definiciones de funciones, propiedad, linaje).
+
+## Inferencia por lotes frente a tiempo real
+
+No todas las predicciones deben realizarse en tiempo real. La diferencia de costos es enorme:
+
+- **Inferencia por lotes**: ejecute predicciones según un cronograma (cada hora, diariamente). Barato, utiliza instancias puntuales. Ideal para recomendaciones, calificación de riesgos y generación de informes.
+- **Inferencia en tiempo real** - Predicciones de menos de un segundo a través de API. Caro, requiere instancias de GPU siempre activas. Requerido para chatbots, detección de fraude, sistemas autónomos.
+- **Casi en tiempo real (transmisión)** - Procese eventos a medida que llegan a través de Kafka o Pub/Sub. Equilibra la latencia y el costo para casos de uso como personalización y detección de anomalías.
+
+Un patrón común es precalcular predicciones por lotes para el 95 % de los casos que son predecibles y enrutar solo el 5 % restante a un punto final en tiempo real.
+
+Consejo de optimización de costos: **puntos finales de inferencia de escala automática** según la profundidad de la cola de solicitudes, no la utilización de la CPU. Las cargas de trabajo de aprendizaje automático están en ráfagas: el escalamiento de la profundidad de la cola evita el sobreaprovisionamiento y los tiempos de espera de las solicitudes durante los picos de tráfico.
+
+<Quiz question="¿Cuándo es preferible la inferencia por lotes a la inferencia en tiempo real?" options="Cuando se necesitan predicciones en menos de 100 ms|Cuando las predicciones se pueden calcular previamente según un cronograma y la latencia no es crítica|Cuando el modelo es demasiado pequeño para servir GPU|Cuando necesita manejar usuarios simultáneos" answer="1" explanation="La inferencia por lotes es ideal cuando las predicciones se pueden programar con anticipación; es significativamente más económica porque puede usar instancias puntuales y no necesita una infraestructura de GPU siempre activa." />
+
+<ThinkAboutIt>Está diseñando una plataforma de aprendizaje automático para un gran minorista. ¿Qué componentes (almacén de funciones, registro de modelos, capa de servicio, monitoreo) crearía primero y cuáles adoptaría como servicios administrados? ¿Qué factores impulsan esa decisión?</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Diseño de sistemas de aprendizaje automático por Chip Huyen](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/): el libro definitivo sobre el diseño de sistemas de producción ML
+- [Modelo de madurez MLOps de Google](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning): marco de Google para evaluar la madurez de MLOps desde el nivel 0 al nivel 2
+- [vLLM: Servicio de LLM fácil, rápido y económico](https://docs.vllm.ai/) - Documentación oficial para el motor de servicio de LLM de código abierto líder

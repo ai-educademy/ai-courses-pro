@@ -1,0 +1,120 @@
+---
+title: "Aufmerksamkeit und Transformatoren – Die Architektur, die alles veränderte"
+description: "Ein tiefer Einblick in Selbstaufmerksamkeit, Mehrkopfaufmerksamkeit, Positionskodierung und die Transformer-Architektur, die jedem modernen großen Sprachmodell zugrunde liegt."
+order: 6
+difficulty: "advanced"
+duration: 20
+icon: "🔦"
+published: true
+machineTranslated: true
+---
+# Aufmerksamkeit und Transformatoren – Die Architektur, die alles veränderte
+
+Jedes wichtige Sprachmodell von heute – GPT-4, Claude, Gemini, LLaMA – basiert auf der Transformer-Architektur. Es wurde 2017 in der wegweisenden Veröffentlichung *Attention Is All You Need* veröffentlicht und ersetzte die Wiederholung durch einen Mechanismus namens **Selbstaufmerksamkeit**, der eine beispiellose Parallelität und Leistung ermöglichte.
+
+## Warum RNNs an eine Wand stoßen
+
+Wiederkehrende neuronale Netze verarbeiten einen Token nach dem anderen und übertragen so einen verborgenen Zustand weiter. Dadurch entstehen zwei lähmende Probleme:
+
+- **Verschwindende Gradienten** – Wenn sich ein Gradient über Hunderte von Zeitschritten zurück ausbreitet, schrumpft er auf nahezu Null, wodurch es unmöglich wird, Abhängigkeiten über große Entfernungen zu lernen.
+- **Sequentieller Engpass** – Jeder Schritt hängt vom vorherigen ab, sodass Sie das Training nicht über eine Sequenz hinweg parallelisieren können. Eine 1.000-Token-Eingabe erfordert 1.000 serielle Vorgänge.
+
+LSTMs und GRUs fügten Gating-Mechanismen hinzu, die das Verschwinden von Gradienten erleichterten, lösten jedoch nie das Parallelisierungsproblem. Das Training blieb grundsätzlich langsam.
+
+## Die Aufmerksamkeitsintuition
+
+Stellen Sie sich vor, Sie lesen einen langen Absatz und werden gefragt: „Was hat der CEO angekündigt?“ Ihre Augen lesen nicht jedes Wort der Reihe nach noch einmal, sondern **springen zum relevanten Satz**. Aufmerksamkeit funktioniert auf die gleiche Weise: Sie lässt jedes Token jedes andere Token betrachten und entscheiden, welche für den aktuellen Kontext am wichtigsten sind.
+
+Betrachten Sie es als einen **Scheinwerfer auf einer Bühne**. Anstatt die gesamte Bühne gleichmäßig auszuleuchten, lernt das Modell, einen hellen Strahl auf die Token zu richten, die die relevantesten Informationen für die jeweilige Aufgabe enthalten.
+
+<Illustration src="/images/lessons/attention-and-transformers.svg" alt="Diagramm, das die Selbstaufmerksamkeit zeigt: Ein Abfragetoken kümmert sich um alle Schlüsseltokens mit unterschiedlichen Gewichtungen und erzeugt eine gewichtete Summe von Werten" caption="Durch die Selbstaufmerksamkeit kümmert sich jeder Token um jeden anderen Token, wobei erlernte Gewichtungen die Relevanz bestimmen." />
+
+## Abfrage, Schlüssel, Wert – Der Kernmechanismus
+
+Selbstaufmerksamkeit entlehnt die Terminologie der Informationsbeschaffung. Für jedes Token berechnet das Modell drei Vektoren:
+
+- **Frage (F)** - *„Wonach suche ich?“*
+- **Schlüssel (K)** - *"Welche Informationen enthalte ich?"*
+- **Wert (V)** - *„Was trage ich tatsächlich bei, wenn ich ausgewählt werde?“*
+
+Der Aufmerksamkeitswert zwischen zwei Token ist das **Skalarprodukt von Q und K**, skaliert mit √d_k (der Schlüsseldimension), um explodierende Werte zu verhindern. Die Anwendung von Softmax ergibt normalisierte Gewichte und die Ausgabe ist eine gewichtete Summe aller V-Vektoren:
+
+```
+Attention(Q, K, V) = softmax(Q·Kᵀ / √d_k) · V
+```
+
+**Komplettlösung:** Betrachten Sie den Satz *"Die Katze saß auf der Matte, weil sie müde war."* Bei der Verarbeitung von *"it"* orientiert sich die Abfrage nach *"it"* am stärksten an *"cat"* (hoher Q·K-Score), wodurch das mehrdeutige Pronomen aufgelöst wird – keine Wiederholung erforderlich.
+
+<Quiz question="Warum teilen wir in der Selbstaufmerksamkeitsformel durch √d_k?" options="Damit das Modell auf GPUs schneller läuft|Um zu verhindern, dass Punktprodukte zu groß werden, wodurch Softmax in Bereiche mit winzigen Farbverläufen gedrängt würde|Um die Anzahl der Parameter im Modell zu reduzieren|Zur Normalisierung für Sequenzen variabler Länge" answer="1" explanation="Wenn d_k groß ist, können Skalarprodukte eine sehr große Größe annehmen, was dazu führt, dass Softmax Gradienten nahe Null (den Sättigungsbereich) ausgibt. Durch die Division durch √d_k bleiben die Werte in einem Bereich, in dem Softmax-Gradienten gesund bleiben." />
+
+## Mehrköpfige Aufmerksamkeit
+
+Ein einzelner Aufmerksamkeitskopf kann jeweils nur eine Art von Beziehung erfassen. **Multi-Head-Aufmerksamkeit** führt mehrere Aufmerksamkeitsköpfe parallel aus, jeder mit seinen eigenen erlernten Q-, K-, V-Projektionen, und verkettet und projiziert dann die Ergebnisse:
+
+```
+MultiHead(Q, K, V) = Concat(head₁, ..., headₕ) · Wᴼ
+```
+
+Verschiedene Köpfe lernen unterschiedliche sprachliche Muster – einer kümmert sich möglicherweise um syntaktische Abhängigkeiten, ein anderer um semantische Ähnlichkeit und ein dritter um positionelle Nähe. GPT-3 verwendet 96 Köpfe; Jeder sieht einen 128-dimensionalen Ausschnitt des gesamten 12.288-dimensionalen Raums.
+
+<FunFact>Forscher bei Google haben herausgefunden, dass sich einzelne Aufmerksamkeitsköpfe in BERT bemerkenswert spezialisieren – einige verfolgen die Subjekt-Verb-Übereinstimmung, andere kümmern sich um die Koreferenzauflösung und einige lernen sogar das Parsen von Abhängigkeiten, alles ohne explizite Aufsicht.
+</FunFact>
+
+## Positionskodierung
+
+Selbstaufmerksamkeit ist **permutationsinvariant** – sie behandelt *„Hund beißt Mann“* genauso wie *„Mann beißt Hund“*, es sei denn, wir injizieren Positionsinformationen. Der ursprüngliche Transformer verwendete Sinuskodierungen:
+
+```
+PE(pos, 2i)   = sin(pos / 10000^(2i/d_model))
+PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))
+```
+
+Jede Position erhält ein einzigartiges Muster aus Sinus- und Kosinuswellen mit unterschiedlichen Frequenzen. Dadurch kann das Modell relative Positionen lernen, da `PE(pos+k)` als lineare Funktion von `PE(pos)` ausgedrückt werden kann. Moderne Modelle (GPT, LLaMA) verwenden **Rotary Positional Embeddings (RoPE)**, die die relative Position direkt in das Q/K-Skalarprodukt kodieren.
+
+## Die vollständige Transformer-Architektur
+
+Der ursprüngliche Transformer hat eine **Encoder-Decoder**-Struktur:
+
+- **Encoder** – Verarbeitet die gesamte Eingabe mit bidirektionaler Selbstaufmerksamkeit (jeder Token kümmert sich um jeden anderen). Stapelt N Schichten von Selbstaufmerksamkeit + Feed-Forward-Blöcken mit Restverbindungen und Schichtnormalisierung.
+- **Decoder** – Erzeugt automatisch regressive Ausgabe mit **kausaler (maskierter) Selbstaufmerksamkeit** (jeder Token kann sich nur um vorherige Token kümmern) plus Queraufmerksamkeit auf die Encoder-Ausgabe.
+
+Jede Unterschicht folgt dem Muster: `LayerNorm(x + Sublayer(x))`, wobei die Restverbindung dafür sorgt, dass Gradienten ungehindert durch tiefe Stapel fließen.
+
+<ThinkAboutIt>Die Restverbindungen des Transformers ermöglichen den direkten Fluss von Farbverläufen durch mehr als 100 Schichten. Ohne sie wäre es nahezu unmöglich, ein 96-Schichten-GPT-3 zu trainieren. In welcher Beziehung steht dies zu den Skip-Verbindungen, die ResNets für Deep Computer Vision nutzbar gemacht haben?
+</ThinkAboutIt>
+
+## Warum Transformatoren parallelisieren
+
+Die wichtigste Erkenntnis: Selbstaufmerksamkeit berechnet alle paarweisen Token-Interaktionen in einer **einzelnen Matrixmultiplikation**. Für eine Sequenz der Länge n wird die gesamte n×n-Aufmerksamkeitsmatrix gleichzeitig auf GPU-Hardware berechnet. Vergleichen Sie dies mit RNNs, die unabhängig von der verfügbaren Rechenleistung n aufeinanderfolgende Schritte erfordern.
+
+Diese O(1)-Tiefe (konstante sequentielle Operationen) im Vergleich zur O(n)-Tiefe des RNN ist genau der Grund, warum Transformer während des Trainings auf Sequenzen von Tausenden von Token skaliert werden.
+
+## Nur-Decoder vs. Nur-Encoder vs. Encoder-Decoder
+
+Aus dem ursprünglichen Entwurf gingen drei Architekturvarianten hervor:
+
+| Variante | Achtung | Beispiel | Am besten für |
+|---------|-----------|---------|----------|
+| **Nur Encoder** | Bidirektional | BERT, RoBERTa | Klassifizierung, NER, Einbettungen |
+| **Nur Decoder** | Kausal (von links nach rechts) | GPT, LLaMA, Claude | Textgenerierung, Chat, Argumentation |
+| **Encoder-Decoder** | Beide | T5, BART, Whisper | Übersetzung, Zusammenfassung |
+
+Heutzutage dominieren reine Decoder-Modelle, da **die Generierung die universelle Schnittstelle ist** – jede NLP-Aufgabe kann als Textgenerierung definiert werden. Diese architektonische Einfachheit lässt sich auch vorhersehbarer skalieren.
+
+<Quiz question="Warum nutzen reine Decoder-Modelle während des Trainings kausale (maskierte) Aufmerksamkeit?" options="Um die Speichernutzung um die Hälfte zu reduzieren|Um zu verhindern, dass sich Token um zukünftige Token kümmern, wodurch die Antwort während des autoregressiven Trainings verloren geht|Um das Modell bidirektional zu machen|Um die Schlussfolgerung zu beschleunigen, indem Aufmerksamkeitsberechnungen übersprungen werden" answer="1" explanation="Während des Trainings sagt das Modell den nächsten Token an jeder Position gleichzeitig voraus. Durch kausale Maskierung wird sichergestellt, dass jede Position nur vorhergehende Token sehen kann, wodurch verhindert wird, dass Informationen von zukünftigen Positionen verloren gehen, was die Vorhersageaufgabe trivialisieren würde." />
+
+<Quiz question="Auf welcher Transformer-Variante basiert BERT und warum ist sie für die Generierung von offenem Text ungeeignet?" options="Nur Decoder; es fehlen Queraufmerksamkeitsebenen|Encoder-Decoder; Für die Textgenerierung ist ein separater Decoder erforderlich|Nur Encoder; Seine bidirektionale Aufmerksamkeit bedeutet, dass es die gesamte Sequenz sieht, was eine autoregressive Generierung unmöglich macht|Nur Encoder; es hat zu wenige Parameter für Generierungsaufgaben" answer="2" explanation="BERT nutzt bidirektionale Aufmerksamkeit (nur Encoder), was bedeutet, dass jeder Token jeden anderen Token, einschließlich zukünftiger, betreut. Dies ist perfekt für das Verständnis von Aufgaben, macht aber die autoregressive Generierung unmöglich – es kann nicht „das nächste Token” vorhersagen, wenn es bereits alle Token sehen kann." />
+
+<FunFact>Der Originalaufsatz *Attention Is All You Need* wurde von einem früheren Veranstaltungsort abgelehnt, bevor er bei NeurIPS 2017 angenommen wurde. Im Jahr 2024 wurde er über 130.000 Mal zitiert – was ihn zu einem der meistzitierten Informatikaufsätze aller Zeiten macht.
+</FunFact>
+
+<ThinkAboutIt>Selbstaufmerksamkeit hat eine O(n²)-Komplexität in der Sequenzlänge – eine Verdoppelung des Kontextfensters vervierfacht die Berechnung. Die Forschung zu linearer Aufmerksamkeit, spärlicher Aufmerksamkeit und Ringaufmerksamkeit zielt darauf ab, diese Barriere zu überwinden. Welche Kompromisse könnten diese Näherungen mit sich bringen?
+</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+
+– [Aufmerksamkeit ist alles, was Sie brauchen (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762) – Das Grundlagenpapier zur Einführung in die Transformer-Architektur
+- [Andrej Karpathy – Lasst uns GPT erstellen: von Grund auf, im Code](https://www.youtube.com/watch?v=kCc8FmEb1nY) – Eine vollständige Anleitung zum Aufbau eines Transformers von Grund auf
+- [Der illustrierte Transformer (Jay Alammar)](https://jalammar.github.io/illustrated-transformer/) – Visuelle, intuitive Erklärung aller Transformer-Komponenten

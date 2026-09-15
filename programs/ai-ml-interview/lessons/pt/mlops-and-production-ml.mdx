@@ -1,0 +1,244 @@
+---
+title: "MLOps e ML de produção"
+description: "Demonstre experiência em ML de produção, desde o atendimento do modelo até o monitoramento e a infraestrutura que faz o ML funcionar em escala."
+order: 4
+difficulty: "advanced"
+duration: 20
+icon: "⚙️"
+published: true
+machineTranslated: true
+---
+# ⚙️ MLOps e ML de produção
+
+Aqui está uma estatística que deve moldar a forma como você se prepara para entrevistas: **87% dos modelos de ML nunca chegam à produção.** A lacuna entre um notebook Jupyter e um serviço de ML confiável e escalonável é enorme — e as empresas estão desesperadas por engenheiros que possam superá-la. As perguntas da entrevista MLOps testam se você pode usar um modelo de "funciona na minha máquina" para "funciona para milhões de usuários, de forma confiável, às 3 da manhã de um sábado".
+
+---
+
+## 🧭 O que o MLOps realmente cobre
+
+MLOps é o conjunto de práticas que trazem a disciplina DevOps para o aprendizado de máquina. Abrange todo o ciclo de vida do ML:
+
+```
+Data → Feature Engineering → Training → Evaluation → Deployment → Monitoring → Retraining
+  ↑                                                                              |
+  └──────────────────────────── Feedback Loop ────────────────────────────────────┘
+```
+
+Os principais pilares incluem:
+- **CI/CD para ML**: testes automatizados de dados, recursos e modelos, não apenas de código
+- **Acompanhamento de experimentos**: registro sistemático de hiperparâmetros, métricas e artefatos
+- **Controle de versão do modelo**: rastreando qual versão do modelo está atendendo qual tráfego
+- **Exibição de modelos**: entrega de previsões aos usuários de maneira confiável e rápida
+- **Monitoramento**: detectando quando os modelos se degradam na produção
+
+<Callout>A maior diferença entre MLOps e DevOps tradicional: em software, alterações de código quebram coisas. No ML, as alterações de *dados* quebram as coisas – muitas vezes silenciosamente, sem nenhum registro de erros.
+</Callout>
+
+---
+
+## 🚀 Padrões de exibição de modelos
+
+A maneira como você veicula previsões depende dos requisitos de latência, da escala e da frequência com que as previsões precisam ser alteradas.
+
+### Inferência em lote
+
+Pré-calcule as previsões de acordo com uma programação (de hora em hora, diariamente) e armazene-as para pesquisa.
+
+**Ideal para**: recomendações por e-mail, pontuações de risco diárias, relatórios semanais
+
+```
+Schedule → Load data → Run model → Write predictions to DB → Serve from DB
+```
+
+**Prós**: infraestrutura simples, pode usar modelos grandes, econômico
+**Contras**: as previsões podem ficar obsoletas e não responder ao contexto em tempo real
+
+### Inferência em tempo real (modelo como serviço)
+
+O modelo é executado por trás de uma API. Cada solicitação aciona uma previsão.
+
+**Ideal para**: classificação de pesquisa, detecção de fraudes, chatbots
+
+```
+User request → API Gateway → Feature lookup → Model inference → Response
+```
+
+**Prós**: previsões recentes, podem usar contexto em tempo real
+**Contras**: sensível à latência, necessidade de otimizar o tamanho do modelo e a infraestrutura de atendimento
+
+### Modelo incorporado
+
+O modelo é incluído diretamente no aplicativo ou dispositivo.
+
+**Ideal para**: aplicativos móveis, dispositivos IoT, computação de ponta
+
+**Prós**: sem latência de rede, funciona offline
+**Contras**: mais difícil de atualizar, limitado pelos recursos do dispositivo
+
+<Quiz
+  question="Um aplicativo de entrega de comida precisa estimar o tempo de entrega de cada pedido. Qual padrão de serviço é mais apropriado?"
+  options="Inferência em lote calculada todas as noites|Inferência em tempo real no momento do pedido|Modelo incorporado no telefone do cliente|Tabela de pesquisa pré-computada"
+  answer="1"
+  explanation="O tempo de entrega depende de fatores em tempo real: carga atual do restaurante, disponibilidade do motorista, condições de trânsito e clima. Eles mudam minuto a minuto, portanto as previsões em lote ficariam obsoletas. A inferência em tempo real permite que o modelo use o contexto mais recente para cada pedido."
+/>
+
+---
+
+## 📊 Acompanhamento de experimentos
+
+Executar experimentos de ML sem rastreamento é como fazer ciência sem um caderno de laboratório. Você precisa registrar:
+
+- **Hiperparâmetros**: taxa de aprendizagem, tamanho do lote, opções de arquitetura
+- **Métricas**: perda de treinamento, métricas de validação em cada época
+- **Artefatos**: pontos de verificação do modelo, gráficos de importância de recursos, matrizes de confusão
+- **Ambiente**: versões da biblioteca, hardware usado, sementes aleatórias
+
+### Ferramentas populares
+
+| Ferramenta | Pontos fortes | Implantação |
+|---|---|---|
+| **MLfluxo** | Código aberto, registro de modelo, ampla adoção | Auto-hospedado ou gerenciado |
+| **Pesos e preconceitos (W&B)** | UI bonita, recursos de colaboração, varreduras | Hospedado em nuvem |
+| **Netuno.ai** | Leve, bom para equipes | Hospedado em nuvem |
+| **TensorBoard** | Gratuito e totalmente integrado ao TensorFlow | Local ou incorporado |
+
+```python
+import mlflow
+
+mlflow.set_experiment("fraud-detection-v2")
+
+with mlflow.start_run():
+    mlflow.log_param("learning_rate", 0.001)
+    mlflow.log_param("n_estimators", 500)
+
+    model = train_model(X_train, y_train)
+    metrics = evaluate_model(model, X_test, y_test)
+
+    mlflow.log_metric("auc_roc", metrics["auc_roc"])
+    mlflow.log_metric("precision", metrics["precision"])
+    mlflow.sklearn.log_model(model, "model")
+```
+
+<ThinkAboutIt>Sua equipe vem realizando experimentos há seis meses sem nenhum sistema de rastreamento. Uma parte interessada pergunta: “Por que o desempenho do modelo caiu no mês passado?” Como você responderia e o que você implementaria para evitar essa situação no futuro?
+</ThinkAboutIt>
+
+---
+
+## 🔍 Monitoramento de ML em produção
+
+O monitoramento de software tradicional rastreia erros e latência. O monitoramento de ML adiciona uma camada crítica: **o modelo ainda faz boas previsões?**
+
+### Tipos de deriva
+
+**Desvio de dados** (mudança de covariável): a distribuição dos recursos de entrada muda. Exemplo: um modelo de comércio eletrônico treinado em dados pré-pandêmicos observa um aumento nas pesquisas de equipamentos para escritórios domésticos.
+
+**Desvio de conceito**: a relação entre recursos e mudanças de destino. Exemplo: o recurso “status de emprego” de um modelo de pontuação de crédito significa algo diferente durante uma recessão.
+
+**Desvio de previsão**: a distribuição dos resultados do modelo muda, mesmo que os dados pareçam semelhantes.
+
+### O que monitorar
+
+| Sinal | Como detectar | Ação |
+|---|---|---|
+| Distribuições de recursos de entrada | Testes estatísticos (teste KS, PSI) | Investigue o pipeline de dados |
+| Distribuição de previsão | Acompanhe a média, a variação e os percentis ao longo do tempo | Comparar com o período de referência |
+| Desempenho do modelo (quando rótulos disponíveis) | Rastreie a precisão, F1, etc. em relação à verdade básica | Acionar a reconversão profissional se estiver abaixo do limiar |
+| Latência | Tempos de resposta P50, P95, P99 | Dimensione a infraestrutura ou otimize o modelo |
+| Qualidade dos dados | Taxas nulas, violações de esquema, anomalias de volume | Alerta equipe de engenharia de dados |
+
+```python
+from scipy.stats import ks_2samp
+
+# Kolmogorov-Smirnov test for distribution shift
+def detect_drift(reference_data, current_data, threshold=0.05):
+    statistic, p_value = ks_2samp(reference_data, current_data)
+    return p_value < threshold  # True = drift detected
+```
+
+<FunFact>Quando o modelo de preços de casas “Zestimate” da Zillow sofreu uma mudança de conceito durante o mercado imobiliário incomum de 2021, a empresa perdeu mais de US$ 500 milhões em compras de casas guiadas pelas previsões de seu próprio modelo – e finalmente encerrou seu negócio de vendas de casas.
+</FunFact>
+
+---
+
+## 🔄 CI/CD para aprendizado de máquina
+
+O ML CI/CD vai além do teste de código. Você também precisa validar dados, recursos e modelos.
+
+### A pirâmide de testes de ML
+
+```
+              ┌──────────────┐
+              │  Model Tests  │  ← Does the model meet quality thresholds?
+             ┌┴──────────────┴┐
+             │  Feature Tests  │  ← Are features computed correctly?
+            ┌┴────────────────┴┐
+            │  Data Validation  │  ← Is the data schema correct? Missing values?
+           ┌┴──────────────────┴┐
+           │    Unit Tests       │  ← Does the code work?
+           └────────────────────┘
+```
+
+**Validação de dados**: esquema de verificação, taxas nulas, intervalos de valores, contagens de linhas
+**Testes de recursos**: verifique se as transformações de recursos produzem os resultados esperados
+**Testes de modelo**: garanta que o modelo treinado exceda os limites mínimos de qualidade antes da implantação
+
+<Quiz
+  question="A taxa de cliques do seu modelo de recomendação caiu 15% em duas semanas, mas nenhum código foi alterado. Qual é a causa mais provável?"
+  options="Um bug foi introduzido no código do modelo|Desvio de dados – a distribuição dos dados de entrada mudou|Os hiperparâmetros do modelo precisam de reajuste|A estrutura de teste A/B tem um bug"
+  answer="1"
+  explanation="Quando nenhum código foi alterado, mas o desempenho diminuiu, o culpado mais provável é o desvio de dados – os dados do mundo real que o modelo recebe mudaram daqueles em que foram treinados. Podem ser mudanças sazonais, novos segmentos de usuários ou alterações nos pipelines de dados upstream."
+/>
+
+---
+
+## 💰 Considerações sobre infraestrutura
+
+O ML de produção tem custos reais. Os entrevistadores querem ver a consciência dos custos:
+
+### Gerenciamento de GPU
+
+- **Treinamento**: use instâncias spot/preemptivas para economizar custos (com checkpointing!)
+- **Serviço**: considere a destilação ou quantização do modelo para reduzir os requisitos de GPU
+- **Escalonamento automático**: dimensione instâncias de GPU com base em padrões de tráfego, não em capacidade máxima
+
+### Estratégias de otimização de custos
+
+- **Compressão de modelo**: poda, quantização, destilação de conhecimento
+- **Cache**: previsões de cache para entradas repetidas
+- **Veiculação em camadas**: use um modelo barato para a maioria das solicitações e um modelo caro apenas quando a confiança for baixa
+- **Dimensionamento correto**: não atende um modelo de parâmetro 175B quando um modelo 7B ajustado atinge 95% da qualidade
+
+```
+Cost per prediction ≈ (GPU cost per hour) / (predictions per hour)
+
+Example:
+- GPU instance: $3/hour
+- Model throughput: 1,000 predictions/second
+- Cost per prediction: $3 / 3,600,000 ≈ $0.0000008
+```
+
+---
+
+## 🏗️ Perguntas comuns em entrevistas
+
+Aqui estão questões que você deve estar preparado para discutir:
+
+1. "Mostre-me como você implantaria um novo modelo na produção" - descreva o pipeline completo, desde o treinamento até a implantação canário e a implementação completa
+2. "Como você lidaria com um modelo cuja produção é degradante?" — monitoramento, análise de causa raiz, reversão, reciclagem
+3. "Qual é a diferença entre reciclagem de modelo e atualização de modelo?" — reciclagem completa em novos dados versus aprendizagem incremental/online
+4. "Como você garante a reprodutibilidade em experimentos de ML?" — controle de versão para código, dados e configuração; sementes fixas; conteinerização
+5. "Descreva sua plataforma de ML ideal" — armazenamento de recursos, rastreador de experimentos, registro de modelo, infraestrutura de atendimento, painel de monitoramento
+
+<Callout>Ao responder às perguntas da entrevista sobre MLOps, sempre conecte as decisões técnicas ao impacto nos negócios. "Usamos implantações canário porque reverter um modelo ruim custa X em receita perdida" é mais atraente do que descrever apenas a configuração técnica.
+</Callout>
+
+---
+
+## 🔑 Principais vantagens
+
+- **MLOps preenche a lacuna** entre o desenvolvimento de modelos e a produção — este é o conjunto de habilidades de ML mais solicitado atualmente
+- **Escolha os padrões de serviço com sabedoria**: lote para custo, tempo real para frescor, incorporado para vantagem
+- **Monitoramento além da latência**: desvio de dados, desvio de conceito e degradação do modelo são os assassinos silenciosos
+- **Acompanhe todos os experimentos**: parâmetros, métricas, artefatos e ambiente
+- **Teste o pipeline de ML**, não apenas o código: validação de dados, testes de recursos e portas de qualidade do modelo
+- **Pense no custo**: compactação de modelo, armazenamento em cache e serviço em camadas reduzem as contas de infraestrutura

@@ -1,0 +1,281 @@
+---
+title: "Dominio del análisis de complejidad"
+description: "Analice con confianza la complejidad del tiempo y el espacio: la habilidad que separa las buenas soluciones de las óptimas en las entrevistas de codificación."
+order: 7
+difficulty: "intermediate"
+duration: 18
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+# Dominio del análisis de complejidad
+
+"¿Cuál es la complejidad del tiempo?" - cuatro palabras que siguen a cada solución que presenta en una entrevista de codificación. Si lo hace bien, parecerá un ingeniero confiado. Tropieza y el entrevistador te pregunta si realmente entiendes tu propio código. El análisis de la complejidad no es sólo una teoría académica; es la lente a través de la cual los ingenieros evalúan si una solución funcionará a escala. Esta lección lo preparará para analizar cualquier solución con confianza, desde bucles simples hasta complicados algoritmos recursivos.
+
+## Fundamentos de la notación O grande
+
+Big-O describe el límite superior de cómo crece el tiempo de ejecución o el uso de memoria de un algoritmo a medida que crece el tamaño de entrada. Elimina constantes y términos de orden inferior para centrarse en el factor dominante.
+
+| Complejidad | Nombre | Ejemplo | 1 millón de elementos |
+|---|---|---|---|
+| O(1) | Constante | Búsqueda de mapas hash | Instantáneo |
+| O(log n) | Logarítmico | Búsqueda binaria | ~20 operaciones |
+| O(n) | Lineal | Bucle único a través de la matriz | 1M de operaciones |
+| O(norte Iniciar sesiónnorte) | Linearítmica | Ordenar por fusión, ordenar por montón | ~20M operaciones |
+| O(n²) | Cuadrático | Bucles anidados (fuerza bruta) | 1 billón de operaciones |
+| O(2ⁿ) | Exponencial | Subconjuntos recursivos | Muerte por calor del universo |
+| O(n!) | Factoriales | Todas las permutaciones | Muerte por calor × muerte por calor |
+
+<Callout>Una regla práctica: las computadoras modernas manejan aproximadamente 10⁸ operaciones simples por segundo. Si su algoritmo es O(n²) y n = 10⁵, son 10¹⁰ operaciones, aproximadamente 100 segundos. Demasiado lento. Este cálculo mental le ayuda a juzgar rápidamente si su enfoque se realizará dentro de los límites de tiempo habituales.</Callout>
+
+## Analizando bucles simples
+
+### Bucle único → O(n)
+
+```python
+def find_max(nums):
+    max_val = nums[0]       # O(1)
+    for num in nums:         # Loop runs n times
+        if num > max_val:    # O(1) comparison
+            max_val = num    # O(1) assignment
+    return max_val           # O(1)
+# Total: O(1) + O(n) × O(1) = O(n)
+```
+
+### Bucles anidados → Multiplicar
+
+```python
+def has_duplicate_pair(nums):
+    for i in range(len(nums)):           # n iterations
+        for j in range(i + 1, len(nums)):  # ~n iterations
+            if nums[i] == nums[j]:
+                return True
+    return False
+# Total: O(n) × O(n) = O(n²)
+```
+
+### Bloques secuenciales → Agregar
+
+```python
+def process(nums):
+    # Block 1: O(n)
+    for num in nums:
+        print(num)
+
+    # Block 2: O(n²)
+    for i in range(len(nums)):
+        for j in range(len(nums)):
+            print(i, j)
+
+# Total: O(n) + O(n²) = O(n²)  — drop the lower-order term
+```
+
+### Bucles con iteraciones no obvias
+
+```python
+# This is O(n), not O(n²)!
+def two_pointer_sum(nums, target):
+    left, right = 0, len(nums) - 1
+    while left < right:    # Each pointer moves at most n times total
+        total = nums[left] + nums[right]
+        if total == target:
+            return True
+        elif total < target:
+            left += 1
+        else:
+            right -= 1
+    return False
+```
+
+<ThinkAboutIt>Considere un bucle donde la variable duplica cada iteración: `i = 1; while i < n: i *= 2`. ¿Cuántas veces se ejecuta este bucle? ¿Cuál es la complejidad? (Pista: si i se duplica cada vez, ¿cuántas duplicaciones se necesitan para llegar a n?)</ThinkAboutIt>
+
+## Analizando la recursividad
+
+La recursividad es donde el análisis de la complejidad se vuelve interesante. La herramienta clave es el **árbol de recursividad**.
+
+### Recursión lineal → O(n)
+
+```python
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+# Recursion tree: single chain of n calls
+# factorial(5) → factorial(4) → factorial(3) → factorial(2) → factorial(1)
+# Time: O(n), Space: O(n) — n stack frames
+```
+
+### Recursión binaria → O(2ⁿ)
+
+```python
+# Naive Fibonacci — the classic exponential example
+def fib(n):
+    if n <= 1:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+# Recursion tree: each call spawns TWO calls
+#                fib(5)
+#              /        \
+#          fib(4)       fib(3)
+#         /     \       /    \
+#      fib(3)  fib(2) fib(2) fib(1)
+#      ...
+# Nodes at each level double → total nodes ≈ 2ⁿ
+# Time: O(2ⁿ), Space: O(n) — max depth of tree
+```
+
+### Recursión memorizada → O(n)
+
+```python
+def fib_memo(n, memo={}):
+    if n in memo:
+        return memo[n]
+    if n <= 1:
+        return n
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+
+# Each subproblem computed only once → O(n) unique calls
+# Time: O(n), Space: O(n)
+```
+
+<FunFact>La diferencia entre Fibonacci ingenuo y memorizado es asombrosa en escala. Calcular ingenuamente fib(50) requiere alrededor de 2⁵⁰ ≈ 1 billón de operaciones, aproximadamente 100 días en una computadora moderna. La versión memorizada requiere exactamente 50 operaciones, realizadas en microsegundos. Por eso es importante el análisis de la complejidad.</FunFact>
+
+### El teorema maestro (simplificado)
+
+Para recurrencias de divide y vencerás de la forma **T(n) = aT(n/b) + O(nᵈ)**:
+
+| Condición | Complejidad |
+|---|---|
+| d > log_b(a) | O(nᵈ) |
+| d = log_b(a) | O(nᵈ iniciar sesión n) |
+| d <log_b(a) | O(n^(log_b(a))) |
+
+**Ejemplos prácticos**:
+- **Fusionar clasificación**: T(n) = 2T(n/2) + O(n) → a=2, b=2, d=1 → d = log₂2 → **O(n log n)**
+- **Búsqueda binaria**: T(n) = T(n/2) + O(1) → a=1, b=2, d=0 → d = log₂1 → **O(log n)**
+- **Strassen Matrix Mult**: T(n) = 7T(n/2) + O(n²) → a=7, b=2, d=2 → d < log₂7 → **O(n^2.81)**
+
+## Complejidad espacial
+
+La complejidad del espacio es tan importante como la complejidad del tiempo, pero a menudo se pasa por alto. Contar:
+
+1. **Espacio auxiliar**: estructuras de datos adicionales que usted crea
+2. **Apilar marcos**: cada llamada recursiva agrega un marco
+
+```python
+# O(1) space — only a few variables
+def reverse_in_place(nums):
+    left, right = 0, len(nums) - 1
+    while left < right:
+        nums[left], nums[right] = nums[right], nums[left]
+        left += 1
+        right -= 1
+
+# O(n) space — creating a new list
+def reverse_copy(nums):
+    return nums[::-1]
+
+# O(n) space from recursion — n stack frames
+def reverse_recursive(nums, left, right):
+    if left >= right:
+        return
+    nums[left], nums[right] = nums[right], nums[left]
+    reverse_recursive(nums, left + 1, right - 1)
+```
+
+<Callout>En las entrevistas, indique siempre la complejidad temporal Y espacial. Un seguimiento común es "¿Puedes hacerlo en el espacio O(1)?" Esto a menudo significa convertir una solución recursiva en iterativa o encontrar un algoritmo local.</Callout>
+
+## Conceptos básicos del análisis amortizado
+
+Algunas operaciones son costosas ocasionalmente pero baratas en promedio. El análisis amortizado da cuenta de esto.
+
+**Ejemplo clásico: matriz dinámica (ArrayList)**
+
+```python
+# Appending to a dynamic array
+# Most appends are O(1) — just place the element
+# Occasionally (when full), the array doubles: O(n) copy
+# Over n operations: n × O(1) + log(n) × O(n) = O(n) total
+# Amortised cost per operation: O(n) / n = O(1)
+```
+
+Otros ejemplos de O(1) amortizados:
+- Inserciones de mapas hash (refrito ocasional)
+- Operaciones de árbol de expansión
+- Implementación de cola de dos pilas.
+
+## Trampas de complejidad comunes
+
+### Trampa 1: Bucles ocultos en operaciones integradas
+
+```python
+# Looks like O(n), but string concatenation in a loop is O(n²)
+def build_string(chars):
+    result = ""
+    for char in chars:
+        result += char   # Each += creates a new string → O(current length)
+    return result
+# Fix: use ''.join(chars) → O(n)
+
+# list.index() and 'in' on lists are O(n)
+for item in big_list:
+    if item in another_big_list:  # O(n) × O(n) = O(n²)
+        process(item)
+# Fix: convert to set for O(1) lookup
+```
+
+### Trampa 2: La clasificación domina
+
+```python
+def find_kth_largest(nums, k):
+    nums.sort()       # O(n log n) — this dominates
+    return nums[-k]   # O(1)
+# Total: O(n log n), not O(1)
+# Better: use a heap for O(n log k)
+```
+
+### Trampa 3: Profundidad de recursividad ≠ Trabajo total
+
+```python
+# Depth is O(log n), but total work is O(n)
+def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])     # T(n/2)
+    right = merge_sort(arr[mid:])    # T(n/2)
+    return merge(left, right)        # O(n) work at each level
+# log n levels × O(n) work per level = O(n log n)
+```
+
+<Quiz question="¿Cuál es la complejidad temporal de este código? `for i in range(n): for j in range(i): print(i, j)`" options="En)|O(n iniciar sesión n)|O(n²)|O(n³)" answer="2" explanation="El bucle interno se ejecuta 0 + 1 + 2 + ... + (n-1) = n(n-1)/2 veces en total. Esta es la suma de la serie aritmética, que se simplifica a O(n²). Es una trampa común porque el bucle interno no siempre se ejecuta n veces, pero el trabajo total sigue siendo cuadrático." />
+
+## De la fuerza bruta a lo óptimo
+
+En las entrevistas, a menudo comenzará con una solución de fuerza bruta y la optimizará. Aquí está la ruta de optimización común:
+
+| Actual | Técnica de optimización | Mejorado a |
+|---|---|---|
+| O(n²) | Mapa hash para búsquedas | O(n) |
+| O(n²) | Clasificación + dos consejos | O(norte Iniciar sesiónnorte) |
+| O(2ⁿ) | Memorización / DP | O(n²) u O(n×m) |
+| O(norte Iniciar sesiónnorte) | Clasificación por cubos/clasificación por conteo (rango limitado) | O(n) |
+| O(n) espacio | Manipulación in situ | O(1) espacio |
+
+**El flujo de la conversación en una entrevista**:
+1. "Mi enfoque de fuerza bruta es O(n²) usando bucles anidados".
+2. "Noto que estamos haciendo búsquedas repetidas: un mapa hash puede reducir la búsqueda interna a O(1)".
+3. "La solución optimizada es O(n) tiempo y O(n) espacio".
+4. "La desventaja es que utilizamos memoria adicional, pero la mejora del tiempo es significativa".
+
+## Conclusiones clave
+
+- **Conozca la jerarquía**: O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(2ⁿ) < O(n!). Hará referencia a esto en cada entrevista.
+- **Multiplicar bucles anidados, agregar bloques secuenciales**: las dos reglas fundamentales para el análisis de bucles.
+- **Dibujar árboles de recursividad**: hacen que la complejidad recursiva sea visual y mucho más fácil de analizar correctamente.
+- **Esté atento a los costos ocultos**: la concatenación de cadenas, las pruebas de membresía de listas y la clasificación de bucles internos son trampas comunes.
+- **Estado tanto en el tiempo como en el espacio**: un análisis de complejidad completo siempre cubre ambas dimensiones.
+- **Conéctese a la optimización**: conocer la complejidad de la fuerza bruta le indica cuánto margen de mejora hay.

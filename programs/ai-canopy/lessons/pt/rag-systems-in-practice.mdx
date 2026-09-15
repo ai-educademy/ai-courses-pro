@@ -1,0 +1,36 @@
+---
+title: "Sistemas RAG na prática"
+description: "Recuperação de design que melhora as respostas em vez de ocultar dados fracos atrás de um modelo confiável."
+order: 11
+difficulty: intermediate
+duration: 45
+icon: "🔎"
+published: true
+machineTranslated: true
+---
+## Por que a recuperação é importante
+
+Os modelos de linguagem são excelentes para transformar o contexto, mas não são uma fonte de verdade. A geração aumentada de recuperação (RAG) fornece ao modelo evidências atuais e relevantes no momento da solicitação.
+
+## Um loop de recuperação de produção
+
+1. **Ingerir** documentos com propriedade, carimbos de data/hora, permissões e procedência.
+2. **Pedaço** por significado, em vez de uma contagem arbitrária de caracteres.
+3. Incorporações de **índice** junto com texto e metadados pesquisáveis.
+4. **Recuperar** com pesquisa híbrida quando termos exatos e semelhança semântica são importantes.
+5. **Reclassificar** a lista de acordo com a pergunta do usuário.
+6. **Gere** uma resposta que cite as evidências fornecidas.
+7. **Avalie** a qualidade da recuperação e da resposta separadamente.
+
+A escolha de projeto importante não é o banco de dados vetorial. É o contrato entre a recuperação e a geração: quais evidências são permitidas no contexto, quanto, de qual inquilino e o que o modelo deve fazer quando faltam evidências.
+
+## Modos de falha para testar
+
+- O documento correto existe, mas não foi recuperado.
+- A passagem recuperada é relevante, mas desatualizada.
+- Um usuário pode recuperar um documento que não está autorizado a ver.
+- A resposta parece plausível, mas não pode ser fundamentada nas passagens fornecidas.
+
+## Construir desafio
+
+Crie um pequeno assistente de conhecimento com cinco documentos de origem. Adicione citações, uma resposta “evidência insuficiente”, metadados de atualização do documento e um conjunto de testes de ouro de dez perguntas. Registre a recuperação de recuperação e o aterramento antes de alterar o prompt.

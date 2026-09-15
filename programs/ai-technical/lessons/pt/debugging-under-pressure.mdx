@@ -1,0 +1,228 @@
+---
+title: "Depuração sob pressão"
+description: "Desenvolva uma abordagem de depuração sistemática que funcione mesmo quando o tempo está passando e o entrevistador está observando."
+order: 6
+difficulty: "intermediate"
+duration: 15
+icon: "🐛"
+published: true
+machineTranslated: true
+---
+# Depuração sob pressão
+
+Há um tipo especial de estresse que vem da depuração do código enquanto alguém observa você e um cronômetro faz a contagem regressiva. Suas palmas ficam suadas, sua mente fica em branco e, de repente, você não consegue se lembrar de como funciona um loop for. Todo engenheiro esteve lá. A diferença entre os candidatos que desmoronam e aqueles que brilham não é o talento bruto – é ter um processo sistemático que funciona mesmo quando seu cérebro quer entrar em pânico. Esta lição fornece esse processo.
+
+## A estrutura de depuração RIIFV
+
+Quando você receber um código com bugs em uma entrevista, resista à tentação de começar a procurar o bug imediatamente. Em vez disso, siga esta estrutura de cinco etapas:
+
+###R — Reproduzir
+
+Confirme a existência do bug e entenda seus sintomas.
+
+- Qual é o comportamento esperado?
+- Qual é o comportamento real?
+- Sob quais entradas ocorre o bug?
+
+```python
+# You're told this function should return the second largest element
+def second_largest(nums):
+    first = second = float('-inf')
+    for num in nums:
+        if num > first:
+            second = first
+            first = num
+        elif num > second:
+            second = num
+    return second
+
+# Step 1: Reproduce with test cases
+print(second_largest([3, 1, 4, 1, 5]))  # Expected: 4, Got: 4 ✓
+print(second_largest([5, 5, 5]))         # Expected: 5, Got: -inf ✗ — BUG!
+print(second_largest([1]))               # Expected: None?, Got: -inf — Edge case
+```
+
+### I - Isolar
+
+Limite onde o bug vive. Use o pensamento de dividir para conquistar:
+
+- O bug está na análise de entrada, na lógica ou na saída?
+- Qual linha ou bloco específico produz o resultado errado?
+- Você pode isolá-lo para um caso de teste com falha mínima?
+
+### I - Identificar
+
+Uma vez isolado, determine a causa raiz – não apenas o sintoma:
+
+- **Sintoma**: Retorna `-inf` para `[5, 5, 5]`
+- **Causa raiz**: A condição `elif num > second` não trata duplicatas. Quando todos os elementos são iguais, `num > first` só é verdadeiro uma vez e `num > second` nunca é verdadeiro para os restantes elementos iguais.
+
+### F – Correção
+
+Aplique a correção mínima que aborda a causa raiz sem introduzir novos bugs:
+
+```python
+def second_largest(nums):
+    if len(nums) < 2:
+        return None
+    first = second = float('-inf')
+    for num in nums:
+        if num > first:
+            second = first
+            first = num
+        elif num > second and num != first:  # Handle case: distinct second
+            second = num
+    return second if second != float('-inf') else first  # All same → return that value
+```
+
+<ThinkAboutIt>Espere - `second_largest([5, 5, 5])` deveria retornar 5 ou Nenhum? Isso é ambíguo e, em uma entrevista real, esse é exatamente o tipo de pergunta que você deve fazer ao entrevistador. Esclarecer os requisitos faz parte da depuração.</ThinkAboutIt>
+
+### V — Verifique
+
+Confirme se a correção funciona para todos os casos – o caso original com falha, casos extremos e casos aprovados anteriormente:
+
+```python
+assert second_largest([3, 1, 4, 1, 5]) == 4    # Normal case
+assert second_largest([5, 5, 5]) == 5            # Duplicates
+assert second_largest([1, 2]) == 1               # Minimum valid input
+assert second_largest([1]) is None               # Too few elements
+assert second_largest([-1, -2, -3]) == -2        # Negative numbers
+```
+
+<Callout>Sempre execute novamente seus casos de teste originais após corrigir um bug. É surpreendentemente comum corrigir um bug enquanto introduz outro. A etapa "verificar" captura regressões que custariam a entrevista.</Callout>
+
+## Formatos comuns de entrevista de depuração
+
+### Formato 1: "Aqui está o código com erros - conserte-o"
+
+Você recebe uma função com 1-3 bugs. Aplicar RIIFV:
+- Leia o código e entenda a intenção
+- Execute casos de teste mentais para encontrar falhas
+- Corrija cada bug e explique seu raciocínio
+
+### Formato 2: "Este sistema está quebrado - diagnostique"
+
+Você recebe um cenário: “Os usuários relatam que a página de checkout às vezes mostra o preço errado”. Você precisa:
+- Faça perguntas esclarecedoras (“Às vezes? É aleatório ou segue um padrão?”)
+- Formule hipóteses ("Pode ser um problema de cache, uma condição de corrida ou um bug de conversão de moeda")
+- Propor etapas de investigação em ordem de prioridade
+
+### Formato 3: "Depurar este sistema ativo" (depuração de pares)
+
+Você e o entrevistador depuram juntos. Eles podem desempenhar o papel de companheiros de equipe ou de sistema:
+- Verbalize seu processo de pensamento
+- Proponha o que você verificaria primeiro e por quê
+- Interpretar logs e métricas que eles fornecem
+
+## Pensando em voz alta durante a depuração
+
+A maior diferença entre depurar sozinho e depurar em uma entrevista é que você precisa narrar. Veja como fazer isso sem parecer forçado:
+
+**Declare suas observações**:
+"Vejo que a função recebe uma lista e deve retornar a segunda maior. Deixe-me seguir com um exemplo simples..."
+
+**Forme hipóteses**:
+"Meu primeiro pensamento é que ele pode não lidar com casos extremos, como valores duplicados. Deixe-me testar com [5, 5, 5]..."
+
+**Explique seu raciocínio**:
+"A condição `num > second` nunca é verdadeira quando todos os valores são iguais porque `first` já é 5, e os 5 restantes não são maiores que `second`, que também é `-inf`... espere, na verdade `5 > -inf` é verdadeiro, então o segundo se torna 5 no segundo elemento... Hmm, deixe-me rastrear com mais cuidado."
+
+**Admita quando estiver errado**:
+"Na verdade, minha hipótese inicial estava incorreta. Deixe-me reconstituir isso..."
+
+<FunFact>Uma pesquisa do psicólogo Gary Klein descobriu que depuradores experientes resolvem problemas até 10 vezes mais rápido do que os novatos, não porque sejam mais inteligentes, mas porque reconhecem padrões de experiências anteriores. É por isso que praticar com diversos tipos de bugs é mais importante do que inteligência bruta.</FunFact>
+
+## Uso estratégico de declarações impressas
+
+Em uma entrevista de codificação, as instruções impressas são o seu depurador. Use-os estrategicamente:
+
+```python
+def merge_sorted_lists(list1, list2):
+    result = []
+    i = j = 0
+    while i < len(list1) and j < len(list2):
+        print(f"Comparing list1[{i}]={list1[i]} with list2[{j}]={list2[j]}")
+        if list1[i] <= list2[j]:
+            result.append(list1[i])
+            i += 1
+        else:
+            result.append(list2[j])
+            j += 1
+        print(f"Result so far: {result}")
+
+    # Don't forget: add remaining elements
+    result.extend(list1[i:])
+    result.extend(list2[j:])
+    print(f"Final result: {result}")
+    return result
+```
+
+**Dicas para depuração de impressão eficaz**:
+- Imprimir em pontos de decisão (antes de if/else, dentro de loops)
+- Incluir nomes de variáveis e índices na saída
+- Imprimir antes e depois da localização suspeita do bug
+- Remova ou comente os prints antes de enviar sua solução final
+
+## Depurando sistemas distribuídos
+
+Para entrevistas de nível sênior, você pode ser questionado sobre depuração de sistemas distribuídos:
+
+### O kit de ferramentas de depuração
+
+| Ferramenta/Técnica | O que isso revela |
+|---|---|
+| **Logs** (estruturados, com IDs de correlação) | Sequência de eventos, detalhes do erro |
+| **Métricas** (latência, taxa de erro, taxa de transferência) | Tendências e anomalias |
+| **Traces** (rastreamento distribuído) | Fluxo de solicitações entre serviços |
+| **Verificações de saúde** | Quais componentes estão degradados |
+
+### Abordagem Sistemática
+
+1. **Verifique os painéis de métricas** — é um pico ou uma degradação gradual?
+2. **Restringir o escopo** — qual serviço, endpoint ou região é afetado?
+3. **Verifique as implantações recentes** — "o que mudou?" é a pergunta de maior sinal
+4. **Siga o rastreamento** — use IDs de correlação para rastrear uma solicitação com falha entre serviços
+5. **Verificar dependências** — um serviço downstream (banco de dados, cache, API de terceiros) é a causa raiz?
+
+```
+User reports slow checkout
+→ Metrics show p99 latency spike at 14:30
+→ Correlated with deployment of payment-service v2.3.1
+→ Traces show payment-service waiting 10s on database query
+→ Database query plan changed due to missing index after schema migration
+→ Root cause: migration in v2.3.1 dropped an index
+→ Fix: recreate index, add migration test
+```
+
+<Quiz question="Um serviço de produção mostra repentinamente um aumento de 5x na latência do p99. Nenhum código foi implantado nas últimas 24 horas. O que você deve investigar primeiro?" options="Pesquise na base de código por bugs recentes|Verifique se uma dependência downstream está apresentando problemas|Reverter para a versão anterior|Adicione mais registros e aguarde a recorrência do problema" answer="1" explanation="Quando nenhum código é alterado, a causa raiz provavelmente é externa: uma dependência downstream (banco de dados, cache, API de terceiros) pode ser degradada ou pode haver alterações na infraestrutura (rede, DNS, expiração de certificado). Verificar primeiro as dependências é a etapa de investigação de maior sinal." />
+
+## Gerenciamento de tempo durante rodadas de depuração
+
+Uma rodada de depuração típica dura de 30 a 45 minutos. Faça um orçamento do seu tempo:
+
+| Fase | Tempo | Atividade |
+|---|---|---|
+| **Entenda** | 5 minutos | Leia o código, esclareça o problema, identifique o comportamento esperado versus o comportamento real |
+| **Reproduzir** | 5 minutos | Crie casos de teste que acionem o bug |
+| **Isolar e identificar** | 10 minutos | Limite a causa raiz usando instruções de rastreamento e impressão |
+| **Corrigir** | 5 minutos | Aplique a correção mínima e correta |
+| **Verificar** | 5 minutos | Teste a correção em todos os casos, incluindo casos extremos |
+
+<Callout>Se você demorou 15 minutos e não encontrou o bug, dê um passo atrás e mude sua abordagem. Releia a definição do problema – você pode ter entendido mal o comportamento esperado. Experimente um caso de teste completamente diferente. Às vezes, o erro está nas suas suposições, não no código.</Callout>
+
+## O que fazer quando você está preso
+
+1. **Releia a declaração do problema** — você pode ter feito uma suposição incorreta
+2. **Tente um caso de teste mínimo** — reduza a entrada ao menor caso que ainda falha
+3. **Rastreie linha por linha** — com caneta e papel, se necessário, rastreie cada variável
+4. **Verifique os limites** — primeira iteração, última iteração, entrada vazia
+5. **Explique o problema ao entrevistador** — a “depuração do pato de borracha” funciona mesmo com um público humano
+6. **Peça uma dica** – isso é muito melhor do que ficar sentado em silêncio por 10 minutos
+
+## Principais conclusões
+
+- **Use a estrutura RIIFV**: Reproduzir → Isolar → Identificar → Corrigir → Verificar. Funciona sob pressão porque dá ao cérebro um processo quando o instinto falha.
+- **Pense em voz alta continuamente**: narre suas observações, hipóteses e raciocínios. O silêncio é seu inimigo em uma entrevista de depuração.
+- **Priorize casos extremos**: a maioria dos bugs de entrevista se esconde em entradas vazias, duplicatas, números negativos ou condições de limite.
+- **As declarações impressas são suas amigas**: use-as estrategicamente nos pontos de decisão e limpe-as antes de finalizar.
+- **Saiba quando girar**: se sua abordagem não funcionar após 10 a 15 minutos, dê um passo para trás e tente um ângulo completamente diferente.

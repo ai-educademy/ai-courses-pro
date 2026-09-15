@@ -1,0 +1,132 @@
+---
+title: "Aprendizaje por refuerzo: cómo la IA aprende haciendo"
+description: "Comprenda cómo los agentes de IA aprenden mediante prueba, error y recompensa, desde campeones de juegos hasta robots del mundo real."
+order: 7
+difficulty: "intermediate"
+duration: 15
+icon: "🎮"
+published: true
+machineTranslated: true
+---
+# Aprendizaje por refuerzo: cómo la IA aprende haciendo
+
+Imagínese enseñarle a un cachorro a sentarse. No le das un libro de texto, le dejas probar cosas y, cuando se sienta, le das un premio. Con el tiempo, aprende qué acciones obtienen recompensas. **El aprendizaje por refuerzo (RL)** funciona de la misma manera: un agente de IA aprende interactuando con un entorno, recibiendo retroalimentación y ajustando su comportamiento para maximizar la recompensa a largo plazo.
+
+## El bucle agente-entorno
+
+Cada sistema RL tiene la misma estructura central:
+
+1. El **agente** observa el **estado** actual del medio ambiente.
+2. Elige una **acción** entre sus opciones disponibles.
+3. El entorno pasa a un nuevo estado y devuelve una señal de **recompensa**.
+4. El agente utiliza esa recompensa para actualizar su estrategia (llamada **política**).
+
+Este bucle se repite (potencialmente millones de veces) hasta que el agente descubre una política que
+constantemente gana altas recompensas. A diferencia del aprendizaje supervisado, no existe un conjunto de datos etiquetado que lo indique.
+el agente qué hacer. Debe descubrir un comportamiento eficaz únicamente a través de la interacción.
+
+<Illustration src="/images/lessons/reinforcement-learning.svg" alt="Diagrama que muestra el ciclo agente-entorno: estado, acción, recompensa, siguiente estado" caption="El bucle agente-entorno es la base de todo aprendizaje por refuerzo." />
+
+## Exploración vs Explotación
+
+Uno de los dilemas centrales de RL: ¿debería el agente **explotar** lo que ya sabe que funciona, o **explorar** acciones desconocidas que podrían generar recompensas aún mejores?
+
+- Una analogía con un restaurante: ¿pides tu plato favorito (explotar) o pruebas algo nuevo que podría ser incluso mejor (explorar)?
+- Demasiada explotación y el agente se queda atrapado en estrategias mediocres. Demasiada exploración y pérdida de tiempo en malas acciones.
+
+La mayoría de los algoritmos utilizan una estrategia **épsilon-codiciosa**: con probabilidad ε el agente explora aleatoriamente,
+y el resto del tiempo explota su acción más conocida. Durante el entrenamiento, ε disminuye gradualmente a medida que
+el agente se vuelve más seguro. Métodos más sofisticados, como el límite superior de confianza (UCB)
+y Thompson Sampling: explore de forma más inteligente centrándose en acciones inciertas.
+
+<FunFact>AlphaGo de DeepMind exploró aproximadamente 30 millones de juegos de autojuego durante el entrenamiento, muchos más juegos de los que cualquier ser humano podría jugar en su vida.</FunFact>
+
+## Q-Learning: una idea simple pero poderosa
+
+**Q-learning** asigna un valor (llamado valor Q) a cada par estado-acción. El valor Q representa la recompensa futura total esperada si el agente realiza esa acción en ese estado y luego sigue la mejor política.
+
+La regla de actualización es sorprendentemente elegante:
+
+```
+Q(state, action) ← Q(state, action) + α × [reward + γ × max Q(next_state, all_actions) − Q(state, action)]
+```
+
+- **α** (tasa de aprendizaje) controla la rapidez con la que el agente actualiza sus creencias.
+- **γ** (factor de descuento) controla cuánto valora el agente las recompensas futuras frente a las inmediatas.
+
+A lo largo de muchos episodios, los valores Q convergen y el agente puede simplemente elegir la acción con mayor
+Valor Q en cualquier estado. Para entornos simples, este enfoque basado en tablas funciona bien. cuando el estado
+el espacio es demasiado grande para una tabla (por ejemplo, entradas de píxeles sin procesar de un videojuego), una red neuronal
+se aproxima a los valores Q: este es **Deep Q-Learning (DQN)**, el enfoque que DeepMind utilizó para dominar
+Juegos de Atari en 2015.
+
+<Quiz question="¿Qué representa el valor Q en Q-learning?" options="La probabilidad de ganar un juego.|La recompensa futura total esperada para un par estado-acción|La velocidad a la que el agente aprende.|El número de veces que se ha intentado una acción." answer="1" explanation="Un valor Q estima la recompensa acumulada total que un agente puede esperar al realizar una acción específica en un estado determinado y seguir la política óptima a partir de entonces." />
+
+## Métodos de gradiente de políticas
+
+Q-learning funciona aprendiendo el valor de las acciones. Los métodos de **gradiente de políticas** toman un camino diferente: optimizan directamente la política en sí: el mapeo de estados a acciones.
+
+En lugar de preguntar "¿qué tan buena es esta acción?", preguntan "¿cómo debo ajustar mis probabilidades de acción para obtener más recompensa?" El agente impulsa su política en la dirección que aumenta la recompensa esperada, utilizando el ascenso de gradiente.
+
+**La optimización de políticas próximas (PPO)**, desarrollada por OpenAI, es uno de los algoritmos de gradiente de políticas más populares. Es estable, eficiente y se utilizó para entrenar el componente RL de ChatGPT (a través de RLHF - Aprendizaje reforzado a partir de retroalimentación humana).
+
+## AlphaGo: el juego que lo cambió todo
+
+En marzo de 2016, **AlphaGo** de DeepMind derrotó a Lee Sedol, uno de los mejores jugadores de Go de la historia, 4 juegos a 1. El Go tiene más posiciones posibles en el tablero que átomos en el universo: la búsqueda por fuerza bruta era imposible.
+
+AlphaGo combinado:
+- **Aprendizaje supervisado** a partir de juegos de expertos humanos para impulsar su política.
+- **RL de juego autónomo** para mejorar mucho más allá del juego a nivel humano.
+- **Búsqueda de árboles de Monte Carlo** para planificar mudanzas de manera eficiente.
+
+Su sucesor, **AlphaGo Zero**, se saltó por completo los datos humanos (aprendió únicamente del juego personal) y superó al AlphaGo original en 40 días.
+
+<ThinkAboutIt>AlphaGo Zero aprendió sin ningún conocimiento humano. ¿Sugiere esto que la experiencia humana a veces puede ser una limitación más que una ventaja para la IA?</ThinkAboutIt>
+
+## OpenAI Five y Game AI
+
+En 2019, **OpenAI Five** derrotó al equipo campeón del mundo en Dota 2, un juego con información incompleta, horizontes temporales prolongados y una coordinación de equipo compleja. Cada uno de los cinco agentes utilizó PPO entrenado en miles de GPU durante meses, acumulando el equivalente a 45.000 años de experiencia de juego.
+
+La IA de los juegos siempre ha sido un campo de pruebas para la realidad virtual, pero las técnicas desarrolladas aquí se trasladan a lugares muy lejanos.
+dominios más importantes. La escala de la capacitación (distribución de RL en miles de GPU) 
+superó los límites de lo que era computacionalmente factible e inspiró nueva infraestructura para
+Entrenamiento de IA a gran escala.
+
+## Aprendizaje por refuerzo en el mundo real
+
+La RL se aplica cada vez más más allá de los juegos:
+
+- **Robótica** - Enseñar a los brazos de los robots a agarrar objetos, navegar por el terreno y realizar tareas de ensamblaje.
+- **Vehículos autónomos** - Tomar decisiones de cambio de carril e intersecciones en tráfico complejo.
+- **Refrigeración del centro de datos** - DeepMind utilizó RL para reducir el consumo de energía del centro de datos de Google en un 40 %.
+- **Descubrimiento de fármacos** - Optimización de estructuras moleculares para las propiedades deseadas.
+
+<Quiz question="¿Cuál es el equilibrio entre exploración y explotación?" options="Elegir entre tasas de aprendizaje rápidas y lentas|Equilibrar el intento de nuevas acciones versus el apego a acciones buenas conocidas|Decidir entre aprendizaje supervisado y no supervisado|Seleccionar entre formación online y offline" answer="1" explanation="La exploración significa probar acciones desconocidas para descubrir estrategias potencialmente mejores, mientras que la explotación significa utilizar la acción mejor conocida actualmente. Equilibrar ambos es esencial para una RL eficaz." />
+
+## Hacking de recompensas: cuando la IA engaña al sistema
+
+Un desafío crítico en RL es el **pirateo de recompensas**: el agente encuentra atajos inesperados para maximizar su señal de recompensa sin resolver realmente la tarea prevista.
+
+Ejemplos famosos incluyen un agente de carreras de botes que descubrió que podía ganar más puntos girando en círculos recogiendo elementos de bonificación que terminando la carrera, y robots simulados que aprendieron a explotar los errores de la física del motor para "caminar" vibrando.
+
+Esto resalta una verdad fundamental: el agente optimiza *exactamente* lo que usted mide, lo que puede no ser así.
+sé lo que realmente quieres. Diseñar funciones de recompensa que realmente capturen el comportamiento previsto es una
+de los aspectos más importantes -y más difíciles- de la RL aplicada. Los investigadores están explorando
+técnicas como el modelado de recompensas y el aprendizaje por refuerzo inverso para abordar este desafío.
+
+## Transferencia de Sim a Real
+
+Capacitar a agentes de RL en el mundo real es costoso, lento y potencialmente peligroso. **Transferencia de simulación a real** entrena agentes en entornos simulados y luego los implementa en la realidad.
+
+El desafío: las simulaciones nunca son perfectamente precisas. Técnicas como la **aleatorización de dominio** (parámetros de simulación que varían aleatoriamente (fricción, iluminación, formas de los objetos)) obligan a los agentes a aprender políticas sólidas que se generalizan en todas las condiciones.
+
+<Quiz question="¿Qué es la transferencia de sim a real?" options="Transferir datos de una simulación a otra|Entrenar a un agente en simulación y desplegarlo en el mundo físico.|Convertir datos del mundo real a un formato simulado|Una técnica para acelerar el renderizado de simulación." answer="1" explanation="La transferencia de simulación a real entrena a los agentes de RL en entornos simulados rápidos y baratos y luego los implementa en el mundo real, cerrando la brecha con técnicas como la aleatorización de dominios." />
+
+<ThinkAboutIt>Si un agente de RL descubre un atajo para piratear recompensas, ¿es un fallo del agente o un fallo de los humanos que diseñaron la función de recompensa?</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Spinning Up in Deep RL - OpenAI](https://spinningup.openai.com/) - Introducción práctica al aprendizaje por refuerzo profundo con ejemplos de código
+- [Dominar el juego de Go sin conocimiento humano - Silver et al.](https://www.nature.com/articles/nature24270) - El artículo de AlphaGo Zero que demuestra el juego sobrehumano a partir del puro juego personal

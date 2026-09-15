@@ -1,0 +1,211 @@
+---
+title: "Estructuras de datos para entrevistas"
+description: "Domine las estructuras de datos esenciales que aparecen en el 90% de las entrevistas de codificación: matrices, árboles, gráficos, mapas hash y cuándo usar cada uno."
+order: 1
+difficulty: "intermediate"
+duration: 20
+icon: "📊"
+published: true
+machineTranslated: true
+---
+# Estructuras de datos para entrevistas
+
+Aquí hay un secreto que los mejores entrenadores de entrevistas no le cobrarán $500 por aprender: aproximadamente el 90% de los problemas de codificación de las entrevistas giran en torno a solo siete estructuras de datos. Si comprendes profundamente cuándo y por qué recurrir a cada uno, ya habrás ganado la mitad de la batalla. La otra mitad es práctica, pero sin los modelos mentales adecuados, la práctica es sólo memorización. Esta lección le brinda el mapa para que cada problema que encuentre se sienta como un territorio familiar.
+
+## Las 7 estructuras de datos que debes conocer
+
+Cada entrevista técnica bebe del mismo pozo. Estas son las estructuras que encontrará, clasificadas por frecuencia:
+
+| Estructura de datos | Frecuencia de la entrevista | Operaciones principales | Cuando lo esperan los entrevistadores |
+|---|---|---|---|
+| **Matrices/cadenas** | ★★★★★ | Acceder a O(1), Buscar O(n), Insertar O(n) | Casi todos los problemas comienzan aquí |
+| **Mapas/conjuntos hash** | ★★★★★ | Insertar O(1), Buscar O(1), Eliminar O(1) | "Optimice esto de O(n²) a O(n)" |
+| **Listas enlazadas** | ★★★★☆ | Insertar O(1), Eliminar O(1), Acceder a O(n) | Manipulación de punteros, detección de ciclos |
+| **Pilas y colas** | ★★★★☆ | Empujar/sacar O(1), poner en cola/quitar de cola O(1) | Análisis, BFS, deshacer operaciones |
+| **Árboles (binario, BST)** | ★★★★☆ | Buscar O(log n), Insertar O(log n) | Datos jerárquicos, operaciones ordenadas |
+| **Gráficos** | ★★★☆☆ | Depende de la representación | Relaciones, caminos, conectividad |
+| **Montones** | ★★★☆☆ | Insertar O (log n), Extraer-min O (log n) | "Encuentra el k mayor/menor" |
+
+<Callout>Si solo tienes una semana para prepararte, concéntrate en matrices, mapas hash y árboles. Estas tres representan la mayoría de las preguntas de las entrevistas en empresas de nivel FAANG.</Callout>
+
+## Matrices y cadenas: su base
+
+Las matrices son el punto de partida para casi todos los problemas de las entrevistas. La idea clave es que la mayoría de los problemas de matrices no tienen que ver realmente con matrices, sino con reconocer patrones como dos punteros, ventanas deslizantes o sumas de prefijos.
+
+```python
+# Two Sum — the most classic interview problem
+# "Given an array and target, find two numbers that add to target"
+def two_sum(nums, target):
+    seen = {}  # Hash map to store complement
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+    return []
+
+# Time: O(n), Space: O(n) — trading space for time
+```
+
+Observe cómo incluso este problema de "matriz" es en realidad un problema de mapa hash. Ese patrón se repite constantemente: la fuerza bruta utiliza bucles anidados sobre una matriz y la solución óptima introduce un mapa hash.
+
+## Hash Maps: la navaja suiza de la entrevista
+
+Si está atrapado en algún problema y la fuerza bruta es O(n²), pregúntese: "¿Puede un mapa hash reducir esto a O(n)?" Sorprendentemente, la respuesta es sí.
+
+Los mapas hash brillan cuando lo necesitas:
+- **Frecuencias de recuento**: recuento de caracteres, recuento de palabras, frecuencias de elementos
+- **Seguimiento de elementos vistos**: detección de duplicados, problemas de estilo de dos sumas
+- **Elementos de grupo**: agrupación de anagramas, categorización
+- **Cálculos de caché** — memorización en programación dinámica
+
+```java
+// Group Anagrams — a classic hash map problem
+public List<List<String>> groupAnagrams(String[] strs) {
+    Map<String, List<String>> map = new HashMap<>();
+    for (String s : strs) {
+        char[] chars = s.toCharArray();
+        Arrays.sort(chars);
+        String key = new String(chars);
+        map.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
+    }
+    return new ArrayList<>(map.values());
+}
+```
+
+<ThinkAboutIt>Cuando ve un problema que le pide "buscar", "contar" o "verificar si existe", ¿qué estructura de datos le viene a la mente inmediatamente? ¿Cómo explicaría la compensación entre la búsqueda O(1) de un mapa hash y la búsqueda binaria O(log n) de una matriz ordenada?</ThinkAboutIt>
+
+## Listas enlazadas: dominio del puntero
+
+Los problemas de listas enlazadas ponen a prueba su capacidad para manipular punteros sin perder la pista de los nodos. Las tres técnicas que necesitas son:
+
+1. **Dos punteros (rápido/lento)**: detección de ciclo, búsqueda del nodo medio
+2. **Nodo de cabeza ficticia**: simplifica los casos extremos en los que la cabeza podría cambiar
+3. **Reversión**: la reversión iterativa es un elemento básico para muchos problemas
+
+```python
+# Detect a cycle in a linked list (Floyd's Algorithm)
+def has_cycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow == fast:
+            return True
+    return False
+```
+
+<FunFact>El algoritmo de detección del ciclo de Floyd, también conocido como algoritmo de "tortuga y liebre", se publicó en 1967. Es uno de los algoritmos más antiguos que todavía se pregunta con frecuencia en las entrevistas de codificación modernas: más de 55 años y contando.</FunFact>
+
+## Pilas y colas: el orden importa
+
+Las pilas (LIFO) y las colas (FIFO) son estructuras más simples, pero desbloquean categorías enteras de problemas:
+
+- **Pilas**: paréntesis válidos, evaluación de expresiones, problemas de pila monótona, deshacer/rehacer
+- **Colas**: recorrido BFS, ventana deslizante máxima (con deque), programación de tareas
+
+```python
+# Valid Parentheses — classic stack problem
+def is_valid(s: str) -> bool:
+    stack = []
+    matching = {')': '(', '}': '{', ']': '['}
+    for char in s:
+        if char in matching:
+            if not stack or stack[-1] != matching[char]:
+                return False
+            stack.pop()
+        else:
+            stack.append(char)
+    return len(stack) == 0
+```
+
+## Árboles: pensamiento jerárquico
+
+Los problemas de árbol suelen implicar recursividad y uno de tres órdenes transversales (en orden, preorden, postorden). El modelo mental a desarrollar es: "¿Qué necesito del subárbol izquierdo, del subárbol derecho y cómo los combino en el nodo actual?"
+
+```python
+# Maximum depth of a binary tree — the template for tree recursion
+def max_depth(root):
+    if not root:
+        return 0
+    left_depth = max_depth(root.left)
+    right_depth = max_depth(root.right)
+    return 1 + max(left_depth, right_depth)
+```
+
+Los problemas de BST (árbol de búsqueda binaria) añaden una propiedad crucial: el recorrido en orden produce elementos ordenados. Si ve "ordenado" y "árbol" en el mismo problema, piense en BST de inmediato.
+
+## Gráficos: modelado de relaciones
+
+Los problemas de gráficos parecen intimidantes, pero la mayoría se reducen a BFS o DFS una vez que se ha creado la lista de adyacencia. Las habilidades clave son:
+
+- **Construyendo el gráfico** a partir de listas de aristas o matrices
+- **BFS** para la ruta más corta en gráficos no ponderados
+- **DFS** para conectividad, detección de ciclos y clasificación topológica
+
+```python
+# BFS shortest path in an unweighted graph
+from collections import deque
+
+def shortest_path(graph, start, end):
+    queue = deque([(start, 0)])
+    visited = {start}
+    while queue:
+        node, distance = queue.popleft()
+        if node == end:
+            return distance
+        for neighbour in graph[node]:
+            if neighbour not in visited:
+                visited.add(neighbour)
+                queue.append((neighbour, distance + 1))
+    return -1  # Not reachable
+```
+
+## Montones: la señal "Top K"
+
+Siempre que un problema dice "encontrar las K más grandes", "las K más cercanas" o "fusionar K listas ordenadas", es casi seguro que la respuesta sea un montón (cola de prioridad). En Python, `heapq` proporciona un montón mínimo; para un montón máximo, niegue los valores.
+
+```python
+import heapq
+
+# Find the K largest elements in an array
+def k_largest(nums, k):
+    return heapq.nlargest(k, nums)  # Uses a min-heap of size k internally
+```
+
+<Quiz question="Necesita encontrar la mediana de un flujo de números en O (log n) por inserción. ¿Qué combinación de estructura de datos es la más apropiada?" options="Dos matrices ordenadas|Un único BST equilibrado|Dos montones (montón máximo + montón mínimo)|Un mapa hash con totales acumulados" answer="2" explanation="El enfoque de dos montones utiliza un montón máximo para la mitad inferior y un montón mínimo para la mitad superior. Equilibrarlos después de cada inserción requiere O (log n), y la mediana siempre está disponible en O (1) desde la parte superior del montón." />
+
+## Hoja de referencia sobre la complejidad del tiempo y el espacio
+
+| Estructura | Acceso | Buscar | Insertar | Eliminar | Espacio |
+|---|---|---|---|---|---|
+| Matriz | O(1) | O(n) | O(n) | O(n) | O(n) |
+| Mapa hash | — | O(1)* | O(1)* | O(1)* | O(n) |
+| Lista enlazada | O(n) | O(n) | O(1) | O(1) | O(n) |
+| Pila/Cola | O(n) | O(n) | O(1) | O(1) | O(n) |
+| BST (equilibrado) | O(log n) | O(log n) | O(log n) | O(log n) | O(n) |
+| Montón | — | O(n) | O(log n) | O(log n) | O(n) |
+
+*\* Caso promedio; El peor de los casos es O(n) debido a colisiones de hash.*
+
+## Reconocimiento de patrones: elección de la estructura adecuada
+
+Desarrolle esta lista de verificación mental al leer un problema:
+
+- **¿Necesita una búsqueda rápida?** → Mapa Hash
+- **¿Necesita orden?** → BST o matriz ordenada + búsqueda binaria
+- **¿Necesita procesamiento FIFO?** → Cola (BFS)
+- **¿Necesita LIFO/retroceso?** → Pila (DFS)
+- **¿Necesitas top-K o prioridad?** → Montón
+- **¿Necesitas modelar conexiones?** → Gráfico
+- **¿Necesita acceso O(1) por índice?** → Matriz
+
+<Callout>En su entrevista, indique explícitamente qué estructura de datos está eligiendo y por qué. Decir "Usaré un mapa hash aquí porque necesitamos búsquedas O(1) para evitar el bucle anidado" demuestra exactamente el pensamiento de ingeniería que los entrevistadores quieren ver.</Callout>
+
+## Conclusiones clave
+
+- **Siete estructuras cubren el 90% de las entrevistas**: matrices, mapas hash, listas enlazadas, pilas/colas, árboles, gráficos y montones.
+- **Los mapas hash son tu mejor amigo**: en caso de duda, un mapa hash probablemente ayude.
+- **Conozca sus complejidades**: los entrevistadores preguntarán "¿cuál es la complejidad del tiempo?" después de cada solución.
+- **El reconocimiento de patrones es mejor que la memorización**: aprenda a asignar señales de problemas ("K superior" → montón, "camino más corto" → BFS) a la estructura correcta.
+- **Practique deliberadamente**: resuelva de 3 a 5 problemas por estructura de datos, centrándose en la comprensión más que en la velocidad. La velocidad proviene de la comprensión.

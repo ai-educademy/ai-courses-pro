@@ -1,0 +1,33 @@
+---
+title: "Agentes Utilizadores de Ferramentas e MCP"
+description: "Mude de demonstrações impressionantes para agentes limitados e observáveis ​​que usam ferramentas com segurança."
+order: 12
+difficulty: intermediate
+duration: 45
+icon: "🧰"
+published: true
+machineTranslated: true
+---
+## Fluxo de trabalho ou agente?
+
+Use um fluxo de trabalho quando as etapas forem conhecidas e devem ser determinísticas. Use um agente quando o sistema precisar escolher entre ferramentas ou se adaptar às informações descobertas durante a execução. Comece com o design mais simples que atenda aos requisitos.
+
+## Uma ferramenta é um contrato
+
+Cada ferramenta deve definir:
+
+- Um nome e propósito restritos.
+- Um esquema de entrada digitado com validação.
+- Autorização explícita e limites de inquilinos.
+- Um formato de resultado compacto e útil.
+- Tempos limite, novas tentativas, idempotência e um registro de auditoria.
+
+O Model Context Protocol (MCP) padroniza como clientes compatíveis descobrem e chamam ferramentas e recursos. Isso não elimina a necessidade de autenticação, privilégio mínimo, validação de entrada ou aprovação humana para ações consequentes.
+
+## Limites seguros do agente
+
+Mantenha o planejamento separado da execução. Trate o texto recuperado e a saída da ferramenta como dados não confiáveis. Limite a contagem de ferramentas e a profundidade da recursão. Exija confirmação antes de enviar mensagens, alterar registros, gastar dinheiro ou fazer alterações irreversíveis.
+
+## Construir desafio
+
+Crie um agente que possa pesquisar um pequeno conjunto de documentos, calcular um resultado e redigir (mas não enviar) um e-mail. Registre cada chamada de ferramenta, rejeite argumentos malformados, adicione um tempo limite e teste o texto de injeção de prompt dentro de um documento recuperado.

@@ -1,0 +1,130 @@
+---
+title: "Edge AI – Executando modelos em telefones, navegadores e dispositivos IoT"
+description: "Explore a compactação de modelos, a inferência no dispositivo e os aceleradores de hardware que alimentam a IA na borda, de telefones celulares a navegadores da web."
+order: 7
+difficulty: "advanced"
+duration: 17
+icon: "📱"
+published: true
+machineTranslated: true
+---
+# IA de borda
+
+Nem toda previsão deve ir e voltar para a nuvem. O Edge AI executa modelos diretamente no dispositivo – seu telefone, seu navegador, uma câmera, um carro. Os benefícios são atraentes: latência de rede zero, privacidade total (os dados nunca saem do dispositivo), capacidade off-line e custos de serviço drasticamente mais baixos.
+
+O desafio? Você precisa de um modelo que caiba em megabytes, funcione em hardware limitado e ainda forneça precisão útil.
+
+## Por que Edge Over Cloud?
+
+A decisão entre edge e nuvem não é binária – a maioria dos sistemas de produção usa uma abordagem híbrida. Mas compreender as compensações é fundamental:
+
+| Fator | Inferência em Nuvem | Inferência de borda |
+|--------|----------------|----------------|
+| **Latência** | 100-500 ms (ida e volta da rede) | 5-50 ms (no dispositivo) |
+| **Privacidade** | Dados enviados ao servidor | Os dados permanecem no dispositivo |
+| **Custo** | Custo de GPU por solicitação | Custo marginal zero |
+| **Off-line** | Requer conectividade | Funciona em qualquer lugar |
+| **Escalabilidade** | Gargalo do servidor | Balanças com dispositivos |
+| **Tamanho do modelo** | Ilimitado | Limitado pela memória do dispositivo |
+
+Para aplicações como tradução em tempo real, previsão de teclado, desbloqueio facial ou monitoramento de saúde, a vantagem não é apenas preferível – é a única opção viável.
+
+<Illustration src="/images/lessons/edge-ai.svg" alt="Diagrama comparando a inferência na nuvem com o percurso de ida e volta da rede versus a inferência na borda executada diretamente no dispositivo" caption="A inferência de borda elimina totalmente o percurso de ida e volta da rede – fundamental para aplicações em tempo real." />
+
+## Técnicas de compressão de modelo
+
+Os modelos de produção são muito grandes para dispositivos de ponta. Um modelo da classe GPT com precisão FP32 consumiria gigabytes de memória. As técnicas de compactação tornam a implantação viável.
+
+### Quantização
+
+A quantização reduz a precisão numérica dos pesos do modelo de ponto flutuante de 32 bits (FP32) para representações menores:
+
+- **FP16** - Meia precisão. 2× redução de memória, perda mínima de precisão. Padrão para inferência de GPU.
+- **INT8** - 4× redução de memória. O ponto ideal para a maioria das implantações de borda.
+- **INT4** - Redução de memória de 8×. Agressivo, mas viável para modelos de linguagem grandes com calibração cuidadosa.
+
+A quantização pós-treinamento (PTQ) converte um modelo já treinado. O treinamento com reconhecimento de quantização (QAT) simula baixa precisão durante o treinamento para melhor retenção da precisão.
+
+<FunFact>O Neural Engine da Apple no iPhone 15 Pro processa operações INT8 a 35 TOPS (trilhões de operações por segundo) – aproximadamente equivalente a uma GPU de data center de médio porte de apenas cinco anos atrás.</FunFact>
+
+### Poda
+
+A poda remove pesos (ou neurônios inteiros) que menos contribuem para a saída do modelo. A poda não estruturada zera os pesos individuais; a poda estruturada remove canais inteiros ou cabeças de atenção para acelerações reais no hardware.
+
+Um modelo bem podado pode remover 50-90% dos parâmetros com menos de 1% de degradação da precisão - mas o modelo podado deve ser ajustado posteriormente para recuperar o desempenho.
+
+### Destilação de Conhecimento
+
+Treine um modelo pequeno de “aluno” para imitar os resultados de um modelo grande de “professor”. O aluno aprende não apenas os rótulos corretos, mas também a distribuição completa de probabilidades do professor – incluindo quais respostas erradas são “quase certas”. Essa informação suave é transferida surpreendentemente bem.
+
+O DistilBERT, por exemplo, retém 97% da precisão do BERT com 60% do seu tamanho e 2x a velocidade.
+
+<Quiz question="Qual técnica de compressão treina um modelo menor para replicar a distribuição de saída de um modelo maior?" options="Quantização|Poda|Destilação de conhecimento|Compartilhamento de peso" answer="2" explanation="A destilação de conhecimento treina um modelo de aluno compacto usando os resultados de probabilidade suave do professor, transferindo conhecimento diferenciado além de rótulos rígidos." />
+
+## ONNX: o formato universal
+
+**Open Neural Network Exchange (ONNX)** é um formato de modelo independente de estrutura. Treine em PyTorch, exporte para ONNX, implante em qualquer lugar: TensorFlow Lite, Core ML, ONNX Runtime ou navegador.
+
+O ONNX Runtime fornece inferência otimizada entre CPUs, GPUs e NPUs com uma única API. Ele lida automaticamente com fusão de operadores, planejamento de memória e aceleração específica de hardware.
+
+## Tempos de execução específicos da plataforma
+
+### TensorFlow Lite (móvel/IoT)
+
+Tempo de execução do Google para Android, iOS e microcontroladores. Os modelos TFLite são buffers planos - pequenos, rápidos de carregar, sem alocação dinâmica de memória. O intérprete tem menos de 1 MB. Delegue APIs que transferem a computação para hardware GPU, DSP ou NPU.
+
+### Core ML (Ecossistema Apple)
+
+A estrutura da Apple roteia automaticamente a computação pela CPU, GPU e pelo Neural Engine dedicado. Se você enviar um aplicativo iOS com recursos de ML, Core ML é o caminho de menor resistência. Suporta criptografia de modelo para proteção de IP.
+
+### WebAssembly + ONNX Runtime Web
+
+Execute modelos de ML no navegador com desempenho quase nativo. ONNX Runtime Web compila modelos para WebAssembly e usa WebGL ou WebGPU para aceleração de GPU. Nenhum servidor, nenhuma instalação, nenhum dado sai do navegador.
+
+Casos de uso: remoção de fundo em tempo real em videochamadas, moderação de conteúdo na página e OCR de documentos baseado em navegador.
+
+<Quiz question="Qual é a principal vantagem do ONNX como formato de modelo?" options="Funciona apenas com modelos PyTorch|Ele fornece portabilidade independente de estrutura entre destinos de implantação|Ele quantiza automaticamente os modelos para INT4|Elimina a necessidade de aceleradores de hardware" answer="1" explanation="ONNX permite o treinamento em uma estrutura e a implantação em outra - fornecendo um formato de intercâmbio universal entre tempos de execução e plataformas de hardware." />
+
+## Modelos de linguagem grande no dispositivo
+
+Executar LLMs em hardware de consumo parecia impossível há dois anos. Hoje, modelos quantizados com menos de 4 bilhões de parâmetros funcionam confortavelmente em telefones principais:
+
+- **Gemma 2B/7B** (Google) - Otimizado para dispositivos móveis via TFLite e MediaPipe
+- **Phi-3 Mini** (Microsoft) - Parâmetros de 3,8B, forte raciocínio para seu tamanho
+- **Llama 3.2 1B/3B** (Meta) - Desenvolvido especificamente para implantação no dispositivo
+- **Gemini Nano** (Google) - Integrado ao Android 14+ via AICore
+
+Esses modelos lidam com resumo, tradução, respostas inteligentes e conclusão de código sem qualquer chamada de rede.
+
+<ThinkAboutIt>LLMs no dispositivo significam que suas mensagens privadas, dados de saúde e histórico de navegação nunca saem do seu telefone. Mas também significam menos visibilidade para o monitoramento da segurança. Como os fabricantes de dispositivos devem equilibrar privacidade com segurança de conteúdo?</ThinkAboutIt>
+
+## Aceleradores de hardware na borda
+
+Dispositivos modernos incluem silício dedicado para inferência de redes neurais:
+
+- **Apple Neural Engine** - NPU de 16 núcleos em chips das séries M e A. Integração estreita do Core ML.
+- **Qualcomm Hexagon NPU** - Capacita a IA do Android em chips Snapdragon. Suporta INT4 nativamente.
+- **Google Tensor TPU** – Chip personalizado em smartphones Pixel para fala, tradução e fotos no dispositivo.
+- **Intel Movidius** - VPU de baixo consumo de energia para câmeras IoT e drones.
+
+A tendência é clara: todos os grandes fabricantes de chips agora tratam a aceleração de IA como um recurso de primeira classe, e não como uma reflexão tardia.
+
+## Aplicativos de IA de borda do mundo real
+
+- **Previsão do teclado** (GBoard, SwiftKey) - A previsão da próxima palavra é executada inteiramente no dispositivo usando modelos personalizados
+- **Tradução em tempo real** (Google Translate off-line) - Tradução automática neural completa sem conectividade
+- **Reconhecimento facial** (Face ID) - O sistema TrueDepth da Apple processa mapas faciais 3D no Neural Engine
+- **Câmeras inteligentes** - Análise de varejo, monitoramento da vida selvagem e gerenciamento de tráfego na borda
+- **Aparelhos auditivos** - Cancelamento de ruído no dispositivo e aprimoramento de fala com latência inferior a um milissegundo
+
+<Quiz question="Por que a implantação de borda é essencial para o recurso de cancelamento de ruído de um aparelho auditivo?" options="GPUs em nuvem são mais precisas|O dispositivo precisa de latência inferior a um milissegundo que as viagens de ida e volta da rede não podem fornecer|Os modelos de borda são sempre mais precisos|A implantação na nuvem seria mais barata" answer="1" explanation="Os aparelhos auditivos requerem latência de processamento de áudio inferior a um milissegundo. Qualquer viagem de ida e volta na rede introduziria um atraso perceptível, tornando o dispositivo inutilizável para conversas em tempo real." />
+
+<ThinkAboutIt>Você está construindo um sistema de inspeção de qualidade baseado em IA para um chão de fábrica sem internet confiável. Que modelo de arquitetura, estratégia de compactação e hardware você escolheria? Como você lidaria com as atualizações de modelo?</ThinkAboutIt>
+
+---
+
+## 📚 Leitura adicional
+
+- [ONNX Runtime Documentation](https://onnxruntime.ai/) - Guia oficial para o mecanismo de inferência de plataforma cruzada
+- [Guia TensorFlow Lite](https://www.tensorflow.org/lite/guide) - Guia completo do Google para implantação de ML no dispositivo
+- [Uma Pesquisa sobre Compressão de Modelos para LLMs](https://arxiv.org/abs/2308.07633) - Visão geral acadêmica de quantização, poda e destilação para modelos grandes

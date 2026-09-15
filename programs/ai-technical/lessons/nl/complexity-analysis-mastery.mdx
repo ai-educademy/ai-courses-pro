@@ -1,0 +1,281 @@
+---
+title: "Beheersing van complexiteitsanalyse"
+description: "Analyseer met vertrouwen de complexiteit van tijd en ruimte: de vaardigheid die goede oplossingen onderscheidt van optimale oplossingen bij het coderen van interviews."
+order: 7
+difficulty: "intermediate"
+duration: 18
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+# Beheersing van complexiteitsanalyse
+
+"Wat is de tijdscomplexiteit?" – vier woorden die volgen op elke oplossing die u presenteert in een codeerinterview. Doe het goed, en je klinkt als een zelfverzekerde ingenieur. Struikel, en de interviewer vraagt ​​zich af of je je eigen code echt begrijpt. Complexiteitsanalyse is niet alleen academische theorie; het is de lens waardoor ingenieurs beoordelen of een oplossing op schaal zal werken. Met deze les kunt u elke oplossing met vertrouwen analyseren, van eenvoudige lussen tot lastige recursieve algoritmen.
+
+## Basisprincipes van Big-O-notatie
+
+Big-O beschrijft de bovengrens van hoe de runtime of het geheugengebruik van een algoritme groeit naarmate de invoergrootte groeit. Het verwijdert constanten en termen van lagere orde en concentreert zich op de dominante factor.
+
+| Complexiteit | Naam | Voorbeeld | 1M-elementen |
+|---|---|---|---|
+| O(1) | Constante | Hash-kaart opzoeken | Direct |
+| O(logboek n) | Logaritmisch | Binair zoeken | ~20 bewerkingen |
+| O(n) | Lineair | Enkele lus door array | 1M-operaties |
+| O(n logboek n) | Linearitmisch | Sorteren samenvoegen, sorteren op heap | ~20 miljoen operaties |
+| O(n²) | Kwadratisch | Geneste lussen (brute kracht) | 1 biljoen operaties |
+| O(2ⁿ) | Exponentieel | Recursieve deelverzamelingen | Hittedood van het universum |
+| O(n!) | Factoriaal | Alle permutaties | Hittedood × hittedood |
+
+<Callout>Een praktische vuistregel: moderne computers verwerken ongeveer 10⁸ eenvoudige handelingen per seconde. Als uw algoritme O(n²) en n = 10⁵ is, zijn dat 10¹⁰ bewerkingen – ongeveer 100 seconden. Te langzaam. Met deze hoofdrekenen kunt u snel beoordelen of uw aanpak binnen de gebruikelijke tijdslimieten zal slagen.</Callout>
+
+## Eenvoudige loops analyseren
+
+### Enkele lus → O(n)
+
+```python
+def find_max(nums):
+    max_val = nums[0]       # O(1)
+    for num in nums:         # Loop runs n times
+        if num > max_val:    # O(1) comparison
+            max_val = num    # O(1) assignment
+    return max_val           # O(1)
+# Total: O(1) + O(n) × O(1) = O(n)
+```
+
+### Geneste lussen → Vermenigvuldigen
+
+```python
+def has_duplicate_pair(nums):
+    for i in range(len(nums)):           # n iterations
+        for j in range(i + 1, len(nums)):  # ~n iterations
+            if nums[i] == nums[j]:
+                return True
+    return False
+# Total: O(n) × O(n) = O(n²)
+```
+
+### Opeenvolgende blokken → Toevoegen
+
+```python
+def process(nums):
+    # Block 1: O(n)
+    for num in nums:
+        print(num)
+
+    # Block 2: O(n²)
+    for i in range(len(nums)):
+        for j in range(len(nums)):
+            print(i, j)
+
+# Total: O(n) + O(n²) = O(n²)  — drop the lower-order term
+```
+
+### Lussen met niet voor de hand liggende iteraties
+
+```python
+# This is O(n), not O(n²)!
+def two_pointer_sum(nums, target):
+    left, right = 0, len(nums) - 1
+    while left < right:    # Each pointer moves at most n times total
+        total = nums[left] + nums[right]
+        if total == target:
+            return True
+        elif total < target:
+            left += 1
+        else:
+            right -= 1
+    return False
+```
+
+<ThinkAboutIt>Beschouw een lus waarbij de variabele elke iteratie verdubbelt: `i = 1; while i < n: i *= 2`. Hoe vaak wordt deze lus uitgevoerd? Wat is de complexiteit? (Hint: als ik elke keer verdubbel, hoeveel verdubbelingen zijn er nodig om n te bereiken?)</ThinkAboutIt>
+
+## Recursie analyseren
+
+Recursie is waar complexiteitsanalyse interessant wordt. Het belangrijkste hulpmiddel is de **recursieboom**.
+
+### Lineaire recursie → O(n)
+
+```python
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+# Recursion tree: single chain of n calls
+# factorial(5) → factorial(4) → factorial(3) → factorial(2) → factorial(1)
+# Time: O(n), Space: O(n) — n stack frames
+```
+
+### Binaire recursie → O(2ⁿ)
+
+```python
+# Naive Fibonacci — the classic exponential example
+def fib(n):
+    if n <= 1:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+# Recursion tree: each call spawns TWO calls
+#                fib(5)
+#              /        \
+#          fib(4)       fib(3)
+#         /     \       /    \
+#      fib(3)  fib(2) fib(2) fib(1)
+#      ...
+# Nodes at each level double → total nodes ≈ 2ⁿ
+# Time: O(2ⁿ), Space: O(n) — max depth of tree
+```
+
+### Gememoriseerde recursie → O(n)
+
+```python
+def fib_memo(n, memo={}):
+    if n in memo:
+        return memo[n]
+    if n <= 1:
+        return n
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+
+# Each subproblem computed only once → O(n) unique calls
+# Time: O(n), Space: O(n)
+```
+
+<FunFact>Het verschil tussen de naïeve en gememoriseerde Fibonacci is enorm groot. Het op naïeve wijze berekenen van fib(50) vereist ongeveer 2⁵⁰ ≈ 1 biljard bewerkingen – ongeveer 100 dagen op een moderne computer. De gememoriseerde versie vereist precies 50 bewerkingen – uitgevoerd in microseconden. Dit is de reden waarom complexiteitsanalyse belangrijk is.</FunFact>
+
+### De hoofdstelling (vereenvoudigd)
+
+Voor verdeel-en-heers-herhalingen in de vorm **T(n) = aT(n/b) + O(nᵈ)**:
+
+| Conditie | Complexiteit |
+|---|---|
+| d > log_b(a) | O(nᵈ) |
+| d = log_b(a) | O(nᵈlog n) |
+| d <log_b(a) | O(n^(log_b(a))) |
+
+**Praktische voorbeelden**:
+- **Samenvoegsortering**: T(n) = 2T(n/2) + O(n) → a=2, b=2, d=1 → d = log₂2 → **O(n log n)**
+- **Binair zoeken**: T(n) = T(n/2) + O(1) → a=1, b=2, d=0 → d = log₂1 → **O(log n)**
+- **Strassen Matrix Mult**: T(n) = 7T(n/2) + O(n²) → a=7, b=2, d=2 → d < log₂7 → **O(n^2,81)**
+
+## Ruimtecomplexiteit
+
+Ruimtecomplexiteit is net zo belangrijk als tijdcomplexiteit, maar wordt vaak over het hoofd gezien. Graaf:
+
+1. **Hulpruimte** — extra gegevensstructuren die u maakt
+2. **Frames stapelen** — elke recursieve aanroep voegt een frame toe
+
+```python
+# O(1) space — only a few variables
+def reverse_in_place(nums):
+    left, right = 0, len(nums) - 1
+    while left < right:
+        nums[left], nums[right] = nums[right], nums[left]
+        left += 1
+        right -= 1
+
+# O(n) space — creating a new list
+def reverse_copy(nums):
+    return nums[::-1]
+
+# O(n) space from recursion — n stack frames
+def reverse_recursive(nums, left, right):
+    if left >= right:
+        return
+    nums[left], nums[right] = nums[right], nums[left]
+    reverse_recursive(nums, left + 1, right - 1)
+```
+
+<Callout>Vermeld in interviews altijd zowel de tijd- als de ruimtecomplexiteit. Een veelvoorkomend vervolg is: "Kun je het doen in de O(1)-ruimte?" Dit betekent vaak dat een recursieve oplossing moet worden omgezet in een iteratieve oplossing, of dat er een in-place algoritme moet worden gevonden.</Callout>
+
+## Basisprincipes van geamortiseerde analyse
+
+Sommige operaties zijn af en toe duur, maar gemiddeld goedkoop. Geamortiseerde analyse houdt hier rekening mee.
+
+**Klassiek voorbeeld: dynamische array (ArrayList)**
+
+```python
+# Appending to a dynamic array
+# Most appends are O(1) — just place the element
+# Occasionally (when full), the array doubles: O(n) copy
+# Over n operations: n × O(1) + log(n) × O(n) = O(n) total
+# Amortised cost per operation: O(n) / n = O(1)
+```
+
+Andere geamortiseerde O(1) voorbeelden:
+- Hash-kaartinvoegingen (af en toe opnieuw hashen)
+- Splay tree-operaties
+- Implementatie van wachtrijen met twee stapels
+
+## Veelvoorkomende complexiteitsvalkuilen
+
+### Valkuil 1: verborgen loops in ingebouwde bewerkingen
+
+```python
+# Looks like O(n), but string concatenation in a loop is O(n²)
+def build_string(chars):
+    result = ""
+    for char in chars:
+        result += char   # Each += creates a new string → O(current length)
+    return result
+# Fix: use ''.join(chars) → O(n)
+
+# list.index() and 'in' on lists are O(n)
+for item in big_list:
+    if item in another_big_list:  # O(n) × O(n) = O(n²)
+        process(item)
+# Fix: convert to set for O(1) lookup
+```
+
+### Valkuil 2: Sorteren domineert
+
+```python
+def find_kth_largest(nums, k):
+    nums.sort()       # O(n log n) — this dominates
+    return nums[-k]   # O(1)
+# Total: O(n log n), not O(1)
+# Better: use a heap for O(n log k)
+```
+
+### Valkuil 3: Recursiediepte ≠ Totaal werk
+
+```python
+# Depth is O(log n), but total work is O(n)
+def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])     # T(n/2)
+    right = merge_sort(arr[mid:])    # T(n/2)
+    return merge(left, right)        # O(n) work at each level
+# log n levels × O(n) work per level = O(n log n)
+```
+
+<Quiz question="Wat is de tijdscomplexiteit van deze code? `for i in range(n): for j in range(i): print(i, j)`" options="Op)|O(n logboek n)|O(n²)|O(n³)" answer="2" explanation="De binnenste lus loopt 0 + 1 + 2 + ... + (n-1) = n(n-1)/2 keer totaal. Dit is de som van de rekenkundige reeks, die wordt vereenvoudigd tot O(n²). Het is een veel voorkomende valkuil omdat de binnenste lus niet altijd n keer loopt, maar het totale werk nog steeds kwadratisch is." />
+
+## Van brute kracht naar optimaal
+
+In sollicitatiegesprekken begin je vaak met een brute force-oplossing en optimaliseer je deze. Dit is het algemene optimalisatiepad:
+
+| Huidig ​​| Optimalisatietechniek | Verbeterd naar |
+|---|---|---|
+| O(n²) | Hash-kaart voor zoekopdrachten | O(n) |
+| O(n²) | Sorteren + twee wijzers | O(n logboek n) |
+| O(2ⁿ) | Memoisatie / DP | O(n²) of O(n×m) |
+| O(n logboek n) | Emmersortering/telsortering (beperkt bereik) | O(n) |
+| O(n) spatie | Manipulatie ter plaatse | O(1) spatie |
+
+**Het gespreksverloop in een interview**:
+1. "Mijn brute force-aanpak is O(n²) met behulp van geneste lussen."
+2. "Ik merk dat we herhaalde zoekopdrachten uitvoeren - een hash-kaart kan de innerlijke zoekopdracht terugbrengen tot O(1)."
+3. "De geoptimaliseerde oplossing is O(n) tijd en O(n) ruimte."
+4. "De wisselwerking is dat we extra geheugen gebruiken, maar de tijdsverbetering is aanzienlijk."
+
+## Belangrijkste afhaalrestaurants
+
+- **Ken de hiërarchie**: O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(2ⁿ) < O(n!). Je zult hier in elk interview naar verwijzen.
+- **Vermenigvuldig geneste lussen, voeg opeenvolgende blokken toe**: de twee fundamentele regels voor lusanalyse.
+- **Teken recursiebomen**: ze maken recursieve complexiteit visueel en veel gemakkelijker om correct te analyseren.
+- **Let op verborgen kosten**: het aaneenschakelen van strings, het testen van lidmaatschappen van lijsten en het sorteren binnen lussen zijn veelvoorkomende valkuilen.
+- **Vermeld zowel tijd als ruimte**: een volledige complexiteitsanalyse bestrijkt altijd beide dimensies.
+- **Verbinden met optimalisatie**: als u de brute-force-complexiteit kent, weet u hoeveel ruimte er is voor verbetering.

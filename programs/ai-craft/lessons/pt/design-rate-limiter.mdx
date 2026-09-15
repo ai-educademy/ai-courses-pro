@@ -1,0 +1,137 @@
+---
+title: "Projete um limitador de taxa – protegendo APIs em escala"
+description: "Aprenda como projetar um limitador de taxa distribuída usando token bucket, janela deslizante e algoritmos apoiados por Redis para proteger APIs contra abusos e garantir um uso justo."
+order: 6
+difficulty: "advanced"
+duration: 20
+icon: "🛡️"
+published: true
+machineTranslated: true
+---
+# Projete um limitador de taxa – protegendo APIs em escala
+
+A limitação de taxa é um dos tópicos de design de sistema mais práticos. Cada API de produção - do GitHub ao Stripe - depende dela para evitar abusos, garantir o uso justo e proteger os serviços de back-end contra sobrecarga.
+
+## Passo 1 – Levantamento de Requisitos
+
+### Requisitos Funcionais
+- Limitar solicitações com base em regras configuráveis (por usuário, IP ou chave de API)
+- Retornar feedback claro quando um cliente for limitado (HTTP 429)
+- Suporta múltiplas regras de limitação de taxa simultaneamente
+
+### Requisitos Não Funcionais
+- **Baixa latência** - o limitador não deve adicionar sobrecarga significativa
+- **Distribuído** - funciona em vários servidores
+- **Tolerante a falhas** - se o limitador falhar, o tráfego ainda deverá fluir (falha aberta)
+
+<ThinkAboutIt>Um limitador de taxa deve falhar ao abrir (permitir tráfego) ou falhar ao fechar (bloquear o tráfego) quando travar? Quais são as vantagens e desvantagens de um site de comércio eletrônico versus uma API bancária?</ThinkAboutIt>
+
+## Etapa 2 - Algoritmos de limitação de taxa
+
+### Contador de janela fixa
+Divida o tempo em janelas fixas (por exemplo, intervalos de 60 segundos). Incrementar um contador por solicitação. Redefinir nos limites da janela. **Problema:** o tráfego intenso nas bordas da janela pode permitir 2× o limite.
+
+### Registro da janela deslizante
+Armazene o carimbo de data/hora de cada solicitação. Conte as entradas na janela final. Preciso, mas **consome muita memória** - armazenar cada carimbo de data/hora é caro em grande escala.
+
+### Contador de janela deslizante
+Um híbrido: combine a contagem de janelas atual com uma parte ponderada da janela anterior. Equilibra precisão e eficiência de memória.
+
+### Algoritmo de token bucket (mais popular)
+Um balde contém tokens até uma capacidade máxima. Os tokens são adicionados a uma taxa fixa. Cada solicitação consome um token. Se o bucket estiver vazio, a solicitação será rejeitada.
+
+```
+Bucket: capacity=10, refill_rate=2/sec
+
+Time 0s: [🪙🪙🪙🪙🪙🪙🪙🪙🪙🪙] → 10 tokens
+Burst of 8 requests → [🪙🪙] → 2 tokens remain
+Time 1s: refill +2 → [🪙🪙🪙🪙] → 4 tokens
+```
+
+### Comparação de algoritmos
+
+| Algoritmo | Memória | Precisão | Tratamento de explosão |
+|-----------|--------|----------|----------------|
+| Janela Fixa | Baixo | Baixo (explosões de borda) | Pobre |
+| Registro deslizante | Alto | Exato | Bom |
+| Contador deslizante | Médio | Aproximado | Bom |
+| Balde de tokens | Baixo | Bom | Excelente |
+
+<Quiz question="Qual algoritmo permite rajadas controladas enquanto mantém uma taxa constante de longo prazo?" options="Contador de janela fixa|Registro de janela deslizante|Balde de tokens|Contador de janela deslizante" answer="2" explanation="O Token Bucket permite rajadas curtas até a capacidade do balde, ao mesmo tempo em que impõe uma taxa média por meio do mecanismo de recarga. Isso o torna ideal para APIs que precisam lidar com padrões de tráfego em rajadas." />
+
+## Etapa 3 - Arquitetura de alto nível
+
+```
+Client → API Gateway (Rate Limiter Middleware) → Backend Services
+                    ↕
+              Redis Cluster
+         (counters + token buckets)
+```
+
+<Illustration src="/images/lessons/design-rate-limiter.svg" alt="Arquitetura do limitador de taxa mostrando clientes, gateway de API com middleware limitador de taxa, cluster Redis para estado distribuído e serviços de back-end" caption="O limitador de taxa fica no gateway da API, usando Redis para armazenamento de contador distribuído" />
+
+### Onde colocar o limitador de taxa
+- **Do lado do cliente** - fácil de falsificar, não confiável
+- **Lado do servidor** – somente por instância, não escalável
+- **API Gateway / Middleware** – a melhor abordagem para sistemas distribuídos; aplicação centralizada em todas as instâncias
+
+## Etapa 4 - Aprofundamento: Limitação de Taxa Distribuída
+
+### Scripts Redis + Lua
+Em uma configuração distribuída, vários servidores devem compartilhar o estado de limitação de taxa. Redis é a escolha padrão devido às suas operações atômicas e latência inferior a um milissegundo.
+
+Um script Lua garante atomicidade - a verificação e decremento acontece em uma única operação Redis, evitando condições de corrida:
+
+```
+-- Token Bucket in Redis (pseudocode)
+local tokens = redis.call('GET', key)
+local last_refill = redis.call('GET', key..':time')
+-- Calculate tokens to add based on elapsed time
+-- If tokens > 0: decrement and ALLOW
+-- Else: DENY
+```
+
+### Cabeçalhos de resposta
+Limitadores de taxa bem projetados comunicam o estado aos clientes:
+- `X-RateLimit-Limit: 100` - máximo de solicitações por janela
+- `X-RateLimit-Remaining: 42` - pedidos restantes
+- `X-RateLimit-Reset: 1672531200` - Época UTC quando a janela é reiniciada
+- HTTP `429 Too Many Requests` com cabeçalho `Retry-After`
+
+<Quiz question="Por que os scripts Lua são usados ​​com Redis para limitação de taxa em vez de comandos GET e SET separados?" options="Lua é mais rápida que comandos Redis|Os scripts Lua são executados atomicamente no Redis, evitando condições de corrida|Redis não suporta GET/SET nativamente|Lua reduz largura de banda da rede" answer="1" explanation="Os scripts Lua são executados atomicamente no servidor Redis. Sem atomicidade, duas solicitações simultâneas poderiam ler a mesma contagem de tokens, ambas verem os tokens disponíveis e ambas diminuirem - permitindo mais solicitações do que o limite permite." />
+
+## Etapa 5 - Tratamento de casos extremos
+
+### Condições da corrida
+Sem operações atômicas, as solicitações simultâneas podem contornar os limites. Soluções: scripts Redis Lua ou transações Redis `MULTI/EXEC`.
+
+### Dimensões de limite de taxa
+Aplique limites em vários níveis simultaneamente:
+- **Por usuário** - 100 solicitações/minuto para usuários autenticados
+- **Por IP** - 50 solicitações/minuto para tráfego anônimo
+- **Por chave de API** - planos em níveis (gratuito: 10/min, profissional: 1.000/min)
+
+### Desvio de relógio distribuído
+Os servidores podem ter relógios ligeiramente diferentes. Use o horário do servidor Redis como a única fonte de verdade, em vez de depender dos carimbos de data/hora do servidor de aplicativos.
+
+<FunFact>A API REST do GitHub permite 5.000 solicitações por hora para usuários autenticados, mas apenas 60 por hora para solicitações não autenticadas. Stripe usa uma abordagem de janela deslizante com limites separados para chaves de API de modo ativo e de teste.</FunFact>
+
+## Etapa 6 - Gargalos e otimizações
+
+| Gargalo | Solução |
+|-----------|----------|
+| Ponto único de falha do Redis | Cluster Redis com replicação |
+| Latência de rede para Redis | Cache local na memória com sincronização periódica |
+| Chaves de atalho (chaves de API populares) | Fragmento em vários nós Redis |
+| Sobrecarga de avaliação de regras | Regras de pré-compilação, configurações de cache |
+
+<Quiz question="Um limitador de taxa usa uma janela fixa de 60 segundos com um limite de 100 solicitações. Um usuário envia 100 solicitações no segundo 59 e mais 100 no segundo 61. Quantas solicitações são processadas?" options="100|150|200|Depende do algoritmo" answer="2" explanation="Com contadores de janela fixos, todas as 200 solicitações são aprovadas porque 100 caem na janela 1 (segundos 0 a 59) e 100 na janela 2 (segundos 60 a 119). Esse problema de explosão de borda é o motivo pelo qual os algoritmos de janela deslizante ou de token bucket são preferidos." />
+
+<ThinkAboutIt>Se você estiver projetando uma limitação de taxa para uma API global com data centers em Londres, Nova York e Tóquio, você usaria um único Redis centralizado ou clusters Redis regionais? Que compensações de consistência você aceitaria?</ThinkAboutIt>
+
+---
+
+## 📚 Leitura adicional
+- [Limite de taxa - Entrevista de design de sistema, cap. 4](https://bytebytego.com/) - Projeto passo a passo do limitador de taxa de Alex Xu
+- [Stripe Rate Limiting](https://stripe.com/blog/rate-limiters) - como o Stripe lida com a limitação de taxa na produção
+- [Plugin Kong Rate Limiting](https://docs.konghq.com/hub/kong-inc/rate-limiting/) - implementação de gateway de API do mundo real

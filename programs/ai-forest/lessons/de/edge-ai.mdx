@@ -1,0 +1,130 @@
+---
+title: "Edge AI – Ausführen von Modellen auf Telefonen, Browsern und IoT-Geräten"
+description: "Entdecken Sie Modellkomprimierung, geräteinterne Inferenz und die Hardwarebeschleuniger, die KI an der Edge antreiben – von Mobiltelefonen bis hin zu Webbrowsern."
+order: 7
+difficulty: "advanced"
+duration: 17
+icon: "📱"
+published: true
+machineTranslated: true
+---
+# Edge-KI
+
+Nicht jede Vorhersage sollte in die Cloud und zurück wandern. Edge AI führt Modelle direkt auf dem Gerät aus – Ihrem Telefon, Ihrem Browser, einer Kamera, einem Auto. Die Vorteile sind überzeugend: keine Netzwerklatenz, vollständiger Datenschutz (Daten verlassen nie das Gerät), Offline-Fähigkeit und deutlich geringere Bereitstellungskosten.
+
+Die Herausforderung? Sie benötigen ein Modell, das in Megabyte passt, auf begrenzter Hardware läuft und dennoch eine brauchbare Genauigkeit liefert.
+
+## Warum Edge Over Cloud?
+
+Die Entscheidung zwischen Edge und Cloud ist nicht binär – die meisten Produktionssysteme nutzen einen hybriden Ansatz. Es ist jedoch wichtig, die Kompromisse zu verstehen:
+
+| Faktor | Cloud-Inferenz | Kanteninferenz |
+|--------|----------------|----------------|
+| **Latenz** | 100–500 ms (Netzwerk-Roundtrip) | 5–50 ms (auf dem Gerät) |
+| **Datenschutz** | An Server gesendete Daten | Daten bleiben auf dem Gerät |
+| **Kosten** | GPU-Kosten pro Anfrage | Null Grenzkosten |
+| **Offline** | Erfordert Konnektivität | Funktioniert überall |
+| **Skalierbarkeit** | Serverengpass | Waagen mit Geräten |
+| **Modellgröße** | Unbegrenzt | Durch Gerätespeicher eingeschränkt |
+
+Für Anwendungen wie Echtzeitübersetzung, Tastaturvorhersage, Gesichtsentsperrung oder Gesundheitsüberwachung ist der Edge nicht nur vorzuziehen, sondern die einzig praktikable Option.
+
+<Illustration src="/images/lessons/edge-ai.svg" alt="Diagramm zum Vergleich der Cloud-Inferenz mit Netzwerk-Roundtrip im Vergleich zur Edge-Inferenz, die direkt auf dem Gerät ausgeführt wird" caption="Edge-Inferenz eliminiert den Netzwerk-Roundtrip vollständig – entscheidend für Echtzeitanwendungen." />
+
+## Modellkomprimierungstechniken
+
+Produktionsmodelle sind zu groß für Edge-Geräte. Ein Modell der GPT-Klasse mit FP32-Präzision würde Gigabyte an Speicher verbrauchen. Komprimierungstechniken machen die Bereitstellung möglich.
+
+### Quantisierung
+
+Die Quantisierung reduziert die numerische Präzision von Modellgewichten von 32-Bit-Gleitkomma (FP32) auf kleinere Darstellungen:
+
+- **FP16** – Halbe Präzision. 2-fache Speicherreduzierung, minimaler Genauigkeitsverlust. Standard für GPU-Inferenz.
+- **INT8** – 4-fache Speicherreduzierung. Der Sweet Spot für die meisten Edge-Bereitstellungen.
+- **INT4** – 8-fache Speicherreduzierung. Aggressiv, aber bei sorgfältiger Kalibrierung für große Sprachmodelle geeignet.
+
+Post-Training-Quantisierung (PTQ) konvertiert ein bereits trainiertes Modell. Quantisierungsbewusstes Training (QAT) simuliert eine geringe Präzision während des Trainings für eine bessere Beibehaltung der Genauigkeit.
+
+<FunFact>Apples Neural Engine auf dem iPhone 15 Pro verarbeitet INT8-Operationen mit 35 TOPS (Billionen Operationen pro Sekunde) – das entspricht in etwa einer Rechenzentrums-GPU der Mittelklasse von vor fünf Jahren.</FunFact>
+
+### Beschneiden
+
+Beim Beschneiden werden Gewichte (oder ganze Neuronen) entfernt, die am wenigsten zur Ausgabe des Modells beitragen. Durch unstrukturiertes Bereinigen werden einzelne Gewichtungen auf Null gesetzt. Beim strukturierten Bereinigen werden ganze Kanäle oder Aufmerksamkeitskanäle entfernt, um tatsächliche Hardware-Beschleunigungen zu erzielen.
+
+Ein gut beschnittenes Modell kann 50–90 % der Parameter mit weniger als 1 % Genauigkeitsverlust entfernen – das beschnittene Modell muss jedoch anschließend feinabgestimmt werden, um die Leistung wiederherzustellen.
+
+### Wissensdestillation
+
+Trainieren Sie ein kleines „Schüler“-Modell, um die Ergebnisse eines großen „Lehrer“-Modells nachzuahmen. Der Schüler lernt nicht nur die richtigen Bezeichnungen, sondern auch die vollständige Wahrscheinlichkeitsverteilung des Lehrers – einschließlich der Frage, welche falschen Antworten „fast richtig“ sind. Diese sanften Informationen lassen sich überraschend gut übertragen.
+
+DistilBERT beispielsweise behält 97 % der BERT-Genauigkeit bei 60 % seiner Größe und der doppelten Geschwindigkeit.
+
+<Quiz question="Welche Komprimierungstechnik trainiert ein kleineres Modell, um die Ausgabeverteilung eines größeren Modells zu reproduzieren?" options="Quantisierung|Beschneidung|Wissensdestillation|Gewichtsverteilung" answer="2" explanation="Die Wissensdestillation trainiert ein kompaktes Schülermodell unter Verwendung der Soft-Wahrscheinlichkeitsausgaben des Lehrers und überträgt differenziertes Wissen über harte Etiketten hinaus." />
+
+## ONNX: Das universelle Format
+
+**Open Neural Network Exchange (ONNX)** ist ein Framework-unabhängiges Modellformat. Trainieren Sie in PyTorch, exportieren Sie nach ONNX, stellen Sie es überall bereit – TensorFlow Lite, Core ML, ONNX Runtime oder den Browser.
+
+ONNX Runtime bietet optimierte Inferenz über CPUs, GPUs und NPUs hinweg mit einer einzigen API. Es übernimmt automatisch die Operatorfusion, die Speicherplanung und die hardwarespezifische Beschleunigung.
+
+## Plattformspezifische Laufzeiten
+
+### TensorFlow Lite (Mobil / IoT)
+
+Googles Laufzeit für Android, iOS und Mikrocontroller. TFLite-Modelle sind flache Puffer – klein, schnell zu laden, keine dynamische Speicherzuweisung. Der Interpreter ist weniger als 1 MB groß. Delegierte APIs verlagern die Berechnung auf GPU-, DSP- oder NPU-Hardware.
+
+### Core ML (Apple-Ökosystem)
+
+Das Apple-Framework leitet Berechnungen automatisch über CPU, GPU und die dedizierte Neural Engine weiter. Wenn Sie eine iOS-App mit ML-Funktionen ausliefern, ist Core ML der Weg des geringsten Widerstands. Es unterstützt Modellverschlüsselung für den IP-Schutz.
+
+### WebAssembly + ONNX Runtime Web
+
+Führen Sie ML-Modelle im Browser mit nahezu nativer Leistung aus. ONNX Runtime Web kompiliert Modelle zu WebAssembly und verwendet WebGL oder WebGPU zur GPU-Beschleunigung. Kein Server, keine Installation, keine Daten verlassen den Browser.
+
+Anwendungsfälle: Echtzeit-Hintergrundentfernung bei Videoanrufen, On-Page-Content-Moderation und browserbasierte Dokument-OCR.
+
+<Quiz question="Was ist der Hauptvorteil von ONNX als Modellformat?" options="Es funktioniert nur mit PyTorch-Modellen|Es bietet Framework-unabhängige Portabilität über Bereitstellungsziele hinweg|Es quantisiert Modelle automatisch auf INT4|Es macht Hardwarebeschleuniger überflüssig" answer="1" explanation="ONNX ermöglicht das Training in einem Framework und die Bereitstellung in einem anderen und bietet so ein universelles Austauschformat über Laufzeiten und Hardwareplattformen hinweg." />
+
+## Große Sprachmodelle auf dem Gerät
+
+Vor zwei Jahren schien es unmöglich, LLMs auf Consumer-Hardware auszuführen. Heutzutage laufen quantisierte Modelle mit weniger als 4 Milliarden Parametern problemlos auf Flaggschiff-Telefonen:
+
+- **Gemma 2B/7B** (Google) – Optimiert für Mobilgeräte über TFLite und MediaPipe
+- **Phi-3 Mini** (Microsoft) – 3,8B Parameter, starke Gründe für seine Größe
+- **Llama 3.2 1B/3B** (Meta) – Speziell für die Bereitstellung auf dem Gerät entwickelt
+- **Gemini Nano** (Google) – Über AICore in Android 14+ integriert
+
+Diese Modelle übernehmen Zusammenfassung, Übersetzung, intelligente Antworten und Code-Vervollständigung ohne Netzwerkaufruf.
+
+<ThinkAboutIt>LLMs auf dem Gerät bedeuten, dass Ihre privaten Nachrichten, Gesundheitsdaten und Ihr Browserverlauf Ihr Telefon nie verlassen. Sie bedeuten aber auch weniger Sichtbarkeit für die Sicherheitsüberwachung. Wie sollten Gerätehersteller Datenschutz und Inhaltssicherheit in Einklang bringen?</ThinkAboutIt>
+
+## Hardwarebeschleuniger am Edge
+
+Moderne Geräte umfassen dediziertes Silizium für die Inferenz neuronaler Netzwerke:
+
+- **Apple Neural Engine** – 16-Kern-NPU in Chips der M-Serie und A-Serie. Enge Core ML-Integration.
+- **Qualcomm Hexagon NPU** – Unterstützt Android AI auf Snapdragon-Chips. Unterstützt INT4 nativ.
+- **Google Tensor TPU** – Benutzerdefinierter Chip in Pixel-Telefonen für Sprache, Übersetzung und Fotos auf dem Gerät.
+- **Intel Movidius** – VPU mit geringem Stromverbrauch für IoT-Kameras und Drohnen.
+
+Der Trend ist klar: Jeder große Chiphersteller betrachtet die KI-Beschleunigung mittlerweile als erstklassiges Feature und nicht als Nebensache.
+
+## Reale Edge-KI-Anwendungen
+
+- **Tastaturvorhersage** (GBoard, SwiftKey) – Die Vorhersage des nächsten Wortes erfolgt mithilfe personalisierter Modelle vollständig auf dem Gerät
+- **Echtzeitübersetzung** (Google Translate offline) – Vollständige neuronale maschinelle Übersetzung ohne Konnektivität
+- **Gesichtserkennung** (Face ID) – Apples TrueDepth-System verarbeitet 3D-Gesichtskarten auf der Neural Engine
+- **Intelligente Kameras** – Einzelhandelsanalysen, Wildtierüberwachung und Verkehrsmanagement am Rande
+- **Hörgeräte** – Geräuschunterdrückung und Sprachverbesserung im Gerät mit einer Latenzzeit von weniger als einer Millisekunde
+
+<Quiz question="Warum ist der Edge-Einsatz für die Geräuschunterdrückungsfunktion eines Hörgeräts unerlässlich?" options="Cloud-GPUs sind genauer|Das Gerät benötigt eine Latenzzeit von weniger als einer Millisekunde, die Netzwerk-Roundtrips nicht bieten können|Kantenmodelle sind immer genauer|Eine Cloud-Bereitstellung wäre günstiger" answer="1" explanation="Hörgeräte erfordern eine Audioverarbeitungslatenz von weniger als einer Millisekunde. Jeder Netzwerk-Roundtrip würde zu einer spürbaren Verzögerung führen und das Gerät für Echtzeitgespräche unbrauchbar machen." />
+
+<ThinkAboutIt>Sie bauen ein KI-gestütztes Qualitätskontrollsystem für eine Fabrikhalle ohne zuverlässiges Internet. Welche Modellarchitektur, Komprimierungsstrategie und Hardware würden Sie wählen? Wie würden Sie mit Modellaktualisierungen umgehen?</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+
+- [ONNX Runtime Documentation](https://onnxruntime.ai/) – Offizieller Leitfaden zur plattformübergreifenden Inferenz-Engine
+– [TensorFlow Lite Guide](https://www.tensorflow.org/lite/guide) – Googles umfassender Leitfaden zur geräteinternen ML-Bereitstellung
+- [Eine Umfrage zur Modellkomprimierung für LLMs](https://arxiv.org/abs/2308.07633) – Akademischer Überblick über Quantisierung, Bereinigung und Destillation für große Modelle

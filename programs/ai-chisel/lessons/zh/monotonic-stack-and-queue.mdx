@@ -1,0 +1,150 @@
+---
+title: "单调堆栈和队列 - 下一个更大的元素及其他"
+description: "学习单调堆栈和队列模式，以在 O(n) 时间内解决下一个更大的元素、每日温度、直方图和滑动窗口问题。"
+order: 8
+difficulty: "advanced"
+duration: 19
+icon: "📊"
+published: true
+machineTranslated: true
+---
+## 是什么让堆栈变得单调？
+
+**单调堆栈**按照从下到上严格递增或递减的顺序维护元素。在推送新元素之前，您需要弹出所有违反不变量的内容。这个想法为看似需要 O(n²) 的问题解锁了 O(n) 解决方案。
+
+```
+Decreasing stack processing [2, 1, 5, 3, 4]:
+
+Push 2 → [2]
+Push 1 → [2, 1]         (1 < 2, invariant holds)
+Pop 1, Pop 2, Push 5 → [5]  (5 > both)
+Push 3 → [5, 3]
+Pop 3, Push 4 → [5, 4]  (4 > 3)
+```
+
+## 下一个更大的元素
+
+对于每个元素，找到其右侧第一个较大的元素。蛮力向右扫描每个位置 - O(n²)。单调递减堆栈一次性完成此操作。
+
+```python
+def next_greater(nums):
+    result = [-1] * len(nums)
+    stack = []
+    for i, num in enumerate(nums):
+        while stack and nums[stack[-1]] < num:
+            result[stack.pop()] = num
+        stack.append(i)
+    return result
+```
+
+当我们弹出索引 `j` 时，当前元素是下一个更大的元素 - 保证，因为之间的所有内容都较小（它们更早弹出或从未被阻止 `j`）。
+
+<Quiz
+  question="对于输入 [4, 2, 1, 5]，在处理 5 之前单调堆栈包含什么？"
+  options="[4,2,1]|[4]|[1]|[5]"
+  answer="0"
+  explanation="4 > 2 > 1，因此所有三个都位于递减堆栈中。当 5 到达时，所有的都被弹出，因为 5 比每个都大。"
+/>
+
+## 每日温度（LeetCode 739）
+
+*给定每日温度，找出距离温暖的日子还有多少天。*这是具有索引的下一个更大元素 - 当 `j` 被索引 `i` 弹出时，索引 `j` 的答案是 `i − j`。
+
+## 库存跨度问题
+
+*对于每一天，连续多少天（包括今天）价格≤今天的价格？* 使用单调递减堆栈存储`(price, index)`。当弹出时，当前索引和新堆栈顶部之间的间隙给出了跨度。
+
+<ThinkAboutIt>库存跨度问题从左到右处理元素，但找到有关左侧的信息。堆栈如何在前进的同时编码“向后看”？</ThinkAboutIt>
+
+## 直方图中最大的矩形
+
+LeetCode 的 **直方图中最大的矩形** 是单调堆栈问题皇冠上的宝石。
+
+**关键见解：** 对于每个条形，找出它作为最短的条形可以向左和向右延伸多远。使用递增堆栈 - 当弹出一个栏时，弹出的栏定义其右边界，新的堆栈顶部定义其左边界。
+
+```python
+def largest_rectangle(heights):
+    stack, max_area = [], 0
+    for i, h in enumerate(heights + [0]):
+        while stack and heights[stack[-1]] > h:
+            height = heights[stack.pop()]
+            width = i if not stack else i - stack[-1] - 1
+            max_area = max(max_area, height * width)
+        stack.append(i)
+    return max_area
+```
+
+最后的标记 `[0]` 强制处理所有剩余的钢筋。
+
+<Illustration src="/images/lessons/monotonic-stack-and-queue.svg" alt="突出显示最大矩形的直方图条" caption="单调堆栈找到每个条可以支持的最宽矩形作为最短条。" />
+
+## 收集雨水 - 堆栈方法
+
+单调递减堆栈不是经典的两指针方法，而是逐层计算捕获的水。当出现较高的条形时，弹出较短的条形并计算弹出的条形、当前条形和新的堆栈顶部之间截留的水。
+
+```
+Heights:  [3, 1, 2, 1, 3]
+Water:       [2, 1, 2]  → total = 5
+```
+
+<FunFact>Trapping Rain Water 至少有四种不同的 O(n) 解决方案 - 两指针、单调堆栈、前缀最大数组和单遍优化方法。面试官喜欢看到多种策略。</FunFact>
+
+## 单调队列 - 滑动窗口最大值
+
+**单调双端队列**（双端队列）保持降序并支持从两端高效删除。对于 **滑动窗口最大值** (LeetCode 239)：
+
+1、添加索引`i`前，弹出所有小于`nums[i]`的后置元素
+2. 将`i`推到后面
+3. 前面始终是当前窗口的最大值
+4. 如果前面板掉到窗外，请将其拆下
+
+```python
+from collections import deque
+
+def max_sliding_window(nums, k):
+    dq, result = deque(), []
+    for i, num in enumerate(nums):
+        while dq and nums[dq[-1]] <= num:
+            dq.pop()
+        dq.append(i)
+        if dq[0] <= i - k:
+            dq.popleft()
+        if i >= k - 1:
+            result.append(nums[dq[0]])
+    return result
+```
+
+每个元素最多进入和离开双端队列一次 - 总共**O(n)**。
+
+<Quiz
+  question="为什么滑动窗口最大值的单调双端队列从 FRONT 中删除？"
+  options="维持排序顺序|删除最小元素|驱逐已离开窗口的元素|反转队列"
+  answer="2"
+  explanation="前面的元素可能具有当前窗口之外的索引。删除它们可确保仅保留有效的候选人。"
+/>
+
+## 模式 - 在处理时保持不变
+
+每个单调堆栈/队列问题都遵循一个模板：
+
+1. **定义不变量**（递增或递减）
+2. **流行违规者** - 并从每个流行中提取有用的信息
+3. **压入当前元素**
+4. *pop 事件* 是计算答案的地方
+
+<Quiz
+  question="在单调递增堆栈中，当元素 X 导致元素 Y 弹出时，什么关系成立？"
+  options="X < Y|X > Y|X=Y|没有保证关系"
+  answer="0"
+  explanation="当传入元素较小时，会弹出递增堆栈，因为 Y > X 违反了从下到上的递增不变量。"
+/>
+
+<ThinkAboutIt>您可以通过简单地更改下一个更大元素模板中的比较运算符来解决“下一个较小元素”问题吗？不变量会变成什么？</ThinkAboutIt>
+
+---
+
+## 📚 进一步阅读
+
+- [Monotonic Stack - LeetCode Explore](https://leetcode.com/tag/monotonic-stack/) - 精心策划的练习问题集
+- [直方图中最大的矩形 - LeetCode 84](https://leetcode.com/problems/largest-rectangle-in-histogram/) - 最终的单调堆栈挑战
+- [滑动窗口最大值 - LeetCode 239](https://leetcode.com/problems/sliding-window-maximum/) - 经典单调双端队列应用

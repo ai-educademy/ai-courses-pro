@@ -1,0 +1,159 @@
+---
+title: "Entwerfen Sie einen verteilten Cache – Redis-Architektur von Grund auf"
+description: "Entwerfen Sie ein verteiltes Caching-System, das Cache-Strategien, konsistentes Hashing, Räumungsrichtlinien, Cache-Stampede-Prävention und Redis-Cluster-Architektur abdeckt."
+order: 10
+difficulty: "advanced"
+duration: 23
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+# Entwerfen Sie einen verteilten Cache – Redis-Architektur von Grund auf
+
+Caching ist die effektivste Technik zur Verbesserung der Systemleistung. Ein gut konzipierter verteilter Cache kann die Datenbanklast um über 90 % reduzieren und die Antwortzeiten von Hunderten von Millisekunden auf weniger als eine Millisekunde verkürzen.
+
+## Schritt 1 – Anforderungserfassung
+
+### Funktionale Anforderungen
+- Speichern Sie Schlüssel-Wert-Paare mit optionaler TTL (Time-to-Live).
+- Unterstützt allgemeine Vorgänge: GET, SET, DELETE und Massenvorgänge
+- Verteilen Sie Daten zur horizontalen Skalierung auf mehrere Knoten
+
+### Nichtfunktionale Anforderungen
+- **Geringe Latenz** – Lesevorgänge für Cache-Treffer im Submillisekundenbereich
+- **Hoher Durchsatz** – 100.000+ Vorgänge pro Sekunde und Knoten
+- **Hohe Verfügbarkeit** – Cache-Fehler sollten das System nicht zum Absturz bringen
+- **Skalierbarkeit** – Knoten ohne Ausfallzeit hinzufügen
+
+### Wann zwischengespeichert werden soll
+- **Leselastige Arbeitslast** – wenn die Zahl der Lesevorgänge die Zahl der Schreibvorgänge bei weitem übersteigt
+– **Teure Berechnungen** – Ergebnisse der ML-Modellinferenz, komplexe Aggregationen
+- **Daten, auf die häufig zugegriffen wird** – Benutzersitzungen, Produktkataloge, Konfiguration
+
+## Schritt 2 – Caching-Strategien
+
+### Cache-Aside (Lazy Loading)
+Das häufigste Muster. Die Anwendung überprüft zuerst den Cache. Bei einem Fehlschlag liest es aus der Datenbank und füllt dann den Cache:
+
+```
+GET user:123 → Cache HIT → return cached data
+GET user:456 → Cache MISS → query DB → SET cache → return data
+```
+
+**Vorteile:** speichert nur das, was tatsächlich angefordert wird. **Nachteile:** Cache-Fehler verursachen Latenz; Daten können veraltet sein.
+
+### Durchlesen
+Der Cache selbst verarbeitet Datenbanklesevorgänge bei einem Fehlschlag. Die Anwendung kommuniziert nur mit der Cache-Schicht, die die Datenquelle abstrahiert.
+
+### Durchschreiben
+Jeder Schreibvorgang erfolgt synchron sowohl in den Cache als auch in die Datenbank. Stellt sicher, dass der Cache immer konsistent ist, erhöht aber die Schreiblatenz.
+
+### Write-Behind (Write-Back)
+Schreibvorgänge werden sofort in den Cache verschoben. Der Cache wird stapelweise asynchron in die Datenbank geleert. Geringere Schreiblatenz, aber das Risiko eines Datenverlusts, wenn der Cache-Knoten vor dem Leeren abstürzt.
+
+| Strategie | Konsistenz | Leselatenz | Schreiblatenz | Anwendungsfall |
+|----------|-------------|-------------|---------------|----------|
+| Cache-Aside | Eventuell | Fehlschussstrafe | N/A | Allzweck |
+| Durchlesen | Eventuell | Fehlschussstrafe | N/A | Vereinfachte Lesarten |
+| Durchschreiben | Stark | Schnell | Langsamer | Konsistenzkritisch |
+| Write-Behind | Eventuell | Schnell | Schnell | Schreibintensive Arbeitslasten |
+
+<Quiz question="Eine E-Commerce-Website muss Produktpreise zwischenspeichern, die sich selten ändern, aber innerhalb von 5 Minuten korrekt sein müssen. Welche Strategie ist am besten geeignet?" options="Write-Behind mit 1-stündigem Spülintervall|Cache-Aside mit einer 5-Minuten-TTL|Durchschreiben bei jeder Preisaktualisierung|Kein Caching – immer aus der Datenbank lesen" answer="1" explanation="Cache-Aside mit einer TTL von 5 Minuten stellt sicher, dass veraltete Daten nie über das akzeptable Zeitfenster hinaus bestehen bleiben. Durchschreiben würde funktionieren, führt aber bei seltenen Aktualisierungen zu unnötiger Schreiblatenz. Cache-Aside ist einfacher und passt perfekt zum Muster „Leselastig, gelegentlich aktualisiert”." />
+
+## Schritt 3 – Räumungsrichtlinien
+
+Welche Einträge entfernen wir, wenn der Cache voll ist?
+
+- **LRU (Least Recent Used)** – entfernt den Eintrag, auf den am längsten nicht zugegriffen wurde. Beste Allzweckpolice
+- **LFU (Least Frequently Used)** – entfernt den Eintrag, auf den am seltensten zugegriffen wird. Besser für verzerrte Zugriffsmuster
+- **TTL-basiert** – Einträge verfallen unabhängig vom Zugriff nach einer festgelegten Zeit. Unverzichtbar für die Aktualität der Daten
+- **Zufällig** – überraschend effektiv und sehr einfach umzusetzen
+
+<FunFact>Redis verwendet einen angenäherten LRU-Algorithmus, der eine kleine Anzahl von Schlüsseln abtastet (Standard: 5) und die zuletzt verwendeten davon entfernt. Dies ist fast so genau wie echtes LRU, erfordert jedoch keinen zusätzlichen Speicheraufwand für die Verfolgung der Zugriffsreihenfolge.</FunFact>
+
+## Schritt 4 – Konsistentes Hashing für die Verteilung
+
+### Das Problem mit einfachem Hashing
+Bei `hash(key) % N`-Knoten werden durch das Hinzufügen oder Entfernen eines Knotens fast alle Schlüssel neu zugeordnet, was zu einem massiven Cache-Miss-Sturm führt.
+
+### Konsistentes Hashing mit virtuellen Knoten
+Konsistentes Hashing ordnet sowohl Schlüssel als auch Knoten einem Ring zu. Jeder Schlüssel wird dem nächsten Knoten im Uhrzeigersinn auf dem Ring zugewiesen:
+
+```
+Hash Ring (0 to 2^32):
+     Node A (3 virtual nodes: A1, A2, A3)
+     Node B (3 virtual nodes: B1, B2, B3)
+     Node C (3 virtual nodes: C1, C2, C3)
+
+Key "user:123" → hash → lands between B2 and A1 → assigned to Node A
+```
+
+**Virtuelle Knoten** lösen das Problem der ungleichmäßigen Verteilung. Jeder physische Knoten erhält mehrere Positionen im Ring, sodass auch bei wenigen physischen Knoten eine gleichmäßige Auslastung gewährleistet ist.
+
+Wenn ein Knoten hinzugefügt oder entfernt wird, werden nur die ihm benachbarten Schlüssel im Ring neu zugeordnet – ungefähr `K/N` Schlüssel (wobei K die Gesamtzahl der Schlüssel und N die Anzahl der Knoten ist), nicht alle.
+
+<Illustration src="/images/lessons/design-distributed-cache.svg" alt="Konsistenter Hashing-Ring, der physische Knoten anzeigt, die virtuellen Knoten zugeordnet sind, wobei die Schlüssel dem nächsten Knoten im Uhrzeigersinn zugewiesen sind" caption="Durch konsistentes Hashing wird sichergestellt, dass durch das Hinzufügen oder Entfernen eines Knotens nur ein kleiner Teil der Schlüssel neu zugeordnet wird, wodurch Cache-Stampedes verhindert werden" />
+
+<Quiz question="Ein Cache-Cluster hat 4 Knoten. Knoten 3 fällt aus. Wie viel Prozent der Schlüssel werden beim einfachen Modulo-Hashing (Schlüssel % 4 → Schlüssel % 3) neu zugeordnet?" options="25 % (nur die Schlüssel von Node 3)|50 %|75 % – fast alle Tasten sind neu zugeordnet|100 %" answer="2" explanation="Beim Wechsel von Mod 4 zu Mod 3 werden etwa 75 % aller Schlüssel anderen Knoten zugeordnet. Beispielsweise befand sich ein Schlüssel, der auf 7 gehasht wurde, auf Knoten 3 (7 % 4 = 3), geht jetzt aber an Knoten 1 (7 % 3 = 1). Dies führt zu einem massiven Anstieg der Cache-Fehler. Konsistentes Hashing löst dieses Problem, indem nur ~K/N-Schlüssel neu zugeordnet werden." />
+
+## Schritt 5 – Verhinderung von Cache-Stampedes
+
+Ein **Cache-Ansturm** tritt auf, wenn ein beliebter Cache-Eintrag abläuft und Hunderte von gleichzeitigen Anfragen gleichzeitig den Cache verpassen und die Datenbank erreichen.
+
+### Lösungen
+
+**Mutex/Sperrung:** Wenn ein Cache-Fehler auftritt, erwerben Sie eine verteilte Sperre. Es wird nur eine Anfrage aus der Datenbank abgerufen. andere warten darauf, dass der Cache neu gefüllt wird.
+
+**Probabilistischer früher Ablauf:** Jede Anfrage hat eine kleine zufällige Chance, den Cache zu aktualisieren, bevor die TTL tatsächlich abläuft. Dies verteilt die Aktualisierungslast über die Zeit, anstatt bei Ablauf eine donnernde Herde zu erzeugen.
+
+**Hintergrundaktualisierung:** Ein Hintergrundprozess aktualisiert beliebte Cache-Einträge, bevor sie ablaufen. Der Cache ist für Hotkeys nie leer.
+
+<ThinkAboutIt>Stellen Sie sich einen Flash-Sale vor, bei dem eine Produktseite 100.000 Anfragen pro Sekunde erhält. Der Cache-Eintrag für Produktdetails läuft ab. Ohne Stampede-Prävention erreichen alle 100.000 Anfragen gleichzeitig die Datenbank. Welche Präventionsstrategie würden Sie wählen und warum?</ThinkAboutIt>
+
+## Schritt 6 – Redis-Cluster-Architektur
+
+Redis Cluster ist der am weitesten verbreitete verteilte Cache:
+
+- **16.384 Hash-Slots** verteilt auf Masterknoten
+- Jede Taste wird über `CRC16(key) % 16384` einem Steckplatz zugeordnet.
+- **Replikation:** Jeder Master verfügt über ein oder mehrere Replikate für das Failover
+- **Automatisches Failover:** Wenn ein Master ausfällt, wird sein Replikat innerhalb von Sekunden hochgestuft
+
+```
+Slots 0-5460:     Master A ←→ Replica A'
+Slots 5461-10922: Master B ←→ Replica B'
+Slots 10923-16383: Master C ←→ Replica C'
+```
+
+### Überwachung wichtiger Kennzahlen
+- **Trefferquote** – Ziel 95 %+; unter 80 % weist auf ein Caching-Problem hin
+- **Speichernutzung** – bleiben Sie unter 80 %, um Räumungen zu vermeiden
+- **Räumungsrate** – hohe Räumungen bedeuten, dass der Cache zu klein ist
+– **Latenzperzentile** – p99 sollte für Cache-Treffer unter 1 ms liegen
+
+## Schritt 7 – Reale Caching-Muster
+
+| Muster | Umsetzung | TTL |
+|---------|---------------|-----|
+| Sitzungsspeicher | `SET session:{id} {data}` | 30 Minuten |
+| API-Antwortcache | `SET api:/users/123 {json}` | 5 Minuten |
+| Datenbankabfrage-Cache | `SET query:{hash} {result}` | 1 Minute |
+| Ratenbegrenzerzähler | `INCR ratelimit:{user}:{window}` | Fensterdauer |
+| Feature-Flags | `HSET features {flag} {value}` | 10 Sekunden |
+
+### Cache-Ungültigkeitserklärung
+Das schwierigste Problem in der Informatik (neben der Benennung von Dingen):
+- **TTL-basiert** – einfach, toleriert Veraltung für die TTL-Dauer
+- **Ereignisgesteuert** – Ungültigkeitsereignisse veröffentlichen, wenn sich Daten ändern (über Kafka oder Redis Pub/Sub)
+- **Versionsbasiert** – eine Version in den Cache-Schlüssel aufnehmen; Erhöhen Sie die Version bei Schreibvorgängen, um alte Einträge effektiv ungültig zu machen
+
+<Quiz question="Welcher Ansatz zur Cache-Invalidierung bietet die stärkste Konsistenzgarantie?" options="TTL-basierter Ablauf mit einem 5-Minuten-Fenster|Ereignisgesteuerte Invalidierung, ausgelöst durch Datenbankschreibvorgänge|Zufällige Räumung|Hintergrundaktualisierung alle 10 Sekunden" answer="1" explanation="Die ereignisgesteuerte Invalidierung reagiert auf tatsächliche Datenänderungen und macht den Cache sofort ungültig, wenn die Quelldaten aktualisiert werden. TTL-basierte Ansätze haben immer ein Veraltungsfenster, während die Hintergrundaktualisierung Lücken zwischen den Aktualisierungszyklen aufweist." />
+
+<ThinkAboutIt>Phil Karlton sagte bekanntlich: „In der Informatik gibt es nur zwei schwierige Dinge – Cache-Ungültigmachung und Benennung von Dingen.“ Warum ist die Cache-Ungültigmachung in verteilten Systemen so schwierig? Überlegen Sie, was passiert, wenn ein Schreibvorgang in die Datenbank erfolgreich ist, die Cache-Ungültigkeitsmeldung jedoch verloren geht.</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+- [Konsistentes Hashing – ByteByteGo](https://bytebytego.com/courses/system-design-interview/design-consistent-hashing) – visuelle Erklärung von konsistentem Hashing und virtuellen Knoten
+- [Redis-Cluster-Spezifikation](https://redis.io/docs/reference/cluster-spec/) – offizielle Dokumentation zur Redis-Cluster-Architektur
+- [Caching-Strategien – AWS](https://aws.amazon.com/caching/best-practices/) – praktische Caching-Muster für Cloud-Anwendungen

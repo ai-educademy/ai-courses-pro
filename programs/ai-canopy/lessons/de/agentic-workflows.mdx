@@ -1,0 +1,134 @@
+---
+title: "Agentische Arbeitsabläufe – Aufbau von KI-Systemen mit mehreren Agenten"
+description: "Erfahren Sie, wie KI-Agenten mithilfe von Werkzeugnutzung, Speicher, Planungsstrategien und Multi-Agenten-Architekturen für komplexe Aufgaben in der realen Welt beobachten, schlussfolgern und autonom handeln."
+order: 9
+difficulty: "advanced"
+duration: 20
+icon: "🤖"
+published: true
+machineTranslated: true
+---
+# Agentische Arbeitsabläufe – Aufbau von Multi-Agent-KI-Systemen
+
+Ein Sprachmodell beantwortet Fragen. Ein **Agent** erreicht Ziele. Der Unterschied besteht in der Schleife: Agenten beobachten ihre Umgebung, überlegen, was zu tun ist, ergreifen mithilfe von Tools Maßnahmen und wiederholen den Vorgang, bis die Aufgabe abgeschlossen ist. Diese Lektion behandelt die Architektur, Muster und Fehlermodi moderner Agenten-KI-Systeme.
+
+## Was einen KI-Agenten ausmacht
+
+Ein KI-Agent wird durch drei Fähigkeiten definiert, die in einer Endlosschleife arbeiten:
+
+1. **Beobachten** – Nehmen Sie den aktuellen Zustand wahr: Benutzeranweisungen, Werkzeugausgaben, Umgebungsdaten, frühere Aktionen
+2. **Grund** – Entscheiden Sie, was als nächstes zu tun ist: Ziel zerlegen, Schritte planen, Optionen bewerten
+3. **Aktion** – Eine Aktion ausführen: ein Tool aufrufen, Code schreiben, eine API-Anfrage senden, ein Ergebnis zurückgeben
+
+Der entscheidende Unterschied zur einfachen Eingabeaufforderung ist die **Autonomie über mehrere Schritte**. Ein Agent antwortet nicht nur – er iteriert. Es durchsucht möglicherweise das Internet, liest die Ergebnisse, entscheidet, dass es weitere Informationen benötigt, sucht erneut mit einer verfeinerten Abfrage, fasst die Ergebnisse zusammen und präsentiert dann eine Antwort.
+
+<Illustration src="/images/lessons/agentic-workflows.svg" alt="Kreisdiagramm, das die Observe-Reason-Act-Schleife mit Verbindungen zu Tools, Speicher und Umgebung zeigt" caption="Die Agentenschleife: Beobachten Sie die Umgebung, denken Sie über den nächsten Schritt nach, handeln Sie mithilfe von Werkzeugen und wiederholen Sie den Vorgang, bis das Ziel erreicht ist." />
+
+## Werkzeugverwendung und Funktionsaufruf
+
+Ohne Tools ist ein Agent auf die Textgenerierung beschränkt. **Der Einsatz von Werkzeugen** gibt Agenten die Möglichkeit, mit der Welt zu interagieren:
+
+- **Funktionsaufruf** – Das LLM gibt strukturiertes JSON aus und gibt an, welche Funktion mit welchen Argumenten aufgerufen werden soll. Die Laufzeit führt die Funktion aus und gibt Ergebnisse als Kontext zurück.
+- **API-Integration** – Agenten können Datenbanken abfragen, REST-Endpunkte aufrufen, E-Mails senden oder Dateien bearbeiten.
+- **Codeausführung** – Einige Agenten schreiben und führen Code in einer Sandbox-Umgebung aus und verwenden die Ausgabe als Informationen für die nächsten Schritte.
+
+Moderne Frameworks stellen Tools als typisierte Funktionssignaturen mit Beschreibungen bereit. Das Modell lernt anhand der Aufgabe, welches Tool aufgerufen werden soll – es wählt einen Taschenrechner für Mathematik, eine Suchmaschine für aktuelle Ereignisse oder einen Code-Interpreter für die Datenanalyse.
+
+<Quiz question="Was ist der Hauptvorteil des Funktionsaufrufs gegenüber der Aufforderung an den LLM, sich die Verwendung eines Tools vorzustellen?" options="Funktionsaufrufe verbrauchen weniger Rechenleistung|Funktionsaufrufe erzeugen durch die Ausführung von Code oder API-Aufrufen tatsächliche Ergebnisse in der realen Welt, anstatt plausible, aber möglicherweise erfundene Antworten zu generieren|Für den Funktionsaufruf ist kein Sprachmodell erforderlich|Funktionsaufrufe führen immer zu korrekten Ergebnissen" answer="1" explanation="Wenn sich ein LLM ein Suchergebnis „vorstellt”, halluziniert er möglicherweise plausible, aber falsche Informationen. Der Funktionsaufruf führt die Suche tatsächlich aus und gibt echte Daten zurück, wodurch die Argumentation des Agenten auf sachlichen Ergebnissen externer Systeme basiert." />
+
+## Gedächtnis: Kurzzeit- und Langzeitgedächtnis
+
+Agenten benötigen Speicher, um komplexe Aufgaben zu bewältigen, die über ein einzelnes Kontextfenster hinausgehen:
+
+**Kurzzeitgedächtnis** ist der Gesprächskontext – das verschiebbare Fenster aktueller Beobachtungen, Aktionen und Ergebnisse. Sie ist durch die Kontextlänge des Modells begrenzt und verringert sich bei Informationen weit hinten im Fenster.
+
+**Langzeitgedächtnis** nutzt externen Speicher, typischerweise **Vektordatenbanken**, um Informationen über Sitzungen hinweg beizubehalten und abzurufen:
+- Betten Sie wichtige Beobachtungen ein und speichern Sie sie in einem Vektorspeicher
+- Fragen Sie bei jedem Schritt das Geschäft nach relevanten Erfahrungen aus der Vergangenheit ab
+– Dadurch erhalten Agenten Zugriff auf das über viele Interaktionen gesammelte Wissen
+
+Die Kombination aus kurzfristigem Kontext und langfristigem Abruf spiegelt das menschliche Arbeitsgedächtnis und das episodische Gedächtnis wider – so bleibt der unmittelbare Kontext jederzeit verfügbar und kann bei Bedarf auf eine größere Wissensbasis zurückgegriffen werden.
+
+## Planungsstrategien
+
+Wie ein Agent entscheidet, **was als nächstes zu tun ist**, bestimmt seine Wirksamkeit:
+
+**Chain-of-Thought (CoT)** – Das Modell argumentiert Schritt für Schritt, bevor es handelt. Einfach, aber effektiv für unkomplizierte Probleme.
+
+**ReAct (Reason + Act)** – Verschachtelt explizite Argumentationsspuren mit Werkzeugaktionen in einem strukturierten Format: `Thought → Action → Observation → Thought → ...` Dadurch wird der Entscheidungsprozess des Agenten transparent und debuggbar.
+
+**Tree-of-Thought (ToT)** – Der Agent untersucht mehrere Argumentationspfade gleichzeitig, bewertet jeden Zweig und wählt den vielversprechendsten aus. Nützlich für Probleme, bei denen der erste Ansatz möglicherweise falsch ist (z. B. Rätsellösen, komplexes Debuggen).
+
+**Planen und dann ausführen** – Der Agent erstellt zunächst einen vollständigen Plan und führt dann jeden Schritt aus. Dadurch wird die Strategie auf hoher Ebene von der Umsetzung auf niedriger Ebene getrennt, wodurch die Wahrscheinlichkeit verringert wird, dass man mitten in der Ausführung den Überblick über das Gesamtziel verliert.
+
+<FunFact>AutoGPT, eines der ersten Experimente mit autonomen Agenten, ging im April 2023 viral und wurde kurzzeitig zum am schnellsten wachsenden GitHub-Repository in der Geschichte. Trotz seiner Beliebtheit blieb es häufig in Endlosschleifen stecken – ein Problem, das die enorme Kluft zwischen beeindruckenden Demos und zuverlässigen Produktionsagenten deutlich machte.
+</FunFact>
+
+## Multi-Agent-Architekturen
+
+Komplexe Aufgaben profitieren oft von der Zusammenarbeit mehrerer spezialisierter Agenten:
+
+**Supervisor-Muster** – Ein zentraler „Manager“-Agent zerlegt die Aufgabe und delegiert Unteraufgaben an spezialisierte Arbeiteragenten (einen Forscher, einen Programmierer, einen Prüfer). Der Vorgesetzte fasst die Ergebnisse zusammen und verwaltet die Koordination.
+
+**Peer-to-Peer** – Agenten kommunizieren direkt miteinander, ohne einen zentralen Koordinator. Jeder Agent hat eine definierte Rolle und gibt Ergebnisse an den nächsten Agenten in einer Kette oder einem Netzwerk weiter.
+
+**Hierarchisch** – Mehrere Aufsichtsebenen: Ein Planer auf oberster Ebene delegiert an Koordinatoren auf mittlerer Ebene, die Fachkräfte verwalten. Dies spiegelt Organisationsstrukturen wider und skaliert auf sehr komplexe Aufgaben.
+
+<ThinkAboutIt>Multi-Agenten-Systeme verursachen Koordinationsaufwand, Kommunikationskosten und die Möglichkeit, dass Agenten zweckübergreifend arbeiten. Unter welchen Umständen überwiegen die Vorteile der Spezialisierung die Komplexität der Orchestrierung? Wann ist ein einzelner, leistungsfähigerer Agent die bessere Wahl?
+</ThinkAboutIt>
+
+## Moderne Agenten-Frameworks
+
+Das Ökosystem hat sich aufgrund früher Experimente schnell entwickelt:
+
+- **LangGraph** – Erstellt Agenten als zustandsbehaftete Diagramme mit expliziter Flusskontrolle, Zyklen und Persistenz. Bevorzugt Vorhersehbarkeit und Debugbarkeit gegenüber Autonomie.
+- **CrewAI** – Konzentriert sich auf die rollenbasierte Zusammenarbeit mehrerer Agenten mit definierten Aufgaben, Tools und Delegationsmustern.
+- **AutoGen (Microsoft)** – Ermöglicht Konversationsworkflows mit mehreren Agenten, bei denen Agenten miteinander chatten, um Probleme zu lösen.
+- **OpenAI Agents SDK** – Erstanbieter-Framework mit integriertem Funktionsaufruf, Übergaben zwischen Agenten und Leitplanken.
+
+## Agentenkodierung
+
+Die vielleicht transformativste Anwendung: KI-Agenten, die Code autonom schreiben, testen und debuggen:
+
+– **GitHub Copilot** – In-Editor-Agent-Modus, der Änderungen plant, mehrere Dateien bearbeitet und Terminalbefehle ausführt.
+- **Cursor** – IDE, die um einen Agenten herum aufgebaut ist, der ganze Codebasen versteht und mehrere Dateien bearbeitet.
+- **Devin (Cognition)** – Autonomer Software-Engineering-Agent, der komplette Entwicklungsaufgaben vom Issue bis zur Pull-Anfrage abwickeln kann.
+
+Diese Tools stellen einen Wandel von **Autovervollständigung zu Autonomie** dar – der Agent schlägt nicht nur die nächste Zeile vor, er versteht das Ziel und arbeitet über Dateien, Terminals und Browser hinweg darauf hin.
+
+## Wenn Agenten ausfallen
+
+Das Verständnis von Fehlermodi ist für den Aufbau zuverlässiger Agenten von entscheidender Bedeutung:
+
+- **Halluzinationsschleifen** – Der Agent fabriziert ein Werkzeugergebnis, argumentiert daraus und dringt mit jeder Iteration tiefer in die Fiktion ein.
+- **Unendliche Rekursion** – Der Agent wiederholt wiederholt eine fehlgeschlagene Aktion, ohne seinen Ansatz zu ändern, wodurch Token und Rechenleistung verbrannt werden.
+- **Zieldrift** – Über viele Schritte hinweg verliert der Agent nach und nach das ursprüngliche Ziel aus den Augen und verfolgt tangentiale Teilaufgaben.
+- **Belohnungs-Hacking** – Der Agent findet Verknüpfungen, die seine Erfolgskriterien erfüllen, ohne das Problem tatsächlich zu lösen.
+
+<Quiz question="Ein Agent hat die Aufgabe, einen Fehler in einer Codebasis zu finden. Es sucht nach der Datei, findet sie nicht und sucht dann wiederholt mit derselben Abfrage. Welcher Fehlermodus ist das?" options="Halluzinationsschleife|Zieldrift|Unendliche Rekursion – Wiederholen einer fehlgeschlagenen Aktion, ohne den Ansatz anzupassen|Belohnungs-Hacking" answer="2" explanation="Dabei handelt es sich um eine unendliche Rekursion: Der Agent steckt in einer Schleife fest und versucht genau dieselbe fehlgeschlagene Aktion erneut, ohne seinen Ansatz zu ändern. Ein gut konzipierter Agent sollte wiederholte Fehler erkennen und eine alternative Strategie ausprobieren – andere Suchbegriffe, um Klarstellung bitten oder einen anderen Weg erkunden." />
+
+## Produktionsagentenmuster
+
+Baustoffe, die in der Produktion zuverlässig funktionieren, erfordern Abwehrtechnik:
+
+- **Leitlinien** – Eingabe-/Ausgabevalidierung, Inhaltsfilterung und Grenzprüfungen, die verhindern, dass Agenten gefährliche Aktionen ausführen.
+- **Human-in-the-Loop** – Für Aktionen mit hohem Risiko (Versenden von E-Mails, Ändern von Datenbanken, Bereitstellen von Code) ist vor der Ausführung eine menschliche Genehmigung erforderlich.
+- **Strukturierte Ausgaben** – Erzwingen Sie, dass Agenten maschinenlesbare Antworten (JSON-Schemas) anstelle von Freiformtext erzeugen, wodurch Analysefehler reduziert werden.
+- **Beobachtbarkeit** – Protokollieren Sie jeden Gedanken, jede Aktion und jeden Tool-Aufruf. Ohne umfassende Traces ist das Debuggen einer fehlgeschlagenen Agentenausführung in 20 Schritten nahezu unmöglich.
+- **Leistungsschalter** – Legen Sie maximale Schrittzahlen, Token-Budgets und Zeitlimits fest. Wenn ein Agent diese Grenzen überschreitet, halten Sie an und eskalieren Sie zu einem Menschen.
+
+<Quiz question="Warum ist die Human-in-the-Loop-Genehmigung für Produktionsmitarbeiter, die hochriskante Aktionen ausführen, von entscheidender Bedeutung?" options="Denn KI-Agenten liegen immer falsch|Weil es die Rechenkosten senkt|Da Agenten halluzinieren, Absichten missverstehen oder irreversible Maßnahmen ergreifen können, bietet die menschliche Aufsicht ein Sicherheitsnetz für Entscheidungen mit Konsequenzen für die reale Welt|Denn die Vorschriften verlangen es in jedem Fall" answer="2" explanation="Agenten können Ziele falsch interpretieren, Informationen halluzinieren oder Maßnahmen ergreifen, die schwer rückgängig zu machen sind (Daten löschen, Mitteilungen senden, Code bereitstellen). Bei hochriskanten Vorgängen fungiert die menschliche Zustimmung als entscheidendes Sicherheitsnetz und erkennt Fehler, bevor sie Auswirkungen auf die reale Welt haben." />
+
+<FunFact>Browser-Agenten – KI-Systeme, die durch Klicken, Tippen und Lesen von Bildschirmen durch Websites navigieren – gehören zu den Agentenanwendungen, die am schwierigsten zuverlässig zu erstellen sind. Benchmarks wie WebArena zeigen, dass selbst die besten Agenten nur 15–30 % realistischer Webaufgaben erfolgreich erledigen, verglichen mit einer nahezu perfekten menschlichen Leistung.
+</FunFact>
+
+<ThinkAboutIt>Da die Tools zur Agentencodierung immer leistungsfähiger werden, verlagert sich die Rolle des Softwareentwicklers vom Schreiben von Code hin zur Überprüfung, Steuerung und Verifizierung von KI-generiertem Code. Welche neuen Fähigkeiten werden in dieser Welt unverzichtbar – und welche traditionellen Fähigkeiten verlieren an Bedeutung?
+</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+
+- [ReAct: Synergizing Reasoning and Acting in Language Models (Yao et al., 2023)](https://arxiv.org/abs/2210.03629) – Das grundlegende Papier zum ReAct-Agentenmuster
+- [Die Landschaft aufkommender KI-Agentenarchitekturen (LangChain)](https://blog.langchain.dev/what-is-an-agent/) – Umfassender Überblick über moderne Agentenentwurfsmuster
+- [Andrew Ng – Agentic Design Patterns](https://www.deeplearning.ai/the-batch/how-agents-can-improve-llm-performance/) – Vier wichtige Agentenmuster: Reflexion, Werkzeugnutzung, Planung und Zusammenarbeit mehrerer Agenten

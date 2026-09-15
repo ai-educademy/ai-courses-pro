@@ -1,0 +1,218 @@
+---
+title: "コードレビューインタビュー"
+description: "コード レビューの面接ラウンドで優れた能力を発揮します。バグを特定し、改善を提案し、エンジニアリング上の判断を示します。"
+order: 5
+difficulty: "intermediate"
+duration: 15
+icon: "👁️"
+published: true
+machineTranslated: true
+---
+# コードレビューインタビュー
+
+コードレビュー面接は、採用プロセスの中で最も過小評価されている面接の 1 つであり、最も多くのことが明らかになる面接の 1 つです。コーディング面接ではコードを書けるかどうかがテストされますが、コードレビュー面接ではコードを読み、推論し、改善できるかどうかがテストされます。これらは、品質についてどのように考えているか、フィードバックをどのように優先しているか、他のエンジニアとどのようにコミュニケーションしているかを明らかにします。多くの受験者は LeetCode について何か月も準備をしますが、まったく準備ができていない状態でコード レビュー ラウンドに臨みます。そんな人にはならないでください。
+
+## コードレビュー面接で実際にテストされる内容
+
+コードレビューのスキルを評価する面接官は、次の 5 つのことを求めています。
+
+1. **バグ検出** — 論理エラー、エッジケース、競合状態を見つけることができますか?
+2. **設計センス** — SOLID 原則への違反、不十分な抽象化、または保守が困難なコードを認識していますか?
+3. **セキュリティ意識** — インジェクションの脆弱性、認証の欠陥、またはデータ漏洩のリスクを特定できますか?
+4. **コミュニケーション スキル** — 問題を明確かつ建設的に説明できますか?
+5. **優先順位付け** — 最も重要なことに集中しますか? それとも変数名を優先しますか?
+
+<Callout>コード レビューの面接で最もよくある間違いは、実際のバグを見逃すまま、スタイルの問題 (名前、書式設定) にすべての時間を費やしてしまうことです。面接官は、あなたが何を優先するかを確認するために、スタイルの問題と並行して重大なバグを意図的に植え付けます。</Callout>
+
+## 体系的なレビューのアプローチ
+
+コードをランダムにスキャンしないでください。構造化されたパスベースのアプローチを使用します。
+
+### パス 1: 意図を理解する (2 分)
+
+何かを批判する前に、コードが何をしようとしているのかを理解してください。
+- 関数/クラス名とコメントを読む
+- 入力と出力を特定する
+- ビジネスロジックを理解する
+
+### パス 2: 正しさ (5 分)
+
+ここでバグが見つかります。系統的にチェックします。
+- **エッジケース**: 空の入力、NULL 値、単一要素、最大値
+- **Off-by-one エラー**: ループ境界、配列インデックス付け
+- **ロジック エラー**: 間違った条件、ブレーク ステートメントの欠落、間違った演算子
+- **同時実行の問題**: 共有の可変状態、競合状態
+- **エラー処理**: キャッチされない例外、null チェックの欠落
+
+### パス 3: 設計と保守性 (3 分)
+
+構造的な問題を探します。
+- 関数があまりにも多くのことを実行している (単一責任に違反している)
+- コンポーネント間の緊密な結合
+- マジックナンバーとハードコードされた値
+- 欠落している抽象化または不要な抽象化
+- コードの重複
+
+### パス 4: パフォーマンスとセキュリティ (2 分)
+
+- ループ内の不要なデータベース クエリ (N+1 問題)
+- 入力検証またはサニタイズが欠落している
+- ログまたは応答内の機密データの漏洩
+- より良い代替手段が存在する非効率なアルゴリズム
+
+## 発見すべき一般的なバグのパターン
+
+これらの高頻度のバグをキャッチできるように目を訓練してください。
+
+### Null 参照エラー
+
+```java
+// Bug: user could be null
+public String getUserEmail(Long userId) {
+    User user = userRepository.findById(userId);
+    return user.getEmail();  // NullPointerException if user not found
+}
+
+// Fixed
+public String getUserEmail(Long userId) {
+    return userRepository.findById(userId)
+        .map(User::getEmail)
+        .orElseThrow(() -> new UserNotFoundException(userId));
+}
+```
+
+### オフバイワンエラー
+
+```python
+# Bug: misses the last element
+def find_max(numbers):
+    max_val = numbers[0]
+    for i in range(1, len(numbers) - 1):  # Should be len(numbers)
+        if numbers[i] > max_val:
+            max_val = numbers[i]
+    return max_val
+```
+
+### リソースリーク
+
+```java
+// Bug: connection is never closed if an exception occurs
+public List<User> getUsers() {
+    Connection conn = dataSource.getConnection();
+    Statement stmt = conn.createStatement();
+    ResultSet rs = stmt.executeQuery("SELECT * FROM users");
+    // process results...
+    conn.close();
+    return users;
+}
+
+// Fixed: use try-with-resources
+public List<User> getUsers() {
+    try (Connection conn = dataSource.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery("SELECT * FROM users")) {
+        // process results...
+        return users;
+    }
+}
+```
+
+### SQL インジェクション
+
+```python
+# Bug: SQL injection vulnerability
+def get_user(username):
+    query = f"SELECT * FROM users WHERE username = '{username}'"
+    return db.execute(query)
+
+# Fixed: parameterised query
+def get_user(username):
+    query = "SELECT * FROM users WHERE username = %s"
+    return db.execute(query, (username,))
+```
+
+<FunFact>Google での 100,000 件を超えるコード レビューの調査によると、すべてのレビュー コメントの約 25% が「正確さ」、つまり実際のバグや論理エラーに関するものであることがわかりました。残りの 25% は、コードを理解しやすくする「理解」に関するものです。スタイルとフォーマットは実質的なコメントの 10% 未満を占めました。</FunFact>
+
+### 同時実行性のバグ
+
+```java
+// Bug: race condition — check-then-act is not atomic
+public void transferMoney(Account from, Account to, BigDecimal amount) {
+    if (from.getBalance().compareTo(amount) >= 0) {
+        // Another thread could modify balance here
+        from.setBalance(from.getBalance().subtract(amount));
+        to.setBalance(to.getBalance().add(amount));
+    }
+}
+```
+
+<ThinkAboutIt>上記の同時実行バグをどのように修正しますか?少なくとも 3 つのアプローチ (同期、オプティミスティック ロック、データベース レベルのトランザクション) を検討してください。高スループット システムにおけるそれぞれのトレードオフは何ですか?</ThinkAboutIt>
+
+## フィードバックの優先順位付け
+
+時間制限のある面接では、すべてのフィードバックが同じであるとは限りません。この優先順位フレームワークを使用します。
+
+|優先順位 |カテゴリー |例 |
+|---|---|---|
+| 🔴 **重大** |バグ、セキュリティの脆弱性、データ損失 | SQL インジェクション、競合状態、null 逆参照 |
+| 🟠 **高** |設計上の問題、パフォーマンス上の問題 | N+1 クエリ、欠落しているエラー処理、密結合 |
+| 🟡 **中** |保守性、可読性 |複雑な条件文、ドキュメントの欠落、マジックナンバー |
+| 🟢 **低** |スタイル、マイナーな改善 |変数の命名、インポート順序、マイナーなリファクタリング |
+
+面接では、時間の 80% を 🔴 と 🟠 の項目に費やします。 🟡 の項目について簡単に言及します。残り時間があり、重要な問題をすでに見つけている場合にのみ 🟢 項目に触れてください。
+
+## レビューのフィードバックを伝える
+
+フィードバックそのものと同じくらい、フィードバックをどのように提供するかが重要です。面接官はあなたのコラボレーションスキルを評価しています。
+
+**これを実行してください**:
+- 「このクエリがループ内にあることに気付きました。これにより、N+1 のパフォーマンスの問題が発生する可能性があります。これを 1 つのクエリにまとめることをお勧めします。」
+- 「これは、ユーザーが見つからない場合に NullPointerException をスローする可能性があるようです。ここで null チェックを追加するか、Optional を使用できますか?」
+- 「ここでは戦略パターンをうまく利用しています。これにより、新しい支払いタイプの追加が簡単になります。」
+
+**これではありません**:
+- 「このコードは間違っています。」 （あまりにも率直すぎて説明がありません）
+- 「私だったら絶対にこんな風には書きません。」 (エゴ主導)
+- "この変数名を変更します。" (優先度の低いアイテムのバイクシェディング)
+
+<Callout>フィードバックの背後にある「内容」だけでなく、「なぜ」も常に説明してください。 「パラメータ化されたクエリを使用する必要があります」は問題ありません。 「現在の文字列連結は SQL インジェクション攻撃に対して脆弱であるため、パラメーター化されたクエリを使用する必要があります。」の方がはるかに優れています。</Callout>
+
+## サンプルコードレビューのウォークスルー
+
+面接でレビューを求められる可能性のある機能は次のとおりです。
+
+```python
+def process_orders(orders):
+    results = []
+    for order in orders:
+        user = db.query(f"SELECT * FROM users WHERE id = {order['user_id']}")
+        if user:
+            total = 0
+            for item in order['items']:
+                price = db.query(f"SELECT price FROM products WHERE id = {item['product_id']}")
+                total = total + price[0] * item['quantity']
+                if item['quantity'] > 100:
+                    total = total * 0.9
+            if total > 0:
+                results.append({'user': user, 'total': total, 'order_id': order['id']})
+    return results
+```
+
+**強力なレビューにより次のことが特定されます:**
+
+1. 🔴 **SQL インジェクション** (行 4、7): SQL クエリでの文字列補間。パラメータ化されたクエリを使用します。
+2. 🔴 **N+1 クエリの問題** (行 4、7): 注文ごとに 2 つのデータベース クエリ、商品ごとに 1 つ。それぞれ 10 個の商品を含む 100 件の注文の場合、クエリは 1,100 件になります。単一のクエリにバッチ処理します。
+3. 🟠 **エラー処理なし**: 製品が見つからない場合、`price[0]` はクラッシュします。 `db.query` は失敗する可能性があります。
+4. 🟠 **割引ロジックは非表示です**: 数量 > 100 の 10% 割引は、ネストされたループに埋め込まれたビジネス ルールです。それを抽出します。
+5. 🟡 **マジックナンバー**: `0.9` と `100` には定数 (`BULK_DISCOUNT_RATE`、`BULK_THRESHOLD`) という名前を付ける必要があります。
+6. 🟡 **機能が多すぎる**: ユーザーの取得、合計の計算、割引の適用 - 単一責任に違反します。
+
+<Quiz question="コード レビューのインタビュー中に、変数の命名に関する小さな問題と SQL インジェクションの潜在的な脆弱性を発見しました。残り 2 分です。何を優先すべきでしょうか?" options="すぐにできるので、最初に変数の名前を修正します|SQL インジェクションの脆弱性に完全に焦点を当てる|両方に均等に言及し、徹底していることを示します|両方をスキップして、さらに問題を探してください" answer="1" explanation="SQL インジェクションは、データ侵害につながる可能性のある重大なセキュリティ脆弱性です。スタイルの問題よりも常にセキュリティの問題を優先してください。命名の問題については、注入のリスクを十分に説明した後、時間が許す場合にのみ簡単に言及してください。" />
+
+## 重要なポイント
+
+- **構造化されたアプローチを使用します**: 複数のパス (意図 → 正確性 → 設計 → パフォーマンス/セキュリティ) により、ランダムなスキャンよりも多くの問題を捕捉できます。
+- **容赦なく優先順位を付ける**: 重大なバグとセキュリティ問題が最初で、スタイルは最後です。面接官はあなたの判断力を試すために両方を植え付けます。
+- **建設的なコミュニケーション**: *理由*を説明し、代替案を提案し、見つかった良いパターンを認めます。
+- **一般的なバグ パターンを知る**: null 参照、off-by-one エラー、リソース リーク、SQL インジェクション、競合状態は、ほぼすべてのコード レビュー インタビューで現れます。
+- **コードを読む練習をする**: GitHub 上のオープンソースのプル リクエストを読むことに時間を費やしてください。コードを読むスキルとコードを書くスキルは異なりますが、ほとんどのエンジニアはそれを十分に練習していません。

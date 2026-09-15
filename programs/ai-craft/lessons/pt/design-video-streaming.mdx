@@ -1,0 +1,137 @@
+---
+title: "Projete uma plataforma de streaming de vídeo - Arquitetura YouTube/Netflix"
+description: "Projete uma plataforma escalonável de streaming de vídeo que cubra pipelines de upload, transcodificação de taxa de bits adaptável, distribuição CDN e arquitetura de streaming ao vivo."
+order: 8
+difficulty: "advanced"
+duration: 25
+icon: "🎬"
+published: true
+machineTranslated: true
+---
+# Projete uma plataforma de streaming de vídeo - Arquitetura YouTube/Netflix
+
+O streaming de vídeo é responsável por mais de 65% do tráfego global da Internet. O projeto deste sistema abrange pipelines de processamento de arquivos, arquitetura CDN e streaming adaptativo – conceitos que se aplicam muito além do vídeo.
+
+## Passo 1 – Levantamento de Requisitos
+
+### Requisitos Funcionais
+- Enviar vídeos (até 1 GB por arquivo)
+- Transmita vídeos com qualidade adaptável com base nas condições da rede
+- Pesquise vídeos por título, descrição e tags
+- Rastreie contagens de visualizações e métricas de engajamento
+
+### Requisitos Não Funcionais
+- **Disponibilidade** 99,99% de tempo de atividade para streaming
+- **Baixa latência** - a reprodução do vídeo começa em 2 segundos
+- **Alcance global** – atenda usuários em todos os continentes com eficiência
+- **Econômico** - otimize o armazenamento e a largura de banda (os dois maiores custos)
+
+## Etapa 2 - Arquitetura de alto nível
+
+```
+Upload Flow:
+Client → Upload Service → Object Storage (raw)
+                              ↓
+                    Transcoding Pipeline (async)
+                         ↓          ↓
+                   Multiple      Thumbnail
+                   Qualities     Generator
+                         ↓          ↓
+                    CDN Origin Storage → CDN Edge Servers
+
+Streaming Flow:
+Client → CDN Edge → (cache miss) → CDN Origin → Object Storage
+```
+
+<Illustration src="/images/lessons/design-video-streaming.svg" alt="Arquitetura de streaming de vídeo mostrando pipeline de upload com transcodificação, armazenamento de objetos, distribuição de CDN e fluxo de streaming para clientes" caption="Os fluxos de upload e streaming são completamente separados - os uploads são assíncronos e exigem muita gravação, enquanto o streaming exige muita leitura e é sensível à latência." />
+
+## Etapa 3 - Pipeline de upload de vídeo
+
+### Processamento passo a passo
+1. **Upload** - o cliente envia vídeo bruto para armazenamento de objetos (por exemplo, S3) por meio de URLs pré-assinados com uploads recuperáveis para arquivos grandes
+2. **Transcodificação** - converta o vídeo de origem em múltiplas resoluções (1080p, 720p, 480p, 360p) e codecs (H.264, VP9, AV1)
+3. **Embalagem de taxa de bits adaptável** - divida cada nível de qualidade em pequenos segmentos (2 a 10 segundos) para streaming HLS/DASH
+4. **Geração de miniaturas** - extraia quadros em intervalos regulares para visualizar miniaturas
+5. **Atualização de metadados** - marque o vídeo como "pronto" no banco de dados assim que todo o processamento for concluído
+
+### Transcodificação em escala
+Um único vídeo 4K de 10 minutos pode levar mais de 30 minutos para ser transcodificado em uma máquina. Para lidar com milhares de uploads simultâneos:
+- Divida vídeos em partes e transcodifique em paralelo usando um fluxo de trabalho baseado em DAG (como AWS Step Functions)
+- Use instâncias spot/preemptivas para reduzir os custos de computação em 60-80%
+
+<Quiz question="Por que a transcodificação de vídeo é feita de forma assíncrona e não durante o upload?" options="Para reduzir o tempo de upload para o usuário|A transcodificação consome muita CPU e bloquearia o serviço de upload, degradando a disponibilidade|Para economizar espaço de armazenamento|Porque os navegadores não podem reproduzir formatos de vídeo brutos" answer="1" explanation="A transcodificação de um único vídeo em vários níveis de qualidade exige muito da CPU (minutos a horas). Fazer isso de forma síncrona bloquearia o serviço de upload, criaria uma experiência terrível para o usuário e exigiria que o serviço de upload tivesse enormes recursos de computação." />
+
+## Etapa 4 - Protocolos de streaming e CDN
+
+### Streaming de taxa de bits adaptável
+O player muda automaticamente a qualidade com base na velocidade da rede do visualizador:
+
+| Protocolo | Usado por | Formato do segmento | Manifesto |
+|----------|------------|----------------|----------|
+| HLS | Apple, a maioria dos navegadores | .ts ou .fmp4 | lista de reprodução .m3u8 |
+| TRAÇO | YouTube, Netflix | Segmentos .mp4 | Manifesto .mpd |
+
+O cliente baixa um arquivo de manifesto listando todos os níveis de qualidade disponíveis e, em seguida, solicita um segmento de cada vez, alternando a qualidade perfeitamente conforme a largura de banda muda.
+
+### Arquitetura CDN
+CDN é o componente mais crítico para desempenho de streaming:
+
+```
+User in London → London Edge PoP (cache hit: 95%)
+                     ↓ (cache miss)
+              European Regional Cache
+                     ↓ (cache miss)
+              Origin Storage (S3)
+```
+
+**Informações importantes:** vídeos populares são armazenados em cache em pontos de presença mais próximos dos usuários. O conteúdo de cauda longa só pode ser armazenado em cache em nós regionais, com buscas de origem para conteúdo raro.
+
+<FunFact>A Netflix oferece mais de 700 milhões de horas de vídeo por semana. Seu Open Connect CDN coloca dispositivos de hardware personalizados diretamente dentro dos data centers do ISP, armazenando em cache o conteúdo popular na última milha para reduzir o tráfego de backbone da Internet em mais de 90%.</FunFact>
+
+## Etapa 5 - Serviços de suporte
+
+### Serviço de metadados de vídeo
+Armazena título, descrição, tags, data de upload, contagens de visualizações e status de processamento. Use um banco de dados relacional (PostgreSQL) para consultas estruturadas e indexação de pesquisa.
+
+### Ver contagem em escala
+A abordagem ingênua (incremento em cada visualização) cria um ponto de acesso de gravação. Em vez disso:
+- Visualização em lote de eventos em um stream (Kafka)
+- Contagens agregadas periodicamente (a cada 30 segundos)
+- Use contagem aproximada para exibição em tempo real, contagens exatas para análises
+
+<Quiz question="Um vídeo se torna viral e recebe 1 milhão de visualizações por minuto. Qual é o maior problema em incrementar um contador de banco de dados em cada visualização?" options="O banco de dados fica sem armazenamento|A contenção de gravação em uma única linha cria um gargalo e prejudica o desempenho|O contador transborda|As consultas de leitura ficam lentas" answer="1" explanation="Milhões de gravações simultâneas em uma única linha causam contenção extrema de bloqueio no banco de dados. É por isso que as contagens de visualizações normalmente são armazenadas em buffer na memória ou em um fluxo e, em seguida, agregadas em lote no banco de dados periodicamente." />
+
+### Arquitetura de transmissão ao vivo
+A transmissão ao vivo difere da sob demanda em alguns aspectos importantes:
+- **Sem pré-transcodificação** - o vídeo deve ser transcodificado em tempo real
+- **Latência ultrabaixa**: os espectadores esperam um atraso inferior a 5 segundos
+- **Protocolo de ingestão** - streamers push via RTMP; os espectadores recebem via HLS/DASH com extensões de baixa latência
+
+## Etapa 6 - Detalhamento e otimizações de custos
+
+As plataformas de vídeo são **extremamente caras** para operar. Os três maiores custos:
+
+| Centro de Custo | Estimativa (10 milhões de usuários diários) | Otimização |
+|------------|---------------------------|-------------|
+| Armazenamento | ~$200 mil/mês | Armazenamento em camadas (quente/quente/frio), exclusão de uploads com falha |
+| Largura de banda CDN | ~$500 mil/mês | Cache de borda, compactação com codecs modernos (AV1) |
+| Computação de transcodificação | ~$ 100 mil/mês | Identifique instâncias, pule níveis de qualidade raramente observados |
+
+<ThinkAboutIt>A Netflix gasta bilhões anualmente na entrega de conteúdo. Se você estivesse projetando o sistema do zero, criaria seu próprio CDN (como o Netflix Open Connect) ou usaria um CDN comercial (como o CloudFront)? Em que escala construir o seu próprio se torna econômico?</ThinkAboutIt>
+
+### Proteção de Conteúdo (DRM)
+O conteúdo premium requer gerenciamento de direitos digitais:
+- **Widevine** (Google) - Chrome, Android
+- **FairPlay** (Apple) - Safari, iOS
+- **PlayReady** (Microsoft) - Edge, Windows
+
+Cada sistema DRM requer criptografia separada e integração de servidor de licença, adicionando complexidade significativa.
+
+<ThinkAboutIt>O YouTube armazena mais de 800 milhões de vídeos. Se cada vídeo for transcodificado em 5 níveis de qualidade e cada nível tiver em média 500 MB, estime o armazenamento total necessário. Como você projetaria uma estratégia de armazenamento econômica?</ThinkAboutIt>
+
+---
+
+## 📚 Leitura adicional
+- [Design de sistema do YouTube - Entrevista de design de sistema Vol. 2, cap. 14](https://bytebytego.com/) - O mergulho profundo de Alex Xu na arquitetura da plataforma de vídeo
+- [Netflix Tech Blog: Content Delivery](https://netflixtechblog.com/) - como a Netflix construiu o Open Connect e atende ao tráfego global
+- [HLS vs DASH Streaming](https://www.cloudflare.com/learning/video/what-is-http-live-streaming/) - entendendo protocolos de taxa de bits adaptativos

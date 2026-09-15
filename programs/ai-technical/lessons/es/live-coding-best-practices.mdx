@@ -1,0 +1,248 @@
+---
+title: "Mejores prácticas de codificación en vivo"
+description: "Domine el arte de codificar frente a un entrevistador, desde la configuración del entorno hasta las estrategias de comunicación que muestren su forma de pensar."
+order: 8
+difficulty: "advanced"
+duration: 20
+icon: "💡"
+published: true
+machineTranslated: true
+---
+# Mejores prácticas de codificación en vivo
+
+Puedes resolver los medios LeetCode mientras duermes, pero colocas a un ser humano en el otro extremo de una pantalla compartida y de repente tus dedos olvidan dónde van los puntos y coma. Las entrevistas de codificación en vivo son una actuación en la que te juzgan no solo por el código final, sino también por cómo llegas allí. Los candidatos que aprueban no siempre son los codificadores más rápidos; ellos son los que se comunican con claridad, manejan los contratiempos con gracia y escriben código que es legible bajo presión. Esta lección le enseña a ser ese candidato.
+
+## Configurando su entorno
+
+Las primeras impresiones importan. Cuando abres CoderPad, HackerRank o VS Code Live Share, el entrevistador ya se está formando opiniones.
+
+### Consejos específicos de la plataforma
+
+**CoderPad** (el más común):
+- Elija su idioma en el menú desplegable antes de que comience la entrevista
+- Utilice el botón Ejecutar integrado: sepa que el resultado aparece en el panel de la consola
+- Están disponibles la sangría automática y el resaltado de sintaxis.
+
+**HackerRank**:
+- Lea atentamente el planteamiento del problema: las entradas provienen de la entrada estándar.
+- Los casos de prueba se ejecutan automáticamente; entender el formato esperado
+- Se pueden agregar casos de prueba personalizados en el panel izquierdo
+
+**VS Code Live Share / Google Docs**:
+- Sin autocompletar ni resaltado de sintaxis (posiblemente)
+- Sangría consistentemente a mano: muestra disciplina
+- Para Google Docs: utilice una fuente monoespaciada (Courier New)
+
+<Callout>Antes de cualquier entrevista de codificación en vivo, realice una verificación del entorno de 5 minutos. Abra la plataforma, escriba "Hola mundo" y ejecútela. Trabajar a tientas con la plataforma durante la entrevista desperdicia valiosos minutos y debilita tu confianza.</Callout>
+
+### Elección de idioma
+
+Elija el idioma que domine con mayor fluidez, no el que crea que suena impresionante. Dicho esto, esto es lo que debes considerar:
+
+| Idioma | Ventajas | Contras |
+|---|---|---|
+| **Python** | Biblioteca estándar rica y concisa, rápida de escribir | Tiempo de ejecución más lento, tipo ambigüedad |
+| **Java** | Escritura fuerte, los entrevistadores lo esperan para el diseño de sistemas | Detallado, repetitivo |
+| **JavaScript** | Bueno para roles frontend, flexible | Coerción de tipo peculiar, menos común para los algoritmos |
+| **C++** | Tiempo de ejecución rápido, muestra habilidades de bajo nivel | STL detallado y propenso a errores |
+
+## El protocolo de hablar en voz alta
+
+Esta es la habilidad de entrevista más impactante y la que la mayoría de los candidatos descuidan. Tu monólogo interior debe convertirse en un monólogo exterior.
+
+### Qué decir en cada etapa
+
+**Leyendo el problema** (minutos 0-3):
+- "Déjame asegurarme de entender el problema: necesitamos encontrar..."
+- "Algunas preguntas aclaratorias: ¿puede la entrada estar vacía? ¿Pueden haber números negativos?"
+- "Déjame pensar en algunos ejemplos para verificar mi comprensión".
+
+**Planificando tu enfoque** (minutos 3-7):
+- "Lo primero que pensé es un enfoque de fuerza bruta utilizando bucles anidados; eso sería O(n²)".
+- "Creo que podemos hacerlo mejor con un mapa hash para rastrear los elementos que hemos visto".
+- "Déjame pensar en casos extremos: entrada vacía, elemento único, todos duplicados..."
+
+**Escribiendo código** (minutos 7-25):
+- "Comenzaré configurando la firma de la función y manejando casos extremos".
+- "Ahora estoy iterando a través del array, y para cada elemento que estoy comprobando..."
+- "Estoy eligiendo un mapa hash aquí porque necesitamos búsquedas O(1)".
+
+**Pruebas** (minutos 25-30):
+- "Permítanme seguir con el ejemplo: para la entrada [2, 7, 11, 15] con objetivo 9..."
+- "También debería comprobar el caso extremo de una matriz vacía..."
+- "Hmm, mi salida para este caso no coincide. Déjame ver la línea 5..."
+
+<ThinkAboutIt>Piensa en la última vez que resolviste un problema en silencio. ¿Cuál fue su proceso de decisión interno? ¿Cómo externalizarías cada una de esas microdecisiones? Practique verbalizar su pensamiento incluso cuando resuelva problemas solo; se vuelve natural durante la entrevista.</ThinkAboutIt>
+
+## Escribir código limpio bajo presión
+
+Bajo estrés, la calidad del código es la primera víctima. Lucha contra esto con hábitos deliberados:
+
+### Utilice nombres significativos
+
+```python
+# Under pressure (what many candidates write)
+def solve(a, t):
+    d = {}
+    for i, v in enumerate(a):
+        if t - v in d:
+            return [d[t - v], i]
+        d[v] = i
+
+# What you should write
+def two_sum(nums, target):
+    seen = {}
+    for index, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], index]
+        seen[num] = index
+```
+
+La segunda versión tarda 10 segundos adicionales en escribirse, pero facilita 10 veces la depuración e impresiona al entrevistador.
+
+### Comience con el esqueleto
+
+Antes de completar la lógica, escriba la estructura:
+
+```python
+def merge_intervals(intervals):
+    # Edge case
+    if not intervals:
+        return []
+
+    # Sort by start time
+    intervals.sort(key=lambda x: x[0])
+
+    # Merge overlapping intervals
+    merged = [intervals[0]]
+    for current in intervals[1:]:
+        # TODO: merge logic
+        pass
+
+    return merged
+```
+
+Esto le muestra al entrevistador su plan antes de implementarlo. También significa que incluso si se le acaba el tiempo, ellos ven un enfoque correcto de alto nivel.
+
+### Las funciones auxiliares son tus amigas
+
+```python
+# Extract reusable logic into named functions
+def is_valid_move(board, row, col):
+    return 0 <= row < len(board) and 0 <= col < len(board[0])
+
+def get_neighbours(row, col):
+    return [(row + dr, col + dc) for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]]
+```
+
+Las funciones auxiliares reducen la carga cognitiva, hacen que su código se autodocumente y le permiten decir: "Implementaré este asistente más adelante; por ahora, supongamos que funciona".
+
+<FunFact>Los estudios sobre programación en parejas (que simulan las entrevistas de codificación en vivo) muestran que las parejas producen código con un 15% menos de defectos que los programadores en solitario, pero toman alrededor de un 15% más de tiempo. En una entrevista, la dinámica de "pareja" con el entrevistador en realidad funciona a su favor: pueden detectar errores que usted pasaría por alto si se comunica abiertamente.</FunFact>
+
+## Manejar las sugerencias con gracia
+
+Los entrevistadores dan pistas. No es una señal de fracaso, es una conversación. Cómo respondes importa:
+
+**Buenas respuestas a sugerencias**:
+- "Ese es un gran punto. Creo que estás sugiriendo que use una pila aquí. Déjame pensar en cómo eso ayuda..."
+- "Ah, ya veo. Si ordeno la entrada primero, el enfoque de dos puntos se vuelve posible. Déjame reestructurar".
+- "Gracias, no había considerado ese caso extremo. Déjame agregar manejo para números negativos".
+
+**Malas respuestas**:
+- Ignorando la pista y continuando tu acercamiento.
+-"Lo sé, estaba a punto de hacer eso" (defensivo)
+- Parece derrotado o nervioso.
+
+<Callout>Un entrevistador que da pistas intenta ayudarle a tener éxito. Muchos candidatos son contratados después de recibir múltiples pistas; lo que importa es que usted capte la pista, se adapte y demuestre que puede colaborar. Apegarse obstinadamente a un enfoque fallido después de una pista es una señal de alerta.</Callout>
+
+## Gestión del tiempo: el plan de 35 minutos
+
+Para un problema de codificación típico de 35 minutos:
+
+| Fase | Minutos | Qué hacer |
+|---|---|---|
+| **Aclarar** | 0-5 | Leer problemas, hacer preguntas, escribir ejemplos |
+| **Planificar** | 5-8 | Discuta el enfoque y la complejidad, consiga la aceptación del entrevistador |
+| **Código** | 8-25 | Escriba código limpio y legible hablando en voz alta |
+| **Prueba** | 25-30 | Rastree los ejemplos manualmente, verifique los casos extremos |
+| **Optimizar** | 30-35 | Discutir posibles mejoras y enfoques alternativos |
+
+### Errores comunes de sincronización
+
+1. **Pasar 15 minutos codificando sin un plan**: terminas reescribiendo
+2. **Nunca realizar pruebas**: enviar y decir "Creo que funciona" es una señal de alerta
+3. **Optimizar antes de obtener una solución que funcione**: resuélvalo primero y luego mejore
+4. **Dedicar demasiado tiempo a un enfoque**: si no funciona después de 10 minutos, pregúntale al entrevistador si hay una mejor dirección.
+
+## Probar su solución antes de decir "Listo"
+
+Nunca digas "ya terminé" sin realizar la prueba. He aquí un enfoque sistemático:
+
+```python
+# Step 1: Trace through the provided example
+# Input: [1, 2, 3, 4, 5], target = 9
+# i=0: complement=9-1=8, not in seen, seen={1:0}
+# i=1: complement=9-2=7, not in seen, seen={1:0, 2:1}
+# ...
+# i=3: complement=9-4=5, not in seen, seen={1:0, 2:1, 3:2, 4:3}
+# i=4: complement=9-5=4, 4 IS in seen at index 3 → return [3, 4] ✓
+
+# Step 2: Test edge cases
+# Empty array: [] → should return [] or None
+# Single element: [5], target=5 → no pair possible
+# Negative numbers: [-1, 2, 3], target=1 → [-1, 2] at indices [0, 1]
+# Duplicates: [3, 3], target=6 → should return [0, 1]
+```
+
+Verbalizar este proceso de prueba. Muestra minuciosidad y detecta errores antes que el entrevistador.
+
+## Qué hacer cuando estás estancado
+
+Quedarse estancado no es un fracaso; quedarse estancado en silencio sí lo es. Aquí está tu plan de escape:
+
+1. **Replantear el problema**: a veces decirlo en voz alta revela un nuevo ángulo
+2. **Trabaje con un pequeño ejemplo**: resolver manualmente un caso pequeño puede revelar el algoritmo
+3. **Piensa en problemas relacionados** — "Esto me recuerda el patrón de la ventana deslizante..."
+4. **Considere las restricciones**: si n ≤ 1000, una solución O(n²) podría ser aceptable
+5. **Simplifique el problema**: resuelva primero una versión más simple y luego agregue complejidad
+6. **Pide una pista**: "Estoy considerando usar un mapa hash para rastrear frecuencias, pero no estoy seguro de cómo manejar la reducción de la ventana. ¿Podrías indicarme la dirección correcta?"
+
+```python
+# When stuck, try the "brute force first" strategy:
+# 1. Write the O(n²) solution — it's usually straightforward
+# 2. Identify the bottleneck (usually the inner loop)
+# 3. Ask: "Can I eliminate this inner loop with a data structure?"
+# 4. This often leads naturally to the optimal solution
+```
+
+<Quiz question="Llevas 20 minutos en una entrevista de 35 minutos y tu solución tiene un error que no puedes encontrar. ¿Cuál es el mejor siguiente paso?" options="Empezar de nuevo con un enfoque completamente nuevo|Siéntate en silencio y piensa hasta que lo encuentres.|Agregue declaraciones impresas en puntos de decisión clave y siga un pequeño ejemplo|Pídele al entrevistador que te diga dónde está el error." answer="2" explanation="Cuando quedan 15 minutos, agregar declaraciones impresas estratégicas y rastrear un pequeño ejemplo es el enfoque de depuración más eficiente. Empezar de nuevo desperdicia el trabajo que has hecho. Sentarse en silencio es una pérdida de tiempo y no proporciona señal. Pedir la respuesta directa no muestra capacidad de depuración." />
+
+## La discusión posterior a la solución
+
+Una vez que su solución funcione, la entrevista no termina. Esté preparado para:
+
+- **"¿Cuál es la complejidad del tiempo y el espacio?"** — tenlo siempre listo
+- **"¿Puedes optimizarlo?"** — discute las compensaciones incluso si no puedes implementarlo a tiempo
+- **"¿Cómo manejaría esto los casos extremos?"** — demuestra que has pensado en escenarios de producción
+- **"¿Qué pasaría si la entrada fuera mil millones de elementos?"** — esto gira en torno al pensamiento de diseño de sistemas
+
+```python
+# Example post-solution discussion:
+# "My solution is O(n) time and O(n) space.
+#  The space is used by the hash map which stores at most n elements.
+#  If memory is a constraint, we could sort the array first and use
+#  two pointers for O(n log n) time and O(1) space — but we'd need
+#  to modify the input array or create a copy.
+#  For 1 billion elements, we might need to partition the data
+#  and process in chunks, or use external sorting."
+```
+
+## Conclusiones clave
+
+- **Habla en voz alta continuamente**: el silencio es tu enemigo: narra tu proceso de resolución de problemas de principio a fin.
+- **Aclare antes de codificar**: 5 minutos de preguntas ahorran 15 minutos de codificación en la dirección incorrecta.
+- **Escriba código limpio incluso bajo presión**: nombres significativos, funciones auxiliares y un enfoque basado en el esqueleto facilitan la depuración e impresionan a los entrevistadores.
+- **Prueba sistemáticamente**: revisa ejemplos y casos extremos antes de declarar "hecho".
+- **Maneja las pistas y los contratiempos con elegancia**: quedarte atascado es normal; lo que importa es cómo te recuperas.
+- **Administra tu tiempo**: planificar (5min) → codificar (17min) → probar (5min) → discutir (5min). Ajuste según el problema, pero nunca omita las pruebas.

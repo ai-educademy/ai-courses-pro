@@ -1,0 +1,154 @@
+---
+title: "Contribuyendo al código abierto: desarrolle su reputación y retribuya"
+description: "Aprenda a encontrar proyectos, realizar contribuciones significativas, redactar excelentes relaciones públicas y crear un perfil público a través del trabajo de inteligencia artificial de código abierto."
+order: 5
+difficulty: "advanced"
+duration: 15
+icon: "🤝"
+published: true
+machineTranslated: true
+---
+# Contribuyendo al código abierto
+
+Las contribuciones de código abierto son la forma más rápida de aprender, generar credibilidad y conectarse con la comunidad de IA. Esta lección le muestra exactamente cómo comenzar y hacer contribuciones importantes.
+
+## ¿Por qué contribuir?
+
+Contribuir al código abierto no es caridad: es un paso profesional estratégico.
+
+**Aprendizaje**: leer y modificar código con calidad de producción le enseña patrones que los tutoriales nunca cubren. Aprenderá cómo los sistemas reales manejan los casos extremos, las pruebas y la escala.
+
+**Establecimiento de contactos**: sus revisores y co-contribuyentes de relaciones públicas a menudo se convierten en colaboradores, árbitros o incluso cofundadores. La comunidad de código abierto de IA está notablemente unida.
+
+**Impacto profesional**: los gerentes de contratación de las principales empresas de inteligencia artificial analizan activamente los perfiles de GitHub. Un RP fusionado con un proyecto respetado indica competencia mucho más que una certificación.
+
+**Retribuir**: Es casi seguro que se habrá beneficiado de las herramientas de código abierto. Contribuir es cómo el ecosistema se sostiene.
+
+<FunFact>Una encuesta de GitHub de 2024 encontró que el 87% de los gerentes de contratación de IA/ML consideran las contribuciones de código abierto al evaluar a los candidatos, lo que la convierte en la segunda señal más valorada después de la experiencia laboral relevante.
+</FunFact>
+
+## Encontrar el proyecto adecuado
+
+No empieces contribuyendo a PyTorch o TensorFlow. Comience donde su contribución será notada y valorada.
+
+**Dónde buscar:**
+- **Temas de GitHub** - busque `good-first-issue` + `machine-learning` o `artificial-intelligence`
+- **Hugging Face**: sus bibliotecas `transformers`, `datasets` y `diffusers` dan la bienvenida activamente a los contribuyentes
+- **LangChain / LlamaIndex** - proyectos de rápido avance con muchos problemas abiertos
+- **Herramientas más pequeñas**: las bibliotecas con 500 a 5000 estrellas a menudo tienen mantenedores receptivos y agradecidos por la ayuda.
+
+**Cómo evaluar un proyecto:**
+1. Verifique la última fecha de confirmación: ¿se mantiene activamente?
+2. Lea CONTRIBUTING.md: ¿existe alguno?
+3. Observe las relaciones públicas abiertas: ¿se están revisando o se están ignorando?
+4. Verifique los tiempos de respuesta a los problemas: ¿se involucran los mantenedores?
+
+<Quiz question="¿Cuál es el mejor indicador de que un proyecto da la bienvenida a nuevos contribuyentes?" options="Tiene más de 10.000 estrellas.|Tiene un CONTRIBUTING.md y mantenedores receptivos.|Utiliza los últimos modelos de IA.|No tiene problemas abiertos" answer="1" explanation="Un archivo CONTRIBUTING.md y mantenedores receptivos indican que el proyecto está configurado para la colaboración. El recuento de estrellas por sí solo no dice nada sobre la experiencia del colaborador." />
+
+<Illustration src="/images/lessons/contributing-to-open-source.svg" alt="Flujo de trabajo de contribución de código abierto, desde la búsqueda de un proyecto hasta las relaciones públicas fusionadas" caption="El viaje de la contribución: desde el primer número hasta las relaciones públicas fusionadas" />
+
+## El flujo de trabajo de contribución
+
+Cada contribución sigue el mismo patrón. Domina esto una vez y podrás contribuir en cualquier lugar.
+
+### Paso 1: bifurcar y clonar
+
+```bash
+gh repo fork owner/project --clone
+cd project
+git remote add upstream https://github.com/owner/project.git
+```
+
+### Paso 2: crear una sucursal
+
+```bash
+git checkout -b fix/improve-tokeniser-docs
+```
+
+Utilice nombres de sucursales descriptivos. Prefijos como `fix/`, `feat/` o `docs/` ayudan a los mantenedores a comprender la intención de un vistazo.
+
+### Paso 3: Realice sus cambios
+
+- Siga exactamente el estilo de codificación del proyecto.
+- Ejecute pruebas existentes antes y después de sus cambios.
+- Agregar pruebas para nuevas funciones.
+- Mantenga los cambios enfocados: una preocupación por RP
+
+### Paso 4: comprometerse y presionar
+
+```bash
+git add .
+git commit -m "docs: clarify tokeniser padding behaviour for batch inputs"
+git push origin fix/improve-tokeniser-docs
+```
+
+### Paso 5: abrir una solicitud de extracción
+
+Escriba una descripción de relaciones públicas clara que explique **qué** cambió, **por qué** lo cambió y **cómo** probarlo. Haga referencia al número de edición si existe.
+
+<ThinkAboutIt>Piense en un error que haya encontrado en una herramienta de inteligencia artificial de código abierto. ¿Podrías haberlo solucionado tú mismo y enviar un PR? A menudo la respuesta es sí, y esa primera contribución es la barrera mental más difícil de superar.
+</ThinkAboutIt>
+
+## Redacción de excelentes relaciones públicas y compromisos
+
+Su PR es su tarjeta de presentación profesional. Haz que cuente.
+
+**Mensajes de confirmación**: utilice confirmaciones convencionales: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`. Mantenga el asunto por debajo de 72 caracteres. Agregue un cuerpo para cambios complejos.
+
+**Las descripciones de relaciones públicas deben incluir:**
+- Un resumen de una línea del cambio.
+- Contexto: ¿qué problema resuelve esto?
+- Cómo probar el cambio.
+- Capturas de pantalla o muestras de salida si es relevante
+- Cualquier compensación o decisión que haya tomado
+
+**Errores comunes a evitar:**
+- Mezclar cambios no relacionados en un PR
+- Ignorar las reglas de formato y linting del proyecto.
+- No responder a los comentarios de revisión con prontitud
+- Empujar con fuerza sin previo aviso durante la revisión.
+
+<Quiz question="¿Cuál es el elemento más importante de una buena solicitud de extracción?" options="Número máximo de archivos modificados|Una descripción clara de qué, por qué y cómo probar.|Uso de las últimas funciones de idioma|Agregar comentarios extensos en línea" answer="1" explanation="Una descripción clara de las relaciones públicas ayuda a los mantenedores a realizar revisiones de manera eficiente. Muestra respeto por su tiempo y aumenta drásticamente las posibilidades de que sus relaciones públicas se fusionen." />
+
+## Más allá del código
+
+Algunas de las contribuciones más valiosas involucran código cero.
+
+**Documentación**: corrige errores tipográficos, mejora ejemplos, traduce documentos. Muchos proyectos necesitan desesperadamente ayuda con la documentación y es un excelente punto de entrada.
+
+**Clasificación de problemas**: reproduzca errores, agregue contexto y etiquete problemas. Esto es increíblemente valioso para los mantenedores que se ahogan en problemas sin procesar.
+
+**Traducciones**: ayude a que las herramientas de IA sean accesibles a nivel mundial. Proyectos como Hugging Face buscan traductores activamente.
+
+**Soporte comunitario**: responda preguntas en Discord, Stack Overflow o debates de GitHub. Ayudar a los demás también es un aporte.
+
+<Callout>**Consejo profesional:** Los RP de documentación tienen la tasa de aceptación más alta de cualquier tipo de contribución. Son la manera perfecta de aprender un código base, generar confianza con los mantenedores y prepararse para contribuciones de código más importantes más adelante.
+</Callout>
+
+## Construyendo un perfil público
+
+Las contribuciones constantes se convierten en un poderoso activo profesional.
+
+**Pasos prácticos:**
+1. Fija tus mejores contribuciones en tu perfil de GitHub.
+2. Escribe publicaciones breves en el blog sobre lo que aprendiste de cada contribución.
+3. Participe en debates sobre proyectos: los comentarios reflexivos se notan
+4. Asiste a reuniones o conferencias virtuales relacionadas con tus proyectos.
+5. Agregue trabajo de código abierto a su CV con enlaces a RP fusionados
+
+<FunFact>Las primeras contribuciones de código abierto de Andrej Karpathy a las bibliotecas de redes neuronales ayudaron a establecer su reputación mucho antes de unirse a Tesla u OpenAI. Tu perfil de GitHub es un portafolio vivo.
+</FunFact>
+
+<Quiz question="¿Qué tipo de contribución de código abierto tiene la tasa de aceptación más alta?" options="Grandes adiciones de funciones|Optimizaciones de rendimiento|Mejoras en la documentación|Refactores de arquitectura" answer="2" explanation="Los RP de documentación tienen la tasa de aceptación más alta porque conllevan un riesgo bajo, requieren un esfuerzo de revisión mínimo y abordan una necesidad universal en todos los proyectos de código abierto." />
+
+<ThinkAboutIt>¿Cómo sería tu contribución ideal de código abierto? Elija un proyecto de IA que utilice habitualmente y encuentre un problema en el que pueda trabajar esta semana. El mejor momento para empezar a contribuir es ahora.
+</ThinkAboutIt>
+
+## Conclusiones clave
+
+- Las contribuciones de código abierto aceleran el aprendizaje, la creación de redes y el crecimiento profesional.
+- Comience con proyectos más pequeños y mantenidos activamente, no con megarepos
+- Domina el flujo de trabajo bifurcación → rama → relaciones públicas y úsalo en todas partes
+- Escriba relaciones públicas claras y enfocadas con mensajes de confirmación descriptivos.
+- La documentación y la clasificación de problemas son contribuciones valiosas que no necesitan código.
+- La coherencia importa más que la escala: las pequeñas contribuciones periódicas se componen

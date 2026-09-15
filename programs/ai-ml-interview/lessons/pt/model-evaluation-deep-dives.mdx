@@ -1,0 +1,215 @@
+---
+title: "Aprofundamentos na avaliação do modelo"
+description: "Domine as métricas, metodologias e vantagens da avaliação de modelos – o tópico que separa os engenheiros de ML dos profissionais de ML."
+order: 2
+difficulty: "advanced"
+duration: 20
+icon: "📊"
+published: true
+machineTranslated: true
+---
+# 📊 Aprofundamentos na avaliação do modelo
+
+"Seu modelo tem 95% de precisão - envie-o!" Se essa frase não o incomoda imediatamente, esta lição é exatamente o que você precisa. A avaliação do modelo é o tópico da entrevista que separa os candidatos que *treinaram* modelos daqueles que os *implantaram*. Os entrevistadores investigam o conhecimento da avaliação porque revela se você entende o que um modelo está realmente fazendo – e se deve ser confiável.
+
+---
+
+## 🎯 Métricas de classificação: além da precisão
+
+A precisão – a porcentagem de previsões corretas – é a métrica que todos aprendem primeiro e a métrica que engana com mais frequência. Considere um modelo de detecção de fraude em um conjunto de dados onde apenas 0,5% das transações são fraudulentas. Um modelo que prevê "não fraude" para tudo atinge **99,5% de precisão** e não detecta nenhuma fraude.
+
+### Precisão, recall e F1
+
+Essas três métricas formam a espinha dorsal da avaliação da classificação:
+
+- **Precisão** = TP / (TP + FP) — "De tudo que marquei como positivo, quanto realmente foi?"
+- **Recall** = TP / (TP + FN) — "De tudo que foi realmente positivo, quanto eu peguei?"
+- **Pontuação F1** = 2 × (Precisão × Recuperação) / (Precisão + Recuperação) — a média harmônica, equilibrando ambos
+
+```
+              Predicted Positive    Predicted Negative
+Actual Positive       TP                   FN
+Actual Negative       FP                   TN
+```
+
+<ThinkAboutIt>Você está construindo um modelo para detectar câncer a partir de imagens médicas. Você otimizaria para precisão ou recall? Quais são as consequências no mundo real de errar em cada direção?
+</ThinkAboutIt>
+
+### Quando usar qual
+
+| Cenário | Otimizar para | Por que |
+|---|---|---|
+| Filtro de spam | Precisão | Enviar e-mail real para spam é pior do que deixar passar spam |
+| Rastreio do cancro | Lembrar | Perder um caso de câncer é muito pior que um alarme falso |
+| Classificação de pesquisa | Precisão@K | Os usuários olham apenas para os melhores resultados |
+| Detecção de fraude | F1 ou personalizado | Precisa de equilíbrio – muitos falsos positivos bloqueiam clientes reais |
+
+---
+
+## 📈 AUC-ROC e AUC-PR: o quadro completo
+
+### Curva ROC
+
+A curva Receiver Operating Characteristic representa a **Taxa de Verdadeiro Positivo** (recall) contra a **Taxa de Falso Positivo** (FP / (FP + TN)) em cada limite de classificação. A área sob esta curva (**AUC-ROC**) fornece uma medida independente do limite da qualidade do modelo.
+
+- **AUC = 1,0**: separação perfeita
+- **AUC = 0,5**: adivinhação aleatória (a linha diagonal)
+- **AUC < 0,5**: pior que aleatório (seus rótulos podem ser invertidos!)
+
+### Curva de recuperação de precisão
+
+Quando as classes estão fortemente desequilibradas, a AUC-ROC pode ser enganadoramente optimista. A **curva Precision-Recall** representa precisão versus recall e é mais informativa para detecção de eventos raros.
+
+```python
+from sklearn.metrics import precision_recall_curve, auc
+
+precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
+pr_auc = auc(recall, precision)
+```
+
+<Callout>Dica para entrevista: se o entrevistador mencionar um conjunto de dados desequilibrado, sugira imediatamente AUC-PR em vez de AUC-ROC. Isso sinaliza que você entende a limitação das curvas ROC em ambientes desequilibrados – uma distinção que muitos candidatos não percebem.
+</Callout>
+
+<Quiz
+  question="Um modelo de detecção de fraude tem AUC-ROC de 0,98 em um conjunto de dados onde 0,1% das transações são fraudulentas. Qual é a preocupação mais válida?"
+  options="O modelo é claramente excelente e pronto para produção|AUC-ROC pode ser enganosamente elevada em dados desequilibrados – em vez disso, verifique AUC-PR|O modelo está superajustado porque a AUC é muito alta|Você deve usar precisão em vez de AUC"
+  answer="1"
+  explanation="Com extremo desequilíbrio de classe, um modelo pode atingir alta AUC-ROC classificando corretamente a classe da esmagadora maioria. AUC-PR centra-se no desempenho da classe minoritária (positiva) e dá uma imagem mais honesta de quão bem o modelo detecta a fraude."
+/>
+
+---
+
+## 📐 Métricas de regressão
+
+Nem tudo é classificação. Ao prever valores contínuos, estas métricas são importantes:
+
+### Erro Quadrático Médio (MSE)
+
+$$MSE = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2$$
+
+Penaliza fortemente erros grandes (penalidade quadrática). É bom quando os grandes erros são muito piores do que os pequenos - por exemplo, prever os preços das casas onde perder £ 100 mil é muito pior do que perder £ 10 mil.
+
+### Erro Médio Absoluto (MAE)
+
+$$MAE = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|$$
+
+Trata todos os erros linearmente. Mais robusto para valores discrepantes do que MSE. Use quando valores discrepantes são esperados e não devem dominar sua métrica.
+
+### R² (Coeficiente de Determinação)
+
+$$R^2 = 1 - \frac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i - \bar{y})^2}$$
+
+Mede quanta variação seu modelo explica em comparação com a simples previsão da média. R² = 1 significa ajuste perfeito; R² = 0 significa que seu modelo não é melhor do que prever a média.
+
+<FunFact>R² pode realmente ficar negativo! Isso acontece quando as previsões do seu modelo são piores do que simplesmente prever a média da variável alvo para cada entrada. É um sinal de que algo deu muito errado.
+</FunFact>
+
+---
+
+## 🔄 Estratégias de validação cruzada
+
+Manter um único conjunto de testes funciona para grandes conjuntos de dados, mas a validação cruzada fornece estimativas mais confiáveis ​​do desempenho da generalização.
+
+### Validação cruzada K-Fold
+
+Divida os dados em K dobras iguais. Treine nas dobras K-1, valide nas dobras restantes. Repita K vezes. Relate a média e o desvio padrão de sua métrica.
+
+```python
+from sklearn.model_selection import cross_val_score
+
+scores = cross_val_score(model, X, y, cv=5, scoring='f1')
+print(f"F1: {scores.mean():.3f} ± {scores.std():.3f}")
+```
+
+### K-Fold estratificado
+
+Preserva a distribuição de classes em cada dobra – essencial para conjuntos de dados desequilibrados.
+
+### Divisão de série temporal
+
+Para dados temporais, **nunca** use divisões aleatórias. Use validação cruzada de janela expansível ou deslizante para respeitar a ordem temporal:
+
+```
+Fold 1: Train [Jan-Mar]  → Test [Apr]
+Fold 2: Train [Jan-Apr]  → Test [May]
+Fold 3: Train [Jan-May]  → Test [Jun]
+```
+
+<Quiz
+  question="Você está avaliando um modelo de previsão de preços de ações. Qual estratégia de validação cruzada é mais apropriada?"
+  options="Dobra K padrão|Deixe um de fora|Divisão de série temporal|K-Fold estratificado"
+  answer="2"
+  explanation="Os preços das ações são dados temporais. O uso do K-Fold aleatório permitiria que o modelo 'espiasse' os dados futuros durante o treinamento, fornecendo resultados excessivamente otimistas. A divisão de série temporal garante que o modelo seja sempre validado nos dados provenientes após o período de treinamento."
+/>
+
+---
+
+## 🌐 Avaliação offline vs online
+
+As métricas offline (calculadas com base em dados históricos) nem sempre prevêem o desempenho online. Um modelo com melhor AUC pode, na verdade, reduzir o envolvimento do usuário, uma vez implantado.
+
+| Aspecto | Avaliação off-line | Avaliação Online (Teste A/B) |
+|---|---|---|
+| Velocidade | Rápido – execute com dados salvos | Lento – precisa de tráfego real |
+| Custo | Baixo | Alto (engenharia + custo de oportunidade) |
+| Medidas | Qualidade do modelo em dados históricos | Impacto real nos negócios |
+| Limitação | Não captura alterações de comportamento do usuário | Requer rigor estatístico |
+
+### Teste A/B para modelos de ML
+
+Ao executar um teste A/B para um novo modelo:
+
+1. **Defina a métrica principal** (por exemplo, receita por usuário) e métricas de proteção (por exemplo, latência, taxa de erro)
+2. **Calcule o tamanho da amostra necessário** para significância estatística
+3. **Randomizar corretamente** — dividir no nível do usuário, não no nível da solicitação
+4. **Executar por tempo suficiente** — considere os efeitos da novidade e a sazonalidade semanal
+5. **Verificar interferências** — o comportamento do grupo de tratamento afeta o grupo de controle?
+
+<ThinkAboutIt>Seu novo modelo de recomendação mostra uma melhoria de 3% no AUC-ROC off-line, mas uma *diminuição* de 1% na taxa de cliques durante os testes A/B. O que poderia explicar essa discrepância e o que você investigaria?
+</ThinkAboutIt>
+
+---
+
+## ⚖️ Lidando com conjuntos de dados desequilibrados
+
+Dados desequilibrados afetam tanto o treinamento quanto a avaliação. Estratégias comuns:
+
+**Durante o treinamento:**
+- Oversample da classe minoritária (SMOTE)
+- Subamostrar a classe majoritária
+- Use pesos de classe na função de perda
+- Gerar exemplos sintéticos
+
+**Durante a avaliação:**
+- Use precisão, recall, F1 em vez de precisão
+- Use AUC-PR em vez de AUC-ROC
+- Métricas de relatório por classe
+- Use validação cruzada estratificada
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+# Class weight approach — inversely proportional to class frequency
+model = RandomForestClassifier(class_weight='balanced')
+```
+
+<Quiz
+  question="Qual métrica é MENOS adequada para avaliar um modelo em um conjunto de dados altamente desequilibrado?"
+  options="AUC de recall de precisão|Precisão|Pontuação F1|Lembrar"
+  answer="1"
+  explanation="A precisão trata todas as classes igualmente e é dominada pela classe majoritária. Em um conjunto de dados desequilibrado de 99:1, um modelo que prevê sempre a classe majoritária atinge 99% de precisão, sendo completamente inútil para detectar a classe minoritária."
+/>
+
+---
+
+## 🔑 Principais vantagens
+
+- **Nunca confie apenas na precisão** — especialmente com dados desequilibrados
+- **Combinar a métrica com a meta de negócios**: recall para segurança crítica, precisão quando falsos positivos são caros
+- **AUC-PR sobre AUC-ROC** para problemas de desequilíbrio — esta é uma dica de entrevista de alto sinal
+- **Use divisões baseadas em tempo** para dados temporais — divisões aleatórias causam vazamento de dados
+- **Métricas off-line não são suficientes** — planeje testes A/B para validar o impacto no mundo real
+- **Conheça as fórmulas** — os entrevistadores podem pedir que você deduza ou explique precisão, recall, F1, MSE e R²
+
+<Callout>Quando um entrevistador pergunta “como você avaliaria esse modelo?”, ele está realmente perguntando “você entende o que esse modelo precisa para dar certo e você pode medir isso?” Comece com o contexto de negócios e depois escolha suas métricas.
+</Callout>

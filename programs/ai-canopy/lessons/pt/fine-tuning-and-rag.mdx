@@ -1,0 +1,125 @@
+---
+title: "Ajuste fino e RAG – Como as empresas personalizam a IA para seus dados"
+description: "Aprenda quando e como ajustar modelos ou usar geração de recuperação aumentada para criar aplicativos de IA específicos de domínio."
+order: 4
+difficulty: "advanced"
+duration: 20
+icon: "🔧"
+published: true
+machineTranslated: true
+---
+# Ajuste fino e RAG – Como as empresas personalizam a IA para seus dados
+
+Um LLM de uso geral sabe muito sobre o mundo, mas nada sobre os documentos internos da sua empresa, dados proprietários ou terminologia específica do domínio. Esta lição aborda as duas abordagens principais para preencher essa lacuna: **ajuste fino** e **geração aumentada por recuperação (RAG)**.
+
+## Por que os modelos genéricos não são suficientes
+
+Imagine pedir ao GPT-4 para responder às dúvidas dos clientes sobre a política de devolução específica da sua empresa, códigos internos de produtos ou protocolos de tratamento médico. Não pode - essa informação não está nos dados de treinamento.
+
+As empresas precisam de IA que combine a **inteligência geral** de um grande modelo com o **conhecimento específico** de seu domínio. Existem dois caminhos para chegar lá, e escolher o caminho certo é extremamente importante.
+
+<Callout>Um equívoco comum é que você pode simplesmente “carregar seus dados” em um LLM. Na realidade, a personalização de um modelo requer o retreinamento de seus pesos (ajuste fino) ou a construção de um pipeline de recuperação (RAG) - ambos são esforços de engenharia que exigem um planejamento cuidadoso.
+</Callout>
+
+<Illustration src="/images/lessons/fine-tuning-and-rag.svg" alt="Diagrama comparando abordagens de ajuste fino e RAG para personalizar LLMs" caption="O ajuste fino altera os pesos do modelo; O RAG fornece conhecimento externo no momento da consulta." />
+
+## Ajuste fino: ensinando novos truques ao modelo
+
+O ajuste fino pega um modelo pré-treinado e continua treinando-o em seu próprio conjunto de dados. Os pesos do modelo são atualizados para refletir o idioma, o estilo e o conhecimento do seu domínio.
+
+**Quando fazer o ajuste fino:**
+- Você precisa que o modelo adote um tom específico ou estilo de escrita de forma consistente.
+- Seu domínio possui terminologia especializada que o modelo básico não lida bem.
+- Você deseja inferência mais rápida (o conhecimento é “incorporado” em vez de recuperado).
+
+**O processo:**
+1. Prepare um conjunto de dados de exemplos de alta qualidade em seu domínio (normalmente centenas a milhares de pares de entrada-saída).
+2. Escolha um modelo básico (por exemplo, Llama 3, Mistral).
+3. Treine por algumas épocas com baixa taxa de aprendizado para evitar esquecimentos catastróficos.
+4. Avalie os dados de teste mantidos.
+
+<FunFact>A Bloomberg construiu o BloombergGPT ajustando 363 bilhões de tokens de dados financeiros. O modelo resultante superou significativamente os modelos de uso geral em tarefas financeiras de PNL, como análise de sentimento de chamadas de lucros e reconhecimento de entidade nomeada em registros da SEC.
+</FunFact>
+
+## LoRA e QLoRA: ajuste fino eficiente
+
+O ajuste fino tradicional atualiza **todos** os parâmetros do modelo, exigindo enorme memória da GPU. Um modelo de 70 bilhões de parâmetros precisa de centenas de gigabytes apenas para armazenamento gradiente.
+
+**LoRA (adaptação de baixa classificação)** resolve isso com elegância:
+- Em vez de atualizar todos os pesos, LoRA congela o modelo original e adiciona pequenas **matrizes adaptadoras treináveis** a cada camada.
+- Esses adaptadores normalmente adicionam apenas 0,1–1% de parâmetros extras.
+- O resultado é um desempenho quase idêntico por uma fração do custo.
+
+**QLoRA** vai além ao quantizar o modelo congelado com precisão de 4 bits, reduzindo drasticamente os requisitos de memória. Você pode ajustar um modelo de parâmetros de 70B em uma única GPU de consumidor com 48 GB de VRAM.
+
+<Quiz question="Qual é a principal vantagem do LoRA em relação ao ajuste fino tradicional?" options="LoRA produz modelos mais precisos do que o ajuste fino completo|LoRA treina apenas pequenas matrizes de adaptadores, exigindo muito menos memória e computação da GPU|LoRA elimina a necessidade de dados de treinamento|LoRA funciona apenas com modelos pequenos com menos de 1 bilhão de parâmetros" answer="1" explanation="LoRA congela os pesos do modelo original e treina pequenas matrizes adaptadoras de baixa classificação. Isso reduz drasticamente o uso de memória e o tempo de treinamento, ao mesmo tempo que alcança um desempenho comparável ao ajuste fino completo." />
+
+## RAG: Geração Aumentada por Recuperação
+
+RAG adota uma abordagem completamente diferente. Em vez de alterar o modelo, você **concede acesso a documentos externos no momento da consulta**.
+
+**Como funciona o RAG:**
+1. **Índice** - Seus documentos são divididos em partes e convertidos em vetores numéricos (incorporação) usando um modelo de incorporação.
+2. **Armazenar** - Esses vetores são armazenados em um banco de dados de vetores para pesquisa rápida de similaridade.
+3. **Recuperar** - Quando um usuário faz uma pergunta, a consulta também é incorporada e os trechos do documento mais relevantes são recuperados.
+4. **Gerar** - Os pedaços recuperados são inseridos no prompt como contexto, e o LLM gera uma resposta baseada em seus documentos reais.
+
+**Quando usar RAG:**
+- Sua base de conhecimento muda frequentemente (novos documentos, políticas atualizadas).
+- Você precisa de citações de fontes e rastreabilidade.
+- Você deseja evitar o custo e a complexidade do ajuste fino.
+- A precisão dos factos é crítica e as alucinações devem ser minimizadas.
+
+<ThinkAboutIt>O RAG fornece ao modelo documentos relevantes no momento da consulta, mas o modelo ainda gera a resposta final. Como você pode verificar se a resposta do modelo realmente reflete o que os documentos recuperados dizem, em vez de alucinar além deles?
+</ThinkAboutIt>
+
+## Bancos de dados de vetores
+
+Os bancos de dados vetoriais são desenvolvidos especificamente para armazenar e pesquisar incorporações de alta dimensão:
+
+| Banco de dados | Tipo | Recurso principal |
+|----------|------|------------|
+| **Pinha** | Nuvem gerenciada | API simples e totalmente hospedada |
+| **Tecelagem** | Código aberto | Pesquisa híbrida (vetor + palavra-chave) |
+| **pgvetor** | Extensão PostgreSQL | Use seu banco de dados Postgres existente |
+| **Croma** | Código aberto | Leve, ótimo para prototipagem |
+| **Qdrant** | Código aberto | Alto desempenho, à base de ferrugem |
+
+A escolha de um banco de dados vetorial depende da sua escala, da infraestrutura existente e se você precisa de hospedagem gerenciada ou prefere soluções auto-hospedadas.
+
+<Quiz question="Em um sistema RAG, qual é a função do banco de dados vetorial?" options="Ele treina o modelo de linguagem com novos dados|Ele armazena incorporações de documentos e permite uma busca rápida por similaridade para contextos relevantes|Ele gera a resposta final às dúvidas do usuário|Ele substitui totalmente a necessidade de um modelo de linguagem" answer="1" explanation="O banco de dados vetorial armazena representações numéricas (incorporações) de seus documentos. Quando uma consulta chega, ela encontra rapidamente os pedaços de documentos mais semanticamente semelhantes, que são então fornecidos ao LLM como contexto para gerar uma resposta." />
+
+## Quando fazer o ajuste fino vs. quando usar o RAG
+
+| Consideração | Ajuste fino | RAG |
+|---------------|-------------|-----|
+| **Atualidade dos dados** | Estático (retreinar para atualizar) | Dinâmico (atualizar documentos a qualquer momento) |
+| **Custo** | Maior adiantamento (treinamento) | Menor custo inicial e contínuo de recuperação |
+| **Rastreabilidade** | Baixo (o conhecimento está implícito) | Alto (pode citar documentos fonte) |
+| **Estilo/comportamento** | Excelente para tom e formato | Limitado a instruções imediatas |
+| **Risco de alucinação** | Moderado | Inferior (fundamentado em documentos) |
+
+**Os melhores sistemas de produção geralmente combinam ambos.** Ajuste a linguagem e o estilo específicos do domínio e, em seguida, use o RAG para injetar conteúdo factual atualizado no momento da consulta.
+
+<FunFact>O Serviço Nacional de Saúde do Reino Unido testou sistemas RAG que conectam LLMs a diretrizes clínicas e bancos de dados de interação medicamentosa. Os médicos podem fazer perguntas em linguagem natural e receber respostas baseadas nas diretrizes mais recentes do NICE, completas com referências de páginas.
+</FunFact>
+
+## Exemplos do mundo real
+
+- **Suporte ao cliente** - Um varejista ajusta um modelo em tickets de suporte anteriores para obter tom e, em seguida, usa o RAG no catálogo de produtos e na política de devolução para obter respostas factuais.
+- **Análise de documentos jurídicos** - Os escritórios de advocacia usam o RAG para pesquisar milhões de documentos de casos, com o LLM resumindo precedentes relevantes para cada novo caso.
+- **Perguntas e respostas médicas** - Os profissionais de saúde usam o RAG em relação à literatura revisada por pares para que os médicos possam fazer perguntas em linguagem natural e receber respostas baseadas em evidências com citações.
+
+## Construindo um pipeline RAG de produção
+
+Um sistema RAG robusto requer mais do que apenas um banco de dados vetorial e um LLM. As principais considerações incluem:
+
+- **Estratégia de divisão** - A forma como você divide os documentos é extremamente importante. Conteúdo muito grande e irrelevante dilui o sinal; muito pequeno e você perde o contexto. A sobreposição de pedaços com sobreposição de 10 a 20% geralmente funciona bem.
+- **Reclassificação** - Após a recuperação inicial do vetor, um reclassificador de codificador cruzado pode reordenar os resultados por relevância, melhorando significativamente a qualidade da resposta.
+- **Avaliação** - Meça a precisão da recuperação (você encontrou os pedaços certos?) e a fidelidade da geração (a resposta refletiu os pedaços?) separadamente.
+- **Pesquisa híbrida** - A combinação de similaridade vetorial com a pesquisa tradicional por palavra-chave (BM25) detecta casos em que a pesquisa semântica por si só perde termos exatos ou siglas.
+
+<Quiz question="A base de conhecimento de uma empresa é atualizada diariamente com informações de novos produtos. Qual abordagem é mais apropriada?" options="Ajustando o modelo diariamente com base nos novos dados|Usando RAG para que o modelo sempre recupere os documentos mais recentes|Retreinar o modelo do zero a cada semana|Usando um modelo menor que não precisa de dados externos" answer="1" explanation="O RAG é ideal para alterações frequentes de dados porque você só precisa atualizar o índice do documento - sem necessidade de novo treinamento do modelo. O ajuste fino seria impraticável para atualizações diárias devido ao custo e ao tempo." />
+
+<ThinkAboutIt>Se um sistema RAG recuperar os documentos errados devido a um modelo de incorporação deficiente, o LLM gerará com segurança uma resposta baseada em contexto irrelevante. Como você poderia projetar salvaguardas para detectar e prevenir esse modo de falha?
+</ThinkAboutIt>

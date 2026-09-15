@@ -1,0 +1,147 @@
+---
+title: "Projete um sistema de notificação - Push, Email e SMS em escala de bilhões"
+description: "Projete um sistema de notificação multicanal escalável para lidar com notificações push, e-mail, SMS e no aplicativo com filas de mensagens, desduplicação e gerenciamento de preferências do usuário."
+order: 7
+difficulty: "advanced"
+duration: 22
+icon: "🔔"
+published: true
+machineTranslated: true
+---
+# Projete um sistema de notificação - Push, Email e SMS em escala de bilhões
+
+Os aplicativos modernos enviam bilhões de notificações diariamente em vários canais. Projetar este sistema ensina sobre filas de mensagens, integrações de terceiros e como lidar com falhas em grande escala.
+
+## Passo 1 – Levantamento de Requisitos
+
+### Requisitos Funcionais
+- Suporte a vários canais: notificações push, e-mail, SMS e no aplicativo
+- Os usuários podem configurar preferências de notificação e cancelar por canal
+- Mensagens modelo com personalização (por exemplo, "Olá {nome}, seu pedido foi enviado")
+- Suporte para notificações agendadas e imediatas
+
+### Requisitos Não Funcionais
+- **Escalabilidade** - lida com mais de 10 milhões de notificações por dia
+- **Confiabilidade** - sem notificações perdidas; entrega pelo menos uma vez
+- **Baixa latência** - notificações urgentes entregues em segundos
+- **Extensível** - fácil de adicionar novos canais (WhatsApp, Slack)
+
+<ThinkAboutIt>A entrega da notificação deve ser exatamente uma vez ou pelo menos uma vez? Considere a experiência do usuário ao receber um SMS duplicado em vez de perder um alerta crítico de segurança.</ThinkAboutIt>
+
+## Etapa 2 - Arquitetura de alto nível
+
+```
+Caller Services → Notification Service → Validation + Preference Check
+                                              ↓
+                                    Message Queue (Kafka)
+                                    ↓       ↓       ↓       ↓
+                                 Push    Email    SMS    In-App
+                                Worker   Worker  Worker  Worker
+                                  ↓        ↓       ↓       ↓
+                                 FCM   SendGrid  Twilio  WebSocket
+```
+
+<Illustration src="/images/lessons/design-notification-system.svg" alt="Arquitetura do sistema de notificação com serviços de chamada, serviço de notificação, filas de mensagens Kafka, trabalhadores específicos de canal e provedores terceirizados" caption="As filas de mensagens separam o serviço de notificação dos entregadores, permitindo escalonamento independente por canal" />
+
+### Componentes principais
+1. **Serviço de Notificação** - valida solicitações, verifica as preferências do usuário, renderiza modelos e enfileira mensagens
+2. **Filas de mensagens** - filas separadas por canal para dimensionamento e isolamento independentes
+3. **Delivery Workers**: trabalhadores específicos do canal que lidam com chamadas de API de terceiros
+4. **Serviço de Modelo** - armazena e renderiza modelos de notificação com substituição de variáveis
+
+## Etapa 3 - Aprofundamento: Componentes Principais
+
+### Preferências do usuário e cancelamento
+Armazene preferências por usuário e por tipo de notificação:
+
+```
+user_preferences:
+  user_id: "u123"
+  channels:
+    email: { enabled: true, quiet_hours: "22:00-08:00" }
+    push: { enabled: true }
+    sms: { enabled: false }
+  categories:
+    marketing: { enabled: false }
+    security: { enabled: true, override_quiet_hours: true }
+```
+
+O serviço de notificação verifica as preferências **antes** de enfileirar - nunca envie o que o usuário não deseja.
+
+### Filas prioritárias
+Nem todas as notificações são iguais. Use níveis de prioridade:
+- **Crítico** - alertas de segurança, códigos OTP → processados imediatamente
+- **Alto** - confirmações de pedidos, recibos de pagamento → segundos
+- **Médio** - interações sociais, comentários → minutos aceitáveis
+- **Baixo** - marketing, recomendações → podem ser agrupados
+
+<Quiz question="Por que o sistema de notificação deveria usar filas de mensagens separadas por canal em vez de uma única fila compartilhada?" options="Para reduzir custos de armazenamento|Para permitir escalonamento independente e evitar que um canal lento bloqueie outros|Porque Kafka requer tópicos separados por consumidor|Para tornar o sistema mais simples" answer="1" explanation="Se a entrega de SMS ficar mais lenta devido a uma interrupção do Twilio, uma fila compartilhada criaria um backlog que também atrasaria a entrega de push e e-mail. Filas separadas por canal fornecem isolamento de falhas e permitem que cada canal seja dimensionado de forma independente." />
+
+## Etapa 4 - Confiabilidade e tratamento de falhas
+
+### Desduplicação
+Evite notificações duplicadas usando uma chave de idempotência. Antes de processar, verifique se o ID de notificação existe em um armazenamento de desduplicação (Redis com TTL):
+
+```
+Key: "dedup:{notification_id}" → TTL: 24 hours
+If key exists → skip (already sent)
+If not → process and set key
+```
+
+### Tentar novamente com espera exponencial
+Os serviços de terceiros falham. Implemente novas tentativas com atrasos crescentes:
+
+```
+Attempt 1: immediate
+Attempt 2: wait 1 second
+Attempt 3: wait 4 seconds
+Attempt 4: wait 16 seconds
+Attempt 5: move to dead-letter queue
+```
+
+### Limitação de taxa por usuário
+Proteja os usuários do cansaço das notificações:
+- Máximo de 3 notificações push por hora por usuário
+- Máximo de 1 e-mail de marketing por dia
+- Notificações de segurança ignoram limites de taxa
+
+<FunFact>O Facebook envia mais de 10 bilhões de notificações push diariamente. Para lidar com isso, eles criaram um pipeline de notificação personalizado que pode processar milhões de mensagens por segundo, com caminhos de entrega separados para iOS (APNs) e Android (FCM).</FunFact>
+
+## Etapa 5 - Integração de terceiros
+
+| Canal | Provedor | Protocolo | Desafios |
+|--------|----------|----------|-----------|
+| Empurrar (iOS) | APNs | HTTP/2 | Gerenciamento de tokens, limites de push silenciosos |
+| Empurrar (Android) | FCM | http | Transmissão temática |
+| E-mail | SendGrid/SES | SMTP/API | Capacidade de entrega, filtros de spam |
+| SMS | Twilio | API REST | Custo por mensagem, conformidade regional |
+| No aplicativo | WebSocket | WS | Gerenciamento de conexão, buffer offline |
+
+### Pipeline de análise
+Acompanhe o ciclo de vida da notificação para cada mensagem:
+- **Criado** → **Em fila** → **Enviado** → **Entregue** → **Aberto** → **Clicado**
+
+Armazene eventos em um banco de dados de série temporal ou fluxo de eventos para relatórios de painel: taxas de entrega, taxas de abertura e taxas de cliques por canal e tipo de notificação.
+
+<Quiz question="Um sistema de notificação tenta novamente uma falha na entrega de SMS 3 vezes. Sem desduplicação, o que poderia acontecer se a primeira tentativa realmente fosse bem-sucedida, mas a confirmação fosse perdida?" options="A mensagem foi perdida permanentemente|O usuário recebe até 4 cópias do mesmo SMS|O sistema detecta automaticamente a duplicata|O mecanismo de nova tentativa evita esse cenário" answer="1" explanation="Se o provedor processou a solicitação, mas a confirmação foi perdida, o sistema pensa que houve falha e tenta novamente. Sem desduplicação no nível do provedor ou com chaves de idempotência, o usuário poderia receber o mesmo SMS diversas vezes." />
+
+## Etapa 6 - Gargalos e otimizações
+
+| Gargalo | Solução |
+|-----------|----------|
+| Limites de taxas de terceiros | Fila com throughput controlado por provedor |
+| Renderização de modelo em escala | Pré-renderizar e armazenar em cache modelos comuns |
+| Pesquisas de preferência por mensagem | Armazenar em cache as preferências do usuário no Redis |
+| Picos de tráfego de pico | Escalonar automaticamente trabalhadores com base na profundidade da fila |
+| Entrega entre regiões | Implantar trabalhadores próximos aos endpoints do provedor |
+
+<ThinkAboutIt>Como você projetaria um sistema de notificação que pudesse enviar 50 milhões de e-mails personalizados para uma promoção da Black Friday em um período de 2 horas, ao mesmo tempo em que entregaria alertas de segurança em tempo real com latência inferior a um segundo?</ThinkAboutIt>
+
+<Quiz question="Qual componente deve verificar as preferências de notificação do usuário?" options="O entregador, pouco antes de chamar a API de terceiros|O serviço chamador, antes de enviar para o serviço de notificação|O serviço de notificação, antes de enfileirar a mensagem|A fila de mensagens, durante o roteamento" answer="2" explanation="Verificar as preferências no serviço de notificação antes de enfileirar evita o desperdício de capacidade da fila e processamento do trabalhador em notificações que o usuário não deseja. Este é o primeiro ponto onde a lógica de preferência centralizada pode ser aplicada." />
+
+---
+
+## 📚 Leitura adicional
+- [Sistema de Notificação - Entrevista de Design de Sistema Vol. 1, cap. 10](https://bytebytego.com/) - Design abrangente do sistema de notificação de Alex Xu
+- [Como o Airbnb construiu uma plataforma de notificação](https://medium.com/airbnb-engineering) - arquitetura de notificação multicanal do mundo real
+- [Firebase Cloud Messaging Docs](https://firebase.google.com/docs/cloud-messaging) - compreensão da mecânica de entrega de notificações push

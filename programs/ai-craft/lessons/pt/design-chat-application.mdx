@@ -1,0 +1,166 @@
+---
+title: "Projete um aplicativo de bate-papo - comunicação em tempo real em grande escala"
+description: "Projete um sistema de bate-papo semelhante ao WhatsApp, lidando com milhões de usuários simultâneos com entrega em tempo real."
+order: 3
+difficulty: "advanced"
+duration: 25
+icon: "💬"
+published: true
+machineTranslated: true
+---
+## O prompt da entrevista
+
+*"Projete um aplicativo de bate-papo como WhatsApp ou Slack que suporte mensagens individuais, bate-papos em grupo e indicadores de presença online."*
+
+Este é um dos favoritos em entrevistas de design de sistema porque testa a comunicação em tempo real, o gerenciamento de conexões, o armazenamento em escala e as compensações do sistema distribuído - tudo em um único problema.
+
+## Passo 1: Levantamento de Requisitos
+
+**Requisitos funcionais:**
+- Mensagens individuais com entrega e recibos de leitura
+- Bate-papo em grupo (até 500 membros)
+- Indicadores de presença online/offline
+- Histórico de mensagens e pesquisa
+- Notificações push para usuários offline
+
+**Requisitos não funcionais:**
+- Baixa latência: mensagens entregues em 200 ms
+- Alta disponibilidade: 99,99% de tempo de atividade
+- Ordenação de mensagens garantida dentro de uma conversa
+- Suporta 50 milhões de conexões simultâneas
+
+<Callout>Sempre quantifique seus requisitos não funcionais com números específicos. "Entrega rápida" é vaga - "entrega abaixo de 200 ms" mostra que você entende o domínio.
+</Callout>
+
+## Etapa 2: Design da API
+
+Ao contrário dos sistemas somente REST, o chat requer **comunicação bidirecional**. Precisamos de dois protocolos:
+
+**API REST** (para operações que não sejam em tempo real):
+```
+POST /api/users/login
+GET  /api/conversations
+GET  /api/conversations/:id/messages?before=timestamp&limit=50
+POST /api/groups
+```
+
+**WebSocket** (para mensagens em tempo real):
+```
+CONNECT  ws://chat.example.com/ws?token=jwt
+SEND     { type: "message", to: "user_456", content: "Hello!" }
+RECEIVE  { type: "message", from: "user_123", content: "Hello!", ts: 1706000000 }
+SEND     { type: "ack", messageId: "msg_789", status: "read" }
+```
+
+## Etapa 3: gerenciamento de conexão WebSocket
+
+Cada usuário conectado mantém uma conexão WebSocket persistente. Com 50 milhões de usuários simultâneos, este é um desafio de engenharia significativo.
+
+**Servidores de conexão** (às vezes chamados de servidores gateway) mantêm conexões WebSocket. Cada servidor pode lidar com cerca de 50.000 a 100.000 conexões simultâneas, o que significa que precisamos de 500 a 1.000 servidores de conexão.
+
+Um **registro de conexão** (cluster Redis) mapeia cada usuário para seu servidor de conexão:
+```
+user_123 → ws-server-042
+user_456 → ws-server-187
+```
+
+Quando o usuário A envia uma mensagem ao usuário B, o fluxo é:
+1. A mensagem chega ao servidor de conexão de A via WebSocket
+2. O servidor procura o servidor de conexão de B no Redis
+3. A mensagem é roteada para o servidor de conexão de B por meio de mensagens internas
+4. O servidor de B envia a mensagem para o WebSocket de B
+
+<Illustration src="/images/lessons/design-chat-application.svg" alt="Arquitetura de chat mostrando servidores de conexão WebSocket, roteamento de mensagens e camadas de armazenamento" caption="As mensagens fluem através de servidores de conexão, com o Redis rastreando qual usuário está conectado e onde." />
+
+## Etapa 4: armazenamento de mensagens
+
+Os aplicativos de bate-papo geram enormes volumes de dados. O WhatsApp processa mais de 100 bilhões de mensagens diariamente.
+
+**Estratégia de armazenamento:**
+- **Mensagens recentes** - mantidas em um armazenamento de dados rápido (Cassandra ou HBase) particionado por ID de conversa
+- **Índice de mensagens** - permite pesquisa via Elasticsearch
+- **Arquivos de mídia** - armazenados em armazenamento de objetos (S3) com entrega CDN
+
+**Design de esquema (Cassandra):**
+```
+Table: messages
+  partition_key: conversation_id
+  clustering_key: message_timestamp (descending)
+  columns: sender_id, content, type, status
+```
+
+Esse design garante que todas as mensagens em uma conversa sejam colocadas na mesma partição, tornando as consultas de "carregamento de mensagens mais antigas" extremamente eficientes - apenas uma leitura sequencial dentro de uma partição.
+
+<Quiz question="Por que o Cassandra é uma escolha forte para armazenamento de mensagens de bate-papo em um banco de dados relacional como o PostgreSQL?" options="Cassandra oferece suporte a junções SQL para consultas complexas|Cassandra fornece transações ACID fortes|Cassandra lida com grande taxa de transferência de gravação e é dimensionada horizontalmente por design|Cassandra criptografa automaticamente todos os dados em repouso" answer="2" explanation="Os sistemas de bate-papo exigem muita gravação (bilhões de mensagens diariamente). A arquitetura distribuída do Cassandra lida com uma enorme taxa de transferência de gravação e é dimensionada horizontalmente adicionando nós, enquanto o PostgreSQL teria dificuldades com esse volume de gravação em um único primário." />
+
+## Etapa 5: Sistema de Presença
+
+Mostrar quem está online parece simples, mas é surpreendentemente complicado em grande escala. Você não pode pesquisar no banco de dados todos os usuários da sua lista de contatos a cada poucos segundos.
+
+**Abordagem de batimento cardíaco:**
+1. Os clientes conectados enviam uma pulsação a cada 30 segundos via WebSocket
+2. O servidor atualiza uma chave Redis com um TTL de 60 segundos: `presence:user_123 → online (TTL 60s)`
+3. Se nenhuma pulsação chegar, a chave expirará e o usuário aparecerá offline
+
+**Fan-out para atualizações de status:**
+Quando um usuário fica online, seu status deve ser enviado a todos os contatos que também estão online. Para um usuário com 500 contatos, isso significa verificar quais contatos estão on-line e enviar atualizações de presença apenas para eles. A **distribuição preguiçosa** evita a transmissão para usuários off-line.
+
+<FunFact>O recurso “visto pela última vez” do WhatsApp causou um drama social inesperado em todo o mundo. Alguns países viram as disputas de relacionamento aumentarem porque os parceiros podiam ver os carimbos de data/hora exatos da última atividade um do outro. O WhatsApp acabou adicionando controles de privacidade para ocultar essas informações.
+</FunFact>
+
+## Etapa 6: notificações push
+
+Quando um usuário está offline (sem WebSocket ativo), as mensagens ainda devem chegar até ele por meio de notificações push.
+
+O fluxo de mensagens muda:
+1. O registro de conexão mostra que o usuário B está offline
+2. A mensagem é armazenada no banco de dados com status “não entregue”
+3. Um serviço de notificação envia um push via APNs (iOS) ou FCM (Android)
+4. Quando o usuário B se reconecta, as mensagens não entregues são buscadas e enviadas via WebSocket
+5. Os recibos de entrega são devolvidos para confirmar o recebimento
+
+<ThinkAboutIt>Bate-papos em grupo com 500 membros apresentam um desafio de fan-out. Se uma mensagem for enviada para um grupo onde 400 membros estão offline, serão 400 notificações push. Como você os limitaria em lote e taxa para evitar sobrecarregar os serviços de notificação durante os horários de pico?
+</ThinkAboutIt>
+
+## Etapa 7: Noções básicas de criptografia de ponta a ponta
+
+Nas discussões das entrevistas, mencionar brevemente a criptografia E2E mostra consciência de segurança:
+
+- Cada usuário gera um **par de chaves pública/privada** em seu dispositivo
+- As mensagens são criptografadas com a chave pública do destinatário antes de sair do dispositivo do remetente
+- O servidor vê apenas texto cifrado - não pode ler o conteúdo da mensagem
+- Os bate-papos em grupo usam uma **chave de grupo compartilhada** que alterna quando os membros entram ou saem
+
+Isso significa que o armazenamento de mensagens do servidor contém apenas blobs criptografados, o que é realmente mais simples do ponto de vista da conformidade de dados.
+
+## Etapa 8: Escalando para milhões
+
+**Principais estratégias de escalonamento:**
+- **Servidores de conexão** escalam horizontalmente - adicione mais servidores à medida que os usuários crescem
+- **Roteamento de mensagens** usa Kafka ou Redis Pub/Sub para comunicação entre servidores
+- **Fragmentação de banco de dados** por ID de conversa distribui carga de armazenamento
+- **Distribuição geográfica** – implante servidores de conexão em diversas regiões para reduzir a latência
+- **Buffering de fila de mensagens** - absorve picos durante horários de pico de uso
+
+<Quiz question="Um usuário em Londres envia uma mensagem para um usuário em Tóquio. Qual é a maneira mais eficaz de minimizar a latência de entrega?" options="Armazene todas as mensagens em um único banco de dados centralizado|Implante servidores de conexão em ambas as regiões com roteamento de mensagens entre regiões|Forçar todas as conexões WebSocket através de servidores de Londres|Armazene em cache todas as mensagens na borda do CDN" answer="1" explanation="A implantação de servidores de conexão em diversas regiões significa que cada usuário se conecta a um servidor próximo. As mensagens são roteadas entre regiões por meio de links inter-regiões otimizados, minimizando a latência que cada usuário experimenta." />
+
+<Quiz question="Durante um grande evento esportivo, o volume de mensagens aumenta 10 vezes. Qual componente corre maior risco de se tornar um gargalo?" options="O CDN servindo ativos estáticos|Os servidores de conexão WebSocket (conexões já estabelecidas)|O caminho de gravação de armazenamento de mensagens (gravações de banco de dados)|O serviço de autenticação de usuário" answer="2" explanation="Os picos de volume de mensagens atingem com mais força o caminho de gravação do armazenamento. As conexões já estão estabelecidas, o CDN lida com conteúdo estático e a autenticação só é executada no login. O banco de dados deve absorver o aumento repentino de gravações." />
+
+## Dicas de entrevista para design de sistema de bate-papo
+
+1. **Comece com a decisão do WebSocket** - explique por que a pesquisa HTTP não funcionará nesta escala
+2. **Quantifique a capacidade de conexão** - mostre que você entende os limites do servidor (cerca de 50 a 100 mil conexões por servidor)
+3. **Entrega off-line de endereços** - muitos candidatos esquecem que os usuários nem sempre estão conectados
+4. **Mencione a ordem das mensagens** - ordem baseada em carimbo de data/hora com resolução de conflitos
+
+<ThinkAboutIt>O Slack e o WhatsApp adotam abordagens muito diferentes em relação ao histórico de mensagens. O WhatsApp armazena mensagens no dispositivo e não sincroniza o histórico completo com novos dispositivos. O Slack armazena tudo no servidor e fornece pesquisa completa. Quais são as compensações de privacidade, custo e experiência do usuário de cada abordagem?
+</ThinkAboutIt>
+
+## Principais conclusões
+
+- Os sistemas de chat requerem WebSockets para comunicação bidirecional em tempo real
+- O gerenciamento de conexões em escala precisa de um registro que mapeie usuários para servidores
+- A taxa de transferência de gravação e as consultas baseadas em partição do Cassandra são adequadas para o armazenamento de mensagens de bate-papo
+- Os sistemas de presença usam pulsações com expiração baseada em TTL no Redis
+- Notificações push lidam com entrega de mensagens offline
+- A distribuição geográfica e o dimensionamento horizontal atendem aos requisitos globais de latência

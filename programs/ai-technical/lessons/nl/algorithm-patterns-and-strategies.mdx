@@ -1,0 +1,294 @@
+---
+title: "Algoritmepatronen en strategieën"
+description: "Leer de 10 algoritmepatronen die 80% van de problemen bij het coderen van interviews oplossen – van schuifvenster tot dynamisch programmeren."
+order: 2
+difficulty: "intermediate"
+duration: 25
+icon: "🧩"
+published: true
+machineTranslated: true
+---
+# Algoritmepatronen en strategieën
+
+Bij het coderen van interviews gaat het niet om het onthouden van 500 LeetCode-oplossingen. Het gaat erom te herkennen welke van de tien patronen van toepassing is op het probleem dat voor je ligt. Zodra je het patroon hebt geïdentificeerd, schrijft de oplossingsstructuur zichzelf. In deze les wordt elk patroon uiteengezet – wanneer u het moet gebruiken, hoe u het kunt herkennen, en een concreet voorbeeld om uw begrip te verankeren. Beschouw deze patronen als lenzen: hoe meer je oefent met het kijken erdoorheen, hoe sneller elk nieuw probleem in beeld komt.
+
+## Patroon 1: twee wijzers
+
+**Herken het wanneer**: de invoer is gesorteerd (of kan worden gesorteerd) en u moet paren of subarrays vinden die aan een bepaalde voorwaarde voldoen.
+
+Twee pointers werken door één pointer aan elk uiteinde van de array te plaatsen (of aan het begin voor de "snelle/langzame" variant) en deze naar elkaar toe te verplaatsen op basis van een voorwaarde.
+
+```python
+# Three Sum: find all triplets that sum to zero
+def three_sum(nums):
+    nums.sort()
+    result = []
+    for i in range(len(nums) - 2):
+        if i > 0 and nums[i] == nums[i - 1]:
+            continue  # Skip duplicates
+        left, right = i + 1, len(nums) - 1
+        while left < right:
+            total = nums[i] + nums[left] + nums[right]
+            if total < 0:
+                left += 1
+            elif total > 0:
+                right -= 1
+            else:
+                result.append([nums[i], nums[left], nums[right]])
+                while left < right and nums[left] == nums[left + 1]:
+                    left += 1
+                left += 1
+                right -= 1
+    return result
+```
+
+**Tijd**: O(n²) — een enorme verbetering ten opzichte van de brute kracht O(n³).
+
+## Patroon 2: Schuifvenster
+
+**Herken het wanneer**: u moet een aaneengesloten subarray of subtekenreeks vinden die aan een bepaalde beperking voldoet (maximale som, bevat alle tekens, enz.).
+
+Het venster wordt groter door de rechteraanwijzer te verplaatsen en krimpt door de linkeraanwijzer te verplaatsen. De sleutel is weten wanneer je moet krimpen.
+
+```python
+# Longest substring without repeating characters
+def length_of_longest_substring(s: str) -> int:
+    char_index = {}
+    max_length = 0
+    left = 0
+    for right, char in enumerate(s):
+        if char in char_index and char_index[char] >= left:
+            left = char_index[char] + 1
+        char_index[char] = right
+        max_length = max(max_length, right - left + 1)
+    return max_length
+```
+
+<Callout>Het schuifvensterpatroon heeft een vaste sjabloon: initialiseer twee aanwijzers, vouw naar rechts uit, krimp naar links wanneer de beperking wordt overtreden en volg uw antwoord. Zodra u deze sjabloon heeft geïnternaliseerd, voelt elk schuifraamprobleem beheersbaar.</Callout>
+
+## Patroon 3: BFS (Breadth-First Search)
+
+**Herken het wanneer**: je hebt het kortste pad nodig in een ongewogen grafiek, het doorlopen van niveau-volgorde, of om buren laag voor laag te verkennen.
+
+BFS gebruikt een wachtrij en verwerkt knooppunten niveau voor niveau. Het garandeert het kortste pad in ongewogen grafieken.
+
+```python
+from collections import deque
+
+# Number of islands — BFS variant
+def num_islands(grid):
+    if not grid:
+        return 0
+    rows, cols = len(grid), len(grid[0])
+    count = 0
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                count += 1
+                queue = deque([(r, c)])
+                grid[r][c] = '0'
+                while queue:
+                    row, col = queue.popleft()
+                    for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                        nr, nc = row + dr, col + dc
+                        if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == '1':
+                            grid[nr][nc] = '0'
+                            queue.append((nr, nc))
+    return count
+```
+
+## Patroon 4: DFS (Depth-First Search)
+
+**Herken het wanneer**: u moet alle paden verkennen, de connectiviteit controleren, cycli detecteren of het probleem een ​​recursieve/boomstructuur heeft.
+
+DFS gaat eerst diep voordat hij wijd gaat. Het is van nature recursief en wordt prachtig in kaart gebracht voor het doorlopen van bomen en het teruglopen.
+
+```python
+# Path sum in a binary tree
+def has_path_sum(root, target_sum):
+    if not root:
+        return False
+    if not root.left and not root.right:
+        return target_sum == root.val
+    return (has_path_sum(root.left, target_sum - root.val) or
+            has_path_sum(root.right, target_sum - root.val))
+```
+
+<ThinkAboutIt>Wanneer zou u BFS boven DFS verkiezen, en omgekeerd? Overweeg: BFS vindt de kortste paden maar gebruikt O(width)-geheugen. DFS gebruikt O(diepte)-geheugen, maar garandeert niet de kortste paden. Hoe beïnvloedt de vorm van de grafiek uw keuze?</ThinkAboutIt>
+
+## Patroon 5: binair zoeken
+
+**Herken het wanneer**: de zoekruimte is gesorteerd of monotoon (als voorwaarde waar is op index i, geldt dit voor alle indices > i of < i).
+
+Binair zoeken is niet alleen bedoeld voor gesorteerde arrays; het werkt in elke monotone situatie. Dit inzicht ontsluit problemen zoals "minimale capaciteit om pakketten te verzenden" of "piekelement vinden".
+
+```python
+# Binary search on answer: minimum days to make m bouquets
+def min_days(bloom_day, m, k):
+    if m * k > len(bloom_day):
+        return -1
+
+    def can_make(days):
+        bouquets = flowers = 0
+        for bloom in bloom_day:
+            if bloom <= days:
+                flowers += 1
+                if flowers == k:
+                    bouquets += 1
+                    flowers = 0
+            else:
+                flowers = 0
+        return bouquets >= m
+
+    lo, hi = min(bloom_day), max(bloom_day)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if can_make(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+```
+
+<FunFact>Ondanks dat binair zoeken conceptueel een van de eenvoudigste algoritmen is, bleek uit een onderzoek van Jon Bentley dat slechts ongeveer 10% van de professionele programmeurs het bij de eerste poging correct kon implementeren. De meest voorkomende bug? Fouten op één na in de randvoorwaarden.</FunFact>
+
+## Patroon 6: Terugkeren
+
+**Herken het wanneer**: u moet alle combinaties, permutaties of subsets genereren die aan beperkingen voldoen. Het probleem luidt vaak 'alles vinden', 'alles genereren' of 'alle mogelijke opsommen'.
+
+Backtracking = DFS met snoeien. Je verkent een pad, en als dit een beperking schendt, ga je terug en probeer je de volgende optie.
+
+```python
+# Generate all valid combinations of n pairs of parentheses
+def generate_parenthesis(n):
+    result = []
+    def backtrack(current, open_count, close_count):
+        if len(current) == 2 * n:
+            result.append(current)
+            return
+        if open_count < n:
+            backtrack(current + '(', open_count + 1, close_count)
+        if close_count < open_count:
+            backtrack(current + ')', open_count, close_count + 1)
+    backtrack('', 0, 0)
+    return result
+```
+
+## Patroon 7: Dynamisch programmeren
+
+**Herken het wanneer**: Het probleem heeft overlappende deelproblemen en een optimale onderbouw. Klassieke signalen zijn onder meer 'minimale kosten', 'aantal manieren', 'langste/kortste reeks' of 'kun je het doel bereiken?'
+
+Het DP-recept: definieer de toestand, schrijf het herhalingspatroon op, beslis tussen top-down (memoisatie) en bottom-up (tabellering).
+
+```python
+# Longest Increasing Subsequence — O(n²) DP
+def length_of_lis(nums):
+    if not nums:
+        return 0
+    dp = [1] * len(nums)  # dp[i] = length of LIS ending at index i
+    for i in range(1, len(nums)):
+        for j in range(i):
+            if nums[j] < nums[i]:
+                dp[i] = max(dp[i], dp[j] + 1)
+    return max(dp)
+```
+
+<Callout>Als je vastzit aan een DP-probleem, begin dan eerst met brute-force recursie. Voeg vervolgens een memo toe. Het omzetten naar een bottom-up tabellering is een optimalisatiestap en niet de eerste stap. Deze aanpak voorkomt dat u verdwaalt in de tafelafmetingen.</Callout>
+
+## Patroon 8: Hebzuchtig
+
+**Herken het wanneer**: Het maken van de lokaal optimale keuze bij elke stap leidt tot de globaal optimale oplossing. Bij hebzuchtige problemen gaat het vaak om intervallen, planning of het maken van keuzes die niet opnieuw hoeven te worden bekeken.
+
+```python
+# Minimum number of meeting rooms (interval scheduling)
+def min_meeting_rooms(intervals):
+    starts = sorted([i[0] for i in intervals])
+    ends = sorted([i[1] for i in intervals])
+    rooms = max_rooms = 0
+    s = e = 0
+    while s < len(starts):
+        if starts[s] < ends[e]:
+            rooms += 1
+            max_rooms = max(max_rooms, rooms)
+            s += 1
+        else:
+            rooms -= 1
+            e += 1
+    return max_rooms
+```
+
+## Patroon 9: Topologische sortering
+
+**Herken het wanneer**: er zijn afhankelijkheden tussen taken (cursusvereisten, bouwvolgorde, taakplanning). De invoer is een gerichte acyclische grafiek (DAG).
+
+```python
+from collections import deque, defaultdict
+
+def course_order(num_courses, prerequisites):
+    graph = defaultdict(list)
+    in_degree = [0] * num_courses
+    for course, prereq in prerequisites:
+        graph[prereq].append(course)
+        in_degree[course] += 1
+
+    queue = deque([i for i in range(num_courses) if in_degree[i] == 0])
+    order = []
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbour in graph[node]:
+            in_degree[neighbour] -= 1
+            if in_degree[neighbour] == 0:
+                queue.append(neighbour)
+    return order if len(order) == num_courses else []
+```
+
+## Patroon 10: Union-Find (Disjoint Set)
+
+**Herken het wanneer**: u moet elementen groeperen, verbonden componenten detecteren of bepalen of twee elementen tot dezelfde set behoren, vooral wanneer verbindingen dynamisch worden toegevoegd.
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])  # Path compression
+        return self.parent[x]
+
+    def union(self, x, y):
+        px, py = self.find(x), self.find(y)
+        if px == py:
+            return False
+        if self.rank[px] < self.rank[py]:
+            px, py = py, px
+        self.parent[py] = px
+        if self.rank[px] == self.rank[py]:
+            self.rank[px] += 1
+        return True
+```
+
+<Quiz question="Je krijgt een probleem: 'Zoek de minimale venstersubstring van s die alle tekens in t bevat.' Welk patroon past het beste?" options="Twee Wijzers|Schuifraam|Dynamische programmering|Binaire zoekopdracht" answer="1" explanation="Dit is een klassiek schuifraamprobleem. U vergroot het venster door de rechteraanwijzer te verplaatsen om tekens op te nemen, en u verkleint het venster vanaf links zodra alle tekens in t zijn opgenomen, waarbij u overal de minimale venstergrootte volgt." />
+
+## Hoe u het juiste patroon herkent
+
+Bouw een beslisboom in je hoofd:
+
+1. **Is de invoer gesorteerd of kan deze worden gesorteerd?** → Twee pointers of binair zoeken
+2. **Heeft u een aaneengesloten subarray/substring nodig?** → Schuifvenster
+3. **Is het een grafiek/boom-doorgang?** → BFS (kortste pad) of DFS (alle paden)
+4. **"Vind alle combinaties/permutaties"?** → Teruggaan
+5. **"Minimale kosten / aantal manieren"?** → Dynamisch programmeren
+6. **Probleem met planning/interval?** → Hebzuchtig of sorterend
+7. **Afhankelijkheden of volgorde?** → Topologische sortering
+8. **Groepering / connectiviteit?** → Union-Find
+
+## Belangrijkste afhaalrestaurants
+
+- **Leer patronen, geen problemen**: 10 patronen dekken de overgrote meerderheid van de interviewvragen.
+- **Begin met brute kracht**: identificeer het patroon van de brute-force-aanpak en optimaliseer vervolgens.
+- **Oefen patroonherkenning**: voor elk probleem dat je oplost, geef je aan welk patroon het gebruikt.
+- **Combineer patronen**: veel middelmatige/moeilijke problemen gebruiken twee patronen samen (bijvoorbeeld binair zoeken + schuifvenster, BFS + topologische sortering).
+- **Verwoord uw redenering**: als u in interviews zegt "dit lijkt op een schuifraamprobleem omdat...", getuigt dit van sterk analytisch denken.

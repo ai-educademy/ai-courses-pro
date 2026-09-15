@@ -1,0 +1,32 @@
+---
+title: "Avalie e opere IA"
+description: "Torne a qualidade, a segurança, a latência e o custo mensuráveis ​​antes que um recurso de IA chegue aos usuários."
+order: 13
+difficulty: advanced
+duration: 45
+icon: "📈"
+published: true
+machineTranslated: true
+---
+## Demonstrações não são evidências
+
+Uma demonstração convincente prova apenas que um caminho funcionou uma vez. Um sistema de IA de produção precisa de um conjunto de avaliação repetível, rastreamentos, taxonomia de falhas e limites de liberação.
+
+## Crie um ciclo de avaliação
+
+Crie um conjunto de dados dourado que represente a intenção real do usuário, casos extremos, entradas adversárias e falhas conhecidas. Meça as dimensões separadamente:
+
+- **Recuperação:** recuperação, precisão, relevância, atualização e correção de permissão.
+- **Geração:** fundamentação, correção factual, integridade e qualidade da recusa.
+- **Comportamento do agente:** seleção de ferramentas, validade de argumentos, sucesso de tarefas, etapas desnecessárias e recuperação.
+- **Operações:** latência, uso de token, custo, taxa de erro e feedback do usuário.
+
+Use verificações automatizadas para cada versão e, em seguida, inspecione manualmente as falhas do representante. O LLM como juiz pode ajudar a dimensionar a revisão, mas precisa de uma rubrica, exemplos de calibração e verificações pontuais contra o julgamento humano.
+
+## Opere para a mudança
+
+Prompts de versão, modelos, ferramentas, configurações de recuperação e dados de avaliação. Rastreie solicitações sem armazenar conteúdo confidencial desnecessariamente. Implemente as alterações gradualmente, compare coortes e mantenha um caminho de reversão.
+
+## Construir desafio
+
+Pegue o RAG ou agente das lições anteriores. Adicione 20 casos dourados, três casos de segurança, medidas de latência e custo e um portão de liberação. Quebre o sistema deliberadamente, classifique as falhas e documente a próxima correção.

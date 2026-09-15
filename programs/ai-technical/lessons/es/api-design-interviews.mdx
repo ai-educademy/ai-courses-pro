@@ -1,0 +1,296 @@
+---
+title: "Entrevistas de diseño de API"
+description: "Diseñe API limpias e intuitivas bajo la presión de una entrevista: REST, GraphQL y los principios que hacen que las API sean excelentes."
+order: 4
+difficulty: "intermediate"
+duration: 18
+icon: "🔌"
+published: true
+machineTranslated: true
+---
+# Entrevistas de diseño de API
+
+Las API son contratos entre sistemas y diseñarlas bien es una habilidad que separa a los ingenieros senior de los junior. En una entrevista de diseño de API, no solo está escribiendo puntos finales: está demostrando que comprende cómo los consumidores usarán su sistema, cómo evolucionará con el tiempo y dónde están los modos de falla. Ya sea que le pidan diseñar una pasarela de pago o una API de plataforma de redes sociales, los principios son los mismos. Dominémoslos.
+
+## Principios de diseño de API REST
+
+REST sigue siendo el paradigma API dominante en las entrevistas. Los fundamentos que debes demostrar:
+
+### Diseño orientado a recursos
+
+Piense en sustantivos (recursos), no en verbos (acciones). Las URL deben representar cosas y los métodos HTTP deben representar acciones sobre esas cosas.
+
+```
+✅ Good:
+GET    /users/123              — Fetch user 123
+POST   /users                  — Create a new user
+PUT    /users/123              — Replace user 123
+PATCH  /users/123              — Partially update user 123
+DELETE /users/123              — Delete user 123
+
+❌ Bad:
+GET    /getUser?id=123
+POST   /createUser
+POST   /deleteUser/123
+```
+
+<Callout>Una jerarquía de recursos limpia cuenta la historia de la API. `/users/123/orders/456/items` se lee naturalmente: "El usuario 123 solicita los artículos 456". Si la estructura de su URL no se lee como una oración, reconsidere el diseño de su recurso.</Callout>
+
+### Métodos HTTP y códigos de estado
+
+Conozca estos detalles: los entrevistadores pondrán a prueba su precisión:
+
+| Método | ¿Idempotente? | Caso de uso |
+|---|---|---|
+| OBTENER | Sí | Leer un recurso (nunca mutar) |
+| PUBLICAR | No | Crear un recurso |
+| PONER | Sí | Reemplazo completo de un recurso |
+| PARCHE | No* | Actualización parcial |
+| BORRAR | Sí | Eliminar un recurso |
+
+*PATCH técnicamente no garantiza la idempotencia, aunque las implementaciones a menudo sí lo son.*
+
+**Códigos de estado que debes conocer**:
+- `200 OK` — Éxito con el cuerpo de respuesta
+- `201 Created` — Recurso creado (incluye encabezado `Location`)
+- `204 No Content` — Éxito sin cuerpo de respuesta (común para DELETE)
+- `400 Bad Request` — El cliente envió datos no válidos
+- `401 Unauthorized` — Se requiere autenticación
+- `403 Forbidden` — Autenticado pero no autorizado
+- `404 Not Found` — El recurso no existe
+- `409 Conflict` — Conflicto con el estado actual (duplicado, la versión no coincide)
+- `429 Too Many Requests` — Tarifa limitada
+- `500 Internal Server Error` — Algo se rompió de nuestro lado
+
+### Paginación
+
+Nunca devuelva listas ilimitadas. Tres patrones comunes:
+
+```json
+// Offset-based (simple but poor for large datasets)
+GET /users?offset=20&limit=10
+
+// Cursor-based (preferred for feeds and large datasets)
+GET /users?cursor=eyJ0aW1lIjoiMjAyNC0wMS0wMSJ9&limit=10
+
+// Response includes pagination metadata
+{
+  "data": [...],
+  "pagination": {
+    "next_cursor": "eyJ0aW1lIjoiMjAyNC0wMS0wMiJ9",
+    "has_more": true
+  }
+}
+```
+
+<ThinkAboutIt>¿Por qué se prefiere la paginación basada en cursor a la basada en desplazamiento para conjuntos de datos grandes y que se actualizan con frecuencia? Considere lo que sucede cuando se insertan nuevos elementos mientras un usuario pagina los resultados.</ThinkAboutIt>
+
+### Control de versiones
+
+Las API evolucionan. Diseña para ello desde el primer día.
+
+```
+// URL versioning (most common, explicit)
+GET /v1/users/123
+GET /v2/users/123
+
+// Header versioning (cleaner URLs, less discoverable)
+GET /users/123
+Accept: application/vnd.myapi.v2+json
+```
+
+En las entrevistas, el control de versiones de URL es la respuesta segura, a menos que el entrevistador explore alternativas específicamente.
+
+### Respuestas de error
+
+Las respuestas de error coherentes e informativas separan las API excelentes de las frustrantes:
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "The request body contains invalid fields.",
+    "details": [
+      {
+        "field": "email",
+        "message": "Must be a valid email address."
+      },
+      {
+        "field": "age",
+        "message": "Must be a positive integer."
+      }
+    ],
+    "request_id": "req_abc123"
+  }
+}
+```
+
+Incluya siempre un `request_id` para depurar y un `code` legible por máquina junto con el `message` legible por humanos.
+
+## GraphQL en entrevistas
+
+Las preguntas sobre GraphQL son cada vez más comunes, especialmente en empresas con necesidades complejas de frontend.
+
+**Ventajas clave para articular**:
+- Los clientes solicitan exactamente los datos que necesitan (sin exagerar)
+- El punto final único reduce los viajes de ida y vuelta
+- El esquema fuertemente tipado sirve como documentación.
+
+```graphql
+# Schema definition
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  orders(first: Int, after: String): OrderConnection!
+}
+
+type Order {
+  id: ID!
+  total: Float!
+  status: OrderStatus!
+  items: [OrderItem!]!
+}
+
+# Query — client specifies exactly what it needs
+query {
+  user(id: "123") {
+    name
+    orders(first: 5) {
+      edges {
+        node {
+          total
+          status
+        }
+      }
+    }
+  }
+}
+```
+
+**Compensaciones para discutir**: GraphQL agrega complejidad en el lado del servidor (cadenas de resolución, consultas N+1, el almacenamiento en caché es más difícil). Para API CRUD simples, REST suele ser la mejor opción.
+
+<FunFact>GraphQL se desarrolló internamente en Facebook en 2012 para resolver un problema específico de rendimiento móvil: el News Feed requería datos de muchos servicios backend diferentes, y realizar múltiples llamadas REST desde dispositivos móviles en redes lentas estaba acabando con el rendimiento. Fue de código abierto en 2015.</FunFact>
+
+## Conceptos básicos de seguridad de API
+
+Cada entrevista de diseño de API debe abordar el tema de la seguridad. Cubre estos elementos esenciales:
+
+### Autenticación y autorización
+
+```
+Authentication (AuthN): WHO are you?
+→ API Keys, OAuth 2.0, JWT tokens
+
+Authorisation (AuthZ): WHAT can you do?
+→ Role-based (RBAC), Scope-based, Resource-based
+```
+
+```
+// JWT in Authorization header
+GET /users/123/orders
+Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
+
+// API Key (for server-to-server)
+GET /analytics/reports
+X-API-Key: sk_live_abc123...
+```
+
+### Limitación de velocidad
+
+Proteja su API del abuso y garantice un uso justo:
+
+```
+// Rate limit headers in response
+HTTP/1.1 200 OK
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 847
+X-RateLimit-Reset: 1640995200
+
+// When limit is exceeded
+HTTP/1.1 429 Too Many Requests
+Retry-After: 60
+```
+
+Analice las estrategias de limitación de velocidad: por usuario, por IP, por punto final y límites escalonados para diferentes planes API.
+
+## Escenarios reales de entrevistas
+
+### Diseñar una API de pago
+
+Requisitos para aclarar:
+- ¿Qué métodos de pago? (Tarjeta, transferencia bancaria, billetera)
+- ¿Necesitamos idempotencia? (Sí, siempre para pagos)
+- ¿Qué pasa con los reembolsos y las disputas?
+
+```
+POST /v1/payments
+{
+  "amount": 4999,           // Always use smallest currency unit (cents)
+  "currency": "GBP",
+  "payment_method": "pm_card_visa_123",
+  "idempotency_key": "order_789_attempt_1",
+  "metadata": {
+    "order_id": "order_789"
+  }
+}
+
+Response: 201 Created
+{
+  "id": "pay_abc123",
+  "status": "processing",
+  "amount": 4999,
+  "currency": "GBP",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+<Callout>Para las API de pago, siempre hable sobre las claves de idempotencia. Se producen fallas en la red, los clientes vuelven a intentarlo y, sin idempotencia, les cobrará dos veces. La clave de idempotencia garantiza que volver a intentar la misma solicitud produzca el mismo resultado.</Callout>
+
+**Decisiones de diseño clave para discutir**:
+- Importes en la unidad monetaria más pequeña (centavos/peniques) para evitar problemas de punto flotante
+- Claves de idempotencia para reintentos seguros
+- Devoluciones de llamadas de Webhook para actualizaciones de estado asíncronas
+- Consideraciones de cumplimiento de PCI
+
+### Diseñar una API de redes sociales
+
+```
+// Post creation
+POST /v1/posts
+{
+  "content": "Hello world!",
+  "media_ids": ["media_123"],
+  "visibility": "public"
+}
+
+// Feed retrieval with cursor pagination
+GET /v1/feed?cursor=abc&limit=20
+
+// Interactions
+POST /v1/posts/{post_id}/likes
+DELETE /v1/posts/{post_id}/likes
+POST /v1/posts/{post_id}/comments
+```
+
+Analice el filtrado, la búsqueda y cómo se ensambla el feed (el modelo de extracción versus inserción se relaciona con el diseño del sistema).
+
+## Errores comunes en las entrevistas de diseño de API
+
+1. **Exponer la implementación interna**: no permita que los nombres de las columnas de la base de datos o los ID internos se filtren en la API. Utilice DTO.
+2. **Nombres inconsistentes**: elige `snake_case` o `camelCase` y mantenlo en todas partes.
+3. **Falta paginación**: cualquier punto final de la lista debe admitir la paginación.
+4. **Sin discusión sobre manejo de errores**: muestra tu opinión sobre los modos de falla.
+5. **Ignorar la compatibilidad con versiones anteriores**: agregar campos obligatorios a los puntos finales existentes interrumpe los clientes.
+6. **Usar verbos en URL**: `/createUser` en lugar de `POST /users`.
+
+<Quiz question="Un cliente envía una solicitud POST para crear un pedido, pero la red descarta la respuesta. El cliente vuelve a intentarlo con la misma clave de idempotencia. ¿Qué debería devolver el servidor?" options="400 Solicitud incorrecta: solicitud duplicada|201 Creado - con el pedido original (misma respuesta que la primera vez)|409 Conflicto: el orden ya existe|200 OK — con un nuevo pedido" answer="1" explanation="Con idempotencia, el servidor reconoce la clave duplicada y devuelve la misma respuesta 201 creada con los datos del pedido original. Este es el objetivo de las claves de idempotencia: hacer que los reintentos sean seguros y transparentes para el cliente." />
+
+## Conclusiones clave
+
+- **Piense en los recursos**: diseñe URL en torno a sustantivos, deje que los métodos HTTP manejen los verbos.
+- **Conozca sus códigos de estado**: los códigos de estado precisos muestran que comprende la semántica HTTP.
+- **Paginar siempre**: las respuestas de lista ilimitada son una señal de alerta en las entrevistas.
+- **Diseño para el fracaso**: la idempotencia, las respuestas de error y la limitación de la velocidad muestran un pensamiento de preparación para la producción.
+- **La seguridad no es opcional**: la autenticación, la autorización y la limitación de velocidad deben ser parte de cada discusión sobre el diseño de API.
+- **Articule las compensaciones**: REST frente a GraphQL, coherencia frente a flexibilidad, simplicidad frente a potencia: los entrevistadores quieren escuchar su razonamiento.

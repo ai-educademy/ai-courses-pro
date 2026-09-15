@@ -1,0 +1,189 @@
+---
+title: "Entrevista simulada de diseño de sistemas: una simulación de 45 minutos para un ingeniero senior"
+description: "Un tutorial completo sobre el diseño de sistemas para una plataforma de entrega de alimentos (requisitos, diseño de API, arquitectura, análisis profundos y escalamiento) estructurado exactamente como una entrevista real a un ingeniero senior."
+order: 9
+difficulty: "advanced"
+duration: 25
+icon: "🏗️"
+published: true
+machineTranslated: true
+---
+# Entrevista simulada de diseño de sistemas: una simulación de ingeniero senior de 45 minutos
+
+Las entrevistas de diseño de sistemas separan a los ingenieros superiores del resto. No existe una única respuesta correcta: los entrevistadores evalúan su **pensamiento estructurado**, su análisis de compensaciones y su capacidad para sortear la ambigüedad. Esta lección es una simulación completa de 45 minutos.
+
+## 🎯 El problema: diseñar un sistema de entrega de alimentos
+
+*"Diseñar una plataforma de entrega de alimentos como Uber Eats o Deliveroo que conecte a clientes, restaurantes y repartidores."*
+
+<Illustration src="/images/lessons/system-design-mock-interview.svg" alt="Arquitectura de alto nivel de un sistema de entrega de alimentos con servicios de usuario, restaurante, pedidos y conductor." caption="Los cuatro dominios principales de una plataforma de entrega de alimentos: cada uno es un contexto delimitado con su propio servicio." />
+
+## Fase 1: Recopilación de requisitos (5 minutos)
+
+**Nunca empieces a dibujar cuadros inmediatamente.** Primero haz preguntas aclaratorias:
+
+**Requisitos funcionales:**
+- Los clientes exploran restaurantes, ven menús, realizan pedidos y realizan un seguimiento de la entrega en tiempo real
+- Los restaurantes gestionan menús, aceptan/rechazan pedidos, actualizan el estado de preparación
+- Los conductores reciben solicitudes de entrega, navegan hasta la recogida/devolución y confirman la entrega.
+- Tiempo de entrega estimado (EDT) en tiempo real que se muestra durante todo el ciclo de vida del pedido.
+
+**Requisitos no funcionales:**
+- **Disponibilidad**: 99,99 % de tiempo de actividad (≈52 minutos de tiempo de inactividad por año)
+- **Latencia**: búsqueda < 200 ms, realización de pedidos < 500 ms, actualizaciones de ubicación < 1 s
+- **Escala**: 50 millones de usuarios activos mensuales, 5 millones de pedidos por día, 500 000 usuarios simultáneos en su punto máximo
+- **Consistencia**: consistencia eventual aceptable para la búsqueda; fuerte consistencia para los pagos
+
+<Quiz question="¿Por qué la coherencia final es aceptable para la búsqueda de restaurantes pero NO para el procesamiento de pagos?" options="La búsqueda es menos importante que los pagos|Mostrar un menú ligeramente obsoleto es tolerable; Cobrar a un usuario dos veces no es|La consistencia final siempre es más rápida|Las API de pago no admiten la coherencia final" answer="1" explanation="Que un usuario vea un restaurante que acaba de cerrar es un inconveniente menor; un nuevo intento lo soluciona. Pero procesar un pago dos veces causa un daño financiero real. El costo de la inconsistencia determina el modelo de consistencia." />
+
+## Fase 2: Diseño API (5 minutos)
+
+Defina los contratos principales antes de la arquitectura:
+
+```
+# Customer APIs
+GET    /api/v1/restaurants?lat={}&lng={}&cuisine={}  → Restaurant[]
+GET    /api/v1/restaurants/{id}/menu                  → Menu
+POST   /api/v1/orders                                 → Order
+GET    /api/v1/orders/{id}/track                      → OrderStatus + DriverLocation
+
+# Restaurant APIs
+PATCH  /api/v1/restaurants/{id}/menu/items/{itemId}   → MenuItem
+POST   /api/v1/orders/{id}/accept                     → Order
+POST   /api/v1/orders/{id}/ready                      → Order
+
+# Driver APIs
+POST   /api/v1/drivers/{id}/location                  → void (fire-and-forget)
+POST   /api/v1/deliveries/{id}/accept                 → Delivery
+POST   /api/v1/deliveries/{id}/complete               → Delivery
+```
+
+**Decisión clave**: utilice WebSockets para el seguimiento del conductor en tiempo real, REST para todo lo demás.
+
+## Fase 3: Arquitectura de alto nivel (10 minutos)
+
+### Servicios principales
+
+| Servicio | Responsabilidad | Base de datos |
+|---------|---------------|----------|
+| **Servicio de usuario** | Autenticación, perfiles, direcciones | PostgreSQL |
+| **Servicio de Restaurante** | Menús, disponibilidad, horarios | PostgreSQL + Elasticsearch |
+| **Servicio de pedidos** | Ciclo de vida del pedido, máquina de estados | PostgreSQL (fuerte consistencia) |
+| **Servicio de conductor** | Ubicación del conductor, disponibilidad, coincidencia | Redis (ubicación) + PostgreSQL |
+| **Servicio de pago** | Cargos, reembolsos, pagos en restaurantes | PostgreSQL (se requiere ACID) |
+| **Servicio de notificación** | Notificaciones push, SMS y correo electrónico | Consumidor de cola de mensajes |
+
+### Patrones de comunicación
+
+- **Síncrono**: API Gateway → servicios individuales (REST/gRPC)
+- **Asíncrono**: eventos de pedidos publicados en **Kafka** - consumidos por los servicios de pago, notificación y análisis
+- **En tiempo real**: actualizaciones de la ubicación del controlador a través de WebSocket → almacenadas en **Redis** con indexación geoespacial
+
+<FunFact>Uber procesa más de 1 millón de actualizaciones de ubicación por segundo en todo el mundo. Construyeron su propio sistema de indexación geoespacial (H3) utilizando cuadrículas jerárquicas hexagonales porque las consultas tradicionales de latitud/longitud no podían mantenerse a escala.</FunFact>
+
+## Fase 4: Análisis profundo: componentes críticos (15 minutos)
+
+### Algoritmo de coincidencia de controladores
+
+Cuando un pedido está listo para ser recogido, el servicio de emparejamiento debe asignar el conductor óptimo:
+
+```
+Score(driver) = w1 × (1 / distance_to_restaurant)
+              + w2 × driver_rating
+              + w3 × (1 / current_active_orders)
+              + w4 × acceptance_rate
+```
+
+**Implementación**: consulte Redis `GEORADIUS` para conductores dentro de un radio de 5 km del restaurante, califique a cada candidato y asigne el conductor disponible con la puntuación más alta. Si se rechaza, ofrézcalo al siguiente conductor con un tiempo de espera de 30 segundos.
+
+### Seguimiento de pedidos en tiempo real
+
+```
+Client ←→ WebSocket Gateway ←→ Driver Service
+                                    ↑
+                              Redis GEO Store
+                            (GEOADD, GEOPOS)
+```
+
+Los conductores publican las coordenadas GPS cada 4 segundos. La puerta de enlace WebSocket se suscribe a actualizaciones de ubicación para pedidos activos y las envía al dispositivo del cliente. **Redis Pub/Sub** maneja la distribución en abanico de manera eficiente.
+
+### Tiempo estimado de entrega
+
+EDT es una **predicción de múltiples etapas**:
+
+```
+EDT = restaurant_prep_time + driver_pickup_travel + dropoff_travel + buffer
+
+Where:
+- restaurant_prep_time  → ML model trained on historical order data per restaurant
+- driver_pickup_travel  → distance/traffic API (Google Maps, Mapbox)
+- dropoff_travel        → same routing API
+- buffer                → dynamic, increases during rain/peak hours
+```
+
+<ThinkAboutIt>El algoritmo de coincidencia anterior utiliza pesos fijos (w1–w4). ¿Cómo evolucionaría esto hacia un sistema de aprendizaje que optimice la velocidad de entrega Y la satisfacción del conductor simultáneamente?</ThinkAboutIt>
+
+### Procesamiento de pagos
+
+Los pagos siguen un **patrón de dos fases**:
+
+1. **Autorizar**: reservar fondos cuando se realiza el pedido (retener, no cobrar)
+2. **Captura**: cobra el importe real después de la confirmación de la entrega
+
+Esto maneja con elegancia las modificaciones de pedidos, cancelaciones y reembolsos parciales. Utilice una **clave de idempotencia** en cada solicitud de pago para evitar el doble cobro durante los reintentos.
+
+<Quiz question="¿Por qué utilizar un patrón de pago de dos fases (autorizar y luego capturar) en lugar de cobrar inmediatamente?" options="Es más rápido que una sola carga.|Maneja cancelaciones, modificaciones y reembolsos sin una lógica de reversión compleja.|Los proveedores de pago lo requieren|Reduce las tarifas de transacción" answer="1" explanation="Autorizar y luego capturar le permite retener fondos sin comprometerse. Si el restaurante cancela o el pedido cambia, usted simplemente libera la autorización y no es necesario procesar el reembolso. Esto simplifica drásticamente los casos extremos." />
+
+## Fase 5: Escalamiento y cuellos de botella (10 minutos)
+
+### Escalado de base de datos
+
+- **Servicio de pedidos**: fragmento por `order_id`: los pedidos son independientes, el escalado horizontal es sencillo
+- **Servicio de restaurante**: réplicas de lectura para consultas de búsqueda, Elasticsearch para búsqueda de texto completo y geoespacial
+- **Ubicación del controlador**: Redis Cluster con indexación geoespacial: lecturas puras en memoria en menos de milisegundos
+
+### Manejo de carga máxima (sobretensión)
+
+En las horas punta (viernes a las 19:00 horas, grandes eventos deportivos), el volumen de pedidos puede multiplicarse por 10:
+
+- **Pods de aplicaciones de escalado automático** basados en la profundidad de la cola, no en la CPU
+- **Aumento de precios** para equilibrar la oferta y la demanda: aumentar las tarifas de envío cuando la oferta de conductores es baja
+- **Límite de velocidad** por usuario para evitar abusos durante el pico
+- **Disyuntores** en servicios descendentes: degradación gradual por falla en cascada
+
+### Puntos únicos de falla
+
+| Componente | Mitigación |
+|-----------|-----------|
+| Puerta de enlace API | Múltiples instancias detrás de un balanceador de carga, controles de estado |
+| Kafka | Clúster de múltiples intermediarios con factor de replicación 3 |
+| Redis | Redis Sentinel para conmutación por error automática |
+| Proveedor de pagos | Proveedor secundario con respaldo automático |
+
+<Quiz question="Estás ampliando el servicio de pedidos. ¿Qué clave de fragmentación proporciona la MEJOR distribución de escritura?" options="restaurant_id: todos los pedidos de un restaurante en un fragmento|user_id: todos los pedidos de un usuario en un fragmento|order_id: órdenes distribuidas aleatoriamente entre fragmentos|city_id: todos los pedidos en una ciudad en un fragmento" answer="2" explanation="La fragmentación mediante order_id distribuye las escrituras de manera uniforme, ya que los ID de pedido se generan aleatoriamente (UUID o ID de copo de nieve). La fragmentación por restaurant_id o city_id crea puntos calientes: los restaurantes y las ciudades populares reciben un tráfico desproporcionado." />
+
+<ThinkAboutIt>Su entrevistador pregunta: "¿Qué sucede cuando el servicio de pago no funciona durante 30 segundos durante un período pico?" Analice el modo de falla exacto, cómo se ven afectados los pedidos y cómo se ve la recuperación.</ThinkAboutIt>
+
+## 💡 Consejos para la entrevista
+
+1. **Estructure su tiempo**: no dedique 30 minutos a los requisitos
+2. **Establezca explícitamente las compensaciones** - "Elegí X sobre Y porque..."
+3. **Comience de manera simple, luego escale**: primero diseñe para una carga de 1× y luego dirija 100×
+4. **Dibuja mientras hablas**: la comunicación visual es la mitad de la evaluación
+5. **Reconocer incógnitas** - "Necesitaría comparar esto, pero mi hipótesis es..."
+
+## 🎯 Conclusiones clave
+
+- Comience siempre con los requisitos: funcionales y no funcionales.
+- Diseñar contratos API antes que diagramas de arquitectura.
+- Profundizar en 2 o 3 componentes, no todos superficialmente
+- Cada elección arquitectónica implica compensaciones: nómbralas
+- Práctica con cronómetro: 45 minutos, sin prórrogas
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Entrevista sobre diseño de sistemas por Alex Xu](https://www.amazon.co.uk/System-Design-Interview-insiders-guide/dp/B08CMF2CQF): el libro de preparación para entrevistas sobre diseño de sistemas más práctico
+- [Blog de ingeniería de Uber](https://www.uber.com/en-GB/blog/engineering/): inmersiones profundas en sistemas del mundo real a escala masiva
+- [Diseño de aplicaciones intensivas en datos por Martin Kleppmann](https://dataintensive.net/) - La referencia definitiva sobre los fundamentos de los sistemas distribuidos

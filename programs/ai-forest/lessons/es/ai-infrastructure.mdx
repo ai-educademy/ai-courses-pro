@@ -1,0 +1,137 @@
+---
+title: "Infraestructura de IA: GPU, TPU y la batalla de la nube"
+description: "Comprenda el hardware y la infraestructura de la nube que impulsan la IA moderna: arquitecturas de GPU, comparaciones de plataformas en la nube, silicio personalizado y optimización de inferencias."
+order: 9
+difficulty: "advanced"
+duration: 18
+icon: "🖥️"
+published: true
+machineTranslated: true
+---
+# Infraestructura de IA
+
+Detrás de cada avance de la IA hay una enorme historia de infraestructura. Según se informa, entrenar GPT-4 costó más de 100 millones de dólares sólo en computación. Comprender el hardware, las plataformas en la nube y las técnicas de optimización que impulsan la IA moderna es esencial para cualquiera que construya a escala.
+
+## Por qué las GPU superan a las CPU en IA
+
+Las CPU están optimizadas para tareas secuenciales: unos pocos núcleos potentes que manejan una lógica compleja. Las GPU están optimizadas para el paralelismo: miles de núcleos simples ejecutan la misma operación con diferentes datos simultáneamente.
+
+El entrenamiento de redes neuronales es fundamentalmente la multiplicación de matrices a escala. Un único paso de entrenamiento para un modelo grande implica multiplicar matrices con miles de millones de elementos. Una CPU los procesa secuencialmente. Una GPU procesa miles de elementos en paralelo.
+
+Una GPU NVIDIA H100 ofrece aproximadamente **4000 TFLOPS** de computación FP8. Una CPU de servidor de alta gama gestiona quizás 2 TFLOPS. Para las cargas de trabajo vergonzosamente paralelas del aprendizaje profundo, las GPU ganan por tres órdenes de magnitud.
+
+<Illustration src="/images/lessons/ai-infrastructure.svg" alt="Diagrama comparativo que muestra CPU con pocos núcleos potentes versus GPU con miles de núcleos paralelos para operaciones matriciales" caption="Las GPU procesan miles de operaciones matriciales simultáneamente: la ventaja fundamental para las cargas de trabajo de IA." />
+
+## Dominio de NVIDIA
+
+NVIDIA controla aproximadamente entre el 80 y el 90 % del mercado de aceleradores de IA. Su foso no es sólo el hardware: es el **ecosistema CUDA**. Casi todos los marcos de aprendizaje automático (PyTorch, TensorFlow, JAX) se basan en CUDA. Cambiar a un competidor significa reescribir núcleos de bajo nivel y aceptar posibles incompatibilidades.
+
+### La gama de GPU
+
+| GPU | Memoria | Rendimiento del 8PM | Caso de uso |
+|-----|--------|-----------------|----------|
+| **A100** | 80GB HBM2e | 624 TFLOPS | Caballo de batalla de los centros de datos actuales |
+| **H100** | 80GB HBM3 | 3.958 TFLOPS | Entrenamiento modelo frontera |
+| **H200** | 141GB HBM3e | 3.958 TFLOPS | Inferencia LLM ligada a la memoria |
+| **B200** | 192GB HBM3e | 9.000 TFLOPS | Entrenamiento e inferencia de próxima generación |
+
+El salto de H100 a B200 representa un aumento de rendimiento de 2,3 veces, pero el verdadero cuello de botella suele ser el **ancho de banda de la memoria**, no el cálculo sin procesar. Los 141 GB de memoria HBM3e del H200 apuntan específicamente a la inferencia LLM donde la caché KV domina el uso de la memoria.
+
+<FunFact>Una sola GPU NVIDIA B200 cuesta aproximadamente entre 30.000 y 40.000 dólares. Un servidor DGX B200 con ocho de estas GPU cuesta más de 300.000 dólares. Según se informa, Meta encargó 350.000 GPU H100 para el entrenamiento de Llama, una inversión en hardware que supera los 10.000 millones de dólares.</FunFact>
+
+## TPU de Google
+
+Las unidades de procesamiento de tensores de Google son ASIC personalizados diseñados específicamente para operaciones matriciales. A diferencia de las GPU, que manejan gráficos y computación, las TPU están diseñadas específicamente para redes neuronales.
+
+- **TPU v5p**: el último chip de entrenamiento de Google, disponible en módulos de hasta 8960 chips conectados mediante interconexión de alta velocidad
+- **TPU v5e** - Costo optimizado para cargas de trabajo de inferencia
+- Ventaja clave: estrecha integración con JAX y el compilador XLA
+- Limitación de clave: solo disponible a través de Google Cloud; no hay opción local
+
+Google entrena todos sus modelos básicos (Gemini, PaLM) en TPU, lo que demuestra que compiten con NVIDIA en la frontera.
+
+## AMD y la competencia
+
+**MI300X** de AMD es la alternativa más creíble de NVIDIA:
+- Memoria HBM3 de 192 GB (más que la H100)
+- Fuerte pila de software ROCm (mejorando pero aún por detrás de CUDA)
+- Importante ventaja de precio: aproximadamente entre un 30 y un 40 % más barato que su equivalente NVIDIA
+- Ecosistema en crecimiento de marcos de aprendizaje automático con soporte nativo de ROCm (PyTorch, JAX)
+
+Microsoft, Meta y Oracle han adoptado MI300X para cargas de trabajo de inferencia. La ventaja de la memoria es particularmente convincente para modelos de lenguaje grandes donde la caché KV es el principal cuello de botella.
+
+El acelerador **Gaudi 3** de Intel también está ingresando a la mezcla, ofreciendo un rendimiento de capacitación competitivo con un enfoque en las relaciones precio-rendimiento empresarial. El mercado de aceleradores de IA finalmente se está convirtiendo en un ecosistema de múltiples proveedores.
+
+<Quiz question="¿Por qué el foso competitivo de NVIDIA no se trata sólo del rendimiento del hardware?" options="Fabrican sus propios chips|El ecosistema de software CUDA genera enormes costos de cambio|Son la única empresa que fabrica GPU.|Sus GPU son la opción más barata" answer="1" explanation="El dominio de NVIDIA se basa en el ecosistema CUDA: casi todos los marcos y bibliotecas de ML se basan en CUDA, lo que hace que el costo de cambiar a la competencia sea extremadamente alto incluso cuando el hardware alternativo es competitivo." />
+
+## Comparación de proveedores de nube
+
+Ninguna empresa ajena a los hiperescaladores puede permitirse el lujo de construir su propio clúster de GPU para la IA de vanguardia. La batalla de las nubes es feroz:
+
+| Plataforma | Oferta clave | Fuerza |
+|----------|-------------|----------|
+| **AWS SageMaker** | Plataforma de aprendizaje automático de un extremo a otro | La más amplia selección de GPU, chips personalizados Inferentia |
+| **GCP Vértice AI** | ML administrado con acceso a TPU | Disponibilidad de TPU, estrecha integración de BigQuery |
+| **Azure ML** | Plataforma de aprendizaje automático empresarial | Asociación OpenAI, cumplimiento empresarial |
+| **Laboratorios Lambda** | Nube de GPU para IA | Simplicidad, precios competitivos del H100 |
+| **Tejido central** | Nube nativa de GPU | Diseñado específicamente para IA, asociación con NVIDIA |
+
+**Las instancias puntuales** pueden reducir los costos de capacitación entre un 60 % y un 90 %. La contrapartida: su trabajo de formación puede verse interrumpido en cualquier momento. Marcos como **PyTorch Lightning** y **DeepSpeed** admiten puntos de control para reanudar el entrenamiento sin problemas después de la preferencia.
+
+## La escasez de GPU y la geopolítica
+
+La infraestructura de IA es ahora una cuestión geopolítica:
+
+- **TSMC** (Taiwán) fabrica casi todos los chips de IA avanzados para NVIDIA, AMD, Apple y Google. Una interrupción en TSMC detendría el progreso de la IA a nivel mundial.
+- Los **controles de exportación de Estados Unidos** restringen el acceso de China a chips avanzados (A100, H100 prohibidos). China está invirtiendo mucho en alternativas nacionales (Huawei Ascend, Biren).
+- **Los chips de NVIDIA específicos para China** (H20) ofrecen un rendimiento reducido para cumplir con las normas de exportación y al mismo tiempo mantener el acceso al mercado.
+- La **Ley CHIPS** (EE.UU.) y programas similares en la UE y Japón tienen como objetivo diversificar la fabricación de semiconductores.
+
+<ThinkAboutIt>Los chips de IA avanzados se fabrican casi exclusivamente en Taiwán. Si las tensiones geopolíticas interrumpieran esta cadena de suministro, ¿cómo afectaría el desarrollo de la IA a nivel mundial? ¿Qué países y empresas son más vulnerables?</ThinkAboutIt>
+
+## Startups de silicio personalizadas
+
+Varias startups están desafiando por completo el paradigma de GPU:
+
+- **Groq** - La arquitectura LPU (Unidad de procesamiento del lenguaje) ofrece inferencia determinista y de latencia ultrabaja. No se requieren lotes.
+- **Cerebras** - El chip a escala de oblea (del tamaño de un plato) elimina los cuellos de botella en el ancho de banda de la memoria para el entrenamiento.
+- **SambaNova**: arquitectura de flujo de datos reconfigurable optimizada para la IA empresarial.
+- **Graphcore** (adquirido por SoftBank): arquitectura IPU con SRAM masiva en chip para cargas de trabajo estructuradas en gráficos.
+
+Estos no son reemplazos de NVIDIA a día de hoy. Pero representan una auténtica innovación arquitectónica que podría remodelar el mercado a medida que las cargas de trabajo de IA se diversifiquen más allá de los transformadores.
+
+<Quiz question="¿Cuál es el principal cuello de botella para la inferencia de LLM que los nuevos diseños de GPU (H200, MI300X) abordan específicamente?" options="Velocidad de computación bruta (TFLOPS)|Capacidad de memoria y ancho de banda para la caché KV|Consumo de energía|Conectividad de red entre GPU" answer="1" explanation="La inferencia de LLM está ligada a la memoria, no a la computación. La caché KV crece linealmente con la longitud de la secuencia y el tamaño del lote, lo que hace que la capacidad de la memoria y el ancho de banda sean cuellos de botella críticos." />
+
+## Optimización de inferencia
+
+La formación aparece en los titulares, pero el dinero se gasta en la inferencia. Técnicas que reducen el coste de inferencia:
+
+- **Procesamiento por lotes dinámico**: agrupe las solicitudes entrantes para maximizar la utilización de la GPU
+- **Gestión de caché KV** - PagedAttention de vLLM evita la fragmentación de la memoria
+- **Decodificación especulativa** - Utilice un modelo pequeño para redactar tokens, verificado en paralelo por el modelo grande (aceleración de 2-3×)
+- **Procesamiento por lotes continuo**: procese nuevas solicitudes sin esperar a que se completen todas las solicitudes actuales
+- **Paralelismo de modelos**: divida modelos grandes en varias GPU para un servicio sensible a la latencia
+
+<Quiz question="¿Cómo acelera la decodificación especulativa la inferencia LLM?" options="Entrena el modelo más rápido.|Un modelo borrador pequeño propone tokens que el modelo grande verifica en paralelo|Reduce el tamaño del modelo mediante cuantificación.|Aumenta la capacidad de memoria de la GPU." answer="1" explanation="La decodificación especulativa utiliza un modelo pequeño y rápido para generar tokens candidatos. El modelo grande verifica múltiples candidatos en un solo paso hacia adelante, logrando una aceleración de 2 a 3 veces porque la verificación es más barata que la generación secuencial." />
+
+## El costo total de la infraestructura de IA
+
+El costo de la infraestructura va mucho más allá del alquiler de GPU. Una imagen completa incluye:
+
+- **Cómputo**: horas de GPU para entrenamiento e inferencia (normalmente entre el 60 % y el 70 % del coste total)
+- **Almacenamiento** - Datos de entrenamiento, puntos de control, artefactos de modelo y registros
+- **Redes** - Transferencia de datos entre GPU, regiones y usuarios finales
+- **Ingeniería**: ingenieros de aprendizaje automático, ingenieros de plataforma y personal de DevOps para operar la pila
+- **Electricidad** - Un único servidor H100 consume más de 10 kW; La potencia del centro de datos es una limitación cada vez mayor.
+
+A escala, empresas como Meta gastan más de 10.000 millones de dólares al año en infraestructura de IA. Para las empresas emergentes, los costos de la nube para una ejecución de capacitación del modelo de frontera única pueden exceder el millón de dólares. Comprender y optimizar este conjunto de costos es una competencia fundamental.
+
+<ThinkAboutIt>Su empresa necesita ofrecer un modelo de parámetros de 70 mil millones a 10 000 usuarios simultáneos con una latencia inferior a un segundo. Mapee su infraestructura: ¿cuántas GPU, qué marco de servicio, qué técnicas de optimización y cómo sería la factura mensual de la nube?</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Arquitectura de GPU NVIDIA H100 Tensor Core](https://resources.nvidia.com/en-us-tensor-core) - Profundización técnica en la arquitectura Hopper
+- [Documentación de Google Cloud TPU](https://cloud.google.com/tpu/docs/intro-to-tpu) - Guía oficial de arquitectura y programación de TPU
+- [Explicación de la escasez de GPU (semianálisis)](https://www.semianalysis.com/) - Análisis de la industria de la dinámica de oferta y demanda de chips de IA

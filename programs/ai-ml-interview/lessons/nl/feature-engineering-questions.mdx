@@ -1,0 +1,209 @@
+---
+title: "Technische vragen over functies"
+description: "Behandel vragen over functie-engineering-interviews met vertrouwen, van onbewerkte gegevens tot productieklare functies."
+order: 3
+difficulty: "intermediate"
+duration: 18
+icon: "🔧"
+published: true
+machineTranslated: true
+---
+# 🔧 Technische vragen over functies
+
+Hier is een geheim dat doorgewinterde ML-ingenieurs weten: **het model dat u kiest, doet er veel minder toe dan de functies die u eraan toevoegt.** Een eenvoudige logistische regressie met briljante functies zal bijna altijd een diep neuraal netwerk met slechte functies verslaan. Dat is de reden waarom interviewers dol zijn op technische vragen: ze testen of je de *data*-kant van machine learning begrijpt, en niet alleen de algoritmen.
+
+---
+
+## 🤔 Waarom interviewers belang hechten aan feature-engineering
+
+Feature engineering bevindt zich op het kruispunt van domeinkennis, data-intuïtie en technische vaardigheden. Wanneer een interviewer u vraagt ​​om 'functies te ontwerpen voor een voorspellingssysteem voor de verwachte aankomsttijd van ritten', testen ze het volgende:
+
+- Kun je creatief nadenken over welke signalen er in de data zitten?
+- Begrijpt u hoe ruwe gegevens worden omgezet in modelinvoer?
+- Kunt u problemen zoals lekkage, schaarsheid en kalkaanslag anticiperen?
+- Denkt u na over productiebeperkingen (latentie, opslag, versheid)?
+
+<Callout>Een gebruikelijk interviewpatroon: de interviewer beschrijft een zakelijk probleem en vraagt ​​u om over de kenmerken ervan te brainstormen. Begin met te vragen naar beschikbare gegevensbronnen. Dit laat zien dat u nadenkt over haalbaarheid, en niet alleen over theorie.
+</Callout>
+
+---
+
+## 📦 Soorten functies
+
+### Numerieke kenmerken
+
+Ruwe cijfers die rechtstreeks in modellen kunnen worden ingevoerd, maar vaak profiteren van transformatie:
+
+- **Standaardisatie**: centrum tot gemiddelde 0, schaal tot eenheidsvariantie (essentieel voor op afstand gebaseerde modellen zoals SVM, KNN)
+- **Logboektransformatie**: rechtsscheve distributies comprimeren (inkomen, paginaweergaven)
+- **Binning**: converteer continue waarden naar afzonderlijke buckets (leeftijd → leeftijdsgroep)
+
+```python
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+
+# Log transform for skewed feature
+df['log_income'] = np.log1p(df['income'])
+
+# Standardisation
+scaler = StandardScaler()
+df[['age_scaled', 'income_scaled']] = scaler.fit_transform(df[['age', 'income']])
+```
+
+### Categorische kenmerken
+
+Niet-numerieke gegevens zoals land, productcategorie of gebruikerssegment. Coderingsstrategie is belangrijk:
+
+| Werkwijze | Wanneer gebruiken | Pluspunten | Nadelen |
+|---|---|---|---|
+| One-Hot-codering | Lage kardinaliteit (< 20 categorieën) | Eenvoudig, geen ordinale aanname | Schaars, hoogdimensionaal |
+| Labelcodering | Ordinale categorieën (laag/midden/hoog) | Compact | Impliceert valse ordening voor niet-ordinale |
+| Doelcodering | Hoge kardinaliteit (stad, postcode) | Legt categorie-doelrelatie vast | Risico op datalekken |
+| Inbedding | Zeer hoge kardinaliteit, diepgaand leren | Leert dichte representaties | Neuraal netwerk nodig |
+
+<ThinkAboutIt>U bouwt een aanbevelingsmodel en een van uw kenmerken is `product_id` met 500.000 unieke waarden. Eén-hot-codering zou 500K verspreide kolommen creëren. Welke coderingsstrategieën zou u overwegen, en wat zijn de afwegingen?
+</ThinkAboutIt>
+
+### Tijdelijke kenmerken
+
+Op tijd gebaseerde gegevens zijn rijk aan signalen – als u deze op de juiste manier extraheert:
+
+- **Cyclische codering**: uur van de dag, dag van de week (gebruik sin/cos om de cyclische aard vast te leggen)
+- **Lag-kenmerken**: waarde op t-1, t-7, t-30 (cruciaal voor tijdreeksen)
+- **Rollingsstatistieken**: voortschrijdend gemiddelde over 7 dagen, voortschrijdend gemiddelde over 30 dagen
+- **Tijd sinds gebeurtenis**: dagen sinds laatste aankoop, uren sinds laatste login
+
+```python
+# Cyclical encoding for hour of day
+df['hour_sin'] = np.sin(2 * np.pi * df['hour'] / 24)
+df['hour_cos'] = np.cos(2 * np.pi * df['hour'] / 24)
+
+# Lag and rolling features
+df['sales_lag_7'] = df['sales'].shift(7)
+df['sales_rolling_mean_7'] = df['sales'].rolling(window=7).mean()
+```
+
+### Tekstfuncties
+
+Wanneer modellen tekstgegevens moeten gebruiken:
+
+- **Bag of Words / TF-IDF**: eenvoudig, interpreteerbaar, werkt goed met traditionele ML
+- **Woordinbedding**: Word2Vec, GloVe — dichte representaties die de semantische betekenis vastleggen
+- **Zininbedding**: BERT, Zin-BERT — contextuele representaties
+- **Handgemaakt**: aantal woorden, gemiddelde woordlengte, sentimentscore, aanwezigheid van specifieke trefwoorden
+
+### Interactiefuncties
+
+Combinaties van functies die relaties vastleggen die het model mogelijk niet zelfstandig leert:
+
+- **Functiekruisen**: `city × device_type` (mobiele gebruikers in de stad gedragen zich anders dan desktopgebruikers op het platteland)
+- **Ratio's**: `clicks / impressions` = klikfrequentie
+- **Verschillen**: `current_price - avg_price` = relatief prijssignaal
+
+<Quiz
+  question="Welke codering is het MEEST geschikt voor een 'stads'-kenmerk met 10.000 unieke waarden in een boommodel met gradiëntversterking?"
+  options="One-Hot-codering|Doelcodering|Binaire codering|Labelcodering"
+  answer="1"
+  explanation="Met 10.000 unieke steden creëert one-hot-codering een onpraktisch schaarse matrix. Doelcodering koppelt elke stad aan het gemiddelde van de doelvariabele, waardoor één enkel compact kenmerk ontstaat dat de relatie tussen stad en doel vastlegt. Het vereist een zorgvuldige regularisatie om gegevenslekken te voorkomen (gebruik binnen kruisvalidatieplooien)."
+/>
+
+---
+
+## 🧹 Ontbrekende gegevens verwerken
+
+Ontbrekende gegevens zijn overal in de productie aanwezig. Uw aanpak geeft uw ervaringsniveau weer:
+
+**Eenvoudige strategieën:**
+- Laat rijen vallen (alleen als ontbrekende gegevens zeldzaam en willekeurig zijn)
+- Vul met gemiddelde/mediaan (numeriek) of modus (categorisch)
+- Vul met een schildwachtwaarde (-1 of "ONBEKEND")
+
+**Betere strategieën:**
+- Maak een binaire indicatorfunctie: `is_income_missing` (het *feit* dat gegevens ontbreken, kan informatief zijn!)
+- Gebruik modelgebaseerde imputatie (KNN-imputer, iteratieve imputer)
+- Voor boomgebaseerde modellen verwerken veel implementaties ontbrekende waarden standaard
+
+```python
+# Indicator feature + median imputation
+df['is_income_missing'] = df['income'].isna().astype(int)
+df['income'] = df['income'].fillna(df['income'].median())
+```
+
+<FunFact>In de beroemde Netflix Prize-competitie was een van de krachtigste functies eenvoudigweg *of een gebruiker een film had beoordeeld* – en niet de beoordeling zelf. Het patroon van ontbrekende beoordelingen bracht gebruikersvoorkeuren beter aan het licht dan de beoordelingen zelf.
+</FunFact>
+
+---
+
+## 🔍 Methoden voor functieselectie
+
+Meer functies is niet altijd beter. Functieselectie vermindert overfitting, verbetert de latentie en maakt modellen interpreteerbaar.
+
+### Filtermethoden
+Rangschik functies op basis van statistische correlatie met het doel – snel maar negeert functie-interacties:
+- Correlatiecoëfficiënt (numerieke doelstellingen)
+- Wederzijdse informatie (werkt voor elk functietype)
+- Chi-kwadraattest (categorische kenmerken)
+
+### Wrapper-methoden
+Treinmodellen met verschillende subsets van functies – nauwkeurig maar duur:
+- Voorwaartse selectie: begin leeg, voeg de beste eigenschap één voor één toe
+- Achterwaartse eliminatie: begin met alle functies en verwijder de minst nuttige tegelijk
+
+### Ingebedde methoden
+Functieselectie is ingebouwd in het modeltrainingsproces:
+- **L1-regularisatie** (Lasso): brengt onbelangrijke kenmerkgewichten naar exact nul
+- **Op bomen gebaseerd belang**: bomen met gradiëntverbetering rapporteren belangrijkheidsscores van functies
+
+```python
+from sklearn.feature_selection import SelectKBest, mutual_info_classif
+
+# Select top 20 features by mutual information
+selector = SelectKBest(mutual_info_classif, k=20)
+X_selected = selector.fit_transform(X, y)
+```
+
+<Quiz
+  question="U ontdekt dat het toevoegen van een 'current_timestamp'-functie aan uw model de prestaties van de testset dramatisch verbetert. Wat is de meest waarschijnlijke verklaring?"
+  options="Tijdstempels helpen het model echt om temporele patronen te leren|Dit is waarschijnlijk een datalek: het tijdstempel correleert met de trein/test-splitsing|Het model heeft geleerd de trainingsgegevens te onthouden|Uw testset is te klein"
+  answer="1"
+  explanation="Een onbewerkte tijdstempel die monotoon toeneemt, kan fungeren als proxy voor de trein-/testsplitsing zelf, waardoor informatie lekt over de vraag of een monster zich in de trainings- of testset bevindt. Dit is een klassiek voorbeeld van datalekken die de testprestaties opdrijven, maar mislukken tijdens de productie."
+/>
+
+---
+
+## 🏭 Functie-engineering in productie
+
+Functie-engineering op interviewniveau stopt niet bij notebooks. Productieoverwegingen zijn onder meer:
+
+### Functiewinkels
+
+Een feature store is een gecentraliseerd systeem voor het beheren, opslaan en aanbieden van features. Het lost op:
+- **Consistentie**: dezelfde functiedefinitie bij training en service
+- **Herbruikbaarheid**: teams delen functies in plaats van ze opnieuw te implementeren
+- **Versheid**: geplande pipelines houden functies up-to-date
+
+Populaire tools: **Feast**, **Tecton**, **Hopsworks**, **AWS SageMaker Feature Store**
+
+### Training-serving scheef
+
+De gevaarlijkste productiebug in ML: functies worden anders berekend tijdens training dan tijdens het serveren. Veelvoorkomende oorzaken:
+- Verschillende codepaden voor batch (training) en realtime (serving)
+- Verouderde functiewaarden in het weergavepad
+- Verschillende bibliotheekversies tussen omgevingen
+
+<Callout>Wanneer een interviewer vraagt ​​naar feature-engineering in de productie, vermeld dan altijd training-serving skew. Het is het probleem dat de meeste kandidaten over het hoofd zien en waar de meeste productie-ML-systemen last van hebben.
+</Callout>
+
+---
+
+## 🔑Belangrijkste afhaalrestaurants
+
+- **Functies overtroeven algoritmen** — investeer meer tijd in feature-engineering dan in modelarchitectuur
+- **Koppel codering aan kardinaliteit**: one-hot voor laag, doelcodering of inbedding voor hoog
+- **Ontbrekende gegevens zijn een functie**, niet alleen een probleem: maak indicatorvariabelen
+- **Let op lekkage**: als een functie te mooi lijkt om waar te zijn, is dat waarschijnlijk ook het geval
+- **Denk aan de productie**: featurestores, scheve training-serving en latentiebeperkingen
+- **Oefen brainstormfuncties** voor veelvoorkomende problemen: aanbevelingen, fraude, verwachte aankomsttijd, zoeken
+
+<ThinkAboutIt>Kies een product dat u dagelijks gebruikt (bijvoorbeeld Spotify, Uber, Amazon). Welke functies zou u ontwikkelen om te voorspellen of u dat product morgen zult gebruiken? Denk aan gebruikersfuncties, tijdelijke functies en interactiefuncties.
+</ThinkAboutIt>

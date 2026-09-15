@@ -1,0 +1,173 @@
+---
+title: "Versuche und Präfixbäume – Autovervollständigung, Rechtschreibprüfung und IP-Routing"
+description: "Beherrschen Sie die Trie-Datenstruktur für blitzschnelle Präfixsuche. Erstellen Sie automatische Vervollständigung und Platzhaltersuche und erkunden Sie komprimierte Versuche und IP-Routing."
+order: 6
+difficulty: "advanced"
+duration: 18
+icon: "🌳"
+published: true
+machineTranslated: true
+---
+## Was ist ein Versuch?
+
+Ein **trie** (ausgesprochen „try“) ist eine baumartige Struktur, bei der jeder Knoten ein einzelnes Zeichen darstellt. Pfade von der Wurzel zu markierten Knoten buchstabieren gespeicherte Wörter. Im Gegensatz zu Hash-Maps können Sie mit Versuchen *alle Wörter abfragen, die ein Präfix haben*, ohne jeden Schlüssel zu scannen.
+
+```
+        root
+       / | \
+      a   b   c
+     /     \
+    p       a
+   / \       \
+  p   e      t
+  |
+  l
+  e
+```
+
+Jeder Pfad kodiert ein Wort: **Apfel**, **Affe**, **Fledermaus**, **Katze**.
+
+## Die TrieNode-Klasse
+
+Jeder Knoten enthält eine Karte von Kindern und ein Flag, das die Wortvervollständigung anzeigt.
+
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end = False
+```
+
+Ein vollständiger Trie umschließt dies mit Einfüge-, Such- und Präfixoperationen.
+
+## Kernbetrieb
+
+### Einfügen - O(m), wobei m = Wortlänge
+
+Gehen Sie Zeichen für Zeichen durch, erstellen Sie nach Bedarf Knoten und markieren Sie dann den letzten Knoten.
+
+```python
+def insert(self, word):
+    node = self.root
+    for ch in word:
+        if ch not in node.children:
+            node.children[ch] = TrieNode()
+        node = node.children[ch]
+    node.is_end = True
+```
+
+### Suchen und beginnt mit
+
+**Suche** folgt dem Pfad und prüft `is_end`. **startsWith** prüft nur, ob der Pfad existiert – es ist kein `is_end = True` erforderlich.
+
+<Quiz
+  question="Was unterscheidet „search('app‘)” von „startsWith(‘app‘)”, wenn „apple” gespeichert ist, „app” jedoch nicht?"
+  options="Die Suche gibt „True” zurück, „startsWith” gibt „False” zurück|Beide geben True zurück|Die Suche gibt „False” zurück, „startsWith” gibt „True” zurück|Beide geben False zurück"
+  answer="2"
+  explanation="Die Suche prüft is_end (False für „app”), während „startsWith” nur den Pfad benötigt, um vorhanden zu sein."
+/>
+
+## Automatische Vervollständigung mit DFS
+
+Um Vervollständigungen für ein Präfix vorzuschlagen, navigieren Sie zum Präfixknoten und führen Sie dann DFS aus, um alle darunter liegenden Wörter zu sammeln.
+
+```python
+def autocomplete(self, prefix):
+    node = self._find(prefix)
+    if not node:
+        return []
+    results = []
+    self._dfs(node, prefix, results)
+    return results
+```
+
+Der `_dfs`-Helfer führt eine Rekursion durch untergeordnete Elemente durch und hängt an Ergebnisse an, wann immer `is_end` `True` ist.
+
+<ThinkAboutIt>Wie würden Sie die automatische Vervollständigung auf die Top-K-häufigsten Vorschläge beschränken? Welche zusätzlichen Daten würde jeder Knoten benötigen?</ThinkAboutIt>
+
+## Platzhaltersuche – Wortwörterbuch
+
+LeetCodes **Design-Datenstruktur zum Hinzufügen und Suchen von Wörtern** fordert Sie auf, `.` als Platzhalter für ein beliebiges einzelnes Zeichen zu verwenden.
+
+Wenn Sie während der Suche auf `.` klicken, verzweigen Sie in *jedes* untergeordnete Element und fahren Sie rekursiv fort. Dies verwandelt eine einfache Durchquerung in eine begrenzte Backtracking-Suche.
+
+```python
+def search_wild(self, node, word, i):
+    if i == len(word):
+        return node.is_end
+    if word[i] == '.':
+        return any(
+            self.search_wild(c, word, i + 1)
+            for c in node.children.values()
+        )
+    if word[i] not in node.children:
+        return False
+    return self.search_wild(
+        node.children[word[i]], word, i + 1
+    )
+```
+
+## Längstes gemeinsames Präfix
+
+Gehen Sie den Versuch von der Wurzel an. Das längste gemeinsame Präfix endet am ersten Knoten mit mehr als einem Kind oder einer `is_end`-Flagge.
+
+<Illustration src="/images/lessons/tries-and-prefix-trees.svg" alt="Trie-Struktur mit hervorgehobenen gemeinsamen Präfixpfaden" caption="Gemeinsam genutzte Präfixpfade laufen in einem einzigen Zweig zusammen, bis es zu einer Teilung kommt." />
+
+## IP-Routing mit Versuchen
+
+Router speichern IP-Präfixe in einem **binären Versuch** – jedes Bit (0 oder 1) bildet einen Zweig. Die längste Präfixübereinstimmung findet die spezifischste Route. So finden Ihre Pakete ihren Weg durch das Internet.
+
+<FunFact>Internet-Backbone-Router führen pro Sekunde Milliarden von Suchvorgängen nach der längsten Präfixübereinstimmung durch und nutzen dabei hardwareoptimierte Versuche, die in spezielle Chips, sogenannte TCAMs, integriert sind.</FunFact>
+
+## Komprimierte Versuche (Radix-Bäume)
+
+Standard versucht, Platz bei Ketten mit nur einem Kind zu verschwenden. Ein **Basisbaum** führt diese Ketten zu einzelnen Kanten zusammen, in denen Beschriftungen mit mehreren Zeichen gespeichert werden.
+
+```
+Standard:  r → u → n → n → i → n → g
+Radix:     r → "unning"
+```
+
+Dies reduziert die Anzahl der Knoten erheblich und wird von Linux-Kernel-Routing-Tabellen und HTTP-Routern wie Go's `httprouter` verwendet.
+
+## Zeit- und Raumkomplexität
+
+| Betrieb | Versuchen | Hash-Karte |
+|-------------|--------|----------|
+| Einfügen | O(m) | O(m) |
+| Suche | O(m) | O(m) |
+| Präfixabfrage| O(m+k) | O(n·m) |
+
+Dabei ist *m* die Wortlänge, *k* die Ergebnisanzahl und *n* die Gesamtzahl der Schlüssel. Bei präfixintensiven Workloads dominieren Versuche.
+
+<Quiz
+  question="Welches Szenario profitiert am wenigsten von einem Versuch gegenüber einer Hash-Map?"
+  options="Vorschläge zur automatischen Vervollständigung|Genaue Schlüsselwertsuche|Rechtschreibprüfung mit Präfixabgleich|Alle Wörter finden, die mit „pre” beginnen"
+  answer="1"
+  explanation="Für exakte Suchvorgänge ohne Präfixabfragen ist eine Hash-Map einfacher und ebenso schnell."
+/>
+
+## Wann man zu einem Versuch greifen sollte
+
+- Präfixbasierte Abfragen (Autocomplete, Type-Ahead)
+- Wildcard- oder Regex-ähnlicher Abgleich von Zeichenfolgen
+– Längstes gemeinsames Präfix in einer Menge
+- IP-Routing/längste Präfix-Übereinstimmung
+- Rechtschreibprüfung mit Variationen der Bearbeitungsentfernung
+
+<Quiz
+  question="Welche zeitliche Komplexität hat das Einfügen von n Wörtern der durchschnittlichen Länge m in einen Versuch?"
+  options="An)|O(m)|O(n × m)|O(n × m²)"
+  answer="2"
+  explanation="Jedes Wort benötigt O(m) zum Einfügen, und Sie tun dies n-mal, was O(n × m) ergibt."
+/>
+
+<ThinkAboutIt>Wenn der Speicher Ihr Engpass ist, wann würden Sie eine Hash-Map auswählen, die vollständige Schlüssel über einen Versuch hinweg speichert, und wann würde ein komprimierter Versuch gewinnen?</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+
+- [Trie-Datenstruktur – Wikipedia](https://en.wikipedia.org/wiki/Trie) – Umfassende Übersicht über Trie-Varianten und -Geschichte
+- [Implement Trie – LeetCode 208](https://leetcode.com/problems/implement-trie-prefix-tree/) – Das klassische Trie-Implementierungsproblem
+- [Radix-Bäume im Linux-Kernel](https://lwn.net/Articles/175432/) – Wie komprimierte Versuche Kernel-Interna antreiben

@@ -1,0 +1,150 @@
+---
+title: "Pila y cola monótonas: el siguiente gran elemento y más allá"
+description: "Aprenda los patrones monótonos de pila y cola para resolver problemas del siguiente elemento mayor, temperaturas diarias, histogramas y ventanas deslizantes en tiempo O(n)."
+order: 8
+difficulty: "advanced"
+duration: 19
+icon: "📊"
+published: true
+machineTranslated: true
+---
+## ¿Qué hace que una pila sea monótona?
+
+Una **pila monótona** mantiene los elementos en orden estrictamente creciente o decreciente de abajo hacia arriba. Antes de insertar un nuevo elemento, elimina todo lo que viole el invariante. Esta única idea desbloquea soluciones O(n) para problemas que parecen requerir O(n²).
+
+```
+Decreasing stack processing [2, 1, 5, 3, 4]:
+
+Push 2 → [2]
+Push 1 → [2, 1]         (1 < 2, invariant holds)
+Pop 1, Pop 2, Push 5 → [5]  (5 > both)
+Push 3 → [5, 3]
+Pop 3, Push 4 → [5, 4]  (4 > 3)
+```
+
+## Siguiente elemento mayor
+
+Para cada elemento, busque el primer elemento más grande a su derecha. La fuerza bruta escanea hacia la derecha para cada posición: O(n²). Una pila monótona decreciente lo hace de una sola vez.
+
+```python
+def next_greater(nums):
+    result = [-1] * len(nums)
+    stack = []
+    for i, num in enumerate(nums):
+        while stack and nums[stack[-1]] < num:
+            result[stack.pop()] = num
+        stack.append(i)
+    return result
+```
+
+Cuando sacamos el índice `j`, el elemento actual es el siguiente mayor, garantizado porque todo lo que hay entre ellos era más pequeño (se abrieron antes o nunca se bloquearon `j`).
+
+<Quiz
+  question="Para la entrada [4, 2, 1, 5], ¿qué contiene la pila monótona justo ANTES de procesar 5?"
+  options="[4, 2, 1]|[4]|[1]|[5]"
+  answer="0"
+  explanation="4 > 2 > 1, por lo que los tres se ubican en la pila decreciente. Cuando llega 5, todos desaparecen porque 5 es mayor que cada uno."
+/>
+
+## Temperaturas diarias (LeetCode 739)
+
+*Dadas las temperaturas diarias, encuentre cuántos días faltan para que llegue un día más cálido.* Este es el siguiente elemento mayor con índices: la respuesta para el índice `j` es `i − j` cuando `j` aparece junto al índice `i`.
+
+## Problema de extensión de existencias
+
+*Para cada día, ¿cuántos días consecutivos (incluido hoy) tuvieron un precio ≤ el precio de hoy?* Utilice una pila decreciente monótona que almacene `(price, index)`. Cuando aparece, la brecha entre el índice actual y la nueva parte superior de la pila proporciona el intervalo.
+
+<ThinkAboutIt>El problema del stock span procesa elementos de izquierda a derecha, pero encuentra información sobre el lado izquierdo. ¿Cómo codifica la pila "mirar hacia atrás" mientras avanza?</ThinkAboutIt>
+
+## Rectángulo más grande en histograma
+
+El **Rectángulo más grande en histograma** de LeetCode es la joya de la corona de los problemas de pila monótona.
+
+**Información clave:** para cada barra, encuentre hasta qué punto puede extenderse hacia la izquierda y hacia la derecha como la barra más corta. Utilice una pila creciente: cuando una barra aparece, la barra emergente define su límite derecho y la nueva parte superior de la pila define su límite izquierdo.
+
+```python
+def largest_rectangle(heights):
+    stack, max_area = [], 0
+    for i, h in enumerate(heights + [0]):
+        while stack and heights[stack[-1]] > h:
+            height = heights[stack.pop()]
+            width = i if not stack else i - stack[-1] - 1
+            max_area = max(max_area, height * width)
+        stack.append(i)
+    return max_area
+```
+
+El centinela `[0]` al final obliga a procesar todas las barras restantes.
+
+<Illustration src="/images/lessons/monotonic-stack-and-queue.svg" alt="Barras de histograma con el rectángulo más grande resaltado" caption="La pila monótona encuentra el rectángulo más ancho que cada barra puede soportar como barra más corta." />
+
+## Atrapamiento de agua de lluvia: enfoque de pila
+
+En lugar del método clásico de dos punteros, una pila decreciente monótona calcula el agua atrapada capa por capa. Cuando aparezca una barra más alta, haga estallar las barras más cortas y calcule el agua atrapada entre la barra sacada, la barra actual y la nueva parte superior de la pila.
+
+```
+Heights:  [3, 1, 2, 1, 3]
+Water:       [2, 1, 2]  → total = 5
+```
+
+<FunFact>Trapping Rain Water tiene al menos cuatro soluciones O(n) distintas: dos punteros, pila monótona, matrices de prefijo máximo y un enfoque optimizado de un solo paso. A los entrevistadores les encanta ver múltiples estrategias.</FunFact>
+
+## Cola monótona - Máximo de ventana deslizante
+
+Una **deque monótona** (cola de dos extremos) mantiene un orden decreciente y admite una eliminación eficiente desde ambos extremos. Para **Ventana deslizante máxima** (LeetCode 239):
+
+1. Antes de agregar el índice `i`, extraiga todos los elementos posteriores más pequeños que `nums[i]`
+2. Empuje `i` hacia atrás
+3. El frente es siempre el máximo de la ventana actual.
+4. Retire el frente si cae fuera de la ventana.
+
+```python
+from collections import deque
+
+def max_sliding_window(nums, k):
+    dq, result = deque(), []
+    for i, num in enumerate(nums):
+        while dq and nums[dq[-1]] <= num:
+            dq.pop()
+        dq.append(i)
+        if dq[0] <= i - k:
+            dq.popleft()
+        if i >= k - 1:
+            result.append(nums[dq[0]])
+    return result
+```
+
+Cada elemento entra y sale del deque como máximo una vez: **O(n)** en total.
+
+<Quiz
+  question="¿Por qué el deque monótono para ventana corrediza se retira al máximo desde el FRENTE?"
+  options="Para mantener el orden ordenado|Para eliminar el elemento mínimo|Para desalojar elementos que han salido de la ventana|Para invertir la cola"
+  answer="2"
+  explanation="Los elementos al frente pueden tener índices fuera de la ventana actual. Eliminarlos garantiza que solo queden candidatos válidos."
+/>
+
+## El patrón: mantener invariante durante el procesamiento
+
+Cada problema monótono de pila/cola sigue una plantilla:
+
+1. **Defina la invariante** (creciente o decreciente)
+2. **Infractores del pop** - y extrae información útil de cada pop
+3. **Empujar el elemento actual**
+4. El *evento pop* es donde se calcula la respuesta.
+
+<Quiz
+  question="En una pila creciente monótona, cuando el elemento X provoca un estallido del elemento Y, ¿qué relación se mantiene?"
+  options="X<Y|X > Y|X = Y|No hay relación garantizada"
+  answer="0"
+  explanation="Una pila creciente aparece cuando el elemento entrante es más pequeño, porque Y > X viola la invariante creciente de abajo hacia arriba."
+/>
+
+<ThinkAboutIt>¿Podrías resolver el "Siguiente elemento más pequeño" simplemente cambiando el operador de comparación en la plantilla del siguiente elemento mayor? ¿En qué se convertiría el invariante?</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Pila monotónica - LeetCode Explore](https://leetcode.com/tag/monotonic-stack/) - Conjunto de problemas seleccionados para practicar
+- [Rectángulo más grande en histograma - LeetCode 84](https://leetcode.com/problems/largest-rectangle-in-histogram/) - El desafío de pila monótono definitivo
+- [Ventana deslizante máxima - LeetCode 239](https://leetcode.com/problems/sliding-window-maximum/) - Aplicación clásica deque monótona

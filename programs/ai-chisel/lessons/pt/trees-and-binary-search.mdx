@@ -1,0 +1,129 @@
+---
+title: "Árvores e pesquisa binária – como a IA toma decisões rápidas"
+description: "Explore estruturas em árvore que potencializam a tomada de decisões, desde bancos de dados até aprendizado de máquina."
+order: 2
+difficulty: "intermediate"
+duration: 18
+icon: "🌲"
+published: true
+machineTranslated: true
+---
+## As árvores estão por toda parte na IA
+
+Cada vez que um filtro de spam classifica um e-mail ou um banco de dados recupera seu pedido em milissegundos, uma estrutura de dados em árvore faz o trabalho pesado. Modelo de árvores **decisões hierárquicas** - cada nó restringe o espaço de pesquisa até chegar a uma resposta.
+
+<Illustration src="/images/lessons/trees-and-binary-search.svg" alt="Uma árvore de pesquisa binária com nós rotulados por valor, mostrando propriedades menores à esquerda e maiores à direita" caption="Em um BST, todo filho da esquerda é menor e todo filho da direita é maior que seu pai." />
+
+## Árvores de pesquisa binária (BSTs)
+
+Um BST armazena elementos de modo que, para qualquer nó, todos os valores em sua subárvore **esquerda** sejam menores e todos os valores em sua subárvore **direita** sejam maiores.
+
+### Procurar
+
+```
+function search(node, target):
+    if node is null: return null
+    if target == node.value: return node
+    if target < node.value: return search(node.left, target)
+    return search(node.right, target)
+```
+
+Cada comparação elimina aproximadamente metade dos nós restantes - O(log n) em uma árvore balanceada.
+
+### Inserção
+
+```
+function insert(node, value):
+    if node is null: return new Node(value)
+    if value < node.value:
+        node.left = insert(node.left, value)
+    else:
+        node.right = insert(node.right, value)
+    return node
+```
+
+### Exclusão
+
+Excluir é a operação mais complicada. Surgem três casos:
+
+1. **Nó folha** - simplesmente remova-o.
+2. **Um filho** – substitua o nó por seu filho.
+3. **Dois filhos** - troque o valor do nó com seu sucessor em ordem (menor valor na subárvore direita) e exclua esse sucessor.
+
+<Quiz question="Qual é o sucessor em ordem de um nó em um BST?" options="O pai do nó|O maior nó na subárvore esquerda|O menor nó na subárvore direita|A raiz da árvore" answer="2" explanation="O sucessor em ordem é o menor valor na subárvore direita - encontrado indo para a direita uma vez e depois para a esquerda o máximo possível." />
+
+## Equilibrado vs Desequilibrado
+
+Se você inserir dados classificados em um BST simples, eles degenerarão em uma lista vinculada - O(n) por operação. Árvores de **autoequilíbrio** corrigem isso:
+
+| Árvore | Regra de equilíbrio | Uso típico |
+|------|-------------|-------------|
+| AVL | Diferença de altura ≤ 1 entre subárvores | Pesquisas na memória |
+| Vermelho-Preto | Regras de rotação baseadas em cores | Bibliotecas padrão de linguagem (por exemplo, Java TreeMap) |
+| Árvore B | Várias chaves por nó, todas saem na mesma profundidade | Bancos de dados e sistemas de arquivos |
+
+<FunFact>PostgreSQL e MySQL usam variantes de árvore B como estrutura de índice padrão. Uma árvore B com fator de ramificação 100 pode indexar um bilhão de linhas em apenas cinco níveis.</FunFact>
+
+## Travessias em árvores
+
+As travessias visitam cada nó exatamente uma vez. As três ordens clássicas diferem apenas em **quando** você processa o nó atual em relação aos seus filhos.
+
+| Travessia | Encomendar | Caso de uso |
+|----------|-------|----------|
+| **Em ordem** | Esquerda → Nó → Direita | Produz saída classificada de um BST |
+| **Pré-encomenda** | Nó → Esquerda → Direita | Serializar/clonar uma árvore |
+| **Pós-encomenda** | Esquerda → Direita → Nó | Exclua uma árvore com segurança; avaliar árvores de expressão |
+
+```
+function inOrder(node):
+    if node is null: return
+    inOrder(node.left)
+    process(node)
+    inOrder(node.right)
+```
+
+<ThinkAboutIt>Um compilador analisa seu código em uma árvore de sintaxe abstrata (AST). Qual ordem de percurso você usaria para avaliar a expressão `(3 + 5) * 2` armazenada como uma árvore? Por quê?</ThinkAboutIt>
+
+## Heaps e filas prioritárias
+
+Um **heap** é uma árvore binária completa onde cada pai é maior (heap máximo) ou menor (heap mínimo) que seus filhos. Suporta:
+
+- **Inserir** - adicione no final, borbulhe. O(log n).
+- **Extrair min/max** - remova a raiz, mova o último elemento para a raiz, peneire. O(log n).
+
+Filas de prioridade baseadas no poder dos heaps:
+- **Algoritmo de Dijkstra** (próxima lição!) - sempre expanda o nó não visitado mais próximo.
+- **Agendamento de tarefas** - Os agendadores do sistema operacional escolhem o processo de maior prioridade.
+- **Beam search em PNL** - mantenha as k conclusões de frases mais promissoras.
+
+```
+function siftUp(heap, index):
+    while index > 0:
+        parent = (index - 1) / 2
+        if heap[index] < heap[parent]:
+            swap(heap, index, parent)
+            index = parent
+        else: break
+```
+
+<Quiz question="Qual é a complexidade de tempo para encontrar o elemento mínimo em um heap mínimo?" options="Sobre)|O (log n)|O(1)|Sobre (n log n)" answer="2" explanation="O mínimo está sempre na raiz de um heap mínimo, portanto, acessá-lo é O(1) - não é necessário atravessar." />
+
+## Aplicativos reais de IA
+
+- **Árvores de decisão** no aprendizado de máquina dividem os dados em cada nó usando o recurso que melhor separa as classes: uma aplicação direta da estrutura em árvore.
+- **Árvores de sintaxe** na PNL representam a estrutura gramatical, permitindo tarefas como análise de sentimento e tradução automática.
+- **Monte Carlo Tree Search (MCTS)** alimenta a IA do jogo, como AlphaGo, explorando movimentos possíveis como uma árvore de estados do jogo.
+- **Árvores Huffman** compactam dados atribuindo códigos mais curtos a símbolos frequentes - usados ​​na compactação de peso do modelo.
+
+<FunFact>O classificador de árvore de decisão scikit-learn constrói uma árvore onde cada nó interno testa um limite de recurso. Um modelo treinado com profundidade 20 pode representar mais de um milhão de caminhos de decisão distintos.</FunFact>
+
+<ThinkAboutIt>Se você estivesse construindo um sistema de preenchimento automático, usaria um BST, um heap ou uma estrutura de árvore diferente (como um trie)? Considere quais operações você precisa para ser rápido.</ThinkAboutIt>
+
+## Principais conclusões
+
+1. Os BSTs fornecem pesquisa, inserção e exclusão O (log n) - mas apenas quando balanceados.
+2. A ordem de passagem determina quais informações você extrai de uma árvore.
+3. Heaps fornecem acesso O(1) ao valor extremo e inserção O(log n) - ideal para algoritmos de IA baseados em prioridade.
+4. As árvores sustentam a tomada de decisões em ML, bancos de dados, compiladores e IA de jogos.
+
+<Quiz question="Por que a inserção de dados já classificados em um BST simples (desequilibrado) causa problemas de desempenho?" options="Ele cria nós duplicados|A árvore se torna uma lista vinculada com operações O(n)|Ocorrem colisões de hash|O nó raiz estourou" answer="1" explanation="Cada novo valor é sempre maior (ou menor) que o anterior, então cada inserção vai para o mesmo lado, produzindo uma cadeia linear em vez de uma árvore balanceada." />

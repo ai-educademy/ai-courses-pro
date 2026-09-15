@@ -1,0 +1,211 @@
+---
+title: "面试数据结构"
+description: "掌握 90% 的编程面试中出现的基本数据结构——数组、树、图、哈希图以及何时使用它们。"
+order: 1
+difficulty: "intermediate"
+duration: 20
+icon: "📊"
+published: true
+machineTranslated: true
+---
+# 面试数据结构
+
+顶级面试教练不会向你收取 500 美元的费用来学习以下秘密：大约 90% 的编程面试问题仅围绕七种数据结构。如果你深刻理解何时以及为何要接触每一个目标，那么你就已经成功了一半。另一半是练习——但如果没有正确的思维模式，练习就只是记忆。本课程为您提供了地图，因此您遇到的每个问题都感觉像是熟悉的领域。
+
+## 7 个必须了解的数据结构
+
+每次技术面试都来自同一口井。以下是您将遇到的结构，按频率排名：
+
+|数据结构|采访频率 |核心运营|当面试官期待时 |
+|---|---|---|---|
+| **数组/字符串** | ★★★★★ |访问 O(1)、搜索 O(n)、插入 O(n) |几乎所有问题都从这里开始 |
+| **哈希映射/集** | ★★★★★ |插入 O(1)，查找 O(1)，删除 O(1) | “将其从 O(n²) 优化到 O(n)”|
+| **链接列表** | ★★★★☆ |插入 O(1)，删除 O(1)，访问 O(n) |指针操作、循环检测|
+| **堆栈和队列** | ★★★★☆ |推入/弹出 O(1)，入队/出队 O(1) |解析、BFS、撤消操作 |
+| **树（二进制，BST）** | ★★★★☆ |搜索 O(log n)，插入 O(log n) |分层数据、排序操作 |
+| **图表** | ★★★☆☆ |取决于代表性|关系、路径、连通性|
+| **堆** | ★★★☆☆ |插入 O(log n)，提取最小 O(log n) | “找到 k 个最大/最小”|
+
+<Callout>如果您只有一周的时间来准备，请重点关注数组、哈希图和树。这三者占FAANG级别公司面试问题的大部分。</Callout>
+
+## 数组和字符串——你的基础
+
+数组是几乎每个面试问题的起点。关键的见解是，大多数数组问题实际上与数组无关——它们与识别两个指针、滑动窗口或前缀和等模式有关。
+
+```python
+# Two Sum — the most classic interview problem
+# "Given an array and target, find two numbers that add to target"
+def two_sum(nums, target):
+    seen = {}  # Hash map to store complement
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+    return []
+
+# Time: O(n), Space: O(n) — trading space for time
+```
+
+请注意，即使这个“数组”问题实际上也是一个哈希映射问题。这种模式不断重复：暴力破解在数组上使用嵌套循环，而最佳解决方案引入了哈希映射。
+
+## 哈希映射 — 瑞士军刀访谈
+
+如果您遇到任何问题并且暴力破解的复杂度为 O(n²)，请问问自己：“哈希映射可以将其简化为 O(n) 吗？”答案往往是肯定的。
+
+当您需要时，哈希映射会发挥作用：
+- **计数频率** — 字符数、字数、元素频率
+- **跟踪看到的元素** - 重复检测、二和式问题
+- **组项目** — 字谜分组、分类
+- **缓存计算** - 动态编程中的记忆
+
+```java
+// Group Anagrams — a classic hash map problem
+public List<List<String>> groupAnagrams(String[] strs) {
+    Map<String, List<String>> map = new HashMap<>();
+    for (String s : strs) {
+        char[] chars = s.toCharArray();
+        Arrays.sort(chars);
+        String key = new String(chars);
+        map.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
+    }
+    return new ArrayList<>(map.values());
+}
+```
+
+<ThinkAboutIt>当你看到一个问题要求你“查找”、“计数”或“检查是否存在”时，你应该立即想到什么数据结构？您如何解释哈希映射的 O(1) 查找和排序数组的 O(log n) 二分搜索之间的权衡？</ThinkAboutIt>
+
+## 链表——指针掌握
+
+链表问题测试您在不丢失节点的情况下操作指针的能力。您需要的三种技术是：
+
+1. **双指针（快/慢）**——循环检测，寻找中间节点
+2. **虚拟头节点** - 简化头可能发生变化的边缘情况
+3. **逆转**——迭代逆转是解决许多问题的基础
+
+```python
+# Detect a cycle in a linked list (Floyd's Algorithm)
+def has_cycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow == fast:
+            return True
+    return False
+```
+
+<FunFact>Floyd 的周期检测算法，也称为“龟兔赛跑”算法，于 1967 年发布。它是现代编程面试中仍然常见的最古老的算法之一 - 已有 55 年以上的历史，而且还在不断增加。</FunFact>
+
+## 栈和队列——顺序很重要
+
+堆栈 (LIFO) 和队列 (FIFO) 是更简单的结构，但它们可以解决整个类别的问题：
+
+- **堆栈**：有效括号、表达式求值、单调堆栈问题、撤消/重做
+- **队列**：BFS遍历、滑动窗口最大值（带双端队列）、任务调度
+
+```python
+# Valid Parentheses — classic stack problem
+def is_valid(s: str) -> bool:
+    stack = []
+    matching = {')': '(', '}': '{', ']': '['}
+    for char in s:
+        if char in matching:
+            if not stack or stack[-1] != matching[char]:
+                return False
+            stack.pop()
+        else:
+            stack.append(char)
+    return len(stack) == 0
+```
+
+## 树——层次思维
+
+树问题通常涉及递归和三种遍历顺序之一（中序、前序、后序）。需要开发的思维模型是：“我需要左子树、右子树什么，以及如何在当前节点将它们组合起来？”
+
+```python
+# Maximum depth of a binary tree — the template for tree recursion
+def max_depth(root):
+    if not root:
+        return 0
+    left_depth = max_depth(root.left)
+    right_depth = max_depth(root.right)
+    return 1 + max(left_depth, right_depth)
+```
+
+BST（二叉搜索树）问题添加了一个重要属性：有序遍历产生排序元素。如果您在同一个问题中看到“排序”和“树”，请立即考虑 BST。
+
+## 图 — 关系建模
+
+图问题令人生畏，但一旦构建了邻接表，大多数问题都可以简化为 BFS 或 DFS。关键技能是：
+
+- **从边列表或矩阵构建图表**
+- **BFS** 用于未加权图中的最短路径
+- **DFS** 用于连接、循环检测、拓扑排序
+
+```python
+# BFS shortest path in an unweighted graph
+from collections import deque
+
+def shortest_path(graph, start, end):
+    queue = deque([(start, 0)])
+    visited = {start}
+    while queue:
+        node, distance = queue.popleft()
+        if node == end:
+            return distance
+        for neighbour in graph[node]:
+            if neighbour not in visited:
+                visited.add(neighbour)
+                queue.append((neighbour, distance + 1))
+    return -1  # Not reachable
+```
+
+## 堆 — “Top K”信号
+
+每当一个问题说“找到 K 个最大的”、“K 个最接近的”或“合并 K 个排序列表”时，堆（优先级队列）几乎肯定是答案。在Python中，`heapq`提供了一个最小堆；对于最大堆，对值求负。
+
+```python
+import heapq
+
+# Find the K largest elements in an array
+def k_largest(nums, k):
+    return heapq.nlargest(k, nums)  # Uses a min-heap of size k internally
+```
+
+<Quiz question="每次插入时，您需要在 O(log n) 内找到数字流的中位数。哪种数据结构组合最合适？" options="两个有序数组|单一平衡 BST|两个堆（最大堆 + 最小堆）|具有运行总计的哈希图" answer="2" explanation="两堆方法对下半部分使用最大堆，对上半部分使用最小堆。每次插入后平衡它们需要 O(log n)，并且中值始终可以在 O(1) 时间内从堆顶获得。" />
+
+## 时间和空间复杂性备忘单
+
+|结构|访问 |搜索 |插入 |删除 |空间|
+|---|---|---|---|---|---|
+|数组| O(1) | O(1) | O(n) | O(n) | O(n) | O(n) |
+|哈希映射 | — | O(1)* | O(1)* O(1)* | O(1)* O(1)* | O(1)* O(n) |
+|链接列表 | O(n) | O(n) | O(1) | O(1) | O(1) | O(1) | O(n) |
+|堆栈/队列| O(n) | O(n) | O(1) | O(1) | O(1) | O(1) | O(n) |
+| BST（平衡）| O(log n) | O(log n) | O(log n) | O(log n) | O(n) |
+|堆| — | O(n) | O(log n) | O(log n) | O(n) |
+
+*\* 平均情况；由于哈希冲突，最坏的情况是 O(n)。*
+
+## 模式识别——选择正确的结构
+
+在阅读问题时制定以下心理清单：
+
+- **需要快速查找？** → 哈希映射
+- **需要排序顺序？** → BST 或排序数组 + 二分查找
+- **需要 FIFO 处理？** → 队列 (BFS)
+- **需要 LIFO/回溯？** → 堆栈 (DFS)
+- **需要 top-K 或优先级？** → 堆
+- **需要建立连接模型吗？** → 图
+- **需要通过索引进行 O(1) 访问？** → 数组
+
+<Callout>在面试中，明确说明您选择哪种数据结构以及原因。说“我将在这里使用哈希映射，因为我们需要 O(1) 查找来避免嵌套循环”这正是面试官希望看到的工程思维。</Callout>
+
+## 要点
+
+- **七种结构覆盖了 90% 的面试**：数组、哈希图、链表、栈/队列、树、图和堆。
+- **哈希映射是你最好的朋友**：当有疑问时，哈希映射可能会有所帮助。
+- **了解你的复杂性**：面试官会问“时间复杂度是多少？”每次解决后。
+- **模式识别胜过记忆**：学习将问题信号（“顶部 K”→ 堆，“最短路径”→ BFS）映射到正确的结构。
+- **刻意练习**：每个数据结构解决 3-5 个问题，重点是理解而不是速度。速度来自理解。

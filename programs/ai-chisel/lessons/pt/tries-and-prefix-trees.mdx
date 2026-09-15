@@ -1,0 +1,173 @@
+---
+title: "Tentativas e árvores de prefixo - preenchimento automático, verificação ortográfica e roteamento IP"
+description: "Domine a estrutura de dados trie para pesquisas de prefixo extremamente rápidas. Crie preenchimento automático, pesquisa curinga e explore tentativas compactadas e roteamento IP."
+order: 6
+difficulty: "advanced"
+duration: 18
+icon: "🌳"
+published: true
+machineTranslated: true
+---
+## O que é uma tentativa?
+
+Um **trie** (pronuncia-se "try") é uma estrutura semelhante a uma árvore onde cada nó representa um único caractere. Caminhos da raiz até os nós marcados indicam as palavras armazenadas. Ao contrário dos mapas hash, as tentativas permitem consultar *todas as palavras que compartilham um prefixo* sem verificar todas as chaves.
+
+```
+        root
+       / | \
+      a   b   c
+     /     \
+    p       a
+   / \       \
+  p   e      t
+  |
+  l
+  e
+```
+
+Cada caminho codifica uma palavra: **apple**, **ape**, **bat**, **cat**.
+
+## A classe TrieNode
+
+Cada nó contém um mapa de filhos e uma bandeira indicando a conclusão da palavra.
+
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end = False
+```
+
+Um Trie completo envolve isso com operações de inserção, pesquisa e prefixo.
+
+## Operações principais
+
+### Inserir - O(m) onde m = comprimento da palavra
+
+Caminhe caractere por caractere, criando nós conforme necessário e marque o último nó.
+
+```python
+def insert(self, word):
+    node = self.root
+    for ch in word:
+        if ch not in node.children:
+            node.children[ch] = TrieNode()
+        node = node.children[ch]
+    node.is_end = True
+```
+
+### Pesquise e comeceCom
+
+**Pesquisar** segue o caminho e verifica `is_end`. **startsWith** apenas verifica se o caminho existe - não requer `is_end = True`.
+
+<Quiz
+  question="O que distingue search('app') destartWith('app') quando 'apple' é armazenado, mas 'app' não?"
+  options="pesquisa retorna True, startWith retorna False|Ambos retornam True|pesquisa retorna False, startWith retorna True|Ambos retornam falso"
+  answer="2"
+  explanation="search verifica is_end (False para 'app'), enquantostartWith só precisa que o caminho exista."
+/>
+
+## Preenchimento automático com DFS
+
+Para sugerir conclusões para um prefixo, navegue até o nó do prefixo e execute o DFS coletando todas as palavras abaixo dele.
+
+```python
+def autocomplete(self, prefix):
+    node = self._find(prefix)
+    if not node:
+        return []
+    results = []
+    self._dfs(node, prefix, results)
+    return results
+```
+
+O auxiliar `_dfs` recorre através dos filhos, anexando aos resultados sempre que `is_end` for `True`.
+
+<ThinkAboutIt>Como você limitaria o preenchimento automático às sugestões mais frequentes? De quais dados extras cada nó precisaria?</ThinkAboutIt>
+
+## Pesquisa curinga - Dicionário de palavras
+
+**Estrutura de dados de adição e pesquisa de palavras do LeetCode** solicita que você trate `.` como um curinga que corresponde a qualquer caractere único.
+
+Durante a pesquisa, quando você atingir `.`, ramifique em *todos* filhos e continue recursivamente. Isso transforma um simples percurso em uma busca de retrocesso limitada.
+
+```python
+def search_wild(self, node, word, i):
+    if i == len(word):
+        return node.is_end
+    if word[i] == '.':
+        return any(
+            self.search_wild(c, word, i + 1)
+            for c in node.children.values()
+        )
+    if word[i] not in node.children:
+        return False
+    return self.search_wild(
+        node.children[word[i]], word, i + 1
+    )
+```
+
+## Prefixo comum mais longo
+
+Faça a tentativa desde a raiz. O prefixo comum mais longo termina no primeiro nó com mais de um filho ou um sinalizador `is_end`.
+
+<Illustration src="/images/lessons/tries-and-prefix-trees.svg" alt="Estrutura de teste mostrando caminhos de prefixo compartilhados em destaque" caption="Caminhos de prefixo compartilhados convergem em uma única ramificação até que ocorra uma divisão." />
+
+## Roteamento IP com tentativas
+
+Os roteadores armazenam prefixos IP em um **trie binário** - cada bit (0 ou 1) forma uma ramificação. A correspondência de prefixo mais longa encontra a rota mais específica. É assim que seus pacotes passam pela Internet.
+
+<FunFact>Os roteadores de backbone da Internet realizam bilhões de pesquisas de correspondência de prefixo mais longas por segundo, usando tentativas otimizadas por hardware incorporadas em chips especializados chamados TCAMs.</FunFact>
+
+## Tentativas compactadas (Árvores Radix)
+
+O padrão tenta desperdiçar espaço em cadeias de filhos únicos. Uma **árvore radix** mescla essas cadeias em arestas únicas que armazenam rótulos de vários caracteres.
+
+```
+Standard:  r → u → n → n → i → n → g
+Radix:     r → "unning"
+```
+
+Isso reduz drasticamente a contagem de nós e é usado pelas tabelas de roteamento do kernel Linux e roteadores HTTP como o `httprouter` do Go.
+
+## Complexidade de Tempo e Espaço
+
+| Operação | Experimente | Mapa de hash |
+|------------|--------|----------|
+| Inserir | O(m) | O(m) |
+| Pesquisar | O(m) | O(m) |
+| Consulta de prefixo | O(m+k) | O(n·m) |
+
+Aqui *m* é o comprimento da palavra, *k* é a contagem de resultados e *n* é o total de chaves. As tentativas dominam cargas de trabalho com muitos prefixos.
+
+<Quiz
+  question="Qual cenário se beneficia MENOS de uma tentativa em um mapa hash?"
+  options="Sugestões de preenchimento automático|Pesquisas exatas de valores-chave|Corretor ortográfico com correspondência de prefixo|Encontrar todas as palavras que começam com 'pré'"
+  answer="1"
+  explanation="Para pesquisas exatas sem consultas de prefixo, um mapa hash é mais simples e igualmente rápido."
+/>
+
+## Quando tentar
+
+- Consultas baseadas em prefixo (preenchimento automático, digitação antecipada)
+- Correspondência curinga ou semelhante a regex em strings
+- Prefixo comum mais longo em um conjunto
+- Roteamento IP/correspondência de prefixo mais longo
+- Verificação ortográfica com variações de distância de edição
+
+<Quiz
+  question="Inserir n palavras de comprimento médio m em uma tentativa tem que complexidade de tempo?"
+  options="Sobre)|O(m)|O (n × m)|O(n × m²)"
+  answer="2"
+  explanation="Cada palavra leva O(m) para ser inserida, e você faz isso n vezes, dando O(n × m)."
+/>
+
+<ThinkAboutIt>Se a memória é o seu gargalo, quando você escolheria um mapa hash armazenando chaves completas em uma tentativa e quando uma tentativa compactada venceria?</ThinkAboutIt>
+
+---
+
+## 📚 Leitura adicional
+
+- [Estrutura de dados do teste - Wikipedia](https://en.wikipedia.org/wiki/Trie) - Visão geral abrangente das variantes e do histórico do teste
+- [Implement Trie - LeetCode 208](https://leetcode.com/problems/implement-trie-prefix-tree/) - O clássico problema de implementação de trie
+- [Árvores Radix no Kernel Linux](https://lwn.net/Articles/175432/) - Como as tentativas compactadas alimentam os componentes internos do kernel

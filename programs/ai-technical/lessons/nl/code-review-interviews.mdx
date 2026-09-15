@@ -1,0 +1,218 @@
+---
+title: "Codebeoordelingsinterviews"
+description: "Excelleer tijdens codebeoordelingsinterviews: identificeer bugs, stel verbeteringen voor en toon uw technische oordeel."
+order: 5
+difficulty: "intermediate"
+duration: 15
+icon: "👁️"
+published: true
+machineTranslated: true
+---
+# Codebeoordelingsinterviews
+
+Codereview-interviews zijn een van de meest onderschatte rondes in het wervingsproces – en een van de meest onthullende. Terwijl het coderen van interviews test of je code kunt schrijven, testen codebeoordelingsinterviews of je de code kunt lezen, erover kunt redeneren en deze kunt verbeteren. Ze laten zien hoe u over kwaliteit denkt, hoe u feedback prioriteit geeft en hoe u met andere engineers communiceert. Veel kandidaten bereiden zich maandenlang voor op LeetCode, maar lopen totaal onvoorbereid een codereviewronde binnen. Wees niet die persoon.
+
+## Welke codereview-interviews eigenlijk testen
+
+Interviewers die uw vaardigheden op het gebied van codereview beoordelen, letten op vijf dingen:
+
+1. **Bugdetectie** — Kun jij logische fouten, randgevallen en raceomstandigheden opsporen?
+2. **Ontwerpgevoel** — Herkent u schendingen van de SOLID-principes, slechte abstracties of code die moeilijk te onderhouden zal zijn?
+3. **Beveiligingsbewustzijn** — Kunt u kwetsbaarheden in injecties, authenticatiefouten of risico's op het gebied van gegevensblootstelling identificeren?
+4. **Communicatievaardigheid** — Kunt u problemen duidelijk en constructief uitleggen?
+5. **Prioriteiten stellen** — Concentreer je je op wat het belangrijkst is, of concentreer je je op de namen van variabelen?
+
+<Callout>De meest voorkomende fout bij codereview-interviews is dat je al je tijd besteedt aan stijlproblemen (naamgeving, opmaak) terwijl je feitelijke bugs mist. Interviewers plaatsen opzettelijk kritische bugs naast stijlproblemen om te zien waar u prioriteit aan geeft.</Callout>
+
+## De systematische reviewbenadering
+
+Scan de code niet willekeurig. Gebruik een gestructureerde, op passen gebaseerde aanpak:
+
+### Pass 1: Begrijp de bedoeling (2 minuten)
+
+Voordat u iets bekritiseert, moet u begrijpen wat de code probeert te doen:
+- Lees de functie-/klassenamen en opmerkingen
+- Identificeer de in- en uitgangen
+- Begrijp de bedrijfslogica
+
+### Pass 2: Correctheid (5 minuten)
+
+Dit is waar je bugs vindt. Systematisch controleren:
+- **Randgevallen**: lege invoer, nulwaarden, afzonderlijke elementen, maximale waarden
+- **Off-by-one-fouten**: lusgrenzen, array-indexering
+- **Logische fouten**: onjuiste voorwaarden, ontbrekende break-instructies, verkeerde operator
+- **Gelijktijdigheidsproblemen**: gedeelde veranderlijke status, racevoorwaarden
+- **Foutafhandeling**: niet-afgevangen uitzonderingen, ontbrekende nulcontroles
+
+### Pass 3: Ontwerp en onderhoudbaarheid (3 minuten)
+
+Zoek naar structurele problemen:
+- Functies die te veel dingen doen (de individuele verantwoordelijkheid schenden)
+- Strakke koppeling tussen componenten
+- Magische getallen en hardgecodeerde waarden
+- Ontbrekende abstracties of onnodige abstracties
+- Codeduplicatie
+
+### Pass 4: Prestaties en beveiliging (2 minuten)
+
+- Onnodige databasequery's in lussen (N+1-probleem)
+- Ontbrekende invoervalidatie of opschoning
+- Gevoelige gegevens blootgelegd in logs of reacties
+- Inefficiënte algoritmen waar betere alternatieven bestaan
+
+## Veelvoorkomende bugpatronen om te ontdekken
+
+Train je ogen om deze hoogfrequente bugs op te vangen:
+
+### Null-referentiefouten
+
+```java
+// Bug: user could be null
+public String getUserEmail(Long userId) {
+    User user = userRepository.findById(userId);
+    return user.getEmail();  // NullPointerException if user not found
+}
+
+// Fixed
+public String getUserEmail(Long userId) {
+    return userRepository.findById(userId)
+        .map(User::getEmail)
+        .orElseThrow(() -> new UserNotFoundException(userId));
+}
+```
+
+### Off-by-One-fouten
+
+```python
+# Bug: misses the last element
+def find_max(numbers):
+    max_val = numbers[0]
+    for i in range(1, len(numbers) - 1):  # Should be len(numbers)
+        if numbers[i] > max_val:
+            max_val = numbers[i]
+    return max_val
+```
+
+### Lekkage van hulpbronnen
+
+```java
+// Bug: connection is never closed if an exception occurs
+public List<User> getUsers() {
+    Connection conn = dataSource.getConnection();
+    Statement stmt = conn.createStatement();
+    ResultSet rs = stmt.executeQuery("SELECT * FROM users");
+    // process results...
+    conn.close();
+    return users;
+}
+
+// Fixed: use try-with-resources
+public List<User> getUsers() {
+    try (Connection conn = dataSource.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery("SELECT * FROM users")) {
+        // process results...
+        return users;
+    }
+}
+```
+
+### SQL-injectie
+
+```python
+# Bug: SQL injection vulnerability
+def get_user(username):
+    query = f"SELECT * FROM users WHERE username = '{username}'"
+    return db.execute(query)
+
+# Fixed: parameterised query
+def get_user(username):
+    query = "SELECT * FROM users WHERE username = %s"
+    return db.execute(query, (username,))
+```
+
+<FunFact>Uit een onderzoek naar meer dan 100.000 coderecensies bij Google bleek dat ongeveer 25% van alle recensies over 'juistheid' gaat: feitelijke bugs of logische fouten. Nog eens 25% gaat over 'begrip', waardoor code gemakkelijker te begrijpen is. Stijl en opmaak waren goed voor minder dan 10% van de inhoudelijke reacties.</FunFact>
+
+### Gelijktijdigheidsbugs
+
+```java
+// Bug: race condition — check-then-act is not atomic
+public void transferMoney(Account from, Account to, BigDecimal amount) {
+    if (from.getBalance().compareTo(amount) >= 0) {
+        // Another thread could modify balance here
+        from.setBalance(from.getBalance().subtract(amount));
+        to.setBalance(to.getBalance().add(amount));
+    }
+}
+```
+
+<ThinkAboutIt>Hoe zou u de bovenstaande gelijktijdigheidsbug oplossen? Overweeg ten minste drie benaderingen: synchronisatie, optimistische vergrendeling en transacties op databaseniveau. Wat zijn de afwegingen van elk in een systeem met hoge doorvoer?</ThinkAboutIt>
+
+## Prioriteit geven aan uw feedback
+
+In een in de tijd beperkt interview is niet alle feedback gelijk. Gebruik dit prioriteitenkader:
+
+| Prioriteit | Categorie | Voorbeeld |
+|---|---|---|
+| 🔴 **Kritisch** | Bugs, beveiligingsproblemen, gegevensverlies | SQL-injectie, raceomstandigheden, nul-dereferentie |
+| 🟠 **Hoog** | Ontwerpproblemen, prestatieproblemen | N+1 queries, ontbrekende foutafhandeling, nauwe koppeling |
+| 🟡 **Gemiddeld** | Onderhoudbaarheid, leesbaarheid | Complexe conditionals, ontbrekende documentatie, magische getallen |
+| 🟢 **Laag** | Stijl, kleine verbeteringen | Variabele naamgeving, importvolgorde, kleine refactoren |
+
+Besteed tijdens een sollicitatiegesprek 80% van uw tijd aan 🔴 en 🟠 items. Noem 🟡artikelen kort. Raak 🟢-items alleen aan als je nog tijd over hebt en de belangrijke problemen al hebt gevonden.
+
+## Feedback over recensies communiceren
+
+Hoe u feedback geeft, is net zo belangrijk als de feedback zelf. Interviewers evalueren uw samenwerkingsvaardigheden.
+
+**Doe dit**:
+- "Ik merk dat deze query zich in een lus bevindt, wat N+1 prestatieproblemen kan veroorzaken. We willen dit misschien in één enkele query verwerken."
+- "Het lijkt erop dat er een NullPointerException kan ontstaan ​​als de gebruiker niet wordt gevonden. Kunnen we hier een null-controle toevoegen of Optioneel gebruiken?"
+- "Mooi gebruik van het strategiepatroon hier: het maakt het toevoegen van nieuwe betalingsmethoden eenvoudig."
+
+**Niet dit**:
+- "Deze code is verkeerd." (te bot, geen uitleg)
+- "Ik zou het nooit op deze manier schrijven." (ego-gedreven)
+- "Verander de naam van deze variabele." (fietsenstalling op items met lage prioriteit)
+
+<Callout>Leg altijd het *waarom* achter je feedback uit, niet alleen het *wat*. "Dit moet geparametriseerde query's gebruiken" is oké. "Hierbij moeten geparametriseerde query's worden gebruikt, omdat de huidige aaneenschakeling van tekenreeksen kwetsbaar is voor SQL-injectieaanvallen" is veel beter.</Callout>
+
+## Voorbeeld van een codebeoordeling
+
+Hier is een functie die u mogelijk wordt gevraagd te beoordelen in een sollicitatiegesprek:
+
+```python
+def process_orders(orders):
+    results = []
+    for order in orders:
+        user = db.query(f"SELECT * FROM users WHERE id = {order['user_id']}")
+        if user:
+            total = 0
+            for item in order['items']:
+                price = db.query(f"SELECT price FROM products WHERE id = {item['product_id']}")
+                total = total + price[0] * item['quantity']
+                if item['quantity'] > 100:
+                    total = total * 0.9
+            if total > 0:
+                results.append({'user': user, 'total': total, 'order_id': order['id']})
+    return results
+```
+
+**Een sterke recensie zou het volgende identificeren:**
+
+1. 🔴 **SQL-injectie** (regels 4, 7): Tekenreeksinterpolatie in SQL-query's. Gebruik geparametriseerde query's.
+2. 🔴 **N+1 Queryprobleem** (regels 4, 7): Twee databasequery's per bestelling, één per item. Voor 100 bestellingen met elk 10 artikelen zijn dat 1.100 zoekopdrachten. Batch in afzonderlijke zoekopdrachten.
+3. 🟠 **Geen foutafhandeling**: `price[0]` crasht als het product niet wordt gevonden. `db.query` kan mislukken.
+4. 🟠 **Kortingslogica is verborgen**: de korting van 10% voor hoeveelheden > 100 is een bedrijfsregel die verborgen is in geneste lussen. Pak het uit.
+5. 🟡 **Magisch getal**: `0.9` en `100` moeten constanten worden genoemd (`BULK_DISCOUNT_RATE`, `BULK_THRESHOLD`).
+6. 🟡 **Functie doet te veel**: gebruikers ophalen, totalen berekenen, kortingen toepassen - is in strijd met de individuele verantwoordelijkheid.
+
+<Quiz question="Tijdens een codebeoordelingsinterview ontdekt u een klein probleem met de naamgeving van variabelen en een potentiële kwetsbaarheid voor SQL-injectie. Je hebt nog 2 minuten. Waar moet u prioriteit aan geven?" options="Corrigeer eerst de naamgeving van de variabele, omdat deze snel is|Concentreer u volledig op de kwetsbaarheid voor SQL-injectie|Noem beide evenveel – laat zien dat je grondig bent|Sla beide over en zoek naar meer problemen" answer="1" explanation="SQL-injectie is een kritiek beveiligingsprobleem dat tot datalekken kan leiden. Geef altijd voorrang aan beveiligingskwesties boven stijlproblemen. Noem het naamgevingsprobleem alleen kort als de tijd het toelaat, nadat u het injectierisico grondig heeft uitgelegd." />
+
+## Belangrijkste afhaalrestaurants
+
+- **Gebruik een gestructureerde aanpak**: meerdere passages (intentie → correctheid → ontwerp → prestatie/beveiliging) vangen meer problemen op dan willekeurig scannen.
+- **Geef meedogenloos prioriteit**: kritieke bugs en beveiligingsproblemen eerst, stijl als laatste. Interviewers planten beide om uw oordeel te testen.
+- **Communiceer constructief**: leg het *waarom* uit, stel alternatieven voor en erken de goede patronen die je ziet.
+- **Ken de veelvoorkomende bugpatronen**: null-referenties, eenmalige fouten, resourcelekken, SQL-injectie en racecondities komen voor in bijna elk interview met codereviews.
+- **Oefen het lezen van code**: besteed tijd aan het lezen van open-source pull-aanvragen op GitHub. De vaardigheid van het lezen van code verschilt van het schrijven ervan, en de meeste ingenieurs oefenen het niet genoeg uit.

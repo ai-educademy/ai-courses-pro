@@ -1,0 +1,188 @@
+---
+title: "Manipulação de bits - truques XOR, potência de dois e contagem de bits"
+description: "Desbloqueie o pensamento em nível de bit para codificar entrevistas. Cancelamento mestre de XOR, truque de Brian Kernighan, mascaramento de bits para subconjuntos e aplicações práticas."
+order: 10
+difficulty: "advanced"
+duration: 17
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+## Revisão de números binários
+
+Cada inteiro é uma sequência de bits. O número 13 em binário é `1101`:
+
+```
+Bit position:  3  2  1  0
+Bit value:     1  1  0  1
+Decimal:       8+ 4+ 0+ 1 = 13
+```
+
+A manipulação de bits opera diretamente nesses bits usando operadores bit a bit - geralmente substituindo loops por operações únicas.
+
+## Operações principais bit a bit
+
+| Operador | Símbolo | Exemplo (5 = 101, 3 = 011) | Resultado |
+|----------|--------|----------------------------|--------|
+| E | `&` | `101 & 011` | `001` (1) |
+| OU | `\|` | `101 \| 011` | `111` (7) |
+| XOR | `^` | `101 ^ 011` | `110` (6) |
+| NÃO | `~` | `~101` | `...010` |
+| Deslocamento à esquerda | `<<` | `101 << 1` | `1010` (10) |
+| Mudança para a direita | `>>` | `101 >> 1` | `10` (2) |
+
+## Truques essenciais
+
+### Verifique se a potência de dois
+
+Uma potência de 2 tem exatamente um bit definido: `n & (n - 1) == 0`.
+
+```
+  n = 8:  1000          n = 6:  0110
+  n-1=7:  0111          n-1=5:  0101
+  &    :  0000 ✓ power  &    :  0100 ✗ not power
+```
+
+### Contagem de bits definidos (algoritmo de Brian Kernighan)
+
+Cada `n & (n - 1)` remove o bit definido mais baixo. Conte as iterações até n = 0.
+
+```python
+def count_bits(n):
+    count = 0
+    while n:
+        n &= n - 1
+        count += 1
+    return count
+```
+
+Isso é executado em O(k), onde k é o número de bits definidos - não O(32).
+
+### Troca sem variável de temperatura
+
+```python
+a ^= b
+b ^= a
+a ^= b
+```
+
+Funciona porque XOR é seu próprio inverso: `a ^ b ^ b = a`.
+
+<Quiz
+  question="O que n & (n - 1) faz com a representação binária de n?"
+  options="Define todos os bits como 1|Limpa todos os bits|Limpa o bit mais baixo definido|Inverte todos os bits"
+  answer="2"
+  explanation="n - 1 inverte todos os bits do bit definido mais baixo para baixo. AND-ing com n zera o bit definido mais baixo."
+/>
+
+## Número Único - Cancelamento XOR
+
+Cada elemento aparece duas vezes, exceto um. Encontre-o. Desde `a ^ a = 0` e `a ^ 0 = a`, XOR todos os elementos - pares são cancelados, deixando o número único.
+
+```python
+def single_number(nums):
+    result = 0
+    for n in nums:
+        result ^= n
+    return result
+```
+
+Tempo O(n), espaço O(1). Não é necessário mapa hash.
+
+<Illustration src="/images/lessons/bit-manipulation.svg" alt="Cancelamento de XOR mostrando pares eliminando até zero, deixando o único número único" caption="Os pares XOR são cancelados para zero - apenas o elemento não emparelhado sobrevive." />
+
+## Número Único III - Dois Números Únicos
+
+Quando *dois* números são únicos, faça um XOR de tudo para obter `x = a ^ b`. Encontre qualquer bit definido em `x` (os números diferem aí). Particione todos os números por esse bit e faça XOR em cada grupo - cada grupo contém exatamente um número exclusivo.
+
+```python
+def single_number_iii(nums):
+    xor = 0
+    for n in nums:
+        xor ^= n
+    diff_bit = xor & (-xor)  # isolate rightmost set bit
+    a = b = 0
+    for n in nums:
+        if n & diff_bit:
+            a ^= n
+        else:
+            b ^= n
+    return [a, b]
+```
+
+<ThinkAboutIt>Por que `xor & (-xor)` isola o bit definido mais à direita? Pense em como os números negativos são representados em complemento de dois.</ThinkAboutIt>
+
+## Número de 1 Bit (LeetCode 191)
+
+Este é o algoritmo de Brian Kernighan visto acima - uma pergunta direta da entrevista. O acompanhamento pergunta: e se a entrada estiver assinada? Em Python, números inteiros têm precisão arbitrária, mas em Java/C++ você deve lidar com limites de 32 bits.
+
+## Mascaramento de bits para subconjuntos
+
+Uma máscara de bits de comprimento n representa um subconjunto de n itens. O bit `i` sendo definido significa que o item `i` está incluído. Iterar de `0` a `2^n - 1` gera todos os subconjuntos.
+
+```python
+def all_subsets(items):
+    n = len(items)
+    for mask in range(1 << n):
+        subset = [items[i] for i in range(n)
+                  if mask & (1 << i)]
+        yield subset
+```
+
+Esta técnica fornece soluções para problemas com n ≤ 20 - pequeno o suficiente para enumeração 2^n.
+
+<FunFact>As permissões de arquivo do Linux (rwxr-xr-x = 755) são uma máscara de bits do mundo real. Cada dígito codifica três bits de permissão: leitura (4), gravação (2), execução (1), combinado com OR.</FunFact>
+
+## Revertendo bits (LeetCode 190)
+
+Inverta um número inteiro sem sinal de 32 bits, bit a bit. Desloque o resultado para a esquerda e OR no bit mais baixo da entrada e, a seguir, desloque a entrada para a direita.
+
+```python
+def reverse_bits(n):
+    result = 0
+    for _ in range(32):
+        result = (result << 1) | (n & 1)
+        n >>= 1
+    return result
+```
+
+## Número ausente (LeetCode 268)
+
+Matriz de n números de 0 a n com um faltando. XOR todos os elementos da matriz com todos os índices de 0 a n - os pares são cancelados, deixando o número ausente. Como alternativa, use a fórmula da soma, mas o XOR evita um possível estouro.
+
+## Distância de Hamming (LeetCode 461)
+
+O número de posições onde os bits correspondentes diferem. XOR os dois números - os bits definidos no resultado são as posições diferentes. Conte-os com o truque de Brian Kernighan.
+
+```python
+def hamming_distance(x, y):
+    return count_bits(x ^ y)
+```
+
+<Quiz
+  question="Qual é a distância de Hamming entre 7 (0111) e 1 (0001)?"
+  options="1|2|3|4"
+  answer="1"
+  explanation="7 XOR 1 = 0110, que possui dois bits definidos. Os bits diferem nas posições 1 e 2."
+/>
+
+## Aplicações Práticas
+
+A manipulação de bits aparece em todos os lugares: as permissões de arquivo Unix usam máscaras OR/AND, os sinalizadores de recursos armazenam alternâncias como bits individuais, as máscaras de sub-rede da rede usam AND para roteamento e a detecção de erros depende de somas de verificação XOR.
+
+<Quiz
+  question="Para verificar se o bit k está definido no inteiro n, qual expressão está correta?"
+  options="n&k|n & (1 <<k)|n|(1 << k)|n ^ (1 << k)"
+  answer="1"
+  explanation="(1 << k) cria uma máscara com apenas o bit k definido. AND-ing com n retorna diferente de zero apenas se o bit k estiver definido em n."
+/>
+
+<ThinkAboutIt>Muitas soluções de manipulação de bits parecem “truques de mágica” em entrevistas. Como você explicaria a solução de números faltantes baseada em XOR para um colega de equipe que nunca a viu?</ThinkAboutIt>
+
+---
+
+## 📚 Leitura adicional
+
+- [Manipulação de bits - LeetCode Explore](https://leetcode.com/tag/bit-manipulation/) - Coleção de problemas com curadoria classificada por dificuldade
+- [Algoritmo de Brian Kernighan - GeeksforGeeks](https://www.geeksforgeeks.org/count-set-bits-in-an-integer/) - Passo a passo detalhado com visualizações
+- [Bitmask DP - CP-Algorithms](https://cp-algorithms.com/algebra/all-submasks.html) - Técnicas avançadas de bitmask para programação competitiva

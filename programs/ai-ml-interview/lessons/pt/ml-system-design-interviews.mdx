@@ -1,0 +1,183 @@
+---
+title: "Entrevistas de design de sistema de ML"
+description: "Projete sistemas de aprendizado de máquina de ponta a ponta — desde o enquadramento do problema até a implantação — usando uma estrutura estruturada que os entrevistadores adoram."
+order: 1
+difficulty: "advanced"
+duration: 25
+icon: "🏗️"
+published: true
+machineTranslated: true
+---
+# 🏗️ Entrevistas de design de sistema de ML
+
+Você passou pelas rodadas de codificação. Agora o entrevistador desliza um marcador no quadro branco sobre a mesa e diz: “Projete um sistema de recomendação para 50 milhões de usuários”. Suas palmas ficam úmidas - não porque você não conheça ML, mas porque você nunca praticou *pensar em voz alta* sobre sistemas inteiros. Esta lição fornece uma estrutura repetível que transforma aquela pergunta aberta em uma conversa estruturada.
+
+---
+
+## 🗺️ Por que o design do sistema de ML é diferente
+
+O design de sistema de software tradicional concentra-se no fluxo de dados, armazenamento e escalabilidade. O design do sistema de ML adiciona uma dimensão extra: **o modelo é um componente vivo** que se degrada com o tempo, depende da qualidade dos dados e requer avaliação contínua.
+
+Os entrevistadores não procuram um diagrama de arquitetura perfeito. Eles querem ver se você pode:
+
+- Traduzir um problema de negócios vago em uma tarefa de ML bem definida
+- Identifique antecipadamente os requisitos de dados e possíveis armadilhas
+- Raciocinar sobre compensações em vez de recitar respostas de livros didáticos
+- Pense no que acontece *depois* de o modelo ser implantado
+
+<Callout>O maior erro que os candidatos cometem é ir direto para a seleção do modelo. Os entrevistadores relatam consistentemente que o enquadramento do problema e a discussão de dados são onde os candidatos se diferenciam.
+</Callout>
+
+---
+
+## 🧩 A estrutura de design de sistema de ML de oito etapas
+
+Use esta estrutura como esqueleto para cada questão de design. Você não precisa gastar o mesmo tempo em cada etapa – adapte-se com base na pergunta – mas tocar em cada uma delas sinaliza maturidade.
+
+### 1. Definição de problemas e métricas de negócios
+
+Comece esclarecendo o objetivo. Pergunte: *Como é o sucesso para o negócio?*
+
+- **Classificação de pesquisa**: maximizar a taxa de cliques? Tempo para resultado?
+- **Detecção de fraude**: minimiza falsos negativos (fraude perdida) enquanto controla falsos positivos (usuários legítimos bloqueados)?
+- **Moderação de conteúdo**: Priorizar a recuperação (capturar tudo que é prejudicial) em vez da precisão?
+
+Mapeie antecipadamente a métrica de negócios para um objetivo compatível com ML. Por exemplo, “aumentar o envolvimento do usuário” pode ser traduzido como “prever a probabilidade de clique em cada item e classificar por pontuação”.
+
+### 2. Pipeline e coleta de dados
+
+Discuta de onde vêm os dados, como são coletados e quais problemas você prevê:
+
+- **Fontes de dados**: registros de comportamento do usuário, registros de transações, APIs de terceiros
+- **Estratégia de rotulagem**: rótulos explícitos (avaliações do usuário), sinais implícitos (cliques, tempo de permanência) ou anotação humana
+- **Atualização dos dados**: com que frequência os dados mudam e a desatualização prejudica o desempenho?
+
+### 3. Engenharia de recursos
+
+Descreva os recursos que você extrairia. Agrupe-os logicamente:
+
+| Grupo de recursos | Exemplos |
+|---|---|
+| Recursos do usuário | intervalo de idade, mandato, taxa histórica de cliques |
+| Recursos do item | categoria, faixa de preço, pontuação de popularidade |
+| Recursos de contexto | hora do dia, tipo de dispositivo, localização |
+| Recursos de interação | co-ocorrência usuário×item, profundidade da sessão |
+
+### 4. Seleção de modelo
+
+Agora – e só agora – discuta modelos. Justifique sua escolha:
+
+- **Linha de base**: regressão logística ou árvores com gradiente aumentado (rápido para treinar, interpretável)
+- **Avançado**: aprendizagem profunda (modelos de duas torres para recuperação, classificadores baseados em transformadores)
+- **Ensemble**: combine um modelo de recuperação rápida com um reclassificador mais lento, porém mais preciso
+
+### 5. Estratégia de treinamento
+
+Cubra como você treinaria e validaria:
+
+- Divisões de treinamento/validação/teste (divisões baseadas em tempo para dados temporais)
+- Lidar com desequilíbrio de classe (sobreamostragem, ponderação de perdas)
+- Abordagem de ajuste de hiperparâmetros
+
+### 6. Avaliação offline
+
+Escolha métricas que se alinhem com a meta de negócios. Precision@K para classificação, AUC-ROC para classificação binária, NDCG para listas ordenadas.
+
+### 7. Implantação e veiculação
+
+Discuta como o modelo chega aos usuários:
+
+- **Inferência em lote**: previsões pré-cálculo todas as noites (bom para recomendações por e-mail)
+- **Inferência em tempo real**: pontuação em cada solicitação (necessária para classificação de pesquisa)
+- **Híbrido**: conjunto de candidatos pré-cálculo, reclassificação em tempo real
+
+### 8. Monitoramento e Iteração
+
+Explique o que você observaria após o lançamento: desvio de dados, mudanças na distribuição de previsões e métricas on-line por meio de testes A/B.
+
+<ThinkAboutIt>Imagine que você está projetando um sistema de detecção de fraudes. A empresa diz "pegue todas as fraudes". Por que o recall de 100% é um alvo perigoso e como você enquadraria a conversa em torno de compensações aceitáveis?
+</ThinkAboutIt>
+
+---
+
+## 🎯 Perguntas comuns sobre design de ML e como abordá-las
+
+### Sistema de recomendação
+
+- **Enquadramento**: prever P(o usuário clica no item) → classificar os itens por pontuação
+- **Desafio principal**: problema de inicialização a frio para novos usuários/itens
+- **Arquitetura**: geração de candidatos (rápido, aproximado) → classificação (precisa, mais lenta) → reclassificação (regras de negócios, diversidade)
+
+### Classificação de pesquisa
+
+- **Enquadramento**: dada uma consulta, classifique os documentos por relevância
+- **Desafio principal**: equilibrar relevância, atualização e personalização
+- **Arquitetura**: recuperação de índice invertido → modelo de aprendizagem para classificação → combinação com regras de negócios
+
+### Detecção de fraude
+
+- **Framing**: classificação binária — esta transação é fraudulenta?
+- **Desafio principal**: extremo desequilíbrio de classe (a fraude é < 0,1% das transações)
+- **Arquitetura**: filtros baseados em regras → modelo de ML → fila de revisão humana para casos incertos
+
+<Quiz
+  question="Em uma entrevista de design de sistema de ML, o que você deve fazer PRIMEIRO quando receber uma solicitação de design?"
+  options="Escolha uma arquitetura de rede neural|Esclareça o problema e defina métricas de negócios|Desenhe o pipeline de dados|Discuta as métricas de avaliação do modelo"
+  answer="1"
+  explanation="Comece sempre esclarecendo o problema. Compreender o que significa o sucesso para o negócio determina cada decisão posterior – desde a coleta de dados até a seleção de métricas e a estratégia de implantação."
+/>
+
+---
+
+## ⚖️ Discutindo compensações como um engenheiro sênior
+
+Os entrevistadores adoram discussões de compensação porque revelam profundidade de experiência. Aqui estão as compensações que mais surgem:
+
+| Troca | Quando favorecer a esquerda | Quando favorecer o certo |
+|---|---|---|
+| Latência vs Precisão | Voltado ao usuário em tempo real (pesquisa) | Lote off-line (recomendações de e-mail) |
+| Modelo Simples vs Complexo | Dados pequenos, precisam de interpretabilidade | Grandes dados, a precisão é crítica |
+| Exibição em lote vs em tempo real | As previsões não mudam rapidamente | As previsões devem refletir o contexto mais recente |
+| Construir vs Comprar | Diferencial central para o negócio | Capacidade de mercadoria (por exemplo, OCR) |
+
+Ao discutir uma compensação, use este padrão:
+
+> "Poderíamos escolher a **opção A** que nos dá [benefício], mas a desvantagem é [custo]. Alternativamente, a **opção B** [benefício], embora introduza [custo]. Dada [restrição específica do problema], eu me inclinaria para a **opção A** porque..."
+
+<FunFact>A Netflix estima que seu sistema de recomendação economize para a empresa mais de US$ 1 bilhão por ano em redução de rotatividade. O valor desse sistema único de BC excede o PIB de alguns países pequenos.
+</FunFact>
+
+---
+
+## 🛠️ Juntando tudo: um mini passo a passo
+
+**Aviso**: "Projete um sistema de moderação de conteúdo para uma plataforma de mídia social."
+
+1. **Problema**: classificar o conteúdo gerado pelo usuário (texto + imagens) como seguro, duvidoso ou prejudicial
+2. **Dados**: decisões de moderação rotuladas de revisores humanos, relatórios de usuários
+3. **Recursos**: incorporação de texto, recursos de imagem (pontuação de nudez, indicadores de violência), histórico do usuário (violações anteriores)
+4. **Modelo**: classificador multimodal (ramificação de texto + ramificação de imagem → camada de fusão → cabeça de classificação)
+5. **Treinamento**: amostragem estratificada para lidar com o desequilíbrio de classes; reciclagem regular à medida que surgem novos padrões prejudiciais
+6. **Avaliação**: alto recall de conteúdo prejudicial; a precisão é importante para o borderline (evite censura excessiva)
+7. **Exibição**: inferência em tempo real no momento do upload; enfileirar casos limítrofes para análise humana
+8. **Monitoramento**: rastreie a taxa de falsos positivos por meio de apelos dos usuários; monitorar novos padrões de abuso
+
+<Quiz
+  question="Por que uma abordagem de veiculação híbrida (geração de candidatos em lote + classificação em tempo real) é comum em sistemas de recomendação?"
+  options="É mais barato do que a veiculação pura em tempo real|Equilibra a necessidade de ampla cobertura com classificação personalizada e sensível ao contexto|É mais fácil de implementar do que apenas em lote|Elimina a necessidade de lojas de recursos"
+  answer="1"
+  explanation="A geração de candidatos em lote pode filtrar com eficiência milhões de itens para produzir uma lista restrita gerenciável. A classificação em tempo real personaliza essa lista usando o contexto mais recente (hora do dia, comportamento da sessão), proporcionando o melhor equilíbrio entre cobertura e relevância."
+/>
+
+---
+
+## 🔑 Principais vantagens
+
+- **Use uma estrutura**: problema → dados → recursos → modelo → treinamento → avaliação → implantação → monitoramento
+- **Comece com o problema de negócios**, não com o modelo — os entrevistadores percebem quando você pula esta etapa
+- **Discutir explicitamente as compensações** — este é o maior diferencial entre candidatos de nível médio e sênior
+- **Pense além da precisão** — latência, custo, justiça e facilidade de manutenção são importantes na produção
+- **Pratique em voz alta** — O design do sistema de ML é tanto um exercício de comunicação quanto um exercício técnico
+
+<Callout>As melhores respostas de design de sistema de ML parecem uma conversa, não uma palestra. Faça uma pausa para conversar com o entrevistador, faça perguntas esclarecedoras e esteja disposto a mudar quando ele o empurrar em uma direção diferente.
+</Callout>

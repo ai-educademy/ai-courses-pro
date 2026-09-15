@@ -1,0 +1,125 @@
+---
+title: "Feinabstimmung und RAG – Wie Unternehmen KI für ihre Daten anpassen"
+description: "Erfahren Sie, wann und wie Sie Modelle verfeinern oder die abrufgestützte Generierung verwenden, um domänenspezifische KI-Anwendungen zu erstellen."
+order: 4
+difficulty: "advanced"
+duration: 20
+icon: "🔧"
+published: true
+machineTranslated: true
+---
+# Feinabstimmung und RAG – Wie Unternehmen KI für ihre Daten anpassen
+
+Ein universeller LLM weiß viel über die Welt, aber nichts über die internen Dokumente, proprietären Daten oder domänenspezifischen Terminologie Ihres Unternehmens. In dieser Lektion werden die beiden Hauptansätze zur Überbrückung dieser Lücke behandelt: **Feinabstimmung** und **Retrieval-Augmented Generation (RAG)**.
+
+## Warum generische Modelle nicht ausreichen
+
+Stellen Sie sich vor, Sie bitten GPT-4, Kundenanfragen zu den spezifischen Rückgaberichtlinien, internen Produktcodes oder medizinischen Behandlungsprotokollen Ihres Unternehmens zu beantworten. Das ist nicht möglich – diese Informationen sind nicht in den Trainingsdaten enthalten.
+
+Unternehmen benötigen KI, die die **allgemeine Intelligenz** eines großen Modells mit **spezifischem Wissen** ihrer Domäne kombiniert. Es gibt zwei Wege, um dorthin zu gelangen, und die Wahl des richtigen Weges ist enorm wichtig.
+
+<Callout>Ein weit verbreitetes Missverständnis ist, dass Sie Ihre Daten einfach auf ein LLM „hochladen“ können. In Wirklichkeit erfordert die Anpassung eines Modells entweder eine Neuschulung seiner Gewichte (Feinabstimmung) oder den Aufbau einer Retrieval-Pipeline (RAG) – beides sind technische Anstrengungen, die eine sorgfältige Planung erfordern.
+</Callout>
+
+<Illustration src="/images/lessons/fine-tuning-and-rag.svg" alt="Diagramm zum Vergleich von Feinabstimmungs- und RAG-Ansätzen zur Anpassung von LLMs" caption="Durch die Feinabstimmung werden die Gewichte des Modells geändert. RAG stellt zum Abfragezeitpunkt externes Wissen zur Verfügung." />
+
+## Feinabstimmung: Dem Modell neue Tricks beibringen
+
+Bei der Feinabstimmung wird ein vorab trainiertes Modell verwendet und es anhand Ihres eigenen Datensatzes weiter trainiert. Die Gewichtungen des Modells werden aktualisiert, um die Sprache, den Stil und das Wissen Ihrer Domain widerzuspiegeln.
+
+**Wann ist eine Feinabstimmung erforderlich:**
+- Das Modell muss konsequent einen bestimmten Ton oder Schreibstil übernehmen.
+- Ihre Domain verfügt über spezielle Terminologie, mit der das Basismodell schlecht umgehen kann.
+- Sie möchten eine schnellere Schlussfolgerung (Wissen wird „eingebacken“ und nicht abgerufen).
+
+**Der Prozess:**
+1. Bereiten Sie einen Datensatz mit hochwertigen Beispielen in Ihrer Domäne vor (normalerweise Hunderte bis Tausende von Eingabe-Ausgabe-Paaren).
+2. Wählen Sie ein Basismodell (z. B. Llama 3, Mistral).
+3. Trainieren Sie einige Epochen lang mit einer niedrigen Lernrate, um katastrophales Vergessen zu vermeiden.
+4. Werten Sie die zurückgehaltenen Testdaten aus.
+
+<FunFact>Bloomberg baute BloombergGPT durch die Feinabstimmung von 363 Milliarden Tokens an Finanzdaten auf. Das resultierende Modell übertraf bei finanziellen NLP-Aufgaben wie der Sentimentanalyse von Gewinnmitteilungen und der Erkennung benannter Unternehmen in SEC-Einreichungen die Allzweckmodelle deutlich.
+</FunFact>
+
+## LoRA und QLoRA: Effiziente Feinabstimmung
+
+Bei der herkömmlichen Feinabstimmung werden **alle** Modellparameter aktualisiert, was enormen GPU-Speicher erfordert. Ein Modell mit 70 Milliarden Parametern benötigt allein für die Gradientenspeicherung Hunderte von Gigabyte.
+
+**LoRA (Low-Rank Adaptation)** löst dieses Problem elegant:
+– Anstatt alle Gewichte zu aktualisieren, friert LoRA das Originalmodell ein und fügt jeder Ebene kleine **trainierbare Adaptermatrizen** hinzu.
+– Diese Adapter fügen normalerweise nur 0,1–1 % zusätzliche Parameter hinzu.
+- Das Ergebnis ist eine nahezu identische Leistung zu einem Bruchteil der Kosten.
+
+**QLoRA** geht noch einen Schritt weiter, indem es das eingefrorene Modell auf 4-Bit-Präzision quantisiert und so den Speicherbedarf drastisch reduziert. Sie können ein 70-B-Parametermodell auf einer einzelnen Consumer-GPU mit 48 GB VRAM optimieren.
+
+<Quiz question="Was ist der entscheidende Vorteil von LoRA gegenüber der herkömmlichen Feinabstimmung?" options="LoRA erzeugt genauere Modelle als die vollständige Feinabstimmung|LoRA trainiert nur kleine Adaptermatrizen und erfordert weit weniger GPU-Speicher und Rechenleistung|LoRA macht Trainingsdaten überflüssig|LoRA funktioniert nur mit kleinen Modellen unter 1 Milliarde Parametern" answer="1" explanation="LoRA friert die ursprünglichen Modellgewichte ein und trainiert stattdessen kleine Adaptermatrizen mit niedrigem Rang. Dadurch werden die Speichernutzung und die Trainingszeit drastisch reduziert und gleichzeitig eine Leistung erreicht, die mit einer vollständigen Feinabstimmung vergleichbar ist." />
+
+## RAG: Retrieval-Augmented Generation
+
+Einen völlig anderen Ansatz verfolgt die RAG. Anstatt das Modell zu ändern, **gewähren Sie ihm zum Zeitpunkt der Abfrage Zugriff auf externe Dokumente**.
+
+**So funktioniert RAG:**
+1. **Index** – Ihre Dokumente werden in Blöcke aufgeteilt und mithilfe eines Einbettungsmodells in numerische Vektoren (Einbettungen) umgewandelt.
+2. **Speichern** – Diese Vektoren werden zur schnellen Ähnlichkeitssuche in einer Vektordatenbank gespeichert.
+3. **Abrufen** – Wenn ein Benutzer eine Frage stellt, wird die Abfrage ebenfalls eingebettet und die relevantesten Dokumentabschnitte werden abgerufen.
+4. **Generieren** – Die abgerufenen Blöcke werden als Kontext in die Eingabeaufforderung eingefügt und der LLM generiert eine Antwort, die auf Ihren tatsächlichen Dokumenten basiert.
+
+**Wann ist RAG zu verwenden:**
+- Ihre Wissensdatenbank ändert sich häufig (neue Dokumente, aktualisierte Richtlinien).
+- Sie benötigen Quellenangaben und Nachvollziehbarkeit.
+- Sie möchten die Kosten und Komplexität einer Feinabstimmung vermeiden.
+- Die sachliche Genauigkeit ist von entscheidender Bedeutung und Halluzinationen müssen minimiert werden.
+
+<ThinkAboutIt>RAG stellt dem Modell zum Zeitpunkt der Abfrage relevante Dokumente zur Verfügung, das Modell generiert jedoch dennoch die endgültige Antwort. Wie können Sie überprüfen, ob die Antwort des Modells tatsächlich das widerspiegelt, was in den abgerufenen Dokumenten steht, anstatt darüber hinaus zu halluzinieren?
+</ThinkAboutIt>
+
+## Vektordatenbanken
+
+Vektordatenbanken wurden speziell zum Speichern und Durchsuchen hochdimensionaler Einbettungen entwickelt:
+
+| Datenbank | Geben Sie | ein Hauptmerkmal |
+|----------|------|-------------|
+| **Tannenzapfen** | Verwaltete Cloud | Vollständig gehostete, einfache API |
+| **Weaviate** | Open-Source | Hybridsuche (Vektor + Schlüsselwort) |
+| **pgvector** | PostgreSQL-Erweiterung | Nutzen Sie Ihre vorhandene Postgres-Datenbank |
+| **Chroma** | Open-Source | Leicht, ideal für Prototyping |
+| **Qdrant** | Open-Source | Hochleistung, auf Rostbasis |
+
+Die Wahl einer Vektordatenbank hängt von Ihrer Größe, der vorhandenen Infrastruktur und davon ab, ob Sie verwaltetes Hosting benötigen oder selbst gehostete Lösungen bevorzugen.
+
+<Quiz question="Welche Rolle spielt die Vektordatenbank in einem RAG-System?" options="Es trainiert das Sprachmodell anhand neuer Daten|Es speichert Dokumenteinbettungen und ermöglicht eine schnelle Ähnlichkeitssuche für relevanten Kontext|Es generiert die endgültige Antwort auf Benutzeranfragen|Es ersetzt die Notwendigkeit eines Sprachmodells vollständig" answer="1" explanation="Die Vektordatenbank speichert numerische Darstellungen (Einbettungen) Ihrer Dokumente. Wenn eine Anfrage eintrifft, findet sie schnell die semantisch ähnlichsten Dokumentabschnitte, die dann dem LLM als Kontext für die Generierung einer Antwort bereitgestellt werden." />
+
+## Wann sollte eine Feinabstimmung erfolgen und wann sollte RAG verwendet werden?
+
+| Überlegung | Feinabstimmung | RAG |
+|---------------|-------------|-----|
+| **Datenaktualität** | Statisch (zum Aktualisieren neu trainieren) | Dynamisch (Dokumente jederzeit aktualisieren) |
+| **Kosten** | Höherer Vorlauf (Schulung) | Geringere Vorab- und laufende Abrufkosten |
+| **Rückverfolgbarkeit** | Niedrig (Wissen ist implizit) | Hoch (Quelldokumente können zitiert werden) |
+| **Stil/Verhalten** | Hervorragend für Ton und Format | Beschränkt auf sofortige Anweisungen |
+| **Halluzinationsrisiko** | Mäßig | Niedriger (in Dokumenten begründet) |
+
+**Die besten Produktionssysteme kombinieren häufig beides.** Nehmen Sie eine Feinabstimmung für domänenspezifische Sprache und Stil vor und verwenden Sie dann RAG, um zum Zeitpunkt der Abfrage aktuelle, sachliche Inhalte einzufügen.
+
+<FunFact>Der britische National Health Service hat RAG-Systeme erprobt, die LLMs mit klinischen Leitlinien und Datenbanken zu Arzneimittelwechselwirkungen verbinden. Ärzte können Fragen in natürlicher Sprache stellen und erhalten Antworten auf der Grundlage der neuesten NICE-Richtlinien, komplett mit Seitenverweisen.
+</FunFact>
+
+## Beispiele aus der Praxis
+
+- **Kundensupport** – Ein Einzelhändler verfeinert ein Modell anhand früherer Support-Tickets für den Ton und verwendet dann die RAG anhand des Produktkatalogs und der Rückgaberichtlinien, um sachliche Antworten zu erhalten.
+- **Analyse von Rechtsdokumenten** – Anwaltskanzleien nutzen RAG, um Millionen von Falldokumenten zu durchsuchen, wobei das LLM relevante Präzedenzfälle für jeden neuen Fall zusammenfasst.
+- **Fragen und Antworten zu medizinischen Fragen** – Gesundheitsdienstleister verwenden RAG anhand von Peer-Review-Literatur, damit Ärzte Fragen in natürlicher Sprache stellen und evidenzbasierte Antworten mit Zitaten erhalten können.
+
+## Aufbau einer Produktions-RAG-Pipeline
+
+Ein robustes RAG-System erfordert mehr als nur eine Vektordatenbank und ein LLM. Zu den wichtigsten Überlegungen gehören:
+
+- **Chunking-Strategie** – Wie Sie Dokumente aufteilen, ist von enormer Bedeutung. Zu große und irrelevante Inhalte verwässern das Signal; zu klein und Sie verlieren den Kontext. Überlappende Stücke mit einer Überlappung von 10–20 % funktionieren oft gut.
+- **Neues Ranking** – Nach dem ersten Vektorabruf kann ein Cross-Encoder-Re-Ranker die Ergebnisse nach Relevanz neu ordnen und so die Antwortqualität erheblich verbessern.
+- **Bewertung** – Messen Sie die Abrufgenauigkeit (haben Sie die richtigen Chunks gefunden?) und die Generationstreue (spiegelte die Antwort die Chunks wider?) getrennt voneinander.
+- **Hybridsuche** – Durch die Kombination von Vektorähnlichkeit mit der herkömmlichen Schlüsselwortsuche (BM25) werden Fälle erfasst, in denen bei der semantischen Suche allein genaue Begriffe oder Akronyme übersehen werden.
+
+<Quiz question="Die Wissensdatenbank eines Unternehmens wird täglich mit neuen Produktinformationen aktualisiert. Welcher Ansatz ist am besten geeignet?" options="Tägliche Feinabstimmung des Modells anhand der neuen Daten|Durch die Verwendung von RAG ruft das Modell immer die neuesten Dokumente ab|Jede Woche wird das Modell von Grund auf neu trainiert|Verwendung eines kleineren Modells, das keine externen Daten benötigt" answer="1" explanation="RAG ist ideal für sich häufig ändernde Daten, da Sie nur den Dokumentindex aktualisieren müssen – keine Neuschulung des Modells erforderlich. Eine Feinabstimmung wäre für tägliche Updates aus Kosten- und Zeitgründen unpraktisch." />
+
+<ThinkAboutIt>Wenn ein RAG-System aufgrund eines schlechten Einbettungsmodells die falschen Dokumente abruft, generiert das LLM zuverlässig eine Antwort basierend auf irrelevantem Kontext. Wie könnten Sie Schutzmaßnahmen entwerfen, um diesen Fehlermodus zu erkennen und zu verhindern?
+</ThinkAboutIt>

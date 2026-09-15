@@ -1,0 +1,214 @@
+---
+title: "Transformers uitgelegd: de architectuur achter ChatGPT"
+description: "Begrijp de Transformer-architectuur die ChatGPT, GPT-4, BERT en Gemini aanstuurt – het aandachtsmechanisme stap voor stap uitgelegd."
+order: 12
+difficulty: "intermediate"
+duration: 35
+icon: "🤖"
+published: true
+machineTranslated: true
+---
+# Transformers uitgelegd: de architectuur achter ChatGPT
+
+In 2017 publiceerde een team van Google een artikel met de titel *"Attention Is All You Need"*. Het introduceerde de **Transformer**-architectuur en veranderde AI voor altijd. Elk belangrijk taalmodel waar je van hebt gehoord – ChatGPT, GPT-4, BERT, Gemini, Claude, LLaMA – is gebouwd op Transformers.
+
+Om te begrijpen waarom Transformers belangrijk zijn, moet je eerst begrijpen wat ze hebben vervangen.
+
+## ⏱️ Het probleem met RNN's: tekst opeenvolgend verwerken
+
+Vóór Transformers was de dominante benadering voor het verwerken van reeksen (tekst, audio, tijdreeksen) het **Recurrent Neural Network (RNN)** en zijn varianten: LSTM's en GRU's.
+
+RNN's verwerken tekst **woord voor woord**, waarbij ze een "verborgen toestand" behouden die informatie naar voren brengt:
+
+```
+Input:  "The cat sat on the mat because it was comfortable"
+         ↓    ↓    ↓   ↓    ↓    ↓      ↓      ↓   ↓      ↓
+        h1 → h2 → h3 → h4 → h5 → h6 → h7 → h8 → h9 → h10 → output
+```
+
+Dit werkt, maar heeft twee grote problemen:
+
+**1. Verdwijnende gradiënten over lange reeksen**
+Tegen de tijd dat het model woord 10 verwerkt, is de informatie van woord 1 "verdund" door negen verborgen statusupdates. Het model heeft moeite om 'it' (woord 8) terug te koppelen aan 'kat' (woord 2) als de zin lang is.
+
+**2. Langzaam — geen parallellisatie**
+Omdat elk woord afhankelijk is van de vorige verborgen status, moet u de woorden één voor één verwerken. Je kunt niet parallelliseren over een reeks. Het trainen van lange documenten gaat pijnlijk langzaam.
+
+De Transformer lost beide problemen op met één enkel elegant mechanisme: **aandacht**.
+
+## 👀 Het zelfaandachtsmechanisme
+
+De centrale innovatie van de Transformer is **zelfaandacht**: het vermogen van elk woord in een reeks om tegelijkertijd direct op elk ander woord te letten, ongeacht hoe ver ze uit elkaar liggen.
+
+In plaats van informatie opeenvolgend door te geven, berekent zelfaandacht **hoe relevant elk woord is voor elk ander woord in de reeks** — in één keer.
+
+### Query, sleutel en waarde — in gewoon Engels
+
+Voor elk woord (of teken) creëert de Transformer drie vectoren:
+
+- **Query (Q)**: *"Wat zoek ik?"* — de vraag die dit woord stelt
+- **Sleutel (K)**: *"Wat bevat ik?"* — de advertentie die elk woord over zichzelf uitzendt
+- **Waarde (V)**: *"Welke informatie geef ik?"* — de feitelijke inhoud die moet worden opgehaald
+
+De aandachtsscore tussen twee woorden wordt berekend door het puntproduct van de zoekopdracht van het ene woord te nemen met de sleutel van een ander woord. Een hoge score betekent "deze twee woorden zijn zeer relevant voor elkaar."
+
+```python
+import torch
+import torch.nn.functional as F
+
+def self_attention(Q, K, V):
+    d_k = Q.shape[-1]  # dimension of key vectors
+    
+    # Compute raw attention scores: how relevant is each word to each other
+    scores = torch.matmul(Q, K.transpose(-2, -1)) / (d_k ** 0.5)
+    
+    # Convert scores to probabilities (weights that sum to 1)
+    attention_weights = F.softmax(scores, dim=-1)
+    
+    # Weighted sum of Value vectors
+    output = torch.matmul(attention_weights, V)
+    
+    return output, attention_weights
+
+# For the sentence "The cat sat on the mat because it was comfortable",
+# "it" will have a high attention score with "cat" (the antecedent)
+# regardless of how many words separate them
+```
+
+Het resultaat: **elk token heeft een directe zichtlijn naar elk ander token**. Geen informatieknelpunt meer, geen verdwijnende gradiënten meer over lange reeksen.
+
+### Waarom de vierkantswortelschaling?
+
+De `/ (d_k ** 0.5)` in de bovenstaande code voorkomt dat de puntproducten zeer grote getallen worden die de softmax in gebieden met extreem kleine gradiënten zouden duwen. Het is een stabilisatietruc.
+
+## 🧠 Meerhoofdige aandacht
+
+In plaats van de aandacht slechts één keer te berekenen, berekenen Transformers deze **meerdere keren parallel** met verschillende aangeleerde projecties. Dit wordt **multi-head aandacht** genoemd:
+
+```python
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model=512, num_heads=8):
+        super().__init__()
+        self.num_heads = num_heads
+        self.d_k = d_model // num_heads  # 64 per head
+        
+        # Separate linear projections for each head
+        self.W_q = nn.Linear(d_model, d_model)
+        self.W_k = nn.Linear(d_model, d_model)
+        self.W_v = nn.Linear(d_model, d_model)
+        self.W_o = nn.Linear(d_model, d_model)
+    
+    def forward(self, x):
+        # Each head learns to attend to different aspects:
+        # Head 1 might focus on syntactic relationships
+        # Head 2 might focus on semantic similarity
+        # Head 3 might focus on co-reference (it → cat)
+        # ... and so on for all 8 heads
+        pass
+```
+
+Elk aandachtshoofd kan zich specialiseren in een ander type relatie. Eén hoofd zou syntactische afhankelijkheden kunnen volgen (overeenkomst tussen onderwerp en werkwoord), een ander zou zich kunnen concentreren op coreferentie (voornaamwoorden en hun antecedenten), en een ander zou semantische gelijkenis kunnen vastleggen.
+
+<FunFact>Het gerucht gaat dat GPT-4 96 aandachtskoppen gebruikt. Iedereen kan zelfstandig leren verschillende taalkundige relaties in het hele contextvenster tegelijkertijd te volgen.</FunFact>
+
+## 📍 Positionele codering
+
+Zelfaandacht heeft één blinde vlek: het is inherent **orde-agnostisch**. "Hond bijt man" en "Man bijt hond" zouden zonder aanvullende informatie identieke attentiescores opleveren.
+
+Om het model een gevoel van woordvolgorde te geven, voegen Transformers **positionele coderingen** toe aan de invoerinsluitingen. De originele Transformer gebruikte sinusoïdale functies:
+
+```python
+import numpy as np
+
+def positional_encoding(seq_len, d_model):
+    PE = np.zeros((seq_len, d_model))
+    for pos in range(seq_len):
+        for i in range(0, d_model, 2):
+            PE[pos, i]     = np.sin(pos / 10000 ** (2*i / d_model))
+            PE[pos, i + 1] = np.cos(pos / 10000 ** (2*i / d_model))
+    return PE
+
+# Each position gets a unique "fingerprint" added to its embedding
+# Position 0 looks different from position 1, which looks different from position 2
+```
+
+Moderne modellen zoals LLaMA gebruiken **Rotary Position Embeddings (RoPE)**, die de relatieve positie effectiever coderen en beter kunnen schalen naar zeer lange contexten.
+
+## 🏗️De volledige Transformer-architectuur
+
+De originele Transformer bestaat uit twee hoofdonderdelen:
+
+### Codeur
+Leest de invoer en bouwt een rijke contextuele representatie op. De representatie van elk token wordt via zelfaandacht geïnformeerd door elk ander token. Gebruikt voor taken zoals: zinsclassificatie, herkenning van benoemde entiteiten, beantwoorden van vragen over een bepaalde passage.
+
+### Decoder
+Genereert uitvoertokens één voor één, waarbij zowel de uitvoer van de encoder als de reeds gegenereerde tokens worden beheerd. Gebruikt voor: vertaling, samenvatting, tekstgeneratie.
+
+Een volledige encoder-decoder-stack:
+```
+Input text → Token Embeddings + Positional Encoding
+           → N × [Multi-Head Self-Attention → Add & Norm → Feed-Forward → Add & Norm]
+           → Encoder Output
+
+Encoder Output + Generated tokens so far
+           → N × [Masked Self-Attention → Cross-Attention → Feed-Forward]
+           → Next token prediction
+```
+
+## 🆚 BERT versus GPT: twee smaken van Transformer
+
+Niet alle Transformer-gebaseerde modellen gebruiken de volledige encoder-decoder-structuur. De twee dominante varianten zijn:
+
+### BERT (alleen encoder)
+- Gebruikt alleen de **encoder**-stack
+- Getraind met **Masked Language Modelling**: sommige invoertokens zijn verborgen en BERT voorspelt ze
+- Uitstekend in het **begrijpen** van tekst: classificatie, zoeken, vragen en antwoorden
+- Leest de volledige context bidirectioneel (elk woord ziet elk ander woord)
+
+### GPT (alleen decoder)
+- Gebruikt alleen de **decoder**-stack  
+- Getraind met **volgende-tokenvoorspelling**: voorspel de volgende, gegeven alle voorgaande tokens
+- Uitstekend in het **genereren** van tekst: conversatie, schrijven, code
+- Causale maskering: elk token kan alleen betrekking hebben op eerdere tokens (niet toekomstige tokens - dat zou vals spelen zijn)
+
+```
+BERT training:   "The [MASK] sat on the mat"  → predict "cat"
+GPT training:    "The cat sat on the"          → predict "mat"
+```
+
+<ThinkAboutIt>De bidirectionele aandacht van BERT betekent dat het toekomstige woorden kan zien bij het opbouwen van de representatie van een woord. GPT kan dat niet. Waarom maakt dit GPT beter voor generatie, maar BERT beter voor classificatietaken?</ThinkAboutIt>
+
+## 📈 Waarom schaal belangrijk is
+
+De Transformer-architectuur bleek opmerkelijk goed te schalen. Grotere modellen met meer parameters, getraind op meer data en met meer rekenkracht leveren consistent betere prestaties op – een fenomeen dat wordt beschreven door **schaalwetten** (Kaplan et al., 2020).
+
+Dit leidde tot een progressie:
+- GPT-1 (2018): 117 miljoen parameters
+- GPT-2 (2019): 1,5B-parameters
+- GPT-3 (2020): 175B-parameters
+- GPT-4 (2023): geschatte meer dan 1 biljoen parameters
+
+Elke sprong bracht kwalitatieve verbeteringen in capaciteiten met zich mee. Taken die GPT-2 helemaal niet kon uitvoeren (complex redeneren, code genereren) werden mogelijk op GPT-3-schaal en uitstekend op GPT-4-schaal.
+
+## ⚡ Training versus gevolgtrekking
+
+Twee zeer verschillende computationele profielen:
+
+**Opleiding**: extreem duur. Het verwerken van miljarden tokens, het berekenen van gradiënten en het bijwerken van honderden miljarden parameters over duizenden GPU's gedurende weken of maanden. De training van GPT-4 kostte naar schatting meer dan $ 100 miljoen.
+
+**Gevolgtrekking**: veel goedkoper. Eén enkele voorwaartse doorgang door het netwerk om elk token te genereren. Vereist nog steeds aanzienlijke hardware (krachtige GPU's of gespecialiseerde AI-chips), maar kan op schaal worden beheerd.
+
+Deze asymmetrie heeft de sector gevormd: een paar goed uitgeruste organisaties trainen funderingsmodellen; alle anderen hebben er toegang toe via API's.
+
+<Quiz question="Welk probleem met RNN's heeft het aandachtsmechanisme van de Transformer opgelost?" options="RNN's konden geen tekst verwerken; ze werkten alleen met afbeeldingen|RNN's worstelden met afhankelijkheden op lange afstand en konden niet parallelliseren over de sequentielengte|RNN's hadden te veel gelabelde gegevens nodig om te trainen|RNN's konden alleen Engelse tekst verwerken" answer="1" explanation="RNN's verwerkten tokens opeenvolgend, waardoor verdwijnende gradiënten ontstonden die het moeilijk maakten om verre woorden met elkaar te verbinden (afhankelijkheden op lange afstand). Ze konden ook niet over de lengte van de reeks worden geparallelliseerd, waardoor de training traag werd. Zelfaandacht lost beide op: elk token houdt rechtstreeks verband met elkaar, en alle aandachtsberekeningen kunnen parallel lopen." />
+
+## Belangrijkste afhaalrestaurants
+
+- **RNN's** verwerkten reeksen stap voor stap, worstelden met afhankelijkheden op lange afstand en konden niet parallelliseren - Transformers vervingen ze
+- **Zelfaandacht** zorgt ervoor dat elk token rechtstreeks aandacht besteedt aan elk ander token via Query-, Key- en Value-vectoren, waardoor beide problemen in één keer worden opgelost
+- **Multi-head-aandacht** voert meerdere aandachtsberekeningen parallel uit, waardoor het model tegelijkertijd verschillende soorten relaties kan leren
+- **Positionele codering** voegt orderinformatie toe aan het inherent positie-agnostische aandachtsmechanisme
+- **BERT** (alleen encoder) is vooraf getraind om tekst bidirectioneel te begrijpen; het beste voor classificatie- en zoektaken
+- **GPT** (alleen decoder) is vooraf getraind om tekst van links naar rechts te genereren; het beste voor generatie en conversatie
+- **Schaal is enorm belangrijk**: grotere Transformers die zijn getraind op meer data ontsluiten consequent nieuwe mogelijkheden, zoals blijkt uit de voortgang van GPT-1 → GPT-4
+- Opleiding is extreem duur; gevolgtrekking is veel goedkoper – deze asymmetrie bepaalt hoe funderingsmodellen worden ingezet

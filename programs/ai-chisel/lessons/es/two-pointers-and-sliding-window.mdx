@@ -1,0 +1,132 @@
+---
+title: "Dos punteros y ventana deslizante: cómo la IA escanea datos de manera eficiente"
+description: "Domine dos patrones esenciales para escanear secuencias sin desperdiciar cálculos."
+order: 1
+difficulty: "intermediate"
+duration: 15
+icon: "👆"
+published: true
+machineTranslated: true
+---
+## Por qué es importante escanear de forma inteligente
+
+Imagine una IA monitoreando una transmisión de video en vivo en busca de actividad sospechosa. No puede volver a ver la grabación completa cada segundo; necesita deslizar una ventana de atención a lo largo de la transmisión, manteniendo un registro del contexto suficiente. Eso es exactamente lo que hacen los patrones **dos punteros** y **ventana deslizante** para datos secuenciales.
+
+Ambas técnicas convierten los escaneos O(n²) de fuerza bruta en elegantes pases O(n).
+
+<Illustration src="/images/lessons/two-pointers-and-sliding-window.svg" alt="Dos punteros que convergen desde ambos extremos de una matriz y una ventana deslizante que se mueve a través de un flujo de datos" caption="Dos punteros reducen el espacio de búsqueda; una ventana corrediza mantiene una vista corriente." />
+
+## La técnica de los dos punteros
+
+Coloque dos referencias en una secuencia y muévalas según una regla. Hay dos sabores principales.
+
+### Punteros convergentes
+
+Comience con un puntero en cada extremo y muévalos hacia adentro. Perfecto para datos **ordenados**.
+
+**Problema clásico: suma de pares:** Dada una matriz ordenada, encuentre dos números que se sumen a un objetivo.
+
+```
+function pairSum(arr, target):
+    left = 0
+    right = arr.length - 1
+    while left < right:
+        sum = arr[left] + arr[right]
+        if sum == target: return (left, right)
+        if sum < target: left += 1
+        else: right -= 1
+    return null
+```
+
+Debido a que la matriz está ordenada, mover `left` hacia la derecha aumenta la suma y mover `right` hacia la izquierda la disminuye, lo que garantiza que nunca nos perderemos un par válido.
+
+### Punteros en la misma dirección
+
+Ambos punteros avanzan, pero a diferentes velocidades. Útil para **particionamiento** o **detección de ciclos**.
+
+**Ejemplo: eliminar duplicados in situ:** Un puntero lento marca la posición de escritura; un puntero rápido escanea hacia adelante.
+
+```
+function removeDuplicates(arr):
+    slow = 0
+    for fast in 1..arr.length - 1:
+        if arr[fast] != arr[slow]:
+            slow += 1
+            arr[slow] = arr[fast]
+    return slow + 1
+```
+
+<Quiz question="En la técnica convergente de dos punteros en una matriz ordenada, ¿qué se debe hacer cuando la suma actual es menor que el objetivo?" options="Mover el puntero derecho hacia la izquierda|Mover el puntero izquierdo hacia la derecha|Intercambiar los dos elementos.|Reiniciar desde el medio" answer="1" explanation="Mover el puntero izquierdo hacia la derecha aumenta la suma porque la matriz está ordenada en orden ascendente." />
+
+## El patrón de ventana corrediza
+
+Una ventana deslizante mantiene una subsecuencia contigua de tamaño _k_ (fijo) o de longitud variable, actualizando los agregados de forma incremental en lugar de volver a calcularlos desde cero.
+
+### Ventana de tamaño fijo
+
+Deslice una ventana de exactamente _k_ elementos a lo largo de la matriz.
+
+**Ejemplo: suma máxima de k elementos consecutivos:**
+
+```
+function maxSubarraySum(arr, k):
+    windowSum = sum(arr[0..k-1])
+    best = windowSum
+    for i in k..arr.length - 1:
+        windowSum += arr[i] - arr[i - k]
+        best = max(best, windowSum)
+    return best
+```
+
+Cada paso agrega el nuevo elemento que ingresa a la ventana y resta el que sale: O (1) por movimiento.
+
+### Ventana de tamaño variable
+
+Expanda la ventana para incluir más datos y luego redúzcala cuando se infrinja una restricción.
+
+**Ejemplo: subcadena más larga sin caracteres repetidos:**
+
+```
+function longestUnique(s):
+    seen = {}
+    left = 0
+    best = 0
+    for right in 0..s.length - 1:
+        if s[right] in seen and seen[s[right]] >= left:
+            left = seen[s[right]] + 1
+        seen[s[right]] = right
+        best = max(best, right - left + 1)
+    return best
+```
+
+<FunFact>Las plataformas de análisis de streaming como Apache Flink utilizan ventanas deslizantes y giratorias como primitivas de primera clase: el mismo concepto ampliado a millones de eventos por segundo.</FunFact>
+
+## Aplicaciones reales de IA
+
+| Patrón | Caso de uso de IA |
+|---------|------------|
+| Ventana fija | Detección de anomalías en las últimas _k_ lecturas del sensor |
+| Ventana variable | Encontrar el intervalo de texto más corto que contenga todas las palabras clave de consulta (motores de búsqueda) |
+| Punteros convergentes | Controles eficientes del vecino más cercano en dimensiones de incrustación ordenadas |
+| Punteros en la misma dirección | Fusionar listas de resultados ordenados de múltiples modelos de recuperación |
+
+<ThinkAboutIt>Un asistente de voz almacena en buffer los últimos 3 segundos de audio para detectar una palabra de activación. ¿Qué patrón es este: ventana fija o ventana variable? ¿Qué sucede si la palabra de activación es más larga que el búfer?</ThinkAboutIt>
+
+## Cuándo usar cuál
+
+- **Dos punteros (convergentes):** entrada ordenada, búsqueda de pares/tripletes, comprobaciones de palíndromo.
+- **Dos sugerencias (misma dirección):** modificaciones en el lugar, problemas de corredor rápido/lento.
+- **Ventana corredera fija:** agregado sobre un tamaño de ventana conocido.
+- **Ventana corredera variable:** encuentre la ventana más pequeña o más grande que cumpla una condición.
+
+<Quiz question="¿Qué patrón elegirías para encontrar el subconjunto más pequeño cuya suma excede un valor dado?" options="Dos indicadores convergentes|Ventana corredera fija|Ventana corredera variable|búsqueda binaria" answer="2" explanation="Una ventana de tamaño variable se expande hasta que la suma excede el valor, luego se contrae desde la izquierda para encontrar la longitud mínima, todo en O(n)." />
+
+<ThinkAboutIt>¿Podrías combinar dos punteros con una ventana corredera? Piense en problemas en los que necesita encontrar un par dentro de una ventana móvil de datos; por ejemplo, detectar transacciones duplicadas dentro de una ventana de cinco minutos.</ThinkAboutIt>
+
+## Conclusiones clave
+
+1. Dos punteros eliminan los bucles anidados aprovechando el orden o la partición.
+2. Las ventanas corredizas mantienen el estado de ejecución para que cada elemento se procese como máximo dos veces.
+3. Ambos patrones son fundamentales en los procesos de IA en tiempo real, desde la detección de anomalías hasta la clasificación de búsqueda.
+
+<Quiz question="¿Cuál es la complejidad de tiempo típica que se logra al convertir un bucle anidado de fuerza bruta en una solución de dos punteros o de ventana deslizante?" options="O(n iniciar sesión n)|En)|O(n²)|O(1)" answer="1" explanation="Ambos patrones procesan cada elemento un número constante de veces, lo que produce O(n) en general, una mejora significativa con respecto al enfoque de fuerza bruta O(n²)." />

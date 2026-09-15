@@ -1,0 +1,127 @@
+---
+title: "Feinabstimmung von LLMs: Anpassen der KI an Ihren Anwendungsfall"
+description: "Erfahren Sie, wie Sie ein vorab trainiertes großes Sprachmodell durch Feinabstimmung auf eine bestimmte Domäne oder Aufgabe spezialisieren."
+order: 14
+difficulty: "advanced"
+duration: 40
+icon: "🎯"
+published: true
+machineTranslated: true
+---
+# Feinabstimmung von LLMs: Anpassen der KI für Ihren Anwendungsfall 🎯
+
+Ein vorab trainiertes großes Sprachmodell ist ein Generalist. Es hat einen beträchtlichen Teil des Internets gelesen und eine atemberaubende Bandbreite an Wissen aufgenommen. Aber „Generalist“ ist ein anderes Wort für „nicht spezialisiert“. Wenn Sie ein Modell benötigen, das die Stimme Ihres Unternehmens zum Ausdruck bringt, den Jargon Ihrer Branche versteht, Ihrem spezifischen Ausgabeformat folgt oder sich weigert, themenfremde Themen zu diskutieren, brauchen Sie mehr als nur Aufforderungen.
+
+Hier kommt die **Feinabstimmung** ins Spiel.
+
+---
+
+## 🗺️ Drei Möglichkeiten, ein Model zu spezialisieren
+
+Bevor wir uns mit der Feinabstimmung der Mechanik befassen, ist es hilfreich zu verstehen, wo sie im Vergleich zu den Alternativen steht:
+
+| Ansatz | Wie es funktioniert | Am besten für |
+|---|---|---|
+| **Prompte Entwicklung** | Bastelanleitungen, die das Basismodell leiten | Schnelle Iteration, keine Daten erforderlich |
+| **RAG (Retrieval-Augmented Generation)** | Rufen Sie relevante Dokumente zum Zeitpunkt der Inferenz ab und fügen Sie sie in die Eingabeaufforderung ein Wissen aktuell halten, große Wissensdatenbanken |
+| **Feinabstimmung** | Passen Sie die Gewichte des Modells mithilfe aufgabenspezifischer Beispiele an | Konsistenter Stil/Format, spezielle Argumentation, Reduzierung der Eingabeaufforderungslänge |
+
+Feinabstimmung und RAG schließen sich nicht gegenseitig aus – viele Produktionssysteme nutzen beides.
+
+---
+
+## 🔬 Was Feinabstimmung tatsächlich bewirkt
+
+Ein vorab trainiertes LLM verfügt über Milliarden von Gewichten (Parametern) – Zahlen, die alles kodieren, was es aus dem Vortraining gelernt hat. Durch die Feinabstimmung wird das Modell weiterhin anhand eines kleineren, kuratierten Datensatzes trainiert, der Ihre spezifische Aufgabe widerspiegelt.
+
+Das Modell sieht Ihre Beispiele, berechnet, wie falsch seine aktuellen Gewichtungen darauf sind, und passt sich an. Die Kernmechaniken des Trainings (Vorwärtsdurchlauf, Verlustberechnung, Rückausbreitung) sind identisch mit denen vor dem Training – Sie führen es einfach noch einmal auf Ihren Daten durch, und das mit deutlich weniger Schritten.
+
+Das Ergebnis: ein Modell, dessen Gewichtung weg von „generalistisch“ hin zu „Ihrem spezifischen Anwendungsfall“ verschoben wurde.
+
+<FunFact>GPT-3 hatte 175 Milliarden Parameter. Die Feinabstimmung aller davon auf einer Consumer-GPU ist völlig unpraktisch. Genau aus diesem Grund wurden Parameter-effiziente Feinabstimmungsmethoden wie LoRA entwickelt – sie machen die Feinabstimmung zugänglich, ohne dass ein Rechenzentrum erforderlich ist.
+</FunFact>
+
+---
+
+## ⚡ Vollständige Feinabstimmung vs. Parametereffiziente Feinabstimmung
+
+**Vollständige Feinabstimmung** aktualisiert jedes Gewicht im Modell. Dies ist der wirkungsvollste Ansatz – aber auch der teuerste. Für ein Modell mit 70 Milliarden Parametern benötigen Sie mehrere High-End-GPUs und Stunden oder Tage Schulung.
+
+**Parametereffiziente Feinabstimmung (PEFT)** friert die meisten Gewichte des Modells ein und trainiert nur eine kleine Anzahl zusätzlicher Parameter. Die beiden vorherrschenden Techniken:
+
+### LoRA (Low-Rank-Anpassung)
+
+Anstatt die ursprünglichen Gewichtsmatrizen direkt zu ändern, fügt LoRA kleine trainierbare Matrizen *neben* den eingefrorenen Gewichten hinzu. Diese kleinen Matrizen erfassen die aufgabenspezifischen Anpassungen.
+
+Die Mathematik: Eine Gewichtsaktualisierungsmatrix, die normalerweise (d × d) wäre, wird als Produkt zweier viel kleinerer Matrizen (d × r) × (r × d) angenähert, wobei r ein kleiner „Rang“ ist (typischerweise 4–64). Dadurch wird die Anzahl der trainierbaren Parameter drastisch reduziert.
+
+Das Ergebnis: Sie trainieren vielleicht 0,1–1 % der Gesamtparameter zu einem winzigen Bruchteil der Rechen- und Speicherkosten und erreichen dabei eine nahezu vollständige Feinabstimmung der Leistung.
+
+### QLoRA (Quantisiertes LoRA)
+
+QLoRA kombiniert LoRA mit **Quantisierung** – und stellt die Gewichte des eingefrorenen Basismodells mit 4-Bit-Präzision anstelle von 16-Bit oder 32-Bit dar. Dies reduziert die Speichernutzung um etwa 75 % und ermöglicht die Feinabstimmung sehr großer Modelle auf einer einzigen Consumer-GPU.
+
+QLoRA ermöglichte Forschern und Entwicklern außerhalb großer Organisationen die Feinabstimmung von Modellen über 70 Milliarden. Es hat den Zugang erheblich demokratisiert.
+
+<ThinkAboutIt>LoRA fügt neben eingefrorenen vortrainierten Gewichten auch leichte trainierbare Matrizen hinzu. Wenn Sie sie zur Inferenz zusammenführen, erhalten Sie dieselbe Architektur mit unterschiedlichen Werten. Können Sie sich vorstellen, warum Sie die LoRA-Gewichte möglicherweise *getrennt* vom Basismodell halten möchten, anstatt sie dauerhaft zusammenzuführen?
+</ThinkAboutIt>
+
+---
+
+## 📊 Die Trainingsdaten-Challenge
+
+Die Feinabstimmung ist nur so gut wie Ihre Trainingsdaten. Gängige Formate:
+
+- **Anweisungsfolgepaare**: `{"instruction": "Summarise in one sentence:", "input": "...", "output": "..."}`
+- **Konversationspaare**: Beispiele für Dialoge mit mehreren Runden
+- **Domain-Text**: Zur Domain-Anpassung reicht ggf. reiner Text aus Ihrem Fachgebiet aus
+
+Qualität ist weitaus wichtiger als Quantität. Ein kuratierter Datensatz mit 1.000 hochwertigen Beispielen übertrifft in der Regel einen verrauschten Datensatz mit 100.000. Häufige Datenprobleme:
+- Inkonsistentes Format oder Ton
+- Etikettenfehler
+- Daten, die zu eng gefasst (Modell wird zu spezialisiert) oder zu weit gefasst (minimaler Nutzen) sind
+
+---
+
+## 🔄 RLHF: Feinabstimmung mit menschlichem Feedback
+
+**Reinforcement Learning from Human Feedback (RLHF)** ist eine zweite Stufe der Feinabstimmung, mit der das Modellverhalten an menschlichen Vorlieben ausgerichtet wird. Auf diese Weise wurde ChatGPT darauf trainiert, hilfreich zu sein und schädliche Anfragen abzulehnen.
+
+Der Prozess: Menschen bewerten die Ergebnisse des Modells nach Qualität, ein „Belohnungsmodell“ lernt, menschliche Präferenzen vorherzusagen, und dann wird das LLM mithilfe von Reinforcement Learning feinabgestimmt, um die Belohnung zu maximieren. Es ist teuer und komplex, aber entscheidend für die Herstellung sicherer und angenehmer Modelle.
+
+---
+
+## 🛠️ Praktische Schritte
+
+1. **Wählen Sie ein Basismodell** – Llama 3, Mistral, Qwen, Gemma. Berücksichtigen Sie Lizenz, Größe und Basisfähigkeit.
+2. **Bereiten Sie Ihren Datensatz vor** – sauber, konsistent, formatiert als Anweisungs-Antwort-Paare. Streben Sie 500–10.000 hochwertige Beispiele an.
+3. **Wählen Sie eine Methode** – LoRA/QLoRA für die meisten Anwendungsfälle; Vollständige Feinabstimmung nur, wenn Sie über die erforderliche Rechenleistung verfügen und die Aufgabe dies erfordert.
+4. **Trainieren** – verwenden Sie Hugging Face `transformers` + `peft` oder höherstufige Frameworks wie Axolotl oder Unsloth.
+5. **Bewerten** – Test an einem ausgehaltenen Satz. Vergleichen Sie es mit dem Basismodell und einer starken, schnell entwickelten Basislinie.
+6. **Iterieren** – Feinabstimmung funktioniert selten gleich beim ersten Mal perfekt. Verbessern Sie Ihre Daten, passen Sie Hyperparameter an, wiederholen Sie den Vorgang.
+
+---
+
+## 🚫 Wann man KEINE Feinabstimmung vornehmen sollte
+
+Feinabstimmung ist nicht immer die richtige Antwort:
+
+- **Ihr Problem kann durch Aufforderung gelöst werden** – ersparen Sie sich den Aufwand; Iterieren Sie zuerst die Eingabeaufforderungen
+- **Ihr Wissen muss auf dem neuesten Stand bleiben** – Feinabstimmung des Wissensaufbaus während der Schulung; RAG eignet sich besser für dynamische Informationen
+- **Sie haben nur sehr wenige Daten** – weniger als ein paar hundert Beispiele schaden oft mehr als dass sie helfen
+- **Sie benötigen eine schnelle Iteration** – ein Feinabstimmungslauf dauert Stunden; Schnelle Änderungen dauern Sekunden
+
+<FunFact>Das Alpaca-Modell (2023) wurde von LLaMA anhand von nur 52.000 von GPT-3.5 generierten Beispielen zur Befolgung von Anweisungen verfeinert. Die Gesamtkosten für die Datengenerierung lagen unter 500 US-Dollar. Es zeigte sich, dass das Verhalten bei der Befolgung von Anweisungen aus einem überraschend kleinen Datensatz gelernt werden konnte.
+</FunFact>
+
+---
+
+<Quiz question="Was ist der Hauptunterschied zwischen Feinabstimmung und Prompt Engineering?" options={["Schnelles Engineering erfordert mehr Rechenleistung", "Durch die Feinabstimmung werden die Gewichte des Modells mithilfe von Trainingsdaten geändert. Prompt Engineering führt das unveränderte Basismodell durch Anweisungen", "Die Feinabstimmung gilt nur für Bildmodelle", "Sie sind dasselbe, haben aber unterschiedliche Namen"]} correct={1} explanation="Prompt Engineering arbeitet mit dem Modell im Ist-Zustand und erstellt Eingaben, die das gewünschte Verhalten hervorrufen. Durch die Feinabstimmung werden tatsächlich die internen Gewichte des Modells geändert, indem das Training anhand aufgabenspezifischer Daten fortgesetzt wird – das Modell selbst wird dauerhaft geändert." />
+
+<Quiz question="Welches Problem löst LoRA bei der LLM-Feinabstimmung?" options={["Dadurch generieren Modelle zur Inferenzzeit schneller Text", "Dadurch wird die Anzahl der trainierbaren Parameter drastisch reduziert, sodass eine Feinabstimmung auf begrenzter Hardware möglich ist", "Es generiert automatisch Trainingsdaten", "Es verhindert eine Überanpassung durch Hinzufügen von Dropout-Ebenen"]} correct={1} explanation="LoRA (Low-Rank Adaptation) friert die Gewichte des Basismodells ein und fügt daneben kleine trainierbare, nach Rang zerlegte Matrizen hinzu. Nur diese kleinen Matrizen werden trainiert, wodurch die trainierbaren Parameter auf etwa 0,1–1 % der Gesamtmenge reduziert werden – was eine Feinabstimmung auf einer einzelnen GPU praktisch macht." />
+
+<Quiz question="Was fügt QLoRA zusätzlich zu LoRA hinzu?" options={["Zusätzliche Trainingsschritte für bessere Genauigkeit", "Quantisierung des eingefrorenen Basismodells auf 4-Bit-Präzision, wodurch der Speicherverbrauch drastisch reduziert wird", "Ein Qualitätsbewertungssystem für Trainingsdaten", "Automatisierte Hyperparameter-Abstimmung"]} correct={1} explanation="QLoRA kombiniert LoRA mit 4-Bit-Quantisierung der eingefrorenen Basismodellgewichte. Dies reduziert die Speichernutzung um etwa 75 % im Vergleich zum vollständigen 16-Bit-Laden und ermöglicht die Feinabstimmung sehr großer Modelle (70 B+) auf einer einzigen Consumer-GPU." />
+
+<Quiz question="Wann ist Feinabstimmung NICHT der beste Ansatz?" options={["Wenn Sie eine konsistente Ausgabeformatierung wünschen", "Wenn Ihr Wissen auf dem neuesten Stand bleiben und häufig aktualisiert werden muss, kann RAG dies besser bewältigen", "Wenn Sie über ein domänenspezifisches Vokabular verfügen", "Wenn Sie möchten, dass das Model themenfremde Anfragen ablehnt"]} correct={1} explanation="Durch die Feinabstimmung werden beim Training Wissen in die Gewichte des Modells integriert. Wenn Ihr Anwendungsfall aktuelle Informationen (Nachrichten, Dokumentationen, Produktkataloge) erfordert, ist RAG besser geeignet – es ruft aktuelle Informationen zum Zeitpunkt der Inferenz ab, ohne dass ein neuer Feinabstimmungslauf erforderlich ist." />
+
+<Quiz question="Wofür wird RLHF im Rahmen der LLM-Feinabstimmung verwendet?" options={["Trainingsdaten automatisch generieren", "Ausrichten des Modellverhaltens an menschlichen Vorlieben durch Training eines Belohnungsmodells anhand menschlicher Rankings", "Reduzierung der Modellgröße durch Komprimierung", "Modelle in mehrere Sprachen übersetzen"]} correct={1} explanation="Reinforcement Learning from Human Feedback (RLHF) nutzt menschliche Präferenzrankings, um ein Belohnungsmodell zu trainieren, das dann die weitere Feinabstimmung durch Reinforcement Learning anleitet. Auf diese Weise lernen Models wie ChatGPT, hilfsbereit, harmlos und ehrlich zu sein und nicht nur fließend." />

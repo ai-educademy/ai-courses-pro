@@ -1,0 +1,171 @@
+---
+title: "Entwerfen Sie eine KI-API-Plattform – um Millionen Menschen mit Vorbildern zu versorgen"
+description: "Entwerfen Sie eine Plattform wie die OpenAI-API, die mehrere KI-Modelle mit Authentifizierung, Ratenbegrenzung und automatischer Skalierung bedient."
+order: 5
+difficulty: "advanced"
+duration: 25
+icon: "🚀"
+published: true
+machineTranslated: true
+---
+## Die Vorstellungsgesprächsaufforderung
+
+* „Entwerfen Sie eine KI-API-Plattform, die Entwicklern über eine REST-API mehrere Modelle für maschinelles Lernen bereitstellt – ähnlich wie OpenAI oder Hugging Face Modelle in großem Maßstab bereitstellen.“*
+
+Diese Frage erfreut sich in Vorstellungsgesprächen immer größerer Beliebtheit, da sie **API-Plattformdesign** mit **GPU-Infrastrukturherausforderungen** verbindet, die speziell für KI-Workloads gelten.
+
+## Schritt 1: Anforderungserfassung
+
+**Funktionale Anforderungen:**
+- Stellen Sie mehrere KI-Modelle (Textgenerierung, Bildklassifizierung, Einbettungen) über die REST-API bereit
+- API-Schlüsselauthentifizierung mit Nutzungskontingenten pro Schlüssel
+- Nutzungsverfolgung und Abrechnung pro API-Aufruf
+- Unterstützen Sie mehrere Modellversionen mit A/B-Tests
+- Streaming-Antworten für Generierungsaufgaben mit langer Laufzeit
+
+**Nichtfunktionale Anforderungen:**
+- Latenz: p50 unter 500 ms für eingebettete Modelle, p50 unter 2 s für generative Modelle
+- Durchsatz: 10.000 Anfragen pro Sekunde über alle Modelle hinweg
+- Verfügbarkeit: 99,9 % Betriebszeit mit sanfter Verschlechterung
+- Kosteneffizienz: GPUs sind teuer – maximieren Sie die Auslastung
+
+<Callout>KI-Plattformen haben eine einzigartig variable Latenz. Eine Textvervollständigungsanforderung kann je nach Ausgabelänge 200 ms oder 30 Sekunden dauern. Besprechen Sie immer, wie Ihr Design mit dieser Abweichung umgeht.
+</Callout>
+
+## Schritt 2: API-Design
+
+```
+POST /v1/completions
+Headers: Authorization: Bearer sk-abc123
+Body: { "model": "gpt-4", "prompt": "Explain caching", "max_tokens": 200 }
+
+POST /v1/embeddings
+Headers: Authorization: Bearer sk-abc123
+Body: { "model": "text-embedding-3", "input": "Hello world" }
+
+GET  /v1/models                    - list available models
+GET  /v1/usage?start=2024-01-01    - usage and billing data
+
+SSE: POST /v1/completions (stream: true)
+     → returns Server-Sent Events with incremental tokens
+```
+
+Streaming über **Server-Sent Events (SSE)** ist für generative Modelle von entscheidender Bedeutung – Benutzer sehen, wie Token nach und nach angezeigt werden, anstatt auf die vollständige Antwort zu warten.
+
+## Schritt 3: API-Gateway und Authentifizierung
+
+Das API-Gateway ist die Eingangstür zur Plattform:
+
+- **Authentifizierung** – Validierung von API-Schlüsseln anhand eines Schlüsselspeichers (Redis für Geschwindigkeit, Datenbank für Persistenz)
+- **Ratenbegrenzung** – Erzwingen von Grenzwerten pro Schlüssel (z. B. 60 Anfragen/Minute für den kostenlosen Kontingent)
+- **Request-Routing** – Leitet Anfragen an den richtigen Model-Serving-Cluster weiter
+- **Validierung anfordern** – Nutzlastschema, Modellverfügbarkeit, Token-Grenzwerte prüfen
+
+**Implementierung der Ratenbegrenzung:**
+Verwenden Sie einen **Schiebefensterzähler** in Redis:
+```
+Key:   rate:{api_key}:{window_minute}
+Value: request count
+TTL:   120 seconds
+```
+
+Jede Anfrage erhöht den Zähler. Wenn der Grenzwert überschritten wird, geben Sie HTTP 429 zurück.
+
+<Quiz question="Die Rate des API-Schlüssels eines Kunden ist auf 100 Anfragen pro Minute begrenzt. Sie senden in den ersten 30 Sekunden 80 Anfragen, in den nächsten 30 Sekunden dann 40 weitere. Was passiert bei einem Fixed-Window-Ansatz?" options="Alle 120 Anfragen sind erfolgreich – sie liegen innerhalb des Minutenlimits|Die letzten 20 Anfragen werden abgelehnt – 100 pro Minute überschritten|Alle 120 Anfragen sind im ersten Fenster erfolgreich, aber das Kontingent der nächsten Minute wird reduziert|Das System stürzt wegen Überkapazität ab" answer="1" explanation="Die Geschwindigkeitsbegrenzung mit festem Fenster wird bei Minutengrenzen zurückgesetzt. Wenn 80 in der zweiten Hälfte von Minute 1 und 40 in der ersten Hälfte von Minute 2 eintreffen, sind alle erfolgreich – auch wenn innerhalb von 60 Sekunden 120 Anfragen eingegangen sind. Aus diesem Grund werden Schiebefensteralgorithmen bevorzugt." />
+
+<Illustration src="/images/lessons/design-ai-api-platform.svg" alt="AI-API-Plattformarchitektur mit Darstellung von Gateway, Routing, GPU-Clustern und Überwachung" caption="Anfragen fließen über das Gateway zu modellspezifischen GPU-Clustern, mit Überwachung und Abrechnung auf jeder Ebene." />
+
+## Schritt 4: Modellbereitstellung und GPU-Zuweisung
+
+Hier unterscheiden sich KI-Plattformen grundlegend von herkömmlichen Webdiensten. GPUs sind rar, teuer und erfordern eine spezielle Orchestrierung.
+
+**Modell-Servierschicht:**
+– Modelle werden mithilfe von Frameworks wie **Triton Inference Server** oder **vLLM** in den GPU-Speicher geladen.
+– Jede Modellversion läuft auf einem dedizierten Pool von GPU-Instanzen
+– Große Sprachmodelle (LLMs) erfordern möglicherweise **Modellparallelität** über mehrere GPUs hinweg
+
+**Batching anfordern:**
+Einzelne Inferenzanfragen sind auf GPUs ineffizient. **Dynamisches Batching** gruppiert mehrere Anfragen und verarbeitet sie gemeinsam:
+- Sammeln Sie Anfragen für bis zu 10 ms oder bis der Stapel 32 Anfragen erreicht
+– Verarbeiten Sie den gesamten Stapel in einem GPU-Vorwärtsdurchlauf
+- Senden Sie individuelle Antworten an jeden Anrufer
+
+Dadurch kann der Durchsatz im Vergleich zur Einzelverarbeitung von Anfragen um das Fünf- bis Zehnfache gesteigert werden.
+
+<FunFact>Eine einzelne NVIDIA H100-GPU kostet etwa 25.000 £ und verbraucht 700 Watt Strom. Der Betrieb eines Clusters von 1.000 GPUs für die Modellbereitstellung kostet allein über 2 Millionen Pfund pro Monat an Strom und Hardware – weshalb effizientes Batching und Auslastung enorm wichtig sind.
+</FunFact>
+
+## Schritt 5: A/B-Tests zwischen Modellversionen
+
+Wenn Sie eine neue Modellversion bereitstellen, benötigen Sie einen kontrollierten Rollout:
+
+- **Verkehrsaufteilung** – Leiten Sie 5 % der Anfragen an das neue Modell weiter, 95 % an das aktuelle
+- **Schattenmodus** – Führen Sie das neue Modell im Produktionsverkehr aus, ohne die Ergebnisse an Benutzer zurückzugeben
+- **Metrikvergleich** – Latenz, Ausgabequalitätswerte, Fehlerraten, Kosten pro Anfrage
+- **Schrittweise Einführung** – Erhöhen Sie den Traffic zur neuen Version, wenn das Vertrauen wächst
+
+Die Routing-Logik befindet sich im API-Gateway:
+```
+model: "gpt-4"  →  95% → gpt-4-v2.1 (current)
+                →   5% → gpt-4-v2.2 (candidate)
+```
+
+<ThinkAboutIt>Die Beurteilung, ob eine neue LLM-Version „besser“ ist, ist überraschend schwierig – im Gegensatz zu Klassifizierungsmodellen gibt es keine einfache Genauigkeitsmetrik. Wie würden Sie ein automatisiertes Qualitätsbewertungssystem für generative KI-Modelle entwerfen?
+</ThinkAboutIt>
+
+## Schritt 6: Nutzungsverfolgung und Abrechnung
+
+KI-APIs berechnen normalerweise pro Token (Eingabe- und Ausgabetoken für LLMs, pro Anfrage für andere Modelle).
+
+**Ereignisgesteuerte Abrechnungspipeline:**
+1. Jede API-Antwort enthält einen Verwendungsheader: `x-usage-tokens: 847`
+2. Ein Abrechnungsereignis wird an Kafka veröffentlicht: `{ api_key, model, input_tokens, output_tokens, timestamp }`
+3. Ein Abrechnungsaggregationsdienst konsumiert Ereignisse und aktualisiert laufende Summen
+4. Nutzungsdashboards fragen aggregierte Daten aus einer Zeitreihendatenbank ab
+
+**Warum Kafka?** Die Abrechnung muss zuverlässig sein, muss aber nicht synchron sein. Wenn der Abrechnungsdienst vorübergehend ausfällt, werden Ereignisse in Kafka in die Warteschlange gestellt und bei der Wiederherstellung verarbeitet – es gehen keine Nutzungsdaten verloren.
+
+<Quiz question="Ihre Abrechnungspipeline verarbeitet Nutzungsereignisse asynchron über Kafka. Ein Kunde überprüft sein Nutzungs-Dashboard und sieht eine niedrigere Zahl als erwartet. Was ist die wahrscheinlichste Ursache?" options="Ereignisse gingen aufgrund eines Kafka-Partitionsfehlers verloren|Der Aggregationsdienst weist eine Verarbeitungsverzögerung auf – Ereignisse wurden noch nicht verarbeitet|Das API-Gateway konnte keine Nutzungsereignisse ausgeben|Der API-Schlüssel des Kunden war ratenbegrenzt" answer="1" explanation="Asynchrone Pipelines weisen von Natur aus Verzögerungen auf. Es kann Sekunden oder Minuten dauern, bis Ereignisse, die in Kafka veröffentlicht werden, verbraucht und aggregiert werden. Daher zeigt das Dashboard eine leicht verzögerte Ansicht der Nutzung an." />
+
+## Schritt 7: Überwachung und Beobachtbarkeit
+
+KI-Plattformen erfordern eine Überwachung, die über Standard-Webdienste hinausgeht:
+
+| Metrisch | Warum es wichtig ist |
+|--------|----------------|
+| Inferenzlatenz (S. 50, S. 95, S. 99) | Benutzererfahrung und SLA-Konformität |
+| GPU-Auslastung | Kosteneffizienz – ungenutzte GPUs verschwenden Geld |
+| Token pro Sekunde | Durchsatzkapazität und Skalierungssignale |
+| Fehlerquote nach Modell | Modellspezifische Fehler erkennen |
+| Warteschlangentiefe | Skalierungsauslöser – Lange Warteschlangen bedeuten, dass die Nachfrage die Kapazität übersteigt |
+| Ausgabequalitätswerte | Modellverschlechterung erkennen (über automatisierte Auswertung) |
+
+**Alarmschwellenwerte:** Eine GPU-Auslastung unter 40 % löst eine Herunterskalierung aus; Eine Warteschlangentiefe über 100 löst eine Skalierung aus.
+
+## Schritt 8: Automatische Skalierung
+
+KI-Workloads weisen sehr unterschiedliche Anforderungen auf. Bei der automatischen Skalierung muss ein Gleichgewicht zwischen Reaktionsfähigkeit und Kosten hergestellt werden:
+
+- **Horizontale Skalierung** – Fügen Sie weitere GPU-Instanzen hinzu, wenn die Warteschlangentiefe oder Latenz die Schwellenwerte überschreitet
+- **Vorausschauende Skalierung** – nutzen Sie historische Verkehrsmuster, um Kapazität vor erwarteten Spitzen bereitzustellen
+- **Skalierung auf Null** – für selten verwendete Modelle alle Instanzen herunterfahren und bei Bedarf einen Kaltstart durchführen
+- **Warmpools** – behalten Sie eine kleine Anzahl von Instanzen mit vorinstallierten Modellen bei, um Kaltstartlatenz zu vermeiden
+
+Die Scale-to-Zero-Strategie ist besonders wichtig für Plattformen, die Hunderte von Modellen hosten – Sie können nicht jedes Modell jederzeit im GPU-Speicher geladen halten.
+
+<Quiz question="Ein Modell, das 2 Anfragen pro Stunde empfängt, läuft derzeit auf einer ständig aktiven GPU-Instanz und kostet 3 £/Stunde. Der Kaltstart von Null dauert 45 Sekunden. Was ist die beste Skalierungsstrategie?" options="Lassen Sie die Instanz immer eingeschaltet – 45 Sekunden zu warten ist zu lang|Skalieren Sie auf Null und akzeptieren Sie 45-Sekunden-Kaltstarts für die erste Anforderung|Verwenden Sie einen warmen Pool einer CPU-Instanz, der bei Bedarf auf die GPU auslagert|Fassen Sie die beiden Anforderungen in einem einzigen geplanten Auftrag zusammen" answer="1" explanation="Bei 2 Anfragen pro Stunde bleibt die GPU 99,9 % der Zeit im Leerlauf. Wenn man auf Null skaliert und einen Kaltstart von 45 Sekunden in Kauf nimmt, spart man fast 2.100 £/Monat pro Modell – die gelegentliche Verzögerung lohnt sich bei einem Modell mit wenig Verkehr." />
+
+<ThinkAboutIt>Die Plattform von OpenAI bedient Modelle, die von schnellen Einbettungsmodellen bis hin zu langsamen Argumentationsmodellen reichen. Jeder hat unterschiedliche Latenzeigenschaften, GPU-Anforderungen und Preise. Wie würden Sie die Routing-Ebene so gestalten, dass ein endlicher GPU-Cluster effizient von Modellen mit so unterschiedlichen Profilen gemeinsam genutzt wird?
+</ThinkAboutIt>
+
+<FunFact>Berichten zufolge verarbeitet OpenAI täglich über 100 Millionen API-Anfragen. Bei einem geschätzten Durchschnitt von 500 Token pro Anfrage sind das 50 Milliarden Token pro Tag – was den kontinuierlichen Betrieb Tausender GPUs erfordert.
+</FunFact>
+
+## Wichtige Erkenntnisse
+
+– KI-API-Plattformen kombinieren traditionelles API-Design mit GPU-spezifischen Infrastrukturherausforderungen
+– Die Anforderungsstapelverarbeitung verbessert den GPU-Durchsatz und die Kosteneffizienz erheblich
+- Die Tarifbegrenzung schützt sowohl die Plattform als auch die Kunden vor unkontrollierten Kosten
+- Die asynchrone Abrechnung über Kafka gewährleistet eine zuverlässige Nutzungsverfolgung ohne blockierende Anfragen
+– Bei der automatischen Skalierung muss ein Gleichgewicht zwischen Reaktionsfähigkeit und Kosten hergestellt werden – Skalierung auf Null für Modelle mit geringem Datenverkehr
+- Die Überwachung der GPU-Auslastung und der Warteschlangentiefe ermöglicht intelligente Skalierungsentscheidungen

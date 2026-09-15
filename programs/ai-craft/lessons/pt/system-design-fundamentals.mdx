@@ -1,0 +1,128 @@
+---
+title: "Fundamentos de Design de Sistema – Os Blocos de Construção de Sistemas Escaláveis"
+description: "Domine os componentes principais que toda entrevista de design de sistema espera que você conheça."
+order: 1
+difficulty: "advanced"
+duration: 20
+icon: "🏗️"
+published: true
+machineTranslated: true
+---
+## Por que o design do sistema é importante
+
+Cada aplicação em larga escala é montada a partir dos mesmos blocos de construção fundamentais. Os entrevistadores não esperam que você invente novas tecnologias - eles querem que você **selecione e combine** os componentes certos para um determinado problema. Esta lição aborda o kit de ferramentas que você usará em cada entrevista de design.
+
+## Arquitetura Cliente-Servidor
+
+Basicamente, a web segue um modelo simples: **clientes** enviam solicitações, **servidores** as processam e as respostas fluem de volta. Mas os sistemas modernos adicionam camadas entre esses dois endpoints para lidar com escala, confiabilidade e desempenho.
+
+Uma solicitação típica pode passar por: cliente → CDN → balanceador de carga → gateway de API → servidor de aplicativos → cache → banco de dados. Cada camada resolve um problema específico, e entender *quando* cada camada é necessária separa os candidatos fortes dos medianos.
+
+<Callout>Nas entrevistas, sempre comece esboçando o fluxo cliente-servidor de alto nível antes de mergulhar nos detalhes. Mostra pensamento estruturado.
+</Callout>
+
+## Balanceadores de carga: distribuindo tráfego
+
+Um único servidor tem capacidade finita. Os balanceadores de carga distribuem solicitações recebidas em vários servidores usando estratégias como:
+
+- **Round-robin** - as solicitações percorrem os servidores sequencialmente
+- **Menos conexões** - rotas para o servidor que lida com o menor número de solicitações ativas
+- **Hashing consistente** - mapeia solicitações para servidores específicos com base em uma chave (útil para armazenamento em cache)
+
+Os balanceadores de carga também realizam **verificações de integridade**, removendo automaticamente servidores não íntegros do pool. Em ambientes de nuvem, serviços como AWS ALB ou Azure Front Door lidam com isso de forma transparente.
+
+<Quiz question="Um serviço de feed de mídia social recebe 10 vezes mais leituras do que gravações. Qual abordagem de balanceamento de carga garante melhor que os usuários acessem consistentemente o mesmo servidor com cache quente?" options="Rodada|Seleção aleatória|Hashing consistente com base no ID do usuário|Menos conexões" answer="2" explanation="O hash consistente roteia o mesmo usuário para o mesmo servidor, maximizando as taxas de acerto do cache. Round-robin e aleatório espalhariam as solicitações pelos servidores, reduzindo a eficácia do cache." />
+
+## Cache: velocidade em todas as camadas
+
+O cache armazena dados acessados ​​com frequência mais perto do consumidor. Existe em vários níveis:
+
+| Camada | Exemplo | Latência |
+|-------|---------|-----|
+| Cache do navegador | Ativos estáticos, respostas de API | ~0ms |
+| CDN | Imagens, CSS, arquivos JS | ~10-50ms |
+| Cache do aplicativo | Redis, Memcached | ~1-5ms |
+| Cache de banco de dados | Cache de resultados da consulta | ~5-10ms |
+
+**Invalidação de cache** é notoriamente um dos problemas mais difíceis da computação. Estratégias comuns incluem **TTL (time-to-live)**, **write-through** (atualizar cache em cada gravação) e **cache-aside** (o aplicativo gerencia o cache explicitamente).
+
+<FunFact>A famosa citação de Phil Karlton - "Existem apenas duas coisas difíceis na Ciência da Computação: invalidação de cache e nomeação de coisas" - é tão amplamente citada que é praticamente um rito de passagem em entrevistas de design de sistemas.
+</FunFact>
+
+## Bancos de dados: SQL vs NoSQL
+
+Escolher o banco de dados certo é uma das decisões de design mais impactantes:
+
+**Bancos de dados SQL** (PostgreSQL, MySQL) oferecem transações ACID, forte consistência e esquemas estruturados. Eles se destacam quando os dados têm relacionamentos claros e você precisa de consultas complexas com junções.
+
+**Bancos de dados NoSQL** vêm em vários tipos:
+- **Lojas de documentos** (MongoDB) – esquemas flexíveis, ótimos para estruturas de dados variadas
+- **Armazenamentos de valores-chave** (DynamoDB, Redis) - pesquisas extremamente rápidas por chave
+- **Lojas de colunas largas** (Cassandra) - grande capacidade de gravação, distribuída por design
+- **Bancos de dados gráficos** (Neo4j) - dados de relacionamento intenso, como redes sociais
+
+<Quiz question="Você está projetando um sistema que armazena perfis de usuário com dados semiestruturados que mudam frequentemente (campos diferentes por tipo de usuário). Qual tipo de banco de dados é mais adequado?" options="Relacional (PostgreSQL)|Armazenamento de documentos (MongoDB)|Coluna larga (Cassandra)|Gráfico (Neo4j)" answer="1" explanation="Armazenamentos de documentos como o MongoDB lidam naturalmente com dados semiestruturados e com esquema flexível. Cada documento pode ter campos diferentes sem migrações de esquema dispendiosas." />
+
+## Filas de mensagens: processamento assíncrono
+
+Nem toda operação precisa de uma resposta imediata. As filas de mensagens (RabbitMQ, Apache Kafka, AWS SQS) separam produtores de consumidores, permitindo:
+
+- **Processamento assíncrono** - envie um e-mail após a inscrição sem bloquear a resposta
+- **Nivelamento de carga** - absorve picos de tráfego armazenando solicitações em buffer
+- **Tolerância a falhas** - se um consumidor travar, as mensagens aguardam na fila
+
+Kafka merece menção especial: não é apenas uma fila, mas um **log de eventos distribuído**, permitindo arquiteturas orientadas a eventos onde vários consumidores podem processar independentemente o mesmo fluxo de eventos.
+
+<Illustration src="/images/lessons/system-design-fundamentals.svg" alt="Diagrama de arquitetura mostrando cliente, balanceador de carga, servidores de aplicativos, camada de cache, banco de dados e fila de mensagens" caption="Os blocos de construção fundamentais de um sistema escalável – cada camada aborda uma preocupação específica." />
+
+## Microsserviços vs Monolith
+
+| Aspecto | Monólito | Microsserviços |
+|--------|----------|---------------|
+| Implantação | Unidade única | Serviços independentes |
+| Dimensionamento | Dimensione tudo junto | Dimensionar serviços individuais |
+| Complexidade | Mais simples de começar | Despesas operacionais |
+| Dados | Banco de dados compartilhado | Banco de dados por serviço |
+
+**Comece o monolith, extraia microsserviços quando necessário.** A maioria dos entrevistadores aprecia os candidatos que reconhecem que os microsserviços introduzem complexidade de sistema distribuído (falhas de rede, consistência de dados, orquestração de implantação) e nem sempre são a escolha certa.
+
+<ThinkAboutIt>A Netflix migrou de um monólito para microsserviços ao longo de vários anos. Mas o Shopify – que lida com bilhões em transações – ainda opera um monólito modular. Que fatores podem tornar uma abordagem melhor que a outra para uma determinada empresa?
+</ThinkAboutIt>
+
+## Teorema CAP simplificado
+
+O teorema CAP afirma que um sistema distribuído pode garantir apenas **duas das três** propriedades simultaneamente:
+
+- **Consistência** - cada leitura retorna a gravação mais recente
+- **Disponibilidade** - cada solicitação recebe uma resposta
+- **Tolerância de partição** - o sistema continua operando apesar de falhas de rede
+
+Como as partições de rede são inevitáveis ​​em sistemas distribuídos, a verdadeira escolha é entre **CP** (consistência sobre disponibilidade) e **AP** (disponibilidade sobre consistência).
+
+- **Sistemas CP** (por exemplo, HBase, MongoDB com leituras majoritárias) - retornam erros em vez de dados obsoletos
+- **Sistemas AP** (por exemplo, Cassandra, DynamoDB) - sempre respondem, mas os dados podem estar um pouco obsoletos
+
+<Quiz question="Você está projetando um sistema de transações bancárias onde saldos incorretos podem causar perdas financeiras. Qual compromisso da PAC você deve priorizar?" options="AP – sempre disponível, eventualmente consistente|CP - consistente, pode rejeitar solicitações durante partições|CA – consistente e disponível, ignore partições|Nenhum – os sistemas modernos evitam totalmente a PAC" answer="1" explanation="Os sistemas financeiros devem priorizar a consistência (CP). É melhor rejeitar temporariamente uma solicitação do que mostrar um saldo incorreto ou processar uma transação duplicada." />
+
+## A estrutura da entrevista
+
+Ao entrar em uma entrevista de design de sistema, siga esta estrutura:
+
+1. **Requisitos** - esclarecer requisitos funcionais e não funcionais (5 min)
+2. **Design de API** - defina os principais endpoints ou interfaces (5 min)
+3. **Modelo de dados** - escolha bancos de dados e defina esquemas (5 min)
+4. **Arquitetura de alto nível** – esboce o sistema usando os blocos de construção atuais (10 min)
+5. **Aprofundamentos** - dimensionar gargalos, lidar com falhas, otimizar (15 min)
+
+<ThinkAboutIt>Pense em um sistema que você usa diariamente – Instagram, Uber ou Spotify. Você consegue identificar quais blocos de construção desta lição ela provavelmente usa? Onde ficaria o balanceador de carga? O que seria armazenado em cache? Qual tipo de banco de dados se ajusta ao seu modelo de dados?
+</ThinkAboutIt>
+
+## Principais conclusões
+
+- Todo sistema escalável usa os mesmos blocos de construção básicos - aprenda-os uma vez, aplique-os em qualquer lugar
+- Balanceadores de carga, caches e filas de mensagens resolvem desafios distintos de escalabilidade
+- A escolha do banco de dados (SQL vs NoSQL) depende do formato dos dados, das necessidades de consistência e dos padrões de acesso
+- O teorema CAP força trade-offs - saiba que lado o seu sistema deve favorecer
+- Siga a estrutura de entrevista estruturada: requisitos → API → dados → arquitetura → aprofundamentos
+
+A seguir: aplicaremos esses fundamentos para projetar um encurtador de URL do zero.

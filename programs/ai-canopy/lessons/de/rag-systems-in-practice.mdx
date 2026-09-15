@@ -1,0 +1,36 @@
+---
+title: "RAG-Systeme in der Praxis"
+description: "Design-Retrieval, das Antworten verbessert, anstatt schwache Daten hinter einem zuverlässigen Modell zu verbergen."
+order: 11
+difficulty: intermediate
+duration: 45
+icon: "🔎"
+published: true
+machineTranslated: true
+---
+## Warum das Abrufen wichtig ist
+
+Sprachmodelle eignen sich hervorragend für die Transformation von Kontexten, sie sind jedoch keine Quelle der Wahrheit. Retrieval-Augmented Generation (RAG) liefert zum Zeitpunkt der Anfrage modellrelevante, aktuelle Erkenntnisse.
+
+## Eine Produktionsabrufschleife
+
+1. **Aufnahme** von Dokumenten mit Eigentum, Zeitstempeln, Berechtigungen und Herkunft.
+2. **Chunk** nach Bedeutung und nicht nach einer willkürlichen Zeichenanzahl.
+3. **Index**-Einbettungen neben durchsuchbarem Text und Metadaten.
+4. **Abrufen** mit Hybridsuche, wenn sowohl genaue Begriffe als auch semantische Ähnlichkeit wichtig sind.
+5. **Neue Rangfolge** der Auswahlliste anhand der Frage des Benutzers.
+6. **Generieren** Sie eine Antwort, die die bereitgestellten Beweise zitiert.
+7. **Bewerten** Sie die Abruf- und Antwortqualität getrennt.
+
+Die wichtige Designauswahl ist nicht die Vektordatenbank. Es handelt sich um den Vertrag zwischen Abruf und Generierung: Welche Beweise werden in den Kontext aufgenommen, wie viele, von welchem ​​Mieter und was das Modell tun muss, wenn Beweise fehlen.
+
+## Fehlermodi zum Testen
+
+- Das richtige Dokument existiert, wurde aber nicht abgerufen.
+- Die abgerufene Passage ist relevant, aber veraltet.
+- Ein Benutzer kann ein Dokument abrufen, für dessen Anzeige er keine Berechtigung hat.
+- Die Antwort klingt plausibel, lässt sich aber nicht auf die gelieferten Passagen stützen.
+
+## Bauherausforderung
+
+Erstellen Sie einen kleinen Wissensassistenten mit fünf Quelldokumenten. Fügen Sie Zitate, eine „Nicht genügend Beweise“-Antwort, Metadaten zur Dokumentenaktualität und einen goldenen Testsatz mit zehn Fragen hinzu. Notieren Sie den Abruf, den Rückruf und die Bodenständigkeit, bevor Sie die Eingabeaufforderung ändern.

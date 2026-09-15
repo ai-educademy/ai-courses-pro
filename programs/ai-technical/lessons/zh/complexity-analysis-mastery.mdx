@@ -1,0 +1,281 @@
+---
+title: "掌握复杂性分析"
+description: "自信地分析时间和空间复杂性——这是在编码面试中区分优秀解决方案和最佳解决方案的技能。"
+order: 7
+difficulty: "intermediate"
+duration: 18
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+# 掌握复杂性分析
+
+“时间复杂度是多少？” — 跟在你在编码面试中提出的每个解决方案后面的四个词。如果做得对，你听起来就像一个自信的工程师。绊倒，面试官质疑你是否真正理解自己的代码。复杂性分析不仅仅是学术理论，更是学术理论。工程师通过它来评估解决方案是否能够大规模运行。本课程使您能够自信地分析任何解决方案 - 从简单的循环到棘手的递归算法。
+
+## Big-O 表示法基础知识
+
+Big-O 描述了算法的运行时间或内存使用量如何随着输入大小的增长而增长的上限。它去掉了常数和低阶项，以关注主导因素。
+
+|复杂性 |名称 |示例| 100 万个元素 |
+|---|---|---|---|
+| O(1) | O(1) |恒定|哈希图查找 |即时|
+| O(log n) |对数|二分查找 |约 20 次操作 |
+| O(n) |线性|单循环遍历数组 | 100 万次操作 |
+| O(n log n) | O(n log n) |线性|归并排序、堆排序 |约 2000 万次操作 |
+| O(n²) |二次 |嵌套循环（强力）| 1万亿次操作|
+| O(2ⁿ) |指数|递归子集|宇宙热寂|
+| O(n!) |阶乘|所有排列 |热死×热死|
+
+<Callout>实用的经验法则：现代计算机每秒处理大约 10⁸ 个简单操作。如果您的算法为 O(n²) 且 n = 10⁵，则需要 101⁰ 次操作 — 大约 100 秒。太慢了。这种心算可以帮助您快速判断您的方法是否会在典型的时间限制内通过。</Callout>
+
+## 分析简单循环
+
+### 单循环 → O(n)
+
+```python
+def find_max(nums):
+    max_val = nums[0]       # O(1)
+    for num in nums:         # Loop runs n times
+        if num > max_val:    # O(1) comparison
+            max_val = num    # O(1) assignment
+    return max_val           # O(1)
+# Total: O(1) + O(n) × O(1) = O(n)
+```
+
+### 嵌套循环 → 乘法
+
+```python
+def has_duplicate_pair(nums):
+    for i in range(len(nums)):           # n iterations
+        for j in range(i + 1, len(nums)):  # ~n iterations
+            if nums[i] == nums[j]:
+                return True
+    return False
+# Total: O(n) × O(n) = O(n²)
+```
+
+### 顺序块 → 添加
+
+```python
+def process(nums):
+    # Block 1: O(n)
+    for num in nums:
+        print(num)
+
+    # Block 2: O(n²)
+    for i in range(len(nums)):
+        for j in range(len(nums)):
+            print(i, j)
+
+# Total: O(n) + O(n²) = O(n²)  — drop the lower-order term
+```
+
+### 具有不明显迭代的循环
+
+```python
+# This is O(n), not O(n²)!
+def two_pointer_sum(nums, target):
+    left, right = 0, len(nums) - 1
+    while left < right:    # Each pointer moves at most n times total
+        total = nums[left] + nums[right]
+        if total == target:
+            return True
+        elif total < target:
+            left += 1
+        else:
+            right -= 1
+    return False
+```
+
+<ThinkAboutIt>考虑一个循环，其中变量每次迭代都会加倍：`i = 1; while i < n: i *= 2`。这个循环执行了多少次？复杂程度如何？ （提示：如果i每次加倍，需要加倍多少次才能达到n？）</ThinkAboutIt>
+
+## 分析递归
+
+递归是复杂性分析变得有趣的地方。关键工具是**递归树**。
+
+### 线性递归 → O(n)
+
+```python
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+# Recursion tree: single chain of n calls
+# factorial(5) → factorial(4) → factorial(3) → factorial(2) → factorial(1)
+# Time: O(n), Space: O(n) — n stack frames
+```
+
+### 二元递归 → O(2ⁿ)
+
+```python
+# Naive Fibonacci — the classic exponential example
+def fib(n):
+    if n <= 1:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+# Recursion tree: each call spawns TWO calls
+#                fib(5)
+#              /        \
+#          fib(4)       fib(3)
+#         /     \       /    \
+#      fib(3)  fib(2) fib(2) fib(1)
+#      ...
+# Nodes at each level double → total nodes ≈ 2ⁿ
+# Time: O(2ⁿ), Space: O(n) — max depth of tree
+```
+
+### 记忆递归 → O(n)
+
+```python
+def fib_memo(n, memo={}):
+    if n in memo:
+        return memo[n]
+    if n <= 1:
+        return n
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+
+# Each subproblem computed only once → O(n) unique calls
+# Time: O(n), Space: O(n)
+```
+
+<FunFact>朴素的斐波那契数列和熟记的斐波那契数列之间的差异是惊人的。计算 fib(50) 需要大约 2⁵⁰ ≈ 1 万亿次运算——在现代计算机上大约需要 100 天。记忆版本需要 50 次操作——在微秒内完成。这就是复杂性分析很重要的原因。</FunFact>
+
+### 主定理（简化）
+
+对于 **T(n) = aT(n/b) + O(nᵈ)** 形式的分治递归：
+
+|状况 |复杂性 |
+|---|---|
+| d > log_b(a) | d > log_b(a) | O(nᵈ) | O(nᵈ) |
+| d = log_b(a) | O(nᵈ log n) | O(nᵈ log n) |
+| d < log_b(a) | O(n^(log_b(a))) | O(n^(log_b(a))) |
+
+**实际例子**：
+- **归并排序**：T(n) = 2T(n/2) + O(n) → a=2, b=2, d=1 → d = log22 → **O(n log n)**
+- **二分查找**：T(n) = T(n/2) + O(1) → a=1, b=2, d=0 → d = log21 → **O(log n)**
+- **施特拉森矩阵乘数**：T(n) = 7T(n/2) + O(n²) → a=7, b=2, d=2 → d < log27 → **O(n^2.81)**
+
+## 空间复杂度
+
+空间复杂度与时间复杂度一样重要，但常常被忽视。数数：
+
+1. **辅助空间** — 您创建的额外数据结构
+2. **栈帧**——每次递归调用都会添加一个帧
+
+```python
+# O(1) space — only a few variables
+def reverse_in_place(nums):
+    left, right = 0, len(nums) - 1
+    while left < right:
+        nums[left], nums[right] = nums[right], nums[left]
+        left += 1
+        right -= 1
+
+# O(n) space — creating a new list
+def reverse_copy(nums):
+    return nums[::-1]
+
+# O(n) space from recursion — n stack frames
+def reverse_recursive(nums, left, right):
+    if left >= right:
+        return
+    nums[left], nums[right] = nums[right], nums[left]
+    reverse_recursive(nums, left + 1, right - 1)
+```
+
+<Callout>在采访中，始终说明时间和空间复杂性。常见的后续问题是“你能在 O(1) 空间中做到这一点吗？”这通常意味着将递归解决方案转换为迭代解决方案，或找到就地算法。</Callout>
+
+## 摊销分析基础知识
+
+有些手术有时很昂贵，但平均来说很便宜。摊销分析说明了这一点。
+
+**经典例子：动态数组（ArrayList）**
+
+```python
+# Appending to a dynamic array
+# Most appends are O(1) — just place the element
+# Occasionally (when full), the array doubles: O(n) copy
+# Over n operations: n × O(1) + log(n) × O(n) = O(n) total
+# Amortised cost per operation: O(n) / n = O(1)
+```
+
+其他摊销 O(1) 示例：
+- 哈希映射插入（偶尔重新哈希）
+- 展开树操作
+- 双栈队列实现
+
+## 常见的复杂性陷阱
+
+### 陷阱 1：内置操作中的隐藏循环
+
+```python
+# Looks like O(n), but string concatenation in a loop is O(n²)
+def build_string(chars):
+    result = ""
+    for char in chars:
+        result += char   # Each += creates a new string → O(current length)
+    return result
+# Fix: use ''.join(chars) → O(n)
+
+# list.index() and 'in' on lists are O(n)
+for item in big_list:
+    if item in another_big_list:  # O(n) × O(n) = O(n²)
+        process(item)
+# Fix: convert to set for O(1) lookup
+```
+
+### 陷阱 2：排序占主导地位
+
+```python
+def find_kth_largest(nums, k):
+    nums.sort()       # O(n log n) — this dominates
+    return nums[-k]   # O(1)
+# Total: O(n log n), not O(1)
+# Better: use a heap for O(n log k)
+```
+
+### 陷阱 3：递归深度 ≠ 总工作量
+
+```python
+# Depth is O(log n), but total work is O(n)
+def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])     # T(n/2)
+    right = merge_sort(arr[mid:])    # T(n/2)
+    return merge(left, right)        # O(n) work at each level
+# log n levels × O(n) work per level = O(n log n)
+```
+
+<Quiz question="这段代码的时间复杂度是多少？ `for i in range(n): for j in range(i): print(i, j)`" options="在）|O(n log n)|O(n²)|O(n3)" answer="2" explanation="内部循环总共运行 0 + 1 + 2 + ... + (n-1) = n(n-1)/2 次。这是算术级数和，可简化为 O(n²)。这是一个常见的陷阱，因为内部循环并不总是运行 n 次，但总工作量仍然是二次的。" />
+
+## 从暴力到最优
+
+在面试中，您通常会从暴力解决方案开始并进行优化。以下是常见的优化路径：
+
+|当前|优化技术|改进为 |
+|---|---|---|
+| O(n²) |用于查找的哈希图 | O(n) |
+| O(n²) |排序+两个指针| O(n log n) | O(n log n) |
+| O(2ⁿ) |记忆/DP | O(n²) 或 O(n×m) |
+| O(n log n) | O(n log n) |桶排序/计数排序（有限范围）| O(n) |
+| O(n) 空间 |就地操纵 | O(1) 空间 |
+
+**采访中的对话流程**：
+1.“我的强力方法是使用嵌套循环的 O(n²)。”
+2.“我注意到我们正在重复查找——哈希映射可以将内部搜索减少到 O(1)。”
+3.“优化的解决方案是 O(n) 时间和 O(n) 空间。”
+4.“代价是我们使用了额外的内存，但时间的改进是显着的。”
+
+## 要点
+
+- **了解层次结构**：O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(2ⁿ) < O(n!)。你会在每次采访中引用这一点。
+- **多重嵌套循环，添加顺序块**：循环分析的两个基本规则。
+- **绘制递归树**：它们使递归复杂性可视化并且更容易正确分析。
+- **注意隐藏成本**：字符串连接、列表成员资格测试和循环内排序是常见的陷阱。
+- **同时说明时间和空间**：完整的复杂性分析始终涵盖两个维度。
+- **连接到优化**：了解强力复杂性可以告诉您还有多少改进空间。

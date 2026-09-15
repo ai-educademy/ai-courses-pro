@@ -1,0 +1,214 @@
+---
+title: "Transformer 解释：ChatGPT 背后的架构"
+description: "了解为 ChatGPT、GPT-4、BERT 和 Gemini 提供支持的 Transformer 架构——逐步解释注意力机制。"
+order: 12
+difficulty: "intermediate"
+duration: 35
+icon: "🤖"
+published: true
+machineTranslated: true
+---
+# Transformers 解释：ChatGPT 背后的架构
+
+2017 年，谷歌的一个团队发表了一篇题为“Attention Is All You Need”的论文。它引入了 **Transformer** 架构，并永远改变了人工智能。您听说过的每一种主要语言模型——ChatGPT、GPT-4、BERT、Gemini、Claude、LLaMA——都是基于 Transformers 构建的。
+
+要了解 Transformer 的重要性，您首先需要了解它们取代了什么。
+
+## ⏱️ RNN 的问题：按顺序处理文本
+
+在 Transformer 出现之前，处理序列（文本、音频、时间序列）的主要方法是 **循环神经网络 (RNN)** 及其变体：LSTM 和 GRU。
+
+RNN 处理文本**一次一个单词**，维持一种向前传送信息的“隐藏状态”：
+
+```
+Input:  "The cat sat on the mat because it was comfortable"
+         ↓    ↓    ↓   ↓    ↓    ↓      ↓      ↓   ↓      ↓
+        h1 → h2 → h3 → h4 → h5 → h6 → h7 → h8 → h9 → h10 → output
+```
+
+这可行，但有两个主要问题：
+
+**1.长序列上的梯度消失**
+当模型处理单词 10 时，来自单词 1 的信息已被九个隐藏状态更新“稀释”。当句子很长时，模型很难将“it”（单词 8）连接回“cat”（单词 2）。
+
+**2.慢——没有并行化**
+由于每个单词都依赖于前一个隐藏状态，因此您必须一次处理一个单词。您无法跨序列进行并行化。对长文档的训练非常缓慢。
+
+Transformer 通过一个优雅的机制解决了这两个问题：**注意力**。
+
+## 👀 自注意力机制
+
+Transformer 的核心创新是“自我关注”：序列中的每个单词能够同时直接关注其他每个单词，无论它们相距多远。
+
+自注意力不是按顺序传递信息，而是一次性计算**每个单词与序列中每个其他单词的相关程度**。
+
+### 查询、键和值 — 用简单的英语
+
+对于每个单词（或标记），Transformer 创建三个向量：
+
+- **查询 (Q)**：*“我在寻找什么？”* — 这个词提出的问题
+- **关键 (K)**：*“我包含什么？”* — 每个单词广播的关于自身的广告
+- **值 (V)**：*“我要提供什么信息？”* — 要检索的实际内容
+
+两个单词之间的注意力分数是通过一个单词的 Query 与另一个单词的 Key 的点积来计算的。高分意味着“这两个词彼此高度相关”。
+
+```python
+import torch
+import torch.nn.functional as F
+
+def self_attention(Q, K, V):
+    d_k = Q.shape[-1]  # dimension of key vectors
+    
+    # Compute raw attention scores: how relevant is each word to each other
+    scores = torch.matmul(Q, K.transpose(-2, -1)) / (d_k ** 0.5)
+    
+    # Convert scores to probabilities (weights that sum to 1)
+    attention_weights = F.softmax(scores, dim=-1)
+    
+    # Weighted sum of Value vectors
+    output = torch.matmul(attention_weights, V)
+    
+    return output, attention_weights
+
+# For the sentence "The cat sat on the mat because it was comfortable",
+# "it" will have a high attention score with "cat" (the antecedent)
+# regardless of how many words separate them
+```
+
+结果：**每个令牌都可以直接看到其他令牌**。不再有信息瓶颈，不再有长序列上的梯度消失。
+
+### 为什么要进行平方根缩放？
+
+上面代码中的 `/ (d_k ** 0.5)` 可以防止点积变得非常大，从而将 softmax 推入梯度极小的区域。这是一个稳定技巧。
+
+## 🧠 多头注意力
+
+Transformers 不是只计算一次注意力，而是使用不同的学习投影**并行**多次计算注意力。这称为**多头注意力**：
+
+```python
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model=512, num_heads=8):
+        super().__init__()
+        self.num_heads = num_heads
+        self.d_k = d_model // num_heads  # 64 per head
+        
+        # Separate linear projections for each head
+        self.W_q = nn.Linear(d_model, d_model)
+        self.W_k = nn.Linear(d_model, d_model)
+        self.W_v = nn.Linear(d_model, d_model)
+        self.W_o = nn.Linear(d_model, d_model)
+    
+    def forward(self, x):
+        # Each head learns to attend to different aspects:
+        # Head 1 might focus on syntactic relationships
+        # Head 2 might focus on semantic similarity
+        # Head 3 might focus on co-reference (it → cat)
+        # ... and so on for all 8 heads
+        pass
+```
+
+每个注意力头都可以专注于不同类型的关系。一个头脑可能会跟踪句法依赖性（主谓一致性），另一个头脑可能会关注共指（代词及其先行词），另一个头脑可能会捕获语义相似性。
+
+<FunFact>据传 GPT-4 使用 96 个注意力头。每个人都可以独立学习同时跟踪整个上下文窗口中的不同语言关系。</FunFact>
+
+## 📍 位置编码
+
+自注意力有一个盲点：它本质上是“顺序无关的”。 “狗咬人”和“人咬狗”会产生相同的注意力分数，无需额外信息。
+
+为了让模型具有词序感，Transformer 在输入嵌入中添加了**位置编码**。最初的 Transformer 使用正弦函数：
+
+```python
+import numpy as np
+
+def positional_encoding(seq_len, d_model):
+    PE = np.zeros((seq_len, d_model))
+    for pos in range(seq_len):
+        for i in range(0, d_model, 2):
+            PE[pos, i]     = np.sin(pos / 10000 ** (2*i / d_model))
+            PE[pos, i + 1] = np.cos(pos / 10000 ** (2*i / d_model))
+    return PE
+
+# Each position gets a unique "fingerprint" added to its embedding
+# Position 0 looks different from position 1, which looks different from position 2
+```
+
+像 LLaMA 这样的现代模型使用 **旋转位置嵌入 (RoPE)**，它可以更有效地编码相对位置，并更好地扩展到很长的上下文。
+
+## 🏗️ 完整的 Transformer 架构
+
+最初的 Transformer 有两个主要部分：
+
+### 编码器
+读取输入并构建丰富的上下文表示。每个令牌的表示都通过自注意力由其他每个令牌告知。用于诸如句子分类、命名实体识别、针对给定段落的问答等任务。
+
+### 解码器
+一次生成一个输出令牌，同时关注编码器的输出和已生成的令牌。用于：翻译、摘要、文本生成。
+
+完整的编码器-解码器堆栈：
+```
+Input text → Token Embeddings + Positional Encoding
+           → N × [Multi-Head Self-Attention → Add & Norm → Feed-Forward → Add & Norm]
+           → Encoder Output
+
+Encoder Output + Generated tokens so far
+           → N × [Masked Self-Attention → Cross-Attention → Feed-Forward]
+           → Next token prediction
+```
+
+## 🆚 BERT 与 GPT：Transformer 的两种风格
+
+并非所有基于 Transformer 的模型都使用完整的编码器-解码器结构。两个主要变体是：
+
+### BERT（仅编码器）
+- 仅使用 **编码器** 堆栈
+- 使用 **Masked Language Modelling** 进行训练：一些输入标记是隐藏的，BERT 可以预测它们
+- 擅长**理解**文本：分类、搜索、问答
+- 双向读取整个上下文（每个单词都能看到其他单词）
+
+### GPT（仅解码器）
+- 仅使用 **解码器** 堆栈  
+- 使用**下一个令牌预测**进行训练：给定所有先前的令牌，预测下一个令牌
+- 擅长**生成**文本：对话、写作、代码
+- 因果屏蔽：每个令牌只能关注之前的令牌（而不是未来的令牌 - 这将是作弊）
+
+```
+BERT training:   "The [MASK] sat on the mat"  → predict "cat"
+GPT training:    "The cat sat on the"          → predict "mat"
+```
+
+<ThinkAboutIt>BERT 的双向注意力意味着它在构建单词表示时可以看到未来的单词。 GPT 不能。为什么这使得 GPT 更适合生成，而 BERT 更适合分类任务？</ThinkAboutIt>
+
+## 📈 为什么规模很重要
+
+事实证明，Transformer 架构的可扩展性非常好。具有更多参数、更多数据训练和更多计算的更大模型，始终能产生更好的性能——这种现象由**缩放定律**描述（Kaplan et al., 2020）。
+
+这导致了一个进展：
+- GPT-1 (2018)：117M 参数
+- GPT-2 (2019)：1.5B 参数
+- GPT-3 (2020)：175B 参数
+- GPT-4 (2023)：估计超过 1 万亿个参数
+
+每一次跳跃都带来了能力的质的提升。 GPT-2 根本无法完成的任务（复杂推理、代码生成）在 GPT-3 规模上变得可能，并且在 GPT-4 规模上表现出色。
+
+## ⚡ 训练与推理
+
+两种截然不同的计算配置文件：
+
+**培训**：极其昂贵。在数周或数月的时间里，在数千个 GPU 上处理数十亿个令牌、计算梯度并更新数千亿个参数。 GPT-4 的培训费用估计超过 1 亿美元。
+
+**推论**：便宜得多。通过网络的单个前向传递来生成每个令牌。仍然需要大量硬件（强大的 GPU 或专门的人工智能芯片），但可以大规模管理。
+
+这种不对称性塑造了这个行业：一些资源充足的组织训练基础模型；其他人都通过 API 访问它们。
+
+<Quiz question="Transformer 的注意力机制解决了 RNN 的什么问题？" options="RNN 无法处理文本——它们只能处理图像|RNN 与长程依赖性作斗争，并且无法跨序列长度并行化|RNN 需要太多标记数据来训练|RNN 只能处理英文文本" answer="1" explanation="RNN 按顺序处理标记，导致梯度消失，从而难以连接远处的单词（长程依赖性）。它们也无法跨序列长度并行化，从而导致训练速度变慢。自注意力解决了这两个问题：每个令牌都直接关注其他令牌，并且所有注意力计算都可以并行运行。" />
+
+## 要点
+
+- **RNN** 逐步处理序列，与长程依赖性作斗争并且无法并行化 - Transformer 取代了它们
+- **自我关注**让每个令牌通过查询、键、值向量直接关注其他令牌——同时解决这两个问题
+- **多头注意力**并行运行多个注意力计算，允许模型同时学习不同类型的关系
+- **位置编码**将顺序信息添加到固有的位置不可知的注意机制中
+- **BERT**（仅编码器）经过预先训练，可以双向理解文本；最适合分类和搜索任务
+- **GPT**（仅解码器）经过预先训练，可以从左到右生成文本；最适合生成和对话
+- **规模非常重要**：接受更多数据训练的大型 Transformer 不断释放新功能，如 GPT-1 → GPT-4 进程所示
+- 培训费用极其昂贵；推理成本要低得多——这种不对称性决定了基础模型的部署方式

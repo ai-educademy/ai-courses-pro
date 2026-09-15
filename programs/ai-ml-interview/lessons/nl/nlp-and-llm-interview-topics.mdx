@@ -1,0 +1,215 @@
+---
+title: "NLP- en LLM-interviewonderwerpen"
+description: "Bereid je voor op het populairste interviewonderwerp op het gebied van AI: natuurlijke taalverwerking en grote taalmodellen, van transformatoren tot snelle engineering."
+order: 5
+difficulty: "advanced"
+duration: 22
+icon: "💬"
+published: true
+machineTranslated: true
+---
+# 💬 NLP- en LLM-interviewonderwerpen
+
+Twee jaar geleden betekenden NLP-interviewvragen het uitleggen van woordinbedding en LSTM-verdwijngradiënten. Tegenwoordig zal de interviewer net zo goed vragen: "Wanneer zou u een model verfijnen versus RAG gebruiken?" Het NLP-landschap is dramatisch veranderd, en interviews zijn mee veranderd. Deze les behandelt zowel de basisprincipes die interviewers nog steeds testen *en* de onderwerpen uit het LLM-tijdperk die nu het gesprek domineren.
+
+---
+
+## 📚 NLP Fundamentals-interviewers verwachten nog steeds
+
+Zelfs in het tijdperk van GPT moet je laten zien dat je begrijpt *waarom* deze modellen werken, en niet alleen *dat* ze werken.
+
+### Tokenisatie
+
+Tokenisatie zet ruwe tekst om in discrete eenheden die het model kan verwerken. De aanpak is belangrijk:
+
+- **Woordniveau**: eenvoudig, maar kan niet overweg met woorden die niet in de woordenschat voorkomen ("onvriendelijkheid" → onbekend)
+- **Karakterniveau**: kan elk woord verwerken, maar de reeksen zijn erg lang
+- **Subwoord (BPE, WordPiece, SentencePiece)**: de moderne standaard: verdeelt zeldzame woorden in betekenisvolle stukken
+
+```
+"unfriendliness" → ["un", "friend", "li", "ness"]  (BPE)
+"playing"        → ["play", "##ing"]                (WordPiece)
+```
+
+<Callout>Interviewtip: als je wordt gevraagd naar tokenisatie, vermeld dan dat tokenisatiekeuzes van invloed zijn op de woordenschatgrootte, de lengte van de reeks en het vermogen van het model om met zeldzame of verkeerd gespelde woorden om te gaan. Dit laat zien dat u de gevolgen voor de stroomafwaartse processen begrijpt, en niet alleen de mechanismen.
+</Callout>
+
+### Insluitingen
+
+Inbedding wijst discrete tokens toe aan dichte continue vectoren waarbij semantische relaties behouden blijven:
+
+- **Word2Vec / GloVe**: statische inbedding — elk woord krijgt één vector, ongeacht de context ("bank" heeft dezelfde inbedding, of het nu een rivieroever of een financiële instelling betekent)
+- **Contextuele inbedding (BERT, GPT)**: de inbedding van elk token hangt af van de omringende context - "bank" krijgt verschillende representaties in verschillende zinnen
+
+### Het aandachtsmechanisme
+
+Aandacht is de belangrijkste innovatie die transformatoren laat werken. In de kern:
+
+$$\text{Aandacht}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+
+In gewoon Engels: voor elk token berekent Attention een gewogen gemiddelde over alle andere tokens, waarbij de gewichten weerspiegelen hoe relevant elk token is voor het huidige token. De schaalfactor √d_k voorkomt dat de puntproducten te groot worden.
+
+**Zelfaandacht** zorgt ervoor dat elk token aandacht kan besteden aan elk ander token in de reeks, waardoor langeafstandsafhankelijkheden worden vastgelegd waar RNN's mee worstelen.
+
+### Transformatorarchitectuur
+
+De transformator bestaat uit:
+- **Encoder**: verwerkt de volledige invoer (gebruikt in modellen in BERT-stijl voor begrip)
+- **Decoder**: genereert uitvoertoken voor token (gebruikt in modellen in GPT-stijl voor generatie)
+- **Encoder-Decoder**: combineert beide (gebruikt in T5, originele transformator voor vertaling)
+
+| Architectuur | Voorbeelden | Beste voor |
+|---|---|---|
+| Alleen encoder | BERT, RoBERTa | Classificatie, NER, inbedding |
+| Alleen decoder | GPT-4, LLaMA, Mistral | Tekst genereren, chatten, redeneren |
+| Encoder-decoder | T5, BART | Vertaling, samenvatting |
+
+<Quiz
+  question="Waarom gebruiken transformatoren aandacht met meerdere hoofden in plaats van een enkel aandachtsmechanisme?"
+  options="Het is computationeel goedkoper dan enkele aandacht|Meerdere hoofden kunnen tegelijkertijd verschillende soorten relaties onderhouden|Het voorkomt overfitting|Het vermindert de lengte van de reeks"
+  answer="1"
+  explanation="Multi-head aandacht stelt het model in staat om gezamenlijk aandacht te besteden aan informatie uit verschillende representatie-subruimten op verschillende posities. Eén hoofd kan syntactische relaties vastleggen, een ander semantische gelijkenis, een ander positionele nabijheid – allemaal parallel."
+/>
+
+---
+
+## 🤖 LLM-specifieke interviewvragen
+
+Dit zijn de vragen die de afgelopen twee jaar naar voren zijn gekomen en die nu in bijna elk ML-interview voorkomen.
+
+### Fijnafstemming versus prompting
+
+| Benader | Wanneer gebruiken | Pluspunten | Nadelen |
+|---|---|---|---|
+| **Nul/paar-shot-meldingen** | Snelle prototyping, algemene taken | Geen training nodig, flexibel | Beperkte controle, kosten per zoekopdracht |
+| **Snelle engineering** | Matig maatwerk | Snelle iteratie, geen GPU-kosten | Breekbaar, moeilijk te bewerken |
+| **Fijnafstemming (volledig)** | Domeinspecifieke taken met gelabelde gegevens | Beste kwaliteit, kleiner model mogelijk | Duur, heeft data en GPU nodig |
+| **LoRA / QLoRA** | Finetuning met beperkte middelen | Efficiënte, kleine adaptergewichten | Iets minder expressief dan volledige verfijning |
+| **RAG** ​​| Kennisintensieve, actuele info nodig | Geen omscholing, citeerbare bronnen | Knelpunt inhaalkwaliteit |
+
+### Retrieval-augmented generatie (RAG)
+
+RAG combineert een opzoeksysteem met een taalmodel:
+
+```
+User query → Embed query → Search vector DB → Retrieve top-K documents
+    → Construct prompt (query + retrieved docs) → LLM generates answer
+```
+
+**Belangrijkste gesprekspunten**:
+- **Chunking-strategie**: de manier waarop u documenten splitst, heeft invloed op de kwaliteit van het ophalen
+- **Keuze van het insluitingsmodel**: domeinspecifieke versus algemene insluitingen
+- **Herrangschikking**: gebruik een cross-encoder om opgehaalde chunks opnieuw te rangschikken voordat deze naar de LLM worden gevoerd
+- **Als RAG faalt**: als het antwoord redenering over veel documenten vereist, of als er geen relevant document bestaat
+
+### RLHF (Bekrachtigend leren van menselijke feedback)
+
+De techniek achter de behulpzaamheid van ChatGPT:
+
+1. **Verfijning onder toezicht**: train op samengestelde prompt-respons-paren
+2. **Beloningsmodeltraining**: mensen rangschikken modeluitvoer; train een beloningsmodel op deze voorkeuren
+3. **PPO-optimalisatie**: gebruik het beloningsmodel om de LLM te verfijnen via versterkend leren
+
+<FunFact>Het originele InstructGPT-artikel toonde aan dat mensen een parametermodel van 1,3 miljard met RLHF verkozen boven een parametermodel van 175 miljard zonder. Uitlijningstechnieken kunnen ervoor zorgen dat kleine modellen beter presteren dan gigantische modellen in de praktijk.
+</FunFact>
+
+### Contextvensters en uitdagingen met lange context
+
+- **Contextvenster**: het maximale aantal tokens dat een model tegelijk kan verwerken (bijvoorbeeld GPT-4 Turbo: 128K, Claude: 200K)
+- **Lost in the middle**: modellen besteden doorgaans minder aandacht aan informatie in het midden van lange contexten
+- **Strategieën**: vat lange documenten samen, plaats cruciale informatie aan het begin/einde, gebruik hiërarchisch ophalen
+
+### Hallucinatie
+
+Modellen genereren plausibele maar feitelijk onjuiste tekst. Mitigatiestrategieën:
+- **RAG**: grondreacties op gevonden bewijsmateriaal
+- **Beperkte generatie**: beperk de uitvoer tot bekende entiteiten of gestructureerde formaten
+- **Zelfconsistentie**: genereer meerdere antwoorden en controleer de overeenstemming
+- **Citatie**: verlang dat het model zijn bronnen citeert (verifieer deze vervolgens)
+
+<ThinkAboutIt>Een juridisch technologiebedrijf wil een AI-assistent bouwen die vragen over jurisprudentie beantwoordt. Hallucinatie kan ertoe leiden dat niet-bestaande juridische precedenten worden aangehaald. Hoe zou u dit systeem ontwerpen om het risico op hallucinaties te minimaliseren en tegelijkertijd de reacties bruikbaar te houden?
+</ThinkAboutIt>
+
+---
+
+## 🎯 Modelselectie: wanneer wat te gebruiken
+
+Dit is een favoriete interviewvraag: "Welk model zou je, gegeven deze gebruikssituatie, kiezen?"
+
+**Gebruik een large frontier-model (GPT-4, Claude) wanneer:**
+- De taak vereist algemene redenering of het volgen van complexe instructies
+- Je hebt geen gelabelde trainingsgegevens
+- De snelheid van het prototypen is belangrijker dan de inferentiekosten
+
+**Gebruik een verfijnd kleiner model (Mistral 7B, LLaMA 3) wanneer:**
+- U beschikt over domeinspecifieke gegevens en heeft consistente, gespecialiseerde output nodig
+- Inferentiekosten zijn belangrijk (op schaal weergeven)
+- De latentievereisten zijn streng
+- U moet ter plaatse draaien voor gegevensprivacy
+
+**Gebruik een traditioneel NLP-model (BERT, RoBERTa) wanneer:**
+- De taak is classificatie, NER of extractie (niet generatie)
+- U hebt snelle gevolgtrekkingen nodig met een zeer hoge doorvoer
+- De taak is goed gedefinieerd met duidelijk gelabelde gegevens
+
+<Quiz
+  question="Een gezondheidszorgbedrijf moet patiëntberichten in vijftien categorieën indelen. Ze hebben 50.000 gelabelde voorbeelden. Welke aanpak is het meest kosteneffectief voor de productie?"
+  options="GPT-4 met aanwijzingen voor een paar schoten|Verfijnd BERT-model|RAG met een vectordatabase|Zero-shot-classificatie met LLaMA 70B"
+  answer="1"
+  explanation="Met 50.000 gelabelde voorbeelden en een goed gedefinieerde classificatietaak zal een verfijnd BERT-model snel, goedkoop in gebruik en zeer nauwkeurig zijn. Het gebruik van een grote LLM voor een classificatietaak met veel trainingsgegevens is onnodig duur en langzamer."
+/>
+
+---
+
+## 🔬 LLM-uitvoer evalueren
+
+Het evalueren van generatieve modellen is moeilijker dan het evalueren van classificatoren. Gemeenschappelijke benaderingen:
+
+- **Geautomatiseerde statistieken**: BLEU, ROUGE, BERTScore (nuttig maar onvolmaakt)
+- **LLM-als-rechter**: gebruik een sterker model om de resultaten van een zwakker model te evalueren
+- **Menselijke evaluatie**: gouden standaard, maar duur en traag
+- **Taakspecifieke evaluatie**: nauwkeurigheid op QA-benchmarks, slagingspercentages voor code-uitvoering
+- **Red-teaming**: vijandige tests op veiligheid, vooringenomenheid en schadelijke resultaten
+
+```python
+# BERTScore example
+from bert_score import score
+
+precision, recall, f1 = score(
+    cands=["The cat sat on the mat"],
+    refs=["A cat was sitting on a mat"],
+    lang="en"
+)
+```
+
+---
+
+## ⚖️Ethische overwegingen
+
+NLP-interviews bevatten steeds vaker ethische vragen:
+
+- **Vertekening in trainingsgegevens**: LLM's absorberen en versterken vooroordelen uit hun trainingscorpora
+- **Privacy**: modellen kunnen trainingsgegevens onthouden en uitspugen (PII-lekkage)
+- **Desinformatie**: generatieve modellen kunnen op grote schaal overtuigende maar valse inhoud creëren
+- **Milieukosten**: het trainen van grote modellen heeft een aanzienlijke ecologische voetafdruk
+
+<Quiz
+  question="Wat is het voornaamste risico van het gebruik van een LLM die is getraind in internetteksten voor een systeem voor aanwervingsaanbevelingen?"
+  options="Het model zal te langzaam zijn voor productiegebruik|Het model kan historische vooroordelen in trainingsgegevens bestendigen|Het model zal willekeurige voorspellingen doen|Het model vereist te veel opslagruimte"
+  answer="1"
+  explanation="LLM's die zijn getraind in internetteksten absorberen maatschappelijke vooroordelen – geslacht, ras, sociaal-economisch – die aanwezig zijn in hun trainingsgegevens. Wanneer deze vooroordelen worden gebruikt voor personeelswerving, kunnen ze leiden tot discriminerende aanbevelingen die historische ongelijkheden in stand houden."
+/>
+
+---
+
+## 🔑Belangrijkste afhaalrestaurants
+
+- **Ken uw basisprincipes**: tokenisatie, inbedding, aandacht en transformatorarchitectuur zijn niet onderhandelbaar
+- **Begrijp het spectrum van fijnafstemming**: van zero-shot-prompts tot volledige fijnafstemming, en wanneer elk geschikt is
+- **RAG is het meest praktische LLM-patroon** — begrijp chunking, ophalen en herrangschikken
+- **Modelselectie gaat over afwegingen**: mogelijkheden versus kosten versus latentie versus privacy
+- **Evaluatie van generatieve modellen is een open probleem** — ken meerdere benaderingen
+- **Ethiek is niet optioneel**: vooroordelen, hallucinaties en privacy zijn nu standaard interviewonderwerpen
+
+<Callout>Het NLP-veld ontwikkelt zich ongelooflijk snel. Controleer vóór je sollicitatiegesprek welke modellen en technieken de afgelopen drie maanden zijn vrijgegeven. Als u recente ontwikkelingen kunt bespreken (terwijl u de grondbeginselen begrijpt), geeft dit aan dat u actief betrokken bent bij het vakgebied.
+</Callout>

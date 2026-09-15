@@ -1,0 +1,281 @@
+---
+title: "Domínio da Análise de Complexidade"
+description: "Analise com confiança a complexidade do tempo e do espaço – a habilidade que separa boas soluções das ideais na codificação de entrevistas."
+order: 7
+difficulty: "intermediate"
+duration: 18
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+# Domínio de análise de complexidade
+
+“Qual é a complexidade do tempo?” – quatro palavras que seguem cada solução que você apresenta em uma entrevista de codificação. Faça certo e você parecerá um engenheiro confiante. Tropece e o entrevistador questiona se você realmente entende seu próprio código. A análise da complexidade não é apenas teoria acadêmica; é a lente através da qual os engenheiros avaliam se uma solução funcionará em grande escala. Esta lição prepara você para analisar qualquer solução com confiança — desde loops simples até algoritmos recursivos complicados.
+
+## Fundamentos da notação Big-O
+
+Big-O descreve o limite superior de como o tempo de execução ou o uso de memória de um algoritmo aumenta à medida que o tamanho da entrada aumenta. Ele elimina constantes e termos de ordem inferior para focar no fator dominante.
+
+| Complexidade | Nome | Exemplo | Elementos 1M |
+|---|---|---|---|
+| O(1) | Constante | Pesquisa de mapa hash | Instantâneo |
+| O(logn) | Logarítmico | Pesquisa binária | ~20 operações |
+| Sobre(n) | Linear | Loop único através da matriz | 1 milhão de operações |
+| O(n log n) | Linearítmico | Classificação de mesclagem, classificação de heap | ~20 milhões de operações |
+| O(n²) | Quadrático | Loops aninhados (força bruta) | 1 trilhão de operações |
+| O(2ⁿ) | Exponencial | Subconjuntos recursivos | Morte térmica do universo |
+| O(n!) | Fatorial | Todas as permutações | Morte por calor × morte por calor |
+
+<Callout>Uma regra prática: os computadores modernos lidam com cerca de 10⁸ operações simples por segundo. Se o seu algoritmo for O (n²) en = 10⁵, são 10¹⁰ operações - cerca de 100 segundos. Muito lento. Essa matemática mental ajuda você a avaliar rapidamente se sua abordagem será aprovada dentro dos limites de tempo normais.</Callout>
+
+## Analisando Loops Simples
+
+### Loop Único → O (n)
+
+```python
+def find_max(nums):
+    max_val = nums[0]       # O(1)
+    for num in nums:         # Loop runs n times
+        if num > max_val:    # O(1) comparison
+            max_val = num    # O(1) assignment
+    return max_val           # O(1)
+# Total: O(1) + O(n) × O(1) = O(n)
+```
+
+### Loops aninhados → Multiplicar
+
+```python
+def has_duplicate_pair(nums):
+    for i in range(len(nums)):           # n iterations
+        for j in range(i + 1, len(nums)):  # ~n iterations
+            if nums[i] == nums[j]:
+                return True
+    return False
+# Total: O(n) × O(n) = O(n²)
+```
+
+### Blocos Sequenciais → Adicionar
+
+```python
+def process(nums):
+    # Block 1: O(n)
+    for num in nums:
+        print(num)
+
+    # Block 2: O(n²)
+    for i in range(len(nums)):
+        for j in range(len(nums)):
+            print(i, j)
+
+# Total: O(n) + O(n²) = O(n²)  — drop the lower-order term
+```
+
+### Loops com iterações não óbvias
+
+```python
+# This is O(n), not O(n²)!
+def two_pointer_sum(nums, target):
+    left, right = 0, len(nums) - 1
+    while left < right:    # Each pointer moves at most n times total
+        total = nums[left] + nums[right]
+        if total == target:
+            return True
+        elif total < target:
+            left += 1
+        else:
+            right -= 1
+    return False
+```
+
+<ThinkAboutIt>Considere um loop onde a variável dobra a cada iteração: `i = 1; while i < n: i *= 2`. Quantas vezes esse loop é executado? Qual é a complexidade? (Dica: se eu dobrar a cada vez, quantas duplicações serão necessárias para chegar a n?)</ThinkAboutIt>
+
+## Analisando Recursão
+
+A recursão é onde a análise de complexidade se torna interessante. A ferramenta principal é a **árvore de recursão**.
+
+### Recursão Linear → O (n)
+
+```python
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+# Recursion tree: single chain of n calls
+# factorial(5) → factorial(4) → factorial(3) → factorial(2) → factorial(1)
+# Time: O(n), Space: O(n) — n stack frames
+```
+
+### Recursão binária → O (2ⁿ)
+
+```python
+# Naive Fibonacci — the classic exponential example
+def fib(n):
+    if n <= 1:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+# Recursion tree: each call spawns TWO calls
+#                fib(5)
+#              /        \
+#          fib(4)       fib(3)
+#         /     \       /    \
+#      fib(3)  fib(2) fib(2) fib(1)
+#      ...
+# Nodes at each level double → total nodes ≈ 2ⁿ
+# Time: O(2ⁿ), Space: O(n) — max depth of tree
+```
+
+### Recursão memorizada → O (n)
+
+```python
+def fib_memo(n, memo={}):
+    if n in memo:
+        return memo[n]
+    if n <= 1:
+        return n
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+
+# Each subproblem computed only once → O(n) unique calls
+# Time: O(n), Space: O(n)
+```
+
+<FunFact>A diferença entre Fibonacci ingênuo e memorizado é impressionante em escala. Computar fib(50) ingenuamente requer cerca de 2⁵⁰ ≈ 1 quatrilhão de operações – aproximadamente 100 dias em um computador moderno. A versão memorizada requer exatamente 50 operações – feitas em microssegundos. É por isso que a análise de complexidade é importante.</FunFact>
+
+### O Teorema Mestre (Simplificado)
+
+Para recorrências de dividir e conquistar da forma **T(n) = aT(n/b) + O(nᵈ)**:
+
+| Condição | Complexidade |
+|---|---|
+| d > log_b(a) | O(nᵈ) |
+| d = log_b(a) | O(nᵈ log n) |
+| d <log_b(a) | O(n^(log_b(a))) |
+
+**Exemplos práticos**:
+- **Mesclar classificação**: T(n) = 2T(n/2) + O(n) → a=2, b=2, d=1 → d = log₂2 → **O(n log n)**
+- **Pesquisa binária**: T(n) = T(n/2) + O(1) → a=1, b=2, d=0 → d = log₂1 → **O(log n)**
+- **Strassen Matrix Mult**: T(n) = 7T(n/2) + O(n²) → a=7, b=2, d=2 → d < log₂7 → **O(n^2,81)**
+
+## Complexidade Espacial
+
+A complexidade do espaço é tão importante quanto a complexidade do tempo, mas muitas vezes esquecida. Contar:
+
+1. **Espaço auxiliar** — estruturas de dados extras que você cria
+2. **Pilhar quadros** — cada chamada recursiva adiciona um quadro
+
+```python
+# O(1) space — only a few variables
+def reverse_in_place(nums):
+    left, right = 0, len(nums) - 1
+    while left < right:
+        nums[left], nums[right] = nums[right], nums[left]
+        left += 1
+        right -= 1
+
+# O(n) space — creating a new list
+def reverse_copy(nums):
+    return nums[::-1]
+
+# O(n) space from recursion — n stack frames
+def reverse_recursive(nums, left, right):
+    if left >= right:
+        return
+    nums[left], nums[right] = nums[right], nums[left]
+    reverse_recursive(nums, left + 1, right - 1)
+```
+
+<Callout>Nas entrevistas, sempre indique a complexidade do tempo E do espaço. Um acompanhamento comum é "Você consegue fazer isso no espaço O(1)?" Isso geralmente significa converter uma solução recursiva em iterativa ou encontrar um algoritmo local.</Callout>
+
+## Noções básicas de análise amortizada
+
+Algumas operações são caras ocasionalmente, mas baratas em média. A análise amortizada explica isso.
+
+**Exemplo clássico: Dynamic Array (ArrayList)**
+
+```python
+# Appending to a dynamic array
+# Most appends are O(1) — just place the element
+# Occasionally (when full), the array doubles: O(n) copy
+# Over n operations: n × O(1) + log(n) × O(n) = O(n) total
+# Amortised cost per operation: O(n) / n = O(1)
+```
+
+Outros exemplos O(1) amortizados:
+- Inserções de mapas hash (rehashing ocasional)
+- Operações de árvore de distribuição
+- Implementação de fila de duas pilhas
+
+## Armadilhas de Complexidade Comuns
+
+### Armadilha 1: Loops ocultos em operações integradas
+
+```python
+# Looks like O(n), but string concatenation in a loop is O(n²)
+def build_string(chars):
+    result = ""
+    for char in chars:
+        result += char   # Each += creates a new string → O(current length)
+    return result
+# Fix: use ''.join(chars) → O(n)
+
+# list.index() and 'in' on lists are O(n)
+for item in big_list:
+    if item in another_big_list:  # O(n) × O(n) = O(n²)
+        process(item)
+# Fix: convert to set for O(1) lookup
+```
+
+### Armadilha 2: Classificação domina
+
+```python
+def find_kth_largest(nums, k):
+    nums.sort()       # O(n log n) — this dominates
+    return nums[-k]   # O(1)
+# Total: O(n log n), not O(1)
+# Better: use a heap for O(n log k)
+```
+
+### Armadilha 3: Profundidade de Recursão ≠ Trabalho Total
+
+```python
+# Depth is O(log n), but total work is O(n)
+def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])     # T(n/2)
+    right = merge_sort(arr[mid:])    # T(n/2)
+    return merge(left, right)        # O(n) work at each level
+# log n levels × O(n) work per level = O(n log n)
+```
+
+<Quiz question="Qual é a complexidade de tempo deste código? `for i in range(n): for j in range(i): print(i, j)`" options="Sobre)|Sobre (n log n)|O(n²)|O(n³)" answer="2" explanation="O loop interno é executado 0 + 1 + 2 + ... + (n-1) = n(n-1)/2 vezes no total. Esta é a soma da série aritmética, que simplifica para O(n²). É uma armadilha comum porque o loop interno nem sempre é executado n vezes, mas o trabalho total ainda é quadrático." />
+
+## Da força bruta ao ideal
+
+Nas entrevistas, muitas vezes você começará com uma solução de força bruta e otimizará. Este é o caminho de otimização comum:
+
+| Atual | Técnica de Otimização | Melhorado para |
+|---|---|---|
+| O(n²) | Mapa hash para pesquisas | Sobre(n) |
+| O(n²) | Classificação + dois ponteiros | O(n log n) |
+| O(2ⁿ) | Memoização / DP | O(n²) ou O(n×m) |
+| O(n log n) | Classificação de intervalo/classificação de contagem (intervalo limitado) | Sobre(n) |
+| O(n)espaço | Manipulação no local | O(1) espaço |
+
+**O fluxo da conversa em uma entrevista**:
+1. "Minha abordagem de força bruta é O(n²) usando loops aninhados."
+2. "Percebo que estamos fazendo pesquisas repetidas — um mapa hash pode reduzir a pesquisa interna para O(1)."
+3. "A solução otimizada é O(n) tempo e O(n) espaço."
+4. "A desvantagem é que estamos usando memória extra, mas a melhoria do tempo é significativa."
+
+## Principais conclusões
+
+- **Conheça a hierarquia**: O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(2ⁿ) < O(n!). Você fará referência a isso em todas as entrevistas.
+- **Multiplicar loops aninhados, adicionar blocos sequenciais**: as duas regras fundamentais para análise de loop.
+- **Desenhar árvores recursivas**: elas tornam a complexidade recursiva visual e muito mais fácil de analisar corretamente.
+- **Observe os custos ocultos**: concatenação de strings, testes de associação de listas e classificação dentro de loops são armadilhas comuns.
+- **Indique o tempo e o espaço**: uma análise de complexidade completa sempre cobre ambas as dimensões.
+- **Conecte-se à otimização**: conhecer a complexidade da força bruta informa quanto espaço há para melhorar.

@@ -1,0 +1,159 @@
+---
+title: "Diseñar una caché distribuida: arquitectura de Redis desde cero"
+description: "Diseñe un sistema de almacenamiento en caché distribuido que cubra estrategias de caché, hash consistente, políticas de desalojo, prevención de estampidas de caché y arquitectura de Redis Cluster."
+order: 10
+difficulty: "advanced"
+duration: 23
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+# Diseñe una caché distribuida: arquitectura de Redis desde cero
+
+El almacenamiento en caché es la técnica más eficaz para mejorar el rendimiento del sistema. Una caché distribuida bien diseñada puede reducir la carga de la base de datos en más de un 90 % y reducir los tiempos de respuesta de cientos de milisegundos a submilisegundos.
+
+## Paso 1: recopilación de requisitos
+
+### Requisitos funcionales
+- Almacenar pares clave-valor con TTL opcional (tiempo de vida)
+- Admite operaciones comunes: GET, SET, DELETE y operaciones masivas
+- Distribuir datos entre múltiples nodos para escalamiento horizontal.
+
+### Requisitos no funcionales
+- **Baja latencia**: lecturas de menos de milisegundos para aciertos de caché
+- **Alto rendimiento** - Más de 100 000 operaciones por segundo por nodo
+- **Alta disponibilidad**: los fallos de la caché no deberían provocar la caída del sistema
+- **Escalabilidad**: agregue nodos sin tiempo de inactividad
+
+### Cuándo almacenar en caché
+- **Cargas de trabajo de lectura intensa**: cuando las lecturas superan ampliamente a las escrituras
+- **Cálculos costosos** - Resultados de inferencia del modelo ML, agregaciones complejas
+- **Datos de acceso frecuente** - sesiones de usuario, catálogos de productos, configuración
+
+## Paso 2: estrategias de almacenamiento en caché
+
+### Caché aparte (carga diferida)
+El patrón más común. La aplicación comprueba primero el caché; Si falla, lee de la base de datos y luego llena el caché:
+
+```
+GET user:123 → Cache HIT → return cached data
+GET user:456 → Cache MISS → query DB → SET cache → return data
+```
+
+**Pros:** solo almacena en caché lo que realmente se solicita. **Contras:** los errores de caché generan latencia; los datos pueden volverse obsoletos.
+
+### Lectura completa
+El caché en sí maneja las lecturas de la base de datos en caso de error. La aplicación sólo habla con la capa de caché, que abstrae la fuente de datos.
+
+### Escritura simultánea
+Cada escritura va al caché y a la base de datos de forma sincrónica. Garantiza que la caché sea siempre coherente pero agrega latencia de escritura.
+
+### Escritura retrasada (escritura posterior)
+Las escrituras van al caché inmediatamente; el caché se vacía de forma asincrónica en la base de datos en lotes. Menor latencia de escritura, pero corre el riesgo de perder datos si el nodo de caché falla antes de vaciarlo.
+
+| Estrategia | Consistencia | Leer latencia | Latencia de escritura | Caso de uso |
+|----------|-------------|-------------|---------------|----------|
+| Aparte del caché | Eventual | Penalti fallado | N/A | Propósito general |
+| Lectura completa | Eventual | Penalti fallado | N/A | Lecturas simplificadas |
+| Escritura directa | Fuerte | Rápido | Más lento | Consistencia crítica |
+| Escritura retrasada | Eventual | Rápido | Rápido | Cargas de trabajo con mucha escritura |
+
+<Quiz question="Un sitio de comercio electrónico necesita almacenar en caché los precios de los productos que cambian con poca frecuencia pero que deben ser precisos en 5 minutos. ¿Qué estrategia es la más adecuada?" options="Escritura retrasada con intervalo de descarga de 1 hora|Caché aparte con un TTL de 5 minutos|Escritura inmediata para cada actualización de precios|Sin almacenamiento en caché: lea siempre desde la base de datos" answer="1" explanation="Cache-Aside con un TTL de 5 minutos garantiza que los datos obsoletos nunca persistan más allá de la ventana aceptable. La escritura directa funcionaría, pero agrega latencia de escritura innecesaria para actualizaciones poco frecuentes. Cache-Aside es más simple y se adapta perfectamente al patrón de ”lectura intensa, actualizada ocasionalmente”." />
+
+## Paso 3 - Políticas de desalojo
+
+Cuando el caché está lleno, ¿qué entradas eliminamos?
+
+- **LRU (Usado menos recientemente)**: desaloja la entrada a la que no se ha accedido durante más tiempo. La mejor política de propósito general
+- **LFU (Uso menos frecuente)**: desaloja la entrada a la que se accede con menos frecuencia. Mejor para patrones de acceso sesgados
+- **Basado en TTL**: las entradas caducan después de un tiempo establecido, independientemente del acceso. Esencial para la actualización de los datos
+- **Aleatorio** - sorprendentemente eficaz y muy sencillo de implementar
+
+<FunFact>Redis utiliza un algoritmo LRU aproximado que muestrea una pequeña cantidad de claves (predeterminado: 5) y desaloja las utilizadas menos recientemente entre ellas. Esto es casi tan preciso como el verdadero LRU, pero no requiere ninguna sobrecarga de memoria adicional para rastrear el orden de acceso.</FunFact>
+
+## Paso 4: Hashing consistente para distribución
+
+### El problema con el hash simple
+Con `hash(key) % N` nodos, agregar o eliminar un nodo reasigna casi todas las claves, lo que provoca una tormenta masiva de pérdida de caché.
+
+### Hashing consistente con nodos virtuales
+El hash consistente asigna claves y nodos a un anillo. Cada clave se asigna al siguiente nodo en el sentido de las agujas del reloj en el anillo:
+
+```
+Hash Ring (0 to 2^32):
+     Node A (3 virtual nodes: A1, A2, A3)
+     Node B (3 virtual nodes: B1, B2, B3)
+     Node C (3 virtual nodes: C1, C2, C3)
+
+Key "user:123" → hash → lands between B2 and A1 → assigned to Node A
+```
+
+**Los nodos virtuales** resuelven el problema de la distribución desigual. Cada nodo físico obtiene múltiples posiciones en el anillo, lo que garantiza una carga equilibrada incluso con pocos nodos físicos.
+
+Cuando se agrega o elimina un nodo, solo se reasignan las claves adyacentes a él en el anillo: aproximadamente `K/N` claves (donde K es el total de claves y N es el recuento de nodos), no todas.
+
+<Illustration src="/images/lessons/design-distributed-cache.svg" alt="Anillo de hash consistente que muestra nodos físicos asignados a nodos virtuales, con claves asignadas al nodo más cercano en el sentido de las agujas del reloj" caption="El hash consistente garantiza que agregar o eliminar un nodo solo reasigne una pequeña fracción de claves, evitando estampidas de caché" />
+
+<Quiz question="Un clúster de caché tiene 4 nodos. El nodo 3 falla. Con hash de módulo simple (clave % 4 → clave % 3), ¿qué porcentaje de claves se reasigna?" options="25% (solo claves del Nodo 3)|50%|75 %: casi todas las claves están reasignadas|100%" answer="2" explanation="Cambiar del mod 4 al mod 3 reasigna aproximadamente el 75% de todas las claves a diferentes nodos. Por ejemplo, una clave cuyo hash llegó a 7 estaba en el nodo 3 (7%4=3), pero ahora va al nodo 1 (7%3=1). Esto provoca un aumento masivo en los errores de caché. El hash consistente resuelve esto reasignando solo las claves ~K/N." />
+
+## Paso 5: Prevención de estampida de caché
+
+Una **estampida de caché** ocurre cuando una entrada popular almacenada en caché caduca y cientos de solicitudes simultáneas pierden el caché y llegan a la base de datos.
+
+### Soluciones
+
+**Mutex/Bloqueo:** Cuando se produce una pérdida de caché, adquiere un bloqueo distribuido. Sólo se obtiene una solicitud de la base de datos; otros esperan a que se vuelva a llenar el caché.
+
+**Caducidad anticipada probabilística:** Cada solicitud tiene una pequeña posibilidad aleatoria de actualizar el caché antes de que el TTL caduque. Esto distribuye la carga de actualización a lo largo del tiempo en lugar de crear una manada atronadora al vencimiento.
+
+**Actualización en segundo plano:** Un proceso en segundo plano actualiza las entradas de caché populares antes de que caduquen. El caché nunca está vacío para las teclas de acceso rápido.
+
+<ThinkAboutIt>Considere una venta flash en la que la página de un producto recibe 100.000 solicitudes por segundo. La entrada de la caché de detalles del producto caduca. Sin prevención de estampida, todas las 100.000 solicitudes llegan a la base de datos simultáneamente. ¿Qué estrategia de prevención elegirías y por qué?</ThinkAboutIt>
+
+## Paso 6: Arquitectura del clúster de Redis
+
+Redis Cluster es el caché distribuido más implementado:
+
+- **16,384 ranuras hash** distribuidas entre nodos maestros
+- Cada clave se asigna a una ranura a través de `CRC16(key) % 16384`
+- **Replicación:** cada maestro tiene una o más réplicas para conmutación por error
+- **Conmutación por error automática:** si un maestro falla, su réplica se promociona en segundos
+
+```
+Slots 0-5460:     Master A ←→ Replica A'
+Slots 5461-10922: Master B ←→ Replica B'
+Slots 10923-16383: Master C ←→ Replica C'
+```
+
+### Monitoreo de métricas clave
+- **Proporción de aciertos** - objetivo 95%+; por debajo del 80% indica un problema de almacenamiento en caché
+- **Uso de memoria**: manténgase por debajo del 80% para evitar desalojos
+- **Tasa de desalojo**: los desalojos altos significan que el caché es insuficiente
+- **Percentiles de latencia** - p99 debe ser inferior a 1 ms para aciertos de caché
+
+## Paso 7: Patrones de almacenamiento en caché del mundo real
+
+| Patrón | Implementación | TTL |
+|---------|---------------|-----|
+| Tienda de sesiones | `SET session:{id} {data}` | 30 minutos |
+| Caché de respuesta API | `SET api:/users/123 {json}` | 5 minutos |
+| Caché de consultas de base de datos | `SET query:{hash} {result}` | 1 minuto |
+| Contador limitador de velocidad | `INCR ratelimit:{user}:{window}` | Duración de la ventana |
+| Banderas de características | `HSET features {flag} {value}` | 10 segundos |
+
+### Invalidación de caché
+El problema más difícil en informática (además de nombrar cosas):
+- **Basado en TTL**: simple, tolera el estancamiento durante la duración del TTL
+- **Basado en eventos**: publica eventos de invalidación cuando cambian los datos (a través de Kafka o Redis Pub/Sub)
+- **Basado en versión**: incluye una versión en la clave de caché; incrementar la versión en escrituras para invalidar efectivamente las entradas antiguas
+
+<Quiz question="¿Qué enfoque de invalidación de caché ofrece la mayor garantía de coherencia?" options="Vencimiento basado en TTL con una ventana de 5 minutos|Invalidación impulsada por eventos desencadenada por escrituras en la base de datos|Desalojo aleatorio|Actualización de fondo cada 10 segundos" answer="1" explanation="La invalidación basada en eventos reacciona a los cambios de datos reales, invalidando el caché inmediatamente cuando se actualizan los datos de origen. Los enfoques basados ​​en TTL siempre tienen una ventana de obsolescencia, mientras que la actualización en segundo plano tiene espacios entre los ciclos de actualización." />
+
+<ThinkAboutIt>Phil Karlton dijo la famosa frase: "Sólo hay dos cosas difíciles en informática: la invalidación de la memoria caché y el nombramiento de cosas". ¿Por qué es tan difícil invalidar la caché en los sistemas distribuidos? Piense en lo que sucede cuando se realiza una escritura en la base de datos pero se pierde el mensaje de invalidación de caché.</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+- [Hashing consistente - ByteByteGo](https://bytebytego.com/courses/system-design-interview/design-consistent-hashing) - explicación visual de hash consistente y nodos virtuales
+- [Especificación de Redis Cluster](https://redis.io/docs/reference/cluster-spec/)-Documentación oficial de la arquitectura de Redis Cluster
+- [Estrategias de almacenamiento en caché - AWS](https://aws.amazon.com/caching/best-practices/) - patrones prácticos de almacenamiento en caché para aplicaciones en la nube

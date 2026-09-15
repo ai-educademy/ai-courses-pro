@@ -1,0 +1,144 @@
+---
+title: "Gobernanza responsable de la IA: creación de equipos que realicen envíos éticos"
+description: "Aprenda la gobernanza práctica de la IA: marcos, auditoría de sesgos, métricas de equidad, herramientas de explicabilidad, juntas de ética, respuesta a incidentes y lecciones de fallas del mundo real."
+order: 10
+difficulty: "advanced"
+duration: 19
+icon: "🛡️"
+published: true
+machineTranslated: true
+---
+# Gobernanza responsable de la IA
+
+La IA responsable no es un ejercicio de casillas de verificación. Es una disciplina de ingeniería que requiere el mismo rigor que la seguridad o la confiabilidad. Las empresas que tratan la ética como una ocurrencia tardía terminan en los titulares: la herramienta de contratación sesgada de Amazon, los algoritmos de atención médica que restaron prioridad a los pacientes negros y los sistemas de reconocimiento facial que fallaron en tonos de piel más oscuros no son casos extremos. Son el resultado predecible de un transporte marítimo sin gobernanza.
+
+## Marcos de gobernanza
+
+Dos marcos dominan la industria:
+
+### Marco de gestión de riesgos de IA del NIST (AI RMF)
+
+El Instituto Nacional de Estándares y Tecnología de EE. UU. ofrece un enfoque estructurado y voluntario construido en torno a cuatro funciones:
+
+1. **Gobernar**: establecer políticas, funciones y estructuras de rendición de cuentas
+2. **Mapa**: identificar y documentar los riesgos de la IA en contexto
+3. **Medida** - Evaluar los riesgos utilizando métodos cuantitativos y cualitativos
+4. **Gestionar**: priorizar y mitigar los riesgos identificados
+
+El AI RMF no es prescriptivo: no indica *qué* medir. Más bien, proporciona un marco de pensamiento que las organizaciones adaptan a su contexto específico.
+
+### ISO/CEI 42001
+
+El primer estándar internacional para un **Sistema de Gestión de IA (AIMS)**. A diferencia del marco NIST, ISO 42001 es certificable: auditores externos pueden verificar el cumplimiento. Cubre todo el ciclo de vida de la IA: desde el contexto organizacional y el compromiso del liderazgo hasta la evaluación de riesgos, los controles de desarrollo y la mejora continua.
+
+La certificación indica a los clientes, reguladores y socios que su gobierno de IA está validado externamente, algo cada vez más importante para las ventas empresariales.
+
+<Illustration src="/images/lessons/responsible-ai-governance.svg" alt="Diagrama marco que muestra los cuatro pilares de la gobernanza de la IA: documentación, equidad, explicabilidad y rendición de cuentas." caption="La gobernanza eficaz de la IA se basa en cuatro pilares: cada uno requiere herramientas y procesos específicos." />
+
+## Tarjetas de modelo y hojas de datos
+
+La documentación es la base de la gobernanza. Dos formatos se han convertido en estándar de la industria:
+
+**Las tarjetas de modelo** (introducidas por Google) documentan el uso previsto de un modelo, el rendimiento evaluado en todos los subgrupos, las consideraciones éticas y las limitaciones conocidas. Cada modelo que implementes debe tener uno.
+
+**Las hojas de datos para conjuntos de datos** documentan cómo se recopilaron los datos de capacitación, qué contienen, sesgos conocidos, usos recomendados y planes de mantenimiento. Si no puede describir sus datos de entrenamiento, no puede gobernar el modelo entrenado en ellos.
+
+Estos no son gastos burocráticos. Son la diferencia entre "no sabíamos que el modelo estaba sesgado" y "documentamos las limitaciones conocidas e implementamos mitigaciones".
+
+<FunFact>El artículo original de Model Cards de Google (2019) descubrió que el simple hecho de requerir documentación hacía que los equipos descubrieran y solucionaran problemas de sesgo que no habían notado previamente: el acto de escribirlo forzaba el pensamiento crítico.</FunFact>
+
+## Canalizaciones de auditoría de sesgos
+
+La auditoría de sesgos debe automatizarse y ejecutarse en cada versión del modelo, no realizarse una vez en el lanzamiento y olvidarse.
+
+Un proceso de auditoría del sesgo de producción:
+
+1. **Defina atributos protegidos**: género, origen étnico, edad, discapacidad y otras características protegidas legalmente relevantes para su dominio.
+2. **Datos de evaluación de sectores**: divida su conjunto de pruebas en subgrupos según atributos protegidos
+3. **Calcular métricas de equidad**: medir las disparidades de desempeño entre grupos (ver más abajo)
+4. **Establecer umbrales**: definir límites de disparidad aceptables (por ejemplo, ninguna precisión de subgrupo inferior al 85 %)
+5. **Implementaciones de puerta**: promoción del modelo de bloque a producción si se violan los umbrales
+6. **Registrar y realizar un seguimiento de las tendencias**: supervise las métricas de equidad a lo largo del tiempo, no solo durante la implementación
+
+<Quiz question="¿Cuándo se debe realizar una auditoría de sesgo en el ciclo de vida del ML?" options="Sólo una vez antes del lanzamiento inicial.|Automáticamente en cada versión del modelo como parte de CI/CD|Sólo cuando se recibe una queja por parcialidad|Anualmente durante las revisiones de cumplimiento" answer="1" explanation="La auditoría de sesgos debe ser automatizada y continua: la deriva de datos, las actualizaciones de modelos y los cambios en las poblaciones significan que una feria de modelos en el momento del lanzamiento puede volverse sesgada con el tiempo." />
+
+## Métricas de equidad
+
+No existe una definición única de "justo". Diferentes métricas codifican diferentes posiciones filosóficas y, a menudo, son matemáticamente incompatibles:
+
+- **Paridad demográfica** - Cada grupo recibe resultados positivos en tasas aproximadamente iguales. Simple pero puede entrar en conflicto con la precisión.
+- **Probabilidades igualadas** - Las tasas de verdaderos positivos y falsos positivos son iguales en todos los grupos. Más fuerte que la paridad demográfica.
+- **Paridad predictiva**: la precisión (valor predictivo positivo) es igual en todos los grupos.
+- **Equidad individual** - Personas similares reciben predicciones similares, independientemente de su pertenencia al grupo.
+
+La idea crítica: **no se pueden satisfacer simultáneamente todos los criterios de equidad** (teorema de imposibilidad de Chouldechova). Debe elegir qué definición de equidad es más importante para su aplicación específica y documentar por qué.
+
+<ThinkAboutIt>Un algoritmo sanitario debe asignar citas limitadas a especialistas. La paridad demográfica daría tasas de nombramiento iguales entre los grupos raciales. Las probabilidades igualadas garantizarían que el algoritmo sea igualmente preciso a la hora de identificar quién necesita atención. Estos criterios entran en conflicto. ¿Cuál elegirías y cómo justificarías esa decisión ante las comunidades afectadas?</ThinkAboutIt>
+
+## Herramientas de explicabilidad
+
+Las partes interesadas (usuarios, reguladores y equipos internos) deben comprender *por qué* un modelo hizo una predicción específica.
+
+### SHAP (explicaciones del aditivo SHapley)
+
+Basado en la teoría de juegos, SHAP asigna a cada característica un valor de importancia para una predicción específica. Responde: "¿Cuánto contribuyó cada característica de entrada a este resultado en particular?" Los valores SHAP son aditivos: suman la diferencia entre la predicción del modelo y la línea base.
+
+### LIME (Explicaciones independientes del modelo local interpretable)
+
+LIME explica las predicciones individuales ajustando un modelo simple e interpretable (como una regresión lineal) a la vecindad local de la entrada. Funciona con cualquier modelo, pero puede ser inestable: pequeños cambios de entrada a veces producen explicaciones muy diferentes.
+
+### Visualización de atención
+
+Para los modelos de transformadores, los pesos de atención muestran qué tokens de entrada "atendió" el modelo al producir cada salida. Útil para depurar pero controvertido como explicación fiel: la atención no siempre se correlaciona con la importancia real de las características.
+
+<Quiz question="¿Qué limitación fundamental se aplica a las métricas de equidad según el teorema de imposibilidad de Chouldechova?" options="Las métricas de equidad no se pueden calcular para modelos grandes|Múltiples criterios de equidad no pueden satisfacerse todos simultáneamente|Las métricas de equidad solo funcionan para clasificadores binarios|Las probabilidades igualadas siempre superan la paridad demográfica" answer="1" explanation="El teorema de Chouldechova demuestra que, excepto en casos triviales, es matemáticamente imposible satisfacer la paridad demográfica, las probabilidades igualadas y la paridad predictiva simultáneamente: los equipos deben elegir." />
+
+## Juntas de ética de la IA
+
+Muchas organizaciones establecen juntas de ética para revisar los sistemas de IA. Si se hacen bien, proporcionan una supervisión genuina. Si se hacen mal, se vuelven performativos:
+
+**Qué funciona:**
+- Membresía diversa (técnicos, legales, éticos, representantes de la comunidad impactada)
+- Autoridad real para retrasar o bloquear implementaciones.
+- Toma de decisiones transparente con criterios publicados
+- Cadencia de revisión regular, no solo revisión en el momento del lanzamiento.
+
+**Qué falla:**
+- Juntas exclusivamente consultivas sin poder para hacer cumplir las decisiones.
+- Membresía homogénea (todos tecnólogos, sin expertos en el campo ni voces de la comunidad)
+- Reunirse sólo cuando surge la controversia, no de manera proactiva.
+- Utilizar la existencia de la junta como relaciones públicas mientras se ignoran sus recomendaciones.
+
+Google disolvió su junta de ética de IA después de una semana en 2019 debido a una controversia sobre la selección de miembros. Desde entonces, Microsoft y otras empresas han avanzado hacia modelos de responsabilidad distribuida en los que la revisión ética está integrada en los equipos de productos en lugar de centralizada.
+
+## Respuesta a incidentes por fallas de IA
+
+Los sistemas de IA fallarán. La pregunta es si tienes un plan:
+
+1. **Detección**: alertas de seguimiento sobre métricas de equidad, calidad de resultados o informes de usuarios
+2. **Triaje** - Clasificación de gravedad: ¿se trata de un problema de producción menor o de un daño sistemático?
+3. **Contención**: revertir el modelo, agregar barandillas o desactivar la función
+4. **Investigación**: análisis de la causa raíz de los datos, modelo o sistema que causó la falla.
+5. **Remediación**: solucione el problema subyacente, vuelva a capacitarse si es necesario y actualice la documentación.
+6. **Comunicación**: informar a los usuarios y partes interesadas afectados de forma transparente
+7. **Prevención**: actualice los procesos de auditoría y las pruebas para detectar problemas similares
+
+<FunFact>Amazon descartó su herramienta de contratación de inteligencia artificial en 2018 después de descubrir que penalizaba sistemáticamente los CV que contenían la palabra "de mujeres": el modelo había aprendido de una década de datos de contratación dominados por hombres. La herramienta nunca se implementó externamente, pero operó internamente durante un año antes de que se detectara el sesgo.</FunFact>
+
+## Estudios de casos de fallas de gobernanza
+
+- **Herramienta de contratación de Amazon (2018)** - Capacitada sobre datos históricos de contratación que reflejaban sesgos de género. La modelo penalizó a las candidatas. Lección: los datos de entrenamiento sesgados producen modelos sesgados, independientemente de la sofisticación del modelo.
+- **Algoritmo de atención médica de Optum (2019)** - Se utilizó el gasto en atención médica como indicador de las necesidades de salud. Debido a que históricamente los pacientes negros tuvieron menos acceso a la atención médica, el algoritmo les quitó prioridad sistemáticamente. Lección: las variables proxy pueden codificar la desigualdad estructural.
+- **Herramienta de reincidencia COMPAS** - El análisis de ProPublica mostró que el sistema tenía el doble de probabilidades de señalar falsamente a los acusados ​​negros como futuros delincuentes. Lección: la precisión agregada puede enmascarar graves disparidades entre subgrupos.
+
+<Quiz question="¿Por qué el algoritmo de atención médica de Optum restó prioridad de manera desproporcionada a los pacientes negros?" options="El modelo estaba intencionalmente sesgado.|Utilizó el gasto en atención médica como indicador de las necesidades, lo que reflejó las disparidades históricas de acceso.|Los datos de entrenamiento contenían etiquetas raciales explícitas.|El algoritmo solo funcionó para ciertos datos demográficos." answer="1" explanation="El algoritmo utilizó el costo de la atención médica como indicador de las necesidades de salud. Debido a que las barreras sistémicas significaron que los pacientes negros históricamente gastaron menos en atención médica, el modelo equiparó un menor gasto con una menor necesidad, lo que codifica la desigualdad estructural." />
+
+<ThinkAboutIt>Está configurando un programa de IA responsable desde cero en una empresa de 500 personas que envía productos de aprendizaje automático. Tienes presupuesto para tres contrataciones. ¿Qué funciones ocuparía usted primero y qué procesos implementaría en los primeros 90 días?</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Marco de gestión de riesgos de IA de NIST](https://airc.nist.gov/AI_RMF_Interactivity/NIST-AI-100-1): el RMF de IA de NIST completo con perfiles interactivos y casos de uso
+- [Tarjetas modelo para informes modelo (Mitchell et al.)](https://arxiv.org/abs/1810.03993) - El documento original que presenta las tarjetas modelo como estándar de documentación
+- [Equidad y aprendizaje automático (Barocas, Hardt, Narayanan)](https://fairmlbook.org/): libro de texto gratuito en línea que cubre las matemáticas y la filosofía de la equidad de ML

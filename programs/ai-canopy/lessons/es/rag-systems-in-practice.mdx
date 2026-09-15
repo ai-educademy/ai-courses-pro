@@ -1,0 +1,36 @@
+---
+title: "Sistemas RAG en la práctica"
+description: "Diseñe una recuperación que mejore las respuestas en lugar de ocultar datos débiles detrás de un modelo confiable."
+order: 11
+difficulty: intermediate
+duration: 45
+icon: "🔎"
+published: true
+machineTranslated: true
+---
+## Por qué es importante la recuperación
+
+Los modelos lingüísticos son excelentes para transformar el contexto, pero no son una fuente de verdad. La generación de recuperación aumentada (RAG) proporciona un modelo de evidencia relevante y actual en el momento de la solicitud.
+
+## Un bucle de recuperación de producción
+
+1. **Ingerir** documentos con propiedad, marcas de tiempo, permisos y procedencia.
+2. **Fragmento** por significado en lugar de un recuento de caracteres arbitrario.
+3. **Indexar** incrustaciones junto con metadatos y texto con capacidad de búsqueda.
+4. **Recuperar** con búsqueda híbrida cuando tanto los términos exactos como la similitud semántica son importantes.
+5. **Reclasificar** la lista corta según la pregunta del usuario.
+6. **Genere** una respuesta que cite la evidencia proporcionada.
+7. **Evaluar** la calidad de recuperación y respuesta por separado.
+
+La elección de diseño importante no es la base de datos vectorial. Es el contrato entre recuperación y generación: qué evidencia se permite en contexto, cuánta, de qué inquilino y qué debe hacer el modelo cuando falta evidencia.
+
+## Modos de falla para probar
+
+- El documento correcto existe pero no se recuperó.
+- El pasaje recuperado es relevante pero está desactualizado.
+- Un usuario puede recuperar un documento que no está autorizado a ver.
+- La respuesta parece plausible pero no se puede fundamentar en los pasajes proporcionados.
+
+## Construir desafío
+
+Cree un pequeño asistente de conocimientos con cinco documentos fuente. Agregue citas, una respuesta de "no hay suficiente evidencia", metadatos de actualización del documento y un conjunto de pruebas de oro de diez preguntas. Registre la recuperación y la conexión a tierra antes de cambiar el mensaje.

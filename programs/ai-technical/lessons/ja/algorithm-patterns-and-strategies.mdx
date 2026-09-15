@@ -1,0 +1,294 @@
+---
+title: "アルゴリズムのパターンと戦略"
+description: "スライディング ウィンドウから動的プログラミングまで、コーディング面接の問題の 80% を解決する 10 のアルゴリズム パターンを学びます。"
+order: 2
+difficulty: "intermediate"
+duration: 25
+icon: "🧩"
+published: true
+machineTranslated: true
+---
+# アルゴリズムのパターンと戦略
+
+コーディング面接は、500 個の LeetCode ソリューションを暗記することではありません。目の前の問題に、およそ 10 のパターンのうちどれが当てはまるかを認識するのです。パターンを特定すると、ソリューションの構造が自動的に書き込まれます。このレッスンでは、各パターンをいつ使用するか、どのように認識するか、理解を定着させるための具体的な例を説明します。これらのパターンをレンズとして考えてください。パターンを通して見る練習をすればするほど、あらゆる新しい問題に早く焦点が当てられるようになります。
+
+## パターン 1: 2 つのポインター
+
+**次の場合に認識します**: 入力がソートされている (またはソートできる) 場合、何らかの条件を満たすペアまたは部分配列を見つける必要があります。
+
+2 つのポインタは、配列の両端 (または「高速/低速」バリアントの場合は先頭) に 1 つのポインタを配置し、条件に基づいてそれらを互いに近づけることによって機能します。
+
+```python
+# Three Sum: find all triplets that sum to zero
+def three_sum(nums):
+    nums.sort()
+    result = []
+    for i in range(len(nums) - 2):
+        if i > 0 and nums[i] == nums[i - 1]:
+            continue  # Skip duplicates
+        left, right = i + 1, len(nums) - 1
+        while left < right:
+            total = nums[i] + nums[left] + nums[right]
+            if total < 0:
+                left += 1
+            elif total > 0:
+                right -= 1
+            else:
+                result.append([nums[i], nums[left], nums[right]])
+                while left < right and nums[left] == nums[left + 1]:
+                    left += 1
+                left += 1
+                right -= 1
+    return result
+```
+
+**時間**: O(n²) — O(n³) ブルートフォースに比べて大幅な改善。
+
+## パターン 2: スライディング ウィンドウ
+
+**次の場合に認識します**: 何らかの制約 (最大合計、すべての文字を含むなど) を満たす連続した部分配列または部分文字列を見つける必要がある。
+
+右ポインタを移動するとウィンドウが拡大し、左ポインタを移動するとウィンドウが縮小します。重要なのは、いつ縮小するかを知ることです。
+
+```python
+# Longest substring without repeating characters
+def length_of_longest_substring(s: str) -> int:
+    char_index = {}
+    max_length = 0
+    left = 0
+    for right, char in enumerate(s):
+        if char in char_index and char_index[char] >= left:
+            left = char_index[char] + 1
+        char_index[char] = right
+        max_length = max(max_length, right - left + 1)
+    return max_length
+```
+
+<Callout>スライディング ウィンドウ パターンには固定テンプレートがあります。つまり、2 つのポインターを初期化し、制約に違反した場合は右に拡張し、左に縮小し、答えを追跡します。このテンプレートを一度身に付けてしまえば、スライディング ウィンドウの問題はすべて対処できるように感じられます。</Callout>
+
+## パターン 3: BFS (幅優先検索)
+
+**次の場合に認識してください**: 重み付けされていないグラフ、レベル順のトラバーサル、またはレイヤーごとに隣接するグラフの最短パスが必要な場合。
+
+BFS はキューを使用し、ノードをレベルごとに処理します。重み付けされていないグラフでの最短パスが保証されます。
+
+```python
+from collections import deque
+
+# Number of islands — BFS variant
+def num_islands(grid):
+    if not grid:
+        return 0
+    rows, cols = len(grid), len(grid[0])
+    count = 0
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                count += 1
+                queue = deque([(r, c)])
+                grid[r][c] = '0'
+                while queue:
+                    row, col = queue.popleft()
+                    for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                        nr, nc = row + dr, col + dc
+                        if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == '1':
+                            grid[nr][nc] = '0'
+                            queue.append((nr, nc))
+    return count
+```
+
+## パターン 4: DFS (深さ優先検索)
+
+**次の場合に認識します**: すべてのパスを探索し、接続を確認し、サイクルを検出する必要がある場合、または問題が再帰的/ツリー構造になっている場合。
+
+DFSはワイドの前にディープに入る。これは自然に再帰的であり、ツリーのトラバースとバックトラッキングに美しくマッピングされます。
+
+```python
+# Path sum in a binary tree
+def has_path_sum(root, target_sum):
+    if not root:
+        return False
+    if not root.left and not root.right:
+        return target_sum == root.val
+    return (has_path_sum(root.left, target_sum - root.val) or
+            has_path_sum(root.right, target_sum - root.val))
+```
+
+<ThinkAboutIt>DFS よりも BFS を選択する場合、またはその逆を選択するのはどのような場合ですか?考慮事項: BFS は最短パスを検索しますが、O(幅) メモリを使用します。 DFS は O(深さ) メモリを使用しますが、最短パスは保証されません。グラフの形状は選択にどのような影響を与えますか?</ThinkAboutIt>
+
+## パターン 5: 二分探索
+
+**次の場合に認識します**: 検索空間がソートまたは単調である (インデックス i で条件が true の場合、すべてのインデックス > i または < i で true)。
+
+二分探索は、並べ替えられた配列に対してのみ機能するわけではありません。あらゆる単調条件に対して機能します。この洞察により、「荷物を発送するための最小容量」や「ピーク要素の検索」などの問題が解決されます。
+
+```python
+# Binary search on answer: minimum days to make m bouquets
+def min_days(bloom_day, m, k):
+    if m * k > len(bloom_day):
+        return -1
+
+    def can_make(days):
+        bouquets = flowers = 0
+        for bloom in bloom_day:
+            if bloom <= days:
+                flowers += 1
+                if flowers == k:
+                    bouquets += 1
+                    flowers = 0
+            else:
+                flowers = 0
+        return bouquets >= m
+
+    lo, hi = min(bloom_day), max(bloom_day)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if can_make(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+```
+
+<FunFact>二分探索は概念的には最も単純なアルゴリズムの 1 つであるにもかかわらず、Jon Bentley の研究によると、プロのプログラマーの約 10% しか最初の試行で正しく実装できなかったことがわかりました。最も一般的なバグは?境界条件におけるオフバイワンエラー。</FunFact>
+
+## パターン 6: バックトラッキング
+
+**次の場合に認識します**: 制約を満たすすべての組み合わせ、順列、またはサブセットを生成する必要がある。この問題では、「すべてを検索」、「すべてを生成」、「可能な限りすべてをリストアップ」ということがよくあります。
+
+バックトラッキング = 枝刈りを伴う DFS。パスを探索し、それが制約に違反する場合は、後戻りして次のオプションを試します。
+
+```python
+# Generate all valid combinations of n pairs of parentheses
+def generate_parenthesis(n):
+    result = []
+    def backtrack(current, open_count, close_count):
+        if len(current) == 2 * n:
+            result.append(current)
+            return
+        if open_count < n:
+            backtrack(current + '(', open_count + 1, close_count)
+        if close_count < open_count:
+            backtrack(current + ')', open_count, close_count + 1)
+    backtrack('', 0, 0)
+    return result
+```
+
+## パターン 7: 動的プログラミング
+
+**次の場合に認識してください**: 問題に重複する部分問題と最適な部分構造がある。古典的なシグナルには、「最小コスト」、「ウェイの数」、「最長/最短シーケンス」、「ターゲットに到達できるか?」などがあります。
+
+DP レシピ: 状態を定義し、繰り返しを記述し、トップダウン (メモ化) かボトムアップ (表作成) かを決定します。
+
+```python
+# Longest Increasing Subsequence — O(n²) DP
+def length_of_lis(nums):
+    if not nums:
+        return 0
+    dp = [1] * len(nums)  # dp[i] = length of LIS ending at index i
+    for i in range(1, len(nums)):
+        for j in range(i):
+            if nums[j] < nums[i]:
+                dp[i] = max(dp[i], dp[j] + 1)
+    return max(dp)
+```
+
+<Callout>DP の問題で行き詰まった場合は、まず総当たり再帰から始めます。次にメモ化を追加します。ボトムアップ集計への変換は最適化のステップであり、最初のステップではありません。このアプローチにより、テーブルの寸法を見失うことがなくなります。</Callout>
+
+## パターン 8: 貪欲
+
+**次の場合に認識してください**: 各ステップで局所的に最適な選択を行うと、全体的に最適なソリューションが得られます。貪欲な問題には、間隔、スケジュール設定、または再検討する必要のない選択が含まれることがよくあります。
+
+```python
+# Minimum number of meeting rooms (interval scheduling)
+def min_meeting_rooms(intervals):
+    starts = sorted([i[0] for i in intervals])
+    ends = sorted([i[1] for i in intervals])
+    rooms = max_rooms = 0
+    s = e = 0
+    while s < len(starts):
+        if starts[s] < ends[e]:
+            rooms += 1
+            max_rooms = max(max_rooms, rooms)
+            s += 1
+        else:
+            rooms -= 1
+            e += 1
+    return max_rooms
+```
+
+## パターン 9: トポロジカルソート
+
+**次の場合に認識してください**: タスク間に依存関係があります (コースの前提条件、ビルド順序、タスクのスケジュール設定)。入力は有向非巡回グラフ (DAG) です。
+
+```python
+from collections import deque, defaultdict
+
+def course_order(num_courses, prerequisites):
+    graph = defaultdict(list)
+    in_degree = [0] * num_courses
+    for course, prereq in prerequisites:
+        graph[prereq].append(course)
+        in_degree[course] += 1
+
+    queue = deque([i for i in range(num_courses) if in_degree[i] == 0])
+    order = []
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbour in graph[node]:
+            in_degree[neighbour] -= 1
+            if in_degree[neighbour] == 0:
+                queue.append(neighbour)
+    return order if len(order) == num_courses else []
+```
+
+## パターン 10: Union-Find (素集合)
+
+**次の場合に認識します**: 要素をグループ化する必要がある場合、接続されたコンポーネントを検出する場合、または 2 つの要素が同じセットに属しているかどうかを判断する必要がある場合、特に接続が動的に追加される場合。
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])  # Path compression
+        return self.parent[x]
+
+    def union(self, x, y):
+        px, py = self.find(x), self.find(y)
+        if px == py:
+            return False
+        if self.rank[px] < self.rank[py]:
+            px, py = py, px
+        self.parent[py] = px
+        if self.rank[px] == self.rank[py]:
+            self.rank[px] += 1
+        return True
+```
+
+<Quiz question="「t のすべての文字を含む s の最小ウィンドウ部分文字列を見つけてください」という問題が与えられました。どのパターンが最も適合しますか?" options="2 つのポインター|引き違い窓|動的プログラミング|二分探索" answer="1" explanation="これは古典的なスライディング ウィンドウの問題です。右ポインタを移動して文字を含めることでウィンドウを拡大し、すべての文字が含まれると左から縮小し、最小ウィンドウ サイズを追跡します。" />
+
+## 正しいパターンを認識する方法
+
+頭の中で意思決定ツリーを構築します。
+
+1. **入力はソートされていますか?** → 2 ポインターまたは二分探索
+2. **連続した部分配列/部分文字列が必要ですか?** → スライディング ウィンドウ
+3. **グラフ/ツリー トラバーサルですか?** → BFS (最短パス) または DFS (すべてのパス)
+4. **「すべての組み合わせ/順列を検索します」?** → バックトラッキング
+5. **「最小コスト / ウェイ数」?** → 動的プログラミング
+6. **「スケジュール/間隔」の問題?** → 貪欲または選別
+7. **依存関係または順序付け?** → トポロジカルソート
+8. **グループ化/接続性?** → Union-Find
+
+## 重要なポイント
+
+- **問題ではなくパターンを学習**: 10 のパターンで面接の質問の大部分をカバーします。
+- **総当たりで開始**:総当たりアプローチからパターンを特定し、最適化します。
+- **パターン認識を練習する**: 解決する問題ごとに、どのパターンが使用されているかラベルを付けます。
+- **パターンを組み合わせる**: 多くの中/難しい問題では 2 つのパターンを組み合わせて使用​​します (例: 二分探索 + スライディング ウィンドウ、BFS + トポロジカル ソート)。
+- **推論を言語化する**: インタビューで「これはスライディング ウィンドウの問題のように見えます。なぜなら...」と言うのは、強力な分析的思考を示します。

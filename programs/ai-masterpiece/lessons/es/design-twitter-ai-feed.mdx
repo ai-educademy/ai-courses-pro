@@ -1,0 +1,153 @@
+---
+title: "Diseñe el feed de IA de Twitter: un estudio de caso de un extremo a otro"
+description: "Analice la arquitectura detrás de una línea de tiempo personalizada que ofrece miles de millones de tweets a cientos de millones de usuarios."
+order: 3
+difficulty: "advanced"
+duration: 30
+icon: "🐦"
+published: true
+machineTranslated: true
+---
+# Diseñar el feed de IA de Twitter
+
+Imagine que le asignan una tarea: cada vez que un usuario abre la aplicación, muéstrele los tweets que encontrará más valiosos (entre miles de millones de posibilidades) en menos de 200 milisegundos.
+
+Este es uno de los problemas de recomendación más difíciles en la industria. Diseñémoslo desde cero.
+
+<Illustration src="/images/lessons/design-twitter-ai-feed.svg" alt="Diagrama de canalización que muestra a los candidatos a tweet fluyendo a través de las etapas de clasificación y filtrado para producir un feed personalizado." caption="El viaje de un tweet desde su creación hasta tu timeline" />
+
+## El problema a escala
+
+Twitter (ahora X) maneja aproximadamente 500 millones de tweets por día. Cada uno de sus más de 350 millones de usuarios activos mensuales espera un feed que parezca **seleccionado personalmente**: relevante, oportuno y atractivo.
+
+Un feed cronológico no funciona a esta escala. Si sigues 500 cuentas, es posible que tengas 10.000 tweets sin leer. La mayoría de ellos son irrelevantes. El trabajo del feed de IA es mostrar los 50 que más te importan **a ti**.
+
+<Callout>Esto no es sólo un problema de clasificación: es un sistema de múltiples etapas que involucra generación de candidatos, ingeniería de funciones, puntuación en tiempo real, seguridad del contenido y servicio a escala masiva.
+</Callout>
+
+## Etapa 1: Generación de candidatos
+
+No se pueden puntuar los 500 millones de tweets diarios de cada usuario. En su lugar, primero **estrechas el campo**.
+
+### Fuentes de candidatos:
+- **Dentro de la red**: Tweets de cuentas que sigues (mayor recuerdo, relevancia moderada).
+- **Fuera de la red**: Tweets que les gustaron o retuitearon las personas que sigues, o que son tendencia en tu gráfico de intereses.
+- **Basado en temas**: Tweets que coinciden con temas con los que ha interactuado recientemente.
+
+### Cómo funciona:
+Un modelo de recuperación ligero (a menudo basado en incrustaciones) genera un conjunto de candidatos de aproximadamente entre 1.000 y 5.000 tweets por usuario. Esto se ejecuta según una programación o se activa cuando el usuario abre la aplicación.
+
+<Quiz question="¿Por qué Twitter utiliza la generación de candidatos en lugar de calificar cada tweet para cada usuario?" options="Porque calificar cada tweet sería demasiado rápido|Porque es computacionalmente imposible ejecutar un modelo de clasificación pesado en miles de millones de tweets por solicitud de usuario.|Porque los usuarios prefieren tweets aleatorios|Porque el modelo de clasificación solo funciona en conjuntos de datos pequeños" answer="1" explanation="Con 500 millones de tweets por día y 350 millones de usuarios, calificar cada tweet para cada usuario requeriría un cálculo astronómico. La generación de candidatos reduce el conjunto a un tamaño manejable antes de que se ejecute el costoso modelo de clasificación." />
+
+## Etapa 2: El modelo de clasificación
+
+Una vez que tenga unos cuantos miles de candidatos, un **modelo de clasificación pesada** califica a cada uno. Aquí es donde vive la verdadera inteligencia.
+
+### Características que utiliza el modelo:
+
+**Funciones de usuario:**
+- Intereses inferidos de interacciones pasadas (me gusta, retuits, respuestas, tiempo de permanencia).
+- Gráfico social: con quién interactúas más.
+- Preferencias demográficas y lingüísticas.
+
+**Características del tweet:**
+- Contenido: incrustaciones de texto, tipo de medio, hashtags.
+- Autor: recuento de seguidores, tasa de participación, puntuación de confianza.
+- Frescura: antigüedad del tweet en minutos.
+
+**Características cruzadas:**
+- Afinidad usuario-autor: con qué frecuencia interactúa con este autor.
+- Afinidad usuario-tema: ¿el tema del tweet coincide con tu perfil de interés?
+- Prueba social: ¿personas similares a usted han interactuado con este tweet?
+
+### Arquitectura modelo:
+Una red neuronal profunda (a menudo un modelo multitarea) predice múltiples tipos de interacción simultáneamente:
+
+- Probabilidad de me gusta.
+- Probabilidad de retuitear.
+- Probabilidad de respuesta.
+- Probabilidad de tiempo de permanencia prolongado (lectura de más de dos segundos).
+
+La puntuación final es una **combinación ponderada** de estas predicciones, ajustada para optimizar un objetivo a nivel de plataforma como "participación saludable".
+
+<ThinkAboutIt>Si optimiza únicamente para obtener clics y me gusta, corre el riesgo de promover contenido sensacionalista o indignante. ¿Cómo diseñaría la fórmula de puntuación para equilibrar el compromiso con la calidad del contenido?
+</ThinkAboutIt>
+
+## Etapa 3: Funciones en tiempo real
+
+Las funciones estáticas no son suficientes. El feed debe responder a lo que está sucediendo **ahora mismo**.
+
+- **Decaimiento de la actualidad**: un tweet de hace 30 segundos recibe un impulso con respecto a uno de hace tres horas.
+- **Temas de actualidad**: si se está desarrollando un evento importante, muestra tweets relacionados incluso si no pertenecen a los intereses habituales del usuario.
+- **Contexto de la sesión**: si un usuario lleva diez minutos desplazándose, diversifique el contenido para reducir la fatiga.
+- **Señales de participación en tiempo real**: un tweet que se vuelve viral en los últimos cinco minutos recibe un impulso temporal.
+
+Estas funciones requieren una **infraestructura de transmisión** (a menudo, Apache Kafka se alimenta de una tienda de funciones como Redis o Feast) que se actualiza casi en tiempo real.
+
+<FunFact>El equipo de ingeniería de Twitter informó que agregar funciones en tiempo real a su modelo de clasificación aumentó la participación de los usuarios en un 8 por ciento, una mejora masiva a su escala, que se traduce en millones de interacciones diarias adicionales.
+</FunFact>
+
+## El algoritmo "para ti": explorar versus explotar
+
+La fuente se enfrenta a un clásico **dilema de exploración-explotación**:
+
+- **Explotar**: muestra contenido similar al que el usuario ha interactuado anteriormente. Compromiso seguro, predecible y alto a corto plazo.
+- **Explorar**: introduzca nuevos temas, nuevos autores y nuevos formatos. Más riesgoso, pero esencial para la retención a largo plazo y la diversidad de contenidos.
+
+El enfoque de Twitter combina ambos:
+
+- Aproximadamente el 80 por ciento del feed es explotación: contenido que el modelo confía que el usuario disfrutará.
+- Aproximadamente el 20 por ciento es exploración: se inyecta nuevo contenido para probar los intereses cambiantes del usuario.
+
+El índice de exploración es en sí mismo un parámetro ajustado mediante pruebas A/B entre millones de usuarios.
+
+<Quiz question="¿Cuál es el principal riesgo de un feed que sólo 'explota' y nunca 'explora'?" options="El feed se vuelve demasiado diverso y confuso.|El usuario queda atrapado en una burbuja de filtro y la plataforma no puede descubrir la evolución de sus intereses.|El sistema utiliza demasiada computación.|El feed se carga demasiado lento" answer="1" explanation="La pura explotación crea burbujas de filtro: el usuario sólo ve lo que ya le gusta, la plataforma no puede adaptarse a los gustos cambiantes y la diversidad de contenidos colapsa. La exploración es esencial para la salud a largo plazo." />
+
+## Moderación de contenido y seguridad
+
+Antes de que cualquier tweet llegue al feed, pasa por una **capa de seguridad**:
+
+1. **Filtro de clasificación previa**: el contenido conocido como spam, acoso y violación de políticas se elimina antes de clasificar.
+2. **Filtro posterior a la clasificación**: después de la clasificación, una verificación secundaria detecta casos extremos; por ejemplo, un tweet que es individualmente aceptable pero dañino cuando se agrupa con contenido similar.
+3. **Controles a nivel de usuario**: los usuarios pueden silenciar temas, bloquear cuentas y marcar contenido como "no interesado", todo lo cual retroalimenta su modelo de personalización.
+
+La capa de seguridad debe ser **rápida** (agregar no más de 10 a 20 ms de latencia) y **conservadora** (en caso de duda, filtrarla y enviarla a revisión humana).
+
+<Callout>La moderación de contenido no es un sistema independiente que se implemente posteriormente. Está profundamente integrado en el proceso de clasificación, influyendo en las puntuaciones y filtrando en cada etapa.
+</Callout>
+
+## Escalado: distribución en abanico en lectura frente a distribución en abanico en escritura
+
+Esta es la decisión arquitectónica que define la infraestructura de Twitter.
+
+### Distribución al escribir:
+Cuando un usuario tuitea, **inserta** ese tuit en la caché de feeds de cada seguidor. Lecturas rápidas, pero escrituras costosas, especialmente para cuentas con millones de seguidores.
+
+### Distribución en abanico al leer:
+Cuando un usuario abre la aplicación, **extrae** los últimos tweets de todas las cuentas que sigue y clasifícalos sobre la marcha. Escrituras baratas, pero lecturas caras.
+
+### El enfoque híbrido de Twitter:
+- Para la mayoría de los usuarios (menos de 10.000 seguidores): distribución en abanico al escribir. Precalcule y almacene en caché el feed.
+- Para cuentas de celebridades (millones de seguidores): despliegue en lectura. Calcule el feed en el momento de la solicitud para evitar inundar millones de cachés en cada tweet.
+
+Esta estrategia híbrida equilibra la amplificación de escritura con la latencia de lectura, manejando de manera eficiente tanto el tweet de un usuario normal como la publicación viral de una estrella del pop.
+
+<FunFact>Cuando una celebridad con 50 millones de seguidores tuitea, la distribución en abanico al escribir requeriría 50 millones de inserciones de caché, lo que tomaría minutos y consumiría un enorme ancho de banda. El enfoque híbrido maneja esto en milisegundos al diferir el trabajo hasta el tiempo de lectura.
+</FunFact>
+
+## Poniéndolo todo junto
+
+El proceso completo para una única solicitud de feed:
+
+1. El usuario abre la aplicación → la solicitud llega al servicio de alimentación.
+2. La generación de candidatos recupera ~3000 tweets de fuentes dentro y fuera de la red.
+3. La tienda de funciones proporciona funciones por lotes y en tiempo real para cada candidato.
+4. El modelo de clasificación califica a todos los candidatos en una única llamada de inferencia por lotes.
+5. Los filtros de seguridad eliminan el contenido que infringe las políticas.
+6. La lógica de exploración inyecta un 20 por ciento de contenido diverso.
+7. La lista de clasificación final se devuelve al cliente en menos de 200 ms.
+
+<ThinkAboutIt>En una entrevista te preguntan: "Si pudieras agregar una nueva señal para mejorar el feed, ¿cuál sería y por qué?" Considere señales que no se analizan comúnmente, tal vez algo relacionado con el bienestar del usuario o la credibilidad del contenido.
+</ThinkAboutIt>
+
+<Quiz question="En la estrategia híbrida de distribución de Twitter, ¿cómo se manejan los tweets de cuentas de celebridades?" options="Se envían inmediatamente al caché de cada seguidor.|Se calculan en el momento de la lectura cuando un seguidor abre su feed.|Están completamente excluidos del feed de IA.|Sólo se muestran a usuarios verificados." answer="1" explanation="Los tweets de celebridades utilizan la distribución en abanico al leer: el feed se calcula cuando un seguidor lo solicita, evitando el enorme costo de enviar un solo tweet a millones de cachés." />

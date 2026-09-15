@@ -1,0 +1,149 @@
+---
+title: "Union-Find - 接続されたコンポーネントとネットワークの検出"
+description: "パス圧縮とランクによる結合を使用した Union-Find (素セット) データ構造を学習します。接続、MST、およびグラフ コンポーネントの問題を効率的に解決します。"
+order: 7
+difficulty: "advanced"
+duration: 17
+icon: "🔗"
+published: true
+machineTranslated: true
+---
+## 接続の問題
+
+ノードのネットワークがあるとすると、次の 2 種類のクエリを常に受信します: *ノード A をノード B に接続* と *A と B は接続されていますか?* これを BFS/DFS で実行すると、クエリごとにグラフを走査することになり、数百万の操作には遅すぎます。
+
+**Union-Find** は両方の応答をほぼ一定の時間で返します。
+
+## 単純なアプローチ - 簡単な検索
+
+各ノードのコンポーネント ID を保存します。接続を確認するには、O(1) で ID を比較します。ただし、2 つのコンポーネントをマージすると、1 つのグループのすべてのメンバー (結合ごとに O(n)) を更新する必要があります。
+
+```
+IDs:  [0, 0, 0, 3, 3]
+       └─group 0─┘ └group 3┘
+union(0, 3) → update all 3s to 0 → O(n)
+```
+
+もっと良いものが必要です。
+
+## Union-Find データ構造
+
+各ノードは **親** を指します。各ツリーのルートはコンポーネントの代表です。 2 つのノードは、同じルートを共有する場合にのみ接続されます。
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+```
+
+## パス圧縮による検索
+
+深いツリーでは、親ポインターを上に進むのが遅くなることがあります。 **パス圧縮** は、訪問したすべてのノードを直接ルートにポイントすることでツリーを平坦化します。
+
+```python
+def find(self, x):
+    if self.parent[x] != x:
+        self.parent[x] = self.find(self.parent[x])
+    return self.parent[x]
+```
+
+ノード 4 を見つける前と後:
+
+```
+Before:  0←1←2←3←4     After:  0←1
+                                0←2
+                                0←3
+                                0←4
+```
+
+## ランクによる結合
+
+常に短い木を高い木の下に取り付けます。これにより、木の高さが対数的に維持され、連鎖の縮退が防止されます。
+
+```python
+def union(self, x, y):
+    rx, ry = self.find(x), self.find(y)
+    if rx == ry:
+        return False
+    if self.rank[rx] < self.rank[ry]:
+        rx, ry = ry, rx
+    self.parent[ry] = rx
+    if self.rank[rx] == self.rank[ry]:
+        self.rank[rx] += 1
+    return True
+```
+
+<Quiz
+  question="ランクによるパス圧縮とユニオンの両方を使用した場合、操作あたりの償却時間はどれくらいですか?"
+  options="O(log n)|の上）|O(α(n)) - ほぼ O(1)|O(√n)"
+  answer="2"
+  explanation="逆アッカーマン関数 α(n) は非常にゆっくりと成長するため、実際の入力に対して 4 を超えることはなく、演算は実質的に O(1) になります。"
+/>
+
+<Illustration src="/images/lessons/union-find-and-disjoint-sets.svg" alt="パス圧縮前後の Union-Find ツリー" caption="パス圧縮により深いチェーンが平坦化され、将来のルックアップが高速に保たれます。" />
+
+## Kruskal の MST アルゴリズム
+
+Union-Find は、最小スパニング ツリーに対する **Kruskal のアルゴリズム**を活用します。
+
+1. すべてのエッジを重みで並べ替えます
+2. 各エッジ (u、v) について、`find(u) ≠ find(v)` の場合、それを追加し、`union(u, v)`
+3. n − 1 個のエッジがあるときに停止します
+
+Union-Find は、エンドポイントがすでにルートを共有しているエッジを拒否することで循環を防ぎます。合計時間: **O(E log E)** はソートによって支配されます。
+
+<ThinkAboutIt>Kruskal では、Union-Find を使用してサイクルを検出します。代わりに DFS を使用してサイクルを検出するにはどうすればよいでしょうか?また、ここでは Union-Find の方が自然であるのはなぜですか?</ThinkAboutIt>
+
+## 古典的な問題
+
+### 接続されたコンポーネントの数
+
+n 個のノードを使用して Union-Find を初期化します。各エッジを`union`で処理します。最後に個別のルートを数えます。
+
+### アカウントの統合 (LeetCode 721)
+
+各アカウントには電子メールがあります。 2 つのアカウントが電子メールを共有している場合、それらは同じ人物に属しています。共有メールでアカウントを結合し、グループ化して並べ替えます。
+
+### 冗長接続 (LeetCode 684)
+
+ツリーと追加のエッジが 1 つあるとすると、冗長なエッジを見つけます。エッジを順番に処理します。`union` が `False` を返す最初のエッジ (すでに接続されています) が答えです。
+
+<FunFact>両方の最適化を備えた Union-Find が O(α(n)) で実行されるという証明は、1975 年に Tarjan によって発表され、コンピューター サイエンスにおける最もエレガントな償却分析の 1 つと考えられています。</FunFact>
+
+## Union-Find と BFS/DFS を選択する場合
+
+|シナリオ |最良の選択 |
+|----------|---------------|
+|接続性のクエリが繰り返される |ユニオン検索 |
+|シングルトラバース / 最短パス | BFS/DFS |
+|インクリメンタルエッジ追加 |ユニオン検索 |
+|エッジ除去 (動的グラフ) | BFS/DFS (またはオフライン UF) |
+|クラスカルのMST |ユニオン検索 |
+|有向グラフのトポロジカルソート/サイクル | DFS |
+
+Union-Find は、エッジを *増分* 処理し、高速な接続チェックが必要な場合に威力を発揮します。 1 回だけ通過する場合、またはパス情報が必要な場合は、BFS/DFS を使用してください。
+
+<Quiz
+  question="エッジは一度に 1 つずつ与えられ、サイクルを作成する最初のエッジを検出する必要があります。どのアプローチが最適ですか?"
+  options="各エッジ後に最初から BFS を実行します|各エッジ後に最初から DFS を実行します|Union-Find - ユニオンはサイクル エッジで False を返します|トポロジカルソート"
+  answer="2"
+  explanation="Union-Find はエッジごとにほぼ O(1) でサイクルを段階的に検出しますが、BFS/DFS は毎回グラフ全体を再走査します。"
+/>
+
+<Quiz
+  question="Union-Find では、ランクによる結合によって何が妨げられますか?"
+  options="エッジの複製|接続されていないコンポーネント|縮退した直鎖 (高い木)|負のエッジの重み"
+  answer="2"
+  explanation="ランクによるユニオンは、常に高いツリーの下に短いツリーを接続することでツリーのバランスを保ち、O(n) 回の検索操作を防ぎます。"
+/>
+
+<ThinkAboutIt>一部の問題では、*元に戻す* 結合 (削除による動的接続) が必要です。標準の Union-Find では不十分な理由と、どのような修正が存在しますか?</ThinkAboutIt>
+
+---
+
+## 📚 続きを読む
+
+- [素集合データ構造 - Wikipedia](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) - Union-Find の理論、証明、歴史
+- [Union-Find - Princeton Algorithms](https://algs4.cs.princeton.edu/15uf/) - Java サンプルを使用した Sedgewick の信頼できる扱い
+- [冗長接続 - LeetCode 684](https://leetcode.com/problems/redundant-connection/) - Union-Find によるサイクル検出のクリーンなアプリケーション

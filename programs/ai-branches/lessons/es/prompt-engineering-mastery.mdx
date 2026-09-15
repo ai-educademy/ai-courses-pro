@@ -1,0 +1,249 @@
+---
+title: "Ingeniería rápida: el arte de hablar con la IA"
+description: "Domina el arte de escribir indicaciones que obtengan resultados brillantes"
+order: 11
+difficulty: "intermediate"
+duration: 15
+icon: "🎯"
+published: true
+machineTranslated: true
+---
+# Ingeniería rápida: el arte de hablar con la IA 🎯
+
+La diferencia entre una respuesta de IA mediocre y una brillante a menudo no tiene nada que ver con la IA en sí, sino con cómo preguntaste.
+
+La ingeniería rápida es la práctica de elaborar entradas para modelos de lenguaje de IA que produzcan de manera confiable resultados útiles y de alta calidad. Es en parte habilidad de comunicación, en parte pensamiento sistémico y en parte experimentación estructurada.
+
+La buena noticia: no es necesario ser ingeniero para ser bueno en esto.
+
+---
+
+## 🧠 Por qué las indicaciones son más importantes de lo que crees
+
+Los LLM son notablemente capaces pero también notablemente literales. No saben lo que *quisiste* preguntar; solo saben lo que *realmente* preguntaste.
+
+Una indicación es esencialmente un ejercicio de establecimiento de contexto. No estás simplemente haciendo una pregunta; estás dando forma:
+- ¿Qué papel debe asumir el modelo?
+- ¿Qué formato de salida esperas?
+- Qué tan detallado y técnico debe ser
+- ¿Qué limitaciones respetar?
+- ¿Cuál es el objetivo de la respuesta?
+
+Domine esto y el mismo modelo subyacente se sentirá varias generaciones más poderoso.
+
+---
+
+## 🎯 Indicaciones de disparo cero: solo pregunte
+
+La forma más simple de indicaciones es la de tiro cero: usted describe su tarea y le pide al modelo que la haga, sin ningún ejemplo.
+
+**Antes:**
+```
+Summarise this article.
+
+[article text]
+```
+
+**Después:**
+```
+Summarise the following article in 3 bullet points. Each bullet should be 
+one sentence. Focus on the main argument, the key evidence, and the 
+conclusion. Avoid jargon.
+
+[article text]
+```
+
+La versión "después" especifica el formato (3 viñetas), la longitud (una oración cada una), las prioridades (argumento, evidencia, conclusión) y el estilo (sin jerga). El modelo tiene un objetivo mucho más claro.
+
+**Errores comunes de tiro cero:**
+- Hacer una pregunta vaga y esperar una respuesta específica.
+- Olvidar especificar el formato de salida
+- No indicar tu audiencia (técnica versus general)
+- Omitir restricciones de longitud
+
+<FunFact>La investigación de OpenAI y otros ha demostrado que simplemente agregar "Pensemos paso a paso" a una sugerencia de razonamiento puede aumentar la precisión en problemas matemáticos y lógicos entre un 40% y un 50%. Se trata de una cadena de pensamiento en su forma más simple, y funciona porque anima al modelo a mostrar su trabajo en lugar de saltar a una respuesta.
+</FunFact>
+
+---
+
+## 📚 Indicaciones breves: aprender con el ejemplo
+
+A veces contar el modelo no es tan efectivo como mostrarlo. **Las indicaciones breves** proporcionan de 2 a 5 ejemplos del patrón de entrada y salida que desea antes de presentar su tarea real.
+
+**Ejemplo: clasificación de sentimientos:**
+```
+Classify the sentiment of each customer review as Positive, Negative, or Neutral.
+
+Review: "The delivery was fast but the product was broken."
+Sentiment: Negative
+
+Review: "Absolutely love this! Will buy again."
+Sentiment: Positive
+
+Review: "It arrived on time."
+Sentiment: Neutral
+
+Review: "The quality exceeded my expectations but the packaging was wasteful."
+Sentiment: [complete this]
+```
+
+El modelo ahora ha visto qué formato desea, cómo manejar señales mixtas y qué granularidad de análisis se espera. Sin esos ejemplos, es posible que obtengas un párrafo en lugar de una sola palabra.
+
+**Cuándo usar pocos disparos:**
+- Formatos de salida inusuales que el modelo podría no producir de forma natural.
+- Tareas de clasificación específicas del dominio.
+- Coincidencia de estilos (escribir con la voz de un autor específico)
+- Salidas estructuradas complejas (esquemas JSON, tablas)
+
+---
+
+## 🔗 Cadena de pensamiento: hacer que el modelo piense en voz alta
+
+**Las indicaciones de cadena de pensamiento (CoT)** le piden al modelo que razone un problema paso a paso antes de dar su respuesta final. Esto mejora drásticamente el rendimiento en razonamiento, matemáticas y tareas de varios pasos.
+
+**Sin cuna:**
+```
+A shop sells apples for £0.50 each. If I buy 7 apples and pay with a £5 note, 
+how much change do I get?
+
+Answer: £1.50
+```
+(A veces es correcto, a veces no, y no puedes ver el funcionamiento)
+
+**Con cuna:**
+```
+A shop sells apples for £0.50 each. If I buy 7 apples and pay with a £5 note, 
+how much change do I get? Work through this step by step.
+
+Step 1: Cost of 7 apples = 7 × £0.50 = £3.50
+Step 2: Change = £5.00 - £3.50 = £1.50
+Answer: £1.50
+```
+
+El razonamiento visible le permite detectar errores, y el acto de escribir los pasos en realidad hace que sea menos probable que el modelo los cometa.
+
+Para **problemas muy complejos**, puedes ir más allá con "CoT de disparo cero"; simplemente agrega: *"Piensa paso a paso, mostrando tu razonamiento claramente antes de dar tu respuesta final".*
+
+---
+
+## 🎭 Instrucción de rol: persona y experiencia
+
+Una de las técnicas más poderosas es darle al modelo un rol o personalidad específica. Esto activa conocimientos relevantes, establece el tono apropiado y, a menudo, mejora la precisión en dominios especializados.
+
+**Sin rol:**
+```
+Explain photosynthesis.
+```
+
+**Con rol:**
+```
+You are a science teacher explaining photosynthesis to a 12-year-old who 
+loves video games. Use gaming analogies where helpful. Be enthusiastic 
+and encouraging.
+```
+
+El segundo mensaje producirá una explicación fundamentalmente diferente y (para esa audiencia) mucho más útil.
+
+**La indicación de roles funciona especialmente bien para:**
+- Explicaciones técnicas al nivel adecuado.
+- Preguntas legales, médicas o financieras (siempre agregue las exenciones de responsabilidad apropiadas)
+- Escritura creativa en un estilo específico.
+- Revisión de código ("actuar como un desarrollador senior de Python revisando este código")
+- Práctica de entrevista ("eres un entrevistador duro en una empresa FAANG")
+
+**Un patrón completo de avisos del sistema:**
+```
+You are [role] with expertise in [domain].
+Your audience is [description of user].
+Your goal is to [specific objective].
+Always [constraint 1].
+Never [constraint 2].
+Format your response as [format specification].
+```
+
+---
+
+## ⛓️ Encadenamiento de indicaciones: desglosar tareas complejas
+
+Para tareas complejas que implican varias etapas, un solo mensaje a menudo no es suficiente. **Encadenamiento de mensajes** divide la tarea en pasos, utilizando el resultado de un mensaje como entrada para el siguiente.
+
+**Ejemplo: escribir una publicación de blog:**
+
+En lugar de un mensaje de monstruo, encadene:
+1. **Pregunta 1**: "Genere 5 ángulos posibles para una publicación de blog sobre [tema]. Para cada uno, proporcione una descripción de una línea".
+2. **Pregunta 2**: "Usando el ángulo n.° 3 de arriba, escriba un esquema detallado con 5 secciones y subpuntos con viñetas".
+3. **Pregunta 3**: "Amplíe la sección 2 del esquema a un borrador completo de 300 palabras, escribiendo en un tono conversacional pero autoritario".
+4. **Pregunta 4**: "Revise el borrador para mayor claridad, elimine las oraciones redundantes y asegúrese de que termine con un llamado a la acción claro".
+
+Esto produce resultados significativamente mejores que solicitar una publicación de blog terminada de una sola vez: cada paso capta toda la atención del modelo en una tarea enfocada.
+
+<ThinkAboutIt>El encadenamiento rápido refleja cómo trabajan los expertos humanos. Un buen autor no empieza simplemente a escribir: realiza una lluvia de ideas, bosqueja, redacta y revisa. Un buen ingeniero no codifica desde cero: diseña, crea prototipos, prueba y refactoriza. ¿Por qué esperaríamos que la IA se saltara estos pasos y produjera una obra maestra en el primer intento?
+</ThinkAboutIt>
+
+---
+
+## 🚫 Errores comunes y cómo solucionarlos
+
+### Error 1: Pedir todo a la vez
+❌ *"Escriba una guía completa sobre el aprendizaje automático que incluya historia, técnicas, aplicaciones, herramientas, trayectorias profesionales y tendencias futuras".*
+
+✅ Divídalo en indicaciones específicas, un tema a la vez.
+
+### Error 2: Solo instrucciones negativas
+❌ *"No seas demasiado técnico. No escribas demasiado. No incluyas jerga."*
+
+✅ *"Escribe a un nivel de Year 9, en 200 palabras, usando el lenguaje cotidiano."* — dile qué DEBE hacer.
+
+### Error 3: no especificar el formato de salida
+❌ *"Enumere los pros y los contras de los vehículos eléctricos."*
+
+✅ *"Cree una tabla que compare vehículos eléctricos con vehículos de gasolina. Utilice columnas: Factor, Eléctrico, Gasolina. Incluya 6 filas que cubran costo, medio ambiente, autonomía, carga, mantenimiento y valor de reventa".*
+
+### Error 4: Olvidar el contexto
+❌ *"Reescribe esto para que sea mejor."*
+
+✅ *"Este párrafo pertenece a un informe técnico dirigido a ejecutivos no técnicos. Vuelva a escribirlo para eliminar la jerga, reduzca la extensión en un 30 % y agregue un resumen de una oración al principio."*
+
+### Error 5: Aceptar la primera respuesta
+Los mejores ingenieros rápidos iteran. Si la primera respuesta no es del todo correcta, dígale al modelo exactamente qué cambiar: *"El tono es demasiado formal; hágalo más conversacional. Y mueva las estadísticas a una barra lateral en lugar del texto principal".*
+
+---
+
+## 🔬 Técnica avanzada: salida estructurada
+
+Para uso programático (API, flujos de trabajo, canalizaciones), a menudo necesita resultados estructurados. Simplemente pídalo explícitamente:
+
+```
+Analyse the following job description and return a JSON object with this 
+exact structure:
+{
+  "required_skills": ["skill1", "skill2"],
+  "nice_to_have_skills": ["skill3"],
+  "seniority_level": "junior|mid|senior",
+  "remote_friendly": true|false,
+  "key_responsibilities": ["resp1", "resp2", "resp3"]
+}
+
+Job description:
+[text here]
+```
+
+Los LLM modernos son notablemente buenos en esto. Muchas API ahora ofrecen un "modo JSON" que impone una salida JSON válida, lo que lo hace aún más confiable.
+
+---
+
+## 🏆 Desarrollar tu práctica de indicaciones
+
+La ingeniería rápida es una habilidad que se agrava. Comience con estos hábitos:
+
+1. **Mantenga una biblioteca de mensajes**: guarde mensajes que funcionen bien para tareas recurrentes
+2. **Prueba A/B**: prueba la misma tarea con dos indicaciones diferentes y compara los resultados.
+3. **Diagnosticar fallas**: cuando una respuesta sea deficiente, pregunte: ¿qué contexto faltaba? ¿Qué era ambiguo?
+4. **Lea investigaciones**: OpenAI, Anthropic y Google DeepMind publican periódicamente artículos sobre técnicas de estimulación.
+5. **Enseñe a otros**: explicar por qué una pauta funciona consolida su propia comprensión
+
+Los modelos están mejorando rápidamente, pero también lo está el límite de lo que un ingeniero hábil y rápido puede extraer de ellos. Los fundamentos aquí (claridad, especificidad, contexto, iteración) seguirán siendo valiosos independientemente del modelo que esté utilizando.
+
+<Quiz question="¿Cuál es el principal beneficio de las indicaciones de pocos disparos en comparación con las de cero disparos?" options={["El modelo responde más rápido.", "Puede proporcionar ejemplos del formato de entrada y salida exacto que desee, guiando la respuesta del modelo con mayor precisión.", "Utiliza menos ventana de contexto.", "El modelo puede hacer preguntas aclaratorias."]} correct={1} explanation="Las indicaciones breves proporcionan de 2 a 5 ejemplos del patrón que desea antes de presentar su tarea real. Esto es particularmente poderoso para formatos de salida inusuales, clasificaciones de dominios específicos o coincidencias de estilos: casos en los que mostrar el modelo no es tan efectivo como mostrarlo." />
+
+<Quiz question="¿Por qué las indicaciones en cadena de pensamiento mejoran la precisión en las tareas de razonamiento?" options={["Hace que el mensaje sea más breve y claro.", "Al hacer que el modelo muestre su razonamiento paso a paso, los errores son más visibles y es menos probable que el modelo se salte pasos lógicos.", "Le da al modelo más ejemplos de entrenamiento.", "Reduce la temperatura de las salidas del modelo."]} correct={1} explanation="Cuando un modelo razona paso a paso, suceden dos cosas: primero, el razonamiento visible permite detectar errores; en segundo lugar, el acto de generar cada paso en realidad reduce la probabilidad de realizar saltos lógicos que se salten razonamientos importantes. Es similar a cómo los humanos cometen menos errores cuando escriben su trabajo en matemáticas." />

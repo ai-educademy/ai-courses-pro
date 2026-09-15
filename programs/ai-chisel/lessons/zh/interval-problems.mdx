@@ -1,0 +1,162 @@
+---
+title: "间隔问题 - 合并、插入和计划"
+description: "掌握从合并和插入到会议室和扫线的基于间隔的问题。了解面试官期望的排序策略和模式。"
+order: 9
+difficulty: "advanced"
+duration: 16
+icon: "📅"
+published: true
+machineTranslated: true
+---
+## 区间表示
+
+一个音程是一对`[start, end]`。大多数间隔问题都始于一个关键步骤：**按开始时间排序**。这会将混乱的列表转换为可以通过简单比较从左到右处理的序列。
+
+```
+Unsorted: [3,6] [1,4] [8,10] [2,5]
+Sorted:   [1,4] [2,5] [3,6] [8,10]
+```
+
+## 合并重叠区间
+
+基础区间问题（LeetCode 56）。排序后，如果当前开始≤前一个结束，则两个连续区间重叠。
+
+```python
+def merge(intervals):
+    intervals.sort()
+    merged = [intervals[0]]
+    for start, end in intervals[1:]:
+        if start <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], end)
+        else:
+            merged.append([start, end])
+    return merged
+```
+
+遍历`[1,4] [2,5] [3,6] [8,10]`：
+- `[2,5]` 重叠 `[1,4]` → 合并到 `[1,5]`
+- `[3,6]` 重叠 `[1,5]` → 合并到 `[1,6]`
+- `[8,10]` 无重叠 → 新区间
+
+结果：`[1,6] [8,10]`
+
+<Quiz
+  question="按start对区间进行排序后，什么条件决定两个连续区间重叠？"
+  options="当前.开始 > 上一个.结束|当前.开始 == 先前.开始|当前.开始 <= 先前.结束|当前.结束 < 先前.开始"
+  answer="2"
+  explanation="如果当前间隔在前一个间隔结束之前或恰好在前一个间隔结束时开始，则它们会重叠并应合并。"
+/>
+
+## 插入间隔
+
+给定排序的非重叠间隔和新间隔，将其插入并根据需要合并（LeetCode 57）。分为三个阶段：
+
+1. 添加新间隔开始之前结束的所有间隔
+2. 将所有重叠的间隔与新的间隔合并
+3.添加剩余间隔不变
+
+<ThinkAboutIt>插入间隔通常在合并步骤不明显的情况下出现。在面试中你如何识别这是一个合并问题？</ThinkAboutIt>
+
+## 会议室 I - 可以参加全部吗？
+
+按开始时间排序。如果任何间隔的开始早于前一个间隔的结束，则存在冲突。
+
+```python
+def can_attend(intervals):
+    intervals.sort()
+    for i in range(1, len(intervals)):
+        if intervals[i][0] < intervals[i - 1][1]:
+            return False
+    return True
+```
+
+## 会议室 II - 最低房间数
+
+这就是**基于事件的方法**的闪光点。将开始和结束分成两个排序列表，然后扫描：
+
+```python
+import heapq
+
+def min_rooms(intervals):
+    intervals.sort()
+    heap = []
+    for start, end in intervals:
+        if heap and heap[0] <= start:
+            heapq.heappop(heap)
+        heapq.heappush(heap, end)
+    return len(heap)
+```
+
+堆跟踪最早结束的会议。如果它在下一个房间开始之前结束，我们会重复使用该房间。堆的最大大小就是答案。
+
+<Illustration src="/images/lessons/interval-problems.svg" alt="显示需要多个房间的重叠会议间隔的时间线" caption="每个垂直切片显示同时举行的会议 - 峰值是所需的最少房间。" />
+
+<FunFact>会议室 II 本质上与查找任意点的最大重叠间隔数相同 - 这是 CPU 线程调度、带宽分配和医院床位规划中使用的概念。</FunFact>
+
+## 非重叠间隔 - 最小移除量
+
+给定间隔，找到要删除的最小数量，这样就不会重叠（LeetCode 435）。贪婪：按**结束时间**排序，始终保留最早结束的间隔 - 这为未来的间隔留下了最大的空间。
+
+```python
+def erase_overlap(intervals):
+    intervals.sort(key=lambda x: x[1])
+    count, prev_end = 0, float('-inf')
+    for start, end in intervals:
+        if start >= prev_end:
+            prev_end = end
+        else:
+            count += 1
+    return count
+```
+
+<Quiz
+  question="为什么按结束时间（而不是开始时间）排序可以解决非重叠间隔问题？"
+  options="它降低了时间复杂度|最早结束为后续间隔留下最大空间|它可以更好地处理领带|它避免了负间隔"
+  answer="1"
+  explanation="贪婪地保留最快完成的间隔可以最大化未来非重叠间隔可用的剩余时间线。"
+/>
+
+## 区间列表交集
+
+给定两个排序的区间列表，找到所有交集（LeetCode 986）。使用两个指针 - 每个列表一个。如果有效（开始≤结束），则`[a1, a2]`和`[b1, b2]`的交集为`[max(a1, b1), min(a2, b2)]`。使间隔最先结束的指针前进。
+
+## 扫线技术
+
+不要逐对比较间隔，而是将每个间隔分解为事件：
+
+```
+[1,4] → +1 at 1, -1 at 4
+[2,6] → +1 at 2, -1 at 6
+```
+
+按时间对事件进行排序。从左向右扫动，保持连续计数。峰值计数回答了“最大重叠”问题。这将会议室 II 概括为任意事件处理问题。
+
+## 日历预订
+
+**我的日历 I** (LeetCode 729)：保持预订的时间间隔并拒绝重叠。 **我的日历 II**：允许单次重叠，但拒绝三次预订。扫描线使多层重叠检测变得简单。
+
+## 模式识别 - 何时怀疑间隔
+
+在问题陈述中寻找以下线索：
+
+- “重叠”、“冲突”、“时间表”、“范围”等词语
+- 开始/结束值对
+- 关于“多少并发”或“最小资源”的问题
+- 可以表示为数轴上的线段的数据
+
+<Quiz
+  question="哪种排序策略最适合”要删除的最小间隔数”问题？"
+  options="按开始时间升序排序|按结束时间升序排序|按间隔长度降序排序|无需排序"
+  answer="1"
+  explanation="按结束时间排序可以实现一种贪婪的方法：始终保持最早完成的间隔，以便为其他间隔提供最大的空间。"
+/>
+
+<ThinkAboutIt>扫线技术将区间问题转化为事件处理问题。您能想到使用这种确切方法的现实世界系统（编码面试之外）吗？</ThinkAboutIt>
+
+---
+
+## 📚 进一步阅读
+
+- [合并间隔 - LeetCode 56](https://leetcode.com/problems/merge-intervals/) - 间隔掌握的基本起始问题
+- [扫线算法 - CP-Algorithms](https://cp-algorithms.com/geometry/intersecting_segments.html) - 扫线范式的深入探索
+- [会议室 II - LeetCode 253](https://leetcode.com/problems/meeting-rooms-ii/) - 经典的最小堆间隔调度问题

@@ -1,0 +1,296 @@
+---
+title: "Entretiens de conception d'API"
+description: "Concevez des API propres et intuitives sous la pression des entretiens : REST, GraphQL et les principes qui rendent les API géniales."
+order: 4
+difficulty: "intermediate"
+duration: 18
+icon: "🔌"
+published: true
+machineTranslated: true
+---
+# Entretiens de conception d'API
+
+Les API sont des contrats entre systèmes, et bien les concevoir est une compétence qui différencie les ingénieurs seniors des juniors. Lors d'un entretien de conception d'API, vous n'écrivez pas seulement des points de terminaison : vous démontrez que vous comprenez comment les consommateurs utiliseront votre système, comment il évoluera au fil du temps et où se trouvent les modes de défaillance. Qu'il vous soit demandé de concevoir une passerelle de paiement ou une API de plateforme de réseaux sociaux, les principes sont les mêmes. Maîtrisons-les.
+
+## Principes de conception de l'API REST
+
+REST reste le paradigme API dominant dans les entretiens. Les fondements que vous devez démontrer :
+
+### Conception orientée ressources
+
+Pensez avec des noms (ressources) et non avec des verbes (actions). Les URL doivent représenter des éléments et les méthodes HTTP doivent représenter des actions sur ces éléments.
+
+```
+✅ Good:
+GET    /users/123              — Fetch user 123
+POST   /users                  — Create a new user
+PUT    /users/123              — Replace user 123
+PATCH  /users/123              — Partially update user 123
+DELETE /users/123              — Delete user 123
+
+❌ Bad:
+GET    /getUser?id=123
+POST   /createUser
+POST   /deleteUser/123
+```
+
+<Callout>Une hiérarchie de ressources propre raconte l'histoire de l'API. `/users/123/orders/456/items` se lit naturellement : "L'utilisateur 123 commande les articles de 456." Si la structure de votre URL ne se lit pas comme une phrase, reconsidérez la conception de vos ressources.</Callout>
+
+### Méthodes HTTP et codes d'état
+
+Connaissez-les à froid : les intervieweurs testeront votre précision :
+
+| Méthode | Idempotent ? | Cas d'utilisation |
+|---|---|---|
+| OBTENIR | Oui | Lire une ressource (ne jamais muter) |
+| POSTER | Non | Créer une ressource |
+| METTRE | Oui | Remplacement complet d'une ressource |
+| PATCH | Non* | Mise à jour partielle |
+| SUPPRIMER | Oui | Supprimer une ressource |
+
+*PATCH n'est techniquement pas garanti idempotent, bien que les implémentations le soient souvent.*
+
+**Codes de statut que vous devez connaître** :
+- `200 OK` — Succès avec le corps de la réponse
+- `201 Created` — Ressource créée (inclure l'en-tête `Location`)
+- `204 No Content` — Succès sans corps de réponse (commun pour DELETE)
+- `400 Bad Request` — Le client a envoyé des données invalides
+- `401 Unauthorized` — Authentification requise
+- `403 Forbidden` — Authentifié mais non autorisé
+- `404 Not Found` — La ressource n'existe pas
+- `409 Conflict` — Conflit avec l'état actuel (doublon, incompatibilité de version)
+- `429 Too Many Requests` — Tarif limité
+- `500 Internal Server Error` — Quelque chose s'est cassé de notre côté
+
+### Pagination
+
+Ne renvoyez jamais de listes illimitées. Trois modèles courants :
+
+```json
+// Offset-based (simple but poor for large datasets)
+GET /users?offset=20&limit=10
+
+// Cursor-based (preferred for feeds and large datasets)
+GET /users?cursor=eyJ0aW1lIjoiMjAyNC0wMS0wMSJ9&limit=10
+
+// Response includes pagination metadata
+{
+  "data": [...],
+  "pagination": {
+    "next_cursor": "eyJ0aW1lIjoiMjAyNC0wMS0wMiJ9",
+    "has_more": true
+  }
+}
+```
+
+<ThinkAboutIt>Pourquoi la pagination basée sur le curseur est-elle préférée à la pagination basée sur le décalage pour les grands ensembles de données fréquemment mis à jour ? Considérez ce qui se passe lorsque de nouveaux éléments sont insérés pendant qu'un utilisateur parcourt les résultats.</ThinkAboutIt>
+
+### Gestion des versions
+
+Les API évoluent. Concevez-le dès le premier jour.
+
+```
+// URL versioning (most common, explicit)
+GET /v1/users/123
+GET /v2/users/123
+
+// Header versioning (cleaner URLs, less discoverable)
+GET /users/123
+Accept: application/vnd.myapi.v2+json
+```
+
+Lors des entretiens, la gestion des versions d'URL est la réponse sûre, à moins que l'intervieweur n'explore spécifiquement des alternatives.
+
+### Réponses aux erreurs
+
+Des réponses aux erreurs cohérentes et informatives distinguent les excellentes API des API frustrantes :
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "The request body contains invalid fields.",
+    "details": [
+      {
+        "field": "email",
+        "message": "Must be a valid email address."
+      },
+      {
+        "field": "age",
+        "message": "Must be a positive integer."
+      }
+    ],
+    "request_id": "req_abc123"
+  }
+}
+```
+
+Incluez toujours un `request_id` pour le débogage et un `code` lisible par machine à côté du `message` lisible par l'homme.
+
+## GraphQL dans les entretiens
+
+Les questions GraphQL sont de plus en plus courantes, en particulier dans les entreprises ayant des besoins front-end complexes.
+
+**Principaux avantages à articuler** :
+- Les clients demandent exactement les données dont ils ont besoin (pas de surextraction)
+- Un point de terminaison unique réduit les allers-retours
+- Le schéma fortement typé sert de documentation
+
+```graphql
+# Schema definition
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  orders(first: Int, after: String): OrderConnection!
+}
+
+type Order {
+  id: ID!
+  total: Float!
+  status: OrderStatus!
+  items: [OrderItem!]!
+}
+
+# Query — client specifies exactly what it needs
+query {
+  user(id: "123") {
+    name
+    orders(first: 5) {
+      edges {
+        node {
+          total
+          status
+        }
+      }
+    }
+  }
+}
+```
+
+**Compromis à discuter** : GraphQL ajoute de la complexité côté serveur (chaînes de résolution, requêtes N+1, la mise en cache est plus difficile). Pour les API CRUD simples, REST est souvent le meilleur choix.
+
+<FunFact>GraphQL a été développé en interne chez Facebook en 2012 pour résoudre un problème spécifique de performances mobiles : le fil d'actualité nécessitait des données provenant de nombreux services backend différents, et passer plusieurs appels REST à partir d'appareils mobiles sur des réseaux lents nuisait aux performances. Il était open source en 2015.</FunFact>
+
+## Bases de la sécurité des API
+
+Chaque entretien de conception d'API doit aborder la sécurité. Couvrez ces éléments essentiels :
+
+### Authentification et autorisation
+
+```
+Authentication (AuthN): WHO are you?
+→ API Keys, OAuth 2.0, JWT tokens
+
+Authorisation (AuthZ): WHAT can you do?
+→ Role-based (RBAC), Scope-based, Resource-based
+```
+
+```
+// JWT in Authorization header
+GET /users/123/orders
+Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
+
+// API Key (for server-to-server)
+GET /analytics/reports
+X-API-Key: sk_live_abc123...
+```
+
+### Limitation du débit
+
+Protégez votre API contre les abus et garantissez une utilisation équitable :
+
+```
+// Rate limit headers in response
+HTTP/1.1 200 OK
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 847
+X-RateLimit-Reset: 1640995200
+
+// When limit is exceeded
+HTTP/1.1 429 Too Many Requests
+Retry-After: 60
+```
+
+Discutez des stratégies de limitation de débit : par utilisateur, par IP, par point de terminaison et limites échelonnées pour différents plans d'API.
+
+## Scénarios d'entretien réels
+
+### Concevoir une API de paiement
+
+Exigences à clarifier :
+- Quels moyens de paiement ? (Carte, virement bancaire, portefeuille)
+- Avons-nous besoin d'idempotence ? (Oui – toujours pour les paiements)
+- Qu'en est-il des remboursements et des litiges ?
+
+```
+POST /v1/payments
+{
+  "amount": 4999,           // Always use smallest currency unit (cents)
+  "currency": "GBP",
+  "payment_method": "pm_card_visa_123",
+  "idempotency_key": "order_789_attempt_1",
+  "metadata": {
+    "order_id": "order_789"
+  }
+}
+
+Response: 201 Created
+{
+  "id": "pay_abc123",
+  "status": "processing",
+  "amount": 4999,
+  "currency": "GBP",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+<Callout>Pour les API de paiement, discutez toujours des clés d’idempotence. Des pannes de réseau se produisent, les clients réessayent et sans idempotence, vous facturerez les clients deux fois. La clé d'idempotence garantit que réessayer la même demande produit le même résultat.</Callout>
+
+**Décisions clés en matière de conception à discuter** :
+- Montants dans la plus petite unité monétaire (cents/pence) pour éviter les problèmes de virgule flottante
+- Clés d'idempotence pour des tentatives sécurisées
+- Rappels Webhook pour les mises à jour de statut asynchrones
+- Considérations relatives à la conformité PCI
+
+### Concevoir une API de médias sociaux
+
+```
+// Post creation
+POST /v1/posts
+{
+  "content": "Hello world!",
+  "media_ids": ["media_123"],
+  "visibility": "public"
+}
+
+// Feed retrieval with cursor pagination
+GET /v1/feed?cursor=abc&limit=20
+
+// Interactions
+POST /v1/posts/{post_id}/likes
+DELETE /v1/posts/{post_id}/likes
+POST /v1/posts/{post_id}/comments
+```
+
+Discutez du filtrage, de la recherche et de la manière dont le flux est assemblé (le modèle pull vs push est lié à la conception du système).
+
+## Erreurs courantes dans les entretiens de conception d'API
+
+1. **Exposer l'implémentation interne** — Ne laissez pas les noms de colonnes de base de données ou les identifiants internes s'infiltrer dans l'API. Utilisez des DTO.
+2. **Nom incohérent** — Choisissez `snake_case` ou `camelCase` et respectez-le partout.
+3. **Pagination manquante** — Tout point de terminaison de liste doit prendre en charge la pagination.
+4. **Aucune discussion sur la gestion des erreurs** — Montrez que vous réfléchissez aux modes de défaillance.
+5. **Ignorer la rétrocompatibilité** — L'ajout de champs obligatoires aux points de terminaison existants interrompt les clients.
+6. **Utiliser des verbes dans les URL** — `/createUser` au lieu de `POST /users`.
+
+<Quiz question="Un client envoie une requête POST pour créer une commande, mais le réseau abandonne la réponse. Le client réessaye avec la même clé d'idempotence. Que doit retourner le serveur ?" options="400 Mauvaise demande – demande en double|201 Créé — avec la commande originale (même réponse que la première fois)|409 Conflit – l'ordre existe déjà|200 OK — avec une nouvelle commande" answer="1" explanation="En cas d'idempotence, le serveur reconnaît la clé en double et renvoie la même réponse 201 Created avec les données de commande d'origine. C’est tout l’intérêt des clés d’idempotence : rendre les tentatives sûres et transparentes pour le client." />
+
+## Points clés à retenir
+
+- **Pensez aux ressources** : concevez les URL autour des noms, laissez les méthodes HTTP gérer les verbes.
+- **Connaissez vos codes d'état** : des codes d'état précis montrent que vous comprenez la sémantique HTTP.
+- **Toujours paginer** : les réponses en liste illimitée sont un signal d'alarme dans les entretiens.
+- **Conception pour l'échec** : l'idempotence, les réponses aux erreurs et la limitation du débit montrent une réflexion sur la préparation à la production.
+- **La sécurité n'est pas facultative** : l'authentification, l'autorisation et la limitation de débit devraient faire partie de chaque discussion sur la conception d'API.
+- **Expliquez les compromis** : REST contre GraphQL, cohérence contre flexibilité, simplicité contre puissance – les enquêteurs veulent entendre votre raisonnement.

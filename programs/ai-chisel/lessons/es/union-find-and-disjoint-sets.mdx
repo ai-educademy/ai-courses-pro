@@ -1,0 +1,149 @@
+---
+title: "Union-Find - Componentes conectados y detección de redes"
+description: "Conozca la estructura de datos Union-Find (conjunto disjunto) con compresión de ruta y unión por rango. Resuelva problemas de conectividad, MST y componentes gráficos de manera eficiente."
+order: 7
+difficulty: "advanced"
+duration: 17
+icon: "🔗"
+published: true
+machineTranslated: true
+---
+## El problema de la conectividad
+
+Dada una red de nodos, recibe constantemente dos tipos de consultas: *conectar el nodo A al nodo B* y *¿están conectados A y B?* Hacer esto con BFS/DFS significa recorrer el gráfico para cada consulta, demasiado lento para millones de operaciones.
+
+**Union-Find** responde a ambas cosas en un tiempo casi constante.
+
+## Enfoque ingenuo: búsqueda rápida
+
+Almacene una ID de componente para cada nodo. Para comprobar la conectividad, compare las ID en O(1). Pero fusionar dos componentes te obliga a actualizar cada miembro de un grupo: O(n) por unión.
+
+```
+IDs:  [0, 0, 0, 3, 3]
+       └─group 0─┘ └group 3┘
+union(0, 3) → update all 3s to 0 → O(n)
+```
+
+Necesitamos algo mejor.
+
+## La estructura de datos Union-Find
+
+Cada nodo apunta a un **padre**. La raíz de cada árbol es el componente representativo. Dos nodos están conectados si y sólo si comparten la misma raíz.
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+```
+
+## Buscar con compresión de ruta
+
+Subir por los punteros de los padres puede resultar lento en un árbol profundo. **Compresión de ruta** aplana el árbol apuntando cada nodo visitado directamente a la raíz.
+
+```python
+def find(self, x):
+    if self.parent[x] != x:
+        self.parent[x] = self.find(self.parent[x])
+    return self.parent[x]
+```
+
+Antes y después de encontrar el nodo 4:
+
+```
+Before:  0←1←2←3←4     After:  0←1
+                                0←2
+                                0←3
+                                0←4
+```
+
+## Unión por rango
+
+Coloque siempre el árbol más corto debajo del más alto. Esto mantiene la altura del árbol logarítmica y evita cadenas degeneradas.
+
+```python
+def union(self, x, y):
+    rx, ry = self.find(x), self.find(y)
+    if rx == ry:
+        return False
+    if self.rank[rx] < self.rank[ry]:
+        rx, ry = ry, rx
+    self.parent[ry] = rx
+    if self.rank[rx] == self.rank[ry]:
+        self.rank[rx] += 1
+    return True
+```
+
+<Quiz
+  question="Tanto con la compresión de trayectoria como con la unión por rango, ¿cuál es el tiempo amortizado por operación?"
+  options="O(log n)|En)|O(α(n)) - casi O(1)|O(√norte)"
+  answer="2"
+  explanation="La función inversa de Ackermann α(n) crece tan lentamente que nunca excede 4 para ninguna entrada práctica, lo que hace que las operaciones sean efectivamente O(1)."
+/>
+
+<Illustration src="/images/lessons/union-find-and-disjoint-sets.svg" alt="Unión: busque árboles antes y después de la compresión del camino" caption="La compresión de rutas aplana las cadenas profundas, manteniendo rápidas las búsquedas futuras." />
+
+## Algoritmo MST de Kruskal
+
+Union-Find potencia **Algoritmo de Kruskal** para árboles de expansión mínima:
+
+1. Ordena todos los bordes por peso.
+2. Para cada arista (u, v), si `find(u) ≠ find(v)`, súmalo y `union(u, v)`
+3. Detente cuando tengas n − 1 aristas
+
+Union-Find evita ciclos al rechazar aristas cuyos puntos finales ya comparten una raíz. Tiempo total: **O(E log E)** dominado por la clasificación.
+
+<ThinkAboutIt>Kruskal's utiliza Union-Find para detectar ciclos. ¿Cómo detectarías un ciclo usando DFS y por qué Union-Find es más natural aquí?</ThinkAboutIt>
+
+## Problemas clásicos
+
+### Número de componentes conectados
+
+Inicialice Union-Find con n nodos. Procese cada borde con `union`. Cuente las raíces distintas al final.
+
+### Fusión de cuentas (LeetCode 721)
+
+Cada cuenta tiene correos electrónicos. Si dos cuentas comparten un correo electrónico, pertenecen a la misma persona. Unión de cuentas mediante correos electrónicos compartidos, luego agrupación y clasificación.
+
+### Conexión redundante (LeetCode 684)
+
+Dado un árbol más un borde adicional, encuentre el borde redundante. Procese los bordes en orden: el primer borde donde `union` devuelve `False` (ya conectado) es la respuesta.
+
+<FunFact>La prueba de que Union-Find con ambas optimizaciones se ejecuta en O(α(n)) fue publicada por Tarjan en 1975 y se considera uno de los análisis amortizados más elegantes en informática.</FunFact>
+
+## Cuándo elegir Union-Find frente a BFS/DFS
+
+| Escenario | La mejor elección |
+|----------|-------------|
+| Consultas de conectividad repetidas | Unión-Buscar |
+| Recorrido único / camino más corto | BFS/DFS |
+| Adiciones incrementales de bordes | Unión-Buscar |
+| Eliminaciones de bordes (gráfico dinámico) | BFS/DFS (o UF fuera de línea) |
+| MST de Kruskal | Unión-Buscar |
+| Ordenación/ciclo topológico en gráfico dirigido | DFS |
+
+Union-Find brilla cuando procesa bordes *incrementalmente* y necesita comprobaciones de conectividad rápidas. Si solo recorre una vez o necesita información de ruta, quédese con BFS/DFS.
+
+<Quiz
+  question="Se le dan bordes uno a la vez y debe detectar el primer borde que crea un ciclo. ¿Qué enfoque es mejor?"
+  options="BFS desde cero después de cada borde|DFS desde cero después de cada borde|Union-Find: el sindicato devuelve Falso en el borde del ciclo|clasificación topológica"
+  answer="2"
+  explanation="Union-Find detecta ciclos de forma incremental cerca de O(1) por borde, mientras que BFS/DFS volvería a recorrer todo el gráfico cada vez."
+/>
+
+<Quiz
+  question="En Union-Find, ¿qué impide la unión por rango?"
+  options="Bordes duplicados|Componentes desconectados|Cadenas lineales degeneradas (árboles altos)|Pesos de borde negativos"
+  answer="2"
+  explanation="La unión por rango mantiene los árboles equilibrados al colocar siempre el árbol más corto debajo del más alto, evitando operaciones de búsqueda O(n)."
+/>
+
+<ThinkAboutIt>Algunos problemas requieren *deshacer* uniones (conectividad dinámica con eliminaciones). ¿Por qué el estándar Union-Find es insuficiente y qué modificaciones existen?</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Estructura de datos de conjuntos disjuntos - Wikipedia](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) - Teoría, pruebas e historia de Union-Find
+- [Union-Find - Algoritmos de Princeton](https://algs4.cs.princeton.edu/15uf/) - Tratamiento autorizado de Sedgewick con ejemplos de Java
+- [Conexión redundante - LeetCode 684](https://leetcode.com/problems/redundant-connection/) - Una aplicación limpia de detección de ciclos con Union-Find

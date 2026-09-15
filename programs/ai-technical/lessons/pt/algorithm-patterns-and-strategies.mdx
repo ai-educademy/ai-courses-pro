@@ -1,0 +1,294 @@
+---
+title: "Padrões e estratégias de algoritmos"
+description: "Aprenda os 10 padrões de algoritmo que resolvem 80% dos problemas de codificação de entrevistas — desde janelas deslizantes até programação dinâmica."
+order: 2
+difficulty: "intermediate"
+duration: 25
+icon: "🧩"
+published: true
+machineTranslated: true
+---
+# Padrões e estratégias de algoritmos
+
+As entrevistas de codificação não são para memorizar 500 soluções LeetCode. O objetivo é reconhecer quais dos dez padrões se aplicam ao problema que você está enfrentando. Depois de identificar o padrão, a estrutura da solução se escreve. Esta lição detalha cada padrão – quando usá-lo, como reconhecê-lo e um exemplo concreto para ancorar sua compreensão. Pense nesses padrões como lentes: quanto mais você pratica olhar através deles, mais rápido cada novo problema entra em foco.
+
+## Padrão 1: Dois ponteiros
+
+**Reconheça quando**: A entrada está classificada (ou pode ser classificada) e você precisa encontrar pares ou submatrizes que atendam a alguma condição.
+
+Dois ponteiros funcionam colocando um ponteiro em cada extremidade da matriz (ou no início para a variante "rápida/lenta") e movendo-os um em direção ao outro com base em uma condição.
+
+```python
+# Three Sum: find all triplets that sum to zero
+def three_sum(nums):
+    nums.sort()
+    result = []
+    for i in range(len(nums) - 2):
+        if i > 0 and nums[i] == nums[i - 1]:
+            continue  # Skip duplicates
+        left, right = i + 1, len(nums) - 1
+        while left < right:
+            total = nums[i] + nums[left] + nums[right]
+            if total < 0:
+                left += 1
+            elif total > 0:
+                right -= 1
+            else:
+                result.append([nums[i], nums[left], nums[right]])
+                while left < right and nums[left] == nums[left + 1]:
+                    left += 1
+                left += 1
+                right -= 1
+    return result
+```
+
+**Tempo**: O(n²) — uma grande melhoria em relação à força bruta O(n³).
+
+## Padrão 2: Janela Deslizante
+
+**Reconheça quando**: Você precisa encontrar um subarray ou substring contíguo que satisfaça alguma restrição (soma máxima, contenha todos os caracteres, etc.).
+
+A janela se expande movendo o ponteiro direito e se contrai movendo o ponteiro esquerdo. A chave é saber quando encolher.
+
+```python
+# Longest substring without repeating characters
+def length_of_longest_substring(s: str) -> int:
+    char_index = {}
+    max_length = 0
+    left = 0
+    for right, char in enumerate(s):
+        if char in char_index and char_index[char] >= left:
+            left = char_index[char] + 1
+        char_index[char] = right
+        max_length = max(max_length, right - left + 1)
+    return max_length
+```
+
+<Callout>O padrão de janela deslizante possui um modelo fixo: inicialize dois ponteiros, expanda para a direita, diminua para a esquerda quando a restrição for violada e rastreie sua resposta. Depois de internalizar esse modelo, todo problema de janela deslizante parece administrável.</Callout>
+
+## Padrão 3: BFS (pesquisa em amplitude)
+
+**Reconheça quando**: você precisa do caminho mais curto em um gráfico não ponderado, travessia de ordem de nível ou para explorar vizinhos camada por camada.
+
+O BFS usa uma fila e processa nós nível por nível. Garante o caminho mais curto em gráficos não ponderados.
+
+```python
+from collections import deque
+
+# Number of islands — BFS variant
+def num_islands(grid):
+    if not grid:
+        return 0
+    rows, cols = len(grid), len(grid[0])
+    count = 0
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                count += 1
+                queue = deque([(r, c)])
+                grid[r][c] = '0'
+                while queue:
+                    row, col = queue.popleft()
+                    for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                        nr, nc = row + dr, col + dc
+                        if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == '1':
+                            grid[nr][nc] = '0'
+                            queue.append((nr, nc))
+    return count
+```
+
+## Padrão 4: DFS (pesquisa em profundidade)
+
+**Reconheça quando**: você precisa explorar todos os caminhos, verificar a conectividade, detectar ciclos ou o problema tem uma estrutura recursiva/em árvore.
+
+O DFS vai fundo antes de abrir. É naturalmente recursivo e mapeia lindamente para travessias e retrocessos em árvores.
+
+```python
+# Path sum in a binary tree
+def has_path_sum(root, target_sum):
+    if not root:
+        return False
+    if not root.left and not root.right:
+        return target_sum == root.val
+    return (has_path_sum(root.left, target_sum - root.val) or
+            has_path_sum(root.right, target_sum - root.val))
+```
+
+<ThinkAboutIt>Quando você escolheria BFS em vez de DFS e vice-versa? Considere: o BFS encontra os caminhos mais curtos, mas usa memória O (largura). O DFS usa memória O (profundidade), mas não garante caminhos mais curtos. Como a forma do gráfico influencia sua escolha?</ThinkAboutIt>
+
+## Padrão 5: Pesquisa Binária
+
+**Reconheça quando**: O espaço de pesquisa é classificado ou monotônico (se a condição for verdadeira no índice i, é verdadeira para todos os índices > i ou < i).
+
+A pesquisa binária não serve apenas para arrays ordenados — ela funciona em qualquer condição monotônica. Esse insight revela problemas como “capacidade mínima para enviar pacotes” ou “encontrar elemento de pico”.
+
+```python
+# Binary search on answer: minimum days to make m bouquets
+def min_days(bloom_day, m, k):
+    if m * k > len(bloom_day):
+        return -1
+
+    def can_make(days):
+        bouquets = flowers = 0
+        for bloom in bloom_day:
+            if bloom <= days:
+                flowers += 1
+                if flowers == k:
+                    bouquets += 1
+                    flowers = 0
+            else:
+                flowers = 0
+        return bouquets >= m
+
+    lo, hi = min(bloom_day), max(bloom_day)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if can_make(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+```
+
+<FunFact>Apesar da pesquisa binária ser um dos algoritmos conceitualmente mais simples, um estudo realizado por Jon Bentley descobriu que apenas cerca de 10% dos programadores profissionais conseguiram implementá-la corretamente na primeira tentativa. O bug mais comum? Erros off-by-one nas condições de contorno.</FunFact>
+
+## Padrão 6: Retrocesso
+
+**Reconheça quando**: você precisa gerar todas as combinações, permutações ou subconjuntos que satisfaçam as restrições. O problema geralmente diz "encontrar todos", "gerar todos" ou "listar todos os possíveis".
+
+Retrocesso = DFS com poda. Você explora um caminho e, se ele violar uma restrição, volta atrás e tenta a próxima opção.
+
+```python
+# Generate all valid combinations of n pairs of parentheses
+def generate_parenthesis(n):
+    result = []
+    def backtrack(current, open_count, close_count):
+        if len(current) == 2 * n:
+            result.append(current)
+            return
+        if open_count < n:
+            backtrack(current + '(', open_count + 1, close_count)
+        if close_count < open_count:
+            backtrack(current + ')', open_count, close_count + 1)
+    backtrack('', 0, 0)
+    return result
+```
+
+## Padrão 7: Programação Dinâmica
+
+**Reconheça quando**: O problema tem subproblemas sobrepostos e subestrutura ideal. Os sinais clássicos incluem "custo mínimo", "número de maneiras", "sequência mais longa/mais curta" ou "você consegue atingir a meta?"
+
+A receita DP: definir o estado, escrever a recorrência, decidir entre top-down (memorização) e bottom-up (tabulação).
+
+```python
+# Longest Increasing Subsequence — O(n²) DP
+def length_of_lis(nums):
+    if not nums:
+        return 0
+    dp = [1] * len(nums)  # dp[i] = length of LIS ending at index i
+    for i in range(1, len(nums)):
+        for j in range(i):
+            if nums[j] < nums[i]:
+                dp[i] = max(dp[i], dp[j] + 1)
+    return max(dp)
+```
+
+<Callout>Quando você estiver preso em um problema de DP, comece primeiro com a recursão de força bruta. Em seguida, adicione memorização. A conversão para tabulação ascendente é uma etapa de otimização, não a primeira. Essa abordagem evita se perder nas dimensões da tabela.</Callout>
+
+## Padrão 8: Ganancioso
+
+**Reconheça quando**: Fazer a escolha localmente ideal em cada etapa leva à solução globalmente ideal. Problemas gananciosos geralmente envolvem intervalos, agendamento ou escolhas que não precisam ser revisadas.
+
+```python
+# Minimum number of meeting rooms (interval scheduling)
+def min_meeting_rooms(intervals):
+    starts = sorted([i[0] for i in intervals])
+    ends = sorted([i[1] for i in intervals])
+    rooms = max_rooms = 0
+    s = e = 0
+    while s < len(starts):
+        if starts[s] < ends[e]:
+            rooms += 1
+            max_rooms = max(max_rooms, rooms)
+            s += 1
+        else:
+            rooms -= 1
+            e += 1
+    return max_rooms
+```
+
+## Padrão 9: classificação topológica
+
+**Reconheça quando**: Existem dependências entre tarefas (pré-requisitos do curso, ordem de construção, agendamento de tarefas). A entrada é um gráfico acíclico direcionado (DAG).
+
+```python
+from collections import deque, defaultdict
+
+def course_order(num_courses, prerequisites):
+    graph = defaultdict(list)
+    in_degree = [0] * num_courses
+    for course, prereq in prerequisites:
+        graph[prereq].append(course)
+        in_degree[course] += 1
+
+    queue = deque([i for i in range(num_courses) if in_degree[i] == 0])
+    order = []
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbour in graph[node]:
+            in_degree[neighbour] -= 1
+            if in_degree[neighbour] == 0:
+                queue.append(neighbour)
+    return order if len(order) == num_courses else []
+```
+
+## Padrão 10: Union-Find (conjunto disjunto)
+
+**Reconheça quando**: você precisa agrupar elementos, detectar componentes conectados ou determinar se dois elementos pertencem ao mesmo conjunto — especialmente quando as conexões são adicionadas dinamicamente.
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])  # Path compression
+        return self.parent[x]
+
+    def union(self, x, y):
+        px, py = self.find(x), self.find(y)
+        if px == py:
+            return False
+        if self.rank[px] < self.rank[py]:
+            px, py = py, px
+        self.parent[py] = px
+        if self.rank[px] == self.rank[py]:
+            self.rank[px] += 1
+        return True
+```
+
+<Quiz question="Você se depara com um problema: 'Encontre a substring mínima da janela de s que contém todos os caracteres em t.' Qual padrão é o mais adequado?" options="Duas dicas|Janela deslizante|Programação Dinâmica|Pesquisa binária" answer="1" explanation="Este é um problema clássico de janela deslizante. Você expande a janela movendo o ponteiro para a direita para incluir caracteres e diminui a partir da esquerda quando todos os caracteres em t são incluídos, rastreando o tamanho mínimo da janela." />
+
+## Como reconhecer o padrão certo
+
+Construa uma árvore de decisão em sua cabeça:
+
+1. **A entrada está classificada ou pode ser classificada?** → Dois ponteiros ou pesquisa binária
+2. **Você precisa de uma submatriz/substring contígua?** → Janela deslizante
+3. **É uma travessia de gráfico/árvore?** → BFS (caminho mais curto) ou DFS (todos os caminhos)
+4. **"Encontrar todas as combinações/permutações"?** → Retrocesso
+5. **"Custo mínimo / número de vias"?** → Programação Dinâmica
+6. **Problema de "Agendamento/intervalo"?** → Ganancioso ou Ordenação
+7. **Dependências ou ordenação?** → Classificação Topológica
+8. **Agrupamento/conectividade?** → Union-Find
+
+## Principais conclusões
+
+- **Aprenda padrões, não problemas**: 10 padrões cobrem a grande maioria das perguntas da entrevista.
+- **Comece com força bruta**: identifique o padrão da abordagem de força bruta e depois otimize.
+- **Pratique o reconhecimento de padrões**: para cada problema que você resolver, identifique qual padrão ele usa.
+- **Combinar padrões**: muitos problemas médios/difíceis usam dois padrões juntos (por exemplo, pesquisa binária + janela deslizante, BFS + classificação topológica).
+- **Verbalize seu raciocínio**: em entrevistas, dizer "isso parece um problema de janela deslizante porque..." mostra um forte pensamento analítico.

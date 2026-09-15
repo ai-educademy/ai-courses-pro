@@ -1,0 +1,127 @@
+---
+title: "LLMs de ajuste fino: personalizando IA para seu caso de uso"
+description: "Aprenda como pegar um modelo de linguagem grande pré-treinado e especializá-lo para um domínio ou tarefa específica por meio de ajuste fino."
+order: 14
+difficulty: "advanced"
+duration: 40
+icon: "🎯"
+published: true
+machineTranslated: true
+---
+# LLMs de ajuste fino: Personalizando IA para seu caso de uso 🎯
+
+Um modelo de linguagem grande pré-treinado é generalista. Ele leu uma fração substancial da Internet e absorveu uma amplitude impressionante de conhecimento. Mas “generalista” é outra palavra para “não especializado”. Se você precisa de um modelo que fale a voz da sua empresa, entenda o jargão do seu setor, siga seu formato de produção específico ou se recuse a discutir assuntos fora do tópico, você precisa de mais do que apenas sugestões.
+
+É aqui que entra o **ajuste fino**.
+
+---
+
+## 🗺️ Três maneiras de especializar um modelo
+
+Antes de mergulhar no ajuste fino da mecânica, é útil entender onde ela está em relação às alternativas:
+
+| Abordagem | Como funciona | Melhor para |
+|---|---|---|
+| **Engenharia imediata** | Instruções de artesanato que orientam o modelo básico | Iteração rápida, sem necessidade de dados |
+| **RAG (geração aumentada de recuperação)** | Recuperar documentos relevantes no momento da inferência e incluí-los no prompt | Manter o conhecimento atualizado, grandes bases de conhecimento |
+| **Ajuste fino** | Ajuste os pesos do modelo usando exemplos específicos de tarefas | Estilo/formato consistente, raciocínio especializado, reduzindo o comprimento do prompt |
+
+O ajuste fino e o RAG não são mutuamente exclusivos – muitos sistemas de produção utilizam ambos.
+
+---
+
+## 🔬 O que o ajuste fino realmente faz
+
+Um LLM pré-treinado tem bilhões de pesos (parâmetros) – números que codificam tudo o que aprendeu no pré-treinamento. O ajuste fino continua treinando o modelo em um conjunto de dados menor e selecionado que reflete sua tarefa específica.
+
+O modelo vê seus exemplos, calcula o quão errados estão seus pesos atuais sobre eles e faz os ajustes. A mecânica básica do treinamento (passagem para frente, cálculo de perdas, retropropagação) é idêntica à do pré-treinamento – você apenas faz isso de novo, com base em seus dados, em muito menos etapas.
+
+O resultado: um modelo cujos pesos foram transferidos do “generalista” para o “seu caso de uso específico”.
+
+<FunFact>O GPT-3 tinha 175 bilhões de parâmetros. O ajuste fino de todos eles em uma GPU de consumidor é completamente impraticável. É precisamente por isso que foram desenvolvidos métodos de ajuste fino com parâmetros eficientes, como o LoRA – eles tornam o ajuste fino acessível sem a necessidade de um data center.
+</FunFact>
+
+---
+
+## ⚡ Ajuste fino completo versus ajuste fino com eficiência de parâmetros
+
+**Ajuste completo** atualiza todos os pesos do modelo. Esta é a abordagem mais poderosa – mas também a mais cara. Para um modelo de 70 bilhões de parâmetros, você precisaria de várias GPUs de última geração e horas ou dias de treinamento.
+
+**Ajuste fino com eficiência de parâmetros (PEFT)** congela a maioria dos pesos do modelo e treina apenas um pequeno número de parâmetros adicionais. As duas técnicas dominantes:
+
+### LoRA (adaptação de baixo escalão)
+
+Em vez de modificar diretamente as matrizes de peso originais, LoRA adiciona pequenas matrizes treináveis ​​*juntamente* com os pesos congelados. Estas pequenas matrizes capturam os ajustes específicos da tarefa.
+
+A matemática: uma matriz de atualização de peso que normalmente seria (d × d) é aproximada como o produto de duas matrizes muito menores (d × r) × (r × d), onde r é uma pequena "classificação" (normalmente 4–64). Isso reduz drasticamente o número de parâmetros treináveis.
+
+O resultado: você treina talvez 0,1–1% do total de parâmetros, com uma pequena fração do custo de computação e memória, ao mesmo tempo em que obtém um desempenho próximo do ajuste fino completo.
+
+### QLoRA (LoRA Quantizado)
+
+QLoRA combina LoRA com **quantização** — representando os pesos do modelo base congelado com precisão de 4 bits em vez de 16 ou 32 bits. Isso reduz o uso de memória em aproximadamente 75%, permitindo o ajuste fino de modelos muito grandes em uma única GPU de consumo.
+
+O QLoRA possibilitou que pesquisadores e desenvolvedores fora de grandes organizações ajustassem modelos 70B+. Democratizou consideravelmente o acesso.
+
+<ThinkAboutIt>LoRA adiciona matrizes treináveis ​​leves junto com pesos pré-treinados congelados. Ao mesclá-los para inferência, você obtém a mesma arquitetura com valores diferentes. Você consegue pensar por que deseja manter os pesos LoRA *separados* do modelo base em vez de mesclá-los permanentemente?
+</ThinkAboutIt>
+
+---
+
+## 📊 O desafio dos dados de treinamento
+
+O ajuste fino é tão bom quanto os seus dados de treinamento. Formatos comuns:
+
+- **Pares que seguem instruções**: `{"instruction": "Summarise in one sentence:", "input": "...", "output": "..."}`
+- **Pares de conversação**: exemplos de diálogos multivoltas
+- **Texto do domínio**: para adaptação do domínio, o texto simples do seu campo pode ser suficiente
+
+A qualidade é muito mais importante do que a quantidade. Um conjunto de dados selecionado com 1.000 exemplos de alta qualidade normalmente supera um conjunto de dados barulhento de 100.000. Problemas comuns de dados:
+- Formato ou tom inconsistente
+- Erros de etiqueta
+- Dados muito restritos (o modelo torna-se muito especializado) ou muito amplos (benefício mínimo)
+
+---
+
+## 🔄 RLHF: ajuste fino com feedback humano
+
+**Aprendizagem por Reforço com Feedback Humano (RLHF)** é um segundo estágio de ajuste fino usado para alinhar o comportamento do modelo com as preferências humanas. Foi assim que o ChatGPT foi treinado para ser útil e recusar solicitações prejudiciais.
+
+O processo: os humanos classificam os resultados do modelo quanto à qualidade, um “modelo de recompensa” aprende a prever as preferências humanas e, em seguida, o LLM é ajustado usando aprendizagem por reforço para maximizar a recompensa. É caro e complexo, mas crucial para a produção de modelos seguros e agradáveis ​​de usar.
+
+---
+
+## 🛠️ Passos práticos
+
+1. **Escolha um modelo básico** — Llama 3, Mistral, Qwen, Gemma. Considere licença, tamanho e capacidade básica.
+2. **Prepare seu conjunto de dados** — limpo, consistente, formatado como pares instrução-resposta. Procure ter entre 500 e 10.000 exemplos de alta qualidade.
+3. **Escolha um método** — LoRA/QLoRA para a maioria dos casos de uso; ajuste fino completo somente se você tiver a computação e a tarefa exigir isso.
+4. **Treinar** — use Hugging Face `transformers` + `peft` ou estruturas de nível superior como Axolotl ou Unsloth.
+5. **Avaliar** — teste em um conjunto resistido. Compare com o modelo básico e uma linha de base forte e de engenharia imediata.
+6. **Iterar** — o ajuste fino raramente funciona perfeitamente na primeira vez. Melhore seus dados, ajuste hiperparâmetros, repita.
+
+---
+
+## 🚫 Quando NÃO fazer o ajuste fino
+
+O ajuste fino nem sempre é a resposta certa:
+
+- **Seu problema pode ser resolvido com avisos** — economize esforço; iterar nos prompts primeiro
+- **Seu conhecimento precisa permanecer atualizado** — afinando o conhecimento na hora do treinamento; RAG é melhor para informações dinâmicas
+- **Você tem poucos dados** — menos de algumas centenas de exemplos geralmente prejudicam mais do que ajudam
+- **Você precisa de iteração rápida** — uma execução de ajuste fino leva horas; alterações imediatas levam segundos
+
+<FunFact>O modelo Alpaca (2023) foi ajustado a partir do LLaMA usando apenas 52.000 exemplos de seguimento de instruções gerados pelo GPT-3.5. O custo total de geração de dados foi inferior a US$ 500. Demonstrou que o comportamento de seguir instruções poderia ser aprendido a partir de um conjunto de dados surpreendentemente pequeno.
+</FunFact>
+
+---
+
+<Quiz question="Qual é a principal diferença entre ajuste fino e engenharia imediata?" options={["A engenharia imediata requer mais computação", "O ajuste fino modifica os pesos do modelo usando dados de treinamento; a engenharia imediata orienta o modelo básico inalterado por meio de instruções", "O ajuste fino é apenas para modelos de imagem", "São a mesma coisa com nomes diferentes"]} correct={1} explanation="A engenharia imediata trabalha com o modelo tal como está, elaborando entradas que provocam o comportamento desejado. O ajuste fino, na verdade, altera os pesos internos do modelo, continuando o treinamento em dados específicos da tarefa – o próprio modelo é permanentemente alterado." />
+
+<Quiz question="Que problema o LoRA resolve no ajuste fino do LLM?" options={["Faz com que os modelos gerem texto mais rapidamente no momento da inferência", "Reduz drasticamente o número de parâmetros treináveis, tornando viável o ajuste fino em hardware limitado", "Ele gera automaticamente dados de treinamento", "Evita overfitting adicionando camadas de eliminação"]} correct={1} explanation="LoRA (Low-Rank Adaptation) congela os pesos do modelo base e adiciona pequenas matrizes treináveis ​​​​decompostas por classificação ao lado deles. Apenas essas pequenas matrizes são treinadas, reduzindo os parâmetros treináveis ​​para aproximadamente 0,1–1% do total – tornando o ajuste fino prático em uma única GPU." />
+
+<Quiz question="O que o QLoRA adiciona ao LoRA?" options={["Etapas extras de treinamento para melhor precisão", "Quantização do modelo base congelado com precisão de 4 bits, reduzindo drasticamente o uso de memória", "Um sistema de pontuação de qualidade para dados de treinamento", "Ajuste automatizado de hiperparâmetros"]} correct={1} explanation="QLoRA combina LoRA com quantização de 4 bits dos pesos do modelo base congelado. Isso reduz o uso de memória em aproximadamente 75% em comparação com o carregamento total de 16 bits, permitindo o ajuste fino de modelos muito grandes (70B+) em uma única GPU de consumo." />
+
+<Quiz question="Quando o ajuste fino NÃO é a melhor abordagem?" options={["Quando você deseja uma formatação de saída consistente", "Quando seu conhecimento precisa se manter atualizado e atualizado com frequência – o RAG lida melhor com isso", "Quando você tem um vocabulário específico de domínio", "Quando você deseja que o modelo recuse solicitações fora do tópico"]} correct={1} explanation="O ajuste fino incorpora o conhecimento aos pesos do modelo no momento do treinamento. Se o seu caso de uso requer informações atualizadas (notícias, documentação, catálogos de produtos), o RAG é mais apropriado — ele recupera informações atuais no momento da inferência sem exigir uma nova execução de ajuste fino." />
+
+<Quiz question="Para que é usado o RLHF no contexto do ajuste fino do LLM?" options={["Gerando dados de treinamento automaticamente", "Alinhando o comportamento do modelo com as preferências humanas, treinando um modelo de recompensa em classificações humanas", "Reduzindo o tamanho do modelo por meio da compactação", "Traduzindo modelos para vários idiomas"]} correct={1} explanation="O Aprendizado por Reforço com Feedback Humano (RLHF) usa classificações de preferência humana para treinar um modelo de recompensa, que então orienta o ajuste fino por meio do aprendizado por reforço. É assim que modelos como o ChatGPT aprendem a ser úteis, inofensivos e honestos, em vez de apenas fluentes." />

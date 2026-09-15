@@ -1,0 +1,249 @@
+---
+title: "Prompt Engineering: de kunst van het praten met AI"
+description: "Beheers het ambacht van het schrijven van aanwijzingen die briljante resultaten opleveren"
+order: 11
+difficulty: "intermediate"
+duration: 15
+icon: "🎯"
+published: true
+machineTranslated: true
+---
+# Prompt Engineering: de kunst van het praten met AI 🎯
+
+Het verschil tussen een middelmatige AI-reactie en een briljante reactie heeft vaak niets te maken met de AI zelf – het heeft alles te maken met hoe je het vroeg.
+
+Prompt engineering is de praktijk van het vervaardigen van input voor AI-taalmodellen die op betrouwbare wijze bruikbare output van hoge kwaliteit produceren. Het is deels communicatievaardigheid, deels systeemdenken en deels gestructureerd experimenteren.
+
+Het goede nieuws: je hoeft geen ingenieur te zijn om er goed in te worden.
+
+---
+
+## 🧠 Waarom prompts belangrijker zijn dan je denkt
+
+LLM's zijn opmerkelijk capabel, maar ook opmerkelijk letterlijk. Ze weten niet wat je *bedoelde* te vragen - ze weten alleen wat je *eigenlijk* vroeg.
+
+Een prompt is in wezen een contextbepalende oefening. Je stelt niet zomaar een vraag; jij geeft vorm:
+- Welke rol het model moet spelen
+- Welk uitvoerformaat u verwacht
+- Hoe gedetailleerd en technisch het moet zijn
+- Welke beperkingen moeten worden gerespecteerd
+- Wat het doel van de reactie is
+
+Beheers dit, en hetzelfde onderliggende model zal meerdere generaties krachtiger aanvoelen.
+
+---
+
+## 🎯 Zero-Shot-prompts: vraag het maar
+
+De eenvoudigste vorm van prompting is zero-shot: je beschrijft je taak en vraagt ​​het model om deze uit te voeren, zonder voorbeelden.
+
+**Vroeger:**
+```
+Summarise this article.
+
+[article text]
+```
+
+**Na:**
+```
+Summarise the following article in 3 bullet points. Each bullet should be 
+one sentence. Focus on the main argument, the key evidence, and the 
+conclusion. Avoid jargon.
+
+[article text]
+```
+
+De "na"-versie specificeert het formaat (3 kogels), de lengte (elk één zin), de prioriteiten (argument, bewijs, conclusie) en stijl (geen jargon). Het model heeft een veel duidelijker doel.
+
+**Veel voorkomende zero-shot-fouten:**
+- Een vage vraag stellen en een specifiek antwoord verwachten
+- Vergeten het uitvoerformaat op te geven
+- Je doelgroep niet vermelden (technisch vs. algemeen)
+- Het weglaten van lengtebeperkingen
+
+<FunFact>Onderzoek van OpenAI en anderen heeft aangetoond dat het simpelweg toevoegen van "Laten we stap voor stap nadenken" aan een redeneringsprompt de nauwkeurigheid van wiskundige en logische problemen met 40-50% kan vergroten. Dit is in zijn eenvoudigste vorm een ​​aanzet tot een gedachtegang – en het werkt omdat het het model aanmoedigt om zijn werk te laten zien in plaats van meteen tot een antwoord te komen.
+</FunFact>
+
+---
+
+## 📚 Weinig schotprompts: leren door het goede voorbeeld te geven
+
+Soms is het vertellen van het model niet zo effectief als het laten zien ervan. **Few-shot prompting** biedt twee tot vijf voorbeelden van het gewenste invoer-uitvoerpatroon voordat u uw daadwerkelijke taak presenteert.
+
+**Voorbeeld — Sentimentclassificatie:**
+```
+Classify the sentiment of each customer review as Positive, Negative, or Neutral.
+
+Review: "The delivery was fast but the product was broken."
+Sentiment: Negative
+
+Review: "Absolutely love this! Will buy again."
+Sentiment: Positive
+
+Review: "It arrived on time."
+Sentiment: Neutral
+
+Review: "The quality exceeded my expectations but the packaging was wasteful."
+Sentiment: [complete this]
+```
+
+Het model heeft nu gezien welk formaat u wilt, hoe met gemengde signalen om moet gaan en welke granulariteit van de analyse wordt verwacht. Zonder deze voorbeelden krijgt u mogelijk een alinea in plaats van een enkel woord.
+
+**Wanneer gebruik je een paar shots:**
+- Ongebruikelijke uitvoerformaten die het model op natuurlijke wijze niet produceert
+- Domeinspecifieke classificatietaken
+- Stijlmatching (schrijven met de stem van een specifieke auteur)
+- Complexe gestructureerde outputs (JSON-schema's, tabellen)
+
+---
+
+## 🔗 Denkketen: het model hardop laten denken
+
+**Chain-of-thought (CoT)-prompts** vraagt ​​het model om stap voor stap een probleem te beredeneren voordat het een definitief antwoord geeft. Dit verbetert de prestaties bij redeneren, wiskunde en taken met meerdere stappen aanzienlijk.
+
+**Zonder CoT:**
+```
+A shop sells apples for £0.50 each. If I buy 7 apples and pay with a £5 note, 
+how much change do I get?
+
+Answer: £1.50
+```
+(Soms correct, soms niet - en je kunt de werking niet zien)
+
+**Met CoT:**
+```
+A shop sells apples for £0.50 each. If I buy 7 apples and pay with a £5 note, 
+how much change do I get? Work through this step by step.
+
+Step 1: Cost of 7 apples = 7 × £0.50 = £3.50
+Step 2: Change = £5.00 - £3.50 = £1.50
+Answer: £1.50
+```
+
+Door de zichtbare redenering kun je fouten opmerken, en door het schrijven van de stappen is de kans kleiner dat het model deze maakt.
+
+Voor **zeer complexe problemen** kun je dit nog verder doorvoeren met "zero-shot CoT" — voeg gewoon toe: *"Denk stap voor stap na en toon je redenering duidelijk voordat je je definitieve antwoord geeft."*
+
+---
+
+## 🎭 Rolprompts: persoonlijkheid en expertise
+
+Een van de krachtigste technieken is om het model een specifieke rol of persona te geven. Dit activeert relevante kennis, zet de juiste toon en verbetert vaak de nauwkeurigheid in gespecialiseerde domeinen.
+
+**Zonder rol:**
+```
+Explain photosynthesis.
+```
+
+**Met rol:**
+```
+You are a science teacher explaining photosynthesis to a 12-year-old who 
+loves video games. Use gaming analogies where helpful. Be enthusiastic 
+and encouraging.
+```
+
+De tweede vraag zal een fundamenteel andere en (voor dat publiek) veel nuttiger verklaring opleveren.
+
+**Rollenaanwijzingen werken vooral goed voor:**
+- Technische uitleg op het juiste niveau
+- Juridische, medische of financiële vragen (voeg altijd de juiste disclaimers toe)
+- Creatief schrijven in een specifieke stijl
+- Codebeoordeling ("werk als senior Python-ontwikkelaar die deze code beoordeelt")
+- Interviewpraktijk ("je bent een stoere interviewer bij een FAANG-bedrijf")
+
+**Een compleet systeempromptpatroon:**
+```
+You are [role] with expertise in [domain].
+Your audience is [description of user].
+Your goal is to [specific objective].
+Always [constraint 1].
+Never [constraint 2].
+Format your response as [format specification].
+```
+
+---
+
+## ⛓️ Prompt Chaining: complexe taken opsplitsen
+
+Voor complexe taken die uit meerdere fasen bestaan, is één enkele prompt vaak niet genoeg. **Prompt chaining** verdeelt de taak in stappen, waarbij de uitvoer van de ene prompt wordt gebruikt als invoer voor de volgende.
+
+**Voorbeeld: een blogpost schrijven:**
+
+In plaats van één monsterprompt, keten:
+1. **Prompt 1**: "Genereer vijf mogelijke invalshoeken voor een blogpost over [onderwerp]. Geef voor elk een beschrijving van één regel."
+2. **Prompt 2**: "Gebruik hoek #3 van bovenaf en schrijf een gedetailleerd overzicht met vijf secties en subpunten met opsommingstekens."
+3. **Prompt 3**: "Breid sectie 2 van het overzicht uit tot een volledig concept van 300 woorden, schrijf op een gemoedelijke maar gezaghebbende toon."
+4. **Prompt 4**: "Bekijk het concept voor duidelijkheid, schrap overtollige zinnen en zorg ervoor dat het eindigt met een duidelijke oproep tot actie."
+
+Dit levert aanzienlijk betere resultaten op dan in één keer vragen om een ​​voltooide blogpost: elke stap vestigt de volledige aandacht van het model op een gerichte taak.
+
+<ThinkAboutIt>Prompt Chaining weerspiegelt hoe menselijke experts werken. Een goede auteur begint niet zomaar met schrijven; hij brainstormt, schetst, schetst en herziet. Een goede ingenieur codeert niet vanaf het begin: hij ontwerpt, maakt prototypes, test en refactort. Waarom zouden we verwachten dat AI deze stappen overslaat en bij de eerste poging meesterwerk produceert?
+</ThinkAboutIt>
+
+---
+
+## 🚫 Veelvoorkomende fouten en hoe u deze kunt oplossen
+
+### Fout 1: Alles tegelijk vragen
+❌ *"Schrijf een uitgebreide gids over machine learning, inclusief geschiedenis, technieken, toepassingen, tools, carrièrepaden en toekomstige trends."*
+
+✅ Verdeel het in gerichte aanwijzingen, één onderwerp tegelijk.
+
+### Fout 2: Alleen negatieve instructies
+❌ *"Wees niet te technisch. Schrijf niet te veel. Gebruik geen jargon."*
+
+✅ *"Schrijf op niveau van jaar 9, in 200 woorden, in alledaagse taal."* — vertel wat je moet doen.
+
+### Fout 3: Het uitvoerformaat niet specificeren
+❌ *"Noem de voor- en nadelen van elektrische voertuigen."*
+
+✅ *"Maak een tabel waarin elektrische en benzinevoertuigen worden vergeleken. Gebruik kolommen: Factor, Elektrisch, Benzine. Voeg zes rijen toe met betrekking tot kosten, milieu, actieradius, opladen, onderhoud en inruilwaarde."*
+
+### Fout 4: Context vergeten
+❌ *"Herschrijf dit om beter te worden."*
+
+✅ *"Deze paragraaf komt uit een technisch rapport gericht op niet-technische leidinggevenden. Herschrijf het om jargon te verwijderen, verkort de lengte met 30% en voeg aan het begin een samenvatting van één zin toe."*
+
+### Fout 5: Het accepteren van de eerste reactie
+De beste snelle ingenieurs herhalen. Als het eerste antwoord niet helemaal juist is, vertel het model dan precies wat het moet veranderen: *"De toon is te formeel – maak hem meer gemoedelijk. En verplaats de statistieken naar een zijbalk in plaats van naar de hoofdtekst."*
+
+---
+
+## 🔬 Geavanceerde techniek: gestructureerde output
+
+Voor programmatisch gebruik (API's, workflows, pipelines) heb je vaak gestructureerde output nodig. Vraag er gewoon expliciet om:
+
+```
+Analyse the following job description and return a JSON object with this 
+exact structure:
+{
+  "required_skills": ["skill1", "skill2"],
+  "nice_to_have_skills": ["skill3"],
+  "seniority_level": "junior|mid|senior",
+  "remote_friendly": true|false,
+  "key_responsibilities": ["resp1", "resp2", "resp3"]
+}
+
+Job description:
+[text here]
+```
+
+Moderne LLM’s zijn hier opmerkelijk goed in. Veel API's bieden nu een "JSON-modus" die geldige JSON-uitvoer afdwingt, waardoor dit nog betrouwbaarder wordt.
+
+---
+
+## 🏆 Bouw je promptingpraktijk op
+
+Snelle engineering is een vaardigheid die samenwerkt. Begin met deze gewoonten:
+
+1. **Houd een promptbibliotheek bij**: sla prompts op die goed werken voor terugkerende taken
+2. **A/B-test**: probeer dezelfde taak met twee verschillende aanwijzingen en vergelijk de resultaten
+3. **Stel fouten vast** — als de respons slecht is, vraag dan: welke context ontbrak? Wat was dubbelzinnig?
+4. **Onderzoek lezen** — OpenAI, Anthropic en Google DeepMind publiceren regelmatig artikelen over promptingstechnieken
+5. **Leer anderen** — uitleggen waarom een prompt werkt versterkt je eigen begrip
+
+De modellen worden snel beter, maar dat geldt ook voor het plafond van wat een bekwame, snelle ingenieur eruit kan halen. De basisprincipes hier – duidelijkheid, specificiteit, context, iteratie – blijven waardevol, ongeacht welk model u gebruikt.
+
+<Quiz question="Wat is het belangrijkste voordeel van een paar shots-prompts vergeleken met een zero-shot-prompt?" options={["Het model reageert sneller", "U kunt voorbeelden geven van het exacte invoer-uitvoerformaat dat u wilt, zodat de reactie van het model nauwkeuriger kan worden begeleid", "Het gebruikt minder van het contextvenster", "Het model mag verhelderende vragen stellen"]} correct={1} explanation="Few-shot prompting biedt 2-5 voorbeelden van het gewenste patroon voordat u uw daadwerkelijke taak presenteert. Dit is vooral krachtig voor ongebruikelijke uitvoerformaten, domeinspecifieke classificaties of stijlmatching - gevallen waarin het vertellen van het model niet zo effectief is als het tonen ervan." />
+
+<Quiz question="Waarom verbetert het stimuleren van een keten van gedachten de nauwkeurigheid van redeneringstaken?" options={["Het maakt de prompt korter en duidelijker", "Door het model de stapsgewijze redenering te laten zien, zijn fouten beter zichtbaar en is het minder waarschijnlijk dat het model logische stappen overslaat", "Het geeft het model meer trainingsvoorbeelden", "Het verlaagt de temperatuur van de uitgangen van het model"]} correct={1} explanation="Wanneer een model stap voor stap redeneert, gebeuren er twee dingen: ten eerste kun je door zichtbaar redeneren fouten ontdekken; ten tweede verkleint de handeling van het genereren van elke stap feitelijk de kans op het maken van logische sprongen die belangrijke redeneringen overslaan. Het is vergelijkbaar met hoe mensen minder fouten maken als ze hun wiskundewerk opschrijven." />

@@ -1,0 +1,158 @@
+---
+title: "Diseñar un rastreador web: cómo indexa Google Internet"
+description: "Diseñe un rastreador web distribuido que cubra la gestión de fronteras de URL, políticas de cortesía, deduplicación de contenido con SimHash y rastreo distribuido con hash consistente."
+order: 9
+difficulty: "advanced"
+duration: 22
+icon: "🕷️"
+published: true
+machineTranslated: true
+---
+# Diseñe un rastreador web: cómo indexa Google Internet
+
+Un rastreador web navega sistemáticamente por Internet para descargar e indexar páginas web. Es la base de todo motor de búsqueda, y diseñar uno le enseña sobre sistemas distribuidos, recorrido de gráficos y manejo del desorden de la web real.
+
+## Paso 1: recopilación de requisitos
+
+### Requisitos funcionales
+- Rastrear páginas web a partir de un conjunto de URL iniciales
+- Extraiga y siga hipervínculos para descubrir nuevas páginas.
+- Almacenar contenido descargado para indexación y procesamiento.
+- Respeta el archivo robots.txt y rastrea las reglas de cortesía.
+
+### Requisitos no funcionales
+- **Escala**: rastrea mil millones de páginas por mes
+- **Cortesía**: nunca abrumes a un solo servidor web
+- **Actualidad**: vuelva a rastrear las páginas importantes con regularidad
+- **Robustez**: maneja HTML con formato incorrecto, bucles infinitos y trampas de arañas.
+
+## Paso 2: Arquitectura de alto nivel
+
+```
+Seed URLs → URL Frontier (priority queue)
+                  ↓
+            URL Scheduler (politeness + priority)
+                  ↓
+         Fetcher (HTTP client pool)
+                  ↓
+         HTML Parser → Extract URLs → URL Filter
+              ↓                           ↓
+       Content Store              URL Dedup (Bloom Filter)
+       (S3 / HDFS)                      ↓
+                                 URL Frontier (loop)
+```
+
+<Illustration src="/images/lessons/design-web-crawler.svg" alt="Arquitectura del rastreador web que muestra el bucle de rastreo desde la frontera de URL a través del buscador, analizador, extracción de URL, deduplicación y regreso a la frontera." caption="El rastreador funciona como un bucle continuo: busca una página, extrae nuevas URL, deduplica y pone en cola para rastreo futuro." />
+
+## Paso 3: el bucle de rastreo
+
+### Rastreo BFS vs DFS
+- **BFS (Breadth-First)**: preferido para el rastreo web. Descubre rápidamente un amplio conjunto de dominios y evita quedar atrapado en un solo sitio
+- **DFS (Depth-First)**: corre el riesgo de profundizar infinitamente en las páginas generadas dinámicamente antes de descubrir otros dominios.
+
+### Diseño de frontera de URL
+La frontera no es una simple cola: es un sofisticado sistema de prioridades con dos subcomponentes:
+
+1. **Cola de prioridad (frontal)**: clasifica las URL por importancia. Los factores incluyen PageRank, frecuencia de actualización y autoridad de dominio.
+2. **Cola de cortesía (atrás)**: garantiza que cada dominio tenga su propia cola FIFO. Un programador elige entre diferentes colas de dominio para evitar dañar a un solo servidor
+
+```
+Front (Priority):       Back (Politeness):
+┌──────────────┐       ┌─── bbc.co.uk queue ───┐
+│ High Priority │ ───→  │ url1 → url4 → url7    │
+│ Med Priority  │ ───→  ├─── github.com queue ──┤
+│ Low Priority  │ ───→  │ url2 → url5 → url8    │
+└──────────────┘       ├─── wikipedia.org queue ┤
+                        │ url3 → url6 → url9    │
+                        └───────────────────────┘
+```
+
+<Quiz question="¿Por qué un rastreador web utiliza BFS en lugar de DFS para el rastreo de propósito general?" options="BFS usa menos memoria|BFS descubre más dominios únicos más rápido y evita quedar atrapado en un solo sitio web|BFS es más rápido que DFS|DFS no funciona con URL" answer="1" explanation="BFS explora nivel por nivel, lo que significa que descubre rápidamente páginas en muchos dominios diferentes. DFS podría seguir enlaces profundamente en un solo sitio, potencialmente llegando a millones de páginas generadas dinámicamente, antes de visitar otro dominio." />
+
+## Paso 4: cortesía y robots.txt
+
+### Respetando los robots.txt
+Antes de rastrear cualquier dominio, busque y almacene en caché su archivo `robots.txt`:
+
+```
+# Example robots.txt
+User-agent: *
+Disallow: /admin/
+Disallow: /private/
+Crawl-delay: 2
+```
+
+Almacenar en caché robots.txt por dominio con un TTL (24 horas). Respete siempre las reglas `Disallow` y las directivas `Crawl-delay`.
+
+### Limitación de la velocidad de rastreo
+Incluso sin `Crawl-delay` explícito, mantenga la cortesía:
+- Máximo 1 solicitud por segundo por dominio (configurable)
+- Utilice colas de descarga separadas por dominio
+- Seguimiento de los tiempos de respuesta: si un servidor se ralentiza, retroceda automáticamente
+
+<FunFact>El rastreador web de Google (Googlebot) rastrea cientos de miles de millones de páginas. Para ser cortés, monitorea los tiempos de respuesta del servidor y reduce su velocidad de rastreo si un sitio comienza a responder lentamente, lo que efectivamente permite que el sitio web "rechace" al rastreador.</FunFact>
+
+## Paso 5: Deduplicación
+
+### Deduplicación de URL (filtro Bloom)
+Con miles de millones de URL, comprobar si una URL se ha visto antes requiere una estructura de datos eficiente. Un filtro Bloom proporciona búsquedas O(1) con una pequeña huella de memoria:
+
+- **Espacio:** ~1 GB para mil millones de URL con una tasa de falsos positivos del 1%
+- **Compensación:** ocasionalmente puede volver a rastrear una página (falso positivo) pero nunca pierde una nueva URL (sin falsos negativos)
+
+Normalice las URL antes de verificar: elimine fragmentos (#), ordene los parámetros de consulta, ponga en minúscula el nombre del host y resuelva las rutas relativas.
+
+### Deduplicación de contenido (SimHash)
+Diferentes URL pueden ofrecer contenido idéntico (espejos, artículos copiados). SimHash genera una huella digital del contenido de la página; las páginas con huellas digitales similares (pequeña distancia de Hamming) probablemente estén duplicadas:
+
+```
+Page A content → SimHash → 10110010...
+Page B content → SimHash → 10110011...
+Hamming distance = 1 → likely duplicate, skip storing
+```
+
+<Quiz question="Un filtro Bloom informa que se ha visto una URL antes. ¿Qué puedes concluir?" options="La URL definitivamente ha sido rastreada.|Probablemente se haya rastreado la URL, pero existe una pequeña posibilidad de que sea un falso positivo.|La URL no ha sido rastreada.|Es necesario reconstruir el filtro Bloom" answer="1" explanation="Los filtros Bloom tienen una pequeña tasa de falsos positivos: pueden decir ”sí, visto” para una URL no vista, pero nunca dicen ”no” para una URL que realmente se agregó. Esto significa volver a rastrear una página de vez en cuando, lo cual es aceptable para la mayoría de los rastreadores." />
+
+## Paso 6: rastreo distribuido
+
+### Escalar horizontalmente
+Una sola máquina no puede rastrear mil millones de páginas al mes. Distribuir el trabajo:
+
+- **El hash consistente** en los nombres de dominio asigna cada dominio a un nodo de rastreo específico. Esto garantiza la cortesía: solo un nodo rastrea un dominio determinado.
+- **La frontera de URL** se divide entre nodos según el anillo hash
+- **Coordinación** a través de un servicio liviano que gestiona las asignaciones de nodos y se reequilibra cuando los nodos se unen o salen
+
+### Almacenamiento en caché de resolución DNS
+Las búsquedas de DNS agregan entre 10 y 100 ms por solicitud. A escala, este es un obstáculo importante:
+- Mantener una caché DNS local por nodo rastreador.
+- Resolución previa de DNS por lotes para URL en cola
+- Utilice un solucionador de DNS dedicado para evitar saturar los servidores DNS públicos
+
+### Detección de trampas de arañas
+Los sitios maliciosos o mal construidos pueden crear infinitos espacios de URL:
+- `/page/1/page/1/page/1/...` - patrones de ruta repetidos
+- Páginas de calendario que generan URL para cada fecha futura.
+- ID de sesión en URL que crean URL únicas para contenido idéntico
+
+**Defensas:** longitud máxima de URL, profundidad máxima de rastreo por dominio, detección de patrones para estructuras de URL repetitivas y límites de recuento de páginas a nivel de dominio.
+
+<ThinkAboutIt>Si necesita mantener actualizado un índice de búsqueda, ¿cómo decidiría qué páginas volver a rastrear primero? Considere un sitio de noticias que se actualiza cada hora frente a un artículo de Wikipedia que cambia mensualmente. ¿Qué señales utilizaría para priorizar la programación de rastreo?</ThinkAboutIt>
+
+## Paso 7: cuellos de botella y optimizaciones
+
+| Cuello de botella | Solución |
+|-----------|----------|
+| Latencia de resolución DNS | Caché de DNS local, resolución previa por lotes |
+| Servidores lentos o que no responden | Tiempos de espera (30 s), E/S asíncronas, omitir después de reintentos |
+| Almacenamiento para contenido rastreado | Comprime páginas, almacena solo el contenido modificado |
+| Memoria de frontera URL | Cola de prioridad respaldada en disco (RocksDB) |
+| Contenido duplicado | Huellas digitales SimHash, detección de URL canónicas |
+
+<ThinkAboutIt>Los motores de búsqueda deben equilibrar la frescura del rastreo (volver a rastrear las páginas con frecuencia) con el descubrimiento (encontrar nuevas páginas). Si su rastreador tiene un presupuesto fijo de 1 millón de páginas por día, ¿cómo dividiría ese presupuesto entre volver a rastrear páginas existentes y descubrir otras nuevas?</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+- [Rastreador web: entrevista sobre diseño de sistemas, vol. 1, cap. 9](https://bytebytego.com/): tutorial detallado sobre el diseño del rastreador web de Alex Xu
+- [Mercator: A Scalable Web Crawler](https://courses.cs.washington.edu/courses/cse454/15wi/papers/mercator.pdf) - documento fundamental sobre la arquitectura de rastreador escalable
+- [Filtros Bloom por ejemplo](https://llimllib.github.io/bloomfilter-tutorial/) - tutorial interactivo sobre cómo funcionan los filtros Bloom

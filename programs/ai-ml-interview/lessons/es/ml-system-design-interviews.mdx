@@ -1,0 +1,183 @@
+---
+title: "Entrevistas sobre diseño de sistemas de aprendizaje automático"
+description: "Diseñe sistemas de aprendizaje automático de un extremo a otro, desde la formulación del problema hasta la implementación, utilizando un marco estructurado que les encanta a los entrevistadores."
+order: 1
+difficulty: "advanced"
+duration: 25
+icon: "🏗️"
+published: true
+machineTranslated: true
+---
+# 🏗️ Entrevistas sobre diseño de sistemas ML
+
+Has superado las rondas de codificación. Ahora el entrevistador desliza un marcador de pizarra sobre la mesa y dice: "Diseña un sistema de recomendación para 50 millones de usuarios". Se te humedecen las palmas de las manos, no porque no conozcas ML, sino porque nunca has practicado *pensar en voz alta* sobre sistemas completos. Esta lección le brinda un marco repetible que convierte esa pregunta abierta en una conversación estructurada.
+
+---
+
+## 🗺️ Por qué el diseño del sistema ML es diferente
+
+El diseño de sistemas de software tradicional se centra en el flujo, el almacenamiento y la escalabilidad de los datos. El diseño del sistema ML agrega una dimensión adicional: **el modelo es un componente vivo** que se degrada con el tiempo, depende de la calidad de los datos y requiere una evaluación continua.
+
+Los entrevistadores no buscan un diagrama de arquitectura perfecto. Quieren ver que puedes:
+
+- Traducir un problema empresarial vago en una tarea de aprendizaje automático con un alcance bien definido.
+- Identificar los requisitos de datos y los posibles obstáculos con antelación
+- Razonar sobre las compensaciones en lugar de recitar las respuestas de los libros de texto.
+- Piense en lo que sucede *después* de implementar el modelo.
+
+<Callout>El mayor error que cometen los candidatos es saltar directamente a la selección del modelo. Los entrevistadores informan constantemente que el encuadre de los problemas y la discusión de los datos son los puntos en los que los candidatos se diferencian.
+</Callout>
+
+---
+
+## 🧩 El marco de diseño del sistema ML de ocho pasos
+
+Utilice este marco como esqueleto para cada pregunta de diseño. No es necesario que dediques el mismo tiempo a cada paso (adaptate según la pregunta), pero tocar cada uno indica madurez.
+
+### 1. Definición del problema y métricas comerciales
+
+Empiece por aclarar el objetivo. Pregunte: *¿Cómo se ve el éxito para el negocio?*
+
+- **Ranking de búsqueda**: ¿maximizar la tasa de clics? ¿Tiempo para obtener resultados?
+- **Detección de fraude**: ¿Minimizar los falsos negativos (fraude no detectado) y controlar los falsos positivos (usuarios legítimos bloqueados)?
+- **Moderación de contenido**: ¿priorizar el recuerdo (captar todo lo dañino) sobre la precisión?
+
+Asigne la métrica empresarial a un objetivo compatible con el aprendizaje automático desde el principio. Por ejemplo, "aumentar la participación del usuario" podría traducirse en "predecir la probabilidad de hacer clic en cada elemento y clasificar por puntuación".
+
+### 2. Canalización y recopilación de datos
+
+Analice de dónde provienen los datos, cómo se recopilan y qué problemas anticipa:
+
+- **Fuentes de datos**: registros de comportamiento del usuario, registros de transacciones, API de terceros
+- **Estrategia de etiquetado**: etiquetas explícitas (calificaciones de usuarios), señales implícitas (clics, tiempo de permanencia) o anotaciones humanas.
+- **Actualidad de los datos**: ¿con qué frecuencia cambian los datos? ¿La obsolescencia afecta el rendimiento?
+
+### 3. Ingeniería de funciones
+
+Describe las características que extraerías. Agrúpelos lógicamente:
+
+| Grupo de funciones | Ejemplos |
+|---|---|
+| Funciones de usuario | grupo de edad, antigüedad, tasa de clics histórica |
+| Características del artículo | categoría, rango de precios, puntuación de popularidad |
+| Funciones de contexto | hora del día, tipo de dispositivo, ubicación |
+| Funciones de interacción | coocurrencia usuario×elemento, profundidad de sesión |
+
+### 4. Selección del modelo
+
+Ahora (y sólo ahora) analicemos los modelos. Justifica tu elección:
+
+- **Línea de base**: regresión logística o árboles potenciados por gradiente (rápido de entrenar, interpretable)
+- **Avanzado**: aprendizaje profundo (modelos de dos torres para recuperación, clasificadores basados en transformadores)
+- **Conjunto**: combina un modelo de recuperación rápida con un reclasificador más lento pero más preciso
+
+### 5. Estrategia de formación
+
+Cubra cómo entrenaría y validaría:
+
+- Divisiones de entrenamiento/validación/prueba (divisiones basadas en tiempo para datos temporales)
+- Manejo del desequilibrio de clases (sobremuestreo, pérdida de ponderación)
+- Enfoque de ajuste de hiperparámetros
+
+### 6. Evaluación sin conexión
+
+Elija métricas que se alineen con el objetivo comercial. Precision@K para clasificación, AUC-ROC para clasificación binaria, NDCG para listas ordenadas.
+
+### 7. Implementación y servicio
+
+Analice cómo llega el modelo a los usuarios:
+
+- **Inferencia por lotes**: cálculo previo de predicciones todas las noches (bueno para recomendaciones por correo electrónico)
+- **Inferencia en tiempo real**: puntuación en cada solicitud (necesaria para la clasificación de búsqueda)
+- **Híbrido**: conjunto de candidatos precalculado, reclasificación en tiempo real
+
+### 8. Monitoreo e iteración
+
+Explique lo que observaría después del lanzamiento: deriva de datos, cambios en la distribución de predicciones y métricas en línea mediante pruebas A/B.
+
+<ThinkAboutIt>Imagine que está diseñando un sistema de detección de fraude. La empresa dice "detectar todo fraude". ¿Por qué el retiro del 100% es un objetivo peligroso y cómo enmarcaría la conversación en torno a compensaciones aceptables?
+</ThinkAboutIt>
+
+---
+
+## 🎯 Preguntas comunes sobre diseño de ML y cómo abordarlas
+
+### Sistema de recomendación
+
+- **Encuadre**: predecir P (elemento de clics del usuario) → clasificar elementos por puntuación
+- **Desafío clave**: problema de arranque en frío para nuevos usuarios/elementos
+- **Arquitectura**: generación de candidatos (rápida, aproximada) → clasificación (precisa, más lenta) → reclasificación (reglas de negocio, diversidad)
+
+### Clasificación de búsqueda
+
+- **Encuadre**: ante una consulta, clasifique los documentos por relevancia
+- **Desafío clave**: equilibrar relevancia, frescura y personalización
+- **Arquitectura**: recuperación de índice invertido → modelo de aprendizaje para clasificar → combinación con reglas comerciales
+
+### Detección de fraude
+
+- **Framing**: clasificación binaria: ¿esta transacción es fraudulenta?
+- **Desafío clave**: desequilibrio de clases extremo (el fraude representa < 0,1% de las transacciones)
+- **Arquitectura**: filtros basados en reglas → modelo ML → cola de revisión humana para casos inciertos
+
+<Quiz
+  question="En una entrevista de diseño de un sistema de ML, ¿qué debe hacer PRIMERO cuando se le solicite un diseño?"
+  options="Elija una arquitectura de red neuronal|Aclarar el problema y definir métricas comerciales.|Dibujar el canal de datos|Discutir las métricas de evaluación del modelo."
+  answer="1"
+  explanation="Empiece siempre por aclarar el problema. Comprender cómo se ve el éxito para el negocio determina cada decisión posterior, desde la recopilación de datos hasta la selección de métricas y la estrategia de implementación."
+/>
+
+---
+
+## ⚖️ Discutir compensaciones como un ingeniero senior
+
+A los entrevistadores les encantan las discusiones sobre compensaciones porque revelan una experiencia profunda. Estas son las compensaciones que más surgen:
+
+| Compensación | Cuándo favorecer a la izquierda | Cuándo favorecer el derecho |
+|---|---|---|
+| Latencia vs Precisión | Orientación al usuario en tiempo real (búsqueda) | Lote sin conexión (recomendaciones por correo electrónico) |
+| Modelo simple vs complejo | Datos pequeños, necesitan interpretabilidad | Grandes datos, la precisión es fundamental |
+| Servicio por lotes o en tiempo real | Las predicciones no cambian rápidamente | Las predicciones deben reflejar el contexto más reciente |
+| Construir versus comprar | Diferenciador central para el negocio | Capacidad de productos básicos (por ejemplo, OCR) |
+
+Cuando hables de una compensación, utiliza este patrón:
+
+> "Podríamos optar por la **opción A** que nos brinda [beneficio], pero la desventaja es el [costo]. Alternativamente, la **opción B** [beneficio], aunque introduce [costo]. Dada [restricción específica del problema], me inclinaría por la **opción A** porque..."
+
+<FunFact>Netflix estima que su sistema de recomendación le ahorra a la compañía más de mil millones de dólares al año en reducción de la rotación. El valor de ese sistema único de ML supera el PIB de algunos países pequeños.
+</FunFact>
+
+---
+
+## 🛠️ Poniéndolo todo junto: un mini tutorial
+
+**Mensaje**: "Diseñe un sistema de moderación de contenido para una plataforma de redes sociales".
+
+1. **Problema**: clasificar el contenido generado por el usuario (texto + imágenes) como seguro, dudoso o dañino
+2. **Datos**: decisiones de moderación etiquetadas de revisores humanos, informes de usuarios
+3. **Características**: incrustaciones de texto, características de imagen (puntuación de desnudez, indicadores de violencia), historial de usuario (violaciones anteriores)
+4. **Modelo**: clasificador multimodal (rama de texto + rama de imagen → capa de fusión → encabezado de clasificación)
+5. **Capacitación**: muestreo estratificado para manejar el desequilibrio de clases; Reentrenamiento regular a medida que surgen nuevos patrones dañinos.
+6. **Evaluación**: alto recuerdo de contenido dañino; La precisión es importante para los límites (evite la censura excesiva)
+7. **Publicación**: inferencia en tiempo real en el momento de la carga; Poner en cola casos límite para revisión humana
+8. **Monitoreo**: realice un seguimiento de la tasa de falsos positivos a través de las apelaciones de los usuarios; monitorear nuevos patrones de abuso
+
+<Quiz
+  question="¿Por qué es común un enfoque de servicio híbrido (generación de candidatos por lotes + clasificación en tiempo real) en los sistemas de recomendación?"
+  options="Es más barato que el servicio puro en tiempo real.|Equilibra la necesidad de una cobertura amplia con una clasificación personalizada y consciente del contexto.|Es más fácil de implementar que solo por lotes|Elimina la necesidad de tiendas de funciones."
+  answer="1"
+  explanation="La generación de candidatos por lotes puede examinar de manera eficiente millones de elementos para producir una lista corta manejable. Luego, la clasificación en tiempo real personaliza esa lista corta utilizando el contexto más reciente (hora del día, comportamiento de la sesión), brindando el mejor equilibrio entre cobertura y relevancia."
+/>
+
+---
+
+## 🔑 Conclusiones clave
+
+- **Utilice un marco**: problema → datos → características → modelo → capacitación → evaluación → implementación → monitoreo
+- **Empiece con el problema empresarial**, no con el modelo: los entrevistadores notan cuando se salta esto
+- **Discute explícitamente las compensaciones**: este es el mayor diferenciador entre los candidatos de nivel medio y superior.
+- **Piense más allá de la precisión**: la latencia, el costo, la equidad y la capacidad de mantenimiento son importantes en la producción.
+- **Practique en voz alta**: el diseño del sistema ML es un ejercicio de comunicación tanto como técnico.
+
+<Callout>Las mejores respuestas sobre el diseño de sistemas de ML parecen una conversación, no una conferencia. Haga una pausa para hablar con el entrevistador, haga preguntas aclaratorias y esté dispuesto a girar cuando lo empujen en una dirección diferente.
+</Callout>

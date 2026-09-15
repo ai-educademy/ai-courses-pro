@@ -1,0 +1,240 @@
+---
+title: "Preparação para entrevista de visão computacional"
+description: "Prepare-se para rodadas de entrevistas sobre visão computacional - de CNNs a arquiteturas modernas, com o teste teórico e prático dos entrevistadores."
+order: 6
+difficulty: "advanced"
+duration: 20
+icon: "👁️"
+published: true
+machineTranslated: true
+---
+# 👁️ Preparação para entrevista de visão computacional
+
+As entrevistas de visão computacional têm um sabor único: misturam fundamentos matemáticos (convoluções, retropropagação através de camadas espaciais) com engenharia prática (como lidar com uma imagem 4K em um dispositivo móvel?). Esteja você entrevistando para uma equipe de direção autônoma ou para uma startup de análise de varejo, esta lição aborda os conceitos que os entrevistadores mais testam — e o conhecimento prático que diferencia os candidatos.
+
+---
+
+## 🧱 Fundamentos do currículo: o que os entrevistadores esperam que você saiba
+
+### Convoluções
+
+Uma camada convolucional desliza um pequeno filtro (kernel) através de uma imagem de entrada, calculando multiplicações por elemento e somando-as para produzir um mapa de características. Esta é a operação central da visão computacional.
+
+```
+Input (5×5)      Kernel (3×3)      Output (3×3)
+┌─────────────┐  ┌─────────┐      ┌─────────┐
+│ 1 0 1 0 1   │  │ 1  0  1 │      │ 4 3 4   │
+│ 0 1 0 1 0   │  │ 0  1  0 │  →   │ 2 4 3   │
+│ 1 0 1 0 1   │  │ 1  0  1 │      │ 4 3 4   │
+│ 0 1 0 1 0   │                   └─────────┘
+│ 1 0 1 0 1   │
+└─────────────┘
+```
+
+**Parâmetros principais**:
+- **Tamanho do kernel**: normalmente 3×3 ou 5×5 — kernels menores empilhados mais profundamente são preferidos a um kernel grande
+- **Stride**: tamanho do passo da janela deslizante (stride 2 divide pela metade as dimensões espaciais)
+- **Preenchimento**: adicione zeros ao redor da borda para preservar o tamanho espacial (preenchimento 'mesmo')
+- **Canais**: um kernel 3×3 em uma imagem RGB é na verdade 3×3×3
+
+**Fórmula de tamanho de saída**:
+
+$$O = \frac{W - K + 2P}{S} + 1$$
+
+Onde W = largura de entrada, K = tamanho do kernel, P = preenchimento, S = passada.
+
+### Agrupamento
+
+O pooling reduz as dimensões espaciais enquanto retém informações importantes:
+- **Max pooling**: assume o valor máximo em cada janela (mais comum)
+- **Average pooling**: calcula a média (usada em algumas arquiteturas antes da camada final)
+- **Pooling médio global**: reduz cada mapa de recursos a um único valor (substitui camadas totalmente conectadas em redes modernas)
+
+### Mapas de recursos e campos receptivos
+
+- **Mapas de recursos**: a saída de cada camada convolucional — as camadas iniciais detectam bordas e texturas, as camadas mais profundas detectam padrões complexos (faces, objetos)
+- **Campo receptivo**: a região da imagem de entrada que influencia um determinado neurônio de saída — cresce mais profundamente na rede
+
+<ThinkAboutIt>Por que as arquiteturas modernas usam múltiplas convoluções 3×3 empilhadas em vez de uma única convolução 7×7? Pense no número de parâmetros, não linearidades e tamanho do campo receptivo.
+</ThinkAboutIt>
+
+---
+
+## 🏛️ Principais arquiteturas que você deve conhecer
+
+### ResNet (redes residuais)
+
+A arquitetura que resolveu o “problema da degradação” – redes mais profundas com desempenho pior do que as mais superficiais.
+
+**Principal inovação**: conexões saltadas (conexões residuais) que permitem que os gradientes fluam diretamente pela rede:
+
+```python
+# Residual block (simplified)
+def residual_block(x):
+    identity = x
+    out = conv_bn_relu(x)
+    out = conv_bn(out)
+    out = out + identity  # Skip connection
+    return relu(out)
+```
+
+**Por que é importante**: pular conexões permite o treinamento de redes muito profundas (mais de 100 camadas). Esta ideia aparece em quase todas as arquiteturas modernas.
+
+### YOLO (você só olha uma vez)
+
+A arquitetura ideal para detecção de objetos em tempo real.
+
+**Principal inovação**: trata a detecção como um único problema de regressão — divide a imagem em uma grade e prevê caixas delimitadoras e probabilidades de classe simultaneamente.
+
+| Versão | Recurso principal | Velocidade |
+|---|---|---|
+| YOLOv3 | Detecção multiescala | ~30FPS |
+| YOLOv5 | Nativo do PyTorch, fácil de usar | ~45FPS |
+| YOLOv8 | Sem âncora, de última geração | ~80FPS |
+
+### Transformadores de visão (ViT)
+
+Aplica a arquitetura do transformador às imagens, dividindo-as em patches:
+
+```
+Image (224×224) → Split into 16×16 patches → 196 patch tokens
+→ Linear projection → Add position embeddings → Transformer encoder → Classification
+```
+
+**Ponto principal da entrevista**: ViT precisa de mais dados do que CNNs para treinar bem (menos viés indutivo), mas tem melhor escalabilidade com mais dados e computação.
+
+<Quiz
+  question="Que problema as conexões residuais (ignoradas) no ResNet resolvem?"
+  options="Overfitting em redes profundas|Gradientes de desaparecimento/explosão que impedem o treinamento de redes muito profundas|Tempo de inferência lento|Alto uso de memória"
+  answer="1"
+  explanation="Sem conexões de salto, os gradientes tornam-se extremamente pequenos à medida que se propagam através de muitas camadas, tornando as redes profundas muito difíceis de treinar. As conexões residuais fornecem um caminho direto para gradientes, permitindo o treinamento eficaz de redes com centenas de camadas."
+/>
+
+---
+
+## ❓ Perguntas comuns em entrevistas de currículo
+
+### Detecção de objetos vs segmentação
+
+Os entrevistadores adoram pedir que você distinga estas tarefas:
+
+| Tarefa | Saída | Exemplo |
+|---|---|---|
+| **Classificação** | Etiqueta única para a imagem | "Isto é um gato" |
+| **Detecção de objetos** | Caixas delimitadoras + etiquetas | "Gato em (x1,y1,x2,y2), cachorro em (x3,y3,x4,y4)" |
+| **Segmentação semântica** | Etiqueta de classe por pixel | Cada pixel rotulado como gato, cachorro ou plano de fundo |
+| **Segmentação de instâncias** | Rótulo por pixel + ID da instância | Distingue cat_1 de cat_2 em nível de pixel |
+
+### Transferir aprendizagem
+
+Uma das técnicas de CV mais práticas – e um tópico de entrevista frequente:
+
+1. **Pegue um modelo pré-treinado** (por exemplo, ResNet-50 treinado em ImageNet)
+2. **Substitua o cabeçalho de classificação final** pelas camadas específicas da tarefa
+3. **Ajuste**:
+   - **Extração de recursos**: congele todas as camadas pré-treinadas, treine apenas o novo cabeçote (rápido, funciona com pequenos conjuntos de dados)
+   - **Ajuste completo**: descongele todas as camadas, treine de ponta a ponta com uma pequena taxa de aprendizado (melhores resultados, precisa de mais dados)
+
+```python
+import torchvision.models as models
+import torch.nn as nn
+
+# Transfer learning with ResNet-50
+model = models.resnet50(pretrained=True)
+
+# Freeze pre-trained layers
+for param in model.parameters():
+    param.requires_grad = False
+
+# Replace final layer for 10-class problem
+model.fc = nn.Linear(model.fc.in_features, 10)
+```
+
+<Callout>Ao discutir a aprendizagem por transferência em entrevistas, sempre mencione *quando ela pode falhar*: quando seu domínio alvo é muito diferente do domínio pré-treinado (por exemplo, raios X médicos versus imagens naturais ImageNet). Nesses casos, você pode precisar de um pré-treinamento específico do domínio.
+</Callout>
+
+### Aumento de dados
+
+Crítico para treinar modelos robustos, especialmente com dados limitados:
+
+- **Geométrico**: rotação, inversão, corte, dimensionamento
+- **Cor**: brilho, contraste, saturação, variação de matiz
+- **Avançado**: CutOut (mascarar patches aleatórios), MixUp (mesclar duas imagens), CutMix (substituir patches por patches de outra imagem)
+- **Aumento do tempo de teste (TTA)**: aumento na inferência e previsões médias para melhor precisão
+
+<FunFact>O conjunto de dados ImageNet — o benchmark que desencadeou a revolução do aprendizado profundo — contém mais de 14 milhões de imagens rotuladas manualmente em 21.841 categorias. O desafio anual ImageNet (2010-2017) elevou as taxas de erro de 28% para 2,3%, superando o desempenho humano em cerca de 5%.
+</FunFact>
+
+---
+
+## 🖼️ Considerações Práticas
+
+### Pré-processamento de imagem
+
+Os sistemas CV de produção precisam de um pré-processamento robusto:
+
+- **Redimensionamento**: os modelos esperam tamanhos de entrada fixos, mas o redimensionamento ingênuo distorce as proporções. Use preenchimento ou corte central.
+- **Normalização**: subtraia a média do ImageNet e divida por padrão (ao usar modelos pré-treinados): `mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]`
+- **Tratamento de resoluções variáveis**: imagens em lote de tamanhos semelhantes ou use camadas de pooling adaptáveis
+
+### Implantação: Edge vs Cloud
+
+| Fator | Borda (Móvel/IoT) | Nuvem |
+|---|---|---|
+| Latência | Muito baixo (sem ida e volta da rede) | Superior (dependente da rede) |
+| Tamanho do modelo | Restrito (MobileNet, EfficientNet-Lite) | Sem restrições |
+| Privacidade | Os dados permanecem no dispositivo | Dados enviados ao servidor |
+| Custo | Sem custos de servidor, mas o hardware é fixo | Pagamento por inferência |
+| Atualizações | Difícil (é necessária atualização do aplicativo) | Fácil (modelo de troca no lado do servidor) |
+
+**Técnicas de compactação de modelo** para implantação na borda:
+- **Quantização**: reduza os pesos de FP32 para INT8 (4× menor e inferência mais rápida)
+- **Poda**: remova pesos de baixa magnitude (poda estruturada para aceleração real)
+- **Destilação de conhecimento**: treine um modelo pequeno de "aluno" para imitar um modelo grande de "professor"
+
+<Quiz
+  question="Você precisa implantar um modelo de detecção de objetos em um telefone celular rodando a 30 FPS. Qual abordagem é mais apropriada?"
+  options="Use um backbone ResNet-152 completo com precisão FP32|Use o backbone MobileNet com quantização INT8|Use o Vision Transformer com total atenção|Use um conjunto de três modelos de detecção"
+  answer="1"
+  explanation="O MobileNet foi projetado especificamente para dispositivos móveis e de borda, usando convoluções separáveis ​​em profundidade para reduzir a computação. A quantização INT8 reduz ainda mais o tamanho do modelo e acelera a inferência, tornando viável a detecção em tempo real em hardware móvel."
+/>
+
+---
+
+## 🌊 Tendências recentes que vale a pena conhecer
+
+### Modelos Multimodais
+
+Modelos que processam imagens e texto:
+- **CLIP** (Pré-treinamento de linguagem-imagem contrastiva): alinha incorporações de imagem e texto em um espaço compartilhado. Permite classificação de imagem zero-shot – descreva uma categoria em texto e encontre imagens correspondentes.
+- **SAM** (Segment Anything Model): um modelo básico para segmentação que pode segmentar qualquer objeto a partir de um ponto, caixa ou prompt de texto.
+
+### Modelos de Difusão
+
+A arquitetura por trás do DALL-E, Stable Diffusion e Midjourney:
+- **Processo de avanço**: adicione gradualmente ruído a uma imagem até que ela se torne puro ruído
+- **Processo reverso**: aprenda a eliminar ruído - dada a entrada ruidosa, preveja e remova o ruído
+- **Aplicações além da arte**: super-resolução de imagens, pintura interna, síntese de imagens médicas
+
+### Aprendizagem auto-supervisionada em CV
+
+Reduzindo a necessidade de dados rotulados:
+- **Aprendizado contrastivo** (SimCLR, MoCo): aprenda representações reunindo visualizações aumentadas da mesma imagem e separando imagens diferentes
+- **Modelagem de imagens mascaradas** (MAE): mascara manchas aleatórias e treina o modelo para reconstruí-las (abordagem BERT, aplicada a imagens)
+
+<ThinkAboutIt>O CLIP pode classificar imagens em categorias que nunca viu durante o treinamento, simplesmente combinando imagens com descrições de texto. Quais são as implicações disso para os pipelines de currículos tradicionais que exigem dados de treinamento rotulados para cada nova categoria?
+</ThinkAboutIt>
+
+---
+
+## 🔑 Principais vantagens
+
+- **Domine os fundamentos**: convoluções, pooling, mapas de recursos e campos receptivos — eles aparecem em todas as entrevistas de currículo
+- **Conheça as principais arquiteturas**: ResNet (pular conexões), YOLO (detecção em tempo real), ViT (transformadores para visão)
+- **Entenda a hierarquia de tarefas**: classificação → detecção → segmentação → segmentação de instância
+- **A aprendizagem por transferência é sua abordagem padrão** — o ajuste fino de modelos pré-treinados supera o treinamento do zero na maioria dos cenários práticos
+- **Pense nas restrições de implantação**: borda versus nuvem, compactação de modelo e orçamentos de latência
+- **Mantenha-se atualizado**: modelos multimodais (CLIP), modelos de base (SAM) e modelos de difusão estão remodelando o campo
+
+<Callout>As entrevistas de currículo testam amplitude e profundidade. Esteja pronto para se aprofundar em uma arquitetura (derivar a fórmula do tamanho de saída, explicar matematicamente as conexões de salto) E em todo o campo (comparar abordagens de detecção, discutir quando usar ViT vs CNN). Prepare os dois modos.
+</Callout>

@@ -1,0 +1,177 @@
+---
+title: "Envíe un proyecto de IA de código abierto: su obra maestra"
+description: "Desde la idea hasta el lanzamiento: planifique, cree, documente, publique y promueva un proyecto de IA de código abierto que se convierta en un catalizador profesional y en la pieza central de su cartera."
+order: 10
+difficulty: "advanced"
+duration: 24
+icon: "🚀"
+published: true
+machineTranslated: true
+---
+# Envíe un proyecto de IA de código abierto: su obra maestra
+
+Ésta es la lección final. Todo lo que ha aprendido converge aquí: procesos de aprendizaje automático, implementación de investigaciones, diseño de sistemas y artesanía de ingeniería. Vas a **enviar un proyecto real de IA de código abierto** que resuelve un problema genuino y perdurará más allá de este curso.
+
+## 💡 Elegir la idea de tu proyecto
+
+Los mejores proyectos de OSS parten de una **frustración personal**. No crees otra aplicación TODO con IA: encuentra un hueco:
+
+- **Rasca tu propia picazón**: una herramienta que desearías que existiera en tu flujo de trabajo diario
+- **Mejora una herramienta existente** - encuentra la limitación de una biblioteca popular y resuélvela
+- **Implementar un artículo**: convertir un avance de investigación en una biblioteca utilizable
+- **Cerrar una brecha**: conecta dos ecosistemas que no se comunican entre sí
+
+<Illustration src="/images/lessons/open-source-ai-project.svg" alt="Ciclo de vida del proyecto de código abierto desde la idea hasta el lanzamiento y el crecimiento de la comunidad" caption="El ciclo de vida del OSS: el envío es el punto medio, no la línea de meta." />
+
+**Validar antes de compilar**: busque en GitHub, PyPI y npm. Si existe algo similar, su proyecto necesita un diferenciador claro: una API más rápida y sencilla, mejor documentación o un enfoque novedoso.
+
+<FunFact>Hugging Face comenzó como una empresa de chatbot para adolescentes. Cuando abrieron su biblioteca Transformers como proyecto paralelo, se volvió tan popular que hicieron girar a toda la empresa en torno a ella, ahora valorada en más de 4.500 millones de dólares.</FunFact>
+
+## 📋 Planificación de proyectos: alcance de MVP
+
+Defina su **Proyecto Mínimo Viable** sin piedad:
+
+```markdown
+## MVP Scope (Week 1-2)
+- Core functionality: ONE thing, done well
+- CLI or Python API interface
+- 3 working examples
+- Basic README with installation and quickstart
+
+## V1.0 Scope (Week 3-4)
+- Comprehensive documentation
+- Test coverage > 80%
+- CI/CD pipeline
+- Published to PyPI/npm
+- Demo deployed
+```
+
+**El antipatrón**: pasar meses perfeccionando un código que nadie ha visto. Envíe temprano, repita según los comentarios.
+
+<ThinkAboutIt>Piense en las últimas tres herramientas que instaló. ¿Qué te hizo elegirlos sobre otras alternativas? ¿Fue el archivo README, el diseño de la API, el recuento de estrellas o algo más? Aplique esos conocimientos a su propio proyecto.</ThinkAboutIt>
+
+## 🏗️ Configuración del repositorio
+
+Las primeras impresiones importan. Un repositorio profesional necesita: `src/` diseño para código, `tests/`, `examples/`, `docs/`, `.github/workflows/ci.yml`, además de archivos raíz: `LICENSE` (MIT o Apache 2.0), `README.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` y `pyproject.toml`.
+
+### El archivo README: su archivo más importante
+
+Su README es una página de ventas. Debe tener: **descripción de una línea**, **instalación** (`pip install my-project`), **inicio rápido** (código de trabajo en menos de 10 líneas), **características clave** (viñetas), **tabla de comparación** frente a alternativas y un **enlace a la documentación**.
+
+<Quiz question="¿Cuál es el elemento más importante del archivo README de un proyecto de código abierto?" options="Un diagrama de arquitectura detallado|Un ejemplo funcional de inicio rápido que los usuarios pueden copiar, pegar y ejecutar inmediatamente|Una lista completa de todas las funciones.|El recuento de estrellas del proyecto y las insignias de colaborador." answer="1" explanation="Los usuarios deciden en 30 segundos si quieren probar su proyecto. Un inicio rápido que se puede copiar y pegar y que funciona convierte inmediatamente a los navegadores en usuarios. Todo lo demás es secundario respecto de esa primera experiencia exitosa." />
+
+## 📦 Publicación en PyPI
+
+Empaquetado moderno de Python con `pyproject.toml`:
+
+```toml
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "my-ai-project"
+version = "0.1.0"
+description = "One-line description of your project"
+requires-python = ">=3.9"
+license = "MIT"
+dependencies = ["torch>=2.0", "numpy>=1.24"]
+
+[project.urls]
+Documentation = "https://my-ai-project.readthedocs.io"
+Repository = "https://github.com/username/my-ai-project"
+```
+
+```bash
+# Build and publish
+pip install build twine
+python -m build
+twine upload dist/*
+```
+
+**Lanzamientos automatizados**: use GitHub Actions para publicar en PyPI en cada lanzamiento etiquetado; nunca publique manualmente después de la primera vez.
+
+## 🎨 Creando demostraciones
+
+Una demostración convierte a los escépticos en usuarios. Tres excelentes plataformas:
+
+| Plataforma | Mejor para | Implementación |
+|----------|----------|-----------|
+| **Abrazando espacios faciales** | Demostraciones del modelo ML | Git push, nivel de GPU gratuito |
+| **Iluminado** | Aplicaciones de datos, paneles de control | Streamlit Cloud, nivel gratuito |
+| **Gradio** | Interfaces rápidas de aprendizaje automático | Hugging Face Spaces o independiente |
+
+```python
+# Gradio demo - 8 lines to a shareable interface
+import gradio as gr
+from my_ai_project import predict
+
+demo = gr.Interface(
+    fn=predict,
+    inputs=gr.Textbox(label="Enter text"),
+    outputs=gr.Label(label="Prediction"),
+    title="My AI Project Demo"
+)
+demo.launch()
+```
+
+<Quiz question="¿Qué plataforma de demostración es MÁS eficaz para conseguir tracción inicial para un proyecto de aprendizaje automático?" options="Una interfaz de React personalizada implementada en Vercel|Hugging Face Spaces: visible para la comunidad de aprendizaje automático con funciones sociales integradas|Un cuaderno Jupyter en el repositorio.|Una demostración de línea de comandos en README" answer="1" explanation="Millones de profesionales de ML pueden descubrir Hugging Face Spaces, admite me gusta y comentarios, y aparece en los resultados de búsqueda. Combina la simplicidad de implementación con la distribución integrada: su demostración encuentra usuarios, y no al revés." />
+
+## 📖 Redacción de documentación
+
+Siga el **marco Diátaxis**: cuatro tipos de documentación: **Tutoriales** (orientados al aprendizaje, paso a paso), **Guías prácticas** (orientadas a tareas, prácticas), **Referencia** (documentos API completos) y **Explicación** (comprensión conceptual). Utilice **MkDocs** o **Docusaurus** para generar sitios desde Markdown. Implemente gratis en las páginas de GitHub o lea los documentos.
+
+## 📣 Comercializar tu proyecto
+
+Construirlo es la mitad de la batalla. Conseguir que la gente lo utilice es la otra mitad:
+
+1. **Hacker News** - Publicación "Mostrar HN: [descripción]" el día del lanzamiento
+2. **Reddit** - r/MachineLearning, r/Python, subreddits relevantes
+3. **Twitter/X** - hilo que explica el problema y su solución, con una demostración GIF
+4. **Búsqueda de productos**: si su proyecto tiene una interfaz web
+5. **Publicación de blog**: artículo técnico detallado en su sitio personal o Medium/Dev.to
+
+**El tiempo importa**: lanzamiento de martes a jueves por la mañana (GMT). Evite fines de semana y días festivos.
+
+<FunFact>Los creadores de FastAPI, LangChain y Streamlit atribuyen a una publicación oportuna de Hacker News "Show HN" el mayor impulsor de su ola de adopción inicial.</FunFact>
+
+<ThinkAboutIt>Su proyecto obtiene 500 estrellas de GitHub en la primera semana, pero cero problemas o relaciones públicas de contribuyentes externos. ¿Es esto un éxito? ¿Qué harías diferente para convertir a los observadores pasivos de estrellas en contribuyentes activos?</ThinkAboutIt>
+
+## 🔧 Manteniendo tu proyecto
+
+La sostenibilidad importa más que la viralidad:
+
+- **Problemas de etiquetas** como `good-first-issue`, `help-wanted`, `bug`, `enhancement`
+- **Responder a los problemas dentro de las 48 horas** - incluso un "Gracias, investigaré esto" genera confianza
+- **Escriba un CONTRIBUTING.md** con instrucciones de configuración, estándares de codificación y pautas de relaciones públicas.
+- **Usar control de versiones semántico**: los cambios importantes obtienen un aumento importante en la versión
+- **Automatizar todo** - CI, lanzamientos, generación de registros de cambios, actualizaciones de dependencias
+
+## 💰 Rutas de monetización
+
+El código abierto no significa mano de obra gratuita para siempre. Modelos sostenibles: **Patrocinadores de GitHub** (bajo esfuerzo, donaciones recurrentes), **consultoría** (configuración y capacitación pagas), **contenedor de SaaS** (versión alojada con características empresariales: mayor esfuerzo pero más sustentable), **licencias duales** (código abierto + comercial) y **patrocinio corporativo** (funciones prioritarias para empresas que pagan).
+
+<Quiz question="¿Cuál es la estrategia de monetización a largo plazo MÁS sostenible para una biblioteca de inteligencia artificial de código abierto popular?" options="Depender de las donaciones de los patrocinadores de GitHub|Creación de una versión alojada de SaaS con soporte y funciones empresariales|Vender el proyecto a una gran empresa.|Colocar anuncios en la documentación." answer="1" explanation="Un contenedor SaaS (versión alojada con funciones empresariales, acuerdos de nivel de servicio y soporte) genera ingresos recurrentes vinculados al valor que reciben los usuarios. Las donaciones son impredecibles, las adquisiciones son eventos únicos y los anuncios erosionan la confianza." />
+
+## 🎯 Lista de verificación de tu obra maestra
+
+Antes de llamarlo enviado:
+
+- [] La funcionalidad principal funciona y está probada
+- [] README tiene instalación, inicio rápido y descripción general de funciones
+- [] Publicado en PyPI o npm
+- [] Demostración en vivo de Hugging Face Spaces o Streamlit
+- [] La canalización de CI/CD ejecuta pruebas en cada PR
+- [] La documentación cubre tutoriales y referencias de API.
+- [ ] LICENCIA, CONTRIBUTING.md y CODE_OF_CONDUCT.md presentes
+- [] Lanzado en al menos dos plataformas (HN, Reddit, Twitter)
+
+**Este proyecto ES tu portafolio.** Cuando un entrevistador te pregunte "¿Qué has construido?", tendrás una respuesta publicada, documentada y en vivo.
+
+---
+
+## 📚 Lecturas adicionales
+
+- [The Diátaxis Documentation Framework](https://diataxis.fr/) - Un enfoque sistemático para redactar una mejor documentación técnica
+- [Guías de código abierto de GitHub](https://opensource.guide/) - Guías oficiales sobre el lanzamiento, el crecimiento y el mantenimiento de proyectos OSS
+- [Trabajar en público por Nadia Eghbal](https://www.amazon.co.uk/Working-Public-Making-Maintenance-Software/dp/0578675862) - La economía y la sociología del mantenimiento de código abierto

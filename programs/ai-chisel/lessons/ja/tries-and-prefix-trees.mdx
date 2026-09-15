@@ -1,0 +1,173 @@
+---
+title: "トライとプレフィックス ツリー - オートコンプリート、スペル チェック、および IP ルーティング"
+description: "超高速のプレフィックス検索のための trie データ構造をマスターします。オートコンプリート、ワイルドカード検索を構築し、圧縮試行と IP ルーティングを探索します。"
+order: 6
+difficulty: "advanced"
+duration: 18
+icon: "🌳"
+published: true
+machineTranslated: true
+---
+## トライとは何ですか?
+
+**トライ** (「トライ」と発音) は、各ノードが 1 つの文字を表すツリー状の構造です。ルートからマークされたノードまでのパスは、保存された単語を綴ります。ハッシュ マップとは異なり、try を使用すると、すべてのキーをスキャンすることなく *プレフィックスを共有するすべての単語* をクエリできます。
+
+```
+        root
+       / | \
+      a   b   c
+     /     \
+    p       a
+   / \       \
+  p   e      t
+  |
+  l
+  e
+```
+
+すべてのパスは単語をエンコードします: **apple**、**ape**、**bat**、**cat**。
+
+## TrieNode クラス
+
+各ノードは、子のマップと単語の補完を示すフラグを保持します。
+
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end = False
+```
+
+完全なトライでは、これを挿入、検索、プレフィックス操作でラップします。
+
+## コアオペレーション
+
+### 挿入 - O(m) ここで、m = 語長
+
+必要に応じてノードを作成しながら 1 文字ずつ歩き、最後のノードをマークします。
+
+```python
+def insert(self, word):
+    node = self.root
+    for ch in word:
+        if ch not in node.children:
+            node.children[ch] = TrieNode()
+        node = node.children[ch]
+    node.is_end = True
+```
+
+### 検索して次で始まる
+
+**検索** はパスをたどり、`is_end`をチェックします。 **startsWith** はパスが存在するかどうかのみをチェックします。`is_end = True` は必要ありません。
+
+<Quiz
+  question="「apple」は保存されているが「app」は保存されていない場合、search('app') とstartsWith('app') の違いは何ですか?"
+  options="検索は True を返し、startsWith は False を返します|どちらも True を返します|検索は False を返し、startsWith は True を返します|どちらも False を返します"
+  answer="2"
+  explanation="search は is_end (「app」の場合は False) をチェックしますが、startsWith は存在するパスのみを必要とします。"
+/>
+
+## DFS によるオートコンプリート
+
+接頭辞の補完を提案するには、接頭辞ノードに移動し、DFS を実行してその下にあるすべての単語を収集します。
+
+```python
+def autocomplete(self, prefix):
+    node = self._find(prefix)
+    if not node:
+        return []
+    results = []
+    self._dfs(node, prefix, results)
+    return results
+```
+
+`_dfs` ヘルパーは子を再帰し、`is_end` が `True` になるたびに結果に追加します。
+
+<ThinkAboutIt>オートコンプリートを最も頻繁に使用される上位 k 件の提案に制限するにはどうすればよいでしょうか?各ノードにはどのような追加データが必要ですか?</ThinkAboutIt>
+
+## ワイルドカード検索 - 単語辞書
+
+LeetCode の **単語の追加と検索のデータ構造の設計** では、`.` を任意の 1 文字に一致するワイルドカードとして処理するように求められます。
+
+検索中に `.` にヒットすると、*すべての* 子に分岐し、再帰的に続行します。これにより、単純なトラバースが限定されたバックトラッキング検索に変わります。
+
+```python
+def search_wild(self, node, word, i):
+    if i == len(word):
+        return node.is_end
+    if word[i] == '.':
+        return any(
+            self.search_wild(c, word, i + 1)
+            for c in node.children.values()
+        )
+    if word[i] not in node.children:
+        return False
+    return self.search_wild(
+        node.children[word[i]], word, i + 1
+    )
+```
+
+## 最長の共通プレフィックス
+
+トライを根元から歩く。最長の共通プレフィックスは、複数の子または `is_end` フラグを持つ最初のノードで終了します。
+
+<Illustration src="/images/lessons/tries-and-prefix-trees.svg" alt="強調表示された共有プレフィックス パスを示すトライ構造" caption="共有プレフィックス パスは、分割が発生するまで 1 つのブランチに収束します。" />
+
+## 試行による IP ルーティング
+
+ルーターは IP プレフィックスを **バイナリ トライ** に保存します。各ビット (0 または 1) が分岐を形成します。最長プレフィックス一致により、最も具体的なルートが検索されます。これが、パケットがインターネット上を通過する方法です。
+
+<FunFact>インターネット バックボーン ルーターは、TCAM と呼ばれる特殊なチップに組み込まれたハードウェアに最適化された試行を使用して、1 秒あたり数十億回の最長プレフィックス一致検索を実行します。</FunFact>
+
+## 圧縮トライ (基数ツリー)
+
+標準は、単一子チェーン上のスペースを無駄にしようとします。 **基数ツリー** は、これらのチェーンを、複数文字のラベルを格納する単一のエッジにマージします。
+
+```
+Standard:  r → u → n → n → i → n → g
+Radix:     r → "unning"
+```
+
+これによりノード数が大幅に削減され、Linux カーネル ルーティング テーブルや Go の `httprouter` などの HTTP ルーターで使用されます。
+
+## 時間と空間の複雑さ
+
+|操作 |トライ |ハッシュマップ |
+|---------------|--------|----------|
+|挿入 | O(m) | O(m) |
+|検索 | O(m) | O(m) |
+|プレフィックス クエリ| O(m+k) | O(n・m) |
+
+ここで、*m* は単語長、*k* は結果数、*n* はキーの総数です。プレフィックスが多いワークロードでは試行が優勢です。
+
+<Quiz
+  question="ハッシュ マップ上のトライによるメリットが最も少ないシナリオはどれですか?"
+  options="オートコンプリートの提案|正確なキーと値の検索|接頭辞一致を備えたスペルチェッカー|「pre」で始まるすべての単語の検索"
+  answer="1"
+  explanation="プレフィックス クエリを使用しない正確なルックアップの場合、ハッシュ マップはより単純で、同様に高速です。"
+/>
+
+## トライに手を伸ばすとき
+
+- プレフィックスベースのクエリ (オートコンプリート、先行入力)
+- ワイルドカードまたは正規表現に似た文字列の一致
+- セット全体で最も長い共通プレフィックス
+- IP ルーティング / 最長プレフィックス マッチ
+- 編集距離のバリエーションによるスペルチェック
+
+<Quiz
+  question="平均長が m の n ワードをトライに挿入すると、時間計算量はどれくらいになりますか?"
+  options="の上）|オ(メートル)|O(n × m)|O(n × 平方メートル)"
+  answer="2"
+  explanation="各単語の挿入には O(m) かかり、これを n 回行うと、O(n × m) になります。"
+/>
+
+<ThinkAboutIt>メモリがボトルネックである場合、トライよりも完全なキーを格納するハッシュ マップをいつ選択しますか?</ThinkAboutIt>
+
+---
+
+## 📚 続きを読む
+
+- [トライのデータ構造 - Wikipedia](https://en.wikipedia.org/wiki/Trie) - トライの亜種と歴史の包括的な概要
+- [トライの実装 - LeetCode 208](https://leetcode.com/problems/implement-trie-prefix-tree/) - 古典的なトライの実装問題
+- [Linux カーネルの基数ツリー](https://lwn.net/Articles/175432/) - カーネル内部の電力を圧縮する方法

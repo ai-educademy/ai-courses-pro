@@ -1,0 +1,296 @@
+---
+title: "API-ontwerpinterviews"
+description: "Ontwerp schone, intuïtieve API's onder druk van interviews: REST, GraphQL en de principes die API's geweldig maken."
+order: 4
+difficulty: "intermediate"
+duration: 18
+icon: "🔌"
+published: true
+machineTranslated: true
+---
+# API-ontwerpinterviews
+
+API's zijn contracten tussen systemen, en het goed ontwerpen ervan is een vaardigheid die senior ingenieurs onderscheidt van junioren. In een API-ontwerpinterview schrijft u niet alleen eindpunten; u laat zien dat u begrijpt hoe consumenten uw systeem zullen gebruiken, hoe het zich in de loop van de tijd zal ontwikkelen en waar de faalwijzen liggen. Of u nu wordt gevraagd een betalingsgateway of een API voor een sociale-mediaplatform te ontwerpen, de principes zijn hetzelfde. Laten we ze onder de knie krijgen.
+
+## REST API-ontwerpprincipes
+
+REST blijft het dominante API-paradigma in interviews. De grondslagen die u moet aantonen:
+
+### Resourcegericht ontwerp
+
+Denk in zelfstandige naamwoorden (middelen), niet in werkwoorden (acties). URL's moeten dingen vertegenwoordigen, en HTTP-methoden moeten acties op die dingen vertegenwoordigen.
+
+```
+✅ Good:
+GET    /users/123              — Fetch user 123
+POST   /users                  — Create a new user
+PUT    /users/123              — Replace user 123
+PATCH  /users/123              — Partially update user 123
+DELETE /users/123              — Delete user 123
+
+❌ Bad:
+GET    /getUser?id=123
+POST   /createUser
+POST   /deleteUser/123
+```
+
+<Callout>Een schone resourcehiërarchie vertelt het verhaal van de API. `/users/123/orders/456/items` luidt natuurlijk: "Gebruiker 123 bestelt de items van 456." Als uw URL-structuur niet als een zin leest, heroverweeg dan uw bronontwerp.</Callout>
+
+### HTTP-methoden en statuscodes
+
+Ken deze koude – interviewers zullen uw nauwkeurigheid testen:
+
+| Werkwijze | Idempotent? | Gebruiksscenario |
+|---|---|---|
+| KRIJG | Ja | Een bron lezen (nooit muteren) |
+| POST | Nee | Een bron maken |
+| ZET | Ja | Volledige vervanging van een hulpbron |
+| PATCH | Nee* | Gedeeltelijke update |
+| VERWIJDEREN | Ja | Een bron verwijderen |
+
+*PATCH is technisch gezien niet gegarandeerd idempotent, hoewel implementaties dat vaak wel zijn.*
+
+**Statuscodes die u moet kennen**:
+- `200 OK` — Succes met antwoordtekst
+- `201 Created` — Bron gemaakt (inclusief koptekst `Location`)
+- `204 No Content` — Succes zonder antwoordtekst (gebruikelijk voor DELETE)
+- `400 Bad Request` — Klant heeft ongeldige gegevens verzonden
+- `401 Unauthorized` — Authenticatie vereist
+- `403 Forbidden` — Geauthenticeerd maar niet geautoriseerd
+- `404 Not Found` — Bron bestaat niet
+- `409 Conflict` — Conflict met huidige status (duplicaat, versie komt niet overeen)
+- `429 Too Many Requests` — Tarief beperkt
+- `500 Internal Server Error` — Er is iets kapot gegaan aan onze kant
+
+### Paginering
+
+Retourneer nooit onbegrensde lijsten. Drie veelvoorkomende patronen:
+
+```json
+// Offset-based (simple but poor for large datasets)
+GET /users?offset=20&limit=10
+
+// Cursor-based (preferred for feeds and large datasets)
+GET /users?cursor=eyJ0aW1lIjoiMjAyNC0wMS0wMSJ9&limit=10
+
+// Response includes pagination metadata
+{
+  "data": [...],
+  "pagination": {
+    "next_cursor": "eyJ0aW1lIjoiMjAyNC0wMS0wMiJ9",
+    "has_more": true
+  }
+}
+```
+
+<ThinkAboutIt>Waarom wordt voor grote, regelmatig bijgewerkte datasets de voorkeur gegeven aan cursorgebaseerde paginering boven offsetgebaseerde paginering? Bedenk wat er gebeurt als er nieuwe items worden ingevoegd terwijl een gebruiker door de resultaten bladert.</ThinkAboutIt>
+
+### Versiebeheer
+
+API's evolueren. Ontwerp er vanaf dag één voor.
+
+```
+// URL versioning (most common, explicit)
+GET /v1/users/123
+GET /v2/users/123
+
+// Header versioning (cleaner URLs, less discoverable)
+GET /users/123
+Accept: application/vnd.myapi.v2+json
+```
+
+In interviews is URL-versiebeheer het veilige antwoord, tenzij de interviewer specifiek alternatieven onderzoekt.
+
+### Foutreacties
+
+Consistente, informatieve foutreacties onderscheiden geweldige API's van frustrerende API's:
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "The request body contains invalid fields.",
+    "details": [
+      {
+        "field": "email",
+        "message": "Must be a valid email address."
+      },
+      {
+        "field": "age",
+        "message": "Must be a positive integer."
+      }
+    ],
+    "request_id": "req_abc123"
+  }
+}
+```
+
+Voeg altijd een `request_id` toe voor foutopsporing en een machinaal leesbare `code` naast de voor mensen leesbare `message`.
+
+## GraphQL in interviews
+
+GraphQL-vragen komen steeds vaker voor, vooral bij bedrijven met complexe frontendbehoeften.
+
+**Belangrijkste voordelen om te verwoorden**:
+- Klanten vragen precies de gegevens op die ze nodig hebben (geen overfetching)
+- Eén eindpunt vermindert retourvluchten
+- Sterk getypeerd schema dient als documentatie
+
+```graphql
+# Schema definition
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  orders(first: Int, after: String): OrderConnection!
+}
+
+type Order {
+  id: ID!
+  total: Float!
+  status: OrderStatus!
+  items: [OrderItem!]!
+}
+
+# Query — client specifies exactly what it needs
+query {
+  user(id: "123") {
+    name
+    orders(first: 5) {
+      edges {
+        node {
+          total
+          status
+        }
+      }
+    }
+  }
+}
+```
+
+**Trade-offs om te bespreken**: GraphQL voegt complexiteit toe aan de serverkant (resolverketens, N+1 queries, caching is moeilijker). Voor eenvoudige CRUD API’s is REST vaak de betere keuze.
+
+<FunFact>GraphQL werd in 2012 intern bij Facebook ontwikkeld om een ​​specifiek mobiel prestatieprobleem op te lossen: de nieuwsfeed vereiste gegevens van veel verschillende backend-services, en het uitvoeren van meerdere REST-oproepen vanaf mobiele apparaten op trage netwerken was slecht voor de prestaties. Het was open source in 2015.</FunFact>
+
+## Basisprincipes van API-beveiliging
+
+Elk API-ontwerpinterview moet betrekking hebben op beveiliging. Behandel deze essentiële zaken:
+
+### Authenticatie en autorisatie
+
+```
+Authentication (AuthN): WHO are you?
+→ API Keys, OAuth 2.0, JWT tokens
+
+Authorisation (AuthZ): WHAT can you do?
+→ Role-based (RBAC), Scope-based, Resource-based
+```
+
+```
+// JWT in Authorization header
+GET /users/123/orders
+Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
+
+// API Key (for server-to-server)
+GET /analytics/reports
+X-API-Key: sk_live_abc123...
+```
+
+### Snelheidslimiet
+
+Bescherm uw API tegen misbruik en zorg voor eerlijk gebruik:
+
+```
+// Rate limit headers in response
+HTTP/1.1 200 OK
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 847
+X-RateLimit-Reset: 1640995200
+
+// When limit is exceeded
+HTTP/1.1 429 Too Many Requests
+Retry-After: 60
+```
+
+Bespreek snelheidsbeperkende strategieën: per gebruiker, per IP, per eindpunt en gelaagde limieten voor verschillende API-abonnementen.
+
+## Echte interviewscenario's
+
+### Ontwerp een betalings-API
+
+Vereisten ter verduidelijking:
+- Welke betaalmethoden? (Kaart, bankoverschrijving, portemonnee)
+- Hebben we idempotentie nodig? (Ja – altijd voor betalingen)
+- Hoe zit het met terugbetalingen en geschillen?
+
+```
+POST /v1/payments
+{
+  "amount": 4999,           // Always use smallest currency unit (cents)
+  "currency": "GBP",
+  "payment_method": "pm_card_visa_123",
+  "idempotency_key": "order_789_attempt_1",
+  "metadata": {
+    "order_id": "order_789"
+  }
+}
+
+Response: 201 Created
+{
+  "id": "pay_abc123",
+  "status": "processing",
+  "amount": 4999,
+  "currency": "GBP",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+<Callout>Bespreek voor betalings-API's altijd idempotentiesleutels. Netwerkstoringen gebeuren, clients proberen het opnieuw en zonder idempotentie brengt u klanten twee keer kosten in rekening. De idempotentiesleutel zorgt ervoor dat het opnieuw proberen van hetzelfde verzoek hetzelfde resultaat oplevert.</Callout>
+
+**Belangrijke ontwerpbeslissingen om te bespreken**:
+- Bedragen in de kleinste munteenheid (cent/pence) om problemen met drijvende komma te voorkomen
+- Idempotentiesleutels voor veilige nieuwe pogingen
+- Webhook-callbacks voor asynchrone statusupdates
+- Overwegingen inzake PCI-naleving
+
+### Ontwerp een sociale media-API
+
+```
+// Post creation
+POST /v1/posts
+{
+  "content": "Hello world!",
+  "media_ids": ["media_123"],
+  "visibility": "public"
+}
+
+// Feed retrieval with cursor pagination
+GET /v1/feed?cursor=abc&limit=20
+
+// Interactions
+POST /v1/posts/{post_id}/likes
+DELETE /v1/posts/{post_id}/likes
+POST /v1/posts/{post_id}/comments
+```
+
+Bespreek filteren, zoeken en hoe de feed wordt samengesteld (pull- versus push-model houdt verband met systeemontwerp).
+
+## Veelgemaakte fouten in API-ontwerpinterviews
+
+1. **Interne implementatie blootleggen** — Zorg ervoor dat databasekolomnamen of interne ID's niet in de API lekken. Gebruik DTO's.
+2. **Inconsistente naamgeving** — Kies `snake_case` of `camelCase` en blijf daar overal bij.
+3. **Ontbrekende paginering**: elk lijsteindpunt moet paginering ondersteunen.
+4. **Geen discussie over foutafhandeling** — Laat zien dat u nadenkt over foutmodi.
+5. **Negeren van achterwaartse compatibiliteit**: het toevoegen van verplichte velden aan bestaande eindpunten leidt tot problemen bij klanten.
+6. **Werkwoorden gebruiken in URL's** — `/createUser` in plaats van `POST /users`.
+
+<Quiz question="Een client verzendt een POST-verzoek om een ​​bestelling te plaatsen, maar het netwerk laat het antwoord achterwege. De client probeert het opnieuw met dezelfde idempotentiesleutel. Wat moet de server retourneren?" options="400 Slecht verzoek: dubbel verzoek|201 Gemaakt — met de oorspronkelijke bestelling (hetzelfde antwoord als de eerste keer)|409 Conflict — bestelling bestaat al|200 OK — met een nieuwe bestelling" answer="1" explanation="Met idempotency herkent de server de dubbele sleutel en retourneert hetzelfde 201 Created-antwoord met de originele bestelgegevens. Dit is het hele punt van idempotentiesleutels: nieuwe pogingen veilig en transparant maken voor de klant." />
+
+## Belangrijkste afhaalrestaurants
+
+- **Denk in hulpbronnen**: ontwerp URL's rond zelfstandige naamwoorden, laat HTTP-methoden de werkwoorden afhandelen.
+- **Ken uw statuscodes**: nauwkeurige statuscodes laten zien dat u de HTTP-semantiek begrijpt.
+- **Altijd gepagineerd**: onbegrensde lijstreacties zijn een alarmsignaal in interviews.
+- **Ontwerp voor mislukking**: idempotentie, foutreacties en snelheidsbeperking duiden op productiegereedheidsdenken.
+- **Beveiliging is niet optioneel**: authenticatie, autorisatie en snelheidsbeperking moeten deel uitmaken van elke discussie over API-ontwerp.
+- **Geformuleerde afwegingen**: REST versus GraphQL, consistentie versus flexibiliteit, eenvoud versus kracht: interviewers willen uw redenering horen.

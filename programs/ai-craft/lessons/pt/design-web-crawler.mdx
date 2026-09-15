@@ -1,0 +1,158 @@
+---
+title: "Projete um rastreador da Web - como o Google indexa a Internet"
+description: "Projete um rastreador da web distribuído que cubra gerenciamento de fronteira de URL, políticas de polidez, desduplicação de conteúdo com SimHash e rastreamento distribuído com hashing consistente."
+order: 9
+difficulty: "advanced"
+duration: 22
+icon: "🕷️"
+published: true
+machineTranslated: true
+---
+# Projete um rastreador da Web - como o Google indexa a Internet
+
+Um rastreador da web navega sistematicamente na Internet para baixar e indexar páginas da web. É a base de todo mecanismo de pesquisa, e projetar um ensina sobre sistemas distribuídos, travessia de gráficos e como lidar com a confusão da web real.
+
+## Passo 1 – Levantamento de Requisitos
+
+### Requisitos Funcionais
+- Rastrear páginas da web a partir de um conjunto de URLs iniciais
+- Extraia e siga hiperlinks para descobrir novas páginas
+- Armazene conteúdo baixado para indexação e processamento
+- Respeite o robots.txt e as regras de polidez do rastreamento
+
+### Requisitos Não Funcionais
+- **Escala** - rastreia 1 bilhão de páginas por mês
+- **Polidez** - nunca sobrecarregue um único servidor web
+- **Atualidade** - rastreie novamente páginas importantes regularmente
+- **Robustez** - lida com HTML malformado, loops infinitos e armadilhas de aranha
+
+## Etapa 2 - Arquitetura de alto nível
+
+```
+Seed URLs → URL Frontier (priority queue)
+                  ↓
+            URL Scheduler (politeness + priority)
+                  ↓
+         Fetcher (HTTP client pool)
+                  ↓
+         HTML Parser → Extract URLs → URL Filter
+              ↓                           ↓
+       Content Store              URL Dedup (Bloom Filter)
+       (S3 / HDFS)                      ↓
+                                 URL Frontier (loop)
+```
+
+<Illustration src="/images/lessons/design-web-crawler.svg" alt="Arquitetura do rastreador da Web mostrando o loop de rastreamento da fronteira de URL por meio de buscador, analisador, extração de URL, desduplicação e retorno à fronteira" caption="O rastreador opera como um loop contínuo: busca uma página, extrai novos URLs, desduplica e enfileira para rastreamento futuro" />
+
+## Etapa 3 - O ciclo de rastreamento
+
+### Rastreamento BFS vs DFS
+- **BFS (Breadth-First)** – preferido para rastreamento da web. Descobre rapidamente um amplo conjunto de domínios e evita ficar preso em um único site
+- **DFS (Depth-First)** - corre o risco de se aprofundar infinitamente nas páginas geradas dinamicamente antes de descobrir outros domínios
+
+### Design de fronteira de URL
+A fronteira não é uma fila simples – é um sistema de prioridade sofisticado com dois subcomponentes:
+
+1. **Fila de prioridade (frontal)** - classifica os URLs por importância. Os fatores incluem PageRank, frequência de atualização e autoridade de domínio
+2. **Fila de Polidez (Voltar)** - garante que cada domínio tenha sua própria fila FIFO. Um agendador escolhe diferentes filas de domínio para evitar sobrecarregar qualquer servidor único
+
+```
+Front (Priority):       Back (Politeness):
+┌──────────────┐       ┌─── bbc.co.uk queue ───┐
+│ High Priority │ ───→  │ url1 → url4 → url7    │
+│ Med Priority  │ ───→  ├─── github.com queue ──┤
+│ Low Priority  │ ───→  │ url2 → url5 → url8    │
+└──────────────┘       ├─── wikipedia.org queue ┤
+                        │ url3 → url6 → url9    │
+                        └───────────────────────┘
+```
+
+<Quiz question="Por que um rastreador da Web usa BFS em vez de DFS para rastreamento de uso geral?" options="BFS usa menos memória|O BFS descobre mais domínios exclusivos com mais rapidez e evita ficar preso em um único site|BFS é mais rápido que DFS|DFS não funciona com URLs" answer="1" explanation="O BFS explora nível por nível, o que significa que descobre páginas em muitos domínios diferentes rapidamente. O DFS poderia seguir links profundamente em um único site - potencialmente atingindo milhões de páginas geradas dinamicamente - antes mesmo de visitar outro domínio." />
+
+## Etapa 4 - Polidez e Robots.txt
+
+### Respeitando Robots.txt
+Antes de rastrear qualquer domínio, busque e armazene em cache seu arquivo `robots.txt`:
+
+```
+# Example robots.txt
+User-agent: *
+Disallow: /admin/
+Disallow: /private/
+Crawl-delay: 2
+```
+
+Armazene robots.txt em cache por domínio com TTL (24 horas). Sempre honre `Disallow` regras e `Crawl-delay` diretivas.
+
+### Limitação de taxa de rastreamento
+Mesmo sem `Crawl-delay` explícito, mantenha a educação:
+- Máximo de 1 solicitação por segundo por domínio (configurável)
+- Use filas de download separadas por domínio
+- Acompanhe os tempos de resposta - se um servidor ficar lento, recue automaticamente
+
+<FunFact>O rastreador da web do Google (Googlebot) rastreia centenas de bilhões de páginas. Para ser educado, ele monitora os tempos de resposta do servidor e reduz sua taxa de rastreamento se um site começar a responder lentamente - permitindo efetivamente que o site "revida" o rastreador.</FunFact>
+
+## Etapa 5 - Desduplicação
+
+### Desduplicação de URL (filtro Bloom)
+Com bilhões de URLs, verificar se uma URL já foi vista antes requer uma estrutura de dados eficiente. Um filtro Bloom fornece pesquisas O(1) com um pequeno consumo de memória:
+
+- **Espaço:** aproximadamente 1 GB para 1 bilhão de URLs com taxa de falsos positivos de 1%
+- **Compensação:** pode ocasionalmente rastrear novamente uma página (falso positivo), mas nunca perde um novo URL (sem falsos negativos)
+
+Normalize URLs antes de verificar: remova fragmentos (#), classifique os parâmetros de consulta, coloque o nome do host em minúsculas e resolva caminhos relativos.
+
+### Desduplicação de conteúdo (SimHash)
+URLs diferentes podem servir conteúdo idêntico (espelhos, artigos copiados). SimHash gera uma impressão digital do conteúdo da página - páginas com impressões digitais semelhantes (pequena distância de Hamming) são provavelmente duplicadas:
+
+```
+Page A content → SimHash → 10110010...
+Page B content → SimHash → 10110011...
+Hamming distance = 1 → likely duplicate, skip storing
+```
+
+<Quiz question="Um filtro Bloom informa que um URL já foi visto antes. O que você pode concluir?" options="O URL foi definitivamente rastreado|O URL provavelmente foi rastreado, mas há uma pequena chance de ser um falso positivo|O URL não foi rastreado|O filtro Bloom precisa ser reconstruído" answer="1" explanation="Os filtros Bloom têm uma pequena taxa de falsos positivos - eles podem dizer 'sim, visto' para um URL não visto, mas nunca dizem 'não' para um URL que foi realmente adicionado. Isso significa rastrear novamente uma página ocasionalmente, o que é aceitável para a maioria dos rastreadores." />
+
+## Etapa 6 - Rastreamento distribuído
+
+### Dimensionando horizontalmente
+Uma única máquina não consegue rastrear um bilhão de páginas mensalmente. Distribua o trabalho:
+
+- **Hashing consistente** em nomes de domínio atribui cada domínio a um nó rastreador específico. Isso garante educação - apenas um nó rastreia um determinado domínio
+- **A fronteira de URL** é particionada entre nós com base no anel hash
+- **Coordenação** por meio de um serviço leve que gerencia atribuições de nós e reequilibra quando os nós entram ou saem
+
+### Cache de resolução DNS
+As pesquisas de DNS adicionam de 10 a 100 ms por solicitação. Em escala, este é um grande gargalo:
+- Manter um cache DNS local por nó rastreador
+- Pré-resolução DNS em lote para URLs enfileirados
+- Use um resolvedor DNS dedicado para evitar sobrecarregar servidores DNS públicos
+
+### Detecção de armadilha de aranha
+Sites maliciosos ou mal construídos podem criar espaços de URL infinitos:
+- `/page/1/page/1/page/1/...` - repetindo padrões de caminho
+- Páginas de calendário gerando URLs para cada data futura
+- IDs de sessão em URLs criando URLs exclusivos para conteúdo idêntico
+
+**Defesas:** comprimento máximo de URL, profundidade máxima de rastreamento por domínio, detecção de padrões para estruturas de URL repetitivas e limites de contagem de páginas em nível de domínio.
+
+<ThinkAboutIt>Se você precisar manter um índice de pesquisa atualizado, como decidiria quais páginas rastrear novamente primeiro? Considere um site de notícias que é atualizado de hora em hora em vez de um artigo da Wikipedia que muda mensalmente. Que sinais você usaria para priorizar o agendamento de novo rastreamento?</ThinkAboutIt>
+
+## Etapa 7 - Gargalos e otimizações
+
+| Gargalo | Solução |
+|-----------|----------|
+| Latência de resolução DNS | Cache DNS local, pré-resolução em lote |
+| Servidores lentos/que não respondem | Tempos limite (30s), E/S assíncrona, salto após novas tentativas |
+| Armazenamento para conteúdo rastreado | Compactar páginas, armazenar apenas conteúdo alterado |
+| Memória de fronteira de URL | Fila de prioridade apoiada em disco (RocksDB) |
+| Conteúdo duplicado | Impressão digital SimHash, detecção canônica de URL |
+
+<ThinkAboutIt>Os mecanismos de pesquisa devem equilibrar a atualização do rastreamento (rastrear novamente as páginas com frequência) e a descoberta (encontrar novas páginas). Se o seu rastreador tiver um orçamento fixo de 1 milhão de páginas por dia, como você dividiria esse orçamento entre rastrear novamente as páginas existentes e descobrir novas?</ThinkAboutIt>
+
+---
+
+## 📚 Leitura adicional
+- [Web Crawler - Entrevista de design de sistema Vol. 1, cap. 9](https://bytebytego.com/) - Passo a passo detalhado do design do rastreador da web de Alex Xu
+- [Mercator: A Scalable Web Crawler](https://courses.cs.washington.edu/courses/cse454/15wi/papers/mercator.pdf) - artigo fundamental sobre arquitetura de crawler escalável
+- [Filtros Bloom por exemplo](https://llimllib.github.io/bloomfilter-tutorial/) - tutorial interativo sobre como funcionam os filtros Bloom

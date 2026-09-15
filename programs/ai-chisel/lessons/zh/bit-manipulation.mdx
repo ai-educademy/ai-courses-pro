@@ -1,0 +1,188 @@
+---
+title: "位操作 - 异或技巧、2 的幂和位计数"
+description: "解锁编码面试的位级思维。掌握 XOR 取消、Brian Kernighan 的技巧、子集的位屏蔽以及实际应用。"
+order: 10
+difficulty: "advanced"
+duration: 17
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+## 二进制数复习
+
+每个整数都是一个位序列。二进制数 13 是 `1101`：
+
+```
+Bit position:  3  2  1  0
+Bit value:     1  1  0  1
+Decimal:       8+ 4+ 0+ 1 = 13
+```
+
+位操作使用按位运算符直接对这些位进行操作 - 通常用单个操作替换循环。
+
+## 核心按位运算
+
+|操作员|符号|示例 (5 = 101, 3 = 011) |结果 |
+|----------|--------|----------------------------|--------|
+|和| `&` | `101 & 011` | `001` (1) |
+|或 | `\|` | `101 \| 011` | `111` (7) |
+|异或| `^` | `101 ^ 011` | `110` (6) |
+|不 | `~` | `~101` | `...010` |
+|左移| `<<` | `101 << 1` | `1010` (10) |
+|右移| `>>` | `101 >> 1` | `10` (2) |
+
+## 基本技巧
+
+### 检查是否为二的幂
+
+2 的幂恰好有一个设置位：`n & (n - 1) == 0`。
+
+```
+  n = 8:  1000          n = 6:  0110
+  n-1=7:  0111          n-1=5:  0101
+  &    :  0000 ✓ power  &    :  0100 ✗ not power
+```
+
+### 计算设置位（Brian Kernighan 算法）
+
+每个 `n & (n - 1)` 删除最低设置位。计算迭代次数，直到 n = 0。
+
+```python
+def count_bits(n):
+    count = 0
+    while n:
+        n &= n - 1
+        count += 1
+    return count
+```
+
+其运行时间复杂度为 O(k)，其中 k 是设置位的数量，而不是 O(32)。
+
+### 没有临时变量的交换
+
+```python
+a ^= b
+b ^= a
+a ^= b
+```
+
+之所以有效，是因为 XOR 是它自己的逆：`a ^ b ^ b = a`。
+
+<Quiz
+  question="n & (n - 1) 对 n 的二进制表示有何作用？"
+  options="将所有位设置为 1|清除所有位|清除最低设置位|翻转所有位"
+  answer="2"
+  explanation="n - 1 将所有位从最低设置位向下翻转。与 n 的与运算将最低设置位清零。"
+/>
+
+## 单数-异或取消
+
+除一个元素外，每个元素都出现两次。找到它。从`a ^ a = 0`和`a ^ 0 = a`开始，异或所有元素 - 对取消，留下唯一的数字。
+
+```python
+def single_number(nums):
+    result = 0
+    for n in nums:
+        result ^= n
+    return result
+```
+
+时间 O(n)，空间 O(1)。不需要哈希图。
+
+<Illustration src="/images/lessons/bit-manipulation.svg" alt="XOR 取消显示对消除为零，留下单个唯一数字" caption="XOR 对取消为零 - 只有未配对的元素幸存。" />
+
+## 单号 III - 两个唯一的号码
+
+当*两个*数字唯一时，对所有内容进行异或以获得 `x = a ^ b`。在`x`中找到任何设置的位（那里的数字不同）。按该位对所有数字进行分区并对每个组进行异或 - 每组恰好包含一个唯一的数字。
+
+```python
+def single_number_iii(nums):
+    xor = 0
+    for n in nums:
+        xor ^= n
+    diff_bit = xor & (-xor)  # isolate rightmost set bit
+    a = b = 0
+    for n in nums:
+        if n & diff_bit:
+            a ^= n
+        else:
+            b ^= n
+    return [a, b]
+```
+
+<ThinkAboutIt>为什么`xor & (-xor)`隔离最右边的设置位？想想负数如何用补码表示。</ThinkAboutIt>
+
+## 1 位数（LeetCode 191）
+
+这是上面 Brian Kernighan 的算法 - 一个直接的面试问题。后续问：如果输入有签名怎么办？在 Python 中，整数具有任意精度，但在 Java/C++ 中，您必须处理 32 位边界。
+
+## 子集的位屏蔽
+
+长度为 n 的位掩码表示 n 个项目的子集。位`i`被设置意味着包含项目`i`。从 `0` 迭代到 `2^n - 1` 生成所有子集。
+
+```python
+def all_subsets(items):
+    n = len(items)
+    for mask in range(1 << n):
+        subset = [items[i] for i in range(n)
+                  if mask & (1 << i)]
+        yield subset
+```
+
+该技术为 n ≤ 20 的问题提供了解决方案 - 对于 2^n 枚举来说足够小。
+
+<FunFact>Linux 文件权限 (rwxr-xr-x = 755) 是真实世界的位掩码。每个数字编码三个权限位：读（4）、写（2）、执行（1），与OR组合。</FunFact>
+
+## 反转位（LeetCode 190）
+
+将 32 位无符号整数逐位反转。将结果左移并与输入的最低位进行“或”运算，然后将输入右移。
+
+```python
+def reverse_bits(n):
+    result = 0
+    for _ in range(32):
+        result = (result << 1) | (n & 1)
+        n >>= 1
+    return result
+```
+
+## 缺失号码（LeetCode 268）
+
+由 0 到 n 的 n 个数字组成的数组，其中缺少一个。对所有索引为 0 到 n 的所有数组元素进行异或 - 对取消，留下缺失的数字。或者，使用求和公式，但 XOR 可以避免潜在的溢出。
+
+## 汉明距离（LeetCode 461）
+
+相应位不同的位置数。对两个数字进行异或 - 结果中的设置位是不同的位置。用 Brian Kernighan 的技巧来计算它们。
+
+```python
+def hamming_distance(x, y):
+    return count_bits(x ^ y)
+```
+
+<Quiz
+  question="7 (0111) 和 1 (0001) 之间的汉明距离是多少？"
+  options="1|2|3|4"
+  answer="1"
+  explanation="7 XOR 1 = 0110，有两个设置位。这些位在位置 1 和 2 处不同。"
+/>
+
+## 实际应用
+
+位操作无处不在：Unix 文件权限使用 OR/AND 掩码，功能标志将切换存储为单独的位，网络子网掩码使用 AND 进行路由，错误检测依赖于 XOR 校验和。
+
+<Quiz
+  question="要检查整数 n 中是否设置了位 k，哪个表达式是正确的？"
+  options="恩和克|n & (1 << k)|n|(1 << k)|n ^ (1 << k)"
+  answer="1"
+  explanation="(1 << k) 创建仅设置了位 k 的掩码。仅当 n 中设置了位 k 时，与 n 进行 AND 运算才返回非零。"
+/>
+
+<ThinkAboutIt>许多位操作解决方案在面试中感觉像是“魔术”。您如何向从未见过的队友解释基于 XOR 的缺失数字解决方案？</ThinkAboutIt>
+
+---
+
+## 📚 进一步阅读
+
+- [位操作 - LeetCode Explore](https://leetcode.com/tag/bit-manipulation/) - 按难度排序的精选问题集合
+- [Brian Kernighan 算法 - GeeksforGeeks](https://www.geeksforgeeks.org/count-set-bits-in-an-integer/) - 详细的可视化演练
+- [位掩码 DP - CP 算法](https://cp-algorithms.com/algebra/all-submasks.html) - 用于竞争性编程的高级位掩码技术

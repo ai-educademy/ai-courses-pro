@@ -1,0 +1,149 @@
+---
+title: "Union-Find - 连接组件和网络检测"
+description: "了解具有路径压缩和按等级并集的并查（不相交集）数据结构。高效解决连接、MST 和图形组件问题。"
+order: 7
+difficulty: "advanced"
+duration: 17
+icon: "🔗"
+published: true
+machineTranslated: true
+---
+## 连接问题
+
+给定一个节点网络，您不断收到两种类型的查询：*将节点 A 连接到节点 B* 以及*A 和 B 连接了吗？* 使用 BFS/DFS 执行此操作意味着为每个查询遍历图形 - 对于数百万次操作来说太慢了。
+
+**并查**在几乎恒定的时间内回答了这两个问题。
+
+## 天真的方法 - 快速查找
+
+存储每个节点的组件 ID。要检查连通性，请在 O(1) 中比较 ID。但是合并两个组件会迫使您更新一个组的每个成员 - 每个联合的 O(n) 时间。
+
+```
+IDs:  [0, 0, 0, 3, 3]
+       └─group 0─┘ └group 3┘
+union(0, 3) → update all 3s to 0 → O(n)
+```
+
+我们需要更好的东西。
+
+## 并查数据​​结构
+
+每个节点都指向一个**父节点**。每棵树的根是组件代表。两个节点连接当且仅当它们共享相同的根。
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+```
+
+## 使用路径压缩查找
+
+在深树中向上查找父指针可能会很慢。 **路径压缩** 通过将每个访问的节点直接指向根来压平树。
+
+```python
+def find(self, x):
+    if self.parent[x] != x:
+        self.parent[x] = self.find(self.parent[x])
+    return self.parent[x]
+```
+
+找到节点4之前和之后：
+
+```
+Before:  0←1←2←3←4     After:  0←1
+                                0←2
+                                0←3
+                                0←4
+```
+
+## 按等级联合
+
+始终将较短的树固定在较高的树下方。这使树高度保持对数并防止退化链。
+
+```python
+def union(self, x, y):
+    rx, ry = self.find(x), self.find(y)
+    if rx == ry:
+        return False
+    if self.rank[rx] < self.rank[ry]:
+        rx, ry = ry, rx
+    self.parent[ry] = rx
+    if self.rank[rx] == self.rank[ry]:
+        self.rank[rx] += 1
+    return True
+```
+
+<Quiz
+  question="通过路径压缩和按等级并集，每个操作的摊余时间是多少？"
+  options="O(logn)|在）|O(α(n)) - 接近 O(1)|O(√n)"
+  answer="2"
+  explanation="反阿克曼函数 α(n) 增长得非常缓慢，对于任何实际输入都不会超过 4，从而使运算效率为 O(1)。"
+/>
+
+<Illustration src="/images/lessons/union-find-and-disjoint-sets.svg" alt="路径压缩前后的并查找树" caption="路径压缩使深层链变平，从而保持未来的快速查找。" />
+
+## Kruskal 的 MST 算法
+
+并查幂 **Kruskal 算法** 对于最小生成树：
+
+1. 按权重对所有边进行排序
+2. 对于每条边 (u, v)，如果 `find(u) ≠ find(v)`，则将其与 `union(u, v)` 相加
+3. 当有 n − 1 条边时停止
+
+并查找通过拒绝端点已经共享根的边来防止循环。总时间：**O(E log E)** 以排序为主。
+
+<ThinkAboutIt>Kruskal 使用 Union-Find 来检测循环。您将如何使用 DFS 来检测循环，为什么并查找在这里更自然？</ThinkAboutIt>
+
+## 经典问题
+
+### 连接组件的数量
+
+用 n 个节点初始化并查找。用 `union` 处理每个边缘。最后数出不同的根。
+
+### 账户合并 (LeetCode 721)
+
+每个帐户都有电子邮件。如果两个帐户共享一封电子邮件，则它们属于同一个人。通过共享电子邮件联合帐户，然后进行分组和排序。
+
+### 冗余连接（LeetCode 684）
+
+给定一棵树加上一条额外的边，找到冗余边。按顺序处理边 - `union` 返回 `False`（已连接）的第一条边就是答案。
+
+<FunFact>Tarjan 于 1975 年发表了两种优化的 Union-Find 运行时间复杂度为 O(α(n)) 的证明，被认为是计算机科学中最优雅的摊销分析之一。</FunFact>
+
+## 何时选择 Union-Find vs BFS/DFS
+
+|场景|最佳选择|
+|----------|-------------|
+|重复的连接查询|联查|
+|单次遍历/最短路径 |广度优先搜索/深度优先搜索 |
+|增量边缘添加 |联查|
+|边缘去除（动态图）| BFS/DFS（或离线超滤）|
+|克鲁斯卡尔的 MST |联查|
+|有向图中的拓扑排序/循环 |免税店 |
+
+当您*增量*处理边缘并需要快速连接检查时，Union-Find 会大放异彩。如果您只遍历一次或需要路径信息，请坚持使用 BFS/DFS。
+
+<Quiz
+  question="一次给您一个边沿，并且必须检测创建循环的第一个边沿。哪种方法最好？"
+  options="每条边之后从头开始 BFS|每条边之后从头开始 DFS|联合查找 - 并集在循环边缘返回 False|拓扑排序"
+  answer="2"
+  explanation="Union-Find 在每条边上以接近 O(1) 的速度增量检测循环，而 BFS/DFS 每次都会重新遍历整个图。"
+/>
+
+<Quiz
+  question="在 Union-Find 中，按等级并集可以防止什么？"
+  options="重复的边|断开的组件|简并线性链（高树）|负边权重"
+  answer="2"
+  explanation="按等级并集始终将较短的树附加在较高的树下，从而保持树的平衡，从而防止 O(n) 查找操作。"
+/>
+
+<ThinkAboutIt>有些问题需要“取消”联合（带有删除的动态连接）。为什么标准 Union-Find 不足，存在哪些修改？</ThinkAboutIt>
+
+---
+
+## 📚 进一步阅读
+
+- [不相交集数据结构 - 维基百科](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) - 并查集的理论、证明和历史
+- 【Union-Find - 普林斯顿算法](https://algs4.cs.princeton.edu/15uf/) - Sedgewick的权威处理与Java实例
+- [冗余连接 - LeetCode 684](https://leetcode.com/problems/redundant-connection/) - 联合查找循环检测的干净应用

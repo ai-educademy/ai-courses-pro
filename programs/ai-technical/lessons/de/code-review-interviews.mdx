@@ -1,0 +1,218 @@
+---
+title: "Code-Review-Interviews"
+description: "Excel bei Interviewrunden zur Codeüberprüfung – identifizieren Sie Fehler, schlagen Sie Verbesserungen vor und stellen Sie Ihr technisches Urteilsvermögen unter Beweis."
+order: 5
+difficulty: "intermediate"
+duration: 15
+icon: "👁️"
+published: true
+machineTranslated: true
+---
+# Code-Review-Interviews
+
+Vorstellungsgespräche zur Codeüberprüfung sind eine der am meisten unterschätzten Runden im Einstellungsprozess – und eine der aufschlussreichsten. Während Coding-Interviews testen, ob Sie Code schreiben können, testen Code-Review-Interviews, ob Sie ihn lesen, darüber nachdenken und ihn verbessern können. Sie zeigen, wie Sie über Qualität denken, wie Sie Feedback priorisieren und wie Sie mit anderen Ingenieuren kommunizieren. Viele Kandidaten bereiten sich monatelang auf LeetCode vor, gehen aber völlig unvorbereitet in eine Code-Review-Runde. Sei nicht diese Person.
+
+## Welche Code-Review-Interviews tatsächlich testen
+
+Interviewer, die Ihre Code-Review-Fähigkeiten bewerten, achten auf fünf Dinge:
+
+1. **Fehlererkennung** – Können Sie logische Fehler, Grenzfälle und Race Conditions erkennen?
+2. **Designsinn** – Erkennen Sie Verstöße gegen SOLID-Prinzipien, schlechte Abstraktionen oder Code, der schwer zu pflegen ist?
+3. **Sicherheitsbewusstsein** – Können Sie Sicherheitslücken bei der Injektion, Authentifizierungsfehler oder Datengefährdungsrisiken erkennen?
+4. **Kommunikationsfähigkeit** – Können Sie Probleme klar und konstruktiv erklären?
+5. **Priorisierung** – Konzentrieren Sie sich auf das Wesentliche oder verzichten Sie auf Variablennamen?
+
+<Callout>Der häufigste Fehler bei Code-Review-Interviews besteht darin, dass man seine ganze Zeit mit Stilfragen (Benennung, Formatierung) verbringt und dabei tatsächliche Fehler übersieht. Interviewer platzieren neben Stilproblemen bewusst auch kritische Fehler, um zu sehen, was Sie priorisieren.</Callout>
+
+## Der systematische Review-Ansatz
+
+Scannen Sie den Code nicht wahllos. Verwenden Sie einen strukturierten passbasierten Ansatz:
+
+### Durchgang 1: Die Absicht verstehen (2 Minuten)
+
+Bevor Sie etwas kritisieren, sollten Sie verstehen, was der Code bewirken soll:
+- Lesen Sie die Funktions-/Klassennamen und Kommentare
+- Identifizieren Sie die Ein- und Ausgänge
+- Verstehen Sie die Geschäftslogik
+
+### Durchgang 2: Korrektheit (5 Minuten)
+
+Hier finden Sie Fehler. Überprüfen Sie systematisch:
+- **Randfälle**: leere Eingaben, Nullwerte, einzelne Elemente, Maximalwerte
+- **Off-by-One-Fehler**: Schleifengrenzen, Array-Indizierung
+- **Logische Fehler**: falsche Bedingungen, fehlende Break-Anweisungen, falscher Operator
+- **Parallelitätsprobleme**: gemeinsamer veränderlicher Zustand, Rennbedingungen
+- **Fehlerbehandlung**: nicht abgefangene Ausnahmen, fehlende Nullprüfungen
+
+### Durchgang 3: Design und Wartbarkeit (3 Minuten)
+
+Suchen Sie nach strukturellen Problemen:
+- Funktionen, die zu viele Dinge tun (Verstoß gegen die Einzelverantwortung)
+- Enge Verbindung zwischen den Komponenten
+- Magische Zahlen und fest codierte Werte
+- Fehlende oder unnötige Abstraktionen
+- Code-Duplizierung
+
+### Durchgang 4: Leistung und Sicherheit (2 Minuten)
+
+- Unnötige Datenbankabfragen in Schleifen (N+1-Problem)
+- Fehlende Eingabevalidierung oder -bereinigung
+– Offengelegte sensible Daten in Protokollen oder Antworten
+- Ineffiziente Algorithmen, wo es bessere Alternativen gibt
+
+## Häufige Fehlermuster, die es zu erkennen gilt
+
+Trainieren Sie Ihre Augen, um diese hochfrequenten Insekten zu erkennen:
+
+### Nullreferenzfehler
+
+```java
+// Bug: user could be null
+public String getUserEmail(Long userId) {
+    User user = userRepository.findById(userId);
+    return user.getEmail();  // NullPointerException if user not found
+}
+
+// Fixed
+public String getUserEmail(Long userId) {
+    return userRepository.findById(userId)
+        .map(User::getEmail)
+        .orElseThrow(() -> new UserNotFoundException(userId));
+}
+```
+
+### Off-by-One-Fehler
+
+```python
+# Bug: misses the last element
+def find_max(numbers):
+    max_val = numbers[0]
+    for i in range(1, len(numbers) - 1):  # Should be len(numbers)
+        if numbers[i] > max_val:
+            max_val = numbers[i]
+    return max_val
+```
+
+### Ressourcenlecks
+
+```java
+// Bug: connection is never closed if an exception occurs
+public List<User> getUsers() {
+    Connection conn = dataSource.getConnection();
+    Statement stmt = conn.createStatement();
+    ResultSet rs = stmt.executeQuery("SELECT * FROM users");
+    // process results...
+    conn.close();
+    return users;
+}
+
+// Fixed: use try-with-resources
+public List<User> getUsers() {
+    try (Connection conn = dataSource.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery("SELECT * FROM users")) {
+        // process results...
+        return users;
+    }
+}
+```
+
+### SQL-Injection
+
+```python
+# Bug: SQL injection vulnerability
+def get_user(username):
+    query = f"SELECT * FROM users WHERE username = '{username}'"
+    return db.execute(query)
+
+# Fixed: parameterised query
+def get_user(username):
+    query = "SELECT * FROM users WHERE username = %s"
+    return db.execute(query, (username,))
+```
+
+<FunFact>Eine Studie mit über 100.000 Codeüberprüfungen bei Google ergab, dass sich etwa 25 % aller Überprüfungskommentare auf „Korrektheit“ beziehen – tatsächliche Fehler oder logische Fehler. Bei weiteren 25 % geht es um „Verständnis“ – darum, Code leichter verständlich zu machen. Stil und Formatierung machten weniger als 10 % der inhaltlichen Kommentare aus.</FunFact>
+
+### Parallelitätsfehler
+
+```java
+// Bug: race condition — check-then-act is not atomic
+public void transferMoney(Account from, Account to, BigDecimal amount) {
+    if (from.getBalance().compareTo(amount) >= 0) {
+        // Another thread could modify balance here
+        from.setBalance(from.getBalance().subtract(amount));
+        to.setBalance(to.getBalance().add(amount));
+    }
+}
+```
+
+<ThinkAboutIt>Wie würden Sie den oben genannten Parallelitätsfehler beheben? Betrachten Sie mindestens drei Ansätze: Synchronisierung, optimistisches Sperren und Transaktionen auf Datenbankebene. Was sind die jeweiligen Kompromisse in einem Hochdurchsatzsystem?</ThinkAboutIt>
+
+## Priorisierung Ihres Feedbacks
+
+In einem zeitlich begrenzten Vorstellungsgespräch sind nicht alle Rückmeldungen gleich. Nutzen Sie diesen Prioritätsrahmen:
+
+| Priorität | Kategorie | Beispiel |
+|---|---|---|
+| 🔴 **Kritisch** | Fehler, Sicherheitslücken, Datenverlust | SQL-Injection, Race-Bedingungen, Null-Dereferenzierung |
+| 🟠 **Hoch** | Designprobleme, Leistungsprobleme | N+1 Abfragen, fehlende Fehlerbehandlung, enge Kopplung |
+| 🟡 **Mittel** | Wartbarkeit, Lesbarkeit | Komplexe Bedingungen, fehlende Dokumentation, magische Zahlen |
+| 🟢 **Niedrig** | Stil, kleinere Verbesserungen | Variablenbenennung, Importreihenfolge, kleinere Refaktoren |
+
+Verbringen Sie in einem Vorstellungsgespräch 80 % Ihrer Zeit mit 🔴- und 🟠-Punkten. Erwähnen Sie 🟡 Artikel kurz. Berühren Sie 🟢 Elemente nur, wenn Sie noch Zeit haben und die wichtigen Themen bereits gefunden haben.
+
+## Bewertungsfeedback kommunizieren
+
+Wie Sie Feedback geben, ist genauso wichtig wie das Feedback selbst. Interviewer bewerten Ihre Fähigkeiten zur Zusammenarbeit.
+
+**Mach das**:
+- „Mir ist aufgefallen, dass sich diese Abfrage in einer Schleife befindet, was zu N+1-Leistungsproblemen führen kann. Möglicherweise möchten wir dies in einer einzigen Abfrage zusammenfassen.“
+– „Es sieht so aus, als würde es eine NullPointerException auslösen, wenn der Benutzer nicht gefunden wird. Könnten wir hier eine Nullprüfung hinzufügen oder Optional verwenden?“
+- „Gute Verwendung des Strategiemusters hier – es macht das Hinzufügen neuer Zahlungsarten unkompliziert.“
+
+**Nicht das**:
+- „Dieser Code ist falsch.“ (zu direkt, keine Erklärung)
+- „So würde ich es nie schreiben.“ (egogetrieben)
+- „Ändern Sie diesen Variablennamen.“ (Fahrradabwurf bei Gegenständen mit niedriger Priorität)
+
+<Callout>Erklären Sie immer das *Warum* hinter Ihrem Feedback, nicht nur das *Was*. „Dies sollte parametrisierte Abfragen verwenden“ ist in Ordnung. „Dabei sollten parametrisierte Abfragen verwendet werden, da die aktuelle Zeichenfolgenverkettung anfällig für SQL-Injection-Angriffe ist“ ist viel besser.</Callout>
+
+## Beispiel für eine exemplarische Vorgehensweise zur Codeüberprüfung
+
+Hier ist eine Funktion, die Sie möglicherweise in einem Vorstellungsgespräch überprüfen sollten:
+
+```python
+def process_orders(orders):
+    results = []
+    for order in orders:
+        user = db.query(f"SELECT * FROM users WHERE id = {order['user_id']}")
+        if user:
+            total = 0
+            for item in order['items']:
+                price = db.query(f"SELECT price FROM products WHERE id = {item['product_id']}")
+                total = total + price[0] * item['quantity']
+                if item['quantity'] > 100:
+                    total = total * 0.9
+            if total > 0:
+                results.append({'user': user, 'total': total, 'order_id': order['id']})
+    return results
+```
+
+**Eine aussagekräftige Rezension würde Folgendes identifizieren:**
+
+1. 🔴 **SQL-Injection** (Zeilen 4, 7): String-Interpolation in SQL-Abfragen. Verwenden Sie parametrisierte Abfragen.
+2. 🔴 **N+1-Abfrageproblem** (Zeilen 4, 7): Zwei Datenbankabfragen pro Bestellung, eine pro Artikel. Bei 100 Bestellungen mit jeweils 10 Artikeln sind das 1.100 Abfragen. Batch in einzelne Abfragen.
+3. 🟠 **Keine Fehlerbehandlung**: `price[0]` stürzt ab, wenn das Produkt nicht gefunden wird. `db.query` könnte scheitern.
+4. 🟠 **Rabattlogik ist ausgeblendet**: Der 10 %-Rabatt für Mengen > 100 ist eine in verschachtelten Schleifen vergrabene Geschäftsregel. Extrahieren Sie es.
+5. 🟡 **Magische Zahl**: `0.9` und `100` sollten benannte Konstanten sein (`BULK_DISCOUNT_RATE`, `BULK_THRESHOLD`).
+6. 🟡 **Funktion macht zu viel**: Benutzer abrufen, Gesamtbeträge berechnen, Rabatte anwenden – verstößt gegen die Einzelverantwortung.
+
+<Quiz question="Während eines Code-Review-Interviews stellen Sie ein geringfügiges Problem bei der Benennung von Variablen und eine potenzielle SQL-Injection-Sicherheitslücke fest. Sie haben noch 2 Minuten Zeit. Was sollten Sie priorisieren?" options="Korrigieren Sie zuerst die Variablenbenennung, da es schnell geht|Konzentrieren Sie sich ausschließlich auf die SQL-Injection-Sicherheitslücke|Erwähnen Sie beide gleichermaßen – zeigen Sie, dass Sie gründlich sind|Überspringen Sie beide und suchen Sie nach weiteren Problemen" answer="1" explanation="SQL-Injection ist eine kritische Sicherheitslücke, die zu Datenschutzverletzungen führen kann. Geben Sie Sicherheitsfragen stets Vorrang vor Stilbedenken. Erwähnen Sie das Namensproblem nur kurz, wenn die Zeit es erlaubt, nachdem Sie das Injektionsrisiko ausführlich erläutert haben." />
+
+## Wichtige Erkenntnisse
+
+- **Verwenden Sie einen strukturierten Ansatz**: Durch mehrere Durchgänge (Absicht → Korrektheit → Design → Leistung/Sicherheit) werden mehr Probleme erkannt als durch zufälliges Scannen.
+- **Sorgfältig Prioritäten setzen**: Kritische Bugs und Sicherheitsprobleme zuerst, Stil zuletzt. Interviewer setzen beides ein, um Ihr Urteilsvermögen zu testen.
+- **Konstruktiv kommunizieren**: Erklären Sie das *Warum*, schlagen Sie Alternativen vor und erkennen Sie gute Muster an, die Sie sehen.
+- **Kennen Sie die häufigsten Fehlermuster**: Nullverweise, Off-by-One-Fehler, Ressourcenlecks, SQL-Injection und Race Conditions tauchen in fast jedem Code-Review-Interview auf.
+- **Üben Sie das Lesen von Code**: Nehmen Sie sich Zeit, um Open-Source-Pull-Requests auf GitHub zu lesen. Die Fähigkeit, Code zu lesen, unterscheidet sich von der Fähigkeit, ihn zu schreiben, und die meisten Ingenieure üben darin nicht ausreichend.

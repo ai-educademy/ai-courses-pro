@@ -1,0 +1,296 @@
+---
+title: "API設計インタビュー"
+description: "REST、GraphQL、API を優れたものにする原則など、面接のプレッシャーの下でクリーンで直感的な API を設計します。"
+order: 4
+difficulty: "intermediate"
+duration: 18
+icon: "🔌"
+published: true
+machineTranslated: true
+---
+# API 設計インタビュー
+
+API はシステム間の契約であり、API を適切に設計することは、上級エンジニアと若手エンジニアを区別するスキルです。 API 設計のインタビューでは、単にエンドポイントを作成しているだけではなく、消費者がシステムをどのように使用するか、時間の経過とともにどのように進化するか、障害モードがどこにあるかを理解していることを実証する必要があります。支払いゲートウェイの設計を依頼された場合でも、ソーシャル メディア プラットフォーム API の設計を依頼された場合でも、原則は同じです。それらをマスターしましょう。
+
+## REST API の設計原則
+
+インタビューでは、依然として REST が支配的な API パラダイムです。実証する必要がある基礎は次のとおりです。
+
+### リソース指向の設計
+
+動詞（アクション）ではなく、名詞（リソース）で考えてください。 URL は物事を表し、HTTP メソッドはそれらに対するアクションを表す必要があります。
+
+```
+✅ Good:
+GET    /users/123              — Fetch user 123
+POST   /users                  — Create a new user
+PUT    /users/123              — Replace user 123
+PATCH  /users/123              — Partially update user 123
+DELETE /users/123              — Delete user 123
+
+❌ Bad:
+GET    /getUser?id=123
+POST   /createUser
+POST   /deleteUser/123
+```
+
+<Callout>クリーンなリソース階層が API のストーリーを伝えます。 `/users/123/orders/456/items` は当然、「ユーザー 123 が 456 の商品を注文した」となります。 URL 構造が文章のように読めない場合は、リソースの設計を再検討してください。</Callout>
+
+### HTTP メソッドとステータス コード
+
+これらの冷たさを知っておいてください。面接官はあなたの正確さをテストします。
+
+|方法 |べき等ですか？ |使用例 |
+|---|---|---|
+|入手 |はい |リソースを読み取ります (変更しないでください) |
+|投稿 |いいえ |リソースを作成する |
+|置く |はい |リソースの完全な置き換え |
+|パッチ |いいえ* |部分更新 |
+|削除 |はい |リソースを削除する |
+
+*PATCH は技術的に冪等性が保証されていませんが、実装では冪等性が保証されていることがよくあります。*
+
+**知っておくべきステータス コード**:
+- `200 OK` — 応答本文の成功
+- `201 Created` — 作成されたリソース (`Location` ヘッダーを含む)
+- `204 No Content` — 応答本文なしで成功 (DELETE に共通)
+- `400 Bad Request` — クライアントが無効なデータを送信しました
+- `401 Unauthorized` — 認証が必要です
+- `403 Forbidden` — 認証されていますが、許可されていません
+- `404 Not Found` — リソースが存在しません
+- `409 Conflict` — 現在の状態と矛盾しています (重複、バージョンの不一致)
+- `429 Too Many Requests` — レート制限あり
+- `500 Internal Server Error` — こちら側で何かが壊れました
+
+### ページネーション
+
+無制限のリストを決して返さないでください。よくある 3 つのパターン:
+
+```json
+// Offset-based (simple but poor for large datasets)
+GET /users?offset=20&limit=10
+
+// Cursor-based (preferred for feeds and large datasets)
+GET /users?cursor=eyJ0aW1lIjoiMjAyNC0wMS0wMSJ9&limit=10
+
+// Response includes pagination metadata
+{
+  "data": [...],
+  "pagination": {
+    "next_cursor": "eyJ0aW1lIjoiMjAyNC0wMS0wMiJ9",
+    "has_more": true
+  }
+}
+```
+
+<ThinkAboutIt>大規模で頻繁に更新されるデータセットでは、オフセット ベースよりもカーソル ベースのページネーションが推奨されるのはなぜですか?ユーザーが結果をページ移動しているときに新しい項目が挿入された場合に何が起こるかを考えてみましょう。</ThinkAboutIt>
+
+### バージョン管理
+
+API は進化します。初日からそのためのデザインをしましょう。
+
+```
+// URL versioning (most common, explicit)
+GET /v1/users/123
+GET /v2/users/123
+
+// Header versioning (cleaner URLs, less discoverable)
+GET /users/123
+Accept: application/vnd.myapi.v2+json
+```
+
+面接では、面接官が特に代替案を検討しない限り、URL バージョン管理が安全な答えです。
+
+### エラー応答
+
+一貫した有益なエラー応答により、優れた API とイライラする API が区別されます。
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "The request body contains invalid fields.",
+    "details": [
+      {
+        "field": "email",
+        "message": "Must be a valid email address."
+      },
+      {
+        "field": "age",
+        "message": "Must be a positive integer."
+      }
+    ],
+    "request_id": "req_abc123"
+  }
+}
+```
+
+デバッグ用の `request_id` と、人間が読める `message` の横に機械が読める `code` を必ず含めてください。
+
+## インタビューにおける GraphQL
+
+GraphQL に関する質問は、特に複雑なフロントエンドのニーズを持つ企業でますます一般的になっています。
+
+**説明すべき主な利点**:
+- クライアントは必要なデータを正確に要求します (オーバーフェッチなし)
+- 単一のエンドポイントでラウンドトリップを削減
+- 厳密に型指定されたスキーマはドキュメントとして機能します
+
+```graphql
+# Schema definition
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  orders(first: Int, after: String): OrderConnection!
+}
+
+type Order {
+  id: ID!
+  total: Float!
+  status: OrderStatus!
+  items: [OrderItem!]!
+}
+
+# Query — client specifies exactly what it needs
+query {
+  user(id: "123") {
+    name
+    orders(first: 5) {
+      edges {
+        node {
+          total
+          status
+        }
+      }
+    }
+  }
+}
+```
+
+**議論すべきトレードオフ**: GraphQL はサーバー側で複雑さを追加します (リゾルバー チェーン、N+1 クエリ、キャッシュが難しくなります)。単純な CRUD API の場合は、多くの場合、REST の方が良い選択となります。
+
+<FunFact>GraphQL は、特定のモバイル パフォーマンスの問題を解決するために 2012 年に Facebook 内で開発されました。ニュース フィードにはさまざまなバックエンド サービスからのデータが必要で、低速ネットワーク上でモバイル デバイスから複数の REST 呼び出しを行うとパフォーマンスが低下していました。 2015 年にオープンソース化されました。</FunFact>
+
+## API セキュリティの基本
+
+API 設計のインタビューはすべてセキュリティについて触れるべきです。以下の重要事項をカバーします。
+
+### 認証と認可
+
+```
+Authentication (AuthN): WHO are you?
+→ API Keys, OAuth 2.0, JWT tokens
+
+Authorisation (AuthZ): WHAT can you do?
+→ Role-based (RBAC), Scope-based, Resource-based
+```
+
+```
+// JWT in Authorization header
+GET /users/123/orders
+Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
+
+// API Key (for server-to-server)
+GET /analytics/reports
+X-API-Key: sk_live_abc123...
+```
+
+### レート制限
+
+API を悪用から保護し、公正な使用を保証します。
+
+```
+// Rate limit headers in response
+HTTP/1.1 200 OK
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 847
+X-RateLimit-Reset: 1640995200
+
+// When limit is exceeded
+HTTP/1.1 429 Too Many Requests
+Retry-After: 60
+```
+
+ユーザーごと、IP ごと、エンドポイントごと、さまざまな API プランの段階的な制限など、レート制限戦略について話し合います。
+
+## 実際の面接シナリオ
+
+### 決済 API を設計する
+
+明確にするための要件:
+- どのような支払い方法がありますか? （カード、銀行振込、ウォレット）
+- 冪等性は必要ですか? (はい - 支払いの場合は常に)
+- 返金や紛争についてはどうなりますか?
+
+```
+POST /v1/payments
+{
+  "amount": 4999,           // Always use smallest currency unit (cents)
+  "currency": "GBP",
+  "payment_method": "pm_card_visa_123",
+  "idempotency_key": "order_789_attempt_1",
+  "metadata": {
+    "order_id": "order_789"
+  }
+}
+
+Response: 201 Created
+{
+  "id": "pay_abc123",
+  "status": "processing",
+  "amount": 4999,
+  "currency": "GBP",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+<Callout>支払い API については、冪等性キーについて常に議論してください。ネットワーク障害が発生すると、クライアントが再試行し、冪等性がなければ、顧客に 2 回請求することになります。冪等性キーにより、同じリクエストを再試行しても同じ結果が得られることが保証されます。</Callout>
+
+**議論すべき重要な設計上の決定事項**:
+- 浮動小数点の問題を回避するための最小通貨単位 (セント/ペンス) での金額
+- 安全な再試行のための冪等キー
+- 非同期ステータス更新のための Webhook コールバック
+- PCI コンプライアンスの考慮事項
+
+### ソーシャル メディア API を設計する
+
+```
+// Post creation
+POST /v1/posts
+{
+  "content": "Hello world!",
+  "media_ids": ["media_123"],
+  "visibility": "public"
+}
+
+// Feed retrieval with cursor pagination
+GET /v1/feed?cursor=abc&limit=20
+
+// Interactions
+POST /v1/posts/{post_id}/likes
+DELETE /v1/posts/{post_id}/likes
+POST /v1/posts/{post_id}/comments
+```
+
+フィルタリング、検索、フィードの組み立て方法 (プルモデルとプッシュモデルの関係をシステム設計に結び付ける) について話し合います。
+
+## API 設計面接でよくある間違い
+
+1. **内部実装の公開** — データベースの列名や内部 ID が API に漏洩しないようにします。 DTO を使用します。
+2. **一貫性のない名前** — `snake_case` または `camelCase` を選択し、どこでもそれを使用します。
+3. **ページネーションがありません** — リスト エンドポイントはページネーションをサポートする必要があります。
+4. **エラー処理に関する議論なし** — 障害モードについての考えを示します。
+5. **下位互換性の無視** — 必須フィールドを既存のエンドポイントに追加すると、クライアントが破損します。
+6. **URL での動詞の使用** — `POST /users` の代わりに `/createUser` を使用します。
+
+<Quiz question="クライアントは注文を作成するために POST リクエストを送信しますが、ネットワークは応答をドロップします。クライアントは同じ冪等キーを使用して再試行します。サーバーは何を返すべきでしょうか?" options="400 不正なリクエスト — 重複したリクエスト|201 作成 — 元の注文で (初回と同じ応答)|409 競合 — 順序はすでに存在します|200 OK — 新規注文あり" answer="1" explanation="冪等性を使用すると、サーバーは重複キーを認識し、元の注文データと同じ 201 Created 応答を返します。これが冪等性キーの要点であり、再試行を安全かつクライアントに対して透過的に行うことができます。" />
+
+## 重要なポイント
+
+- **リソースで考える**: 名詞を中心に URL を設計し、HTTP メソッドで動詞を処理させます。
+- **ステータス コードを知る**: 正確なステータス コードは、HTTP セマンティクスを理解していることを示します。
+- **常にページ分割**: 無制限のリストの回答は、面接では危険信号です。
+- **失敗に備えた設計**: 冪等性、エラー応答、およびレート制限は、運用準備の考え方を示します。
+- **セキュリティはオプションではありません**: 認証、認可、およびレート制限は、すべての API 設計の議論の一部である必要があります。
+- **トレードオフを明確にする**: REST と GraphQL、一貫性と柔軟性、シンプルさとパワー — 面接官はあなたの理由を聞きたいと思っています。

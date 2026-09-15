@@ -1,0 +1,202 @@
+---
+title: "Basisprincipes van systeemontwerp"
+description: "Beheers het systeemontwerpinterview – van het verzamelen van vereisten tot architectuurbeslissingen – met raamwerken die op elke schaal werken."
+order: 3
+difficulty: "advanced"
+duration: 25
+icon: "🏗️"
+published: true
+machineTranslated: true
+---
+# Basisprincipes van systeemontwerp
+
+In het systeemontwerpgesprek worden senior engineers gemaakt of gebroken. In tegenstelling tot het coderen van interviews met duidelijke, juiste antwoorden, test systeemontwerp uw vermogen om door dubbelzinnigheid te navigeren, afwegingen te maken en architecturale beslissingen te communiceren. Het goede nieuws? Er is een herhaalbaar raamwerk dat voor elke vraag werkt. Het geweldige nieuws? Zodra u de bouwstenen begrijpt, kunt u alles ontwerpen, van een URL-verkorter tot een berichtenplatform op wereldschaal. Laten we die toolkit bouwen.
+
+## Het 4-stappen raamwerk
+
+Elk systeemontwerpinterview moet deze structuur volgen. Interviewers verwachten dit, en het zorgt ervoor dat u niet in voortijdige details terechtkomt.
+
+### Stap 1: Verduidelijking van vereisten (5 minuten)
+
+Begin nooit met ontwerpen zonder vragen te stellen. Hier demonstreer je productdenken.
+
+**Functionele vereisten** — wat het systeem doet:
+- "Moeten gebruikers berichten naar groepen kunnen sturen, of alleen 1:1?"
+- "Hebben we realtime meldingen nodig?"
+- "Moet de feed chronologisch of gerangschikt zijn?"
+
+**Niet-functionele vereisten** — hoe goed het het doet:
+- "Wat is de verwachte lees-/schrijfverhouding?"
+- "Welke latentie is acceptabel?"
+- "Hebben we sterke consistentie nodig of is uiteindelijke consistentie oké?"
+
+<Callout>Het stellen van verhelderende vragen is geen teken van zwakte; het is het meest senior-engineer wat je kunt doen. Interviewers laten de vereisten opzettelijk vaag om te zien of je het kunt verduidelijken of blindelings begint met ontwerpen.</Callout>
+
+### Stap 2: Schatting van de achterkant van de envelop (3 minuten)
+
+Snelle berekeningen baseren uw ontwerp op de werkelijkheid en voorkomen over- of onder-engineering.
+
+```
+Example: Design Twitter
+
+Daily Active Users (DAU): 300M
+Tweets per day: 300M × 2 = 600M tweets/day
+Reads per day: 300M × 100 = 30B reads/day (read-heavy)
+Tweets per second: 600M / 86400 ≈ 7,000 writes/sec
+Reads per second: 30B / 86400 ≈ 350,000 reads/sec
+Storage per tweet: ~300 bytes text + metadata ≈ 500 bytes
+Daily storage: 600M × 500B = 300GB/day ≈ 110TB/year
+```
+
+Deze cijfers vertellen je: dit systeem is extreem leeszwaar, heeft caching nodig en zal enorme opslagruimte verzamelen.
+
+### Stap 3: Ontwerp op hoog niveau (10 minuten)
+
+Teken de architectuur met de belangrijkste componenten. Begin eenvoudig en voeg indien nodig complexiteit toe.
+
+```
+Client → Load Balancer → API Servers → Service Layer
+                                          ↓
+                              ┌───────────┼───────────┐
+                              ↓           ↓           ↓
+                           Database     Cache      Message Queue
+                                          ↓           ↓
+                                       CDN        Workers
+```
+
+Doorloop de belangrijkste gebruikersstromen:
+- "Wanneer een gebruiker een tweet plaatst, valideert de API-server deze, schrijft naar de database en pusht naar de fan-out-service..."
+- "Wanneer een gebruiker zijn feed opent, controleren we eerst de cache..."
+
+### Stap 4: Diepe duik (15 minuten)
+
+De interviewer kiest 1-2 gebieden om dieper op in te gaan. Wees bereid om de afwegingen gedetailleerd te bespreken.
+
+<ThinkAboutIt>Als u een meldingssysteem zou ontwerpen, zou u dan onmiddellijk meldingen naar alle volgers pushen (uitwaaieren bij schrijven) of de feed berekenen wanneer elke gebruiker daarom vraagt ​​(uitwaaieren bij lezen)? Wat zijn de afwegingen voor gebruikers met miljoenen volgers?</ThinkAboutIt>
+
+## De bouwstenen
+
+Beschouw deze als Lego-stukken. Elk systeemontwerp is een andere opstelling van dezelfde blokken.
+
+### Loadbalancers
+
+Verdeel het verkeer over meerdere servers. Ken drie strategieën:
+- **Round Robin** — eenvoudige, gelijke verdeling
+- **Minste verbindingen** — verzendt naar de server met de minste actieve verbindingen
+- **Consistente hashing** — routes gebaseerd op verzoekinhoud (handig voor caching)
+
+### Caches
+
+De meest impactvolle prestatie-optimalisatie. Onthoud deze cachepatronen:
+
+```
+Write-through:  App → Cache → DB  (consistent, higher write latency)
+Write-back:     App → Cache ... → DB  (fast writes, risk of data loss)
+Cache-aside:    App checks cache → miss → read DB → populate cache
+```
+
+**Cache-uitzetting**: LRU (Least Recent Used) is het standaardantwoord in interviews. Vermeld TTL (Time-To-Live) voor tijdgevoelige gegevens.
+
+<FunFact>Volgens een beroemd artikel van Jeff Dean voegt een enkele cache-misser die naar de schijf gaat in plaats van naar het geheugen, ongeveer 100x latentie toe. Dit is de reden waarom cachingstrategie vaak de meest impactvolle ontwerpbeslissing is: lezen uit cache (1 ms) versus lezen vanaf schijf (10 ms) versus lezen vanuit meerdere datacenters (150 ms) zijn verschillende ordes van grootte.</FunFact>
+
+### Databases
+
+| Typ | Gebruik Wanneer | Voorbeelden |
+|---|---|---|
+| **Relationeel (SQL)** | ACID-transacties, complexe queries, gestructureerde data | PostgreSQL, MySQL |
+| **Documentwinkel** | Flexibele schema's, geneste gegevens, snelle iteratie | MongoDB, DynamoDB |
+| **Brede kolom** | Enorme schaal, tijdreeksen, zwaar schrijven | Cassandra, HBase |
+| **Grafiek** | Relatie-zware data, sociale netwerken | Neo4j, Neptunus |
+
+**Databaseschaling**:
+- **Verticale schaling**: grotere machine (beperkt plafond)
+- **Leesreplica's**: gescheiden lees- en schrijfverkeer
+- **Sharding**: partitie gegevens over meerdere databases (op basis van gebruikers-ID, geografie, enz.)
+
+### Berichtenwachtrijen
+
+Ontkoppel producenten van consumenten. Essentieel voor:
+- Asynchrone verwerking (e-mail verzenden na aanmelding)
+- Beladingsnivellering (absorbeert verkeerspieken)
+- Gebeurtenisgestuurde architecturen
+
+```
+Producer → [Message Queue] → Consumer
+           (Kafka, SQS,      (Workers that
+            RabbitMQ)          process at
+                               their own pace)
+```
+
+### CDN's (Content Delivery Networks)
+
+Cache statische inhoud (afbeeldingen, CSS, JS) op edge-servers dichtbij gebruikers. Vermeld CDN's wanneer het systeem media bedient of een wereldwijd gebruikersbestand heeft.
+
+## Klassieke systeemontwerpvragen
+
+### Ontwerp een URL-verkorter (bijvoorbeeld bit.ly)
+
+**Belangrijkste beslissingen**:
+- Genereer korte codes met behulp van base62-codering (a-z, A-Z, 0-9)
+- Gebruik een tegen- of hash-gebaseerde aanpak voor uniciteit
+- Veel lezen → populaire URL's agressief in cache plaatsen
+- Database: eenvoudige sleutel-waarde-opslag (short_code → original_url)
+
+```
+POST /shorten  { "url": "https://example.com/very/long/path" }
+→ Returns: { "short_url": "https://bit.ly/abc123" }
+
+GET /abc123
+→ 301 Redirect to original URL (301 = permanent, cacheable by browser)
+```
+
+### Ontwerp een chatsysteem (bijvoorbeeld WhatsApp)
+
+**Belangrijkste beslissingen**:
+- WebSockets voor realtime bidirectionele communicatie
+- Berichtopslag: voor schrijven geoptimaliseerde database (Cassandra)
+- Online aanwezigheid: hartslagmechanisme met time-out
+- Groepsberichten: fan-out naar alle groepsleden via berichtenwachtrij
+
+### Ontwerp een nieuwsfeed (bijvoorbeeld Twitter/Facebook)
+
+**Belangrijkste beslissingen**:
+- **Fan-out bij schrijven** voor gebruikers met < 10.000 volgers (pre-compute feeds)
+- **Fan-out bij lezen** voor beroemde gebruikers (bereken op verzoek om te voorkomen dat naar miljoenen feeds wordt geschreven)
+- Hybride aanpak: de meeste systemen gebruiken beide strategieën
+- Ranking: op ML gebaseerde relevantiescores in zuivere chronologische volgorde
+
+<Quiz question="U ontwerpt een systeem waarbij 95% van de bewerkingen bestaat uit leesbewerkingen en 5% uit schrijfbewerkingen. Welke cachingstrategie is het meest geschikt?" options="Doorschrijfcache|Terugschrijfcache|Cache-aside (lui laden)|Geen cache nodig" answer="2" explanation="Cache-aside (lui laden) is ideaal voor systemen die veel lezen. Gegevens worden alleen in de cache geladen als daarom wordt gevraagd (bij cachemisser), waardoor het cachen van gegevens wordt vermeden die nooit worden gelezen. Doorschrijven voegt onnodige schrijflatentie toe wanneer de meeste bewerkingen worden gelezen." />
+
+## Schattingsvragen behandelen
+
+Interviewers vragen zich graag af: "Hoeveel X heeft Y nodig?" Gebruik deze ankers:
+
+| Metrisch | Waarde |
+|---|---|
+| QPS voor een enkele webserver | ~1.000-10.000 |
+| QPS voor één database | ~1.000-5.000 |
+| Latentie voor lezen in cache | ~1ms |
+| Leeslatentie database | ~5-10 ms |
+| Latentie tussen datacenters | ~100-150 ms |
+| 1 miljoen seconden | ~12 dagen |
+| 1 miljard seconden | ~32 jaar |
+
+## Communicatietips tijdens systeemontwerp
+
+Uw communicatie is net zo belangrijk als uw ontwerp. Oefen deze gewoonten:
+
+1. **Structuur uw gedachten**: "Laat me beginnen met de vereisten, dan een schatting en dan een ontwerp op hoog niveau."
+2. **Expliciet compromissen maken**: "We zouden SQL kunnen gebruiken voor consistentie of NoSQL voor schaal. Gezien onze leeszware werklast, zou ik neigen naar NoSQL met een cachinglaag."
+3. **Erken wat u niet weet**: "Ik ben niet zeker van de exacte replicatiefactor voor Kafka, maar ik weet dat deze configureerbaar is en doorgaans is ingesteld op 3."
+4. **Neem contact op met de interviewer**: "Ik heb het ontwerp op hoog niveau besproken. Wil je dat ik dieper inga op het databaseschema of de cachingstrategie?"
+
+<Callout>De grootste fout bij systeemontwerpinterviews is dat je te vroeg te diep gaat. Weersta de drang om het databaseschema in de eerste vijf minuten te ontwerpen. Begin breed en beperk je vervolgens op basis van wat de interviewer wil onderzoeken.</Callout>
+
+## Belangrijkste afhaalrestaurants
+
+- **Volg het raamwerk van 4 stappen**: vereisten → schatting → ontwerp op hoog niveau → diepgaande analyse. Het werkt elke keer.
+- **Ken uw bouwstenen**: load balancers, caches, databases, berichtenwachtrijen en CDN's vormen de woordenschat van systeemontwerp.
+- **Trade-offs zijn het punt**: er zijn geen perfecte ontwerpen - alleen trade-offs. Formuleer ze duidelijk.
+- **Schatting onderbouwt uw ontwerp**: snelle wiskunde achter de schermen voorkomt dat u over- of onder-engineering uitvoert.
+- **Communicatie is het halve cijfer**: structureer uw gedachten, formuleer aannames en neem regelmatig contact op met de interviewer.
+- **Oefenen met echte systemen**: onderzoek hoe Twitter, WhatsApp, YouTube en Uber daadwerkelijk werken. Hun technische blogs zijn goudmijnen.

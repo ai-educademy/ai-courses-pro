@@ -1,0 +1,137 @@
+---
+title: "Diseñar un limitador de velocidad: proteger las API a escala"
+description: "Aprenda a diseñar un limitador de velocidad distribuido utilizando un depósito de tokens, una ventana deslizante y algoritmos respaldados por Redis para proteger las API del abuso y garantizar un uso justo."
+order: 6
+difficulty: "advanced"
+duration: 20
+icon: "🛡️"
+published: true
+machineTranslated: true
+---
+# Diseñar un limitador de velocidad: proteger las API a escala
+
+La limitación de velocidad es uno de los temas de diseño de sistemas más prácticos. Todas las API de producción, desde GitHub hasta Stripe, dependen de ella para evitar abusos, garantizar un uso justo y proteger los servicios backend para que no se vean abrumados.
+
+## Paso 1: recopilación de requisitos
+
+### Requisitos funcionales
+- Limitar solicitudes basadas en reglas configurables (por usuario, IP o clave API)
+- Devolver comentarios claros cuando se acelera a un cliente (HTTP 429)
+- Admite múltiples reglas de limitación de velocidad simultáneamente
+
+### Requisitos no funcionales
+- **Baja latencia**: el limitador no debe agregar una sobrecarga significativa
+- **Distribuido**: funciona en varios servidores
+- **Tolerante a fallos**: si el limitador falla, el tráfico debería seguir fluyendo (fallo de apertura)
+
+<ThinkAboutIt>¿Un limitador de velocidad debería fallar al abrirse (permitir el tráfico) o fallarse al cerrarse (bloquear el tráfico) cuando falla? ¿Cuáles son las ventajas y desventajas de un sitio de comercio electrónico frente a una API bancaria?</ThinkAboutIt>
+
+## Paso 2: Algoritmos de limitación de velocidad
+
+### Mostrador de ventana fijo
+Divida el tiempo en ventanas fijas (por ejemplo, intervalos de 60 segundos). Incrementar un contador por solicitud. Restablecer en los límites de la ventana. **Problema:** el tráfico en ráfagas en los bordes de las ventanas puede permitir el doble del límite.
+
+### Registro de ventana deslizante
+Almacene la marca de tiempo de cada solicitud. Cuente las entradas dentro de la ventana final. Preciso pero **con mucha memoria**: almacenar cada marca de tiempo es costoso a escala.
+
+### Mostrador de ventana corrediza
+Un híbrido: combina el recuento de ventanas actual con una parte ponderada de la ventana anterior. Equilibra la precisión y la eficiencia de la memoria.
+
+### Algoritmo de depósito de tokens (el más popular)
+Un cubo contiene fichas hasta una capacidad máxima. Los tokens se agregan a una tasa fija. Cada solicitud consume un token. Si el depósito está vacío, la solicitud se rechaza.
+
+```
+Bucket: capacity=10, refill_rate=2/sec
+
+Time 0s: [🪙🪙🪙🪙🪙🪙🪙🪙🪙🪙] → 10 tokens
+Burst of 8 requests → [🪙🪙] → 2 tokens remain
+Time 1s: refill +2 → [🪙🪙🪙🪙] → 4 tokens
+```
+
+### Comparación de algoritmos
+
+| Algoritmo | Memoria | Precisión | Manejo de ráfagas |
+|-----------|----------------|----------|----------------|
+| Ventana fija | Bajo | Bajo (ráfagas de borde) | Pobre |
+| Registro deslizante | Alto | Exacto | Bueno |
+| Mostrador deslizante | Medio | Aproximado | Bueno |
+| Cubo de fichas | Bajo | Bueno | Excelente |
+
+<Quiz question="¿Qué algoritmo permite ráfagas controladas manteniendo una tasa constante a largo plazo?" options="Mostrador de ventana fijo|Registro de ventana corrediza|Cubo de fichas|Mostrador de ventana corredera" answer="2" explanation="Token Bucket permite ráfagas cortas hasta la capacidad del depósito al tiempo que aplica una tasa promedio a través del mecanismo de recarga. Esto lo hace ideal para API que necesitan manejar patrones de tráfico en ráfagas." />
+
+## Paso 3: Arquitectura de alto nivel
+
+```
+Client → API Gateway (Rate Limiter Middleware) → Backend Services
+                    ↕
+              Redis Cluster
+         (counters + token buckets)
+```
+
+<Illustration src="/images/lessons/design-rate-limiter.svg" alt="Arquitectura de limitador de velocidad que muestra clientes, puerta de enlace API con middleware de limitación de velocidad, clúster Redis para estado distribuido y servicios backend." caption="El limitador de velocidad se encuentra en la puerta de enlace API y utiliza Redis para el almacenamiento de contador distribuido." />
+
+### Dónde colocar el limitador de velocidad
+- **Del cliente**: fácil de falsificar, poco confiable
+- **Lado del servidor**: solo por instancia, no escalable
+- **API Gateway/Middleware**: el mejor enfoque para sistemas distribuidos; aplicación centralizada en todas las instancias
+
+## Paso 4: análisis profundo: limitación de tasa distribuida
+
+### Redis + secuencias de comandos Lua
+En una configuración distribuida, varios servidores deben compartir el estado límite de velocidad. Redis es la opción estándar debido a sus operaciones atómicas y su latencia inferior a milisegundos.
+
+Un script Lua garantiza la atomicidad: la verificación y la disminución se realizan en una única operación de Redis, lo que evita condiciones de carrera:
+
+```
+-- Token Bucket in Redis (pseudocode)
+local tokens = redis.call('GET', key)
+local last_refill = redis.call('GET', key..':time')
+-- Calculate tokens to add based on elapsed time
+-- If tokens > 0: decrement and ALLOW
+-- Else: DENY
+```
+
+### Encabezados de respuesta
+Los limitadores de velocidad bien diseñados comunican el estado a los clientes:
+- `X-RateLimit-Limit: 100` - solicitudes máximas por ventana
+- `X-RateLimit-Remaining: 42` - quedan solicitudes
+- `X-RateLimit-Reset: 1672531200` - Época UTC cuando se reinicia la ventana
+- HTTP `429 Too Many Requests` con un encabezado `Retry-After`
+
+<Quiz question="¿Por qué se utilizan scripts Lua con Redis para limitar la velocidad en lugar de comandos GET y SET separados?" options="Lua es más rápido que los comandos de Redis|Los scripts de Lua se ejecutan atómicamente en Redis, evitando condiciones de carrera|Redis no soporta GET/SET de forma nativa|Lua reduce el ancho de banda de la red" answer="1" explanation="Los scripts de Lua se ejecutan de forma atómica en el servidor Redis. Sin atomicidad, dos solicitudes simultáneas podrían leer el mismo recuento de tokens, ambas ver los tokens disponibles y ambas disminuir, lo que permitiría más solicitudes de las que permite el límite." />
+
+## Paso 5: Manejo de casos extremos
+
+### Condiciones de carrera
+Sin operaciones atómicas, las solicitudes simultáneas pueden superar los límites. Soluciones: scripts de Redis Lua o transacciones de Redis `MULTI/EXEC`.
+
+### Dimensiones límite de velocidad
+Aplicar límites en múltiples niveles simultáneamente:
+- **Por usuario** - 100 solicitudes/minuto para usuarios autenticados
+- **Por IP** - 50 solicitudes/minuto para tráfico anónimo
+- **Por clave API** - planes escalonados (gratis: 10/min, pro: 1000/min)
+
+### Desviación del reloj distribuido
+Los servidores pueden tener relojes ligeramente diferentes. Utilice la hora del servidor Redis como única fuente de verdad en lugar de depender de las marcas de tiempo del servidor de aplicaciones.
+
+<FunFact>La API REST de GitHub permite 5000 solicitudes por hora para usuarios autenticados, pero solo 60 por hora para solicitudes no autenticadas. Stripe utiliza un enfoque de ventana deslizante con límites separados para las claves API en modo vivo y de prueba.</FunFact>
+
+## Paso 6: cuellos de botella y optimizaciones
+
+| Cuello de botella | Solución |
+|-----------|----------|
+| Redis único punto de falla | Redis Cluster con replicación |
+| Latencia de red para Redis | Caché local en memoria con sincronización periódica |
+| Teclas de acceso rápido (claves API populares) | Fragmentación en varios nodos de Redis |
+| Gastos generales de evaluación de reglas | Reglas de precompilación, configuraciones de caché |
+
+<Quiz question="Un limitador de velocidad utiliza una ventana fija de 60 segundos con un límite de 100 solicitudes. Un usuario envía 100 solicitudes en el segundo 59 y 100 más en el segundo 61. ¿Cuántas solicitudes llegan?" options="100|150|200|Depende del algoritmo" answer="2" explanation="Con contadores de ventana fijos, las 200 solicitudes pasan porque 100 caen en la ventana 1 (segundos 0-59) y 100 en la ventana 2 (segundos 60-119). Este problema de explosión de bordes es la razón por la que se prefieren los algoritmos de ventana deslizante o depósito de tokens." />
+
+<ThinkAboutIt>Si está diseñando una limitación de velocidad para una API global con centros de datos en Londres, Nueva York y Tokio, ¿utilizaría un único Redis centralizado o clústeres de Redis regionales? ¿Qué compensaciones de coherencia aceptaría?</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+- [Limitación de velocidad - Entrevista sobre diseño del sistema, cap. 4](https://bytebytego.com/) - Diseño del limitador de frecuencia paso a paso de Alex Xu
+- [Limitación de velocidad de Stripe](https://stripe.com/blog/rate-limiters): cómo Stripe maneja la limitación de velocidad en producción
+- [Complemento de limitación de velocidad de Kong](https://docs.konghq.com/hub/kong-inc/rate-limiting/): implementación de puerta de enlace API en el mundo real

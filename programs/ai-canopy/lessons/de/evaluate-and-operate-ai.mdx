@@ -1,0 +1,32 @@
+---
+title: "Bewerten und betreiben Sie KI"
+description: "Machen Sie Qualität, Sicherheit, Latenz und Kosten messbar, bevor eine KI-Funktion Benutzer erreicht."
+order: 13
+difficulty: advanced
+duration: 45
+icon: "📈"
+published: true
+machineTranslated: true
+---
+## Demos sind keine Beweise
+
+Eine überzeugende Demo beweist nur, dass ein Weg einmal funktioniert hat. Ein Produktions-KI-System benötigt einen wiederholbaren Bewertungssatz, Ablaufverfolgungen, Fehlertaxonomie und Freigabeschwellenwerte.
+
+## Erstellen Sie eine Bewertungsschleife
+
+Erstellen Sie einen goldenen Datensatz, der echte Benutzerabsichten, Randfälle, gegnerische Eingaben und bekannte Fehler darstellt. Messen Sie die Maße separat:
+
+- **Abruf:** Rückruf, Präzision, Relevanz, Aktualität und Berechtigungskorrektheit.
+- **Generation:** Bodenständigkeit, sachliche Richtigkeit, Vollständigkeit und Ablehnungsqualität.
+- **Agentenverhalten:** Werkzeugauswahl, Argumentgültigkeit, Aufgabenerfolg, unnötige Schritte und Wiederherstellung.
+- **Vorgänge:** Latenz, Token-Nutzung, Kosten, Fehlerrate und Benutzer-Feedback.
+
+Nutzen Sie automatisierte Prüfungen für jede Version und prüfen Sie dann repräsentative Fehler manuell. LLM-als-Richter können dabei helfen, Bewertungen zu skalieren, aber dazu sind eine Rubrik, Kalibrierungsbeispiele und Stichproben gegen menschliches Urteilsvermögen erforderlich.
+
+## Für Veränderung sorgen
+
+Versionsaufforderungen, Modelle, Tools, Abrufeinstellungen und Bewertungsdaten. Verfolgen Sie Anfragen, ohne sensible Inhalte unnötig zu speichern. Führen Sie Änderungen schrittweise aus, vergleichen Sie Kohorten und behalten Sie einen Rollback-Pfad bei.
+
+## Bauherausforderung
+
+Nehmen Sie den RAG oder Agenten aus den vorherigen Lektionen. Fügen Sie 20 goldene Fälle, drei Sicherheitsfälle, Latenz- und Kostenmessungen sowie ein Release-Gate hinzu. Machen Sie das System absichtlich kaputt, klassifizieren Sie die Fehler und dokumentieren Sie die nächste Fehlerbehebung.

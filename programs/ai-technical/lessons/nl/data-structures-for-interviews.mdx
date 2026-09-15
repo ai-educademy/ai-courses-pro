@@ -1,0 +1,211 @@
+---
+title: "Datastructuren voor interviews"
+description: "Beheers de essentiële datastructuren die in 90% van de codeerinterviews voorkomen: arrays, bomen, grafieken, hash-kaarten en wanneer u deze moet gebruiken."
+order: 1
+difficulty: "intermediate"
+duration: 20
+icon: "📊"
+published: true
+machineTranslated: true
+---
+# Datastructuren voor interviews
+
+Hier is een geheim dat topinterviewcoaches je geen $ 500 vragen om te leren: ruwweg 90% van de codeerinterviewproblemen draait om slechts zeven datastructuren. Als je goed begrijpt wanneer en waarom je ze allemaal moet bereiken, heb je de helft van de strijd al gewonnen. De andere helft is oefenen – maar zonder de juiste mentale modellen is oefenen slechts memoriseren. Deze les geeft je de kaart, zodat elk probleem dat je tegenkomt als bekend terrein aanvoelt.
+
+## De 7 datastructuren die u moet kennen
+
+Elk technisch interview put uit dezelfde bron. Hier zijn de structuren die je tegenkomt, gerangschikt op frequentie:
+
+| Gegevensstructuur | Interviewfrequentie | Kernactiviteiten | Wanneer interviewers het verwachten |
+|---|---|---|---|
+| **Matrices/tekenreeksen** | ★★★★★ | Toegang tot O(1), zoeken naar O(n), invoegen van O(n) | Bijna elk probleem begint hier |
+| **Hash-kaarten / sets** | ★★★★★ | O(1) invoegen, O(1) opzoeken, O(1) verwijderen | "Optimaliseer dit van O(n²) naar O(n)" |
+| **Gekoppelde lijsten** | ★★★★☆ | O(1) invoegen, O(1) verwijderen, O(n) openen | Aanwijzermanipulatie, cyclusdetectie |
+| **Stapels en wachtrijen** | ★★★★☆ | Push/Pop O(1), Enqueue/Dequeue O(1) | Parseren, BFS, bewerkingen ongedaan maken |
+| **Bomen (binair, BST)** | ★★★★☆ | Zoek O(log n), voeg O(log n) in | Hiërarchische gegevens, gesorteerde bewerkingen |
+| **Grafiek** | ★★★☆☆ | Afhankelijk van vertegenwoordiging | Relaties, paden, connectiviteit |
+| **Hopen** | ★★★☆☆ | Voeg O(log n) in, extraheer-min O(log n) | "Vind de k grootste/kleinste" |
+
+<Callout>Als je maar één week hebt om je voor te bereiden, concentreer je dan op arrays, hash-kaarten en bomen. Deze drie vormen het merendeel van de interviewvragen bij bedrijven op FAANG-niveau.</Callout>
+
+## Arrays en strings — uw basis
+
+Arrays vormen het startpunt voor bijna elk interviewprobleem. Het belangrijkste inzicht is dat de meeste array-problemen niet echt over arrays gaan, maar over het herkennen van patronen zoals twee pointers, een schuifvenster of prefix-sommen.
+
+```python
+# Two Sum — the most classic interview problem
+# "Given an array and target, find two numbers that add to target"
+def two_sum(nums, target):
+    seen = {}  # Hash map to store complement
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+    return []
+
+# Time: O(n), Space: O(n) — trading space for time
+```
+
+Merk op dat zelfs dit "array"-probleem in werkelijkheid een hashmap-probleem is. Dat patroon herhaalt zich voortdurend: de brute kracht maakt gebruik van geneste lussen over een array, en de optimale oplossing introduceert een hash-map.
+
+## Hash Maps — Het interview Zwitsers zakmes
+
+Als je met een probleem vastzit en de brute kracht O(n²) is, vraag jezelf dan af: "Kan een hashmap dit terugbrengen tot O(n)?" Het antwoord is verrassend vaak ja.
+
+Hash-kaarten schitteren wanneer u:
+- **Telfrequenties** — aantal tekens, woorden, elementfrequenties
+- **Volg geziene elementen** — dubbele detectie, problemen met twee somstijlen
+- **Groepeer items** — anagramgroepering, categorisatie
+- **Cacheberekeningen** — memoisatie bij dynamisch programmeren
+
+```java
+// Group Anagrams — a classic hash map problem
+public List<List<String>> groupAnagrams(String[] strs) {
+    Map<String, List<String>> map = new HashMap<>();
+    for (String s : strs) {
+        char[] chars = s.toCharArray();
+        Arrays.sort(chars);
+        String key = new String(chars);
+        map.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
+    }
+    return new ArrayList<>(map.values());
+}
+```
+
+<ThinkAboutIt>Wanneer u een probleem tegenkomt waarin u wordt gevraagd te "vinden", "tellen" of "controleren of deze bestaat", aan welke datastructuur moet u dan onmiddellijk denken? Hoe zou je de wisselwerking verklaren tussen de O(1)-zoekopdracht van een hash-kaart en de binaire O(log n)-zoekopdracht van een gesorteerde array?</ThinkAboutIt>
+
+## Gekoppelde lijsten — Pointer Mastery
+
+Problemen met gekoppelde lijsten testen uw vermogen om wijzers te manipuleren zonder knooppunten uit het oog te verliezen. De drie technieken die je nodig hebt zijn:
+
+1. **Tweewijzers (snel/langzaam)** — cyclusdetectie, zoeken naar het middelste knooppunt
+2. **Dummy-hoofdknooppunt** — vereenvoudigt randgevallen waarin het hoofd zou kunnen veranderen
+3. **Omkering** — iteratieve omkering is een bouwsteen voor veel problemen
+
+```python
+# Detect a cycle in a linked list (Floyd's Algorithm)
+def has_cycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow == fast:
+            return True
+    return False
+```
+
+<FunFact>Het cyclusdetectie-algoritme van Floyd, ook wel bekend als het ‘schildpad en haas’-algoritme, werd in 1967 gepubliceerd. Het is een van de oudste algoritmen die nog steeds vaak wordt gebruikt in moderne codeerinterviews – al meer dan 55 jaar en er komen er nog steeds bij.</FunFact>
+
+## Stapels en wachtrijen — Bestelling is belangrijk
+
+Stapels (LIFO) en wachtrijen (FIFO) zijn eenvoudiger structuren, maar ze ontsluiten hele categorieën problemen:
+
+- **Stapels**: geldige haakjes, uitdrukkingsevaluatie, monotone stapelproblemen, ongedaan maken/opnieuw uitvoeren
+- **Wachtrijen**: BFS-traversal, maximaal schuifvenster (met deque), taakplanning
+
+```python
+# Valid Parentheses — classic stack problem
+def is_valid(s: str) -> bool:
+    stack = []
+    matching = {')': '(', '}': '{', ']': '['}
+    for char in s:
+        if char in matching:
+            if not stack or stack[-1] != matching[char]:
+                return False
+            stack.pop()
+        else:
+            stack.append(char)
+    return len(stack) == 0
+```
+
+## Bomen — Hiërarchisch denken
+
+Bij boomproblemen gaat het doorgaans om recursie en een van de drie traversal-orders (in-order, pre-order, post-order). Het mentale model dat moet worden ontwikkeld is: "Wat heb ik nodig van de linker subboom, de rechter subboom, en hoe combineer ik ze op het huidige knooppunt?"
+
+```python
+# Maximum depth of a binary tree — the template for tree recursion
+def max_depth(root):
+    if not root:
+        return 0
+    left_depth = max_depth(root.left)
+    right_depth = max_depth(root.right)
+    return 1 + max(left_depth, right_depth)
+```
+
+BST-problemen (Binary Search Tree) voegen één cruciale eigenschap toe: het in volgorde doorlopen levert gesorteerde elementen op. Als u in hetzelfde probleem "gesorteerd" en "boom" ziet, denk dan onmiddellijk aan BST.
+
+## Grafieken — Relaties modelleren
+
+Grafiekproblemen voelen intimiderend aan, maar de meeste reduceren zich tot BFS of DFS zodra je de lijst met aangrenzende gebieden hebt samengesteld. De belangrijkste vaardigheden zijn:
+
+- **De grafiek opbouwen** op basis van randlijsten of matrices
+- **BFS** voor het kortste pad in ongewogen grafieken
+- **DFS** voor connectiviteit, cyclusdetectie, topologische sortering
+
+```python
+# BFS shortest path in an unweighted graph
+from collections import deque
+
+def shortest_path(graph, start, end):
+    queue = deque([(start, 0)])
+    visited = {start}
+    while queue:
+        node, distance = queue.popleft()
+        if node == end:
+            return distance
+        for neighbour in graph[node]:
+            if neighbour not in visited:
+                visited.add(neighbour)
+                queue.append((neighbour, distance + 1))
+    return -1  # Not reachable
+```
+
+## Heaps - Het "Top K"-signaal
+
+Wanneer een probleem zegt: "vind de K grootste", "K dichtstbijzijnde", of "voeg K gesorteerde lijsten samen", is een heap (prioriteitwachtrij) vrijwel zeker het antwoord. In Python biedt `heapq` een min-heap; voor een max-heap negeert u de waarden.
+
+```python
+import heapq
+
+# Find the K largest elements in an array
+def k_largest(nums, k):
+    return heapq.nlargest(k, nums)  # Uses a min-heap of size k internally
+```
+
+<Quiz question="Je moet de mediaan van een stroom getallen in O(log n) per invoeging vinden. Welke datastructuurcombinatie is het meest geschikt?" options="Twee gesorteerde arrays|Eén gebalanceerde BST|Twee hopen (max-heap + min-heap)|Een hashkaart met lopende totalen" answer="2" explanation="De benadering met twee heaps gebruikt een max-heap voor de onderste helft en een min-heap voor de bovenste helft. Om ze na elke invoeging in evenwicht te brengen, is O(log n) nodig, en de mediaan is altijd beschikbaar in O(1) vanaf de toppen van de hoop." />
+
+## Cheatsheet over tijd en ruimtecomplexiteit
+
+| Structuur | Toegang | Zoeken | Invoegen | Verwijder | Ruimte |
+|---|---|---|---|---|--|
+| Array | O(1) | O(n) | O(n) | O(n) | O(n) |
+| Hash-kaart | — | O(1)* | O(1)* | O(1)* | O(n) |
+| Gekoppelde lijst | O(n) | O(n) | O(1) | O(1) | O(n) |
+| Stapel/wachtrij | O(n) | O(n) | O(1) | O(1) | O(n) |
+| BST (evenwichtig) | O(logboek n) | O(logboek n) | O(logboek n) | O(logboek n) | O(n) |
+| Hoop | — | O(n) | O(logboek n) | O(logboek n) | O(n) |
+
+*\* Gemiddeld geval; in het slechtste geval is O(n) als gevolg van hash-botsingen.*
+
+## Patroonherkenning — De juiste structuur kiezen
+
+Ontwikkel deze mentale checklist bij het lezen van een probleem:
+
+- **Snelle zoekopdracht nodig?** → Hash-kaart
+- **Gesorteerde volgorde nodig?** → BST of gesorteerde array + binair zoeken
+- **FIFO-verwerking nodig?** → Wachtrij (BFS)
+- **LIFO / backtracking nodig?** → Stapel (DFS)
+- **Top-K of prioriteit nodig?** → Heap
+- **Moet je verbindingen modelleren?** → Grafiek
+- **O(1)-toegang nodig via index?** → Array
+
+<Callout>Geef tijdens uw sollicitatiegesprek expliciet aan voor welke datastructuur u kiest en waarom. Als je zegt: "Ik gebruik hier een hash-kaart omdat we O(1)-lookups nodig hebben om de geneste lus te vermijden", demonstreert precies het technische denken dat interviewers willen zien.</Callout>
+
+## Belangrijkste afhaalrestaurants
+
+- **Zeven structuren bestrijken 90% van de interviews**: arrays, hash-kaarten, gekoppelde lijsten, stapels/wachtrijen, bomen, grafieken en heaps.
+- **Hash-kaarten zijn je beste vriend**: bij twijfel helpt een hash-kaart waarschijnlijk.
+- **Ken uw complexiteiten goed**: interviewers zullen vragen "wat is de tijdscomplexiteit?" na elke oplossing.
+- **Patroonherkenning gaat boven memoriseren**: leer probleemsignalen ("top K" → heap, "kortste pad" → BFS) in de juiste structuur te plaatsen.
+- **Oefen bewust**: los 3-5 problemen per datastructuur op, waarbij de nadruk ligt op begrip in plaats van op snelheid. Snelheid komt voort uit begrip.

@@ -1,0 +1,137 @@
+---
+title: "Entwerfen Sie einen Ratenbegrenzer – APIs im großen Maßstab schützen"
+description: "Erfahren Sie, wie Sie mithilfe von Token-Bucket, Sliding Window und Redis-gestützten Algorithmen einen verteilten Ratenbegrenzer entwerfen, um APIs vor Missbrauch zu schützen und eine faire Nutzung sicherzustellen."
+order: 6
+difficulty: "advanced"
+duration: 20
+icon: "🛡️"
+published: true
+machineTranslated: true
+---
+# Entwerfen Sie einen Ratenbegrenzer – Schutz von APIs im großen Maßstab
+
+Ratenbegrenzung ist eines der praktischsten Systemdesignthemen. Jede Produktions-API – von GitHub bis Stripe – verlässt sich darauf, um Missbrauch zu verhindern, eine faire Nutzung sicherzustellen und Backend-Dienste vor einer Überlastung zu schützen.
+
+## Schritt 1 – Anforderungserfassung
+
+### Funktionale Anforderungen
+- Begrenzen Sie Anfragen basierend auf konfigurierbaren Regeln (pro Benutzer, IP oder API-Schlüssel).
+- Geben Sie eine klare Rückmeldung zurück, wenn ein Client gedrosselt ist (HTTP 429)
+- Unterstützen Sie mehrere Ratenbegrenzungsregeln gleichzeitig
+
+### Nichtfunktionale Anforderungen
+- **Geringe Latenz** – der Limiter darf keinen nennenswerten Overhead verursachen
+- **Verteilt** – funktioniert auf mehreren Servern
+- **Fehlertolerant** – wenn der Begrenzer ausfällt, sollte der Datenverkehr weiterhin fließen (Fail-Open)
+
+<ThinkAboutIt>Sollte ein Ratenbegrenzer bei einem Absturz ausfallen (Verkehr zulassen) oder ausfallen (Verkehr blockieren)? Welche Kompromisse gibt es zwischen einer E-Commerce-Website und einer Banking-API?</ThinkAboutIt>
+
+## Schritt 2 – Ratenbegrenzungsalgorithmen
+
+### Fensterzähler behoben
+Teilen Sie die Zeit in feste Fenster ein (z. B. 60-Sekunden-Intervalle). Erhöhen Sie einen Zähler pro Anfrage. An Fenstergrenzen zurücksetzen. **Problem:** Burst-Verkehr an Fensterrändern kann das Zweifache des Grenzwerts zulassen.
+
+### Schiebefensterprotokoll
+Speichern Sie den Zeitstempel jeder Anfrage. Zählen Sie Einträge im nachfolgenden Fenster. Präzise, ​​aber **speicherintensiv** – die Speicherung jedes Zeitstempels ist bei großem Maßstab teuer.
+
+### Schiebefenstertheke
+Ein Hybrid: Kombinieren Sie die aktuelle Fensteranzahl mit einem gewichteten Teil des vorherigen Fensters. Gleicht Genauigkeit und Speichereffizienz aus.
+
+### Token-Bucket-Algorithmus (am beliebtesten)
+Ein Bucket fasst Token bis zu einer maximalen Kapazität. Token werden zu einem festen Preis hinzugefügt. Jede Anfrage verbraucht ein Token. Wenn der Bucket leer ist, wird die Anfrage abgelehnt.
+
+```
+Bucket: capacity=10, refill_rate=2/sec
+
+Time 0s: [🪙🪙🪙🪙🪙🪙🪙🪙🪙🪙] → 10 tokens
+Burst of 8 requests → [🪙🪙] → 2 tokens remain
+Time 1s: refill +2 → [🪙🪙🪙🪙] → 4 tokens
+```
+
+### Algorithmusvergleich
+
+| Algorithmus | Erinnerung | Genauigkeit | Burst-Handhabung |
+|-----------|--------|----------|----------------|
+| Festes Fenster | Niedrig | Niedrig (Kantenausbrüche) | Schlecht |
+| Schiebeprotokoll | Hoch | Genau | Gut |
+| Schiebetheke | Mittel | Ungefähr | Gut |
+| Token-Eimer | Niedrig | Gut | Ausgezeichnet |
+
+<Quiz question="Welcher Algorithmus ermöglicht kontrollierte Bursts bei gleichzeitiger Beibehaltung einer konstanten Langzeitrate?" options="Fensterzähler behoben|Schiebefensterprotokoll|Token-Eimer|Schiebefenstertheke" answer="2" explanation="Der Token-Bucket ermöglicht kurze Ausbrüche bis zur Bucket-Kapazität und erzwingt gleichzeitig eine durchschnittliche Rate über den Nachfüllmechanismus. Dies macht es ideal für APIs, die mit stoßartigen Datenverkehrsmustern umgehen müssen." />
+
+## Schritt 3 – High-Level-Architektur
+
+```
+Client → API Gateway (Rate Limiter Middleware) → Backend Services
+                    ↕
+              Redis Cluster
+         (counters + token buckets)
+```
+
+<Illustration src="/images/lessons/design-rate-limiter.svg" alt="Ratenbegrenzer-Architektur mit Darstellung von Clients, API-Gateway mit ratenbegrenzender Middleware, Redis-Cluster für verteilten Zustand und Backend-Dienste" caption="Der Ratenbegrenzer befindet sich im API-Gateway und verwendet Redis für die verteilte Zählerspeicherung" />
+
+### Wo soll der Geschwindigkeitsbegrenzer platziert werden?
+- **Client-seitig** – leicht zu fälschen, unzuverlässig
+- **Serverseitig** – nur pro Instanz, nicht skalierbar
+- **API Gateway / Middleware** – der beste Ansatz für verteilte Systeme; zentralisierte Durchsetzung über alle Instanzen hinweg
+
+## Schritt 4 – Tiefer Einblick: Verteilte Ratenbegrenzung
+
+### Redis + Lua-Skripte
+In einem verteilten Setup müssen mehrere Server den Ratenbegrenzungsstatus teilen. Redis ist aufgrund seiner atomaren Operationen und der Latenz von weniger als einer Millisekunde die Standardwahl.
+
+Ein Lua-Skript stellt die Atomizität sicher – die Prüfung und Dekrementierung erfolgt in einem einzigen Redis-Vorgang und verhindert so Race-Bedingungen:
+
+```
+-- Token Bucket in Redis (pseudocode)
+local tokens = redis.call('GET', key)
+local last_refill = redis.call('GET', key..':time')
+-- Calculate tokens to add based on elapsed time
+-- If tokens > 0: decrement and ALLOW
+-- Else: DENY
+```
+
+### Antwortheader
+Gut konzipierte Ratenbegrenzer übermitteln den Status an die Kunden:
+- `X-RateLimit-Limit: 100` – maximale Anfragen pro Fenster
+- `X-RateLimit-Remaining: 42` – Anfragen übrig
+- `X-RateLimit-Reset: 1672531200` – UTC-Epoche, wenn das Fenster zurückgesetzt wird
+- HTTP `429 Too Many Requests` mit einem `Retry-After`-Header
+
+<Quiz question="Warum werden bei Redis Lua-Skripte zur Ratenbegrenzung anstelle separater GET- und SET-Befehle verwendet?" options="Lua ist schneller als Redis-Befehle|Lua-Skripte werden atomar auf Redis ausgeführt und verhindern so Race Conditions|Redis unterstützt GET/SET nicht nativ|Lua reduziert die Netzwerkbandbreite" answer="1" explanation="Lua-Skripte werden atomar auf dem Redis-Server ausgeführt. Ohne Atomizität könnten zwei gleichzeitige Anforderungen beide die gleiche Token-Anzahl lesen, beide verfügbare Token sehen und beide dekrementieren – was mehr Anforderungen ermöglichen würde, als das Limit zulässt." />
+
+## Schritt 5 – Umgang mit Randfällen
+
+### Rennbedingungen
+Ohne atomare Operationen können gleichzeitige Anforderungen Beschränkungen umgehen. Lösungen: Redis Lua-Skripte oder Redis `MULTI/EXEC`-Transaktionen.
+
+### Ratenbegrenzende Abmessungen
+Wenden Sie Grenzwerte auf mehreren Ebenen gleichzeitig an:
+- **Pro Benutzer** – 100 Anfragen/Minute für authentifizierte Benutzer
+- **Pro IP** – 50 Anfragen/Minute für anonymen Datenverkehr
+- **Pro API-Schlüssel** – abgestufte Pläne (kostenlos: 10/Min., Pro: 1000/Min.)
+
+### Distributed Clock Skew
+Server können leicht unterschiedliche Uhren haben. Nutzen Sie die Redis-Serverzeit als einzige Quelle der Wahrheit, anstatt sich auf Zeitstempel des Anwendungsservers zu verlassen.
+
+<FunFact>Die REST-API von GitHub ermöglicht 5.000 Anfragen pro Stunde für authentifizierte Benutzer, aber nur 60 pro Stunde für nicht authentifizierte Anfragen. Stripe verwendet einen Schiebefenster-Ansatz mit separaten Grenzwerten für Live- und Testmodus-API-Schlüssel.</FunFact>
+
+## Schritt 6 – Engpässe und Optimierungen
+
+| Engpass | Lösung |
+|-----------|----------|
+| Redis Single Point of Failure | Redis-Cluster mit Replikation |
+| Netzwerklatenz zu Redis | Lokaler In-Memory-Cache mit regelmäßiger Synchronisierung |
+| Hotkeys (beliebte API-Schlüssel) | Shard über mehrere Redis-Knoten |
+| Regelauswertungsaufwand | Vorkompilierungsregeln, Cache-Konfigurationen |
+
+<Quiz question="Ein Ratenbegrenzer verwendet ein festes Fenster von 60 Sekunden mit einem Limit von 100 Anfragen. Ein Benutzer sendet 100 Anfragen in Sekunde 59 und 100 weitere in Sekunde 61. Wie viele Anfragen kommen durch?" options="100|150|200|Es kommt auf den Algorithmus an" answer="2" explanation="Bei festen Fensterzählern werden alle 200 Anfragen durchgelassen, da 100 in Fenster 1 (Sekunden 0–59) und 100 in Fenster 2 (Sekunden 60–119) fallen. Dieses Edge-Burst-Problem ist der Grund, warum Sliding-Window- oder Token-Bucket-Algorithmen bevorzugt werden." />
+
+<ThinkAboutIt>Wenn Sie eine Ratenbegrenzung für eine globale API mit Rechenzentren in London, New York und Tokio entwerfen – würden Sie dann ein einzelnes zentralisiertes Redis oder regionale Redis-Cluster verwenden? Welche Konsistenzkompromisse würden Sie akzeptieren?</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+- [Rate Limiting – System Design Interview, Kap. 4](https://bytebytego.com/) – Alex Xus schrittweises Ratenbegrenzer-Design
+- [Stripe-Ratenbegrenzung](https://stripe.com/blog/rate-limiters) – wie Stripe mit der Ratenbegrenzung in der Produktion umgeht
+- [Kong Rate Limiting Plugin](https://docs.konghq.com/hub/kong-inc/rate-limiting/) – reale API-Gateway-Implementierung

@@ -1,0 +1,143 @@
+---
+title: "图算法 - 人工智能如何驾驭网络"
+description: "了解为地图、社交网络和网络爬虫提供支持的遍历和最短路径算法。"
+order: 3
+difficulty: "intermediate"
+duration: 20
+icon: "🗺️"
+published: true
+machineTranslated: true
+---
+## 图形对互联世界进行建模
+
+友谊、道路网络、超链接、神经通路——每当实体通过关系链接起来时，你就有了一个**图**。形式上，图 G = (V, E) 由顶点（节点）和边（连接）组成。
+
+图可以是**有向**（单向街道）或**无向**（双向），并且边可以带有**权重**（距离、成本、延迟）。
+
+<Illustration src="/images/lessons/graph-algorithms.svg" alt="具有六个节点和标记边的有向加权图，突出显示最短路径" caption="图表捕捉实体之间的关系；边权重量化了遍历的成本。" />
+
+## 表示图
+
+两种常见的表示方式：
+
+|代表|空间|边缘查找 |最适合 |
+|----------------|--------|-------------|----------|
+| **邻接列表** | O(V + E) | O(度) |稀疏图（大多数现实世界的网络）|
+| **邻接矩阵** | O(V²) | O(1) | O(1) |密集图，快速边缘存在检查 |
+
+```
+// Adjacency list example
+graph = {
+    A: [(B, 4), (C, 1)],
+    B: [(D, 1)],
+    C: [(B, 2), (D, 5)],
+    D: []
+}
+```
+
+## 广度优先搜索（BFS）
+
+BFS **逐层探索**，在深入之前访问所有邻居。它使用**队列**。
+
+```
+function bfs(graph, start):
+    visited = {start}
+    queue = [start]
+    while queue is not empty:
+        node = queue.dequeue()
+        process(node)
+        for neighbour in graph[node]:
+            if neighbour not in visited:
+                visited.add(neighbour)
+                queue.enqueue(neighbour)
+```
+
+**关键属性：** BFS 在未加权图中找到**最短路径**，因为它按照距源的距离顺序处理节点。
+
+### BFS 的 AI 用例
+
+- **社交网络好友建议** - 查找 2-3 个联系人范围内的人。
+- **网络爬虫** - 从种子 URL 逐层索引页面。
+- **解谜器** - 找到最小移动次数（例如魔方状态）。
+
+<Quiz question="为什么BFS能保证未加权图中的最短路径？" options="它总是选择最轻的边缘|它按照与源的距离递增的顺序探索节点|它使用堆栈进行回溯|它在遍历之前对所有边进行排序" answer="1" explanation="BFS 先处理距离 d 的所有节点，然后再处理距离 d+1 的任何节点，因此第一次到达节点时是通过最短路径。" />
+
+## 深度优先搜索（DFS）
+
+DFS 在回溯之前**尽可能深入**。它使用**堆栈**（或递归）。
+
+```
+function dfs(graph, node, visited):
+    visited.add(node)
+    process(node)
+    for neighbour in graph[node]:
+        if neighbour not in visited:
+            dfs(graph, neighbour, visited)
+```
+
+### DFS的应用
+
+- **拓扑排序** - 对任务进行排序，以便每个依赖项都排在第一位（构建系统、课程先决条件）。
+- **循环检测** - 如果 DFS 重新访问当前调用堆栈上的节点，则存在循环。
+- **迷宫解决** - 在尝试替代方案之前充分探索一条路径。
+- **连接的组件** - 从每个未访问的节点运行 DFS 以识别单独的集群。
+
+<ThinkAboutIt>包管理器需要以正确的顺序安装依赖项。应该使用 BFS 还是基于 DFS 的拓扑排序？如果依赖图中存在循环会发生什么？</ThinkAboutIt>
+
+## Dijkstra 算法 - 带权重的最短路径
+
+当边具有不同的成本时，BFS 就不再足够了。 Dijkstra 算法找到从源到所有其他节点的最短加权路径。
+
+**核心思想：**始终使用最小堆（优先级队列）扩展**最便宜的未访问节点**。
+
+```
+function dijkstra(graph, source):
+    dist = {source: 0}          // all others: infinity
+    pq = MinHeap([(0, source)])
+    while pq is not empty:
+        (cost, node) = pq.extractMin()
+        if cost > dist[node]: continue
+        for (neighbour, weight) in graph[node]:
+            newDist = cost + weight
+            if newDist < dist.getOrDefault(neighbour, INF):
+                dist[neighbour] = newDist
+                pq.insert((newDist, neighbour))
+    return dist
+```
+
+**时间复杂度：** O((V + E) log V)，使用二元堆。
+
+<FunFact>Google 地图不会在整个道路网络上运行普通的 Dijkstra。它使用收缩层次结构和 A* 搜索 - 但两者都建立在 Dijkstra 通过最短已知距离进行贪婪扩展的基本见解上。</FunFact>
+
+### Dijkstra 的人工智能用例
+
+- **路线规划** - 导航应用程序寻找最快的驱动器。
+- **网络路由** - 选择最低延迟路径的互联网数据包。
+- **知识图** - 找到概念之间最短的语义联系。
+
+<Quiz question="Dijkstra算法需要哪种数据结构才能有效地选择下一个要访问的节点？" options="堆|队列|最小堆（优先队列）|哈希表" answer="2" explanation="最小堆让 Dijkstra 在 O(log V) 时间内提取具有最小暂定距离的未访问节点。" />
+
+## 循环检测和连接组件
+
+### 循环检测
+
+在**有向图中**，跟踪处于三种状态的节点：未访问、正在进行（在当前 DFS 路径上）和已完成。遇到正在进行的节点意味着存在循环。
+
+在**无向图中**，如果 DFS 到达不是直接父节点的访问节点，则存在循环。
+
+### 连接组件
+
+从每个未访问的节点运行 BFS 或 DFS。每次运行都会发现一个连接的组件。在社交网络中，组件揭示了孤立的社区。
+
+<ThinkAboutIt>人工智能欺诈检测系统将交易建模为图表，其中账户是节点，转账是边缘。互联组件如何帮助识别洗钱团伙？</ThinkAboutIt>
+
+## 要点
+
+1. **BFS*​​ 逐级探索 - 非常适合未加权图中的最短路径和基于邻居的发现。
+2. **DFS** 深入研究——拓扑排序、循环检测和成分分析的支柱。
+3. **Dijkstra** 使用优先级队列将 BFS 扩展到加权图 - 现代路线规划的基础。
+4. 图算法是地图、社交网络、包管理器和知识图背后的引擎。
+
+<FunFact>万维网包含超过 500 亿个索引页面。搜索引擎爬虫使用 BFS 的变体来发现页面并重新索引页面，并按页面重要性 (PageRank) 进行优先级排序。</FunFact>
+
+<Quiz question="您将使用哪种算法来检测有向任务依赖图是否包含循环依赖？" options="迪杰斯特拉算法|BFS最短路径|具有进行中跟踪功能的 DFS|二分查找" answer="2" explanation="具有三状态跟踪（未访问、正在进行、已完成）的 DFS 检测后边缘 - 再次遇到正在进行的节点意味着一个循环。" />

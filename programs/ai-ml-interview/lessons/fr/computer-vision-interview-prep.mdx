@@ -1,0 +1,240 @@
+---
+title: "Préparation à un entretien de vision par ordinateur"
+description: "Préparez-vous aux séries d'entretiens en vision par ordinateur - des CNN aux architectures modernes, avec le test des connaissances théoriques et pratiques des intervieweurs."
+order: 6
+difficulty: "advanced"
+duration: 20
+icon: "👁️"
+published: true
+machineTranslated: true
+---
+# 👁️ Préparation à l'entretien de vision par ordinateur
+
+Les entretiens en vision par ordinateur ont une saveur unique : ils mélangent les fondamentaux mathématiques (convolutions, rétropropagation à travers les couches spatiales) avec l'ingénierie pratique (comment gérer une image 4K sur un appareil mobile ?). Que vous passiez un entretien pour une équipe de conduite autonome ou pour une startup d'analyse de vente au détail, cette leçon couvre les concepts que les intervieweurs testent le plus et les connaissances pratiques qui distinguent les candidats.
+
+---
+
+## 🧱 Fondamentaux du CV : ce que les recruteurs attendent que vous sachiez
+
+###Convolutions
+
+Une couche convolutive fait glisser un petit filtre (noyau) sur une image d'entrée, calculant des multiplications par éléments et les additionnant pour produire une carte de caractéristiques. Il s’agit de l’opération principale de la vision par ordinateur.
+
+```
+Input (5×5)      Kernel (3×3)      Output (3×3)
+┌─────────────┐  ┌─────────┐      ┌─────────┐
+│ 1 0 1 0 1   │  │ 1  0  1 │      │ 4 3 4   │
+│ 0 1 0 1 0   │  │ 0  1  0 │  →   │ 2 4 3   │
+│ 1 0 1 0 1   │  │ 1  0  1 │      │ 4 3 4   │
+│ 0 1 0 1 0   │                   └─────────┘
+│ 1 0 1 0 1   │
+└─────────────┘
+```
+
+**Paramètres clés** :
+- **Taille du noyau** : généralement 3×3 ou 5×5 — les petits noyaux empilés plus profondément sont préférés à un gros noyau
+- **Stride** : taille du pas de la fenêtre coulissante (foulée 2 moitiés dimensions spatiales)
+- **Padding** : ajoutez des zéros autour de la bordure pour préserver la taille spatiale ('même' padding)
+- **Canaux** : un noyau 3×3 sur une image RVB est en réalité 3×3×3
+
+**Formule de taille de sortie** :
+
+$$O = \frac{W - K + 2P}{S} + 1$$
+
+Où W = largeur d'entrée, K = taille du noyau, P = rembourrage, S = foulée.
+
+### Mise en commun
+
+La mutualisation réduit les dimensions spatiales tout en conservant les informations importantes :
+- **Max pooling** : prend la valeur maximale dans chaque fenêtre (la plus courante)
+- **Average pooling** : prend la moyenne (utilisée dans certaines architectures avant la couche finale)
+- **Regroupement moyen global** : réduit chaque carte de caractéristiques à une valeur unique (remplace les couches entièrement connectées dans les réseaux modernes)
+
+### Cartes de fonctionnalités et champs réceptifs
+
+- **Cartes de fonctionnalités** : la sortie de chaque couche convolutive – les premières couches détectent les bords et les textures, les couches plus profondes détectent les motifs complexes (visages, objets)
+- **Champ récepteur** : la région de l'image d'entrée qui influence un neurone de sortie particulier — s'approfondit dans le réseau
+
+<ThinkAboutIt>Pourquoi les architectures modernes utilisent-elles plusieurs convolutions 3×3 empilées au lieu d’une seule convolution 7×7 ? Pensez au nombre de paramètres, aux non-linéarités et à la taille du champ récepteur.
+</ThinkAboutIt>
+
+---
+
+## 🏛️ Architectures clés que vous devez connaître
+
+### ResNet (réseaux résiduels)
+
+L'architecture qui a résolu le « problème de dégradation » : les réseaux plus profonds fonctionnent moins bien que les réseaux moins profonds.
+
+**Innovation clé** : évitez les connexions (connexions résiduelles) qui permettent aux gradients de circuler directement à travers le réseau :
+
+```python
+# Residual block (simplified)
+def residual_block(x):
+    identity = x
+    out = conv_bn_relu(x)
+    out = conv_bn(out)
+    out = out + identity  # Skip connection
+    return relu(out)
+```
+
+**Pourquoi c'est important** : les connexions ignorées permettent la formation de réseaux très profonds (plus de 100 couches). Cette idée apparaît dans presque toutes les architectures modernes.
+
+### YOLO (On ne regarde qu'une fois)
+
+L'architecture incontournable pour la détection d'objets en temps réel.
+
+**Innovation clé** : traite la détection comme un problème de régression unique : divise l'image en une grille et prédit simultanément les cadres de délimitation et les probabilités de classe.
+
+| Version | Caractéristique clé | Vitesse |
+|---|---|---|
+| YOLOv3 | Détection multi-échelle | ~30 FPS |
+| YOLOv5 | Natif PyTorch, facile à utiliser | ~45 FPS |
+| YOLOv8 | Sans ancrage, à la pointe de la technologie | ~80 FPS |
+
+### Transformateurs de vision (ViT)
+
+Applique l'architecture du transformateur aux images en les divisant en correctifs :
+
+```
+Image (224×224) → Split into 16×16 patches → 196 patch tokens
+→ Linear projection → Add position embeddings → Transformer encoder → Classification
+```
+
+**Point clé de l'entretien** : ViT a besoin de plus de données que les CNN pour bien s'entraîner (moins de biais inductifs), mais s'adapte mieux avec plus de données et de calculs.
+
+<Quiz
+  question="Quel problème les connexions résiduelles (sautées) dans ResNet résolvent-elles ?"
+  options="Surajustement dans les réseaux profonds|Des gradients qui disparaissent/explosent qui empêchent la formation de réseaux très profonds|Temps d'inférence lent|Utilisation élevée de la mémoire"
+  answer="1"
+  explanation="Sans connexions sautées, les gradients deviennent extrêmement petits à mesure qu'ils se propagent à travers de nombreuses couches, ce qui rend les réseaux profonds très difficiles à former. Les connexions résiduelles fournissent un chemin direct pour les gradients, permettant une formation efficace de réseaux comportant des centaines de couches."
+/>
+
+---
+
+## ❓ Questions courantes d'entretien sur un CV
+
+### Détection d'objets vs segmentation
+
+Les enquêteurs adorent vous demander de distinguer ces tâches :
+
+| Tâche | Sortie | Exemple |
+|---|---|---|
+| **Classement** | Etiquette unique pour l'image | "C'est un chat" |
+| **Détection d'objet** | Boîtes englobantes + étiquettes | "Chat à (x1,y1,x2,y2), chien à (x3,y3,x4,y4)" |
+| **Segmentation sémantique** | Étiquette de classe par pixel | Chaque pixel étiqueté comme chat, chien ou arrière-plan |
+| **Segmentation des instances** | Étiquette par pixel + ID d'instance | Distingue cat_1 de cat_2 au niveau des pixels |
+
+### Apprentissage par transfert
+
+L'une des techniques de CV les plus pratiques — et un sujet d'entretien fréquent :
+
+1. **Prenez un modèle pré-entraîné** (par exemple, ResNet-50 formé sur ImageNet)
+2. **Remplacez la tête de classification finale** par vos couches spécifiques à la tâche
+3. **Affiner** :
+   - **Extraction de fonctionnalités** : gelez toutes les couches pré-entraînées, entraînez uniquement la nouvelle tête (rapide, fonctionne avec de petits ensembles de données)
+   - **Réglage complet** : débloquez toutes les couches, entraînez-vous de bout en bout avec un faible taux d'apprentissage (meilleurs résultats, nécessite plus de données)
+
+```python
+import torchvision.models as models
+import torch.nn as nn
+
+# Transfer learning with ResNet-50
+model = models.resnet50(pretrained=True)
+
+# Freeze pre-trained layers
+for param in model.parameters():
+    param.requires_grad = False
+
+# Replace final layer for 10-class problem
+model.fc = nn.Linear(model.fc.in_features, 10)
+```
+
+<Callout>Lorsque vous discutez de l'apprentissage par transfert lors des entretiens, mentionnez toujours *quand il pourrait échouer* : lorsque votre domaine cible est très différent du domaine pré-entraîné (par exemple, radiographies médicales vs images naturelles ImageNet). Dans ces cas, vous aurez peut-être besoin d’une pré-formation spécifique au domaine.
+</Callout>
+
+### Augmentation des données
+
+Critique pour former des modèles robustes, en particulier avec des données limitées :
+
+- **Géométrique** : rotation, retournement, recadrage, mise à l'échelle
+- **Couleur** : luminosité, contraste, saturation, gigue de teinte
+- **Avancé** : CutOut (masquer les patchs aléatoires), MixUp (mélanger deux images), CutMix (remplacer les patchs par ceux d'une autre image)
+- **Augmentation du temps de test (TTA)** : augmentation de l'inférence et des prédictions moyennes pour une meilleure précision
+
+<FunFact>L'ensemble de données ImageNet – la référence qui a déclenché la révolution du deep learning – contient plus de 14 millions d'images étiquetées à la main dans 21 841 catégories. Le défi annuel ImageNet (2010-2017) a fait passer les taux d'erreur de 28 % à 2,3 %, dépassant les performances humaines d'environ 5 %.
+</FunFact>
+
+---
+
+## 🖼️ Considérations pratiques
+
+### Prétraitement des images
+
+Les systèmes CV de production nécessitent un prétraitement robuste :
+
+- **Redimensionnement** : les modèles s'attendent à des tailles d'entrée fixes, mais un redimensionnement naïf déforme les proportions. Utilisez un rembourrage ou un recadrage central.
+- **Normalisation** : soustrayez la moyenne ImageNet et divisez par std (lors de l'utilisation de modèles pré-entraînés) : `mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]`
+- **Gestion des résolutions variables** : regroupez des images de tailles similaires ou utilisez des couches de pooling adaptatives
+
+### Déploiement : Edge vs Cloud
+
+| Facteur | Bord (Mobile/IoT) | Nuage |
+|---|---|---|
+| Latence | Très faible (pas d'aller-retour réseau) | Supérieur (dépendant du réseau) |
+| Taille du modèle | Contraint (MobileNet, EfficientNet-Lite) | Sans contrainte |
+| Confidentialité | Les données restent sur l'appareil | Données envoyées au serveur |
+| Coût | Pas de frais de serveur, mais le matériel est fixe | Payer par inférence |
+| Mises à jour | Difficile (mise à jour de l'application requise) | Facile (échanger le modèle côté serveur) |
+
+**Techniques de compression de modèles** pour le déploiement en périphérie :
+- **Quantisation** : réduire les poids de FP32 à INT8 (inférence 4× plus petite et plus rapide)
+- **Élagage** : supprimez les poids de faible ampleur (élagage structuré pour une accélération réelle)
+- **Distillation des connaissances** : former un petit modèle "étudiant" pour imiter un grand modèle "enseignant"
+
+<Quiz
+  question="Vous devez déployer un modèle de détection d'objets sur un téléphone mobile fonctionnant à 30 FPS. Quelle approche est la plus appropriée ?"
+  options="Utilisez un backbone ResNet-152 complet avec la précision FP32|Utilisez le backbone MobileNet avec la quantification INT8|Utilisez Vision Transformer avec toute votre attention|Utiliser un ensemble de trois modèles de détection"
+  answer="1"
+  explanation="MobileNet est spécialement conçu pour les appareils mobiles et périphériques, utilisant des convolutions séparables en profondeur pour réduire les calculs. La quantification INT8 réduit encore la taille du modèle et accélère l'inférence, rendant ainsi la détection en temps réel possible sur le matériel mobile."
+/>
+
+---
+
+## 🌊 Tendances récentes à connaître
+
+### Modèles multimodaux
+
+Modèles qui traitent à la fois les images et le texte :
+- **CLIP** (Contrastive Language-Image Pre-training) : aligne les intégrations d'images et de textes dans un espace partagé. Permet la classification des images sans prise de vue : décrivez une catégorie dans le texte et recherchez les images correspondantes.
+- **SAM** (Segment Anything Model) : un modèle de base pour la segmentation qui peut segmenter n'importe quel objet à partir d'une invite de point, de boîte ou de texte.
+
+### Modèles de diffusion
+
+L'architecture derrière DALL-E, Stable Diffusion et Midjourney :
+- **Processus avancé** : ajoutez progressivement du bruit à une image jusqu'à ce qu'elle devienne du bruit pur
+- **Processus inverse** : apprenez à débruiter — étant donné une entrée bruyante, prédisez et supprimez le bruit
+- **Applications au-delà de l'art** : super-résolution d'images, inpainting, synthèse d'images médicales
+
+### Apprentissage auto-supervisé en CV
+
+Réduire le besoin de données étiquetées :
+- **Apprentissage contrastif** (SimCLR, MoCo) : apprenez les représentations en rassemblant des vues augmentées de la même image et en séparant différentes images
+- **Modélisation d'images masquées** (MAE) : masquer des patchs aléatoires et entraîner le modèle à les reconstruire (l'approche BERT, appliquée aux images)
+
+<ThinkAboutIt>CLIP peut classer les images dans des catégories qu'il n'a jamais vues lors de la formation, simplement en faisant correspondre les images aux descriptions textuelles. Quelles en sont les implications pour les pipelines de CV traditionnels qui nécessitent des données de formation étiquetées pour chaque nouvelle catégorie ?
+</ThinkAboutIt>
+
+---
+
+## 🔑 Points clés à retenir
+
+- **Maîtrisez les fondamentaux** : convolutions, pooling, cartes de fonctionnalités et champs réceptifs – ceux-ci reviennent dans chaque entretien de CV
+- **Connaître les architectures clés** : ResNet (saut de connexions), YOLO (détection en temps réel), ViT (transformateurs pour la vision)
+- **Comprendre la hiérarchie des tâches** : classification → détection → segmentation → segmentation d'instance
+- **L'apprentissage par transfert est votre approche par défaut** : le réglage fin des modèles pré-entraînés surpasse la formation à partir de zéro dans la plupart des scénarios pratiques.
+- **Pensez aux contraintes de déploiement** : périphérie ou cloud, compression du modèle et budgets de latence
+- **Rester à jour** : les modèles multimodaux (CLIP), les modèles de fondation (SAM) et les modèles de diffusion remodèlent le domaine
+
+<Callout>Les entretiens de CV testent l'étendue et la profondeur. Soyez prêt à approfondir une architecture (dérivez la formule de taille de sortie, expliquez mathématiquement les connexions sautées) ET à l'échelle du domaine (comparez les approches de détection, discutez du moment où utiliser ViT vs CNN). Préparez les deux modes.
+</Callout>

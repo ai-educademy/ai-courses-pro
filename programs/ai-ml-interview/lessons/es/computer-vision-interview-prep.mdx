@@ -1,0 +1,240 @@
+---
+title: "Preparación para la entrevista de visión por computadora"
+description: "Prepárese para las rondas de entrevistas sobre visión por computadora, desde CNN hasta arquitecturas modernas, con la prueba de conocimientos teóricos y prácticos de los entrevistadores."
+order: 6
+difficulty: "advanced"
+duration: 20
+icon: "👁️"
+published: true
+machineTranslated: true
+---
+# 👁️ Preparación para la entrevista de visión por computadora
+
+Las entrevistas de visión por computadora tienen un sabor único: combinan fundamentos matemáticos (convoluciones, retropropagación a través de capas espaciales) con ingeniería práctica (¿cómo se maneja una imagen 4K en un dispositivo móvil?). Ya sea que esté entrevistando para un equipo de conducción autónoma o una startup de análisis minorista, esta lección cubre los conceptos que los entrevistadores prueban más y el conocimiento práctico que distingue a los candidatos.
+
+---
+
+## 🧱 Fundamentos del CV: lo que los entrevistadores esperan que sepas
+
+### Convoluciones
+
+Una capa convolucional desliza un pequeño filtro (núcleo) a través de una imagen de entrada, calcula multiplicaciones de elementos y las suma para producir un mapa de características. Esta es la operación central de la visión por computadora.
+
+```
+Input (5×5)      Kernel (3×3)      Output (3×3)
+┌─────────────┐  ┌─────────┐      ┌─────────┐
+│ 1 0 1 0 1   │  │ 1  0  1 │      │ 4 3 4   │
+│ 0 1 0 1 0   │  │ 0  1  0 │  →   │ 2 4 3   │
+│ 1 0 1 0 1   │  │ 1  0  1 │      │ 4 3 4   │
+│ 0 1 0 1 0   │                   └─────────┘
+│ 1 0 1 0 1   │
+└─────────────┘
+```
+
+**Parámetros clave**:
+- **Tamaño del grano**: normalmente 3×3 o 5×5; se prefieren los granos más pequeños apilados más profundamente a un grano grande
+- **Stride**: tamaño del paso de la ventana corrediza (zancada 2 mitades de las dimensiones espaciales)
+- **Relleno**: agregue ceros alrededor del borde para preservar el tamaño espacial ('mismo' relleno)
+- **Canales**: un núcleo de 3×3 en una imagen RGB es en realidad 3×3×3
+
+**Fórmula del tamaño de salida**:
+
+$$O = \frac{W - K + 2P}{S} + 1$$
+
+Donde W = ancho de entrada, K = tamaño del núcleo, P = relleno, S = zancada.
+
+### Agrupación
+
+La agrupación reduce las dimensiones espaciales y al mismo tiempo conserva información importante:
+- **Agrupación máxima**: toma el valor máximo en cada ventana (el más común)
+- **Average pooling**: toma la media (utilizada en algunas arquitecturas antes de la capa final)
+- **Agrupación promedio global**: reduce cada mapa de características a un valor único (reemplaza capas completamente conectadas en redes modernas)
+
+### Mapas de características y campos receptivos
+
+- **Mapas de características**: la salida de cada capa convolucional: las primeras capas detectan bordes y texturas, las capas más profundas detectan patrones complejos (caras, objetos)
+- **Campo receptivo**: la región de la imagen de entrada que influye en una neurona de salida particular: crece más profundamente en la red.
+
+<ThinkAboutIt>¿Por qué las arquitecturas modernas utilizan múltiples convoluciones apiladas de 3 × 3 en lugar de una única convolución de 7 × 7? Piense en la cantidad de parámetros, las no linealidades y el tamaño del campo receptivo.
+</ThinkAboutIt>
+
+---
+
+## 🏛️ Arquitecturas clave que debes conocer
+
+### ResNet (Redes Residuales)
+
+La arquitectura que resolvió el "problema de degradación": las redes más profundas funcionan peor que las menos profundas.
+
+**Innovación clave**: omitir conexiones (conexiones residuales) que permiten que los gradientes fluyan directamente a través de la red:
+
+```python
+# Residual block (simplified)
+def residual_block(x):
+    identity = x
+    out = conv_bn_relu(x)
+    out = conv_bn(out)
+    out = out + identity  # Skip connection
+    return relu(out)
+```
+
+**Por qué es importante**: omitir conexiones permite el entrenamiento de redes muy profundas (más de 100 capas). Esta idea aparece en casi todas las arquitecturas modernas.
+
+### YOLO (Solo miras una vez)
+
+La arquitectura de referencia para la detección de objetos en tiempo real.
+
+**Innovación clave**: trata la detección como un problema de regresión único: divide la imagen en una cuadrícula y predice cuadros delimitadores y probabilidades de clase simultáneamente.
+
+| Versión | Característica clave | Velocidad |
+|---|---|---|
+| YOLOv3 | Detección multiescala | ~30 FPS |
+| YOLOv5 | PyTorch nativo, fácil de usar | ~45 FPS |
+| YOLOv8 | Sin anclajes, lo último en tecnología | ~80 FPS |
+
+### Transformadores de visión (ViT)
+
+Aplica la arquitectura del transformador a las imágenes dividiéndolas en parches:
+
+```
+Image (224×224) → Split into 16×16 patches → 196 patch tokens
+→ Linear projection → Add position embeddings → Transformer encoder → Classification
+```
+
+**Punto clave de la entrevista**: ViT necesita más datos que las CNN para entrenar bien (menos sesgo inductivo), pero escala mejor con más datos y computación.
+
+<Quiz
+  question="¿Qué problema resuelven las conexiones residuales (omitidas) en ResNet?"
+  options="Sobreajuste en redes profundas|Degradados que desaparecen o explotan y que impiden el entrenamiento de redes muy profundas|Tiempo de inferencia lento|Alto uso de memoria"
+  answer="1"
+  explanation="Sin conexiones de salto, los gradientes se vuelven cada vez más pequeños a medida que se propagan hacia atrás a través de muchas capas, lo que hace que sea muy difícil entrenar redes profundas. Las conexiones residuales proporcionan un camino directo para los gradientes, lo que permite un entrenamiento eficaz de redes con cientos de capas."
+/>
+
+---
+
+## ❓ Preguntas comunes de la entrevista de CV
+
+### Detección de objetos frente a segmentación
+
+A los entrevistadores les encanta pedirle que distinga estas tareas:
+
+| Tarea | Salida | Ejemplo |
+|---|---|---|
+| **Clasificación** | Etiqueta única para la imagen | "Esto es un gato" |
+| **Detección de objetos** | Cuadros delimitadores + etiquetas | "Gato en (x1,y1,x2,y2), perro en (x3,y3,x4,y4)" |
+| **Segmentación semántica** | Etiqueta de clase por píxel | Cada píxel está etiquetado como gato, perro o fondo |
+| **Segmentación de instancias** | Etiqueta por píxel + ID de instancia | Distingue cat_1 de cat_2 a nivel de píxel |
+
+### Transferir aprendizaje
+
+Una de las técnicas de CV más prácticas y un tema frecuente en las entrevistas:
+
+1. **Tome un modelo previamente entrenado** (por ejemplo, ResNet-50 entrenado en ImageNet)
+2. **Reemplace el encabezado de clasificación final** con las capas específicas de su tarea
+3. **Ajuste**:
+   - **Extracción de funciones**: congela todas las capas previamente entrenadas, entrena solo el nuevo cabezal (rápido, funciona con conjuntos de datos pequeños)
+   - **Ajuste completo**: descongela todas las capas, entrena de un extremo a otro con una tasa de aprendizaje pequeña (mejores resultados, necesita más datos)
+
+```python
+import torchvision.models as models
+import torch.nn as nn
+
+# Transfer learning with ResNet-50
+model = models.resnet50(pretrained=True)
+
+# Freeze pre-trained layers
+for param in model.parameters():
+    param.requires_grad = False
+
+# Replace final layer for 10-class problem
+model.fc = nn.Linear(model.fc.in_features, 10)
+```
+
+<Callout>Cuando hable sobre el aprendizaje por transferencia en las entrevistas, siempre mencione *cuando podría fallar*: cuando su dominio objetivo es muy diferente del dominio previamente entrenado (por ejemplo, rayos X médicos versus imágenes naturales de ImageNet). En estos casos, es posible que necesite una formación previa específica del dominio.
+</Callout>
+
+### Aumento de datos
+
+Fundamental para entrenar modelos robustos, especialmente con datos limitados:
+
+- **Geométrico**: rotación, voltear, recortar, escalar
+- **Color**: brillo, contraste, saturación, fluctuación de tono
+- **Avanzado**: CutOut (enmascara parches aleatorios), MixUp (combina dos imágenes), CutMix (reemplaza parches con parches de otra imagen)
+- **Aumento en el tiempo de prueba (TTA)**: aumento en la inferencia y predicciones promedio para una mayor precisión
+
+<FunFact>El conjunto de datos de ImageNet, el punto de referencia que desató la revolución del aprendizaje profundo, contiene más de 14 millones de imágenes etiquetadas a mano en 21.841 categorías. El desafío anual ImageNet (2010-2017) impulsó las tasas de error del 28 % al 2,3 %, superando el rendimiento humano de aproximadamente el 5 %.
+</FunFact>
+
+---
+
+## 🖼️ Consideraciones prácticas
+
+### Preprocesamiento de imágenes
+
+Los sistemas CV de producción necesitan un preprocesamiento sólido:
+
+- **Cambiar tamaño**: los modelos esperan tamaños de entrada fijos, pero un cambio de tamaño ingenuo distorsiona las relaciones de aspecto. Utilice relleno o recorte central.
+- **Normalización**: restar la media de ImageNet y dividir por estándar (cuando se utilizan modelos previamente entrenados): `mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]`
+- **Manejo de resoluciones variables**: imágenes por lotes de tamaños similares o use capas de agrupación adaptables
+
+### Implementación: Edge vs Cloud
+
+| factor | Borde (móvil/IoT) | Nube |
+|---|---|---|
+| Latencia | Muy bajo (sin red de ida y vuelta) | Superior (dependiente de la red) |
+| Tamaño del modelo | Restringido (MobileNet, EfficientNet-Lite) | Sin restricciones |
+| Privacidad | Los datos permanecen en el dispositivo | Datos enviados al servidor |
+| Costo | No hay costos de servidor, pero el hardware está arreglado | Pago por inferencia |
+| Actualizaciones | Difícil (se requiere actualización de la aplicación) | Fácil (modelo de intercambio del lado del servidor) |
+
+**Técnicas de compresión de modelos** para implementación perimetral:
+- **Cuantización**: reduce los pesos de FP32 a INT8 (inferencia 4 veces más pequeña y más rápida)
+- **Poda**: elimina pesos de baja magnitud (poda estructurada para una aceleración real)
+- **Destilación de conocimientos**: entrene un pequeño modelo de "estudiante" para que imite un modelo grande de "maestro"
+
+<Quiz
+  question="Debe implementar un modelo de detección de objetos en un teléfono móvil que funcione a 30 FPS. ¿Qué enfoque es el más apropiado?"
+  options="Utilice una red troncal ResNet-152 completa con precisión FP32|Utilice la red troncal MobileNet con cuantificación INT8|Utilice Vision Transformer con total atención|Utilice un conjunto de tres modelos de detección"
+  answer="1"
+  explanation="MobileNet está diseñado específicamente para dispositivos móviles y de borde, y utiliza convoluciones separables en profundidad para reducir el cálculo. La cuantificación INT8 reduce aún más el tamaño del modelo y acelera la inferencia, lo que hace factible la detección en tiempo real en hardware móvil."
+/>
+
+---
+
+## 🌊 Tendencias recientes que vale la pena conocer
+
+### Modelos multimodales
+
+Modelos que procesan tanto imágenes como texto:
+- **CLIP** (Preentrenamiento de imagen y lenguaje contrastivo): alinea incrustaciones de imágenes y texto en un espacio compartido. Permite la clasificación de imágenes de toma cero: describe una categoría en texto y encuentra imágenes coincidentes.
+- **SAM** (Segment Anything Model): un modelo básico para la segmentación que puede segmentar cualquier objeto dado un punto, cuadro o mensaje de texto.
+
+### Modelos de difusión
+
+La arquitectura detrás de DALL-E, Stable Diffusion y Midjourney:
+- **Proceso de avance**: agregue gradualmente ruido a una imagen hasta que se convierta en ruido puro
+- **Proceso inverso**: aprenda a eliminar el ruido: dada una entrada ruidosa, prediga y elimine el ruido
+- **Aplicaciones más allá del arte**: superresolución de imágenes, pintura interna, síntesis de imágenes médicas
+
+### Aprendizaje autosupervisado en CV
+
+Reducir la necesidad de datos etiquetados:
+- **Aprendizaje contrastivo** (SimCLR, MoCo): aprende representaciones reuniendo vistas aumentadas de la misma imagen y separando diferentes imágenes.
+- **Modelado de imágenes enmascaradas** (MAE): enmascara parches aleatorios y entrena el modelo para reconstruirlos (el enfoque BERT, aplicado a imágenes)
+
+<ThinkAboutIt>CLIP puede clasificar imágenes en categorías que nunca había visto durante el entrenamiento, simplemente haciendo coincidir las imágenes con las descripciones de texto. ¿Cuáles son las implicaciones de esto para los canales de CV tradicionales que requieren datos de capacitación etiquetados para cada nueva categoría?
+</ThinkAboutIt>
+
+---
+
+## 🔑 Conclusiones clave
+
+- **Domina los fundamentos**: convoluciones, agrupaciones, mapas de características y campos receptivos: estos aparecen en cada entrevista de CV.
+- **Conozca las arquitecturas clave**: ResNet (saltar conexiones), YOLO (detección en tiempo real), ViT (transformadores para visión)
+- **Comprender la jerarquía de tareas**: clasificación → detección → segmentación → segmentación de instancias
+- **El aprendizaje por transferencia es su enfoque predeterminado**: ajustar los modelos previamente entrenados es mejor que entrenar desde cero en la mayoría de los escenarios prácticos.
+- **Piense en las limitaciones de implementación**: borde versus nube, compresión de modelos y presupuestos de latencia
+- **Manténgase actualizado**: los modelos multimodales (CLIP), los modelos de cimentación (SAM) y los modelos de difusión están remodelando el campo
+
+<Callout>Las entrevistas de CV prueban amplitud y profundidad. Esté preparado para profundizar en una arquitectura (derivar la fórmula del tamaño de salida, explicar matemáticamente las conexiones de omisión) Y en todo el campo (comparar enfoques de detección, analizar cuándo usar ViT frente a CNN). Prepara ambos modos.
+</Callout>

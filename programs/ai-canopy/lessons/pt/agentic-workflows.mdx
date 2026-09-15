@@ -1,0 +1,134 @@
+---
+title: "Fluxos de Trabalho Agentes - Construindo Sistemas de IA Multiagentes"
+description: "Aprenda como os agentes de IA observam, raciocinam e agem de forma autônoma usando uso de ferramentas, memória, estratégias de planejamento e arquiteturas multiagentes para tarefas complexas do mundo real."
+order: 9
+difficulty: "advanced"
+duration: 20
+icon: "🤖"
+published: true
+machineTranslated: true
+---
+# Fluxos de Trabalho Agentes - Construindo Sistemas de IA Multiagentes
+
+Um modelo de linguagem responde a perguntas. Um **agente** atinge metas. A diferença é o loop: os agentes observam seu ambiente, raciocinam sobre o que fazer, executam ações usando ferramentas e repetem até que a tarefa seja concluída. Esta lição cobre a arquitetura, os padrões e os modos de falha dos modernos sistemas de IA de agente.
+
+## O que torna um agente de IA
+
+Um agente de IA é definido por três capacidades operando em loop contínuo:
+
+1. **Observar** - Perceba o estado atual: instruções do usuário, resultados da ferramenta, dados do ambiente, ações anteriores
+2. **Motivo** - Decida o que fazer a seguir: decomponha a meta, planeje etapas, avalie opções
+3. **Agir** - Execute uma ação: chame uma ferramenta, escreva código, envie uma solicitação de API, retorne um resultado
+
+A distinção crítica da solicitação simples é a **autonomia em várias etapas**. Um agente não apenas responde – ele itera. Ele pode pesquisar na web, ler os resultados, decidir que precisa de mais informações, pesquisar novamente com uma consulta refinada, sintetizar as descobertas e então apresentar uma resposta.
+
+<Illustration src="/images/lessons/agentic-workflows.svg" alt="Diagrama circular mostrando o loop observar-razão-agir com conexões com ferramentas, memória e ambiente" caption="O ciclo de agência: observe o ambiente, raciocine sobre o próximo passo, aja usando ferramentas e repita até que o objetivo seja alcançado." />
+
+## Uso de ferramentas e chamada de função
+
+Sem ferramentas, um agente fica limitado à geração de texto. **O uso de ferramentas** oferece aos agentes a capacidade de interagir com o mundo:
+
+- **Chamada de função** - O LLM gera JSON estruturado especificando qual função chamar e com quais argumentos. O tempo de execução executa a função e retorna os resultados como contexto.
+- **Integração de API** - Os agentes podem consultar bancos de dados, chamar endpoints REST, enviar e-mails ou manipular arquivos.
+- **Execução de código** - Alguns agentes escrevem e executam código em um ambiente de área restrita, usando a saída para informar as próximas etapas.
+
+Estruturas modernas expõem ferramentas como assinaturas de funções digitadas com descrições. O modelo aprende qual ferramenta invocar com base na tarefa – escolhendo uma calculadora para matemática, um mecanismo de busca para eventos atuais ou um interpretador de código para análise de dados.
+
+<Quiz question="Qual é a principal vantagem da chamada de função em vez de pedir ao LLM para 'imaginar' o uso de uma ferramenta?" options="A chamada de função usa menos computação|A chamada de função produz resultados reais do mundo real executando código ou chamadas de API, em vez de gerar respostas plausíveis, mas potencialmente fabricadas|A chamada de função não requer um modelo de linguagem|A chamada de função sempre produz resultados corretos" answer="1" explanation="Quando um LLM 'imagina' um resultado de pesquisa, pode alucinar informações plausíveis, mas incorretas. A chamada de função realmente executa a pesquisa e retorna dados reais, fundamentando o raciocínio do agente em resultados factuais de sistemas externos." />
+
+## Memória: curto e longo prazo
+
+Os agentes precisam de memória para lidar com tarefas complexas que excedem uma única janela de contexto:
+
+**Memória de curto prazo** é o contexto da conversa – a janela deslizante de observações, ações e resultados recentes. Ele é limitado pelo comprimento do contexto do modelo e degrada as informações mais atrás na janela.
+
+A **memória de longo prazo** usa armazenamento externo, normalmente **bancos de dados vetoriais**, para persistir e recuperar informações entre sessões:
+- Incorpore observações importantes e armazene-as em um armazenamento de vetores
+- Em cada etapa, consulte a loja em busca de experiências anteriores relevantes
+- Isso dá aos agentes acesso ao conhecimento acumulado ao longo de muitas interações
+
+A combinação de contexto de curto prazo e recuperação de longo prazo reflete a memória de trabalho humana e a memória episódica – mantendo o contexto imediato prontamente disponível enquanto utiliza uma base de conhecimento maior quando necessário.
+
+## Estratégias de planejamento
+
+A forma como um agente decide **o que fazer a seguir** determina sua eficácia:
+
+**Cadeia de Pensamento (CoT)** - O modelo raciocina passo a passo antes de agir. Simples, mas eficaz para problemas simples.
+
+**ReAct (Reason + Act)** - Intercala traços de raciocínio explícitos com ações de ferramentas em um formato estruturado: `Thought → Action → Observation → Thought → ...` Isso torna o processo de decisão do agente transparente e depurável.
+
+**Árvore do Pensamento (ToT)** - O agente explora vários caminhos de raciocínio simultaneamente, avalia cada ramo e seleciona o mais promissor. Útil para problemas onde a primeira abordagem pode estar errada (por exemplo, resolução de quebra-cabeças, depuração complexa).
+
+**Planejar e executar** - O agente primeiro gera um plano completo e depois executa cada etapa. Isso separa a estratégia de alto nível da execução de baixo nível, reduzindo a chance de perder o controle do objetivo geral no meio da execução.
+
+<FunFact>AutoGPT, um dos primeiros experimentos com agentes autônomos, se tornou viral em abril de 2023 e se tornou brevemente o repositório GitHub de crescimento mais rápido da história. Apesar de sua popularidade, frequentemente ficava preso em loops infinitos – um problema que destacava a enorme lacuna entre demonstrações impressionantes e agentes de produção confiáveis.
+</FunFact>
+
+## Arquiteturas Multiagentes
+
+Tarefas complexas geralmente se beneficiam do trabalho conjunto de vários agentes especializados:
+
+**Padrão supervisor** - Um agente "gerente" central decompõe a tarefa e delega subtarefas a agentes trabalhadores especializados (um pesquisador, um codificador, um revisor). O supervisor sintetiza seus resultados e gerencia a coordenação.
+
+**Peer-to-peer** – Os agentes se comunicam diretamente entre si sem um coordenador central. Cada agente tem uma função definida e passa os resultados para o próximo agente em uma cadeia ou rede.
+
+**Hierárquica** - Múltiplas camadas de supervisão: um planejador de nível superior delega a coordenadores de nível médio, que gerenciam trabalhadores especializados. Isso reflete estruturas organizacionais e escala para tarefas muito complexas.
+
+<ThinkAboutIt>Os sistemas multiagentes introduzem sobrecarga de coordenação, custos de comunicação e potencial para os agentes trabalharem com finalidades cruzadas. Em que circunstâncias os benefícios da especialização superam a complexidade da orquestração? Quando um agente único e mais capaz é a melhor escolha?
+</ThinkAboutIt>
+
+## Estruturas de agentes modernas
+
+O ecossistema amadureceu rapidamente desde os primeiros experimentos:
+
+- **LangGraph** – Cria agentes como gráficos com estado com fluxo de controle explícito, ciclos e persistência. Favorece a previsibilidade e a depuração em vez da autonomia.
+- **CrewAI** – Concentra-se na colaboração multiagente baseada em funções com tarefas, ferramentas e padrões de delegação definidos.
+- **AutoGen (Microsoft)** – Permite fluxos de trabalho conversacionais com vários agentes, onde os agentes conversam entre si para resolver problemas.
+- **OpenAI Agents SDK** - Estrutura própria com chamada de função integrada, transferências entre agentes e proteções.
+
+## Codificação Agente
+
+Talvez a aplicação mais transformadora: agentes de IA que escrevem, testam e depuram código de forma autônoma:
+
+- **GitHub Copilot** - Modo de agente no editor que planeja alterações, edita vários arquivos e executa comandos de terminal.
+- **Cursor** - IDE construído em torno de um agente que entende bases de código inteiras e faz edições em vários arquivos.
+- **Devin (Cognition)** - Agente autônomo de engenharia de software que pode lidar com tarefas completas de desenvolvimento, desde o problema até a solicitação pull.
+
+Essas ferramentas representam uma mudança do **preenchimento automático para a autonomia** - o agente não apenas sugere a próxima linha, ele entende o objetivo e trabalha para alcançá-lo em arquivos, terminais e navegadores.
+
+## Quando os agentes falham
+
+Compreender os modos de falha é essencial para construir agentes confiáveis:
+
+- **Loops de alucinação** - O agente fabrica um resultado de ferramenta, raciocina a partir dele e se aprofunda na ficção a cada iteração.
+- **Recursão infinita** - O agente tenta repetidamente uma ação com falha sem alterar sua abordagem, queimando tokens e computando.
+- **Desvio de meta** - Ao longo de muitas etapas, o agente perde gradualmente de vista o objetivo original, perseguindo subtarefas tangenciais.
+- **Hacking de recompensas** - O agente encontra atalhos que satisfazem seus critérios de sucesso sem realmente resolver o problema.
+
+<Quiz question="Um agente tem a tarefa de encontrar um bug em uma base de código. Ele procura o arquivo, não o encontra e depois pesquisa novamente com a mesma consulta, repetidamente. Que modo de falha é esse?" options="Ciclo de alucinação|Desvio de meta|Recursão infinita – tentar novamente uma ação com falha sem adaptar a abordagem|Hack de recompensa" answer="2" explanation="Isso é recursão infinita: o agente fica preso em um loop, repetindo exatamente a mesma ação com falha sem modificar sua abordagem. Um agente bem projetado deve detectar falhas repetidas e tentar uma estratégia alternativa – diferentes termos de pesquisa, pedir esclarecimentos ou explorar um caminho diferente." />
+
+## Padrões de Agente de Produção
+
+Construir agentes que funcionem de forma confiável na produção requer engenharia defensiva:
+
+- **Guardrails** - Validação de entrada/saída, filtragem de conteúdo e verificações de limites que evitam que os agentes realizem ações perigosas.
+- **Human-in-the-loop** - Para ações de alto risco (envio de e-mails, modificação de bancos de dados, implantação de código), exigem aprovação humana antes da execução.
+- **Saídas estruturadas** - Força os agentes a produzirem respostas analisáveis ​​por máquina (esquemas JSON) em vez de texto de formato livre, reduzindo erros de análise.
+- **Observabilidade** - Registre cada pensamento, ação e chamada de ferramenta. Sem rastreamentos abrangentes, é quase impossível depurar uma execução de agente de 20 etapas com falha.
+- **Disjuntores** - Defina contagens máximas de etapas, orçamentos de tokens e limites de tempo. Se um agente exceder esses limites, pare e passe para um humano.
+
+<Quiz question="Por que a aprovação humana é crítica para agentes de produção que executam ações de alto risco?" options="Porque os agentes de IA estão sempre errados|Porque reduz os custos de computação|Como os agentes podem ter alucinações, interpretar mal as intenções ou tomar ações irreversíveis, a supervisão humana fornece uma rede de segurança para decisões com consequências no mundo real|Porque os regulamentos exigem isso em todos os casos" answer="2" explanation="Os agentes podem interpretar mal os objetivos, ter alucinações com informações ou realizar ações difíceis de reverter (excluir dados, enviar comunicações, implantar código). Para operações de alto risco, a aprovação humana atua como uma rede de segurança crítica, detectando erros antes que tenham impacto no mundo real." />
+
+<FunFact>Agentes de navegador – sistemas de IA que navegam em sites clicando, digitando e lendo telas – estão entre os aplicativos de agente mais difíceis de construir de maneira confiável. Benchmarks como o WebArena mostram que mesmo os melhores agentes completam com sucesso apenas 15-30% das tarefas realistas da web, em comparação com o desempenho humano quase perfeito.
+</FunFact>
+
+<ThinkAboutIt>À medida que as ferramentas de codificação de agente se tornam mais capazes, o papel do engenheiro de software muda de escrever código para revisar, direcionar e verificar o código gerado por IA. Que novas competências se tornam essenciais neste mundo – e que competências tradicionais se tornam menos críticas?
+</ThinkAboutIt>
+
+---
+
+## 📚 Leitura adicional
+
+- [ReAct: Sinergizando Raciocínio e Ação em Modelos de Linguagem (Yao et al., 2023)](https://arxiv.org/abs/2210.03629) - O artigo fundamental sobre o padrão de agente ReAct
+- [O panorama das arquiteturas emergentes de agentes de IA (LangChain)](https://blog.langchain.dev/what-is-an-agent/) - Visão geral abrangente dos padrões de design de agentes modernos
+- [Andrew Ng - Agentic Design Patterns](https://www.deeplearning.ai/the-batch/how-agents-can-improve-llm-performance/) - Quatro padrões principais de agente: reflexão, uso de ferramentas, planejamento e colaboração multiagente

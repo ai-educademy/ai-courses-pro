@@ -1,0 +1,214 @@
+---
+title: "Transformers explicados: la arquitectura detrás de ChatGPT"
+description: "Comprenda la arquitectura Transformer que impulsa ChatGPT, GPT-4, BERT y Gemini: el mecanismo de atención explicado paso a paso."
+order: 12
+difficulty: "intermediate"
+duration: 35
+icon: "🤖"
+published: true
+machineTranslated: true
+---
+# Transformers explicados: la arquitectura detrás de ChatGPT
+
+En 2017, un equipo de Google publicó un artículo titulado *"La atención es todo lo que necesitas"*. Introdujo la arquitectura **Transformer** y cambió la IA para siempre. Todos los modelos de lenguaje importantes de los que ha oído hablar (ChatGPT, GPT-4, BERT, Gemini, Claude, LLaMA) se basan en Transformers.
+
+Para comprender por qué son importantes los transformadores, primero debe comprender qué reemplazaron.
+
+## ⏱️ El problema con los RNN: procesar texto secuencialmente
+
+Antes de Transformers, el enfoque dominante para procesar secuencias (texto, audio, series de tiempo) era la **Red neuronal recurrente (RNN)** y sus variantes: LSTM y GRU.
+
+Los RNN procesan texto **una palabra a la vez**, manteniendo un "estado oculto" que transmite información:
+
+```
+Input:  "The cat sat on the mat because it was comfortable"
+         ↓    ↓    ↓   ↓    ↓    ↓      ↓      ↓   ↓      ↓
+        h1 → h2 → h3 → h4 → h5 → h6 → h7 → h8 → h9 → h10 → output
+```
+
+Esto funciona, pero tiene dos problemas importantes:
+
+**1. Degradados que desaparecen en secuencias largas**
+Cuando el modelo procesa la palabra 10, la información de la palabra 1 ha sido "diluida" por nueve actualizaciones de estado ocultas. El modelo tiene dificultades para conectar "eso" (palabra 8) con "gato" (palabra 2) cuando la oración es larga.
+
+**2. Lento, sin paralelización**
+Debido a que cada palabra depende del estado oculto anterior, debes procesar las palabras una a la vez. No se puede paralelizar una secuencia. La formación en documentos largos es tremendamente lenta.
+
+El Transformer resuelve ambos problemas con un único y elegante mecanismo: **atención**.
+
+## 👀 El mecanismo de autoatención
+
+La innovación central del Transformer es la **autoatención**: la capacidad de cada palabra en una secuencia de atender directamente a todas las demás palabras simultáneamente, independientemente de qué tan separadas estén.
+
+En lugar de pasar información de forma secuencial, la autoatención calcula **qué tan relevante es cada palabra con respecto a todas las demás palabras de la secuencia**, todo a la vez.
+
+### Consulta, clave y valor: en inglés sencillo
+
+Para cada palabra (o ficha), el Transformador crea tres vectores:
+
+- **Consulta (Q)**: *"¿Qué estoy buscando?"* — la pregunta que plantea esta palabra
+- **Clave (K)**: *"¿Qué contengo?"* — el anuncio que cada palabra transmite sobre sí misma
+- **Valor (V)**: *"¿Qué información proporciono?"* — el contenido real que se recuperará
+
+La puntuación de atención entre dos palabras se calcula tomando el producto escalar de la consulta de una palabra con la clave de otra palabra. Una puntuación alta significa "estas dos palabras son muy relevantes entre sí".
+
+```python
+import torch
+import torch.nn.functional as F
+
+def self_attention(Q, K, V):
+    d_k = Q.shape[-1]  # dimension of key vectors
+    
+    # Compute raw attention scores: how relevant is each word to each other
+    scores = torch.matmul(Q, K.transpose(-2, -1)) / (d_k ** 0.5)
+    
+    # Convert scores to probabilities (weights that sum to 1)
+    attention_weights = F.softmax(scores, dim=-1)
+    
+    # Weighted sum of Value vectors
+    output = torch.matmul(attention_weights, V)
+    
+    return output, attention_weights
+
+# For the sentence "The cat sat on the mat because it was comfortable",
+# "it" will have a high attention score with "cat" (the antecedent)
+# regardless of how many words separate them
+```
+
+El resultado: **cada ficha tiene una línea de visión directa con respecto a todas las demás fichas**. No más cuellos de botella de información, no más gradientes que desaparecen en largas secuencias.
+
+### ¿Por qué el escalamiento de raíz cuadrada?
+
+El `/ (d_k ** 0.5)` en el código anterior evita que los productos escalares se conviertan en números muy grandes que empujarían al softmax a regiones de gradientes extremadamente pequeños. Es un truco de estabilización.
+
+## 🧠 Atención de múltiples cabezas
+
+En lugar de calcular la atención solo una vez, Transformers la calcula **varias veces en paralelo** con diferentes proyecciones aprendidas. Esto se llama **atención multicabeza**:
+
+```python
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model=512, num_heads=8):
+        super().__init__()
+        self.num_heads = num_heads
+        self.d_k = d_model // num_heads  # 64 per head
+        
+        # Separate linear projections for each head
+        self.W_q = nn.Linear(d_model, d_model)
+        self.W_k = nn.Linear(d_model, d_model)
+        self.W_v = nn.Linear(d_model, d_model)
+        self.W_o = nn.Linear(d_model, d_model)
+    
+    def forward(self, x):
+        # Each head learns to attend to different aspects:
+        # Head 1 might focus on syntactic relationships
+        # Head 2 might focus on semantic similarity
+        # Head 3 might focus on co-reference (it → cat)
+        # ... and so on for all 8 heads
+        pass
+```
+
+Cada jefe de atención puede especializarse en un tipo diferente de relación. Una cabeza podría rastrear las dependencias sintácticas (concordancia sujeto-verbo), otra podría centrarse en la correferencia (pronombres y sus antecedentes), otra podría capturar la similitud semántica.
+
+<FunFact>Se rumorea que GPT-4 utiliza 96 cabezas de atención. Cada uno puede aprender de forma independiente a rastrear diferentes relaciones lingüísticas en toda la ventana de contexto simultáneamente.</FunFact>
+
+## 📍 Codificación posicional
+
+La atención personal tiene un punto ciego: es inherentemente **independiente del orden**. "El perro muerde al hombre" y "El hombre muerde al perro" producirían puntuaciones de atención idénticas sin información adicional.
+
+Para darle al modelo un sentido del orden de las palabras, Transformers agrega **codificaciones posicionales** a las incrustaciones de entrada. El transformador original utilizaba funciones sinusoidales:
+
+```python
+import numpy as np
+
+def positional_encoding(seq_len, d_model):
+    PE = np.zeros((seq_len, d_model))
+    for pos in range(seq_len):
+        for i in range(0, d_model, 2):
+            PE[pos, i]     = np.sin(pos / 10000 ** (2*i / d_model))
+            PE[pos, i + 1] = np.cos(pos / 10000 ** (2*i / d_model))
+    return PE
+
+# Each position gets a unique "fingerprint" added to its embedding
+# Position 0 looks different from position 1, which looks different from position 2
+```
+
+Los modelos modernos como LLaMA utilizan **Rotary Position Embeddings (RoPE)**, que codifican la posición relativa de manera más efectiva y escalan mejor a contextos muy largos.
+
+## 🏗️ La arquitectura transformadora completa
+
+El Transformer original tiene dos partes principales:
+
+### Codificador
+Lee la entrada y construye una rica representación contextual. La representación de cada token está informada por todos los demás tokens a través de la atención propia. Se utiliza para tareas como: clasificación de oraciones, reconocimiento de entidades nombradas, respuesta a preguntas sobre un pasaje determinado.
+
+### Decodificador
+Genera tokens de salida uno a la vez, atendiendo tanto a la salida del codificador como a los tokens ya generados. Utilizado para: traducción, resumen, generación de texto.
+
+Una pila completa de codificador-decodificador:
+```
+Input text → Token Embeddings + Positional Encoding
+           → N × [Multi-Head Self-Attention → Add & Norm → Feed-Forward → Add & Norm]
+           → Encoder Output
+
+Encoder Output + Generated tokens so far
+           → N × [Masked Self-Attention → Cross-Attention → Feed-Forward]
+           → Next token prediction
+```
+
+## 🆚 BERT vs GPT: dos sabores de Transformer
+
+No todos los modelos basados ​​en Transformer utilizan la estructura codificador-decodificador completa. Las dos variantes dominantes son:
+
+### BERT (solo codificador)
+- Utiliza sólo la pila **codificador**
+- Entrenado con **Modelado de lenguaje enmascarado**: algunos tokens de entrada están ocultos y BERT los predice
+- Excelente para **comprender** texto: clasificación, búsqueda, preguntas y respuestas
+- Lee todo el contexto bidireccionalmente (cada palabra ve cada dos palabras)
+
+### GPT (solo decodificador)
+- Utiliza sólo la pila **decodificador**  
+- Entrenado con **predicción del siguiente token**: dados todos los tokens anteriores, predice el siguiente
+- Excelente para **generar** texto: conversación, escritura, código
+- Enmascaramiento causal: cada token sólo puede atender a los tokens anteriores (no a los futuros, eso sería hacer trampa)
+
+```
+BERT training:   "The [MASK] sat on the mat"  → predict "cat"
+GPT training:    "The cat sat on the"          → predict "mat"
+```
+
+<ThinkAboutIt>La atención bidireccional de BERT significa que puede ver palabras futuras al construir la representación de una palabra. GPT no puede. ¿Por qué esto hace que GPT sea mejor para la generación pero BERT sea mejor para las tareas de clasificación?</ThinkAboutIt>
+
+## 📈 Por qué es importante la escala
+
+La arquitectura Transformer resultó escalar notablemente bien. Los modelos más grandes con más parámetros, entrenados con más datos y con más computación, producen consistentemente un mejor rendimiento, un fenómeno descrito por **leyes de escala** (Kaplan et al., 2020).
+
+Esto llevó a una progresión:
+- GPT-1 (2018): 117M parámetros
+- GPT-2 (2019): 1,5 mil millones de parámetros
+- GPT-3 (2020): 175B parámetros
+- GPT-4 (2023): más de 1 billón de parámetros estimados
+
+Cada salto trajo mejoras cualitativas en la capacidad. Las tareas que GPT-2 no podía realizar en absoluto (razonamiento complejo, generación de código) se volvieron posibles en la escala GPT-3 y excelentes en la escala GPT-4.
+
+## ⚡ Entrenamiento vs Inferencia
+
+Dos perfiles computacionales muy diferentes:
+
+**Formación**: extremadamente cara. Procesar miles de millones de tokens, calcular gradientes y actualizar cientos de miles de millones de parámetros en miles de GPU durante semanas o meses. Se estimó que el entrenamiento de GPT-4 costó más de 100 millones de dólares.
+
+**Inferencia**: mucho más barato. Un único paso directo a través de la red para generar cada token. Todavía requiere hardware importante (GPU potentes o chips de IA especializados), pero manejable a escala.
+
+Esta asimetría ha dado forma a la industria: unas pocas organizaciones con buenos recursos capacitan modelos de fundaciones; todos los demás acceden a ellos a través de API.
+
+<Quiz question="¿Qué problema con los RNN resolvió el mecanismo de atención del Transformer?" options="Los RNN no podían procesar texto, solo funcionaban con imágenes|Los RNN lucharon con dependencias de largo alcance y no pudieron paralelizar la longitud de la secuencia|Los RNN requirieron demasiados datos etiquetados para entrenar|Los RNN solo podían procesar texto en inglés" answer="1" explanation="Los RNN procesaron tokens secuencialmente, lo que provocó gradientes que desaparecían y dificultaban la conexión de palabras distantes (dependencias de largo alcance). Tampoco se pudieron paralelizar a lo largo de la secuencia, lo que hizo que el entrenamiento fuera lento. La autoatención resuelve ambas cosas: cada token atiende directamente a los demás y todos los cálculos de atención pueden ejecutarse en paralelo." />
+
+## Conclusiones clave
+
+- Los **RNN** procesaron secuencias paso a paso, luchando con dependencias de largo alcance y sin poder paralelizarse; Transformers las reemplazó
+- **Autoatención** permite que cada token atienda directamente a todos los demás tokens a través de vectores de consulta, clave y valor, resolviendo ambos problemas a la vez.
+- **Atención de múltiples cabezas** ejecuta múltiples cálculos de atención en paralelo, lo que permite que el modelo aprenda diferentes tipos de relaciones simultáneamente
+- **Codificación posicional** agrega información de orden al mecanismo de atención inherentemente independiente de la posición
+- **BERT** (solo codificador) está previamente entrenado para comprender texto bidireccionalmente; Lo mejor para tareas de clasificación y búsqueda.
+- **GPT** (solo decodificador) está previamente entrenado para generar texto de izquierda a derecha; Lo mejor para la generación y la conversación.
+- **La escala importa enormemente**: los transformadores más grandes entrenados con más datos desbloquean constantemente nuevas capacidades, como lo demuestra la progresión GPT-1 → GPT-4.
+- La formación es extremadamente cara; La inferencia es mucho más barata: esta asimetría determina cómo se implementan los modelos básicos.

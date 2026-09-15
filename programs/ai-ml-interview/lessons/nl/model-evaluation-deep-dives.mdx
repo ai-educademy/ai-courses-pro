@@ -1,0 +1,215 @@
+---
+title: "Modelevaluatie diepe duiken"
+description: "Beheers de statistieken, methodologieën en afwegingen van modelevaluatie – het onderwerp dat ML-ingenieurs onderscheidt van ML-beoefenaars."
+order: 2
+difficulty: "advanced"
+duration: 20
+icon: "📊"
+published: true
+machineTranslated: true
+---
+# 📊 Modelevaluatie diepe duiken
+
+"Uw model heeft een nauwkeurigheid van 95% - verzend het!" Als je van die zin niet meteen een ongemakkelijk gevoel krijgt, is deze les precies wat je nodig hebt. Modelevaluatie is het gespreksonderwerp dat onderscheid maakt tussen kandidaten die modellen hebben *getraind* en degenen die ze * hebben ingezet*. Interviewers onderzoeken evaluatiekennis omdat deze laat zien of u begrijpt wat een model feitelijk doet – en of het moet worden vertrouwd.
+
+---
+
+## 🎯 Classificatiestatistieken: meer dan nauwkeurigheid
+
+Nauwkeurigheid – het percentage correcte voorspellingen – is de maatstaf die iedereen het eerst leert en de maatstaf die het vaakst misleidt. Overweeg een fraudedetectiemodel op een dataset waarbij slechts 0,5% van de transacties frauduleus is. Een model dat voor alles 'geen fraude' voorspelt, bereikt een nauwkeurigheid van 99,5%** en ontdekt geen fraude.
+
+### Precisie, terugroepen en F1
+
+Deze drie statistieken vormen de ruggengraat van de classificatie-evaluatie:
+
+- **Precisie** = TP / (TP + FP) — "Hoeveel was dat eigenlijk van alles wat ik als positief heb gemarkeerd?"
+- **Herinnering** = TP / (TP + FN) — "Hoeveel heb ik gevangen van alles wat daadwerkelijk positief was?"
+- **F1-score** = 2 × (Precisie × Recall) / (Precisie + Recall) — het harmonische gemiddelde, waarbij beide in evenwicht worden gebracht
+
+```
+              Predicted Positive    Predicted Negative
+Actual Positive       TP                   FN
+Actual Negative       FP                   TN
+```
+
+<ThinkAboutIt>Je bouwt een model om kanker op te sporen uit medische beelden. Zou u optimaliseren voor precisie of terugroepactie? Wat zijn de gevolgen in de echte wereld als dit in beide richtingen fout gaat?
+</ThinkAboutIt>
+
+### Wanneer moet u welke gebruiken?
+
+| Scenario | Optimaliseren voor | Waarom |
+|---|---|---|
+| Spamfilter | Precisie | Echte e-mail naar spam sturen is erger dan wat spam doorlaten |
+| Kankerscreening | Terugroepen | Het missen van een kankergeval is veel erger dan een vals alarm |
+| Zoekrangschikking | Precisie@K | Gebruikers kijken alleen naar topresultaten |
+| Fraudedetectie | F1 of aangepast | Evenwicht nodig – te veel valse positieven blokkeren echte klanten |
+
+---
+
+## 📈 AUC-ROC en AUC-PR: het volledige beeld
+
+### ROC-curve
+
+De curve voor de bedrijfskarakteristieken van de ontvanger toont het **True Positive Rate** (herinnering) tegen het **False Positive Rate** (FP / (FP + TN)) bij elke classificatiedrempel. Het gebied onder deze curve (**AUC-ROC**) geeft een drempelonafhankelijke maatstaf voor de modelkwaliteit.
+
+- **AUC = 1,0**: perfecte scheiding
+- **AUC = 0,5**: willekeurig raden (de diagonale lijn)
+- **AUC < 0,5**: slechter dan willekeurig (uw labels kunnen worden omgedraaid!)
+
+### Precisie-herroepcurve
+
+Wanneer de klassen sterk onevenwichtig zijn, kan AUC-ROC misleidend optimistisch zijn. De **Precision-Recall-curve** geeft precisie versus herinnering weer en is informatiever voor detectie van zeldzame gebeurtenissen.
+
+```python
+from sklearn.metrics import precision_recall_curve, auc
+
+precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
+pr_auc = auc(recall, precision)
+```
+
+<Callout>Interviewtip: als de interviewer een onevenwichtige dataset vermeldt, stel dan onmiddellijk AUC-PR voor boven AUC-ROC. Dit geeft aan dat u de beperking van ROC-curven in onevenwichtige omgevingen begrijpt – een onderscheid dat veel kandidaten missen.
+</Callout>
+
+<Quiz
+  question="Een fraudedetectiemodel heeft een AUC-ROC van 0,98 op een dataset waarbij 0,1% van de transacties frauduleus is. Wat is de meest terechte zorg?"
+  options="Het model is duidelijk uitstekend en klaar voor productie|AUC-ROC kan misleidend hoog zijn op basis van onevenwichtige gegevens; controleer in plaats daarvan AUC-PR|Het model is overfitting omdat de AUC te hoog is|U moet nauwkeurigheid gebruiken in plaats van AUC"
+  answer="1"
+  explanation="Bij een extreem onevenwicht tussen klassen kan een model een hoge AUC-ROC bereiken door de klasse van de overweldigende meerderheid correct te classificeren. AUC-PR richt zich op de prestaties van de (positieve) minderheidsklasse en geeft een eerlijker beeld van hoe goed het model fraude detecteert."
+/>
+
+---
+
+## 📐 Regressiestatistieken
+
+Niet alles is classificatie. Bij het voorspellen van continue waarden zijn deze statistieken van belang:
+
+### Gemiddelde kwadratische fout (MSE)
+
+$$MSE = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2$$
+
+Bestraft grote fouten zwaar (kwadratische straf). Goed als grote fouten veel erger zijn dan kleine – bijvoorbeeld het voorspellen van huizenprijzen waarbij een verschil van £100.000 veel erger is dan een verschil van £10.000.
+
+### Gemiddelde absolute fout (MAE)
+
+$$MAE = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|$$
+
+Behandelt alle fouten lineair. Robuuster voor uitschieters dan MSE. Gebruik deze optie wanneer uitschieters worden verwacht en uw statistiek niet mogen domineren.
+
+### R² (Bepalingscoëfficiënt)
+
+$$R^2 = 1 - \frac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i - \bar{y})^2}$$
+
+Meet hoeveel variantie uw model verklaart in vergelijking met het simpelweg voorspellen van het gemiddelde. R² = 1 betekent perfecte pasvorm; R² = 0 betekent dat uw model niet beter is dan het voorspellen van het gemiddelde.
+
+<FunFact>R² kan zelfs negatief worden! Dit gebeurt wanneer de voorspellingen van uw model slechter zijn dan alleen het voorspellen van het gemiddelde van de doelvariabele voor elke invoer. Het is een teken dat er iets heel erg mis is gegaan.
+</FunFact>
+
+---
+
+## 🔄 Kruisvalidatiestrategieën
+
+Het volhouden van één enkele testset werkt voor grote datasets, maar kruisvalidatie geeft betrouwbaardere schattingen van de generalisatieprestaties.
+
+### K-voudige kruisvalidatie
+
+Gegevens opsplitsen in K gelijke vouwen. Train op K-1-vouwen, valideer op de resterende vouw. Herhaal K keer. Rapporteer het gemiddelde en de standaardafwijking van uw statistiek.
+
+```python
+from sklearn.model_selection import cross_val_score
+
+scores = cross_val_score(model, X, y, cv=5, scoring='f1')
+print(f"F1: {scores.mean():.3f} ± {scores.std():.3f}")
+```
+
+### Gestratificeerde K-vouw
+
+Behoudt de klassenverdeling in elke vouw – essentieel voor onevenwichtige datasets.
+
+### Tijdreekssplitsing
+
+Gebruik **nooit** willekeurige splitsingen voor tijdelijke gegevens. Gebruik kruisvalidatie met uitbreid- of schuifvensters om de tijdsvolgorde te respecteren:
+
+```
+Fold 1: Train [Jan-Mar]  → Test [Apr]
+Fold 2: Train [Jan-Apr]  → Test [May]
+Fold 3: Train [Jan-May]  → Test [Jun]
+```
+
+<Quiz
+  question="U evalueert een aandelenkoersvoorspellingsmodel. Welke kruisvalidatiestrategie is het meest geschikt?"
+  options="Standaard K-vouw|Laat-één-uit|Tijdreekssplitsing|Gestratificeerde K-vouw"
+  answer="2"
+  explanation="Aandelenkoersen zijn tijdelijke gegevens. Door willekeurige K-Fold te gebruiken zou het model tijdens de training naar toekomstige gegevens kunnen 'gluren', wat te optimistische resultaten zou opleveren. Time-Series Split zorgt ervoor dat het model altijd wordt gevalideerd op gegevens die na de trainingsperiode komen."
+/>
+
+---
+
+## 🌐 Offline versus online evaluatie
+
+Offline statistieken (berekend op basis van historische gegevens) voorspellen niet altijd de online prestaties. Een model met een betere AUC zou de gebruikersbetrokkenheid zelfs kunnen verminderen zodra het is geïmplementeerd.
+
+| Aspect | Offline-evaluatie | Online evaluatie (A/B-test) |
+|---|---|---|
+| Snelheid | Snel — gebruik opgeslagen gegevens | Langzaam – echt verkeer nodig |
+| Kosten | Laag | Hoog (engineering + alternatieve kosten) |
+| Maatregelen | Modelkwaliteit op historische gegevens | Werkelijke bedrijfsimpact |
+| Beperking | Legt geen veranderingen in gebruikersgedrag vast | Vereist statistische nauwkeurigheid |
+
+### A/B-testen voor ML-modellen
+
+Bij het uitvoeren van een A/B-test voor een nieuw model:
+
+1. **Definieer de primaire statistiek** (bijvoorbeeld opbrengst per gebruiker) en guardrail-statistieken (bijvoorbeeld latentie, foutenpercentage)
+2. **Bereken de vereiste steekproefomvang** voor statistische significantie
+3. **Correct willekeurig** — gesplitst op gebruikersniveau, niet op verzoekniveau
+4. **Ren lang genoeg** – houd rekening met nieuwigheidseffecten en wekelijkse seizoensinvloeden
+5. **Controleer op interferentie** — heeft het gedrag van de behandelgroep invloed op de controlegroep?
+
+<ThinkAboutIt>Uw nieuwe aanbevelingsmodel laat een verbetering van 3% zien in de AUC-ROC offline, maar een *daling* van 1% in de klikfrequentie tijdens A/B-testen. Wat zou deze discrepantie kunnen verklaren, en wat zou u onderzoeken?
+</ThinkAboutIt>
+
+---
+
+## ⚖️ Omgaan met onevenwichtige datasets
+
+Onevenwichtige gegevens zijn van invloed op zowel training als evaluatie. Gemeenschappelijke strategieën:
+
+**Tijdens de training:**
+- Oversample de minderheidsklasse (SMOTE)
+- Onderproef de meerderheidsklasse
+- Gebruik klassegewichten in de verliesfunctie
+- Genereer synthetische voorbeelden
+
+**Tijdens evaluatie:**
+- Gebruik precisie, terugroepen, F1 in plaats van nauwkeurigheid
+- Gebruik AUC-PR in plaats van AUC-ROC
+- Rapporteer statistieken per klas
+- Gebruik gestratificeerde kruisvalidatie
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+# Class weight approach — inversely proportional to class frequency
+model = RandomForestClassifier(class_weight='balanced')
+```
+
+<Quiz
+  question="Welke metriek is het MINST geschikt voor het evalueren van een model op een zeer onevenwichtige dataset?"
+  options="Precisie-oproep AUC|Nauwkeurigheid|F1-score|Herinneren"
+  answer="1"
+  explanation="Nauwkeurigheid behandelt alle klassen gelijk en wordt gedomineerd door de meerderheidsklasse. Op een 99:1 onevenwichtige dataset bereikt een model dat elke keer de meerderheidsklasse voorspelt een nauwkeurigheid van 99%, terwijl het volkomen nutteloos is voor het detecteren van de minderheidsklasse."
+/>
+
+---
+
+## 🔑Belangrijkste afhaalrestaurants
+
+- **Vertrouw nooit alleen op nauwkeurigheid** — vooral niet bij onevenwichtige gegevens
+- **Maak de meetwaarde af op het bedrijfsdoel**: terugroepen voor veiligheidskritische precisie wanneer valse positieven kostbaar zijn
+- **AUC-PR boven AUC-ROC** voor onevenwichtige problemen — dit is een interviewtip met een hoog signaal
+- **Gebruik op tijd gebaseerde splitsingen** voor tijdelijke gegevens: willekeurige splitsingen veroorzaken gegevenslekken
+- **Offline statistieken zijn niet genoeg**: plan A/B-tests om de impact in de echte wereld te valideren
+- **Ken de formules** — interviewers kunnen u vragen om precisie, herinnering, F1, MSE en R² af te leiden of uit te leggen
+
+<Callout>Wanneer een interviewer vraagt: "Hoe zou u dit model evalueren?", vragen ze eigenlijk: "Begrijpt u wat dit model nodig heeft om goed te worden, en kunt u dat meten?" Begin met de zakelijke context en kies vervolgens uw statistieken.
+</Callout>

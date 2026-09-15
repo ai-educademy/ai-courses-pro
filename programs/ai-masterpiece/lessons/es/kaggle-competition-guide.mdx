@@ -1,0 +1,168 @@
+---
+title: "Guía de competencia de Kaggle: cómo competir (y aprender) en Kaggle"
+description: "Desde el primer envío hasta técnicas de gran maestro: flujos de trabajo de EDA, trucos de ingeniería de funciones, métodos de conjunto y estrategias que se ubican constantemente en el 1% superior."
+order: 7
+difficulty: "advanced"
+duration: 20
+icon: "🏆"
+published: true
+machineTranslated: true
+---
+# Guía de competencia de Kaggle: cómo competir (y aprender) en Kaggle
+
+Kaggle no es solo una plataforma de competencia: es el aula de aprendizaje automático aplicado más grande del mundo. Más de 15 millones de científicos de datos lo utilizan para mejorar sus habilidades, crear carteras y conseguir empleos. Esta lección le enseñará cómo competir de manera efectiva y extraer el máximo aprendizaje de cada competencia.
+
+## 🎯 Por qué Kaggle es importante para tu carrera
+
+La experiencia de Kaggle indica algo que los CV no pueden: **puedes enviar modelos que funcionan con datos confusos del mundo real**. Los gerentes de contratación de Google, Meta y las principales empresas emergentes reclutan activamente en las tablas de clasificación de Kaggle. Incluso sin ganar, un perfil fuerte con cuadernos bien documentados demuestra competencia práctica.
+
+<Illustration src="/images/lessons/kaggle-competition-guide.svg" alt="Flujo de trabajo de la competencia de Kaggle desde la exploración de datos hasta el envío final" caption="El flujo de trabajo típico de Kaggle: iterar entre EDA, ingeniería de funciones y validación hasta la convergencia." />
+
+## 📊 Tipos de competencia y estrategias ganadoras
+
+| Tipo | Ejemplo | Enfoque típico ganador |
+|------|---------|------------------------|
+| **Tablados** | Precios de la vivienda, detección de fraude | Aumento de gradiente (XGBoost/LightGBM) + ingeniería de funciones pesadas |
+| **Visión por computadora** | Clasificación de imágenes, segmentación | CNN preentrenadas (EfficientNet, ConvNeXt) + aumento |
+| **PNL** | Sentimiento, respuesta a preguntas | Transformadores afinados (DeBERTa, RoBERTa) |
+| **Simulación** | Juego AI, optimización | Aprendizaje por refuerzo + heurística de dominio |
+
+<FunFact>El algoritmo individual más popular entre los ganadores del concurso Kaggle es LightGBM: aparece en más del 60 % de las soluciones tabulares que ocupan los primeros lugares, a menudo combinado con CatBoost o XGBoost en conjuntos.</FunFact>
+
+## 🔍 EDA - Tus primeras 48 horas
+
+Nunca empiece a modelar antes de comprender sus datos. Un flujo de trabajo EDA disciplinado:
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("train.csv")
+
+# Shape and types - know what you're working with
+print(f"Shape: {df.shape}")
+print(f"Missing values:\n{df.isnull().sum().sort_values(ascending=False).head(10)}")
+
+# Target distribution - is it balanced?
+df["target"].value_counts(normalize=True).plot(kind="bar")
+plt.title("Target Distribution")
+plt.show()
+
+# Correlations - find quick signal
+correlations = df.select_dtypes(include="number").corr()["target"].sort_values()
+print(correlations.head(10))  # Strongest negative correlations
+print(correlations.tail(10))  # Strongest positive correlations
+```
+
+**Compruebe si hay fugas**: características que no existirían en el momento de la predicción. Este es el error número uno que cometen los principiantes. Si una característica se correlaciona sospechosamente bien con el objetivo, investigue antes de celebrar.
+
+<Quiz question="Durante EDA, descubre una característica con una correlación de 0,98 con el objetivo. ¿Cuál debería ser tu PRIMERA reacción?" options="Celebre: esta característica dominará su modelo|Investigar la fuga de datos: esta correlación es sospechosamente alta|Elimínelo: una correlación alta significa sobreajuste|Úselo solo en su conjunto, no en su línea base." answer="1" explanation="Es casi seguro que una correlación de 0,98 es una fuga de datos. Es probable que la característica contenga información del futuro o se haya derivado del objetivo. Su uso daría puntuaciones de validación infladas que colapsarían en la clasificación privada." />
+
+## 🛠️ Ingeniería de funciones que gana
+
+Los principales competidores dedican el 70% de su tiempo a funciones, no a ajustes de modelos. Técnicas probadas en batalla:
+
+**Funciones de agregación**: estadísticas de grupo con diferentes granularidades:
+```python
+for col in ["category", "store_id", "day_of_week"]:
+    stats = df.groupby(col)["sales"].agg(["mean", "std", "median"])
+    stats.columns = [f"{col}_sales_{s}" for s in ["mean", "std", "median"]]
+    df = df.merge(stats, on=col, how="left")
+```
+
+**Codificación de destino**: reemplace las categorías con medios de destino suavizados (use codificación basada en pliegues para evitar fugas).
+
+**Características de retraso**: para series temporales, los valores anteriores son dorados:
+```python
+for lag in [1, 7, 14, 28]:
+    df[f"sales_lag_{lag}"] = df.groupby("store_id")["sales"].shift(lag)
+```
+
+## ✅ Validación cruzada: confíe en su puntuación local
+
+La puntuación de su CV local es más importante que la clasificación pública. Una estrategia de validación sólida:
+
+```python
+from sklearn.model_selection import StratifiedKFold
+
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+oof_predictions = np.zeros(len(X))
+
+for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
+    X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+    y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+
+    model = lgb.LGBMClassifier(n_estimators=1000, learning_rate=0.05)
+    model.fit(X_train, y_train, eval_set=[(X_val, y_val)],
+              callbacks=[lgb.early_stopping(50)])
+    oof_predictions[val_idx] = model.predict_proba(X_val)[:, 1]
+
+print(f"OOF AUC: {roc_auc_score(y, oof_predictions):.5f}")
+```
+
+**Regla de oro**: si tu CV local y tu LB público no están de acuerdo, confía en tu CV. La tabla de clasificación pública utiliza sólo una fracción de los datos de prueba; sobreajustarse a ella es una trampa.
+
+<ThinkAboutIt>Estás en el puesto 15 en la clasificación pública, pero tu CV local sugiere que tu modelo está demasiado adaptado. ¿Envía su mejor puntuación de LB o su mejor puntuación de CV para el envío final? ¿Por qué?</ThinkAboutIt>
+
+## 🎭 Métodos de conjunto: el empujón final
+
+Casi todas las soluciones ganadoras utilizan conjuntos. Tres técnicas clave:
+
+**Embolsado**: entrene el mismo modelo en diferentes subconjuntos de datos, predicciones promedio. Reduce la variación.
+
+**Apilamiento**: entrene un metamodelo con predicciones desplegadas de diversos modelos base:
+```python
+# Level 1: diverse base models produce OOF predictions
+base_preds = np.column_stack([lgbm_oof, xgb_oof, catboost_oof, nn_oof])
+
+# Level 2: logistic regression learns optimal combination
+from sklearn.linear_model import LogisticRegression
+meta = LogisticRegression()
+meta.fit(base_preds, y_train)
+```
+
+**Combinación**: promedio ponderado de las predicciones del modelo. Más sencillo que apilar pero eficaz:
+```python
+final = 0.4 * lgbm_pred + 0.35 * xgb_pred + 0.25 * catboost_pred
+```
+
+<Quiz question="¿Por qué los métodos de conjunto casi siempre superan a los modelos individuales en las competiciones de Kaggle?" options="Usan más datos de entrenamiento|Reducen el sesgo mediante el uso de modelos más profundos|Reducen la varianza al combinar diversos modelos que cometen diferentes errores.|Son más rápidos de entrenar." answer="2" explanation="Los conjuntos funcionan porque diversos modelos cometen errores no correlacionados. Cuando se promedian, los errores individuales se cancelan mientras que las señales correctas se refuerzan entre sí, lo que reduce la variación general sin aumentar el sesgo." />
+
+## 📓 Escribir fantásticos cuadernos Kaggle
+
+Los cuadernos públicos construyen su reputación. Un cuaderno digno de medalla incluye:
+
+1. **Narrativa clara**: explica tu razonamiento, no solo tu código
+2. **Reproducibilidad**: establezca semillas aleatorias, versiones de la biblioteca de documentos
+3. **Visualizaciones**: tramas que revelan ideas, no solo decoran
+4. **Resultados honestos**: comparte lo que no funcionó y lo que sí funcionó.
+
+<Quiz question="¿Cuál es la forma MÁS efectiva de progresar del rango de Colaborador de Kaggle al de Experto?" options="Ganar una medalla de oro en solitario en una competición destacada|Ganar constantemente medallas de bronce y plata en múltiples competiciones y cuadernos.|Presentarse a tantas competiciones como sea posible independientemente del resultado.|Bifurcando los cuadernos públicos con mayor puntuación" answer="1" explanation="Un desempeño constante en todas las competiciones acumula medallas. Necesitas medallas de competencia Y medallas de cuaderno/discusión. La amplitud de la contribución importa más que un solo resultado afortunado." />
+
+## 📈 Rangos y progresión de Kaggle
+
+| Clasificación | Requisito | Cronología típica |
+|------|------------|-----------------|
+| **Principiante** | Crear una cuenta | Día 1 |
+| **Colaborador** | Perfil completo, ejecute un cuaderno | Semana 1 |
+| **Experto** | 2 medallas de bronce (competiciones) | 3 a 6 meses |
+| **Maestro** | 1 medalla de oro + 2 de plata | 1–2 años |
+| **Gran maestro** | 5 medallas de oro (1 en solitario) | 3 a 5+ años |
+
+<ThinkAboutIt>Más allá de las clasificaciones, ¿cómo usaría su perfil de Kaggle como parte de su cartera al solicitar puestos de aprendizaje automático? ¿Qué buscaría un gerente de contratación en su historial de competencia?</ThinkAboutIt>
+
+## 🎯 Conclusiones clave
+
+- EDA primero, modelado después: siempre verifique si hay fugas de datos
+- La ingeniería de funciones ofrece más impulso que el ajuste de hiperparámetros
+- Confía en tu CV local sobre la clasificación pública
+- Reúne diversos modelos para el empujón final.
+- Documente su trabajo en cuadernos públicos: es su portafolio
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Libro Kaggle de Konrad Banachewicz y Luca Massaron](https://www.kaggle.com/discussions/general/320744) - Estrategias de grandes maestros resumidas en consejos prácticos
+- [Cómo ganar un concurso de ciencia de datos (Coursera)](https://www.coursera.org/learn/competitive-data-science) - Curso de estrategia de Kaggle de arriba hacia abajo de NRU HSE
+- [Papers With Code - Benchmarks](https://paperswithcode.com/sota) - Resultados de última generación en todas las tareas de ML

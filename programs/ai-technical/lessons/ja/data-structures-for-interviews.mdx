@@ -1,0 +1,211 @@
+---
+title: "インタビューのデータ構造"
+description: "コーディング面接の 90% で登場する重要なデータ構造 (配列、ツリー、グラフ、ハッシュ マップ、およびそれぞれをいつ使用するか) をマスターします。"
+order: 1
+difficulty: "intermediate"
+duration: 20
+icon: "📊"
+published: true
+machineTranslated: true
+---
+# インタビューのデータ構造
+
+トップの面接コーチが学ぶのに 500 ドルも請求しない秘密は次のとおりです。コーディング面接の問題の約 90% は、わずか 7 つのデータ構造を中心に展開しています。それぞれの項目に到達するタイミングと理由を深く理解できれば、すでに戦いの半分は勝ったことになります。残りの半分は練習ですが、適切なメンタルモデルがなければ、練習は単なる暗記になってしまいます。このレッスンでは地図を提供するので、遭遇するすべての問題が身近な領域のように感じられます。
+
+## 知っておくべき 7 つのデータ構造
+
+すべての技術面のインタビューは同じ井戸から得られます。遭遇する構造物を頻度順に並べると次のとおりです。
+
+|データ構造 |面接の頻度 |コアオペレーション |面接官がそれを期待するとき |
+|---|---|---|---|
+| **配列 / 文字列** | ★★★★★ |アクセス O(1)、検索 O(n)、挿入 O(n) |ほとんどすべての問題はここから始まります |
+| **ハッシュ マップ/セット** | ★★★★★ |挿入 O(1)、ルックアップ O(1)、削除 O(1) | "これを O(n²) から O(n) に最適化します" |
+| **リンクされたリスト** | ★★★★☆ |挿入 O(1)、削除 O(1)、アクセス O(n) |ポインタ操作、サイクル検出 |
+| **スタックとキュー** | ★★★★☆ |プッシュ/ポップ O(1)、エンキュー/デキュー O(1) |解析、BFS、操作の取り消し |
+| **木 (バイナリ、BST)** | ★★★★☆ |検索 O(log n)、挿入 O(log n) |階層データ、ソート操作 |
+| **グラフ** | ★★★☆☆ |表現に応じて |関係、パス、接続性 |
+| **山盛り** | ★★★☆☆ |挿入 O(log n)、抽出最小 O(log n) | "k 個の最大/最小を見つけます" |
+
+<Callout>準備に 1 週​​間しかない場合は、配列、ハッシュ マップ、ツリーに焦点を当ててください。これら 3 つは、FAANG レベルの企業における面接の質問の大部分を占めます。</Callout>
+
+## 配列と文字列 - あなたの基盤
+
+配列は、ほぼすべての面接の問題の出発点です。重要な洞察は、ほとんどの配列の問題は実際には配列に関するものではなく、2 つのポインター、スライディング ウィンドウ、またはプレフィックスの合計などのパターンの認識に関するものであるということです。
+
+```python
+# Two Sum — the most classic interview problem
+# "Given an array and target, find two numbers that add to target"
+def two_sum(nums, target):
+    seen = {}  # Hash map to store complement
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+    return []
+
+# Time: O(n), Space: O(n) — trading space for time
+```
+
+この「配列」問題ですら、実際にはハッシュ マップの問題であることに注目してください。そのパターンは常に繰り返されます。ブルート フォースでは配列に対してネストされたループが使用され、最適なソリューションではハッシュ マップが導入されます。
+
+## ハッシュ マップ — インタビュー スイス アーミー ナイフ
+
+何らかの問題で行き詰まっていて総当たりが O(n²) である場合は、「ハッシュ マップでこれを O(n) に減らすことができるだろうか?」と自問してください。答えは驚くほど多くの場合「はい」です。
+
+ハッシュ マップは、次のような場合に威力を発揮します。
+- **カウント頻度** — 文字数、単語数、要素の頻度
+- **認識された要素を追跡** — 重複検出、2 和スタイルの問題
+- **項目のグループ化** — アナグラムのグループ化、分類
+- **計算のキャッシュ** — 動的プログラミングにおけるメモ化
+
+```java
+// Group Anagrams — a classic hash map problem
+public List<List<String>> groupAnagrams(String[] strs) {
+    Map<String, List<String>> map = new HashMap<>();
+    for (String s : strs) {
+        char[] chars = s.toCharArray();
+        Arrays.sort(chars);
+        String key = new String(chars);
+        map.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
+    }
+    return new ArrayList<>(map.values());
+}
+```
+
+<ThinkAboutIt>「検索する」、「数える」、または「存在するかどうかを確認する」という問題を見たとき、すぐにどのようなデータ構造が思い浮かぶでしょうか?ハッシュ マップの O(1) ルックアップとソートされた配列の O(log n) 二分探索の間のトレードオフをどのように説明しますか?</ThinkAboutIt>
+
+## リンクされたリスト — ポインターの習得
+
+リンク リストの問題では、ノードを見失うことなくポインターを操作する能力をテストします。必要なテクニックは次の 3 つです。
+
+1. **2 ポインター (高速/低速)** — サイクル検出、中間ノードの検索
+2. **ダミー ヘッド ノード** — ヘッドが変更される可能性がある場合のエッジ ケースを簡素化します。
+3. **逆転** — 反復的な逆転は多くの問題の構成要素です
+
+```python
+# Detect a cycle in a linked list (Floyd's Algorithm)
+def has_cycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow == fast:
+            return True
+    return False
+```
+
+<FunFact>「ウサギとカメ」アルゴリズムとしても知られるフロイドのサイクル検出アルゴリズムは、1967 年に公開されました。これは、55 年以上経ち、今もなお現代のコーディング面接でよく聞かれる最も古いアルゴリズムの 1 つです。</FunFact>
+
+## スタックとキュー — 順序が重要
+
+スタック (LIFO) とキュー (FIFO) はより単純な構造ですが、次のようなカテゴリ全体の問題を解決します。
+
+- **スタック**: 有効な括弧、式の評価、単調スタック問題、元に戻す/やり直し
+- **キュー**: BFS トラバーサル、スライディング ウィンドウの最大値 (両端キューあり)、タスク スケジューリング
+
+```python
+# Valid Parentheses — classic stack problem
+def is_valid(s: str) -> bool:
+    stack = []
+    matching = {')': '(', '}': '{', ']': '['}
+    for char in s:
+        if char in matching:
+            if not stack or stack[-1] != matching[char]:
+                return False
+            stack.pop()
+        else:
+            stack.append(char)
+    return len(stack) == 0
+```
+
+## 木 — 階層的思考
+
+ツリー問題には通常、再帰と 3 つの走査順序 (順、前順、後順) のいずれかが含まれます。開発するメンタル モデルは次のとおりです。「左側のサブツリーと右側のサブツリーから何が必要か、そして現在のノードでそれらをどのように組み合わせるか?」
+
+```python
+# Maximum depth of a binary tree — the template for tree recursion
+def max_depth(root):
+    if not root:
+        return 0
+    left_depth = max_depth(root.left)
+    right_depth = max_depth(root.right)
+    return 1 + max(left_depth, right_depth)
+```
+
+BST (Binary Search Tree) 問題には、1 つの重要な特性が追加されます。それは、順番に走査することでソートされた要素が得られるということです。同じ問題に「sorted」と「tree」が表示されたら、すぐに BST を考えてください。
+
+## グラフ — 関係のモデリング
+
+グラフの問題は恐ろしいように感じられますが、隣接リストを作成すれば、ほとんどは BFS または DFS に軽減されます。主なスキルは次のとおりです。
+
+- **エッジ リストまたは行列からグラフを構築**
+- **BFS** 重み付けされていないグラフの最短パス
+- **DFS** 接続、サイクル検出、トポロジカルソート用
+
+```python
+# BFS shortest path in an unweighted graph
+from collections import deque
+
+def shortest_path(graph, start, end):
+    queue = deque([(start, 0)])
+    visited = {start}
+    while queue:
+        node, distance = queue.popleft()
+        if node == end:
+            return distance
+        for neighbour in graph[node]:
+            if neighbour not in visited:
+                visited.add(neighbour)
+                queue.append((neighbour, distance + 1))
+    return -1  # Not reachable
+```
+
+## ヒープ — 「トップ K」シグナル
+
+「最大の K 個を見つける」、「最も近い K 個のリストをマージする」、または「K 個のソートされたリストをマージする」という問題がある場合、ほぼ確実にヒープ (優先キュー) が答えになります。 Python では、`heapq` が最小ヒープを提供します。最大ヒープの場合は、値を否定します。
+
+```python
+import heapq
+
+# Find the K largest elements in an array
+def k_largest(nums, k):
+    return heapq.nlargest(k, nums)  # Uses a min-heap of size k internally
+```
+
+<Quiz question="挿入ごとに O(log n) の数値ストリームの中央値を見つける必要があります。どのデータ構造の組み合わせが最も適切ですか?" options="2 つのソートされた配列|シングルバランスBST|2 つのヒープ (最大ヒープ + 最小ヒープ)|現在の合計を含むハッシュ マップ" answer="2" explanation="2 ヒープのアプローチでは、下半分に最大ヒープを使用し、上半分に最小ヒープを使用します。各挿入後のバランス調整には O(log n) がかかり、中央値は常にヒープ トップから O(1) で取得できます。" />
+
+## 時間と空間の複雑さに関するチートシート
+
+|構造 |アクセス |検索 |挿入 |削除 |スペース |
+|---|---|---|---|---|---|
+|配列 |お(1) | O(n) | O(n) | O(n) | O(n) |
+|ハッシュマップ | — | O(1)* | O(1)* | O(1)* | O(n) |
+|リンクされたリスト | O(n) | O(n) |お(1) |お(1) | O(n) |
+|スタック/キュー | O(n) | O(n) |お(1) |お(1) | O(n) |
+| BST（バランス） | O(log n) | O(log n) | O(log n) | O(log n) | O(n) |
+|ヒープ | — | O(n) | O(log n) | O(log n) | O(n) |
+
+*\* 平均的なケース。最悪の場合は、ハッシュの衝突により O(n) になります。*
+
+## パターン認識 — 適切な構造の選択
+
+問題を読むときは、次の心のチェックリストを作成してください。
+
+- **高速検索が必要ですか?** → ハッシュ マップ
+- **並べ替え順序が必要ですか?** → BST または並べ替えられた配列 + 二分検索
+- **FIFO 処理が必要ですか?** → キュー (BFS)
+- **LIFO / バックトラッキングが必要ですか?** → スタック (DFS)
+- **top-K または優先度が必要ですか?** → ヒープ
+- **接続をモデル化する必要がありますか?** → グラフ
+- **インデックスによる O(1) アクセスが必要ですか?** → 配列
+
+<Callout>面接では、どのデータ構造を選択しているのか、そしてその理由を明確に述べてください。 「ネストされたループを避けるために O(1) ルックアップが必要なので、ここではハッシュ マップを使用します」と言うのは、まさに面接官が見たいエンジニアリング思考を示しています。</Callout>
+
+## 重要なポイント
+
+- **7 つの構造がインタビューの 90% をカバー**: 配列、ハッシュ マップ、リンク リスト、スタック/キュー、ツリー、グラフ、ヒープ。
+- **ハッシュ マップはあなたの親友**: 迷ったときには、ハッシュ マップが役立つでしょう。
+- **自分の複雑さを冷静に認識してください**: 面接官は「時間の複雑さは何ですか?」と尋ねます。すべての解決策の後で。
+- **パターン認識は記憶に勝ります**: 問題信号 (「上位 K」 → ヒープ、「最短パス」 → BFS) を正しい構造にマッピングする方法を学びます。
+- **意図的に練習**: 速度よりも理解を重視して、データ構造ごとに 3 ～ 5 個の問題を解きます。スピードは理解から生まれます。

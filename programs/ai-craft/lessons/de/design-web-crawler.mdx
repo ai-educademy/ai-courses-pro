@@ -1,0 +1,158 @@
+---
+title: "Entwerfen Sie einen Webcrawler – So indiziert Google das Internet"
+description: "Entwerfen Sie einen verteilten Webcrawler, der URL-Grenzverwaltung, Höflichkeitsrichtlinien, Inhaltsdeduplizierung mit SimHash und verteiltes Crawlen mit konsistentem Hashing abdeckt."
+order: 9
+difficulty: "advanced"
+duration: 22
+icon: "🕷️"
+published: true
+machineTranslated: true
+---
+# Entwerfen Sie einen Webcrawler – So indiziert Google das Internet
+
+Ein Webcrawler durchsucht systematisch das Internet, um Webseiten herunterzuladen und zu indizieren. Es ist die Grundlage jeder Suchmaschine, und wenn Sie eine solche entwerfen, lernen Sie etwas über verteilte Systeme, das Durchlaufen von Graphen und den Umgang mit der Unordnung im echten Web.
+
+## Schritt 1 – Anforderungserfassung
+
+### Funktionale Anforderungen
+- Crawlen Sie Webseiten ausgehend von einer Reihe von Start-URLs
+- Extrahieren und folgen Sie Hyperlinks, um neue Seiten zu entdecken
+- Speichern Sie heruntergeladene Inhalte zur Indizierung und Verarbeitung
+- Respektieren Sie die robots.txt-Datei und die Höflichkeitsregeln für Crawler
+
+### Nichtfunktionale Anforderungen
+- **Skalierung** – 1 Milliarde Seiten pro Monat crawlen
+- **Höflichkeit** – Überfordern Sie niemals einen einzelnen Webserver
+- **Aktivität** – Durchsuchen Sie wichtige Seiten regelmäßig erneut
+- **Robustheit** – Umgang mit fehlerhaftem HTML, Endlosschleifen und Spinnenfallen
+
+## Schritt 2 – High-Level-Architektur
+
+```
+Seed URLs → URL Frontier (priority queue)
+                  ↓
+            URL Scheduler (politeness + priority)
+                  ↓
+         Fetcher (HTTP client pool)
+                  ↓
+         HTML Parser → Extract URLs → URL Filter
+              ↓                           ↓
+       Content Store              URL Dedup (Bloom Filter)
+       (S3 / HDFS)                      ↓
+                                 URL Frontier (loop)
+```
+
+<Illustration src="/images/lessons/design-web-crawler.svg" alt="Web-Crawler-Architektur, die die Crawl-Schleife von der URL-Grenze über Fetcher, Parser, URL-Extraktion, Deduplizierung und zurück zur Grenze zeigt" caption="Der Crawler arbeitet als kontinuierliche Schleife: Ruft eine Seite ab, extrahiert neue URLs, dedupliziert sie und stellt sie für zukünftiges Crawlen in die Warteschlange" />
+
+## Schritt 3 – Die Crawl-Schleife
+
+### BFS vs. DFS Crawling
+- **BFS (Breadth-First)** – bevorzugt für Web-Crawling. Erkennt schnell eine breite Palette von Domänen und vermeidet, sich tief in einer einzelnen Site festzuklammern
+- **DFS (Depth-First)** – riskiert, unendlich tief in dynamisch generierte Seiten einzudringen, bevor andere Domänen entdeckt werden
+
+### URL Frontier Design
+Die Grenze ist keine einfache Warteschlange – es ist ein ausgeklügeltes Prioritätssystem mit zwei Unterkomponenten:
+
+1. **Prioritätswarteschlange (vorne)** – ordnet URLs nach Wichtigkeit. Zu den Faktoren gehören PageRank, Aktualisierungshäufigkeit und Domänenautorität
+2. **Höflichkeitswarteschlange (zurück)** – stellt sicher, dass jede Domäne über eine eigene FIFO-Warteschlange verfügt. Ein Scheduler wählt aus verschiedenen Domänenwarteschlangen aus, um zu vermeiden, dass ein einzelner Server überlastet wird
+
+```
+Front (Priority):       Back (Politeness):
+┌──────────────┐       ┌─── bbc.co.uk queue ───┐
+│ High Priority │ ───→  │ url1 → url4 → url7    │
+│ Med Priority  │ ───→  ├─── github.com queue ──┤
+│ Low Priority  │ ───→  │ url2 → url5 → url8    │
+└──────────────┘       ├─── wikipedia.org queue ┤
+                        │ url3 → url6 → url9    │
+                        └───────────────────────┘
+```
+
+<Quiz question="Warum verwendet ein Webcrawler BFS anstelle von DFS für allgemeines Crawling?" options="BFS verbraucht weniger Speicher|BFS entdeckt schneller einzigartigere Domains und vermeidet, tief in einer einzelnen Website gefangen zu sein|BFS ist schneller als DFS|DFS funktioniert nicht mit URLs" answer="1" explanation="BFS untersucht Ebene für Ebene, was bedeutet, dass es Seiten in vielen verschiedenen Domänen schnell erkennt. DFS könnte Links tief in eine einzelne Site hinein verfolgen und möglicherweise Millionen dynamisch generierter Seiten erreichen, bevor jemals eine andere Domain besucht wird." />
+
+## Schritt 4 – Höflichkeit und Robots.txt
+
+### Respekt vor Robots.txt
+Bevor Sie eine Domain crawlen, rufen Sie deren `robots.txt`-Datei ab und speichern Sie sie im Cache:
+
+```
+# Example robots.txt
+User-agent: *
+Disallow: /admin/
+Disallow: /private/
+Crawl-delay: 2
+```
+
+Zwischenspeichern von robots.txt pro Domain mit einer TTL (24 Stunden). Befolgen Sie stets die `Disallow`-Regeln und `Crawl-delay`-Anweisungen.
+
+### Begrenzung der Crawling-Rate
+Behalten Sie auch ohne explizites `Crawl-delay` Höflichkeit bei:
+- Maximal 1 Anfrage pro Sekunde pro Domain (konfigurierbar)
+- Verwenden Sie separate Download-Warteschlangen pro Domain
+- Verfolgen Sie die Reaktionszeiten. Wenn ein Server langsamer wird, schalten Sie ihn automatisch ab
+
+<FunFact>Der Webcrawler von Google (Googlebot) crawlt Hunderte Milliarden Seiten. Der Höflichkeit halber muss man sagen, dass es die Antwortzeiten des Servers überwacht und die Crawling-Rate reduziert, wenn eine Website beginnt, langsam zu reagieren – wodurch die Website effektiv gegen den Crawler „zurückdrängen“ kann.</FunFact>
+
+## Schritt 5 – Deduplizierung
+
+### URL-Deduplizierung (Bloom-Filter)
+Bei Milliarden von URLs erfordert die Überprüfung, ob eine URL schon einmal gesehen wurde, eine effiziente Datenstruktur. Ein Bloom-Filter bietet O(1)-Suchvorgänge mit geringem Speicherbedarf:
+
+- **Speicherplatz:** ~1 GB für 1 Milliarde URLs bei 1 % Falsch-Positiv-Rate
+- **Kompromiss:** Eine Seite wird gelegentlich erneut gecrawlt (falsch-positive Ergebnisse), es wird jedoch nie eine neue URL übersehen (keine falsch-negativen Ergebnisse).
+
+Normalisieren Sie URLs vor der Prüfung: Entfernen Sie Fragmente (#), sortieren Sie Abfrageparameter, schreiben Sie den Hostnamen in Kleinbuchstaben und lösen Sie relative Pfade auf.
+
+### Inhaltsdeduplizierung (SimHash)
+Verschiedene URLs können identische Inhalte (Spiegel, kopierte Artikel) bereitstellen. SimHash generiert einen Fingerabdruck des Seiteninhalts – Seiten mit ähnlichen Fingerabdrücken (kleiner Hamming-Abstand) sind wahrscheinlich Duplikate:
+
+```
+Page A content → SimHash → 10110010...
+Page B content → SimHash → 10110011...
+Hamming distance = 1 → likely duplicate, skip storing
+```
+
+<Quiz question="Ein Bloom-Filter meldet, dass eine URL bereits einmal gesehen wurde. Was können Sie daraus schließen?" options="Die URL wurde definitiv gecrawlt|Die URL wurde wahrscheinlich gecrawlt, es besteht jedoch eine geringe Wahrscheinlichkeit, dass es sich um einen Fehlalarm handelt|Die URL wurde nicht gecrawlt|Der Bloom-Filter muss neu erstellt werden" answer="1" explanation="Bloom-Filter haben eine geringe Falsch-Positiv-Rate – sie sagen möglicherweise „Ja, gesehen” für eine unsichtbare URL, aber niemals „Nein” für eine URL, die tatsächlich hinzugefügt wurde. Dies bedeutet, dass eine Seite gelegentlich erneut gecrawlt wird, was für die meisten Crawler akzeptabel ist." />
+
+## Schritt 6 – Verteiltes Crawling
+
+### Horizontale Skalierung
+Eine einzelne Maschine kann nicht monatlich eine Milliarde Seiten crawlen. Verteilen Sie die Arbeit:
+
+- **Konsistentes Hashing** für Domänennamen weist jede Domäne einem bestimmten Crawler-Knoten zu. Dies sorgt für Höflichkeit – nur ein Knoten crawlt eine bestimmte Domain
+- **URL-Grenze** wird basierend auf dem Hash-Ring über Knoten verteilt
+- **Koordination** über einen einfachen Dienst, der Knotenzuweisungen verwaltet und neu ausbalanciert, wenn Knoten beitreten oder gehen
+
+### DNS-Auflösungs-Caching
+DNS-Lookups fügen 10–100 ms pro Anfrage hinzu. Im Maßstab stellt dies einen großen Engpass dar:
+- Pflegen Sie einen lokalen DNS-Cache pro Crawler-Knoten
+- Batch-DNS-Vorauflösung für URLs in der Warteschlange
+- Verwenden Sie einen dedizierten DNS-Resolver, um eine Überlastung öffentlicher DNS-Server zu vermeiden
+
+### Spinnenfallenerkennung
+Schädliche oder schlecht erstellte Websites können unendlich viele URL-Bereiche erzeugen:
+- `/page/1/page/1/page/1/...` – sich wiederholende Pfadmuster
+- Kalenderseiten, die URLs für jedes zukünftige Datum generieren
+– Sitzungs-IDs in URLs, die eindeutige URLs für identische Inhalte erstellen
+
+**Schutzmaßnahmen:** maximale URL-Länge, maximale Crawling-Tiefe pro Domain, Mustererkennung für sich wiederholende URL-Strukturen und Seitenanzahlbegrenzungen auf Domain-Ebene.
+
+<ThinkAboutIt>Wenn Sie einen Suchindex auf dem neuesten Stand halten müssen, wie würden Sie dann entscheiden, welche Seiten zuerst erneut gecrawlt werden sollen? Stellen Sie sich eine Nachrichtenseite vor, die stündlich aktualisiert wird, im Vergleich zu einem Wikipedia-Artikel, der sich monatlich ändert. Welche Signale würden Sie verwenden, um die Planung des erneuten Crawlens zu priorisieren?</ThinkAboutIt>
+
+## Schritt 7 – Engpässe und Optimierungen
+
+| Engpass | Lösung |
+|-----------|----------|
+| Latenz der DNS-Auflösung | Lokaler DNS-Cache, Batch-Vorauflösung |
+| Langsame/nicht reagierende Server | Zeitüberschreitungen (30 s), asynchrone E/A, Überspringen nach Wiederholungsversuchen |
+| Speicher für gecrawlte Inhalte | Seiten komprimieren, nur geänderte Inhalte speichern |
+| URL-Grenzspeicher | Festplattengestützte Prioritätswarteschlange (RocksDB) |
+| Doppelter Inhalt | SimHash-Fingerprinting, kanonische URL-Erkennung |
+
+<ThinkAboutIt>Suchmaschinen müssen die Crawl-Aktualität (häufiges erneutes Crawlen von Seiten) mit der Entdeckung (das Finden neuer Seiten) in Einklang bringen. Wenn Ihr Crawler über ein festes Budget von 1 Million Seiten pro Tag verfügt, wie würden Sie dieses Budget zwischen dem erneuten Crawlen vorhandener Seiten und dem Entdecken neuer Seiten aufteilen?</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+- [Web Crawler – System Design Interview Vol. 1, Kap. 9](https://bytebytego.com/) – Alex Xus detaillierte Komplettlösung für das Webcrawler-Design
+- [Mercator: A Scalable Web Crawler](https://courses.cs.washington.edu/courses/cse454/15wi/papers/mercator.pdf) – Grundlagenpapier zur skalierbaren Crawler-Architektur
+- [Bloom-Filter nach Beispiel](https://llimllib.github.io/bloomfilter-tutorial/) – interaktives Tutorial zur Funktionsweise von Bloom-Filtern

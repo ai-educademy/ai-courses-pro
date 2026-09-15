@@ -1,0 +1,188 @@
+---
+title: "Bitmanipulation – XOR-Tricks, Zweierpotenz und Zählen von Bits"
+description: "Nutzen Sie das Denken auf Bitebene für die Codierung von Interviews. Master-XOR-Aufhebung, Brian Kernighans Trick, Bitmaskierung für Teilmengen und praktische Anwendungen."
+order: 10
+difficulty: "advanced"
+duration: 17
+icon: "⚡"
+published: true
+machineTranslated: true
+---
+## Überprüfung der Binärzahlen
+
+Jede ganze Zahl ist eine Folge von Bits. Die Zahl 13 im Binärformat ist `1101`:
+
+```
+Bit position:  3  2  1  0
+Bit value:     1  1  0  1
+Decimal:       8+ 4+ 0+ 1 = 13
+```
+
+Bei der Bitmanipulation werden diese Bits mithilfe bitweiser Operatoren direkt bearbeitet, wobei Schleifen häufig durch Einzeloperationen ersetzt werden.
+
+## Bitweise Kernoperationen
+
+| Betreiber | Symbol | Beispiel (5 = 101, 3 = 011) | Ergebnis |
+|----------|--------|-------------|--------|
+| UND | `&` | `101 & 011` | `001` (1) |
+| ODER | `\|` | `101 \| 011` | `111` (7) |
+| XOR | `^` | `101 ^ 011` | `110` (6) |
+| NICHT | `~` | `~101` | `...010` |
+| Linksverschiebung | `<<` | `101 << 1` | `1010` (10) |
+| Rechtsverschiebung | `>>` | `101 >> 1` | `10` (2) |
+
+## Wichtige Bit-Tricks
+
+### Überprüfen Sie, ob eine Zweierpotenz vorliegt
+
+Eine Zweierpotenz hat genau ein gesetztes Bit: `n & (n - 1) == 0`.
+
+```
+  n = 8:  1000          n = 6:  0110
+  n-1=7:  0111          n-1=5:  0101
+  &    :  0000 ✓ power  &    :  0100 ✗ not power
+```
+
+### Count Set Bits (Brian Kernighans Algorithmus)
+
+Jedes `n & (n - 1)` entfernt das niedrigste gesetzte Bit. Zählen Sie Iterationen, bis n = 0.
+
+```python
+def count_bits(n):
+    count = 0
+    while n:
+        n &= n - 1
+        count += 1
+    return count
+```
+
+Dies läuft in O(k), wobei k die Anzahl der gesetzten Bits ist – nicht O(32).
+
+### Ohne temporäre Variable austauschen
+
+```python
+a ^= b
+b ^= a
+a ^= b
+```
+
+Funktioniert, weil XOR seine eigene Umkehrung ist: `a ^ b ^ b = a`.
+
+<Quiz
+  question="Was macht n & (n - 1) mit der binären Darstellung von n?"
+  options="Setzt alle Bits auf 1|Löscht alle Bits|Löscht das niedrigste gesetzte Bit|Dreht alle Bits um"
+  answer="2"
+  explanation="n - 1 dreht alle Bits vom niedrigsten gesetzten Bit nach unten. Durch UND-Verknüpfung mit n wird das niedrigste gesetzte Bit auf Null gesetzt."
+/>
+
+## Einzelne Nummer – XOR-Stornierung
+
+Bis auf eines kommt jedes Element zweimal vor. Finden Sie es. Da `a ^ a = 0` und `a ^ 0 = a` XOR alle Elemente-Paare aufhebt, bleibt die eindeutige Zahl übrig.
+
+```python
+def single_number(nums):
+    result = 0
+    for n in nums:
+        result ^= n
+    return result
+```
+
+Zeit O(n), Raum O(1). Keine Hash-Map erforderlich.
+
+<Illustration src="/images/lessons/bit-manipulation.svg" alt="XOR-Aufhebung zeigt Paare, die auf Null eliminiert werden, wobei die einzelne eindeutige Zahl übrig bleibt" caption="XOR-Paare heben sich auf Null auf – nur das ungepaarte Element bleibt bestehen." />
+
+## Einzelne Nummer III – Zwei eindeutige Nummern
+
+Wenn *zwei* Zahlen eindeutig sind, XOR alles, um `x = a ^ b` zu erhalten. Finden Sie ein beliebiges gesetztes Bit in `x` (die Zahlen unterscheiden sich dort). Partitionieren Sie alle Zahlen nach diesem Bit und XOR jede Gruppe – jede Gruppe enthält genau eine eindeutige Zahl.
+
+```python
+def single_number_iii(nums):
+    xor = 0
+    for n in nums:
+        xor ^= n
+    diff_bit = xor & (-xor)  # isolate rightmost set bit
+    a = b = 0
+    for n in nums:
+        if n & diff_bit:
+            a ^= n
+        else:
+            b ^= n
+    return [a, b]
+```
+
+<ThinkAboutIt>Warum isoliert `xor & (-xor)` das am weitesten rechts gesetzte Bit? Überlegen Sie, wie negative Zahlen im Zweierkomplement dargestellt werden.</ThinkAboutIt>
+
+## Anzahl der 1 Bits (LeetCode 191)
+
+Dies ist der Algorithmus von Brian Kernighan von oben – eine direkte Interviewfrage. Im Anschluss wird gefragt: Was ist, wenn die Eingabe signiert ist? In Python haben Ganzzahlen eine beliebige Genauigkeit, in Java/C++ müssen Sie jedoch mit 32-Bit-Grenzen umgehen.
+
+## Bitmaskierung für Teilmengen
+
+Eine Bitmaske der Länge n stellt eine Teilmenge von n Elementen dar. Das Setzen von Bit `i` bedeutet, dass Element `i` enthalten ist. Durch die Iteration von `0` bis `2^n - 1` werden alle Teilmengen generiert.
+
+```python
+def all_subsets(items):
+    n = len(items)
+    for mask in range(1 << n):
+        subset = [items[i] for i in range(n)
+                  if mask & (1 << i)]
+        yield subset
+```
+
+Diese Technik ermöglicht Lösungen für Probleme mit n ≤ 20 – klein genug für eine 2^n-Aufzählung.
+
+<FunFact>Linux-Dateiberechtigungen (rwxr-xr-x = 755) sind eine reale Bitmaske. Jede Ziffer kodiert drei Berechtigungsbits: Lesen (4), Schreiben (2), Ausführen (1), kombiniert mit ODER.</FunFact>
+
+## Umkehrbits (LeetCode 190)
+
+Kehren Sie eine 32-Bit-Ganzzahl ohne Vorzeichen Stück für Stück um. Verschieben Sie das Ergebnis nach links und verknüpfen Sie es mit einer ODER-Verknüpfung im niedrigsten Bit der Eingabe, und verschieben Sie dann die Eingabe nach rechts.
+
+```python
+def reverse_bits(n):
+    result = 0
+    for _ in range(32):
+        result = (result << 1) | (n & 1)
+        n >>= 1
+    return result
+```
+
+## Fehlende Nummer (LeetCode 268)
+
+Array von n Zahlen von 0 bis n, wobei eine fehlt. XOR alle Array-Elemente mit allen Indizes 0 bis n – Paare werden gelöscht, die fehlende Zahl bleibt übrig. Alternativ können Sie die Summenformel verwenden, aber XOR vermeidet einen möglichen Überlauf.
+
+## Hamming-Distanz (LeetCode 461)
+
+Die Anzahl der Positionen, an denen entsprechende Bits unterschiedlich sind. XOR die beiden Zahlen – gesetzte Bits im Ergebnis sind die unterschiedlichen Positionen. Zählen Sie sie mit dem Trick von Brian Kernighan.
+
+```python
+def hamming_distance(x, y):
+    return count_bits(x ^ y)
+```
+
+<Quiz
+  question="Wie groß ist die Hamming-Distanz zwischen 7 (0111) und 1 (0001)?"
+  options="1|2|3|4"
+  answer="1"
+  explanation="7 XOR 1 = 0110, das zwei gesetzte Bits hat. Die Bits unterscheiden sich an den Positionen 1 und 2."
+/>
+
+## Praktische Anwendungen
+
+Bitmanipulation kommt überall vor: Unix-Dateiberechtigungen verwenden OR/AND-Masken, Feature-Flags speichern Umschaltungen als einzelne Bits, Netzwerk-Subnetzmasken verwenden AND für das Routing und die Fehlererkennung basiert auf XOR-Prüfsummen.
+
+<Quiz
+  question="Welcher Ausdruck ist korrekt, um zu prüfen, ob das Bit k in der Ganzzahl n gesetzt ist?"
+  options="n & k|n & (1 << k)|N|(1 << k)|n ^ (1 << k)"
+  answer="1"
+  explanation="(1 << k) erstellt eine Maske, bei der nur Bit k gesetzt ist. Die UND-Verknüpfung mit n gibt nur dann einen Wert ungleich Null zurück, wenn das Bit k in n gesetzt ist."
+/>
+
+<ThinkAboutIt>Viele Bit-Manipulationslösungen wirken in Vorstellungsgesprächen wie „Zaubertricks“. Wie würden Sie die XOR-basierte Lösung für fehlende Zahlen einem Teamkollegen erklären, der sie noch nie gesehen hat?</ThinkAboutIt>
+
+---
+
+## 📚 Weiterführende Literatur
+
+- [Bit-Manipulation – LeetCode Explore](https://leetcode.com/tag/bit-manipulation/) – Kuratierte Problemsammlung, sortiert nach Schwierigkeitsgrad
+- [Brian Kernighans Algorithmus – GeeksforGeeks](https://www.geeksforgeeks.org/count-set-bits-in-an-integer/) – Detaillierte Komplettlösung mit Visualisierungen
+- [Bitmask DP – CP-Algorithmen](https://cp-algorithms.com/algebra/all-submasks.html) – Erweiterte Bitmaskentechniken für wettbewerbsfähige Programmierung

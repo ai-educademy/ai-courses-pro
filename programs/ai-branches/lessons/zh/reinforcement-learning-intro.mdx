@@ -1,0 +1,237 @@
+---
+title: "强化学习：通过反复试验教授人工智能"
+description: "了解强化学习的工作原理——AlphaGo、ChatGPT 的 RLHF、游戏人工智能和机器人背后的训练方法。"
+order: 13
+difficulty: "intermediate"
+duration: 30
+icon: "🎮"
+published: true
+machineTranslated: true
+---
+# 强化学习：通过反复试验教授人工智能
+
+孩子如何学会走路？没有人向他们提供“好步骤/坏步骤”示例的标记数据集。没有人写出平衡的物理方程。他们尝试，他们跌倒，他们尝试不同的方式，他们在周围世界的反馈的指导下逐渐进步。
+
+这种直觉——**在奖励和惩罚的指导下通过试错进行学习**——是**强化学习（RL）**的基础，它是人工智能一些最引人注目的成就背后的方法：在围棋和国际象棋中击败世界冠军，训练 ChatGPT 提供帮助，以及教机器人走路。
+
+## 🎯 核心框架：代理、环境、奖励
+
+每个强化学习问题都具有相同的基本结构：
+
+```
+        ┌─────────────────────────────────────────┐
+        │              ENVIRONMENT                 │
+        │   (the world the agent operates in)      │
+        └─────────────────┬───────────────────────┘
+                          │
+         State (s_t)      │      Reward (r_t)
+         What the         │      How good was
+         agent sees ◄─────┤      the last action?
+                          │
+        ┌─────────────────▼───────────────────────┐
+        │                 AGENT                    │
+        │   (the AI that takes actions)            │
+        └─────────────────┬───────────────────────┘
+                          │
+                          │ Action (a_t)
+                          ▼
+              Agent acts on the environment,
+              environment transitions to state s_{t+1}
+```
+
+- **代理**：做出决策的人工智能系统
+- **环境**：代理与之交互的一切（游戏、模拟、物理机器人的周围环境）
+- **状态**：代理当前对环境的观察
+- **动作**：代理做什么（向左移动、移动机器人手臂、选择一个单词）
+- **奖励**：表示行动效果的数字信号（进球+1，失去生命-1，完成任务+10）
+- **策略**：代理的策略 - 从状态到操作的映射
+
+代理的目标是学习一个**策略**，随着时间的推移最大化总**累积奖励**，而不仅仅是即时奖励。
+
+## 🔍 探索与利用：中心困境
+
+RL 智能体面临着永久的紧张：
+
+**利用**：做你已经知道效果好的事情——采取目前看来最好的行动。
+
+**探索**：尝试一些新的东西——也许有更好的策略你还没有发现。
+
+只会探索的机器人永远不会发现更好的路线。只进行探索的机器人永远无法可靠地到达任何地方。
+
+一个简单但有效的策略是**ε-贪婪**：
+
+```python
+import random
+
+epsilon = 0.1  # 10% exploration rate
+
+def choose_action(state, Q_table, epsilon):
+    if random.random() < epsilon:
+        # Explore: choose a random action
+        return random.choice(available_actions)
+    else:
+        # Exploit: choose the action with highest expected reward
+        return argmax(Q_table[state])
+```
+
+当 ε = 0.1 时，智能体在 10% 的时间内随机探索，并在 90% 的时间内利用其学到的知识。通常，ε 开始时较高（早期进行大量探索），并随着智能体变得更加自信而在训练过程中衰减。
+
+<FunFact>探索与利用的困境不仅仅是人工智能的问题，它也出现在人类的决策中。你应该去你最喜欢的餐厅（探索）还是尝试新的地方（探索）？适用相同的数学框架。</FunFact>
+
+## 📊 马尔可夫决策过程 (MDP)
+
+大多数强化学习问题都被形式化为**马尔可夫决策过程 (MDP)**。关键假设是**马尔可夫属性**：当前状态包含选择最佳操作所需的所有信息 - 过去的历​​史并不重要，重要的是你现在所处的位置。
+
+MDP 的定义如下：
+- **S**：一组可能的状态
+- **A**：一组可能的操作
+- **P(s' | s, a)**：转移概率 — 给定状态 s 和动作 a，最终处于状态 s' 的概率
+- **R(s, a)**：奖励函数——在状态 s 中采取行动 a 的立即奖励
+- **γ (gamma)**：折扣因子 — 未来奖励相对于即时奖励的价值
+
+**折扣因素**很重要：近期的奖励比遥远的奖励更有价值：
+
+```python
+# Cumulative discounted reward (Return)
+# R = r_0 + γ·r_1 + γ²·r_2 + γ³·r_3 + ...
+# With γ = 0.99: future rewards are nearly as valuable as immediate ones
+# With γ = 0.5:  rewards 10 steps away are worth only 0.1% of immediate reward
+
+gamma = 0.99
+total_return = sum(gamma**t * reward for t, reward in enumerate(rewards))
+```
+
+## 🧮 Q-Learning：基于价值的强化学习
+
+**Q-learning** 是基础强化学习算法之一。它学习一个 **Q 函数**：Q(s, a) = 如果您在状态 s 中采取行动 a，然后永远采取最佳行动，则预期的未来总奖励。
+
+```python
+import numpy as np
+
+# Initialise Q-table to zeros
+n_states  = 16   # e.g., a 4×4 grid world
+n_actions = 4    # up, down, left, right
+Q = np.zeros((n_states, n_actions))
+
+# Q-learning update rule (the Bellman equation)
+def update_Q(Q, state, action, reward, next_state, alpha=0.1, gamma=0.99):
+    """
+    alpha: learning rate — how fast to update Q values
+    gamma: discount factor — how much to value future rewards
+    """
+    # Current estimate
+    current_Q = Q[state, action]
+    
+    # Target: immediate reward + discounted best future value
+    target = reward + gamma * np.max(Q[next_state])
+    
+    # Move current estimate towards target
+    Q[state, action] = current_Q + alpha * (target - current_Q)
+    
+    return Q
+```
+
+经过数千次训练，Q 学习收敛于最优 Q 函数。一旦学习，策略很简单：在每个状态下，采取 Q 值最高的行动。
+
+**深度 Q 网络 (DQN)** 由 DeepMind 于 2013 年开发，用深度神经网络取代了 Q 表，使 Q 学习能够扩展到复杂的视觉输入。 DQN 因学会直接从像素玩 49 款 Atari 游戏而闻名，其中许多游戏的性能达到了人类水平。
+
+## 🚀 策略梯度方法
+
+Q-learning 间接学习行为的价值。 **策略梯度**方法直接优化策略——从状态到行动的映射。
+
+```python
+# The core idea: if an action led to high reward, make it more likely
+# If an action led to low reward, make it less likely
+
+def policy_gradient_update(policy_network, states, actions, rewards):
+    # Compute discounted returns for each timestep
+    returns = compute_returns(rewards, gamma=0.99)
+    
+    # Normalise returns (reduces variance)
+    returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+    
+    # Policy loss: -log(π(a|s)) × G_t
+    # Maximise log-probability of actions weighted by how good they were
+    log_probs = policy_network.log_prob(states, actions)
+    loss = -(log_probs * returns).mean()
+    
+    # Backpropagate and update
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+```
+
+现代政策梯度变体包括：
+- **PPO（近端策略优化）**：当今使用最广泛的算法，用于 ChatGPT 的 RLHF 训练
+- **A3C（异步优势演员-评论家）**：跨多个环境并行训练
+- **SAC（软演员评论家）**：非常适合连续动作空间（机器人）
+
+## 💬 RLHF：ChatGPT 是如何调整的
+
+强化学习最近最有影响力的应用之一是**人类反馈强化学习 (RLHF)**——该技术用于使 ChatGPT 和其他 LLM 变得有益、无害且诚实。
+
+该过程分为三个阶段：
+
+**第一阶段：预训练**
+在互联网文本上训练大型语言模型来预测下一个标记。这为模型提供了广泛的知识和语言能力，但不了解人类认为有帮助的内容。
+
+**第二阶段：训练奖励模型**
+要求人类注释者对模型响应对进行评分：“哪个响应更好？”使用这些评级来训练**奖励模型**——一个对响应的好坏进行评分的神经网络。
+
+**第 3 阶段：使用 PPO 进行 RL 微调**
+使用奖励模型作为环境。 LLM是代理人；它的行为正在生成代币；它的奖励来自奖励模型对已完成响应的评分。
+
+```
+Human prompt → LLM generates response → Reward model scores it
+                                       → PPO updates LLM to generate
+                                         higher-scoring responses
+```
+
+该循环运行数千次迭代，直到法学硕士持续生成人类评价较高的响应。结果是：这个模型不仅知识渊博，而且真诚地试图提供帮助。
+
+<ThinkAboutIt>RLHF 训练 ChatGPT 生成人类注释者高度评价的响应。如果人类注释者存在偏见，或者“注释者评价较高的内容”与“实际上真实且有帮助的内容”不同，可能会出现哪些潜在问题？</ThinkAboutIt>
+
+## ♟️ AlphaGo 的故事
+
+围棋是一种如此复杂的棋盘游戏——比可观测宇宙中的原子还多——它被认为是人工智能中最困难的挑战之一。大多数专家预计人类冠军将在几十年内保持不败。
+
+2016 年 3 月，DeepMind 的 **AlphaGo** 以 4-1 击败世界冠军李世石。
+
+该系统使用了以下组合：
+- **策略网络**（通过人类游戏的监督学习进行训练，然后通过强化学习进行改进）来建议有希望的行动
+- **价值网络**（通过自我对弈通过强化学习进行训练）来评估棋盘位置
+- **蒙特卡罗树搜索**，在两个网络的指导下提前计划
+
+**AlphaZero**（2017）更进一步：它“从头开始”学习围棋、国际象棋和将棋，没有人类游戏数据——只有规则和通过强化学习的自我对弈。它在三天内超越了 AlphaGo，并在四小时内超越了最好的国际象棋引擎（Stockfish）。
+
+## 🤖 机器人应用
+
+强化学习是现代机器人研究的核心：
+
+- **OpenAI 的 Dactyl** (2019)：完全使用强化学习进行模拟训练的机械手，只需一只手即可解开魔方
+- **Boston Dynamics**：将强化学习与传统控制理论结合使用，实现 Spot 和 Atlas 机器人的敏捷运动
+- **操作任务**：机器人学习在非结构化环境中拾取、放置和组装物体
+- **自动驾驶**：强化学习用于模拟，在实际部署之前训练驾驶策略
+
+机器人强化学习的一个关键挑战是**模拟与真实的差距**：在模拟中训练的策略在现实世界中通常会失败，因为模拟不能完美地模拟物理、摩擦、传感器噪声和意外物体。
+
+## ⚠️ 强化学习的局限性
+
+强化学习很强大，但也有实际的限制：
+
+- **样本效率**：强化学习通常需要数百万或数十亿次交互才能了解人类孩子在数小时内学到的内容。 AlphaGo 在训练过程中玩的游戏相当于人类数千年的游戏
+- **奖励黑客**：代理有时会找到巧妙的方法来最大化奖励，但这违反了目标精神（清洁机器人学会“隐藏”混乱而不是清理它）
+- **稀疏奖励**：当奖励很少时（仅在游戏结束时），学习速度非常慢
+- **安全**：探索性强化学习代理可以在现实世界中采取危险的行动——自动驾驶汽车无法在交通中随机探索
+
+<Quiz question="什么是 RLHF？为什么用它来训练 ChatGPT 等模型？" options="带人类反馈的强化学习——使用人类偏好评级作为奖励信号，使法学硕士更有帮助|从人类文件中随机学习——一种数据收集技术|人类形式的递归语言——一种预训练技术|从人类特征中奖励学习——仅用于机器人技术" answer="0" explanation="RLHF（人类反馈强化学习）根据人类偏好判断训练奖励模型，然后使用 PPO 微调 LLM，以生成在该奖励模型下得分较高的响应。这是使 ChatGPT 变得有用且具有对话性而不仅仅是原始文本预测器的关键技术。" />
+
+## 要点
+
+- 强化学习建立在**代理/环境/奖励**框架之上：代理采取行动，接收奖励，并学习最大化累积奖励的策略
+- **探索与利用**的困境是核心：ε-贪婪和更复杂的策略在尝试新事物和做已经有效的事情之间取得平衡
+- **马尔可夫决策过程 (MDP)** 形式化强化学习问题；折扣因子 γ 控制代理对未来奖励与即时奖励的重视程度
+- **Q-learning**（和深度 Q-网络）学习价值函数； **策略梯度**方法（PPO、A3C）直接优化策略
+- **RLHF** 是 ChatGPT 有用行为背后的技术：人类偏好评级训练奖励模型，然后指导 PPO 对 LLM 的微调
+- **AlphaGo/AlphaZero** 证明，通过自我对弈的强化学习可以在复杂的游戏中超越人类世界冠军，在几天之内就实现了人类数千年积累的知识
+- 强化学习的主要局限性包括**样本效率低**、**奖励黑客**以及机器人技术中的**模拟与真实的差距**

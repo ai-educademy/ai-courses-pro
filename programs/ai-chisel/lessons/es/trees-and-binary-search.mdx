@@ -1,0 +1,129 @@
+---
+title: "Árboles y búsqueda binaria: cómo la IA toma decisiones rápidas"
+description: "Explore estructuras de árbol que impulsan la toma de decisiones, desde bases de datos hasta aprendizaje automático."
+order: 2
+difficulty: "intermediate"
+duration: 18
+icon: "🌲"
+published: true
+machineTranslated: true
+---
+## Los árboles están en todas partes en la IA
+
+Cada vez que un filtro de spam clasifica un correo electrónico o una base de datos recupera su pedido en milisegundos, una estructura de datos de árbol hace el trabajo pesado. Los árboles modelan **decisiones jerárquicas**: cada nodo reduce el espacio de búsqueda hasta llegar a una respuesta.
+
+<Illustration src="/images/lessons/trees-and-binary-search.svg" alt="Un árbol de búsqueda binario con nodos etiquetados por valor, que muestra las propiedades más pequeñas a la izquierda y más grandes a la derecha." caption="En un BST, cada hijo de la izquierda es más pequeño y cada hijo de la derecha es más grande que su padre." />
+
+## Árboles de búsqueda binaria (BST)
+
+Un BST almacena elementos de modo que, para cualquier nodo, todos los valores en su subárbol **izquierdo** sean más pequeños y todos los valores en su subárbol **derecho** sean más grandes.
+
+### Buscar
+
+```
+function search(node, target):
+    if node is null: return null
+    if target == node.value: return node
+    if target < node.value: return search(node.left, target)
+    return search(node.right, target)
+```
+
+Cada comparación elimina aproximadamente la mitad de los nodos restantes: O (log n) en un árbol equilibrado.
+
+### Inserción
+
+```
+function insert(node, value):
+    if node is null: return new Node(value)
+    if value < node.value:
+        node.left = insert(node.left, value)
+    else:
+        node.right = insert(node.right, value)
+    return node
+```
+
+### Eliminación
+
+Eliminar es la operación más complicada. Surgen tres casos:
+
+1. **Nodo hoja**: simplemente elimínelo.
+2. **Un hijo**: reemplace el nodo con su hijo.
+3. **Dos hijos**: intercambie el valor del nodo con su sucesor en orden (el valor más pequeño en el subárbol derecho) y luego elimine ese sucesor.
+
+<Quiz question="¿Cuál es el sucesor en orden de un nodo en una BST?" options="El padre del nodo|El nodo más grande en el subárbol izquierdo.|El nodo más pequeño en el subárbol derecho.|La raíz del árbol" answer="2" explanation="El sucesor en orden es el valor más pequeño en el subárbol derecho, que se encuentra yendo a la derecha una vez y luego a la izquierda lo más posible." />
+
+## Equilibrado vs desequilibrado
+
+Si inserta datos ordenados en un BST simple, degenera en una lista vinculada: O (n) por operación. Los árboles **autoequilibrados** solucionan este problema:
+
+| Árbol | Regla de equilibrio | Uso típico |
+|------|-------------|-------------|
+| AVL | Diferencia de altura ≤ 1 entre subárboles | Búsquedas en memoria |
+| Rojo-Negro | Reglas de rotación basadas en colores | Bibliotecas estándar de lenguaje (por ejemplo, Java TreeMap) |
+| Árbol B | Varias claves por nodo, todas las hojas a la misma profundidad | Bases de datos y sistemas de archivos |
+
+<FunFact>Tanto PostgreSQL como MySQL utilizan variantes de árbol B como estructura de índice predeterminada. Un árbol B con un factor de ramificación de 100 puede indexar mil millones de filas en sólo cinco niveles.</FunFact>
+
+## Recorridos de árboles
+
+Los recorridos visitan cada nodo exactamente una vez. Los tres órdenes clásicos difieren solo en **cuándo** procesa el nodo actual en relación con sus hijos.
+
+| transversal | Orden | Caso de uso |
+|-----------|-------|----------|
+| **En orden** | Izquierda → Nodo → Derecha | Produce resultados ordenados desde un BST |
+| **Reserva** | Nodo → Izquierda → Derecha | Serializar/clonar un árbol |
+| **Post-pedido** | Izquierda → Derecha → Nodo | Eliminar un árbol de forma segura; evaluar árboles de expresión |
+
+```
+function inOrder(node):
+    if node is null: return
+    inOrder(node.left)
+    process(node)
+    inOrder(node.right)
+```
+
+<ThinkAboutIt>Un compilador analiza su código en un árbol de sintaxis abstracta (AST). ¿Qué orden transversal usarías para evaluar la expresión `(3 + 5) * 2` almacenada como árbol? ¿Por qué?</ThinkAboutIt>
+
+## Montones y colas prioritarias
+
+Un **montón** es un árbol binario completo donde cada padre es mayor (montón máximo) o más pequeño (montón mínimo) que sus hijos. Soporta:
+
+- **Insertar** - agregar al final, hacer burbujas. O(log n).
+- **Extraer min/max** - eliminar la raíz, mover el último elemento a la raíz, tamizar. O(log n).
+
+Colas prioritarias basadas en el poder de los montones:
+- **Algoritmo de Dijkstra** (¡próxima lección!): expanda siempre el nodo no visitado más cercano.
+- **Programación de tareas**: los programadores del sistema operativo eligen el proceso de mayor prioridad.
+- **Búsqueda por haz en PNL**: mantenga las k terminaciones de oraciones más prometedoras.
+
+```
+function siftUp(heap, index):
+    while index > 0:
+        parent = (index - 1) / 2
+        if heap[index] < heap[parent]:
+            swap(heap, index, parent)
+            index = parent
+        else: break
+```
+
+<Quiz question="¿Cuál es la complejidad temporal de encontrar el elemento mínimo en un montón mínimo?" options="En)|O(log n)|O(1)|O(n iniciar sesión n)" answer="2" explanation="El mínimo siempre está en la raíz de un montón mínimo, por lo que acceder a él es O(1), no es necesario atravesarlo." />
+
+## Aplicaciones reales de IA
+
+- Los **árboles de decisión** en el aprendizaje automático dividen los datos en cada nodo utilizando la función que mejor separa las clases: una aplicación directa de la estructura de árbol.
+- Los **árboles de sintaxis** en PNL representan la estructura gramatical, lo que permite tareas como el análisis de sentimientos y la traducción automática.
+- **Monte Carlo Tree Search (MCTS)** impulsa la IA de juegos como AlphaGo, explorando posibles movimientos como un árbol de estados del juego.
+- Los **árboles de Huffman** comprimen datos asignando códigos más cortos a símbolos frecuentes (se utilizan en la compresión del peso del modelo).
+
+<FunFact>El clasificador de árbol de decisión scikit-learn crea un árbol donde cada nodo interno prueba un umbral de característica. Un modelo entrenado con profundidad 20 puede representar más de un millón de caminos de decisión distintos.</FunFact>
+
+<ThinkAboutIt>Si estuviera creando un sistema de autocompletar, ¿utilizaría un BST, un montón o una estructura de árbol diferente (como un trie)? Considere qué operaciones necesita para ser rápido.</ThinkAboutIt>
+
+## Conclusiones clave
+
+1. Los BST proporcionan búsqueda, inserción y eliminación O (log n), pero solo cuando están equilibrados.
+2. El orden transversal determina qué información se extrae de un árbol.
+3. Los montones dan acceso O(1) al valor extremo y inserción O(log n), ideal para algoritmos de IA basados ​​en prioridades.
+4. Los árboles sustentan la toma de decisiones en el aprendizaje automático, las bases de datos, los compiladores y la inteligencia artificial de juegos.
+
+<Quiz question="¿Por qué la inserción de datos ya ordenados en un BST simple (no balanceado) causa problemas de rendimiento?" options="Crea nodos duplicados.|El árbol se convierte en una lista enlazada con operaciones O(n)|Se producen colisiones de hash|El nodo raíz se desborda" answer="1" explanation="Cada nuevo valor es siempre mayor (o menor) que el anterior, por lo que cada inserción va al mismo lado, produciendo una cadena lineal en lugar de un árbol equilibrado." />

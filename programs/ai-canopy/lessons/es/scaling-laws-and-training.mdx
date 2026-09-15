@@ -1,0 +1,114 @@
+---
+title: "Leyes de escala y entrenamiento a escala: por qué los modelos más grandes se vuelven más inteligentes"
+description: "Explore las leyes de escalamiento empírico que gobiernan el rendimiento del modelo, las estrategias de capacitación óptimas para la computación y la ingeniería de sistemas distribuidos detrás de los modelos de frontera de capacitación."
+order: 7
+difficulty: "advanced"
+duration: 18
+icon: "📈"
+published: true
+machineTranslated: true
+---
+# Leyes de escalamiento y capacitación a escala: por qué los modelos más grandes se vuelven más inteligentes
+
+La revolución moderna de la IA no es sólo una historia algorítmica: es una historia de **ingeniería y escalamiento**. Los investigadores descubrieron que el rendimiento del modelo sigue leyes de potencia predecibles en todos los parámetros, datos y computación, y explotar esas leyes requería inventar paradigmas de entrenamiento distribuido completamente nuevos.
+
+## Leyes de escala de Kaplan
+
+En 2020, los investigadores de OpenAI (Kaplan et al.) publicaron un hallazgo histórico: la pérdida del transformador sigue **relaciones suaves de ley de potencia** con tres variables:
+
+- **N** - Número de parámetros del modelo
+- **D** - Tamaño del conjunto de datos (tokens)
+- **C** - Calcular presupuesto (FLOP)
+
+El resultado clave: `L(N) ∝ N^(-0.076)`: la pérdida disminuye como una ley de potencia del recuento de parámetros. Duplique los parámetros y la pérdida disminuirá de manera predecible. Estas curvas no mostraron signos de estabilizarse en seis órdenes de magnitud, lo que sugiere que escalar era un camino confiable hacia un mejor desempeño.
+
+Recomendación de Kaplan: cuando la computación es limitada, es más eficiente **entrenar un modelo más grande para menos pasos** que un modelo más pequeño para más pasos. Esto guió la decisión de escalar GPT-3 a 175 mil millones de parámetros.
+
+<Illustration src="/images/lessons/scaling-laws-and-training.svg" alt="Gráfico log-log que muestra una disminución suave de la pérdida según la ley de potencia a medida que aumentan los parámetros, los datos y el cálculo" caption="Las leyes de escala muestran que la pérdida disminuye de manera predecible como una ley de potencia de parámetros, datos y computación." />
+
+## Chinchilla y capacitación en computación óptima
+
+En 2022, el **artículo Chinchilla** de DeepMind cuestionó las conclusiones de Kaplan. Su idea clave: la asignación óptima entre parámetros y tokens de entrenamiento es aproximadamente **1:20**; para cada parámetro, debes entrenar con aproximadamente 20 tokens.
+
+| Modelo | Parámetros | Fichas de entrenamiento | Proporción |
+|-------|-----------|----------------|-------|
+| GPT-3 | 175B | 300B | 1.7:1 |
+| Chinchillas | 70B | 1,4T | 20:1 |
+| LLaMA 2 70B | 70B | 2T | 28:1 |
+
+Chinchilla (70B de parámetros) **superó** al Gopher, mucho más grande (280B), al entrenar con 4 veces más datos. La lección fue profunda: la mayoría de los modelos grandes estaban enormemente **sobreparametrizados y poco entrenados**.
+
+<Quiz question="De acuerdo con las leyes de escalamiento de Chinchilla, ¿cuál es la relación óptima de cálculo aproximada entre los tokens de entrenamiento y los parámetros?" options="1:1 - tokens y parámetros iguales|1:20 - aproximadamente 20 tokens por parámetro|100:1 - 100 tokens por parámetro|Depende completamente de la arquitectura del modelo, no del recuento de parámetros." answer="1" explanation="El hallazgo clave de Chinchilla fue que el entrenamiento óptimo en computación requiere aproximadamente 20 tokens por parámetro. Modelos como GPT-3 (1,7 tokens por parámetro) estaban muy poco capacitados en relación con su tamaño, desperdiciando cálculos en parámetros excesivos en lugar de datos suficientes." />
+
+## Por qué el recuento de parámetros no lo es todo
+
+La capacidad de un modelo depende de la interacción de la arquitectura, los datos y el entrenamiento. Considerar:
+
+- **La calidad de los datos** importa más que el volumen bruto. Los modelos entrenados con texto curado, deduplicado y de alta calidad superan consistentemente a los entrenados con conjuntos de datos más grandes pero más ruidosos. LLaMA de Meta demostró que un modelo 13B entrenado con datos cuidadosamente seleccionados podría igualar a GPT-3 (175B) en muchos puntos de referencia.
+- **Elecciones de arquitectura** - patrones de atención, funciones de activación (SwiGLU vs ReLU), ubicación de normalización (prenorma vs posnorma): todos cambian las curvas de escala.
+- **La tokenización** afecta el volumen de datos efectivo. Un mejor tokenizador comprime más información por token, cambiando la relación parámetro-token.
+
+<FunFact>Se estima que entrenar GPT-4 ha costado más de 100 millones de dólares sólo en computación. La electricidad consumida durante una ejecución de capacitación del modelo de frontera única puede exceder el consumo anual de una ciudad pequeña, lo que plantea serias dudas sobre la sostenibilidad ambiental del escalamiento.
+</FunFact>
+
+## Estrategias de formación distribuida
+
+Ninguna GPU por sí sola puede contener un modelo de frontera. La formación requiere distribuir el trabajo entre miles de aceleradores utilizando varias estrategias complementarias:
+
+**Paralelismo de datos**: el enfoque más simple: replicar el modelo completo en cada GPU, dividir el lote de entrenamiento entre dispositivos y promediar los gradientes después de cada paso. Funciona bien cuando el modelo cabe en la memoria de una sola GPU.
+
+**Paralelismo del modelo (paralelismo tensorial)**: divida capas individuales en GPU. Se divide una única multiplicación de matriz para que cada GPU calcule una porción de la salida. Requiere interconexiones de gran ancho de banda (NVLink, InfiniBand) porque las GPU deben comunicarse en cada paso hacia adelante y hacia atrás.
+
+**Paralelismo de canalización**: asigne diferentes capas a diferentes GPU, pasando activaciones hacia adelante y gradientes hacia atrás a través de la canalización. Introduce **burbujas de canalización** (tiempo de inactividad mientras se espera otras etapas), mitigado por microlotes.
+
+Los sistemas modernos combinan los tres: paralelismo tensorial dentro de un nodo (NVLink rápido), paralelismo de canalización entre nodos y paralelismo de datos entre grupos de nodos.
+
+<ThinkAboutIt>El paralelismo de canalización introduce un tiempo de "burbuja" inactivo cuando las GPU esperan activaciones de otras etapas. Cuanto más grande es el oleoducto, peor es la burbuja que lo envuelve. ¿Cómo podría minimizar este desperdicio y qué compensaciones introduciría su solución?
+</ThinkAboutIt>
+
+## Precisión mixta y acumulación de gradiente
+
+**Entrenamiento de precisión mixta** utiliza flotadores de media precisión (FP16 o BF16) para la mayoría de los cálculos y mantiene una copia maestra de los pesos en FP32. Beneficios:
+
+- **Reducción de memoria 2×** para activaciones y gradientes
+- **Aumento de rendimiento de 2 a 8 veces** en GPU modernas con núcleos tensoriales
+- Se prefiere BF16 (Brain Float 16) a FP16 porque su rango de exponente más amplio evita problemas de desbordamiento comunes en el entrenamiento de FP16
+
+**Acumulación de gradiente** simula lotes de gran tamaño sin costo de memoria proporcional: ejecute múltiples pases hacia adelante/atrás, acumule gradientes y actualice los pesos solo después de N micropasos. Esto le permite lograr tamaños de lote efectivos de millones de tokens incluso en hardware limitado.
+
+## Velocidad profunda y FSDP
+
+Dos marcos dominan la formación distribuida:
+
+- **DeepSpeed ​​(Microsoft)**: implementa las etapas 1 a 3 de ZeRO (Zero Redundancy Optimiser), fragmentando progresivamente los estados, gradientes y parámetros del optimizador en las GPU. ZeRO-3 puede entrenar modelos de billones de parámetros garantizando que ninguna GPU tenga una copia completa de nada.
+- **FSDP (PyTorch)** - Datos paralelos completamente fragmentados, el equivalente nativo de PyTorch a ZeRO-3. Integrado directamente en el ecosistema PyTorch, haciéndolo más accesible para los investigadores.
+
+<Quiz question="¿Qué fragmenta ZeRO Stage 3 en GPU para permitir el entrenamiento de modelos extremadamente grandes?" options="Sólo los estados del optimizador (por ejemplo, momentos de Adam)|Estados y gradientes del optimizador, pero mantiene los parámetros completos en cada GPU|Estados del optimizador, gradientes y parámetros del modelo: nada se replica por completo|Sólo los lotes de datos de entrenamiento." answer="2" explanation="ZeRO Stage 3 elimina toda redundancia al fragmentar los estados, gradientes y parámetros del optimizador en las GPU. Cada GPU contiene solo una fracción de cada componente y recopila todos los parámetros bajo demanda durante los pasos hacia adelante y hacia atrás, lo que permite modelos mucho más grandes que la memoria de cualquier GPU." />
+
+## Habilidades emergentes y rendimientos decrecientes
+
+A medida que los modelos crecen, ciertas capacidades parecen **surgir repentinamente** en lugar de mejorar gradualmente. Los ejemplos incluyen:
+
+- Aritmética de varios pasos que aparece alrededor de 100B de parámetros
+- El razonamiento en cadena de pensamiento mejora drásticamente a escala.
+- El aprendizaje de pocas oportunidades se vuelve confiable solo por encima de ciertos umbrales.
+
+Sin embargo, investigaciones recientes debaten si la emergencia es real o un artefacto de **métricas de evaluación discontinuas**. Cuando se utilizan métricas continuas (como la probabilidad logarítmica por token), el rendimiento a menudo mejora sin problemas: el "salto repentino" es una ilusión de la medición, no del modelo.
+
+El **debate sobre los rendimientos decrecientes** también se está intensificando. Cada orden de magnitud en la computación produce mejoras decrecientes en los puntos de referencia, lo que lleva a algunos investigadores a argumentar que el escalamiento por sí solo no logrará la inteligencia artificial general sin innovaciones arquitectónicas fundamentales.
+
+<Quiz question="¿Por qué algunos investigadores sostienen que las ”habilidades emergentes” en modelos de lenguaje grandes pueden ser una ilusión?" options="Porque los modelos más grandes siempre se entrenan con datos diferentes|Porque las habilidades fueron programadas en secreto por investigadores.|Porque las métricas de evaluación discontinuas (como la precisión de coincidencia exacta) pueden hacer que las mejoras subyacentes suaves aparezcan como saltos repentinos.|Porque la emergencia sólo ocurre en los modelos codificador-decodificador." answer="2" explanation="Schaeffer et al. (2023) demostraron que cuando se utilizan métricas continuas y fluidas (por ejemplo, probabilidad logarítmica a nivel de token), el rendimiento mejora de manera predecible con la escala. La ”emergencia” aguda es a menudo un artefacto de métricas que repentinamente cambian de 0 a 1 (por ejemplo, coincidencia exacta en aritmética) en un umbral de capacidad subyacente." />
+
+<FunFact>La ejecución de entrenamiento PaLM de Google utilizó 6.144 chips TPU v4 simultáneamente, conectados por una red óptica personalizada que abarca todo un centro de datos. Una sola falla de red podría desperdiciar millones de dólares en computación, por lo que crearon puntos de control automatizados que guardan el estado del modelo cada pocos minutos.
+</FunFact>
+
+<ThinkAboutIt>Si las leyes de escalamiento predicen que 10 veces más computación produce una mejora predecible, ¿cómo deberían los laboratorios de IA equilibrar la inversión en escalar arquitecturas existentes versus la investigación de enfoques fundamentalmente nuevos? ¿Qué sucede cuando el costo del próximo 10× supera los mil millones de dólares?
+</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [Leyes de escala para modelos de lenguaje neuronal (Kaplan et al., 2020)](https://arxiv.org/abs/2001.08361) - El documento de leyes de escala original de OpenAI
+- [Entrenamiento de modelos de lenguaje grande óptimos para la computación (Hoffmann et al., 2022)](https://arxiv.org/abs/2203.15556) - El artículo de Chinchilla que reformuló la forma en que se dimensionan y entrenan los modelos
+- [ZeRO: Optimizaciones de memoria para entrenar billones de modelos de parámetros](https://arxiv.org/abs/1910.02054) - Documento DeepSpeed ZeRO de Microsoft sobre la eficiencia del entrenamiento distribuido

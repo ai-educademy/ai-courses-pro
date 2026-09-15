@@ -1,0 +1,127 @@
+---
+title: "Affiner les LLM : personnaliser l'IA pour votre cas d'utilisation"
+description: "Apprenez à utiliser un grand modèle de langage pré-entraîné et à le spécialiser pour un domaine ou une tâche spécifique grâce à des réglages précis."
+order: 14
+difficulty: "advanced"
+duration: 40
+icon: "🎯"
+published: true
+machineTranslated: true
+---
+# LLM de réglage fin : personnalisation de l'IA pour votre cas d'utilisation 🎯
+
+Un grand modèle de langage pré-entraîné est un généraliste. Il a lu une fraction substantielle d’Internet et absorbé un éventail stupéfiant de connaissances. Mais « généraliste » est un autre mot pour « non spécialisé ». Si vous avez besoin d'un modèle qui parle la voix de votre entreprise, comprend le jargon de votre secteur, suit votre format de sortie spécifique ou refuse de discuter de sujets hors sujet, vous avez besoin de plus que des invites.
+
+C'est là qu'intervient le **réglage précis**.
+
+---
+
+## 🗺️ Trois façons de spécialiser un modèle
+
+Avant de plonger dans la mécanique de réglage fin, il est utile de comprendre où elle se situe par rapport aux alternatives :
+
+| Approche | Comment ça marche | Idéal pour |
+|---|---|---|
+| **Ingénierie rapide** | Instructions de fabrication qui guident le modèle de base | Itération rapide, aucune donnée requise |
+| **RAG (génération augmentée par récupération)** | Récupérez les documents pertinents au moment de l'inférence et incluez-les dans l'invite | Maintenir les connaissances à jour, bases de connaissances étendues |
+| **Réglage fin** | Ajustez les poids du modèle à l'aide d'exemples spécifiques à des tâches | Style/format cohérent, raisonnement spécialisé, réduction de la longueur des invites |
+
+Le réglage fin et le RAG ne s’excluent pas mutuellement : de nombreux systèmes de production utilisent les deux.
+
+---
+
+## 🔬 Ce que fait réellement le réglage fin
+
+Un LLM pré-entraîné a des milliards de poids (paramètres) – des nombres qui codent tout ce qu'il a appris lors de la pré-formation. Le réglage fin continue de former le modèle sur un ensemble de données plus petit et organisé qui reflète votre tâche spécifique.
+
+Le modèle voit vos exemples, calcule à quel point ses pondérations actuelles sont erronées et s'ajuste. Les mécanismes de formation de base (passage avant, calcul des pertes, rétropropagation) sont identiques à ceux de la pré-formation : vous recommencez simplement, sur vos données, en beaucoup moins d'étapes.
+
+Le résultat : un modèle dont la pondération a été déplacée du "généraliste" vers "votre cas d'utilisation spécifique".
+
+<FunFact>GPT-3 comptait 175 milliards de paramètres. Les régler tous avec précision sur un GPU grand public est totalement irréaliste. C'est précisément pourquoi des méthodes de réglage fin efficaces comme LoRA ont été développées : elles rendent le réglage fin accessible sans nécessiter de centre de données.
+</FunFact>
+
+---
+
+## ⚡ Réglage fin complet ou réglage fin efficace en fonction des paramètres
+
+**Le réglage fin complet** met à jour chaque poids du modèle. Il s’agit de l’approche la plus puissante, mais aussi la plus coûteuse. Pour un modèle de 70 milliards de paramètres, vous auriez besoin de plusieurs GPU haut de gamme et d'heures ou de jours de formation.
+
+**Le réglage fin efficace des paramètres (PEFT)** gèle la plupart des poids du modèle et n'entraîne qu'un petit nombre de paramètres supplémentaires. Les deux techniques dominantes :
+
+### LoRA (Adaptation de bas rang)
+
+Au lieu de modifier directement les matrices de poids d'origine, LoRA ajoute de petites matrices entraînables *à côté* des poids gelés. Ces petites matrices capturent les ajustements spécifiques à la tâche.
+
+Les mathématiques : une matrice de mise à jour de poids qui serait normalement (d × d) est approchée comme le produit de deux matrices beaucoup plus petites (d × r) × (r × d), où r est un petit « rang » (généralement 4–64). Cela réduit considérablement le nombre de paramètres pouvant être entraînés.
+
+Résultat : vous entraînez peut-être 0,1 à 1 % du total des paramètres, pour une infime fraction du coût de calcul et de mémoire, tout en atteignant des performances proches d'un réglage fin complet.
+
+### QLoRA (LoRA quantifiée)
+
+QLoRA combine LoRA avec **quantification** — représentant les poids du modèle de base gelé avec une précision de 4 bits au lieu de 16 bits ou 32 bits. Cela réduit l'utilisation de la mémoire d'environ 75 %, permettant un réglage fin de très grands modèles sur un seul GPU grand public.
+
+QLoRA a permis aux chercheurs et aux développeurs extérieurs aux grandes organisations d'affiner les modèles 70B+. Cela a considérablement démocratisé l’accès.
+
+<ThinkAboutIt>LoRA ajoute des matrices légères pouvant être entraînées aux côtés de poids pré-entraînés gelés. Lorsque vous les fusionnez à des fins d'inférence, vous obtenez la même architecture avec des valeurs différentes. Pouvez-vous penser à la raison pour laquelle vous pourriez vouloir garder les poids LoRA *séparés* du modèle de base plutôt que de les fusionner définitivement ?
+</ThinkAboutIt>
+
+---
+
+## 📊 Le défi des données de formation
+
+La qualité du réglage dépend de vos données d'entraînement. Formats courants :
+
+- **Paires suivant les instructions** : `{"instruction": "Summarise in one sentence:", "input": "...", "output": "..."}`
+- **Paires conversationnelles** : exemples de dialogues multi-tours
+- **Texte du domaine** : pour l'adaptation du domaine, le texte brut de votre domaine peut suffire
+
+La qualité compte bien plus que la quantité. Un ensemble de données organisé de 1 000 exemples de haute qualité surpasse généralement un ensemble de données bruité de 100 000. Problèmes de données courants :
+- Format ou ton incohérent
+- Erreurs d'étiquette
+- Données trop étroites (le modèle devient trop spécialisé) ou trop larges (bénéfice minime)
+
+---
+
+## 🔄 RLHF : peaufiner avec le feedback humain
+
+**L'apprentissage par renforcement à partir de la rétroaction humaine (RLHF)** est une deuxième étape de réglage fin utilisée pour aligner le comportement du modèle sur les préférences humaines. C'est ainsi que ChatGPT a été formé pour être utile et refuser les demandes nuisibles.
+
+Le processus : les humains classent les résultats du modèle en fonction de leur qualité, un "modèle de récompense" apprend à prédire les préférences humaines, puis le LLM est affiné à l'aide de l'apprentissage par renforcement pour maximiser la récompense. C'est cher et complexe, mais crucial pour produire des modèles sûrs et agréables à utiliser.
+
+---
+
+## 🛠️ Étapes pratiques
+
+1. **Choisissez un modèle de base** — Llama 3, Mistral, Qwen, Gemma. Tenez compte de la licence, de la taille et de la capacité de base.
+2. **Préparez votre ensemble de données** : propre, cohérent, formaté sous forme de paires instruction-réponse. Visez 500 à 10 000 exemples de haute qualité.
+3. **Choisissez une méthode** — LoRA/QLoRA pour la plupart des cas d'utilisation ; réglage fin complet uniquement si vous disposez du calcul et que la tâche l'exige.
+4. **Train** — utilisez Hugging Face `transformers` + `peft`, ou des frameworks de niveau supérieur comme Axolotl ou Unsloth.
+5. **Évaluer** — test sur un ensemble retenu. Comparez avec le modèle de base et une base de référence solide conçue pour les invites.
+6. **Itérer** — le réglage fin fonctionne rarement parfaitement du premier coup. Améliorez vos données, ajustez les hyperparamètres, répétez.
+
+---
+
+## 🚫 Quand NE PAS affiner les réglages
+
+Le réglage fin n’est pas toujours la bonne réponse :
+
+- **Votre problème peut être résolu en vous y invitant** — économisez l'effort ; itérer d'abord sur les invites
+- **Vos connaissances doivent rester à jour** — peaufiner vos connaissances au moment de la formation ; RAG est meilleur pour les informations dynamiques
+- **Vous disposez de très peu de données** : moins de quelques centaines d'exemples font souvent plus de mal qu'ils n'aident.
+- **Vous avez besoin d'une itération rapide** : une exécution de réglage fin prend des heures ; les changements rapides prennent quelques secondes
+
+<FunFact>Le modèle Alpaca (2023) a été affiné à partir de LLaMA en utilisant seulement 52 000 exemples de suivi d'instructions générés par GPT-3.5. Le coût total de génération de données était inférieur à 500 $. Il a démontré que le comportement de suivi des instructions pouvait être appris à partir d’un ensemble de données étonnamment petit.
+</FunFact>
+
+---
+
+<Quiz question="Quelle est la principale différence entre le réglage fin et l’ingénierie rapide ?" options={["L'ingénierie rapide nécessite plus de calcul", "Le réglage fin modifie les pondérations du modèle à l'aide des données d'entraînement ; une ingénierie rapide guide le modèle de base inchangé à travers des instructions", "Le réglage fin concerne uniquement les modèles d'image", "C'est la même chose avec des noms différents"]} correct={1} explanation="L'ingénierie rapide fonctionne avec le modèle tel quel, créant des entrées qui suscitent le comportement souhaité. Le réglage fin modifie en fait les pondérations internes du modèle en poursuivant la formation sur les données spécifiques à la tâche – le modèle lui-même est modifié de manière permanente." />
+
+<Quiz question="Quel problème LoRA résout-il dans le réglage fin du LLM ?" options={["Cela permet aux modèles de générer du texte plus rapidement au moment de l'inférence", "Il réduit considérablement le nombre de paramètres pouvant être entraînés, ce qui rend possible un réglage précis sur un matériel limité.", "Il génère automatiquement des données d'entraînement", "Il empêche le surajustement en ajoutant des couches de suppression"]} correct={1} explanation="LoRA (Low-Rank Adaptation) gèle les poids du modèle de base et ajoute à côté d'eux de petites matrices décomposées en rangs entraînables. Seules ces petites matrices sont entraînées, ce qui réduit les paramètres pouvant être entraînés à environ 0,1 à 1 % du total, ce qui rend le réglage précis pratique sur un seul GPU." />
+
+<Quiz question="Qu'est-ce que QLoRA ajoute en plus de LoRA ?" options={["Étapes de formation supplémentaires pour une meilleure précision", "Quantification du modèle de base gelé avec une précision de 4 bits, réduisant considérablement l'utilisation de la mémoire", "Un système de notation de la qualité des données de formation", "Réglage automatisé des hyperparamètres"]} correct={1} explanation="QLoRA combine LoRA avec une quantification 4 bits des poids du modèle de base gelé. Cela réduit l'utilisation de la mémoire d'environ 75 % par rapport à un chargement complet de 16 bits, permettant un réglage fin de très grands modèles (70 B+) sur un seul GPU grand public." />
+
+<Quiz question="Quand le réglage fin n’est-il PAS la meilleure approche ?" options={["Lorsque vous souhaitez un formatage de sortie cohérent", "Lorsque vos connaissances doivent rester à jour et mises à jour fréquemment, RAG gère cela mieux", "Lorsque vous disposez d'un vocabulaire spécifique à un domaine", "Quand vous souhaitez que le modèle refuse les demandes hors sujet"]} correct={1} explanation="Le réglage fin intègre les connaissances dans les poids du modèle au moment de l'entraînement. Si votre cas d'utilisation nécessite des informations à jour (actualités, documentation, catalogues de produits), RAG est plus approprié : il récupère les informations actuelles au moment de l'inférence sans nécessiter une nouvelle exécution de réglage fin." />
+
+<Quiz question="A quoi sert le RLHF dans le cadre de la mise au point LLM ?" options={["Générer automatiquement des données d'entraînement", "Aligner le comportement du modèle sur les préférences humaines en entraînant un modèle de récompense sur les classements humains", "Réduire la taille du modèle grâce à la compression", "Traduire des modèles dans plusieurs langues"]} correct={1} explanation="L'apprentissage par renforcement à partir de la rétroaction humaine (RLHF) utilise les classements de préférences humaines pour former un modèle de récompense, qui guide ensuite les ajustements ultérieurs via l'apprentissage par renforcement. C'est ainsi que des modèles comme ChatGPT apprennent à être utiles, inoffensifs et honnêtes plutôt que de simplement parler couramment." />

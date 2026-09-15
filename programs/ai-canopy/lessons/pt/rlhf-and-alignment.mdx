@@ -1,0 +1,118 @@
+---
+title: "RLHF e Alinhamento - Como o ChatGPT aprende os valores humanos"
+description: "Entenda como os modelos de linguagem bruta são transformados em assistentes úteis e inofensivos por meio de ajuste fino supervisionado, modelagem de recompensas e aprendizado reforçado a partir de feedback humano."
+order: 8
+difficulty: "advanced"
+duration: 18
+icon: "🎯"
+published: true
+machineTranslated: true
+---
+# RLHF e Alinhamento - Como o ChatGPT aprende os valores humanos
+
+Um modelo de linguagem pré-treinado é um mecanismo poderoso, mas não controlado. Ele pode escrever poesia, gerar código e raciocinar sobre física – mas também pode produzir conteúdo tóxico, fabricar fatos com confiança e ignorar as instruções do usuário. **Alinhamento** é o processo de direcionar essa capacidade bruta para ser genuinamente útil, honesto e inofensivo.
+
+## O problema do alinhamento
+
+O pré-treinamento otimiza um único objetivo: **prever o próximo token**. Isto dá ao modelo amplo conhecimento, mas nenhuma compreensão do que um ser humano realmente *quer*. Faça uma pergunta a um modelo básico e ele poderá completar o texto como se estivesse escrevendo uma postagem em um fórum, um anúncio ou uma teoria da conspiração - porque todos esses padrões existem em seus dados de treinamento.
+
+A lacuna entre “capaz” e “útil” é o problema de alinhamento. Um modelo que pode escrever conselhos médicos, mas não sabe quando recusar, é potencialmente perigoso. Colmatar esta lacuna requer ensinar o modelo de **preferências humanas** - não apenas o que *poderia* vir a seguir, mas o que *deveria* vir a seguir.
+
+<Illustration src="/images/lessons/rlhf-and-alignment.svg" alt="Pipeline de três estágios: SFT treina demonstrações, modelo de recompensa aprende preferências, PPO otimiza política em relação ao modelo de recompensa" caption="O pipeline RLHF transforma um modelo básico em um assistente alinhado por meio de três estágios: SFT, modelagem de recompensa e otimização de RL." />
+
+## Estágio 1: Ajuste fino supervisionado (SFT)
+
+A primeira etapa é simples: colete milhares de **exemplos de demonstração** de alta qualidade (conversas ideais entre um usuário e um assistente) e ajuste o modelo básico com base neles. Isso ensina ao modelo o *formato* de ser útil: responder perguntas diretamente, seguir instruções, admitir incertezas e recusar solicitações prejudiciais.
+
+O SFT por si só produz um modelo visivelmente melhor, mas tem limitações. Os demonstradores humanos só conseguem escrever alguns exemplos, e o modelo aprende a imitar a qualidade *média* dessas demonstrações, em vez de produzir consistentemente a melhor resposta possível.
+
+## Estágio 2: Treinamento de modelo de recompensa
+
+Em vez de escrever respostas ideais, os rotuladores humanos recebem **pares de resultados do modelo** e são solicitados a classificar qual é o melhor. Isto é cognitivamente mais fácil – comparar é mais simples do que criar – e permite coletar muito mais dados de preferências.
+
+Esses pares classificados treinam um **modelo de recompensa (RM)**: uma rede neural separada que recebe um prompt e uma resposta como entrada e gera uma pontuação escalar que representa a preferência humana. O RM aprende padrões como:
+
+- Respostas precisas e originadas têm pontuação mais alta do que respostas vagas
+- Respostas que reconhecem a incerteza têm pontuação mais alta do que as fabricações confiantes
+- As recusas úteis pontuam mais alto do que o cumprimento de solicitações prejudiciais
+
+<Quiz question="Por que é mais fácil e escalável coletar dados de comparação (classificar dois resultados) do que dados de demonstração (escrever resultados ideais)?" options="A comparação requer menos poder computacional|Os humanos podem julgar a qualidade relativa com muito mais rapidez e consistência do que podem produzir textos de nível especializado a partir do zero.|Os dados de comparação requerem menos rotuladores|Os dados de demonstração não podem ser usados ​​para modelos de linguagem" answer="1" explanation="Escrever uma resposta de assistente perfeita requer experiência e um tempo significativo. Comparar duas respostas e julgar qual é a melhor é uma tarefa cognitiva muito mais rápida e produz rótulos mais consistentes em diferentes anotadores, tornando-a muito mais escalável." />
+
+## Estágio 3: Aprendizagem por Reforço (PPO)
+
+Com um modelo de recompensa em mãos, o modelo SFT é ainda mais otimizado usando **Otimização de Política Proximal (PPO)**. O processo:
+
+1. O modelo gera uma resposta a um prompt
+2. O modelo de recompensa pontua a resposta
+3. PPO atualiza os pesos do modelo para aumentar a recompensa esperada
+4. Uma **penalidade de divergência KL** evita que o modelo se desvie muito da linha de base do SFT (evitando hacking de recompensa)
+
+A penalidade KL é crítica. Sem ele, o modelo aprenderia a explorar as peculiaridades do modelo de recompensa – gerando respostas com pontuação elevada, mas que seriam absurdas ou repetitivas. Ao restringir até que ponto a política pode divergir do modelo SFT, o PPO mantém a coerência dos resultados, ao mesmo tempo que melhora o alinhamento.
+
+Este processo de três estágios - SFT → Modelo de recompensa → PPO - é precisamente como a OpenAI transformou o GPT-3.5 em ChatGPT, conforme descrito em seu artigo **InstructGPT**.
+
+<FunFact>O artigo do InstructGPT revelou um resultado surpreendente: um modelo de parâmetro 1,3B alinhado com RLHF foi preferido pelos juízes humanos em vez do 175B GPT-3 não alinhado – um modelo 100× maior. O alinhamento pode ser mais importante do que a escala bruta.
+</FunFact>
+
+## DPO: Eliminando o intermediário
+
+**Otimização de preferência direta (DPO)** simplifica o pipeline RLHF eliminando totalmente o modelo de recompensa separado. Em vez disso, o DPO enquadra o alinhamento como um problema de classificação: dada uma resposta preferida e uma resposta rejeitada, atualize diretamente os pesos do modelo de linguagem para aumentar a probabilidade da resposta preferida.
+
+A função de perda do DPO define implicitamente um modelo de recompensa dentro do próprio modelo de linguagem:
+
+```
+L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
+```
+
+Onde `y_w` é a resposta preferida, `y_l` é a rejeitada e `π_ref` é o modelo de referência (SFT). O DPO é mais simples, mais estável e mais barato de treinar – sem modelo de recompensa, sem loop RL, sem PPO sensível a hiperparâmetros. O LLaMA 2 da Meta e muitos modelos de código aberto agora usam DPO ou suas variantes.
+
+<ThinkAboutIt>O DPO elimina o modelo de recompensa, mas também perde a capacidade de pontuar novas respostas arbitrárias no momento da inferência. Em quais cenários ter um modelo de recompensa explícito (o pipeline RLHF completo) pode ser mais valioso do que a simplicidade do DPO?
+</ThinkAboutIt>
+
+## IA constitucional: autosupervisão em escala
+
+A Anthropic introduziu a **IA Constitucional (CAI)** para reduzir a dependência de rotuladores humanos. A abordagem:
+
+1. Defina um conjunto de princípios (uma "constituição") - por exemplo, *"Escolha a resposta que é mais útil e ao mesmo tempo seja honesto e inofensivo"*
+2. Gere pares de respostas e use o **modelo em si** para julgar qual resposta atende melhor à constituição
+3. Use essas preferências geradas por IA para treinar o modelo de recompensa (RLAIF - RL do AI Feedback)
+
+A CAI dimensiona drasticamente a coleta de preferências – a IA pode gerar e avaliar milhões de comparações por uma fração do custo da rotulagem humana. Também torna os critérios de alinhamento **explícitos e auditáveis**, codificados na constituição, em vez de aprendidos implicitamente com os preconceitos dos rotuladores.
+
+<Quiz question="Qual é a principal inovação da IA ​​Constitucional em comparação com o RLHF padrão?" options="Ele usa um modelo base muito maior|Ele substitui os rotuladores de preferências humanas pelo próprio modelo de IA, guiado por princípios escritos explícitos|Elimina a necessidade de qualquer ajuste fino|Ele treina apenas em dados sintéticos" answer="1" explanation="A IA constitucional utiliza o próprio modelo para gerar julgamentos de preferência, guiados por um conjunto de princípios explicitamente escritos (a constituição). Isso dimensiona enormemente a coleta de dados de preferência, ao mesmo tempo que torna os critérios de alinhamento transparentes e modificáveis." />
+
+## Equipe Vermelha
+
+Nenhuma técnica de alinhamento é perfeita. **A equipe vermelha** envolve tentar deliberadamente fazer com que o modelo produza resultados prejudiciais, tendenciosos ou falsos. Equipes vermelhas investigam:
+
+- Jailbreaks que ignoram o treinamento de segurança
+- Vieses sistemáticos nas respostas entre dados demográficos
+- Erros factuais em domínios de alto risco (médico, jurídico)
+- Inconsistências nos limites de recusa
+
+Os principais laboratórios agora conduzem extensas equipes vermelhas antes de lançar modelos, muitas vezes envolvendo pesquisadores de segurança externos, especialistas de domínio e equipes dedicadas de testes adversários.
+
+## O imposto de alinhamento
+
+O alinhamento tem um custo. Os modelos treinados em RLHF às vezes tornam-se **excessivamente cautelosos** – recusando solicitações benignas, acrescentando advertências desnecessárias ou produzindo respostas brandas para evitar qualquer risco percebido. Este “imposto de alinhamento” é um verdadeiro desafio de engenharia:
+
+- Pouco alinhamento → resultados prejudiciais
+- Muito alinhamento → recusas inúteis e irritantes
+
+A fronteira da pesquisa de alinhamento é encontrar técnicas que maximizem a utilidade e, ao mesmo tempo, mantenham limites de segurança genuínos – e não apenas a correspondência de padrões em respostas superficialmente “seguras”.
+
+<Quiz question="O que é a ”imposto de alinhamento” no contexto dos modelos treinados em RLHF?" options="O custo financeiro da contratação de rotuladores humanos para dados de preferência|A redução na utilidade e capacidade do modelo resultante do treinamento de segurança, tornando o modelo excessivamente cauteloso|O custo computacional de execução da otimização de PPO|O imposto que os governos impõem às empresas de IA para conformidade com a segurança" answer="1" explanation="A taxa de alinhamento refere-se à capacidade ou utilidade perdida quando o treinamento em segurança torna um modelo excessivamente cauteloso – recusando solicitações benignas, protegendo-se desnecessariamente ou produzindo respostas genéricas. Equilibrar a segurança com a ajuda genuína é um dos problemas mais difíceis do alinhamento." />
+
+<FunFact>A OpenAI passou cerca de seis meses no trabalho de alinhamento (coleta de dados SFT, modelagem de recompensas e treinamento RLHF) para transformar o modelo básico do GPT-4 na versão lançada ao público. A fase de alinhamento, embora fosse uma fração da computação pré-treinamento, exigiu milhares de horas de rotulagem humana especializada.
+</FunFact>
+
+<ThinkAboutIt>Os rotuladores humanos inevitavelmente trazem os seus próprios preconceitos, perspectivas culturais e inconsistências para os dados de preferência. Se o alinhamento é, em última análise, “aprender o que os humanos preferem”, quais preferências devem contar – e como lidamos com divergências fundamentais sobre valores entre culturas?
+</ThinkAboutIt>
+
+---
+
+## 📚 Leitura adicional
+
+- [Treinando modelos de linguagem para seguir instruções com feedback humano (InstructGPT)](https://arxiv.org/abs/2203.02155) - Artigo RLHF fundamental da OpenAI
+- [Otimização de preferência direta (Rafailov et al., 2023)](https://arxiv.org/abs/2305.18290) - O artigo DPO que simplificou o treinamento de alinhamento
+- [IA Constitucional: Inocuidade do Feedback de IA (Antrópico)](https://arxiv.org/abs/2212.08073) - Abordagem da Antrópica para alinhamento escalonável usando autosupervisão de IA
