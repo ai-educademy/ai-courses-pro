@@ -1,0 +1,167 @@
+---
+title: "End-to-End-ML-Pipeline – von Rohdaten bis zum bereitgestellten Modell"
+description: "Beherrschen Sie den gesamten ML-Lebenszyklus: Datenerfassung, Feature-Engineering, Modellschulung, Bereitstellung und Überwachung – alles orchestriert als reproduzierbarer Pipeline-Code."
+order: 6
+difficulty: "advanced"
+duration: 22
+icon: "🔄"
+published: true
+machineTranslated: true
+---
+# End-to-End-ML-Pipeline – von Rohdaten bis zum bereitgestellten Modell
+
+Die meisten Tutorials enden bei `model.fit()`. In der Produktion sind das knapp 20 % der Arbeit. Diese Lektion führt durch den **gesamten ML-Lebenszyklus** – dieselbe Pipeline, die Empfehlungs-Engines bei Spotify, Betrugserkennung bei Stripe und Suchranking bei Google antreibt.
+
+## 🗺️ Der ML-Lebenszyklus auf einen Blick
+
+<Illustration src="/images/lessons/end-to-end-ml-pipeline.svg" alt="Diagramm der ML-Pipeline-Stufen von der Datenaufnahme bis zur Überwachung" caption="Die acht Phasen einer Produktions-ML-Pipeline – jede einzelne ist ein potenzieller Fehlerpunkt." />
+
+Jedes Produktions-ML-System durchläuft diese Phasen:
+
+1. **Datenerfassung** – APIs, Datenbanken, Ereignisströme, Web Scraping
+2. **Datenbereinigung** – Umgang mit Nullen, Deduplizierung, Typzwang
+3. **Feature Engineering** – Umwandlung von Rohsignalen in modellbereite Features
+4. **Modellauswahl** – Auswahl der Architekturen, die zu Ihrem Problem passen
+5. **Training** – GPU/CPU-Orchestrierung, Hyperparameter-Tuning
+6. **Bewertung** – Offline-Metriken, A/B-Tests, Fairness-Audits
+7. **Bereitstellung** – Bereitstellung der Infrastruktur, Latenzbudgets
+8. **Überwachung** – Abweichungserkennung, Alarmierung, Neuschulungsauslöser
+
+## 📦 Datenerfassung und Versionierung
+
+Rohdaten sind Ihre Grundlage. Behandeln Sie es wie Quellcode – **alles versionieren**.
+
+```bash
+# Initialise DVC in your repo
+dvc init
+dvc remote add -d storage s3://my-ml-data-bucket
+
+# Track a dataset
+dvc add data/transactions.csv
+git add data/transactions.csv.dvc .gitignore
+git commit -m "Track raw transaction dataset v1"
+dvc push
+```
+
+**DVC** (Data Version Control) lets you `git checkout` any historical dataset. Combined with Git tags, you can reproduce any experiment from any point in time.
+
+<FunFact>Netflix verarbeitet über 1,5 Billionen Ereignisse pro Tag über seine Datenpipelines – etwa 17 Millionen Ereignisse pro Sekunde, die in seine Empfehlungsmodelle einfließen.</FunFact>
+
+## 🛠️ Feature Engineering – Wo Wettbewerbe gewonnen werden
+
+Funktionen sind wichtiger als Algorithmen. Ein durch Gradienten verstärkter Baum mit brillanten Merkmalen schlägt ein tiefes neuronales Netzwerk mit schlechten Merkmalen.
+
+```python
+import pandas as pd
+
+df = pd.read_csv("data/transactions.csv", parse_dates=["timestamp"])
+
+# Temporal features
+df["hour"] = df["timestamp"].dt.hour
+df["is_weekend"] = df["timestamp"].dt.dayofweek >= 5
+
+# Aggregation features
+user_stats = df.groupby("user_id")["amount"].agg(["mean", "std", "count"])
+user_stats.columns = ["user_avg_amount", "user_std_amount", "user_txn_count"]
+df = df.merge(user_stats, on="user_id")
+
+# Ratio features
+df["amount_vs_avg"] = df["amount"] / df["user_avg_amount"]
+```
+
+<Quiz question="Welche Feature-Engineering-Technik bietet normalerweise die BESTE Vorhersagekraft bei tabellarischen ML-Problemen?" options="One-Hot-Codierung kategorialer Variablen|Erstellen von Interaktions- und Verhältnisfunktionen zwischen vorhandenen Spalten|Normalisierung aller Merkmale auf den Mittelwert Null|Anwendung der PCA-Dimensionalitätsreduktion" answer="1" explanation="Interaktions- und Verhältnisfunktionen erfassen Beziehungen zwischen Variablen, die lineare Modelle nicht alleine lernen können. Top-Kaggle-Lösungen nennen diese Transformationen immer wieder als die Transformationen mit der größten Auswirkung." />
+
+## 🧪 Experimentverfolgung mit MLflow
+
+Verlieren Sie nie den Überblick darüber, was Sie versucht haben. MLflow protokolliert Parameter, Metriken und Artefakte automatisch.
+
+```python
+import mlflow
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import f1_score
+
+mlflow.set_experiment("fraud-detection-v2")
+
+with mlflow.start_run(run_name="gbm-baseline"):
+    params = {"n_estimators": 500, "max_depth": 6, "learning_rate": 0.05}
+    mlflow.log_params(params)
+
+    model = GradientBoostingClassifier(**params)
+    model.fit(X_train, y_train)
+
+    score = f1_score(y_test, model.predict(X_test))
+    mlflow.log_metric("f1_score", score)
+    mlflow.sklearn.log_model(model, "model")
+```
+
+Vergleichen Sie Läufe in der MLflow-Benutzeroberfläche und stufen Sie dann das beste Modell mit Staging-→Produktionslebenszyklus-Tags in die **Modellregistrierung** hoch.
+
+## 🚀 Pipeline als Code – Orchestrierung
+
+Manuelle Schritte brechen. Kodieren Sie Ihre Pipeline mithilfe von Orchestrierungs-Frameworks im Code:
+
+| Werkzeug | Am besten für | Schlüsselstärke |
+|------|----------|-------------|
+| **Kubeflow-Pipelines** | Kubernetes-natives ML | Skaliert auf vorhandenen K8s-Clustern |
+| **Apache Airflow** | Komplexe DAG-Planung | Ausgereiftes Ökosystem, breite Akzeptanz |
+| **Präfekt** | Moderne Python-Workflows | Pythonic API, hervorragende Fehlerbehandlung |
+| **ZenML** | MLOps-Abstraktion | Stack-agnostisch, jedes Tool einsteckbar |
+
+<ThinkAboutIt>Sie haben eine Pipeline, die jede Nacht neu trainiert, aber Ihre Daten ändern sich stündlich. Welche Kompromisse wägen Sie bei der Entscheidung über die Umschulungshäufigkeit ab – Kosten, Veraltenheit, Komplexität der Infrastruktur?</ThinkAboutIt>
+
+## 🌐 Modellbereitstellung und -bereitstellung
+
+Ihr Modell benötigt eine API. Zwei vorherrschende Muster:
+
+**REST-API** – einfach, HTTP-basiert, ideal für moderaten Durchsatz:
+```python
+# FastAPI model server
+from fastapi import FastAPI
+import joblib
+
+app = FastAPI()
+model = joblib.load("model.pkl")
+
+@app.post("/predict")
+async def predict(features: dict):
+    prediction = model.predict([list(features.values())])
+    return {"prediction": int(prediction[0])}
+```
+
+**gRPC** – Binärprotokoll, 2–10-mal schneller als REST, ideal für interne Microservices und Szenarien mit hohem Durchsatz.
+
+### Canary-Bereitstellungen
+
+Leiten Sie niemals 100 % des Traffics an ein neues Modell weiter. Verwenden Sie **Canary-Releases**: Routen Sie 5 % → 25 % → 50 % → 100 % und überwachen Sie die Fehlerraten bei jedem Schritt. Führen Sie sofort einen Rollback durch, wenn sich die Messwerte verschlechtern.
+
+<Quiz question="Was ist der PRIMÄRE Vorteil von Canary-Bereitstellungen für ML-Modelle?" options="Sie verkürzen die Modelltrainingszeit|Sie ermöglichen eine schrittweise Einführung mit automatischem Rollback bei Verschlechterung der Metrik|Sie verbessern die Modellgenauigkeit durch A/B-Tests|Sie machen eine Modellversionierung überflüssig" answer="1" explanation="Kanarische Einsätze begrenzen den Explosionsradius. Wenn die Leistung Ihres neuen Modells schlecht ist, ist nur ein kleiner Prozentsatz der Benutzer betroffen, und Sie können einen Rollback durchführen, bevor größerer Schaden entsteht." />
+
+## 📊 Überwachung und Feedbackschleife
+
+Der Einsatz ist nicht die Ziellinie – er ist der Startschuss. Überwachen Sie Folgendes:
+
+- **Datendrift** – Eingabeverteilungen verschieben sich von Trainingsdaten
+- **Konzeptdrift** – die Beziehung zwischen Funktionen und Zieländerungen
+- **Leistungsabfall** – Genauigkeits-/Latenzmetriken sinken
+
+Tools wie **Evidently AI**, **WhyLabs** und **Arize** bieten Drift-Dashboards. Wenn die Drift die Schwellenwerte überschreitet, lösen Sie ein automatisches Neutraining mit neuen Produktionsdaten aus und schließen so die Rückkopplungsschleife.
+
+<Quiz question="Die Präzision eines Betrugserkennungsmodells sinkt innerhalb von drei Monaten von 95 % auf 78 %, die Verteilung der Eingabemerkmale hat sich jedoch nicht geändert. Was für eine Drift ist das?" options="Datendrift|Konzeptdrift|Modelldrift|Feature-Drift" answer="1" explanation="Wenn die Eingabeverteilungen stabil bleiben, die Leistung jedoch abnimmt, hat sich die zugrunde liegende Beziehung zwischen Features und dem Ziel geändert – das ist Konzeptdrift. Betrüger haben ihre Taktiken weiterentwickelt, aber die Datenform sieht gleich aus." />
+
+<ThinkAboutIt>Ihre Überwachung erkennt an einem Freitagabend eine erhebliche Abweichung. Lösen Sie eine automatische Neuschulung aus, warten Sie auf die manuelle Überprüfung am Montag oder führen Sie ein Rollback auf eine frühere Modellversion durch? Welche Faktoren beeinflussen Ihre Entscheidung?</ThinkAboutIt>
+
+## 🎯 Wichtige Erkenntnisse
+
+- Version **alles**: Code, Daten, Modelle und Pipeline-Konfigurationen
+- Feature Engineering liefert einen höheren ROI als Architekturänderungen
+- Pipelines als Code kodieren – manuelle Schritte sind technische Schulden
+- Bereitstellung mit Canary-Releases und kontinuierliche Überwachung
+- Die Rückkopplungsschleife (Produktionsdaten → Umschulung) ist es, was Demos von Produktionssystemen trennt
+
+---
+
+## 📚 Weiterführende Literatur
+
+- [Made With ML – MLOps-Kurs](https://madewithml.com/) – Umfassender, kostenloser MLOps-Lehrplan, der den gesamten Lebenszyklus abdeckt
+- [Designing Machine Learning Systems von Chip Huyen](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/) – Das maßgebliche Buch zum Design von ML-Produktionssystemen
+- [MLflow-Dokumentation](https://mlflow.org/docs/latest/index.html) – Offizielle Leitfäden für Experimentverfolgung und Modellregistrierung

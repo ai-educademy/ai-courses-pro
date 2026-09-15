@@ -1,0 +1,120 @@
+---
+title: "Atención y Transformers: la arquitectura que lo cambió todo"
+description: "Una inmersión profunda en la autoatención, la atención de múltiples cabezas, la codificación posicional y la arquitectura Transformer que impulsa todos los modelos de lenguajes grandes modernos."
+order: 6
+difficulty: "advanced"
+duration: 20
+icon: "🔦"
+published: true
+machineTranslated: true
+---
+# Atención y Transformers - La arquitectura que lo cambió todo
+
+Todos los principales modelos de lenguaje actuales (GPT-4, Claude, Gemini, LLaMA) se basan en la arquitectura Transformer. Publicado en el histórico artículo de 2017 *La atención es todo lo que necesitas*, reemplazó la recurrencia con un mecanismo llamado **autoatención**, desbloqueando un paralelismo y un rendimiento sin precedentes.
+
+## Por qué los RNN chocan contra una pared
+
+El proceso de redes neuronales recurrentes secuencia un token a la vez, llevando hacia adelante un estado oculto. Esto crea dos problemas agobiantes:
+
+- **Gradientes que desaparecen**: cuando un gradiente se propaga a través de cientos de pasos de tiempo, se reduce a casi cero, lo que hace imposible aprender dependencias de largo alcance.
+- **Cuello de botella secuencial** - Cada paso depende del anterior, por lo que no puedes paralelizar el entrenamiento en una secuencia. Una entrada de 1000 tokens requiere 1000 operaciones en serie.
+
+Los LSTM y GRU agregaron mecanismos de activación que facilitaron la desaparición de gradientes, pero nunca resolvieron el problema de la paralelización. La formación siguió siendo fundamentalmente lenta.
+
+## La Intuición de la Atención
+
+Imagínese leer un párrafo largo y que le pregunten *"¿Qué anunció el director ejecutivo?"* Sus ojos no releen cada palabra secuencialmente: **salta a la oración relevante**. La atención funciona de la misma manera: permite que cada token mire a los demás y decida cuáles son más importantes para su contexto actual.
+
+Piense en ello como **un reflector en un escenario**. En lugar de iluminar todo el escenario de manera uniforme, el modelo aprende a iluminar con un haz brillante las fichas que contienen la información más relevante para la tarea en cuestión.
+
+<Illustration src="/images/lessons/attention-and-transformers.svg" alt="Diagrama que muestra la autoatención: un token de consulta atiende a todos los tokens clave con pesos variables, lo que produce una suma ponderada de valores." caption="La autoatención permite que cada token preste atención a todos los demás, y los pesos aprendidos determinan la relevancia." />
+
+## Consulta, clave, valor: el mecanismo central
+
+La autoatención toma prestada terminología de la recuperación de información. Para cada token, el modelo calcula tres vectores:
+
+- **Consulta (Q)** - *"¿Qué estoy buscando?"*
+- **Clave (K)** - *"¿Qué información contengo?"*
+- **Valor (V)** - *"¿Qué aporto realmente si soy seleccionado?"*
+
+La puntuación de atención entre dos tokens es el **producto escalar de Q y K**, escalado por √d_k (la dimensión clave) para evitar valores explosivos. La aplicación de softmax produce pesos normalizados y el resultado es una suma ponderada de todos los vectores V:
+
+```
+Attention(Q, K, V) = softmax(Q·Kᵀ / √d_k) · V
+```
+
+**Tutorial:** Considere la oración *"El gato se sentó en la alfombra porque estaba cansado".* Al procesar *"it"*, la consulta para *"it"* atiende con mayor fuerza a *"cat"* (puntuación Q·K alta), resolviendo el pronombre ambiguo; no es necesaria la recurrencia.
+
+<Quiz question="En la fórmula de la autoatención, ¿por qué dividimos por √d_k?" options="Para hacer que el modelo se ejecute más rápido en GPU|Para evitar que los productos punto crezcan demasiado, lo que empujaría a softmax a regiones con gradientes pequeños|Para reducir el número de parámetros en el modelo.|Para normalizar secuencias de longitud variable" answer="1" explanation="Cuando d_k es grande, los productos escalares pueden volverse muy grandes en magnitud, lo que hace que softmax genere gradientes cercanos a cero (la región de saturación). Dividir por √d_k mantiene los valores en un rango donde los gradientes softmax se mantienen saludables." />
+
+## Atención de múltiples cabezas
+
+Un único foco de atención sólo puede captar un tipo de relación a la vez. **Atención de múltiples cabezas** ejecuta varias cabezas de atención en paralelo, cada una con sus propias proyecciones Q, K, V aprendidas, luego concatena y proyecta los resultados:
+
+```
+MultiHead(Q, K, V) = Concat(head₁, ..., headₕ) · Wᴼ
+```
+
+Diferentes cabezas aprenden diferentes patrones lingüísticos: una podría prestar atención a las dependencias sintácticas, otra a la similitud semántica y una tercera a la proximidad posicional. GPT-3 utiliza 96 cabezales; cada uno ve una porción de 128 dimensiones del espacio completo de 12.288 dimensiones.
+
+<FunFact>Los investigadores de Google descubrieron que las cabezas de atención individuales en BERT se especializan notablemente: algunas rastrean la concordancia sujeto-verbo, otras manejan la resolución de correferencia y algunas incluso aprenden análisis de dependencia, todo sin supervisión explícita.
+</FunFact>
+
+## Codificación posicional
+
+La autoatención es **invariante de permutación**: trata *"perro muerde al hombre"* de manera idéntica a *"hombre muerde al perro"* a menos que inyectemos información posicional. El Transformer original utilizaba codificaciones sinusoidales:
+
+```
+PE(pos, 2i)   = sin(pos / 10000^(2i/d_model))
+PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))
+```
+
+Cada posición obtiene un patrón único de ondas sinusoidales y coseno en diferentes frecuencias. Esto permite que el modelo aprenda posiciones relativas porque `PE(pos+k)` se puede expresar como una función lineal de `PE(pos)`. Los modelos modernos (GPT, LLaMA) utilizan **Incrustaciones posicionales rotativas (RoPE)**, que codifican la posición relativa directamente en el producto escalar Q/K.
+
+## La arquitectura transformadora completa
+
+El Transformer original tiene una estructura **codificador-decodificador**:
+
+- **Codificador**: procesa la entrada completa con autoatención bidireccional (cada token atiende a los demás). Apila N capas de autoatención + bloques de retroalimentación con conexiones residuales y normalización de capas.
+- **Decodificador**: genera salida de forma autorregresiva con **autoatención causal (enmascarada)** (cada token solo puede atender a los tokens anteriores) más atención cruzada a la salida del codificador.
+
+Cada subcapa sigue el patrón: `LayerNorm(x + Sublayer(x))`, donde la conexión residual garantiza que los gradientes fluyan libremente a través de pilas profundas.
+
+<ThinkAboutIt>Las conexiones residuales del Transformer permiten que los gradientes fluyan directamente a través de más de 100 capas. Sin ellos, sería casi imposible entrenar un GPT-3 de 96 capas. ¿Cómo se relaciona esto con las conexiones de salto que hicieron que ResNets fuera viable para la visión profunda por computadora?
+</ThinkAboutIt>
+
+## Por qué los transformadores se paralelizan
+
+La idea clave: la autoatención calcula todas las interacciones de tokens por pares en una **multiplicación de matriz única**. Para una secuencia de longitud n, toda la matriz de atención n × n se calcula simultáneamente en el hardware GPU. Compare esto con los RNN, que requieren n pasos secuenciales independientemente de la computación disponible.
+
+Esta profundidad O(1) (operaciones secuenciales constantes) versus la profundidad O(n) del RNN es precisamente la razón por la que los Transformers escalan a secuencias de miles de tokens durante el entrenamiento.
+
+## Solo decodificador versus solo codificador versus codificador-decodificador
+
+Del diseño original surgieron tres variantes arquitectónicas:
+
+| Variante | Atención | Ejemplo | Mejor para |
+|---------|-----------|---------|----------|
+| **Solo codificador** | Bidireccional | BERT, Roberta | Clasificación, NER, incrustaciones |
+| **Solo decodificador** | Causal (de izquierda a derecha) | GPT, LLaMA, Claude | Generación de texto, chat, razonamiento |
+| **Codificador-decodificador** | Ambos | T5, BART, Susurro | Traducción, resumen |
+
+Los modelos de solo decodificador dominan hoy en día porque **la generación es la interfaz universal**: cualquier tarea de PNL puede enmarcarse como generación de texto. Esta simplicidad arquitectónica también escala de manera más predecible.
+
+<Quiz question="¿Por qué los modelos solo decodificadores utilizan atención causal (enmascarada) durante el entrenamiento?" options="Para reducir el uso de memoria a la mitad|Para evitar que los tokens atiendan a tokens futuros, lo que filtraría la respuesta durante el entrenamiento autorregresivo.|Para hacer el modelo bidireccional|Para acelerar la inferencia omitiendo los cálculos de atención" answer="1" explanation="Durante el entrenamiento, el modelo predice el siguiente token en cada posición simultáneamente. El enmascaramiento causal garantiza que cada posición solo pueda ver los tokens anteriores, evitando la fuga de información de posiciones futuras que trivializarían la tarea de predicción." />
+
+<Quiz question="¿En qué variante de Transformer se basa BERT y por qué no es adecuado para la generación de texto abierto?" options="Sólo decodificador; carece de capas de atención cruzada|Codificador-decodificador; requiere un decodificador separado para generar texto|Sólo codificador; su atención bidireccional significa que ve la secuencia completa, lo que hace imposible la generación autorregresiva|Sólo codificador; tiene muy pocos parámetros para las tareas de generación" answer="2" explanation="BERT utiliza atención bidireccional (solo codificador), lo que significa que cada token atiende a todos los demás tokens, incluidos los futuros. Esto es perfecto para comprender tareas, pero hace imposible la generación autorregresiva: no puede predecir ”el siguiente token” cuando ya puede ver todos los tokens." />
+
+<FunFact>El artículo original *La atención es todo lo que necesitas* fue rechazado en un lugar anterior antes de ser aceptado en NeurIPS 2017. A partir de 2024, tiene más de 130.000 citas, lo que lo convierte en uno de los artículos de informática más citados jamás escritos.
+</FunFact>
+
+<ThinkAboutIt>La autoatención tiene una complejidad O(n²) en la longitud de la secuencia: duplicar la ventana de contexto cuadriplica el cálculo. La investigación sobre la atención lineal, la atención dispersa y la atención en anillo tiene como objetivo romper esta barrera. ¿Qué compensaciones podrían introducir estas aproximaciones?
+</ThinkAboutIt>
+
+---
+
+## 📚 Lecturas adicionales
+
+- [La atención es todo lo que necesitas (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762) - El documento fundamental que presenta la arquitectura Transformer
+- [Andrej Karpathy - Construyamos GPT: desde cero, en código](https://www.youtube.com/watch?v=kCc8FmEb1nY) - Un tutorial completo sobre cómo construir un Transformer desde cero
+- [The Illustrated Transformer (Jay Alammar)](https://jalammar.github.io/illustrated-transformer/) - Explicación visual e intuitiva de cada componente de Transformer
