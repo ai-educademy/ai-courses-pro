@@ -1,78 +1,56 @@
-<div align="center">
+# 🌳 AI Branches
 
-# 🌳 AI Branches - Level 3: Specialisations
+Build with today’s AI capabilities
 
-### Explore AI specialisations at [AI Educademy](https://aieducademy.org)
+Part of [AI Educademy](https://aieducademy.org).
 
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ai-educademy/ai-seeds/blob/main/CONTRIBUTING.md)
-[![Status](https://img.shields.io/badge/status-coming_soon-yellow)]()
+[Start learning](https://aieducademy.org/programs/ai-branches) | [Platform repo](https://github.com/ai-educademy/ai-platform) | [UI library](https://github.com/ai-educademy/ai-ui-library)
 
-Time to branch out! Choose your path through machine learning, computer vision, NLP, and generative AI. Hands-on projects with real code.
+## Overview
 
-[🚀 AI Educademy](https://aieducademy.org) · [🌿 Level 2: AI Sprouts](https://github.com/ai-educademy/ai-sprouts) · [📦 Platform Repo](https://github.com/ai-educademy/ai-platform)
+Move from concepts to applications. Work across text, vision, speech, and multimodal systems while learning where APIs, open models, structured outputs, and human review fit.
 
----
+This private repo contains Pro subscriber lessons for this programme.
 
-</div>
+## Programme facts
 
-## 📋 About
+| Field | Value |
+|-------|-------|
+| Track | Understanding AI |
+| Level | 3 |
+| Lessons | 10 |
+| Estimated study time | 10 hours |
+| Audience | Learners who want to build useful AI features |
+| Prerequisites | AI Sprouts or equivalent foundations |
 
-AI Branches is **Level 3** of the AI Educademy learning path. This is a content-only repo consumed by [`ai-platform`](https://github.com/ai-educademy/ai-platform) via git submodules.
+## Topics
 
-### What You'll Learn
+- Model APIs and structured output
+- Prompt and context design
+- Vision, speech, and multimodal AI
+- Fine-tuning versus retrieval
+- Human-in-the-loop product design
 
-- 🤖 Machine learning workflows - from data to deployment
-- 👁️ Computer vision fundamentals
-- 💬 Natural language processing
-- ✨ Generative AI & large language models
-- 📊 Model evaluation & metrics
+## Outcomes
 
-## 📁 Structure
+- Build a small multimodal AI feature
+- Choose between prompting, retrieval, and fine-tuning
+- Design clear input and output contracts for model calls
+- Explain failure modes to non-technical stakeholders
 
-```
-program.json              # Program metadata
+## Content structure
+
+```text
+program.json
 lessons/
-├── en/                   # English lessons (MDX)
-├── fr/                   # French
-├── nl/                   # Dutch
-├── hi/                   # Hindi
-└── te/                   # Telugu
+└── <locale>/
+    └── <lesson>.mdx
 ```
 
-## 🚧 Status
+## Contributing
 
-**Coming Soon** - Lessons are being written. Want to help? See [Contributing](#-contributing).
+Focused corrections, translation improvements, clearer examples, and accessibility fixes are welcome. Keep PRs small and avoid publishing paid lesson content outside the private repo.
 
-## 🌱 Learning Path
+## Licence
 
-| Level | Program | Status |
-|-------|---------|--------|
-| 1 | [🌱 AI Seeds](https://github.com/ai-educademy/ai-seeds) | ✅ Live |
-| 2 | [🌿 AI Sprouts](https://github.com/ai-educademy/ai-sprouts) | 🚧 Coming soon |
-| 3 | **🌳 AI Branches** ← you are here | 🚧 Coming soon |
-| 4 | [🏕️ AI Canopy](https://github.com/ai-educademy/ai-canopy) | 📋 Planned |
-| 5 | [🌲 AI Forest](https://github.com/ai-educademy/ai-forest) | 📋 Planned |
-
-## 🤝 Contributing
-
-We welcome contributions! Each lesson is an MDX file with frontmatter:
-
-```mdx
----
-title: "Your Lesson Title"
-description: "A short description"
-order: 1
-difficulty: "intermediate"
-duration: 15
-icon: "🤖"
----
-
-Your lesson content in Markdown...
-```
-
-See the [Contributing Guide](https://github.com/ai-educademy/ai-seeds/blob/main/CONTRIBUTING.md) for full details.
-
-## 📄 License
-
-[MIT](LICENSE) © [AI Educademy](https://github.com/ai-educademy)
+© 2026 AI Educademy. All rights reserved. This Pro content is proprietary.
