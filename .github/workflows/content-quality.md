@@ -4,7 +4,7 @@ name: Content Quality
 description: Validates MDX integrity, per-programme manifests and lesson ordering across the private paid course catalogue.
 on:
   schedule:
-    - cron: "daily"
+    - cron: "weekly on monday"
   workflow_dispatch:
 max-daily-ai-credits: 6000
 permissions:
