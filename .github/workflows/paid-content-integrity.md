@@ -4,7 +4,7 @@ name: Paid Content Integrity
 description: "Verifies paid content stays paid: no leakage into the public repo, no lesson bodies in issues or PRs, no secrets or internal URLs, correct third-party attribution."
 on:
   schedule:
-    - cron: "daily"
+    - cron: "weekly on sunday"
   workflow_dispatch:
 max-daily-ai-credits: 6000
 permissions:
@@ -13,7 +13,7 @@ permissions:
   issues: read
 engine:
   id: gemini
-  model: gemini-3.6-flash
+  model: gemini-3.7-flash
 timeout-minutes: 25
 strict: true
 network:
