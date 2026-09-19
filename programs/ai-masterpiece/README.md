@@ -1,89 +1,56 @@
-<div align="center">
+# 🏆 AI Masterpiece
 
-# 🏆 AI Masterpiece - Career Capstone
+Your production AI capstone
 
-### Portfolio-Ready - End-to-End Case Studies
+Part of [AI Educademy](https://aieducademy.org).
 
-[![Coming Soon](https://img.shields.io/badge/status-coming%20soon-yellow?style=for-the-badge)](https://github.com/ai-educademy/ai-masterpiece)
-[![GitHub stars](https://img.shields.io/github/stars/ai-educademy/ai-masterpiece?style=for-the-badge)](https://github.com/ai-educademy/ai-masterpiece/stargazers)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
+[Start learning](https://aieducademy.org/programs/ai-masterpiece) | [Platform repo](https://github.com/ai-educademy/ai-platform) | [UI library](https://github.com/ai-educademy/ai-ui-library)
 
----
+## Overview
 
-🚧 **Coming Soon** - This program is under active development.
+Design, build, evaluate, and present an end-to-end AI product. Combine retrieval or tool use with security, tests, observability, a runbook, and a credible product case.
 
-Part of the **Craft Engineering** track at [AI Educademy](https://aieducademy.org).
+This private repo contains Pro subscriber lessons for this programme.
 
-</div>
+## Programme facts
 
----
+| Field | Value |
+|-------|-------|
+| Track | Craft and Engineering |
+| Level | 5 |
+| Lessons | 10 |
+| Estimated study time | 30 hours |
+| Audience | Engineers ready to demonstrate production AI capability |
+| Prerequisites | AI Canopy plus AI Craft, or equivalent experience |
 
-## 📖 About
+## Topics
 
-**AI Masterpiece** is the career capstone of the Craft Engineering track. It combines everything you've learned - DSA, system design, and behavioral skills - into portfolio-ready projects and real-world interview preparation.
+- Product brief and success metrics
+- Architecture and threat model
+- RAG or agent implementation
+- Evaluation and observability
+- Launch review and portfolio case study
 
-> **Audience:** Engineers ready for senior+ roles
->
-> **Prerequisites:** Completed AI Sketch through AI Polish
+## Outcomes
 
----
+- Ship a portfolio-ready AI system design and prototype
+- Demonstrate evaluation beyond a happy-path demo
+- Document risk, operations, and rollback decisions
+- Present technical work with clear business and user value
 
-## 🗺️ What's Planned
+## Content structure
 
-### 🎙️ Mock Interview Simulator
-AI-powered practice sessions with real-time feedback on communication, problem-solving approach, and technical accuracy.
+```text
+program.json
+lessons/
+└── <locale>/
+    └── <lesson>.mdx
+```
 
-### 🖼️ Portfolio & GitHub Profile Optimization
-Build a standout engineering portfolio and GitHub presence that catches recruiters' attention.
+## Contributing
 
-### 🔍 Job Search Strategy
-Master negotiation tactics, professional networking, and personal branding to land the role you deserve.
+Focused corrections, translation improvements, clearer examples, and accessibility fixes are welcome. Keep PRs small and avoid publishing paid lesson content outside the private repo.
 
----
+## Licence
 
-## 🛤️ Craft Engineering Track
-
-The Craft Engineering track takes you from fundamentals to career-ready through five progressive programs:
-
-| # | Program | Focus |
-|---|---------|-------|
-| 1 | ✏️ [Sketch](https://github.com/ai-educademy/ai-sketch) | Foundations - Pattern Recognition & Core Thinking |
-| 2 | 🪨 [Chisel](https://github.com/ai-educademy/ai-chisel) | Problem Solving - Guided DSA Deep-Dives |
-| 3 | ⚒️ [Craft](https://github.com/ai-educademy/ai-craft) | System Design - Scalable Architecture Patterns |
-| 4 | 💎 [Polish](https://github.com/ai-educademy/ai-polish) | Interview Ready - Behavioral & Communication |
-| 5 | **🏆 [Masterpiece](https://github.com/ai-educademy/ai-masterpiece)** | **Career Capstone - Portfolio & Mock Interviews** ⬅️ You are here |
-
----
-
-## 🎯 Learning Outcomes
-
-- Complete end-to-end system designs
-- Perform confidently in mock interviews
-- Build a standout engineering portfolio
-
----
-
-## 🤝 Want to Contribute?
-
-This program is still being shaped - and we'd love your help! Whether you have ideas for interview scenarios, portfolio tips, or career advice, contributions are welcome.
-
-1. ⭐ Star this repo to show interest
-2. 💬 [Open a discussion](https://github.com/ai-educademy/ai-masterpiece/discussions) to share ideas
-3. 🐛 [Open an issue](https://github.com/ai-educademy/ai-masterpiece/issues) to suggest content or report problems
-4. 🔀 Fork and submit a PR when development begins
-
-See the main [AI Educademy](https://github.com/ai-educademy) org for contribution guidelines.
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-<div align="center">
-
-**[AI Educademy](https://aieducademy.org)** · [GitHub Org](https://github.com/ai-educademy) · Built with ❤️ by the community
-
-</div>
+© 2026 AI Educademy. All rights reserved. This Pro content is proprietary.

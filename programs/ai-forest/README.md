@@ -1,79 +1,56 @@
-<div align="center">
+# 🌲 AI Forest
 
-# 🌲 AI Forest - Level 5: Mastery
+Ship AI products responsibly
 
-### Master the AI ecosystem at [AI Educademy](https://aieducademy.org)
+Part of [AI Educademy](https://aieducademy.org).
 
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ai-educademy/ai-seeds/blob/main/CONTRIBUTING.md)
-[![Status](https://img.shields.io/badge/status-coming_soon-yellow)]()
+[Start learning](https://aieducademy.org/programs/ai-forest) | [Platform repo](https://github.com/ai-educademy/ai-platform) | [UI library](https://github.com/ai-educademy/ai-ui-library)
 
-See the forest for the trees. Tackle advanced research topics, contribute to open-source AI, lead AI strategy, and push the boundaries of what's possible.
+## Overview
 
-[🚀 AI Educademy](https://aieducademy.org) · [🏕️ Level 4: AI Canopy](https://github.com/ai-educademy/ai-canopy) · [📦 Platform Repo](https://github.com/ai-educademy/ai-platform)
+Bring the full lifecycle together: product discovery, architecture, data governance, model and vendor choices, deployment, monitoring, incident response, regulation, and continuous improvement.
 
----
+This private repo contains Pro subscriber lessons for this programme.
 
-</div>
+## Programme facts
 
-## 📋 About
+| Field | Value |
+|-------|-------|
+| Track | Understanding AI |
+| Level | 5 |
+| Lessons | 10 |
+| Estimated study time | 24 hours |
+| Audience | Senior builders, product engineers, technical leaders, and founders |
+| Prerequisites | AI Canopy or equivalent production AI experience |
 
-AI Forest is **Level 5** - the final level of the AI Educademy learning path. This is a content-only repo consumed by [`ai-platform`](https://github.com/ai-educademy/ai-platform) via git submodules.
+## Topics
 
-### What You'll Learn
+- AI product discovery and measurement
+- LLMOps and deployment strategy
+- Security, privacy, and threat modelling
+- Governance, regulation, and auditability
+- Reliability, economics, and incident response
 
-- 🧠 Advanced deep learning architectures (transformers, diffusion models)
-- 🎮 Reinforcement learning & multi-agent systems
-- 🔬 AI research methodology
-- 🌍 Open-source AI contributions
-- 📐 AI strategy & technical leadership
-- 🚀 Frontier models & emerging paradigms
+## Outcomes
 
-## 📁 Structure
+- Create a production AI delivery plan with measurable outcomes
+- Threat-model an AI system and define control points
+- Build a release and monitoring strategy for model change
+- Make defensible trade-offs across quality, cost, speed, and risk
 
-```
-program.json              # Program metadata
+## Content structure
+
+```text
+program.json
 lessons/
-├── en/                   # English lessons (MDX)
-├── fr/                   # French
-├── nl/                   # Dutch
-├── hi/                   # Hindi
-└── te/                   # Telugu
+└── <locale>/
+    └── <lesson>.mdx
 ```
 
-## 🚧 Status
+## Contributing
 
-**Coming Soon** - Lessons are being written. Want to help? See [Contributing](#-contributing).
+Focused corrections, translation improvements, clearer examples, and accessibility fixes are welcome. Keep PRs small and avoid publishing paid lesson content outside the private repo.
 
-## 🌱 Learning Path
+## Licence
 
-| Level | Program | Status |
-|-------|---------|--------|
-| 1 | [🌱 AI Seeds](https://github.com/ai-educademy/ai-seeds) | ✅ Live |
-| 2 | [🌿 AI Sprouts](https://github.com/ai-educademy/ai-sprouts) | 🚧 Coming soon |
-| 3 | [🌳 AI Branches](https://github.com/ai-educademy/ai-branches) | 🚧 Coming soon |
-| 4 | [🏕️ AI Canopy](https://github.com/ai-educademy/ai-canopy) | 🚧 Coming soon |
-| 5 | **🌲 AI Forest** ← you are here | 🚧 Coming soon |
-
-## 🤝 Contributing
-
-We welcome contributions! Each lesson is an MDX file with frontmatter:
-
-```mdx
----
-title: "Your Lesson Title"
-description: "A short description"
-order: 1
-difficulty: "expert"
-duration: 25
-icon: "🧠"
----
-
-Your lesson content in Markdown...
-```
-
-See the [Contributing Guide](https://github.com/ai-educademy/ai-seeds/blob/main/CONTRIBUTING.md) for full details.
-
-## 📄 License
-
-[MIT](LICENSE) © [AI Educademy](https://github.com/ai-educademy)
+© 2026 AI Educademy. All rights reserved. This Pro content is proprietary.

@@ -1,79 +1,56 @@
-<div align="center">
+# 🏕️ AI Canopy
 
-# 🏕️ AI Canopy - Level 4: Production AI
+Engineer reliable GenAI systems
 
-### Build production AI systems at [AI Educademy](https://aieducademy.org)
+Part of [AI Educademy](https://aieducademy.org).
 
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ai-educademy/ai-seeds/blob/main/CONTRIBUTING.md)
-[![Status](https://img.shields.io/badge/status-coming_soon-yellow)]()
+[Start learning](https://aieducademy.org/programs/ai-canopy) | [Platform repo](https://github.com/ai-educademy/ai-platform) | [UI library](https://github.com/ai-educademy/ai-ui-library)
 
-Move beyond experiments. Learn to design, deploy, and maintain AI systems in the real world - from MLOps pipelines to responsible AI governance and scaling strategies.
+## Overview
 
-[🚀 AI Educademy](https://aieducademy.org) · [🌳 Level 3: AI Branches](https://github.com/ai-educademy/ai-branches) · [📦 Platform Repo](https://github.com/ai-educademy/ai-platform)
+Design production-minded LLM applications with retrieval, tool use, agent workflows, MCP, evaluation, guardrails, and observability. Learn to optimise for quality, latency, safety, and cost.
 
----
+This private repo contains Pro subscriber lessons for this programme.
 
-</div>
+## Programme facts
 
-## 📋 About
+| Field | Value |
+|-------|-------|
+| Track | Understanding AI |
+| Level | 4 |
+| Lessons | 13 |
+| Estimated study time | 18 hours |
+| Audience | Developers and technical practitioners building AI applications |
+| Prerequisites | AI Branches plus basic Python or TypeScript |
 
-AI Canopy is **Level 4** of the AI Educademy learning path. This is a content-only repo consumed by [`ai-platform`](https://github.com/ai-educademy/ai-platform) via git submodules.
+## Topics
 
-### What You'll Learn
+- LLM application architecture
+- RAG, hybrid retrieval, and reranking
+- Tool calling, MCP, and agent workflows
+- Golden datasets and agent evaluation
+- Guardrails, tracing, latency, and cost
 
-- 🚀 MLOps & model deployment pipelines
-- 🗄️ Data engineering for AI at scale
-- 🔍 RAG systems & vector databases
-- 🏗️ AI system architecture patterns
-- 📈 Monitoring, observability & cost optimisation
-- ⚖️ AI governance & compliance frameworks
+## Outcomes
 
-## 📁 Structure
+- Build a grounded RAG assistant with citations
+- Design a safe tool-using agent with explicit boundaries
+- Create regression evaluations for quality and tool behaviour
+- Instrument an AI feature for latency, cost, and failure analysis
 
-```
-program.json              # Program metadata
+## Content structure
+
+```text
+program.json
 lessons/
-├── en/                   # English lessons (MDX)
-├── fr/                   # French
-├── nl/                   # Dutch
-├── hi/                   # Hindi
-└── te/                   # Telugu
+└── <locale>/
+    └── <lesson>.mdx
 ```
 
-## 🚧 Status
+## Contributing
 
-**Coming Soon** - Lessons are being written. Want to help? See [Contributing](#-contributing).
+Focused corrections, translation improvements, clearer examples, and accessibility fixes are welcome. Keep PRs small and avoid publishing paid lesson content outside the private repo.
 
-## 🌱 Learning Path
+## Licence
 
-| Level | Program | Status |
-|-------|---------|--------|
-| 1 | [🌱 AI Seeds](https://github.com/ai-educademy/ai-seeds) | ✅ Live |
-| 2 | [🌿 AI Sprouts](https://github.com/ai-educademy/ai-sprouts) | 🚧 Coming soon |
-| 3 | [🌳 AI Branches](https://github.com/ai-educademy/ai-branches) | 🚧 Coming soon |
-| 4 | **🏕️ AI Canopy** ← you are here | 🚧 Coming soon |
-| 5 | [🌲 AI Forest](https://github.com/ai-educademy/ai-forest) | 📋 Planned |
-
-## 🤝 Contributing
-
-We welcome contributions! Each lesson is an MDX file with frontmatter:
-
-```mdx
----
-title: "Your Lesson Title"
-description: "A short description"
-order: 1
-difficulty: "advanced"
-duration: 20
-icon: "🚀"
----
-
-Your lesson content in Markdown...
-```
-
-See the [Contributing Guide](https://github.com/ai-educademy/ai-seeds/blob/main/CONTRIBUTING.md) for full details.
-
-## 📄 License
-
-[MIT](LICENSE) © [AI Educademy](https://github.com/ai-educademy)
+© 2026 AI Educademy. All rights reserved. This Pro content is proprietary.
