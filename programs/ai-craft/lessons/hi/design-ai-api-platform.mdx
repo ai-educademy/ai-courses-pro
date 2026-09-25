@@ -38,7 +38,7 @@ AI platforms की latency बहुत variable होती है। एक 
 ```
 POST /v1/completions
 Headers: Authorization: Bearer sk-abc123
-Body: { "model": "gpt-4", "prompt": "Explain caching", "max_tokens": 200 }
+Body: { "model": "gpt-6-astra", "prompt": "Explain caching", "max_tokens": 200 }
 
 POST /v1/embeddings
 Headers: Authorization: Bearer sk-abc123
@@ -108,8 +108,8 @@ Individually process करने की तुलना में यह throug
 
 Routing logic API gateway में रहती है:
 ```
-model: "gpt-4"  →  95% → gpt-4-v2.1 (current)
-                →   5% → gpt-4-v2.2 (candidate)
+model: "gpt-6-astra"  →  95% → gpt-6-astra (current)
+                →   5% → claude-opus-5-5 (candidate)
 ```
 
 <ThinkAboutIt>

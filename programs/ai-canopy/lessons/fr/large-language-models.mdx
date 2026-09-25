@@ -116,7 +116,7 @@ from openai import OpenAI
 client = OpenAI()
 
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-6-astra",
     messages=[
         {"role": "system", "content": "Vous êtes un tuteur scientifique pour adolescents."},
         {"role": "user", "content": "Expliquez la photosynthèse simplement."}

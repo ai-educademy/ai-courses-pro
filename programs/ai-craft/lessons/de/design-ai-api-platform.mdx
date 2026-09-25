@@ -37,7 +37,7 @@ Diese Frage erfreut sich in Vorstellungsgesprächen immer größerer Beliebtheit
 ```
 POST /v1/completions
 Headers: Authorization: Bearer sk-abc123
-Body: { "model": "gpt-4", "prompt": "Explain caching", "max_tokens": 200 }
+Body: { "model": "gpt-6-astra", "prompt": "Explain caching", "max_tokens": 200 }
 
 POST /v1/embeddings
 Headers: Authorization: Bearer sk-abc123
@@ -106,8 +106,8 @@ Wenn Sie eine neue Modellversion bereitstellen, benötigen Sie einen kontrollier
 
 Die Routing-Logik befindet sich im API-Gateway:
 ```
-model: "gpt-4"  →  95% → gpt-4-v2.1 (current)
-                →   5% → gpt-4-v2.2 (candidate)
+model: "gpt-6-astra"  →  95% → gpt-6-astra (current)
+                →   5% → claude-opus-5-5 (candidate)
 ```
 
 <ThinkAboutIt>Die Beurteilung, ob eine neue LLM-Version „besser“ ist, ist überraschend schwierig – im Gegensatz zu Klassifizierungsmodellen gibt es keine einfache Genauigkeitsmetrik. Wie würden Sie ein automatisiertes Qualitätsbewertungssystem für generative KI-Modelle entwerfen?

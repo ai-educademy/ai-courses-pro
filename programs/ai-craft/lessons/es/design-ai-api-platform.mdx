@@ -37,7 +37,7 @@ Esta pregunta es cada vez más popular en las entrevistas porque combina el **di
 ```
 POST /v1/completions
 Headers: Authorization: Bearer sk-abc123
-Body: { "model": "gpt-4", "prompt": "Explain caching", "max_tokens": 200 }
+Body: { "model": "gpt-6-astra", "prompt": "Explain caching", "max_tokens": 200 }
 
 POST /v1/embeddings
 Headers: Authorization: Bearer sk-abc123
@@ -106,8 +106,8 @@ Al implementar una nueva versión del modelo, necesita una implementación contr
 
 La lógica de enrutamiento reside en la puerta de enlace API:
 ```
-model: "gpt-4"  →  95% → gpt-4-v2.1 (current)
-                →   5% → gpt-4-v2.2 (candidate)
+model: "gpt-6-astra"  →  95% → gpt-6-astra (current)
+                →   5% → claude-opus-5-5 (candidate)
 ```
 
 <ThinkAboutIt>Evaluar si una nueva versión de LLM es "mejor" es sorprendentemente difícil: a diferencia de los modelos de clasificación, no existe una métrica de precisión simple. ¿Cómo diseñaría un sistema automatizado de evaluación de calidad para modelos generativos de IA?

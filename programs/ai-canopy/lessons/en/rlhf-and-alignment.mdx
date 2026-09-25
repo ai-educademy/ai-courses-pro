@@ -49,7 +49,7 @@ With a reward model in hand, the SFT model is further optimised using **Proximal
 
 The KL penalty is critical. Without it, the model would learn to exploit quirks of the reward model - generating responses that score highly but are nonsensical or repetitive. By constraining how far the policy can diverge from the SFT model, PPO keeps outputs coherent while improving alignment.
 
-This three-stage process - SFT → Reward Model → PPO - is precisely how OpenAI transformed GPT-3.5 into ChatGPT, as described in their **InstructGPT** paper.
+This three-stage process - SFT → Reward Model → PPO - is how OpenAI transformed early GPT-family base models into helpful assistants, as described in their **InstructGPT** paper.
 
 <FunFact>
 The InstructGPT paper revealed a striking result: a 1.3B parameter model aligned with RLHF was preferred by human judges over the unaligned 175B GPT-3 - a model 100× larger. Alignment can matter more than raw scale.
@@ -65,7 +65,7 @@ The DPO loss function implicitly defines a reward model within the language mode
 L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
 ```
 
-Where `y_w` is the preferred response, `y_l` is the rejected one, and `π_ref` is the reference (SFT) model. DPO is simpler, more stable, and cheaper to train - no reward model, no RL loop, no hyperparameter-sensitive PPO. Meta's LLaMA 2 and many open-source models now use DPO or its variants.
+Where `y_w` is the preferred response, `y_l` is the rejected one, and `π_ref` is the reference (SFT) model. DPO is simpler, more stable, and cheaper to train - no reward model, no RL loop, no hyperparameter-sensitive PPO. Many open-weight models now use DPO or related preference-optimisation variants.
 
 <ThinkAboutIt>
 DPO eliminates the reward model but also loses the ability to score arbitrary new responses at inference time. In what scenarios might having an explicit reward model (the full RLHF pipeline) be more valuable than the simplicity of DPO?
@@ -106,7 +106,7 @@ The frontier of alignment research is finding techniques that maximise helpfulne
 <Quiz question="What is the 'alignment tax' in the context of RLHF-trained models?" options="The financial cost of hiring human labellers for preference data|The reduction in model helpfulness and capability that results from safety training making the model overly cautious|The computational cost of running PPO optimisation|The tax that governments impose on AI companies for safety compliance" answer="1" explanation="The alignment tax refers to the capability or helpfulness lost when safety training makes a model excessively cautious - refusing benign requests, hedging unnecessarily, or producing generic responses. Balancing safety with genuine helpfulness is one of alignment's hardest open problems." />
 
 <FunFact>
-OpenAI spent roughly six months on alignment work (SFT data collection, reward modelling, and RLHF training) to transform GPT-4's base model into the version released to the public. The alignment phase, while a fraction of the pre-training compute, required thousands of hours of specialised human labelling.
+Frontier labs spend months on alignment work (SFT data collection, reward modelling, preference optimisation, and safety testing) to turn base models into products safe enough to release. The alignment phase, while a fraction of the pre-training compute, requires thousands of hours of specialised human labelling and evaluation.
 </FunFact>
 
 <ThinkAboutIt>

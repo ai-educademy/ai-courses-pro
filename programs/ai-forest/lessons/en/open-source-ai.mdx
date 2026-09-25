@@ -25,7 +25,7 @@ Open-source is not just free software - it is a philosophy that shapes how AI de
 **Data sovereignty** - Running models locally means sensitive data never leaves your infrastructure. For healthcare, legal, and financial applications, this is often a hard requirement.
 
 <FunFact>
-Meta's Llama 3 was downloaded over 30 million times in its first month of release, making it the fastest-adopted open AI model in history. Open-source adoption is accelerating, not slowing.
+Meta's Llama family helped prove that open-weight AI can reach mass developer adoption quickly. Open-weight adoption is accelerating, not slowing.
 </FunFact>
 
 ## Key Platforms
@@ -48,14 +48,14 @@ The open model landscape evolves monthly, but these families define the current 
 
 | Model Family | Creator | Strengths | Best For |
 |---|---|---|---|
-| **Llama 3** | Meta | Strong general performance, large community | General-purpose, fine-tuning base |
+| **Llama 4** | Meta | Native multimodality, long context, large community | General-purpose, fine-tuning base |
 | **Mistral / Mixtral** | Mistral AI | Excellent efficiency, MoE architecture | Cost-sensitive production use |
 | **Phi** | Microsoft | Surprisingly capable for size | Edge devices, mobile |
 | **Gemma** | Google | Strong reasoning, well-documented | Research, structured tasks |
 | **Qwen** | Alibaba | Multilingual strength, competitive benchmarks | Global applications |
 
 <Callout>
-**Licence matters.** Not all "open" models are truly open. Llama 3 has a community licence with usage restrictions above 700M monthly users. Mistral and Gemma use Apache 2.0. Always check the licence before building a product.
+**Licence matters.** Not all "open" models are truly open. Llama models use a community licence with usage restrictions for very large services. Mistral and Gemma families include permissive Apache 2.0 releases. Always check the licence before building a product.
 </Callout>
 
 ## Running Models Locally
@@ -86,7 +86,7 @@ ollama run llama3.1:8b "Explain transformer attention in one paragraph"
 Here is how to compose open-source tools into a production-ready AI system.
 
 **The reference architecture:**
-1. **Model layer** - Llama 3 or Mistral, served via vLLM or Ollama
+1. **Model layer** - Llama 4 or Mistral, served via vLLM or Ollama
 2. **Orchestration** - LangChain or LlamaIndex for multi-step workflows
 3. **Vector store** - Chroma, Qdrant, or Weaviate for embedding-based retrieval
 4. **Data pipeline** - Apache Airflow or Prefect for ETL and data processing
@@ -127,7 +127,7 @@ Browse Hugging Face or GitHub and find one open-source AI project you use regula
 
 - Open-source AI democratises access, accelerates innovation, and enables transparency
 - Hugging Face, Ollama, LangChain, and LlamaIndex form the core ecosystem
-- Open models like Llama 3, Mistral, and Phi rival proprietary alternatives for many tasks
+- Open models like Llama 4, Mistral, and Phi rival proprietary alternatives for many tasks
 - Running models locally is practical on consumer hardware with the right tools
 - A full open-source AI stack can be assembled from freely available components
 - Contributing back strengthens the ecosystem and builds your professional profile
