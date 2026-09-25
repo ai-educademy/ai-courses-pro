@@ -37,7 +37,7 @@ machineTranslated: true
 ```
 POST /v1/completions
 Headers: Authorization: Bearer sk-abc123
-Body: { "model": "gpt-4", "prompt": "Explain caching", "max_tokens": 200 }
+Body: { "model": "gpt-6-astra", "prompt": "Explain caching", "max_tokens": 200 }
 
 POST /v1/embeddings
 Headers: Authorization: Bearer sk-abc123
@@ -106,8 +106,8 @@ TTL:   120 seconds
 
 يوجد منطق التوجيه في بوابة API:
 ```
-model: "gpt-4"  →  95% → gpt-4-v2.1 (current)
-                →   5% → gpt-4-v2.2 (candidate)
+model: "gpt-6-astra"  →  95% → gpt-6-astra (current)
+                →   5% → claude-opus-5-5 (candidate)
 ```
 
 <ThinkAboutIt>يعد تقييم ما إذا كان إصدار LLM الجديد "أفضل" أمرًا صعبًا بشكل مدهش - على عكس نماذج التصنيف، لا يوجد مقياس دقة بسيط. كيف يمكنك تصميم نظام آلي لتقييم الجودة لنماذج الذكاء الاصطناعي التوليدية؟

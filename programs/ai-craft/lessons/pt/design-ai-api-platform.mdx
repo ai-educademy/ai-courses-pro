@@ -37,7 +37,7 @@ Disponibilidade: 99,9% de tempo de atividade com degradação elegante
 ```
 POST /v1/completions
 Headers: Authorization: Bearer sk-abc123
-Body: { "model": "gpt-4", "prompt": "Explain caching", "max_tokens": 200 }
+Body: { "model": "gpt-6-astra", "prompt": "Explain caching", "max_tokens": 200 }
 
 POST /v1/embeddings
 Headers: Authorization: Bearer sk-abc123
@@ -106,8 +106,8 @@ Ao implantar uma nova versão de modelo, você precisa de uma implementação co
 
 A lógica de roteamento reside no gateway da API:
 ```
-model: "gpt-4"  →  95% → gpt-4-v2.1 (current)
-                →   5% → gpt-4-v2.2 (candidate)
+model: "gpt-6-astra"  →  95% → gpt-6-astra (current)
+                →   5% → claude-opus-5-5 (candidate)
 ```
 
 <ThinkAboutIt>Avaliar se uma nova versão do LLM é “melhor” é surpreendentemente difícil – diferentemente dos modelos de classificação, não existe uma métrica de precisão simples. Como você projetaria um sistema automatizado de avaliação de qualidade para modelos generativos de IA?

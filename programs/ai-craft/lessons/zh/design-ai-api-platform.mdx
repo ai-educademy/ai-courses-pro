@@ -37,7 +37,7 @@ machineTranslated: true
 ```
 POST /v1/completions
 Headers: Authorization: Bearer sk-abc123
-Body: { "model": "gpt-4", "prompt": "Explain caching", "max_tokens": 200 }
+Body: { "model": "gpt-6-astra", "prompt": "Explain caching", "max_tokens": 200 }
 
 POST /v1/embeddings
 Headers: Authorization: Bearer sk-abc123
@@ -106,8 +106,8 @@ TTL:   120 seconds
 
 路由逻辑位于 API 网关中：
 ```
-model: "gpt-4"  →  95% → gpt-4-v2.1 (current)
-                →   5% → gpt-4-v2.2 (candidate)
+model: "gpt-6-astra"  →  95% → gpt-6-astra (current)
+                →   5% → claude-opus-5-5 (candidate)
 ```
 
 <ThinkAboutIt>评估新的法学硕士版本是否“更好”出奇地困难——与分类模型不同，没有简单的准确性指标。您将如何为生成式人工智能模型设计自动化质量评估系统？

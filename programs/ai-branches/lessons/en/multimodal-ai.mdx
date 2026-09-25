@@ -41,11 +41,11 @@ wave of research and applications that continues to expand.
 
 <FunFact>CLIP can classify images into categories it has never seen during training - simply by being told the category names in plain English.</FunFact>
 
-## GPT-4V and GPT-4o - Vision Meets Conversation
+## Modern GPT Models - Vision Meets Conversation
 
-OpenAI's **GPT-4V** (Vision) extended the GPT-4 language model to accept images alongside text. You can upload a photograph and ask questions about it, request explanations of diagrams, or have the model read and interpret handwritten notes.
+OpenAI's GPT-4V showed how GPT-family language models could accept images alongside text. Today, frontier GPT models continue that pattern: you can upload a photograph and ask questions about it, request explanations of diagrams, or have the model read and interpret handwritten notes.
 
-**GPT-4o** ("omni") went further, natively processing text, images, and audio in a single model. Rather than routing different modalities through separate systems, GPT-4o was trained end-to-end across all three - enabling faster, more natural interactions.
+Omni-style models went further, natively processing text, images, and audio in a single model. Rather than routing different modalities through separate systems, they are trained end-to-end across all three - enabling faster, more natural interactions.
 
 This matters because a unified model can capture subtle cross-modal relationships: the tone of
 someone's voice matching their facial expression, or a chart's visual layout reinforcing the data
@@ -107,7 +107,7 @@ Video adds a temporal dimension: multimodal models must track objects, actions, 
 - Answer questions about events that span minutes of footage.
 - Detect anomalies in surveillance or manufacturing footage.
 
-Google's Gemini 1.5 Pro demonstrated the ability to reason over hour-long videos - a significant
+Google's Gemini family demonstrated the ability to reason over long videos - a significant
 leap from models that could only process a handful of frames. This opens doors to applications like
 automated sports analysis, security monitoring, and content moderation at scale.
 
@@ -115,7 +115,7 @@ automated sports analysis, security monitoring, and content moderation at scale.
 
 The real world is inherently multimodal. A doctor examines X-rays (vision), reads patient notes (text), and listens to symptoms (audio). A driver watches the road (vision), hears horns (audio), and reads signs (text). AI systems that operate in only one modality are fundamentally limited.
 
-The trend is unmistakable: the most capable AI systems being built today, across the GPT, Gemini and Claude families, are all multimodal. Single-modality models will increasingly become specialist tools within larger multimodal pipelines.
+The trend is unmistakable: the most capable AI systems being built today, across the GPT, Gemini, Claude, and Llama families, are all multimodal. Single-modality models will increasingly become specialist tools within larger multimodal pipelines.
 
 <Quiz question="Why is native multimodality (training on all modalities from scratch) considered advantageous over bolting modalities onto a text model?" options="It requires less training data|It enables tighter cross-modal understanding and faster inference|It eliminates the need for GPUs|It makes models smaller" answer="1" explanation="Native multimodal training allows the model to learn deep relationships between modalities from the start, rather than relying on separate systems that are connected after the fact." />
 
@@ -127,4 +127,4 @@ The trend is unmistakable: the most capable AI systems being built today, across
 
 - [Learning Transferable Visual Models From Natural Language Supervision (CLIP paper)](https://arxiv.org/abs/2103.00020) - The original CLIP paper from OpenAI
 - [Gemini Technical Report - Google DeepMind](https://arxiv.org/abs/2312.11805) - Architecture and capabilities of Google's natively multimodal model family
-- [GPT-4o System Card - OpenAI](https://openai.com/index/gpt-4o-system-card/) - Safety and capability analysis of the omni model
+- [GPT-4o System Card - OpenAI](https://openai.com/index/gpt-4o-system-card/) - Historical safety and capability analysis of an early omni model

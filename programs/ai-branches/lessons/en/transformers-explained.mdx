@@ -1,6 +1,6 @@
 ---
 title: "Transformers Explained: The Architecture Behind ChatGPT"
-description: "Understand the Transformer architecture that powers ChatGPT, GPT-4, BERT and Gemini — the attention mechanism explained step by step."
+description: "Understand the Transformer architecture that powers ChatGPT, Claude, Gemini, BERT and modern GPT models - the attention mechanism explained step by step."
 order: 12
 difficulty: "intermediate"
 duration: 35
@@ -10,7 +10,7 @@ published: true
 
 # Transformers Explained: The Architecture Behind ChatGPT
 
-In 2017, a team at Google published a paper titled *"Attention Is All You Need"*. It introduced the **Transformer** architecture, and it changed AI forever. Every major language model you've heard of — ChatGPT, GPT-4, BERT, Gemini, Claude, LLaMA — is built on Transformers.
+In 2017, a team at Google published a paper titled *"Attention Is All You Need"*. It introduced the **Transformer** architecture, and it changed AI forever. Every major language model you've heard of - ChatGPT, Claude, Gemini, BERT, Llama, and modern GPT models - is built on Transformers.
 
 To understand why Transformers matter, you first need to understand what they replaced.
 
@@ -109,7 +109,7 @@ class MultiHeadAttention(nn.Module):
 
 Each attention head can specialise in a different type of relationship. One head might track syntactic dependencies (subject-verb agreement), another might focus on coreference (pronouns and their antecedents), another might capture semantic similarity.
 
-<FunFact>GPT-4 is rumoured to use 96 attention heads. Each one can independently learn to track different linguistic relationships across the entire context window simultaneously.</FunFact>
+<FunFact>Large GPT-family models use many attention heads. Each one can independently learn to track different linguistic relationships across the entire context window simultaneously.</FunFact>
 
 ## 📍 Positional Encoding
 
@@ -186,15 +186,15 @@ This led to a progression:
 - GPT-1 (2018): 117M parameters
 - GPT-2 (2019): 1.5B parameters
 - GPT-3 (2020): 175B parameters
-- GPT-4 (2023): estimated 1 trillion+ parameters
+- Current frontier models: often mixture-of-experts or undisclosed architectures with hundreds of billions to trillions of effective parameters
 
-Each jump brought qualitative improvements in capability. Tasks that GPT-2 couldn't do at all (complex reasoning, code generation) became possible at GPT-3 scale and excellent at GPT-4 scale.
+Each jump brought qualitative improvements in capability. Tasks that GPT-2 couldn't do at all (complex reasoning, code generation) became possible at GPT-3 scale and continued improving in later frontier models.
 
 ## ⚡ Training vs Inference
 
 Two very different computational profiles:
 
-**Training**: extremely expensive. Processing billions of tokens, computing gradients, and updating hundreds of billions of parameters across thousands of GPUs for weeks or months. GPT-4's training was estimated to cost over $100 million.
+**Training**: extremely expensive. Processing trillions of tokens, computing gradients, and updating huge parameter sets across thousands of GPUs for weeks or months. Current frontier model training can cost hundreds of millions once compute, data, energy, and engineering are included.
 
 **Inference**: much cheaper. A single forward pass through the network to generate each token. Still requires significant hardware (powerful GPUs or specialised AI chips), but manageable at scale.
 
@@ -210,5 +210,5 @@ This asymmetry has shaped the industry: a few well-resourced organisations train
 - **Positional encoding** adds order information to the inherently position-agnostic attention mechanism
 - **BERT** (encoder-only) is pre-trained to understand text bidirectionally; best for classification and search tasks
 - **GPT** (decoder-only) is pre-trained to generate text from left to right; best for generation and conversation
-- **Scale matters enormously**: larger Transformers trained on more data consistently unlock new capabilities, as demonstrated by the GPT-1 → GPT-4 progression
+- **Scale matters enormously**: larger Transformers trained on more data consistently unlock new capabilities, as demonstrated by the progression from GPT-1 through GPT-3 and later frontier systems
 - Training is extremely expensive; inference is much cheaper — this asymmetry shapes how foundation models are deployed

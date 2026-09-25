@@ -16,8 +16,8 @@ Large language models have fundamentally changed what machines can do with text,
 
 A **large language model** is a neural network trained on enormous quantities of text to predict the next token in a sequence. "Large" refers to the number of **parameters** - learnable weights that encode patterns from training data.
 
-- **GPT-4** is estimated to have over 1 trillion parameters.
-- **Llama 3** comes in sizes from 8 billion to 405 billion parameters.
+- **GPT-6 Astra** represents the current OpenAI frontier, with model internals unpublished.
+- **Llama 4 Scout and Maverick** use mixture-of-experts designs with 17 billion active parameters and much larger total parameter counts.
 - **Mistral 7B** shows that smaller models can punch well above their weight.
 
 These models are trained on hundreds of billions of words drawn from books, websites, code repositories, and academic papers. The sheer scale of data and parameters is what gives LLMs their remarkable versatility.
@@ -25,7 +25,7 @@ These models are trained on hundreds of billions of words drawn from books, webs
 **Tokens, not words:** LLMs don't process whole words - they work with **tokens**, which are sub-word units. The word "understanding" might be split into "under" + "stand" + "ing". A typical English word averages about 1.3 tokens. This tokenisation scheme allows models to handle rare words, technical jargon, and even multiple languages without an impossibly large vocabulary.
 
 <FunFact>
-Training GPT-4 is estimated to have cost over $100 million in compute alone. That's roughly the budget of a mid-range Hollywood film - except the "actor" can speak every programming language.
+Training a frontier language model can cost hundreds of millions in compute, data, energy, and engineering. That's roughly the budget of a major film - except the "actor" can speak every programming language.
 </FunFact>
 
 ## The Transformer Architecture
@@ -56,15 +56,15 @@ If a sentence has 500 tokens, self-attention compares every token with every oth
 
 | Model | Creator | Notable Feature |
 |-------|---------|-----------------|
-| **GPT-4o** | OpenAI | Multimodal (text, image, audio) |
-| **Claude 4** | Anthropic | Extended thinking, safety-focused |
-| **Gemini 2.5** | Google DeepMind | Native multimodality, long context |
-| **Llama 3** | Meta | Open-weight, community-driven |
+| **GPT-6 Astra** | OpenAI | Frontier reasoning, coding, research, and multimodal input |
+| **Claude Opus 5.5** | Anthropic | Long-running agentic coding and knowledge work |
+| **Gemini 2.5 Pro** | Google DeepMind | Advanced reasoning, coding, and multimodality |
+| **Llama 4** | Meta | Open-weight, native multimodality, long context |
 | **Mistral Large** | Mistral AI | Efficient European alternative |
 
 The field moves extraordinarily fast - by the time you read this, newer models may already exist.
 
-A crucial distinction in this landscape is between **closed-source** models (GPT-4o, Claude, Gemini) where only the API is available, and **open-weight** models (Llama, Mistral) where the model weights are publicly released. Open-weight models allow organisations to run inference on their own infrastructure, fine-tune for specific domains, and inspect the model's behaviour - advantages that matter greatly for privacy-sensitive industries.
+A crucial distinction in this landscape is between **closed-source** models (GPT, Claude, Gemini) where only the API is available, and **open-weight** models (Llama, Mistral) where the model weights are publicly released. Open-weight models allow organisations to run inference on their own infrastructure, fine-tune for specific domains, and inspect the model's behaviour - advantages that matter greatly for privacy-sensitive industries.
 
 <Callout>
 Not all "open" models are truly open source. Some release weights but restrict commercial use or don't share training data and code. Always check the licence before deploying an open-weight model in production.
@@ -94,7 +94,7 @@ As models scale up, they develop abilities that weren't explicitly trained:
 These emergent properties are one of the most fascinating aspects of scaling - abilities that appear almost "for free" once a model crosses certain size thresholds.
 
 <FunFact>
-GPT-4 passed the Uniform Bar Exam in the 90th percentile - better than most human law graduates. Yet it can still struggle with basic arithmetic if the numbers are unusual enough.
+Early frontier models showed the pattern clearly: they could pass hard professional exams while still stumbling on simple arithmetic or counting tasks when the prompt exposed their weaknesses.
 </FunFact>
 
 ## Limitations You Must Understand
@@ -102,8 +102,8 @@ GPT-4 passed the Uniform Bar Exam in the 90th percentile - better than most huma
 LLMs are powerful but far from perfect:
 
 - **Hallucinations** - Models generate confident-sounding text that is factually wrong. They don't "know" facts; they predict likely token sequences.
-- **Context window limits** - Each model has a maximum input size (e.g., 128K tokens for GPT-4o). Information beyond this window is simply invisible.
-- **Cost and latency** - Running inference on large models requires expensive GPU clusters. A single GPT-4 query costs significantly more than a GPT-3.5 query.
+- **Context window limits** - Each model has a maximum input size, from hundreds of thousands to over a million tokens for current frontier systems. Information beyond this window is simply invisible.
+- **Cost and latency** - Running inference on large models requires expensive GPU clusters. A top-tier frontier query costs significantly more than a small or mid-tier model query.
 - **Lack of true understanding** - LLMs manipulate statistical patterns in text. Whether this constitutes "understanding" is a deep philosophical debate.
 - **Training data cutoffs** - Models don't know about events after their training data was collected unless augmented with retrieval systems.
 
@@ -115,7 +115,7 @@ Always verify critical facts from LLM outputs against authoritative sources. Tre
 
 ## The Scaling Debate
 
-For years, the dominant belief was that **bigger is always better** - more parameters, more data, and more compute would steadily improve performance. This "scaling law" held remarkably well through GPT-2, GPT-3, and GPT-4.
+For years, the dominant belief was that **bigger is always better** - more parameters, more data, and more compute would steadily improve performance. This "scaling law" held remarkably well through the GPT-2, GPT-3, GPT-4 generation and later frontier systems.
 
 However, recent research suggests we may be approaching diminishing returns on raw scale alone. The focus is shifting towards:
 - **Better data quality** over quantity (curated, deduplicated datasets).

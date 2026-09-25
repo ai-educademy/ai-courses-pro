@@ -62,7 +62,7 @@ The transformer consists of:
 | Architecture | Examples | Best For |
 |---|---|---|
 | Encoder-only | BERT, RoBERTa | Classification, NER, embeddings |
-| Decoder-only | GPT-4, LLaMA, Mistral | Text generation, chat, reasoning |
+| Decoder-only | GPT, Llama, Mistral | Text generation, chat, reasoning |
 | Encoder-Decoder | T5, BART | Translation, summarisation |
 
 <Quiz
@@ -117,7 +117,7 @@ The original InstructGPT paper showed that a 1.3B parameter model with RLHF was 
 
 ### Context Windows and Long-Context Challenges
 
-- **Context window**: the maximum number of tokens a model can process at once (e.g., GPT-4 Turbo: 128K, Claude: 200K)
+- **Context window**: the maximum number of tokens a model can process at once. Current frontier systems range from hundreds of thousands to around a million tokens.
 - **Lost in the middle**: models tend to pay less attention to information in the middle of long contexts
 - **Strategies**: summarise long documents, place critical information at the beginning/end, use hierarchical retrieval
 
@@ -139,12 +139,12 @@ A legal technology company wants to build an AI assistant that answers questions
 
 This is a favourite interview question: "Given this use case, which model would you choose?"
 
-**Use a large frontier model (GPT-4, Claude) when:**
+**Use a large frontier model (GPT-6 Astra, Claude Opus 5.5) when:**
 - Task requires general reasoning or complex instruction following
 - You have no labelled training data
 - Prototyping speed matters more than inference cost
 
-**Use a fine-tuned smaller model (Mistral 7B, LLaMA 3) when:**
+**Use a fine-tuned smaller model (Mistral, Llama) when:**
 - You have domain-specific data and need consistent, specialised outputs
 - Inference cost matters (serving at scale)
 - Latency requirements are tight
@@ -157,7 +157,7 @@ This is a favourite interview question: "Given this use case, which model would 
 
 <Quiz
   question="A healthcare company needs to classify patient messages into 15 categories. They have 50,000 labelled examples. Which approach is most cost-effective for production?"
-  options="GPT-4 with few-shot prompting|Fine-tuned BERT model|RAG with a vector database|Zero-shot classification with LLaMA 70B"
+  options="A frontier LLM with few-shot prompting|Fine-tuned BERT model|RAG with a vector database|Zero-shot classification with Llama 70B"
   answer="1"
   explanation="With 50,000 labelled examples and a well-defined classification task, a fine-tuned BERT model will be fast, cheap to serve, and highly accurate. Using a large LLM for a classification task with abundant training data is unnecessarily expensive and slower."
 />

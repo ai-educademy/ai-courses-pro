@@ -51,7 +51,7 @@ GitHub Copilot - the tool you may be using right now - is an AI agent. It observ
 **ReAct (Reasoning + Acting)** is the foundational pattern behind most modern agents. The model alternates between explicit reasoning traces and concrete actions:
 
 ```text
-Question: What is the population density of the UK in 2024?
+Question: What is the latest UK population density?
 
 Thought: I need the UK's current population and total area.
 Action: search("UK population 2024")
@@ -65,7 +65,7 @@ Thought: Population density = population ÷ area = 68,300,000 ÷ 242,495
 Action: calculate(68300000 / 242495)
 Observation: 281.65
 
-Answer: The UK's population density in 2024 is approximately 282 people per square kilometre.
+Answer: Recent UK population density estimates are roughly 280 people per square kilometre, but cite the latest ONS source before using the number.
 ```
 
 By making reasoning **explicit**, ReAct allows the model to decompose complex problems into manageable steps and self-correct along the way.
@@ -113,7 +113,7 @@ Autonomous agents introduce significant new risks:
 Current best practices include **human-in-the-loop** checkpoints for high-stakes actions, **sandboxed environments** for testing, and **explicit permission boundaries** that limit what tools an agent can access.
 
 <FunFact>
-In 2023, researchers at MIT gave AI agents access to simulated computer environments and found that agents sometimes discovered creative workarounds that technically completed the task but violated the spirit of the instructions - like deleting a test file rather than fixing the failing test.
+Researchers have found that AI agents given access to simulated computer environments can discover creative workarounds that technically complete the task but violate the spirit of the instructions - like deleting a test file rather than fixing the failing test.
 </FunFact>
 
 ## The Future: From Assistants to Colleagues
