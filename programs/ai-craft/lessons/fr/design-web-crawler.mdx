@@ -1,6 +1,6 @@
 ---
 title: "Concevoir un Web Crawler - Comment Google indexe Internet"
-description: "Concevez un web crawler distribué couvrant la gestion du URL frontier, les politiques de politesse, la déduplication de contenu avec SimHash et le crawling distribué avec consistent hashing."
+description: "Concevez un web crawler distribué couvrant la gestion du URL de pointe, les politiques de politesse, la déduplication de contenu avec SimHash et le crawling distribué avec consistent hashing."
 order: 9
 difficulty: "advanced"
 duration: 22
@@ -42,7 +42,7 @@ Seed URLs → URL Frontier (priority queue)
                                  URL Frontier (loop)
 ```
 
-<Illustration src="/images/lessons/design-web-crawler.svg" alt="Architecture du web crawler montrant la boucle de crawl depuis le URL frontier en passant par le fetcher, le parser, l'extraction d'URLs, la déduplication et retour au frontier" caption="Le crawler fonctionne en boucle continue : récupérer une page, extraire de nouvelles URLs, dédupliquer et mettre en file d'attente pour le crawl futur" />
+<Illustration src="/images/lessons/design-web-crawler.svg" alt="Architecture du web crawler montrant la boucle de crawl depuis le URL de pointe en passant par le fetcher, le parser, l'extraction d'URLs, la déduplication et retour au de pointe" caption="Le crawler fonctionne en boucle continue : récupérer une page, extraire de nouvelles URLs, dédupliquer et mettre en file d'attente pour le crawl futur" />
 
 ## Étape 3 - La boucle de crawl
 
@@ -50,8 +50,8 @@ Seed URLs → URL Frontier (priority queue)
 - **BFS (Breadth-First)** - préféré pour le web crawling. Découvre rapidement un large ensemble de domaines et évite de s'enfoncer trop profondément dans un seul site
 - **DFS (Depth-First)** - risque de descendre infiniment dans des pages générées dynamiquement avant de découvrir d'autres domaines
 
-### Conception du URL Frontier
-Le frontier n'est pas une simple file d'attente - c'est un système de priorité sophistiqué avec deux sous-composants :
+### Conception du URL de pointe
+Le de pointe n'est pas une simple file d'attente - c'est un système de priorité sophistiqué avec deux sous-composants :
 
 1. **Priority Queue (Front)** - classe les URLs par importance. Les facteurs incluent le PageRank, la fréquence de mise à jour et l'autorité du domaine
 2. **Politeness Queue (Back)** - garantit que chaque domaine a sa propre file FIFO. Un scheduler pioche dans différentes files de domaines pour éviter de surcharger un seul serveur
@@ -119,7 +119,7 @@ Hamming distance = 1 → likely duplicate, skip storing
 Une seule machine ne peut pas crawler un milliard de pages par mois. Distribuez le travail :
 
 - **Consistent hashing** sur les noms de domaine assigne chaque domaine à un nœud crawler spécifique. Cela garantit la politesse - un seul nœud crawle un domaine donné
-- Le **URL frontier** est partitionné entre les nœuds selon le hash ring
+- Le **URL de pointe** est partitionné entre les nœuds selon le hash ring
 - La **coordination** se fait via un service léger qui gère les affectations de nœuds et rééquilibre lorsque des nœuds rejoignent ou quittent le cluster
 
 ### Cache de résolution DNS
@@ -145,7 +145,7 @@ Les sites malveillants ou mal conçus peuvent créer des espaces d'URLs infinis 
 | Latence de résolution DNS | Cache DNS local, pré-résolution par lots |
 | Serveurs lents ou non réactifs | Timeouts (30s), async I/O, abandon après retries |
 | Stockage du contenu crawlé | Compression des pages, stockage du contenu modifié uniquement |
-| Mémoire du URL frontier | Priority queue sur disque (RocksDB) |
+| Mémoire du URL de pointe | Priority queue sur disque (RocksDB) |
 | Contenu dupliqué | SimHash fingerprinting, détection d'URL canonique |
 
 <ThinkAboutIt>Les moteurs de recherche doivent équilibrer la fraîcheur du crawl (re-crawler les pages fréquemment) et la découverte (trouver de nouvelles pages). Si votre crawler a un budget fixe de 1 million de pages par jour, comment répartiriez-vous ce budget entre le re-crawl des pages existantes et la découverte de nouvelles pages ?</ThinkAboutIt>
