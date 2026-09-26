@@ -1,24 +1,24 @@
 ---
-title: "एपीआई डिज़ाइन साक्षात्कार"
-description: "साक्षात्कार के दबाव में स्वच्छ, सहज ज्ञान युक्त एपीआई डिजाइन करें - आरईएसटी, ग्राफक्यूएल, और सिद्धांत जो एपीआई को महान बनाते हैं।"
+title: "API डिज़ाइन इंटरव्यू"
+description: "इंटरव्यू के दबाव में साफ़ और सहज API डिज़ाइन करें: REST, GraphQL और वे सिद्धांत जो API को बेहतरीन बनाते हैं।"
 order: 4
 difficulty: "intermediate"
 duration: 18
 icon: "🔌"
 published: true
-machineTranslated: true
 ---
-# एपीआई डिज़ाइन साक्षात्कार
 
-एपीआई सिस्टम के बीच अनुबंध हैं, और उन्हें अच्छी तरह से डिजाइन करना एक कौशल है जो वरिष्ठ इंजीनियरों को जूनियर से अलग करता है। एपीआई डिज़ाइन साक्षात्कार में, आप केवल समापन बिंदु नहीं लिख रहे हैं - आप यह प्रदर्शित कर रहे हैं कि आप समझते हैं कि उपभोक्ता आपके सिस्टम का उपयोग कैसे करेंगे, यह समय के साथ कैसे विकसित होगा, और विफलता मोड कहां हैं। चाहे आपसे पेमेंट गेटवे या सोशल मीडिया प्लेटफ़ॉर्म एपीआई डिज़ाइन करने के लिए कहा जाए, सिद्धांत समान हैं। आइए उन पर महारत हासिल करें।
+# API डिज़ाइन इंटरव्यू
 
-## रेस्ट एपीआई डिज़ाइन सिद्धांत
+API सिस्टमों के बीच अनुबंध होते हैं, और उन्हें अच्छी तरह डिज़ाइन करना वह कौशल है जो वरिष्ठ इंजीनियरों को जूनियर से अलग करता है। API डिज़ाइन इंटरव्यू में आप सिर्फ़ endpoints नहीं लिख रहे होते। आप दिखा रहे होते हैं कि consumers आपके सिस्टम का उपयोग कैसे करेंगे, वह समय के साथ कैसे बदलेगा, और failure modes कहाँ हैं। चाहे आपसे payment gateway डिज़ाइन करने को कहा जाए या social media platform API, सिद्धांत वही रहते हैं। आइए इन्हें पक्का करें।
 
-साक्षात्कारों में REST प्रमुख API प्रतिमान बना हुआ है। आपको जिन आधारों का प्रदर्शन करना होगा:
+## REST API डिज़ाइन सिद्धांत
 
-### संसाधन-उन्मुख डिज़ाइन
+इंटरव्यू में REST अब भी प्रमुख API paradigm है। ये आधार आपको दिखाने होंगे:
 
-संज्ञा (संसाधन) में सोचें, क्रिया (क्रिया) में नहीं। यूआरएल को चीजों का प्रतिनिधित्व करना चाहिए, और HTTP तरीकों को उन चीजों पर कार्रवाई का प्रतिनिधित्व करना चाहिए।
+### Resource-Oriented Design
+
+Nouns (resources) में सोचें, verbs (actions) में नहीं। URLs को चीज़ों को दिखाना चाहिए, और HTTP methods को उन चीज़ों पर होने वाली actions को।
 
 ```
 ✅ Good:
@@ -34,37 +34,37 @@ POST   /createUser
 POST   /deleteUser/123
 ```
 
-<Callout>एक स्वच्छ संसाधन पदानुक्रम एपीआई की कहानी बताता है। `/users/123/orders/456/items` स्वाभाविक रूप से पढ़ता है: "उपयोगकर्ता 123 का ऑर्डर 456 का आइटम।" यदि आपकी यूआरएल संरचना एक वाक्य की तरह नहीं पढ़ती है, तो अपने संसाधन डिज़ाइन पर पुनर्विचार करें।</Callout>
+<Callout>एक साफ़ resource hierarchy API की कहानी बताती है। `/users/123/orders/456/items` स्वाभाविक रूप से पढ़ा जाता है: "user 123 के order 456 के items." अगर आपकी URL structure वाक्य जैसी नहीं पढ़ी जाती, तो resource design पर फिर से सोचें।</Callout>
 
-### HTTP तरीके और स्थिति कोड
+### HTTP Methods और Status Codes
 
-इन बातों को जानें - साक्षात्कारकर्ता आपकी सटीकता का परीक्षण करेंगे:
+इन्हें ठंडे दिमाग से याद रखें। इंटरव्यूअर आपकी precision जाँचेंगे:
 
-| विधि | नपुंसक? | केस का प्रयोग करें |
+| Method | Idempotent? | Use Case |
 |---|---|---|
-| प्राप्त करें | हाँ | एक संसाधन पढ़ें (कभी भी परिवर्तन न करें) |
-| पोस्ट | नहीं | एक संसाधन बनाएँ |
-| डालो | हाँ | किसी संसाधन का पूर्ण प्रतिस्थापन |
-| पैच | नहीं* | आंशिक अद्यतन |
-| हटाएं | हाँ | एक संसाधन निकालें |
+| GET | Yes | resource पढ़ना (कभी mutate नहीं करना) |
+| POST | No | resource बनाना |
+| PUT | Yes | resource का पूरा replacement |
+| PATCH | No* | partial update |
+| DELETE | Yes | resource हटाना |
 
-*पैच तकनीकी रूप से निष्क्रिय होने की गारंटी नहीं है, हालांकि कार्यान्वयन अक्सर होता है।*
+*PATCH technically idempotent guaranteed नहीं है, हालांकि implementations अक्सर होती हैं।*
 
-**स्थिति कोड जो आपको अवश्य जानना चाहिए**:
-- `200 OK` - प्रतिक्रिया निकाय के साथ सफलता
-- `201 Created` - निर्मित संसाधन (`Location` हेडर शामिल करें)
-- `204 No Content` - बिना किसी प्रतिक्रिया निकाय के सफलता (DELETE के लिए सामान्य)
-- `400 Bad Request` - क्लाइंट ने अमान्य डेटा भेजा
-- `401 Unauthorized` - प्रमाणीकरण आवश्यक है
-- `403 Forbidden` - प्रमाणित लेकिन अधिकृत नहीं
-- `404 Not Found` - संसाधन मौजूद नहीं है
-- `409 Conflict` - वर्तमान स्थिति के साथ संघर्ष (डुप्लिकेट, संस्करण बेमेल)
-- `429 Too Many Requests` - दर सीमित
-- `500 Internal Server Error` - हमारी तरफ से कुछ टूट गया
+**Status codes जो आपको जानने चाहिए**:
+- `200 OK`: response body के साथ success
+- `201 Created`: resource created (`Location` header शामिल करें)
+- `204 No Content`: response body के बिना success (DELETE के लिए common)
+- `400 Bad Request`: client ने invalid data भेजा
+- `401 Unauthorized`: authentication required
+- `403 Forbidden`: authenticated है लेकिन authorised नहीं
+- `404 Not Found`: resource मौजूद नहीं है
+- `409 Conflict`: current state से conflict (duplicate, version mismatch)
+- `429 Too Many Requests`: rate limited
+- `500 Internal Server Error`: हमारी side पर कुछ टूटा
 
-### पृष्ठांकन
+### Pagination
 
-असीमित सूचियाँ कभी न लौटाएँ। तीन सामान्य पैटर्न:
+Unbounded lists कभी return न करें। तीन common patterns:
 
 ```json
 // Offset-based (simple but poor for large datasets)
@@ -83,11 +83,11 @@ GET /users?cursor=eyJ0aW1lIjoiMjAyNC0wMS0wMSJ9&limit=10
 }
 ```
 
-<ThinkAboutIt>बड़े, बार-बार अपडेट किए जाने वाले डेटासेट के लिए ऑफसेट-आधारित की तुलना में कर्सर-आधारित पेजिनेशन को प्राथमिकता क्यों दी जाती है? विचार करें कि जब कोई उपयोगकर्ता परिणामों को पेजिनेट कर रहा होता है तो नए आइटम डालने पर क्या होता है।</ThinkAboutIt>
+<ThinkAboutIt>बड़े और लगातार update होने वाले datasets के लिए offset-based pagination की तुलना में cursor-based pagination को क्यों पसंद किया जाता है? सोचें कि user जब results paginate कर रहा हो और उसी समय नए items insert हो जाएँ, तो क्या होता है।</ThinkAboutIt>
 
-### संस्करण
+### Versioning
 
-एपीआई विकसित होते हैं। पहले दिन से ही इसके लिए डिज़ाइन करें।
+API बदलते हैं। पहले दिन से इसके लिए design करें।
 
 ```
 // URL versioning (most common, explicit)
@@ -99,11 +99,11 @@ GET /users/123
 Accept: application/vnd.myapi.v2+json
 ```
 
-साक्षात्कारों में, यूआरएल संस्करण सुरक्षित उत्तर है जब तक कि साक्षात्कारकर्ता विशेष रूप से विकल्पों की खोज नहीं करता।
+इंटरव्यू में URL versioning safe answer है, जब तक interviewer alternatives पर specifically explore न करे।
 
-### त्रुटि प्रतिक्रियाएँ
+### Error Responses
 
-सुसंगत, सूचनात्मक त्रुटि प्रतिक्रियाएँ महान एपीआई को निराशाजनक एपीआई से अलग करती हैं:
+Consistent और informative error responses बेहतरीन API को frustrating API से अलग करते हैं:
 
 ```json
 {
@@ -125,16 +125,16 @@ Accept: application/vnd.myapi.v2+json
 }
 ```
 
-हमेशा डिबगिंग के लिए `request_id` और मानव-पठनीय `message` के साथ एक मशीन-पठनीय `code` शामिल करें।
+Debugging के लिए हमेशा `request_id` शामिल करें, और human-readable `message` के साथ machine-readable `code` भी दें।
 
-## साक्षात्कार में ग्राफक्यूएल
+## GraphQL इंटरव्यू में
 
-ग्राफक्यूएल प्रश्न तेज़ी से आम होते जा रहे हैं, खासकर जटिल फ्रंटएंड जरूरतों वाली कंपनियों में।
+GraphQL questions अब अधिक common हो रहे हैं, खासकर उन companies में जिनकी frontend needs complex हैं।
 
-**स्पष्ट करने के मुख्य लाभ**:
-- ग्राहक OK उसी डेटा का अनुरोध करते हैं जिसकी उन्हें आवश्यकता है (कोई अति-प्राप्ति नहीं)
-- सिंगल एंडपॉइंट राउंड ट्रिप को कम करता है
-- दृढ़तापूर्वक टाइप किया गया स्कीमा दस्तावेज़ीकरण के रूप में कार्य करता है
+**बताने लायक मुख्य advantages**:
+- Clients exactly वही data request करते हैं जो उन्हें चाहिए (over-fetching नहीं)
+- Single endpoint round trips घटाता है
+- Strongly typed schema documentation जैसा काम करता है
 
 ```graphql
 # Schema definition
@@ -168,15 +168,15 @@ query {
 }
 ```
 
-**व्यापार पर चर्चा**: ग्राफक्यूएल सर्वर साइड पर जटिलता जोड़ता है (रिज़ॉल्वर चेन, एन+1 क्वेरीज़, कैशिंग कठिन है)। सरल CRUD API के लिए, REST अक्सर बेहतर विकल्प होता है।
+**Trade-offs discuss करें**: GraphQL server side पर complexity बढ़ाता है (resolver chains, N+1 queries, caching कठिन होती है)। Simple CRUD APIs के लिए REST अक्सर बेहतर choice है।
 
-<FunFact>ग्राफक्यूएल को एक विशिष्ट मोबाइल प्रदर्शन समस्या को हल करने के लिए 2012 में फेसबुक में आंतरिक रूप से विकसित किया गया था: समाचार फ़ीड को कई अलग-अलग बैकएंड सेवाओं से डेटा की आवश्यकता होती थी, और धीमे नेटवर्क पर मोबाइल उपकरणों से कई आरईएसटी कॉल करने से प्रदर्शन खराब हो रहा था। इसे 2015 में ओपन-सोर्स किया गया था।</FunFact>
+<FunFact>GraphQL को Facebook में 2012 में एक specific mobile performance problem हल करने के लिए internally develop किया गया था: News Feed को कई backend services से data चाहिए था, और धीमे networks पर mobile devices से कई REST calls करना performance खत्म कर रहा था। इसे 2015 में open-source किया गया।</FunFact>
 
-## एपीआई सुरक्षा मूल बातें
+## API Security Basics
 
-प्रत्येक एपीआई डिज़ाइन साक्षात्कार में सुरक्षा पर ध्यान देना चाहिए। इन आवश्यक चीजों को कवर करें:
+हर API design interview में security पर बात होनी चाहिए। ये essentials cover करें:
 
-### प्रमाणीकरण और प्राधिकरण
+### Authentication और Authorisation
 
 ```
 Authentication (AuthN): WHO are you?
@@ -189,16 +189,16 @@ Authorisation (AuthZ): WHAT can you do?
 ```
 // JWT in Authorization header
 GET /users/123/orders
-Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
+Authorization: ******
 
 // API Key (for server-to-server)
 GET /analytics/reports
 X-API-Key: sk_live_abc123...
 ```
 
-### दर सीमित करना
+### Rate Limiting
 
-अपने एपीआई को दुरुपयोग से बचाएं और उचित उपयोग सुनिश्चित करें:
+अपनी API को abuse से बचाएँ और fair usage सुनिश्चित करें:
 
 ```
 // Rate limit headers in response
@@ -212,16 +212,16 @@ HTTP/1.1 429 Too Many Requests
 Retry-After: 60
 ```
 
-दर सीमित करने की रणनीतियों पर चर्चा करें: प्रति-उपयोगकर्ता, प्रति-आईपी, प्रति-एंडपॉइंट, और विभिन्न एपीआई योजनाओं के लिए स्तरीय सीमाएं।
+Rate limiting strategies discuss करें: per-user, per-IP, per-endpoint, और अलग API plans के लिए tiered limits.
 
-## वास्तविक साक्षात्कार परिदृश्य
+## Real Interview Scenarios
 
-### एक भुगतान एपीआई डिज़ाइन करें
+### Payment API design करें
 
-स्पष्ट करने की आवश्यकताएँ:
-- भुगतान के कौन से तरीके? (कार्ड, बैंक हस्तांतरण, वॉलेट)
-- क्या हमें निष्क्रियता की आवश्यकता है? (हाँ - हमेशा भुगतान के लिए)
-- रिफंड और विवादों के बारे में क्या?
+Clarify करने वाली requirements:
+- कौन से payment methods? (Card, bank transfer, wallet)
+- क्या idempotency चाहिए? (हाँ, payments के लिए हमेशा)
+- Refunds और disputes का क्या?
 
 ```
 POST /v1/payments
@@ -245,15 +245,15 @@ Response: 201 Created
 }
 ```
 
-<Callout>भुगतान एपीआई के लिए, हमेशा इडेम्पोटेंसी कुंजियाँ पर चर्चा करें। नेटवर्क विफल हो जाता है, ग्राहक रीट्राई करते हैं, और निष्क्रियता के बिना, आप ग्राहकों से दोगुना शुल्क लेंगे। इडेम्पोटेंसी कुंजी यह सुनिश्चित करती है कि समान अनुरोध को रीट्राई करने से समान परिणाम प्राप्त होता है।</Callout>
+<Callout>Payment APIs के लिए हमेशा idempotency keys discuss करें। Network failures होते हैं, clients retry करते हैं, और idempotency के बिना customers से दो बार charge हो सकता है। Idempotency key सुनिश्चित करती है कि same request retry करने पर same result मिले।</Callout>
 
-**चर्चा के लिए मुख्य डिज़ाइन निर्णय**:
-- फ्लोटिंग-पॉइंट समस्याओं से बचने के लिए राशि सबसे छोटी मुद्रा इकाई (सेंट/पेंस) में
-- सुरक्षित रीट्राई के लिए निष्क्रियता कुंजियाँ
-- एसिंक स्टेटस अपडेट के लिए वेबहुक कॉलबैक
-- पीसीआई अनुपालन संबंधी विचार
+**Discuss करने लायक मुख्य design decisions**:
+- Floating-point issues से बचने के लिए amounts smallest currency unit (cents/pence) में
+- Safe retries के लिए idempotency keys
+- Async status updates के लिए webhook callbacks
+- PCI compliance considerations
 
-### एक सोशल मीडिया एपीआई डिज़ाइन करें
+### Social Media API design करें
 
 ```
 // Post creation
@@ -273,24 +273,24 @@ DELETE /v1/posts/{post_id}/likes
 POST /v1/posts/{post_id}/comments
 ```
 
-फ़िल्टरिंग, खोज और फ़ीड को कैसे इकट्ठा किया जाता है, इस पर चर्चा करें (पुल बनाम पुश मॉडल सिस्टम डिज़ाइन पर वापस निर्भर करता है)।
+Filtering, search, और feed कैसे assemble होती है, यह discuss करें (pull vs push model system design से जुड़ता है)।
 
-## एपीआई डिज़ाइन साक्षात्कार में सामान्य गलतियाँ
+## API Design Interviews में Common Mistakes
 
-1. **आंतरिक कार्यान्वयन को उजागर करना** - डेटाबेस कॉलम नाम या आंतरिक आईडी को एपीआई में लीक न होने दें। डीटीओ का प्रयोग करें.
-2. **असंगत नामकरण** - `snake_case` या `camelCase` चुनें और इसे हर जगह चिपकाएँ।
-3. **अनुपलब्ध पेजिनेशन** - किसी भी सूची समापन बिंदु को पेजिनेशन का समर्थन करना चाहिए।
-4. **कोई त्रुटि प्रबंधन चर्चा नहीं** - दिखाएं कि आप विफलता मोड के बारे में सोचते हैं।
-5. **पिछली संगतता को अनदेखा करना** - मौजूदा एंडपॉइंट में आवश्यक फ़ील्ड जोड़ने से क्लाइंट टूट जाते हैं।
-6. **यूआरएल में क्रियाओं का उपयोग** - `POST /users` के बजाय `/createUser`।
+1. **Internal implementation expose करना**: database column names या internal IDs को API में leak न होने दें। DTOs इस्तेमाल करें।
+2. **Inconsistent naming**: `snake_case` या `camelCase` चुनें और हर जगह वही रखें।
+3. **Pagination गायब होना**: कोई भी list endpoint pagination support करे।
+4. **Error handling discussion नहीं करना**: दिखाएँ कि आप failure modes सोचते हैं।
+5. **Backwards compatibility ignore करना**: मौजूदा endpoints में required fields जोड़ना clients को तोड़ता है।
+6. **URLs में verbs इस्तेमाल करना**: `/createUser` के बजाय `POST /users`।
 
-<Quiz question="एक क्लाइंट ऑर्डर बनाने के लिए POST अनुरोध भेजता है, लेकिन नेटवर्क प्रतिक्रिया छोड़ देता है। ग्राहक उसी इडेम्पोटेंसी key के साथ रीट्राई करता है। सर्वर को क्या लौटाना चाहिए?" options="400 bad अनुरोध - डुप्लिकेट अनुरोध|201 बनाया गया - मूल ऑर्डर के साथ (पहली बार जैसी ही प्रतिक्रिया)|409 संघर्ष - आदेश पहले से ही मौजूद है|200 OK - एक नए ऑर्डर के साथ" answer="1" explanation="इडेम्पोटेंसी के साथ, सर्वर डुप्लिकेट कुंजी को पहचानता है और मूल ऑर्डर डेटा के साथ समान 201 निर्मित प्रतिक्रिया लौटाता है। यह इडेम्पोटेंसी कुंजियाँ का संपूर्ण बिंदु है - क्लाइंट के लिए रीट्राई को सुरक्षित और पारदर्शी बनाना।" />
+<Quiz question="Client order create करने के लिए POST request भेजता है, लेकिन network response गिरा देता है। Client same idempotency key के साथ retry करता है। Server को क्या return करना चाहिए?" options="400 Bad Request: duplicate request|201 Created: original order के साथ (पहली बार जैसा same response)|409 Conflict: order already exists|200 OK: new order के साथ" answer="1" explanation="Idempotency के साथ server duplicate key पहचानता है और original order data के साथ वही 201 Created response return करता है। Idempotency keys का पूरा point यही है: retries को client के लिए safe और transparent बनाना।" />
 
-## चाबी छीनना
+## मुख्य बातें
 
-- **संसाधनों के बारे में सोचें**: संज्ञाओं के आसपास यूआरएल डिज़ाइन करें, HTTP विधियों को क्रियाओं को संभालने दें।
-- **अपने स्टेटस कोड को जानें**: सटीक स्टेटस कोड दर्शाते हैं कि आप HTTP शब्दार्थ को समझते हैं।
-- **हमेशा पेजिनेट करें**: असीमित सूची प्रतिक्रियाएँ साक्षात्कार में एक खतरे का संकेत होती हैं।
-- **विफलता के लिए डिज़ाइन**: निष्क्रियता, त्रुटि प्रतिक्रियाएँ, और दर सीमित करना उत्पादन-तत्परता सोच को दर्शाता है।
-- **सुरक्षा वैकल्चुनता नहीं है**: प्रमाणीकरण, प्राधिकरण और दर सीमित करना प्रत्येक एपीआई डिज़ाइन चर्चा का हिस्सा होना चाहिए।
-- **स्पष्ट व्यापार-बंद**: REST बनाम GraphQL, स्थिरता बनाम लचीलापन, सरलता बनाम शक्ति - साक्षात्कारकर्ता आपका तर्क सुनना चाहते हैं।
+- **Resources में सोचें**: URLs nouns के around design करें, verbs HTTP methods संभालते हैं।
+- **Status codes जानें**: precise status codes बताते हैं कि आप HTTP semantics समझते हैं।
+- **हमेशा paginate करें**: unbounded list responses interviews में red flag हैं।
+- **Failure के लिए design करें**: idempotency, error responses और rate limiting production-readiness thinking दिखाते हैं।
+- **Security optional नहीं है**: authentication, authorisation और rate limiting हर API design discussion का हिस्सा होने चाहिए।
+- **Trade-offs समझाएँ**: REST vs GraphQL, consistency vs flexibility, simplicity vs power. Interviewers आपकी reasoning सुनना चाहते हैं।
