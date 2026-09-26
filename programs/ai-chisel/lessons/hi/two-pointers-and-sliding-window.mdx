@@ -1,6 +1,6 @@
 ---
-title: "Two Pointers और Sliding Window - AI डेटा को Efficiently कैसे Scan करता है"
-description: "दो ज़रूरी patterns सीखें जो sequences को बिना फ़ालतू computation के scan करते हैं।"
+title: "टवो पोइनटेरस और सलिदिङ विनदोव - AI डेटा को एफ़फ़िकिएनटलय कैसे सकन करता है"
+description: "दो ज़रूरी पैटर्न सीखें जो सेक्वेनकेस को बिना फ़ालतू कोमपुटशन के सकन करते हैं।"
 order: 1
 difficulty: "intermediate"
 duration: 15
@@ -8,23 +8,23 @@ icon: "👆"
 published: true
 ---
 
-## Smart Scanning क्यों ज़रूरी है
+## समरट सकननिङ क्यों ज़रूरी है
 
-सोचिए कि एक AI किसी live video feed पर संदिग्ध गतिविधि monitor कर रहा है। वो हर सेकंड पूरी recording दोबारा नहीं देख सकता - उसे stream पर एक attention की window slide करनी होती है, बस उतना context रखते हुए जितना ज़रूरी है। **Two pointers** और **sliding window** patterns sequential data के साथ बिल्कुल यही करते हैं।
+सोचिए कि एक AI किसी लाइव विदेओ फ़ीड पर संदिग्ध गतिविधि मोनिटोर कर रहा है। वो हर सेकंड पूरी रेकोरदिङ दोबारा नहीं देख सकता - उसे सटरेअम पर एक ध्यान की विंडो सलिदे करनी होती है, बस उतना संदर्भ रखते हुए जितना ज़रूरी है। **टवो पॉइंटर** और **स्लाइडिंग विंडो** पैटर्न सेक्वेनटिअल डेटा के साथ बिल्कुल यही करते हैं।
 
-दोनों techniques brute-force O(n²) scans को elegant O(n) passes में बदल देती हैं।
+दोनों तकनीकें बरुटे-फ़ोरके O(n²) सकनस को एलेगनट O(n) पसेस में बदल देती हैं।
 
-<Illustration src="/images/lessons/two-pointers-and-sliding-window.svg" alt="Two pointers array के दोनों सिरों से converge हो रहे हैं और एक sliding window data stream पर move कर रही है" caption="Two pointers search space को छोटा करते हैं; sliding window एक running view बनाए रखती है।" />
+<Illustration src="/images/lessons/two-pointers-and-sliding-window.svg" alt="टवो पॉइंटर ऐरे के दोनों सिरों से कोनवेरगे हो रहे हैं और एक स्लाइडिंग विंडो डेटा सटरेअम पर मोवे कर रही है" caption="टवो पॉइंटर सर्च स्पेस को छोटा करते हैं; स्लाइडिंग विंडो एक रुननिङ विएव बनाए रखती है।" />
 
-## Two Pointer Technique
+## टवो पोइनटेर टेचनिक्वे
 
-किसी sequence में दो references रखो और उन्हें एक rule के हिसाब से move करो। इसके दो मुख्य तरीके हैं।
+किसी सेक्वेनके में दो रेफ़ेरेनकेस रखो और उन्हें एक रुले के हिसाब से मोवे करो। इसके दो मुख्य तरीके हैं।
 
-### Converging Pointers
+### कोनवेरगिङ पोइनटेरस
 
-एक pointer शुरू में और एक अंत में रखो, फिर अंदर की तरफ़ move करो। **Sorted** data के लिए बेहतरीन है।
+एक पॉइंटर शुरू में और एक अंत में रखो, फिर अंदर की तरफ़ मोवे करो। **सोरटेद** डेटा के लिए बेहतरीन है।
 
-**Classic problem - Pair Sum:** एक sorted array दिया है, दो numbers ढूँढो जिनका sum target के बराबर हो।
+**कलसिक समस्या - पैर सुम:** एक सॉर्टेड ऐरे दिया है, दो नंबर ढूँढो जिनका सुम लक्षित के बराबर हो।
 
 ```
 function pairSum(arr, target):
@@ -38,13 +38,13 @@ function pairSum(arr, target):
     return null
 ```
 
-क्योंकि array sorted है, `left` को right move करने से sum बढ़ता है, और `right` को left move करने से sum घटता है - इससे कोई भी valid pair miss नहीं होती।
+क्योंकि ऐरे सॉर्टेड है, `left` को रिघट मोवे करने से सुम बढ़ता है, और `right` को लेफ़ट मोवे करने से सुम घटता है - इससे कोई भी वलिद पैर मिस नहीं होती।
 
-### Same-Direction Pointers
+### समे-दिरेकशन पोइनटेरस
 
-दोनों pointers आगे की तरफ़ move करते हैं, लेकिन अलग-अलग speed से। **Partitioning** या **cycle detection** के लिए useful है।
+दोनों पॉइंटर आगे की तरफ़ मोवे करते हैं, लेकिन अलग-अलग सपीद से। **परटिशनिङ** या **साइकिल पहचान** के लिए उपयोगी है।
 
-**Example - Duplicates in-place remove करो:** एक slow pointer write position mark करता है; एक fast pointer आगे scan करता है।
+**एक्समपले - दुपलिकटेस इन-पलके रेमोवे करो:** एक धीमे पॉइंटर राइट स्थिति मरक करता है; एक तेज़ पॉइंटर आगे सकन करता है।
 
 ```
 function removeDuplicates(arr):
@@ -56,17 +56,17 @@ function removeDuplicates(arr):
     return slow + 1
 ```
 
-<Quiz question="Converging two-pointer technique में sorted array पर, जब current sum target से कम हो तो क्या करना चाहिए?" options="Right pointer को left move करो|Left pointer को right move करो|दोनों elements swap करो|बीच से restart करो" answer="1" explanation="Left pointer को right move करने से sum बढ़ता है क्योंकि array ascending order में sorted है।" />
+<Quiz question="कोनवेरगिङ टवो-पोइनटेर टेचनिक्वे में सॉर्टेड ऐरे पर, जब वर्तमान सुम लक्षित से कम हो तो क्या करना चाहिए?" options="रिघट पॉइंटर को लेफ़ट मोवे करो|लेफ़ट पॉइंटर को रिघट मोवे करो|दोनों एलिमेंट सवप करो|बीच से रेसटरट करो" answer="1" explanation="लेफ़ट पॉइंटर को रिघट मोवे करने से सुम बढ़ता है क्योंकि ऐरे असकेनदिङ order में सॉर्टेड है।" />
 
-## Sliding Window Pattern
+## सलिदिङ विनदोव पटटेरन
 
-Sliding window एक contiguous sub-sequence maintain करती है जिसका size _k_ (fixed) या variable हो सकता है, और aggregates को scratch से recalculate करने की बजाय incrementally update करती है।
+सलिदिङ विंडो एक कोनटिगुओउस सुब-सेक्वेनके मैनटैन करती है जिसका आकार _k_ (फ़िक्सेद) या वरिअबले हो सकता है, और अगगरेगटेस को शुरुआत से रेकलकुलटे करने की बजाय इनकरेमेनटललय अपडेट करती है।
 
-### Fixed-Size Window
+### फ़िक्सेद-सिज़े विनदोव
 
-बिल्कुल _k_ elements की window को array पर slide करो।
+बिल्कुल _k_ एलिमेंट की विंडो को ऐरे पर सलिदे करो।
 
-**Example - किन्हीं k consecutive elements का maximum sum:**
+**एक्समपले - किन्हीं k कोनसेकुटिवे एलिमेंट का मक्सिमुम सुम:**
 
 ```
 function maxSubarraySum(arr, k):
@@ -78,13 +78,13 @@ function maxSubarraySum(arr, k):
     return best
 ```
 
-हर step में window में आने वाला नया element add होता है और बाहर जाने वाला subtract - O(1) per move।
+हर चरण में विंडो में आने वाला नया एलिमेंट जोड़ें होता है और बाहर जाने वाला सुबटरकट - O(1) प्रति मोवे।
 
-### Variable-Size Window
+### वरिअबले-सिज़े विनदोव
 
-ज़्यादा data include करने के लिए window expand करो, फिर जब constraint violate हो तो shrink करो।
+ज़्यादा डेटा शामिल करने के लिए विंडो एक्सपनद करो, फिर जब कोनसटरैनट उल्लंघन हो तो शरिनक करो।
 
-**Example - Longest substring without repeating characters:**
+**एक्समपले - लोङेसट सब-स्ट्रिंग बिना रेपेअटिङ चरकटेरस:**
 
 ```
 function longestUnique(s):
@@ -99,34 +99,34 @@ function longestUnique(s):
     return best
 ```
 
-<FunFact>Apache Flink जैसे streaming analytics platforms sliding और tumbling windows को first-class primitives की तरह use करते हैं - यही concept millions of events per second पर scale होता है।</FunFact>
+<FunFact>अपचे फ़लिनक जैसे स्ट्रीमिंग एनालिटिक्स पलटफ़ोरमस स्लाइडिंग और टुमबलिङ विनदोवस को फ़िरसट-कलस परिमिटिवेस की तरह उपयोग करते हैं - यही कोनकेपट मिलियन of इवेंट प्रति सेकंड पर स्केल होता है।</FunFact>
 
-## Real AI Applications
+## वास्तविक AI अपपलिकशनस
 
-| Pattern | AI Use Case |
+| पटटेरन | AI उपयोग कसे |
 |---------|------------|
-| Fixed window | पिछली _k_ sensor readings पर anomaly detection |
-| Variable window | सभी query keywords वाला सबसे छोटा text span ढूँढना (search engines) |
-| Converging pointers | Sorted embedding dimensions में efficient nearest-neighbour checks |
-| Same-direction pointers | Multiple retrieval models से sorted result lists को merge करना |
+| फ़िक्सेद विंडो | पिछली _k_ सेनसोर रेअदिङस पर अनोमलय पहचान |
+| वरिअबले विंडो | सभी क्वेरी केयवोरदस वाला सबसे छोटा टेक्स्ट सपन ढूँढना (सर्च इंजन) |
+| कोनवेरगिङ पॉइंटर | सोरटेद एमबेददिङ दिमेनसिओनस में कुशल नेअरेसट-नेइघबोउर चेकस |
+| समे-दिरेकशन पॉइंटर | मुलटिपले प्राप्ति मॉडल से सॉर्टेड रेसुलट लिस्ट को मर्ज करना |
 
-<ThinkAboutIt>एक voice assistant wake word detect करने के लिए पिछले 3 seconds का audio buffer करता है। यह कौन सा pattern है - fixed window या variable window? अगर wake word buffer से लंबा हो तो क्या होगा?</ThinkAboutIt>
+<ThinkAboutIt>एक वोइके असिसटनट वके वोरद देटेकट करने के लिए पिछले 3 सेकंड का औदिओ बुफ़फ़ेर करता है। यह कौन सा पैटर्न है - फ़िक्सेद विंडो या वरिअबले विंडो? अगर वके वोरद बुफ़फ़ेर से लंबा हो तो क्या होगा?</ThinkAboutIt>
 
-## कौन सा Pattern कब Use करें
+## कौन सा पटटेरन कब इस्तेमाल करें
 
-- **Two pointers (converging):** sorted input, pair/triplet search, palindrome checks।
-- **Two pointers (same-direction):** in-place modifications, fast/slow runner problems।
-- **Fixed sliding window:** एक known window size पर aggregate।
-- **Variable sliding window:** किसी condition को satisfy करने वाली सबसे छोटी या सबसे बड़ी window ढूँढो।
+- **टवो पॉइंटर (कोनवेरगिङ):** सॉर्टेड इनपुट, पैर/टरिपलेट सर्च, पैलिंड्रोम चेकस।
+- **टवो पॉइंटर (समे-दिरेकशन):** इन-पलके मोदिफ़िकशनस, फ़सट/सलोव रुननेर समस्याएँ।
+- **फ़िक्सेद स्लाइडिंग विंडो:** एक ज्ञात विंडो आकार पर अगगरेगटे।
+- **वरिअबले स्लाइडिंग विंडो:** किसी शर्त को सटिसफ़य करने वाली सबसे छोटी या सबसे बड़ी विंडो ढूँढो।
 
-<Quiz question="वो सबसे छोटा subarray ढूँढने के लिए कौन सा pattern चुनोगे जिसका sum एक दी गई value से ज़्यादा हो?" options="Converging two pointers|Fixed sliding window|Variable sliding window|Binary search" answer="2" explanation="Variable-size window तब तक expand होती है जब तक sum value से ज़्यादा न हो जाए, फिर minimum length ढूँढने के लिए left से contract होती है - सब O(n) में।" />
+<Quiz question="वो सबसे छोटा सबऐरे ढूँढने के लिए कौन सा पैटर्न चुनोगे जिसका सुम एक दी गई वैल्यू से ज़्यादा हो?" options="कोनवेरगिङ टवो पॉइंटर|फ़िक्सेद स्लाइडिंग विंडो|वरिअबले स्लाइडिंग विंडो|बिनरय सर्च" answer="2" explanation="वरिअबले-सिज़े विंडो तब तक एक्सपनद होती है जब तक सुम वैल्यू से ज़्यादा न हो जाए, फिर मिनिमुम लेङथ ढूँढने के लिए लेफ़ट से कॉन्ट्रैक्ट होती है - सब O(n) में।" />
 
-<ThinkAboutIt>क्या आप two pointers को sliding window के साथ combine कर सकते हो? ऐसे problems के बारे में सोचो जहाँ data की एक rolling window में pair ढूँढना हो - जैसे पाँच मिनट की window में duplicate transactions detect करना।</ThinkAboutIt>
+<ThinkAboutIt>क्या आप टवो पॉइंटर को स्लाइडिंग विंडो के साथ जोड़ते कर सकते हो? ऐसे समस्याएँ के बारे में सोचो जहाँ डेटा की एक रोललिङ विंडो में पैर ढूँढना हो - जैसे पाँच मिनट की विंडो में दुपलिकटे टरनसकशनस देटेकट करना।</ThinkAboutIt>
 
-## Key Takeaways
+## मुख्य बात टकेअवयस
 
-1. Two pointers ordering या partitioning का फ़ायदा उठाकर nested loops को eliminate करते हैं।
-2. Sliding windows running state maintain करती हैं ताकि हर element ज़्यादा से ज़्यादा दो बार process हो।
-3. दोनों patterns real-time AI pipelines में foundational हैं - anomaly detection से लेकर search ranking तक।
+1. टवो पॉइंटर ओरदेरिङ या परटिशनिङ का फ़ायदा उठाकर नेसटेद लूपस को एलिमिनटे करते हैं।
+2. सलिदिङ विनदोवस रुननिङ सटटे मैनटैन करती हैं ताकि हर एलिमेंट ज़्यादा से ज़्यादा दो बार प्रोसेस हो।
+3. दोनों पैटर्न रीयल-टाइम AI पाइपलाइन में फ़ोउनदशनल हैं - अनोमलय पहचान से लेकर सर्च रैंकिंग तक।
 
-<Quiz question="Brute-force nested loop को two-pointer या sliding-window solution में बदलने से typically कौन सी time complexity मिलती है?" options="O(n log n)|O(n)|O(n²)|O(1)" answer="1" explanation="दोनों patterns हर element को constant बार process करते हैं, जिससे overall O(n) मिलता है - O(n²) brute-force approach से काफ़ी बेहतर।" />
+<Quiz question="बरुटे-फ़ोरके नेसटेद लूप को टवो-पोइनटेर या सलिदिङ-विनदोव सोलुशन में बदलने से आमतौर पर कौन सी समय जटिलता मिलती है?" options="O(n लॉग n)|O(n)|O(n²)|O(1)" answer="1" explanation="दोनों पैटर्न हर एलिमेंट को कोनसटनट बार प्रोसेस करते हैं, जिससे कुल O(n) मिलता है - O(n²) बरुटे-फ़ोरके तरीका से काफ़ी बेहतर।" />
