@@ -31,7 +31,7 @@ Cela fonctionne, mais présente deux problèmes majeurs :
 **1. Disparition des dégradés sur de longues séquences**
 Au moment où le modèle traite le mot 10, les informations du mot 1 ont été « diluées » par neuf mises à jour d'état cachées. Le modèle a du mal à relier « ça » (mot 8) au « chat » (mot 2) lorsque la phrase est longue.
 
-**2. Lent — pas de parallélisation**
+**2. Lent - pas de parallélisation**
 Étant donné que chaque mot dépend de l'état caché précédent, vous devez traiter les mots un par un. Vous ne pouvez pas paralléliser une séquence. La formation sur de longs documents est extrêmement lente.
 
 Le Transformer résout ces deux problèmes avec un seul mécanisme élégant : **attention**.
@@ -40,15 +40,15 @@ Le Transformer résout ces deux problèmes avec un seul mécanisme élégant : 
 
 L'innovation centrale du Transformer est **l'auto-attention** : la capacité pour chaque mot d'une séquence de s'occuper directement de tous les autres mots simultanément, quelle que soit leur distance.
 
-Plutôt que de transmettre des informations de manière séquentielle, l'auto-attention calcule **la pertinence de chaque mot par rapport à tous les autres mots de la séquence** — d'un seul coup.
+Plutôt que de transmettre des informations de manière séquentielle, l'auto-attention calcule **la pertinence de chaque mot par rapport à tous les autres mots de la séquence** - d'un seul coup.
 
-### Requête, clé et valeur – En anglais simple
+### Requête, clé et valeur - En anglais simple
 
 Pour chaque mot (ou jeton), le Transformer crée trois vecteurs :
 
-- **Requête (Q)** : *"Qu'est-ce que je cherche ?"* — la question posée par ce mot
-- **Clé (K)** : *"Qu'est-ce que je contient ?"* — la publicité que chaque mot diffuse sur lui-même
-- **Valeur (V)** : *"Quelles informations dois-je fournir ?"* — le contenu réel à récupérer
+- **Requête (Q)** : *"Qu'est-ce que je cherche ?"* - la question posée par ce mot
+- **Clé (K)** : *"Qu'est-ce que je contient ?"* - la publicité que chaque mot diffuse sur lui-même
+- **Valeur (V)** : *"Quelles informations dois-je fournir ?"* - le contenu réel à récupérer
 
 Le score d'attention entre deux mots est calculé en prenant le produit scalaire de la requête d'un mot avec la clé d'un autre mot. Un score élevé signifie que « ces deux mots sont très pertinents l'un par rapport à l'autre ».
 
@@ -180,35 +180,35 @@ GPT training:    "The cat sat on the"          → predict "mat"
 
 ## 📈 Pourquoi l'échelle est importante
 
-L’architecture Transformer s’est révélée remarquablement bien évolutive. Des modèles plus grands avec plus de paramètres, entraînés sur plus de données, avec plus de calculs, produisent systématiquement de meilleures performances – un phénomène décrit par les **lois d'échelle** (Kaplan et al., 2020).
+L’architecture Transformer s’est révélée remarquablement bien évolutive. Des modèles plus grands avec plus de paramètres, entraînés sur plus de données, avec plus de calculs, produisent systématiquement de meilleures performances - un phénomène décrit par les **lois d'échelle** (Kaplan et al., 2020).
 
 Cela a conduit à une progression :
 - GPT-1 (2018) : 117 millions de paramètres
 - GPT-2 (2019) : paramètres 1,5B
 - GPT-3 (2020) : paramètres 175B
-- Modèles frontier actuels : souvent mixture-of-experts ou architectures non divulguées avec des centaines de milliards à des trillions de paramètres effectifs
+- Modèles de pointe actuels : souvent mixture-of-experts ou architectures non divulguées avec des centaines de milliards à des trillions de paramètres effectifs
 
-Chaque saut a apporté des améliorations qualitatives de capacité. Les tâches que GPT-2 ne pouvait pas faire du tout (raisonnement complexe, génération de code) sont devenues possibles à l'échelle GPT-3 et ont continué à s'améliorer dans les modèles frontier ultérieurs.
+Chaque saut a apporté des améliorations qualitatives de capacité. Les tâches que GPT-2 ne pouvait pas faire du tout (raisonnement complexe, génération de code) sont devenues possibles à l'échelle GPT-3 et ont continué à s'améliorer dans les modèles de pointe ultérieurs.
 
 ## ⚡ Formation vs Inférence
 
 Deux profils informatiques très différents :
 
-**Entraînement** : extrêmement coûteux. Traiter des trillions de tokens, calculer les gradients et mettre à jour d'énormes ensembles de paramètres sur des milliers de GPUs pendant des semaines ou des mois. L'entraînement des modèles frontier actuels peut coûter des centaines de millions lorsque le calcul, les données, l'énergie et l'ingénierie sont inclus.
+**Entraînement** : extrêmement coûteux. Traiter des trillions de tokens, calculer les gradients et mettre à jour d'énormes ensembles de paramètres sur des milliers de GPUs pendant des semaines ou des mois. L'entraînement des modèles de pointe actuels peut coûter des centaines de millions lorsque le calcul, les données, l'énergie et l'ingénierie sont inclus.
 
 **Inférence** : beaucoup moins cher. Un seul passage à travers le réseau pour générer chaque jeton. Nécessite toujours un matériel important (GPU puissants ou puces IA spécialisées), mais gérable à grande échelle.
 
 Cette asymétrie a façonné le secteur : quelques organisations disposant de ressources suffisantes forment des modèles de fondations ; tout le monde y accède via des API.
 
-<Quiz question="Quel problème avec les RNN le mécanisme d'attention du Transformateur a-t-il résolu ?" options="Les RNN ne pouvaient pas traiter le texte – ils ne travaillaient que sur les images|Les RNN étaient confrontés à des dépendances à longue portée et ne pouvaient pas être parallélisés sur toute la longueur de la séquence|Les RNN nécessitaient trop de données étiquetées pour s'entraîner|Les RNN ne pouvaient traiter que le texte anglais" answer="1" explanation="Les RNN traitaient les jetons de manière séquentielle, provoquant la disparition des gradients qui rendaient difficile la connexion de mots distants (dépendances à longue portée). Ils ne pouvaient pas non plus être parallélisés sur toute la longueur de la séquence, ce qui ralentissait l'entraînement. L’attention personnelle résout les deux : chaque jeton s’occupe directement les uns des autres, et tous les calculs d’attention peuvent s’exécuter en parallèle." />
+<Quiz question="Quel problème avec les RNN le mécanisme d'attention du Transformateur a-t-il résolu ?" options="Les RNN ne pouvaient pas traiter le texte - ils ne travaillaient que sur les images|Les RNN étaient confrontés à des dépendances à longue portée et ne pouvaient pas être parallélisés sur toute la longueur de la séquence|Les RNN nécessitaient trop de données étiquetées pour s'entraîner|Les RNN ne pouvaient traiter que le texte anglais" answer="1" explanation="Les RNN traitaient les jetons de manière séquentielle, provoquant la disparition des gradients qui rendaient difficile la connexion de mots distants (dépendances à longue portée). Ils ne pouvaient pas non plus être parallélisés sur toute la longueur de la séquence, ce qui ralentissait l'entraînement. L’attention personnelle résout les deux : chaque jeton s’occupe directement les uns des autres, et tous les calculs d’attention peuvent s’exécuter en parallèle." />
 
 ## Points clés à retenir
 
-- Les **RNN** traitaient les séquences étape par étape, aux prises avec des dépendances à longue portée et incapables de paralléliser — Les transformateurs les ont remplacés
+- Les **RNN** traitaient les séquences étape par étape, aux prises avec des dépendances à longue portée et incapables de paralléliser - Les transformateurs les ont remplacés
 - **Auto-attention** permet à chaque jeton de s'occuper directement de tous les autres jetons via des vecteurs de requête, de clé et de valeur, résolvant ainsi les deux problèmes à la fois.
 - **Attention multi-têtes** exécute plusieurs calculs d'attention en parallèle, permettant au modèle d'apprendre simultanément différents types de relations
 - **L'encodage positionnel** ajoute des informations de commande au mécanisme d'attention intrinsèquement indépendant de la position.
 - **BERT** (encodeur uniquement) est pré-entraîné pour comprendre le texte de manière bidirectionnelle ; idéal pour les tâches de classification et de recherche
 - **GPT** (décodeur uniquement) est pré-entraîné pour générer du texte de gauche à droite ; idéal pour la génération et la conversation
-- **Le scale compte énormément** : les Transformers plus grands entraînés sur plus de données débloquent constamment de nouvelles capacités, comme le montre la progression de GPT-1 à GPT-3 puis aux systèmes frontier ultérieurs
+- **La mise à l'échelle compte énormément** : les Transformers plus grands entraînés sur plus de données débloquent constamment de nouvelles capacités, comme le montre la progression de GPT-1 à GPT-3 puis aux systèmes de pointe ultérieurs
 - La formation coûte extrêmement cher ; l'inférence est beaucoup moins chère - cette asymétrie façonne la façon dont les modèles de base sont déployés

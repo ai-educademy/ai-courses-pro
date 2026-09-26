@@ -10,7 +10,7 @@ machineTranslated: true
 ---
 # LLM's verfijnen: AI aanpassen aan uw gebruiksscenario 🎯
 
-Een vooraf getraind groottaalmodel is een generalist. Het heeft een substantieel deel van het internet gelezen en een duizelingwekkende hoeveelheid kennis geabsorbeerd. Maar ‘generalist’ is een ander woord voor ‘niet gespecialiseerd’. Als u een model nodig heeft dat de stem van uw bedrijf spreekt, het jargon van uw branche begrijpt, uw specifieke outputformat volgt of weigert om off-topic onderwerpen te bespreken – dan heeft u meer nodig dan alleen maar aanwijzingen.
+Een vooraf getraind groottaalmodel is een generalist. Het heeft een substantieel deel van het internet gelezen en een duizelingwekkende hoeveelheid kennis geabsorbeerd. Maar ‘generalist’ is een ander woord voor ‘niet gespecialiseerd’. Als u een model nodig heeft dat de stem van uw bedrijf spreekt, het jargon van uw branche begrijpt, uw specifieke outputformat volgt of weigert om off-topic onderwerpen te bespreken - dan heeft u meer nodig dan alleen maar aanwijzingen.
 
 Dit is waar **verfijning** om de hoek komt kijken.
 
@@ -26,13 +26,13 @@ Voordat we ingaan op de verfijningsmechanismen, helpt het om te begrijpen waar d
 | **RAG (Retrieval-Augmented Generation)** | Haal relevante documenten op tijdens de conclusie en neem ze op in de prompt | Kennis actueel houden, grote kennisbanken |
 | **Fijnafstemming** | Pas de gewichten van het model aan met behulp van taakspecifieke voorbeelden | Consistente stijl/format, gespecialiseerde redenering, verkorting van de promptlengte |
 
-Fine-tuning en RAG sluiten elkaar niet uit; veel productiesystemen gebruiken beide.
+Fijnafstemming en RAG sluiten elkaar niet uit; veel productiesystemen gebruiken beide.
 
 ---
 
 ## 🔬 Wat fijnafstemming eigenlijk doet
 
-Een vooraf getrainde LLM heeft miljarden gewichten (parameters) – getallen die alles coderen wat hij tijdens de pre-training heeft geleerd. Bij het verfijnen wordt het model verder getraind op een kleinere, samengestelde dataset die uw specifieke taak weerspiegelt.
+Een vooraf getrainde LLM heeft miljarden gewichten (parameters) - getallen die alles coderen wat hij tijdens de pre-training heeft geleerd. Bij het verfijnen wordt het model verder getraind op een kleinere, samengestelde dataset die uw specifieke taak weerspiegelt.
 
 Het model ziet uw voorbeelden, berekent hoe verkeerd de huidige gewichten erop zijn en past zich aan. De kernmechanismen van de training (forward pass, verliesberekening, backpropagation) zijn identiek aan pre-training: u doet het gewoon opnieuw, op basis van uw gegevens, voor veel minder stappen.
 
@@ -55,11 +55,11 @@ In plaats van de oorspronkelijke gewichtsmatrices rechtstreeks aan te passen, vo
 
 De wiskunde: een gewichtsbijwerkingsmatrix die normaal gesproken (d × d) zou zijn, wordt benaderd als het product van twee veel kleinere matrices (d × r) × (r × d), waarbij r een kleine "rang" is (meestal 4-64). Dit vermindert het aantal trainbare parameters dramatisch.
 
-Het resultaat: u traint misschien 0,1–1% van de totale parameters, tegen een klein deel van de reken- en geheugenkosten, terwijl u prestaties bereikt die bijna volledig zijn afgestemd.
+Het resultaat: u traint misschien 0,1-1% van de totale parameters, tegen een klein deel van de reken- en geheugenkosten, terwijl u prestaties bereikt die bijna volledig zijn afgestemd.
 
 ### QLoRA (gekwantiseerde LoRA)
 
-QLoRA combineert LoRA met **kwantisering** — waarbij de gewichten van het bevroren basismodel worden weergegeven met een nauwkeurigheid van 4 bits in plaats van 16 bits of 32 bits. Dit vermindert het geheugengebruik met ongeveer 75%, waardoor zeer grote modellen op één enkele consumenten-GPU kunnen worden verfijnd.
+QLoRA combineert LoRA met **kwantisering** - waarbij de gewichten van het bevroren basismodel worden weergegeven met een nauwkeurigheid van 4 bits in plaats van 16 bits of 32 bits. Dit vermindert het geheugengebruik met ongeveer 75%, waardoor zeer grote modellen op één enkele consumenten-GPU kunnen worden verfijnd.
 
 QLoRA maakte het voor onderzoekers en ontwikkelaars buiten grote organisaties mogelijk om 70B+ modellen te verfijnen. Het democratiseerde de toegang aanzienlijk.
 
@@ -94,11 +94,11 @@ Het proces: mensen rangschikken modelresultaten op kwaliteit, een ‘beloningsmo
 ## 🛠️ Praktische stappen
 
 1. **Kies een basismodel** - Llama 4, Mistral, Qwen, Gemma. Houd rekening met licentie, omvang en basismogelijkheden.
-2. **Bereid uw dataset voor** — schoon, consistent, geformatteerd als instructie-antwoordparen. Streef naar 500–10.000 voorbeelden van hoge kwaliteit.
-3. **Kies een methode** — LoRA/QLoRA voor de meeste gebruiksscenario's; volledige afstemming alleen als u over de rekenkracht beschikt en de taak dit vereist.
-4. **Trainen** — gebruik Hugging Face `transformers` + `peft`, of raamwerken van een hoger niveau, zoals Axolotl of Unsloth.
-5. **Evalueren** — testen op een uitgestelde set. Vergelijk het met het basismodel en een sterke, snel ontworpen basislijn.
-6. **Itereren** — fijnafstemming werkt zelden de eerste keer perfect. Verbeter uw gegevens, pas hyperparameters aan, herhaal.
+2. **Bereid uw dataset voor** - schoon, consistent, geformatteerd als instructie-antwoordparen. Streef naar 500-10.000 voorbeelden van hoge kwaliteit.
+3. **Kies een methode** - LoRA/QLoRA voor de meeste gebruiksscenario's; volledige afstemming alleen als u over de rekenkracht beschikt en de taak dit vereist.
+4. **Trainen** - gebruik Hugging Face `transformers` + `peft`, of raamwerken van een hoger niveau, zoals Axolotl of Unsloth.
+5. **Evalueren** - testen op een uitgestelde set. Vergelijk het met het basismodel en een sterke, snel ontworpen basislijn.
+6. **Itereren** - fijnafstemming werkt zelden de eerste keer perfect. Verbeter uw gegevens, pas hyperparameters aan, herhaal.
 
 ---
 
@@ -106,10 +106,10 @@ Het proces: mensen rangschikken modelresultaten op kwaliteit, een ‘beloningsmo
 
 Verfijning is niet altijd het juiste antwoord:
 
-- **Uw probleem kan worden opgelost als u erom vraagt** — bespaar de moeite; herhaal eerst de aanwijzingen
-- **Uw kennis moet actueel blijven** — door het verfijnen van de kennis tijdens de training; RAG is beter voor dynamische informatie
-- **Je hebt heel weinig gegevens** — minder dan een paar honderd voorbeelden doet vaak meer pijn dan helpt
-- **Je hebt een snelle iteratie nodig** — een afstemmingsrun duurt uren; snelle wijzigingen duren seconden
+- **Uw probleem kan worden opgelost als u erom vraagt** - bespaar de moeite; herhaal eerst de aanwijzingen
+- **Uw kennis moet actueel blijven** - door het verfijnen van de kennis tijdens de training; RAG is beter voor dynamische informatie
+- **Je hebt heel weinig gegevens** - minder dan een paar honderd voorbeelden doet vaak meer pijn dan helpt
+- **Je hebt een snelle iteratie nodig** - een afstemmingsrun duurt uren; snelle wijzigingen duren seconden
 
 <FunFact>Het Alpaca-model (2023) werd verfijnd op basis van LLaMA met behulp van slechts 52.000 instructie-volgende voorbeelden gegenereerd door GPT-3.5. De totale kosten voor het genereren van gegevens bedroegen minder dan $ 500. Het toonde aan dat instructievolggedrag kon worden geleerd uit een verrassend kleine dataset.
 </FunFact>
@@ -118,7 +118,7 @@ Verfijning is niet altijd het juiste antwoord:
 
 <Quiz question="Wat is het belangrijkste verschil tussen verfijning en snelle engineering?" options={["Snelle engineering vereist meer rekenkracht", "Bij fijnafstemming worden de gewichten van het model aangepast met behulp van trainingsgegevens; snelle engineering leidt het ongewijzigde basismodel door middel van instructies", "Fijnafstemming is alleen voor afbeeldingsmodellen", "Ze zijn hetzelfde met verschillende namen"]} correct={1} explanation="Prompt engineering werkt met het model zoals het is en creëert input die het gewenste gedrag uitlokt. Door het nauwkeurig afstemmen worden de interne gewichten van het model feitelijk gewijzigd door voortdurende training op taakspecifieke gegevens; het model zelf wordt permanent gewijzigd." />
 
-<Quiz question="Welk probleem lost LoRA op bij het afstemmen van LLM?" options={["Het zorgt ervoor dat modellen sneller tekst genereren tijdens de inferentie", "Het vermindert het aantal trainbare parameters dramatisch, waardoor fijnafstemming mogelijk wordt op beperkte hardware", "Het genereert automatisch trainingsgegevens", "Het voorkomt overfitting door uitvallagen toe te voegen"]} correct={1} explanation="LoRA (Low-Rank Adaptation) bevriest de gewichten van het basismodel en voegt er kleine trainbare, in rang ontlede matrices aan toe. Alleen deze kleine matrices worden getraind, waardoor de trainbare parameters worden teruggebracht tot ~0,1–1% van het totaal, wat fijnafstemming praktisch maakt op een enkele GPU." />
+<Quiz question="Welk probleem lost LoRA op bij het afstemmen van LLM?" options={["Het zorgt ervoor dat modellen sneller tekst genereren tijdens de inferentie", "Het vermindert het aantal trainbare parameters dramatisch, waardoor fijnafstemming mogelijk wordt op beperkte hardware", "Het genereert automatisch trainingsgegevens", "Het voorkomt overfitting door uitvallagen toe te voegen"]} correct={1} explanation="LoRA (Low-Rank Adaptation) bevriest de gewichten van het basismodel en voegt er kleine trainbare, in rang ontlede matrices aan toe. Alleen deze kleine matrices worden getraind, waardoor de trainbare parameters worden teruggebracht tot ~0,1-1% van het totaal, wat fijnafstemming praktisch maakt op een enkele GPU." />
 
 <Quiz question="Wat voegt QLoRA toe bovenop LoRA?" options={["Extra trainingsstappen voor een betere nauwkeurigheid", "Kwantisering van het bevroren basismodel tot 4-bits precisie, waardoor het geheugengebruik dramatisch wordt verminderd", "Een kwaliteitsscoresysteem voor trainingsgegevens", "Geautomatiseerde afstemming van hyperparameters"]} correct={1} explanation="QLoRA combineert LoRA met 4-bit kwantisering van de bevroren basismodelgewichten. Dit vermindert het geheugengebruik met ongeveer 75% in vergelijking met volledige 16-bits belasting, waardoor het afstemmen van zeer grote modellen (70B+) op een enkele consumenten-GPU mogelijk wordt." />
 

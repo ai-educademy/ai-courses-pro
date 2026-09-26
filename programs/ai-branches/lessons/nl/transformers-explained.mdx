@@ -31,7 +31,7 @@ Dit werkt, maar heeft twee grote problemen:
 **1. Verdwijnende gradiënten over lange reeksen**
 Tegen de tijd dat het model woord 10 verwerkt, is de informatie van woord 1 "verdund" door negen verborgen statusupdates. Het model heeft moeite om 'it' (woord 8) terug te koppelen aan 'kat' (woord 2) als de zin lang is.
 
-**2. Langzaam — geen parallellisatie**
+**2. Langzaam - geen parallellisatie**
 Omdat elk woord afhankelijk is van de vorige verborgen status, moet u de woorden één voor één verwerken. Je kunt niet parallelliseren over een reeks. Het trainen van lange documenten gaat pijnlijk langzaam.
 
 De Transformer lost beide problemen op met één enkel elegant mechanisme: **aandacht**.
@@ -40,15 +40,15 @@ De Transformer lost beide problemen op met één enkel elegant mechanisme: **aan
 
 De centrale innovatie van de Transformer is **zelfaandacht**: het vermogen van elk woord in een reeks om tegelijkertijd direct op elk ander woord te letten, ongeacht hoe ver ze uit elkaar liggen.
 
-In plaats van informatie opeenvolgend door te geven, berekent zelfaandacht **hoe relevant elk woord is voor elk ander woord in de reeks** — in één keer.
+In plaats van informatie opeenvolgend door te geven, berekent zelfaandacht **hoe relevant elk woord is voor elk ander woord in de reeks** - in één keer.
 
-### Query, sleutel en waarde — in gewoon Engels
+### Query, sleutel en waarde - in gewoon Engels
 
 Voor elk woord (of teken) creëert de Transformer drie vectoren:
 
-- **Query (Q)**: *"Wat zoek ik?"* — de vraag die dit woord stelt
-- **Sleutel (K)**: *"Wat bevat ik?"* — de advertentie die elk woord over zichzelf uitzendt
-- **Waarde (V)**: *"Welke informatie geef ik?"* — de feitelijke inhoud die moet worden opgehaald
+- **Query (Q)**: *"Wat zoek ik?"* - de vraag die dit woord stelt
+- **Sleutel (K)**: *"Wat bevat ik?"* - de advertentie die elk woord over zichzelf uitzendt
+- **Waarde (V)**: *"Welke informatie geef ik?"* - de feitelijke inhoud die moet worden opgehaald
 
 De aandachtsscore tussen twee woorden wordt berekend door het puntproduct van de zoekopdracht van het ene woord te nemen met de sleutel van een ander woord. Een hoge score betekent "deze twee woorden zijn zeer relevant voor elkaar."
 
@@ -180,21 +180,21 @@ GPT training:    "The cat sat on the"          → predict "mat"
 
 ## 📈 Waarom schaal belangrijk is
 
-De Transformer-architectuur bleek opmerkelijk goed te schalen. Grotere modellen met meer parameters, getraind op meer data en met meer rekenkracht leveren consistent betere prestaties op – een fenomeen dat wordt beschreven door **schaalwetten** (Kaplan et al., 2020).
+De Transformer-architectuur bleek opmerkelijk goed te schalen. Grotere modellen met meer parameters, getraind op meer data en met meer rekenkracht leveren consistent betere prestaties op - een fenomeen dat wordt beschreven door **schaalwetten** (Kaplan et al., 2020).
 
 Dit leidde tot een progressie:
 - GPT-1 (2018): 117 miljoen parameters
 - GPT-2 (2019): 1,5B-parameters
 - GPT-3 (2020): 175B-parameters
-- Huidige frontier modellen: vaak mixture-of-experts of niet-openbaar gemaakte architecturen met honderden miljarden tot biljoenen effectieve parameters
+- Huidige toonaangevende modellen: vaak mixture-of-experts of niet-openbaar gemaakte architecturen met honderden miljarden tot biljoenen effectieve parameters
 
-Elke sprong bracht kwalitatieve verbeteringen in capaciteit. Taken die GPT-2 helemaal niet kon (complex redeneren, codegeneratie) werden mogelijk op GPT-3-schaal en verbeterden verder in latere frontier modellen.
+Elke sprong bracht kwalitatieve verbeteringen in capaciteit. Taken die GPT-2 helemaal niet kon (complex redeneren, codegeneratie) werden mogelijk op GPT-3-schaal en verbeterden verder in latere toonaangevende modellen.
 
 ## ⚡ Training versus gevolgtrekking
 
 Twee zeer verschillende computationele profielen:
 
-**Training**: extreem duur. Biljoenen tokens verwerken, gradients berekenen en enorme parametersets over duizenden GPUs weken of maanden bijwerken. Het trainen van huidige frontier modellen kan honderden miljoenen kosten wanneer compute, data, energie en engineering worden meegerekend.
+**Training**: extreem duur. Biljoenen tokens verwerken, gradients berekenen en enorme parametersets over duizenden GPUs weken of maanden bijwerken. Het trainen van huidige toonaangevende modellen kan honderden miljoenen kosten wanneer compute, data, energie en engineering worden meegerekend.
 
 **Gevolgtrekking**: veel goedkoper. Eén enkele voorwaartse doorgang door het netwerk om elk token te genereren. Vereist nog steeds aanzienlijke hardware (krachtige GPU's of gespecialiseerde AI-chips), maar kan op schaal worden beheerd.
 
@@ -210,5 +210,5 @@ Deze asymmetrie heeft de sector gevormd: een paar goed uitgeruste organisaties t
 - **Positionele codering** voegt orderinformatie toe aan het inherent positie-agnostische aandachtsmechanisme
 - **BERT** (alleen encoder) is vooraf getraind om tekst bidirectioneel te begrijpen; het beste voor classificatie- en zoektaken
 - **GPT** (alleen decoder) is vooraf getraind om tekst van links naar rechts te genereren; het beste voor generatie en conversatie
-- **Schaal doet er enorm toe**: grotere Transformers getraind op meer data ontgrendelen consequent nieuwe mogelijkheden, zoals blijkt uit de progressie van GPT-1 via GPT-3 en latere frontier systemen
+- **Schaal doet er enorm toe**: grotere Transformers getraind op meer data ontgrendelen consequent nieuwe mogelijkheden, zoals blijkt uit de progressie van GPT-1 via GPT-3 en latere toonaangevende systemen
 - Opleiding is extreem duur; gevolgtrekking is veel goedkoper - deze asymmetrie bepaalt hoe funderingsmodellen worden ingezet

@@ -1,5 +1,5 @@
 ---
-title: "Multimodale KI – Wenn KI gleichzeitig sieht, hört und liest"
+title: "Multimodale KI - Wenn KI gleichzeitig sieht, hört und liest"
 description: "Erfahren Sie, wie moderne KI-Systeme Vision, Sprache und Audio kombinieren, um die Welt besser zu verstehen als Menschen."
 order: 8
 difficulty: "intermediate"
@@ -8,22 +8,22 @@ icon: "🔗"
 published: true
 machineTranslated: true
 ---
-# Multimodale KI – Wenn KI gleichzeitig sieht, hört und liest
+# Multimodale KI - Wenn KI gleichzeitig sieht, hört und liest
 
-Der Mensch nimmt die Welt nicht mit einem einzigen Sinn wahr. Sie lesen eine Speisekarte, werfen einen Blick auf ein Foto des Gerichts und hören sich die Empfehlung des Kellners an – Text, Bild und Ton werden nahtlos kombiniert. Jahrzehntelang waren KI-Systeme jeweils auf eine Modalität beschränkt: Nur Text, Nur Bild, Nur Audio. **Multimodale KI** durchbricht diese Mauern und ermöglicht Modelle, die mehrere Datentypen gleichzeitig verarbeiten und begründen können.
+Der Mensch nimmt die Welt nicht mit einem einzigen Sinn wahr. Sie lesen eine Speisekarte, werfen einen Blick auf ein Foto des Gerichts und hören sich die Empfehlung des Kellners an - Text, Bild und Ton werden nahtlos kombiniert. Jahrzehntelang waren KI-Systeme jeweils auf eine Modalität beschränkt: Nur Text, Nur Bild, Nur Audio. **Multimodale KI** durchbricht diese Mauern und ermöglicht Modelle, die mehrere Datentypen gleichzeitig verarbeiten und begründen können.
 
 ## Was bedeutet multimodal?
 
 Eine **Modalität** ist eine Art von Eingabedaten: Text, Bilder, Audio, Video oder sogar Sensormesswerte. Ein **multimodales Modell** kann zwei oder mehr Modalitäten akzeptieren und Ergebnisse erzeugen, die das Verständnis aller Modalitäten widerspiegeln.
 
 Dies ist grundsätzlich schwieriger als der Umgang mit einer Modalität. Das Modell muss lernen, sich **auszurichten**
-Darstellungen – Verständnis dafür, dass sich das Wort „Hund“ und ein Foto eines Hundes auf dasselbe beziehen
+Darstellungen - Verständnis dafür, dass sich das Wort „Hund“ und ein Foto eines Hundes auf dasselbe beziehen
 Konzept. Es muss auch lernen, wann Modalitäten einander widersprechen und wie Widersprüche abzuwägen sind
 Signale.
 
 <Illustration src="/images/lessons/multimodal-ai.svg" alt="Diagramm, das Text-, Bild- und Audioeingaben zeigt, die in ein einheitliches multimodales Modell fließen" caption="Multimodale KI führt Informationen aus Text, Bildern, Audio und mehr zu einem gemeinsamen Verständnis zusammen." />
 
-## CLIP – Bilder und Text verbinden
+## CLIP - Bilder und Text verbinden
 
 **CLIP** (Contrastive Language-Image Pre-training) von OpenAI, das 2021 veröffentlicht wurde, war ein Durchbruch bei der Verbindung von Vision und Sprache. Es wurde anhand von 400 Millionen Bild-Text-Paaren aus dem Internet trainiert.
 
@@ -33,30 +33,30 @@ Signale.
 2. Ein **Text-Encoder** wandelt Textbeschreibungen im gleichen Raum in Vektoren um.
 3. Während des Trainings lernt CLIP, passende Bild-Text-Paare nahe beieinander und nicht passende Paare auseinander zu schieben.
 
-Das Ergebnis: CLIP versteht visuelle Konzepte durch Sprache. Sie können ein Bild in Worten beschreiben und CLIP findet die beste Übereinstimmung – selbst für Kategorien, auf die es nie explizit trainiert wurde. Diese **Zero-Shot-Fähigkeit** war bemerkenswert.
+Das Ergebnis: CLIP versteht visuelle Konzepte durch Sprache. Sie können ein Bild in Worten beschreiben und CLIP findet die beste Übereinstimmung - selbst für Kategorien, auf die es nie explizit trainiert wurde. Diese **Zero-Shot-Fähigkeit** war bemerkenswert.
 
 CLIP wurde zu einem Grundbaustein. Es ermöglicht die Textführung in Stable Diffusion
 visuelle Suchmaschinen und ist die Grundlage vieler moderner multimodaler Systeme. Seine offene Veröffentlichung löste einen Funken aus
 Welle von Forschung und Anwendungen, die immer weiter zunimmt.
 
-<FunFact>CLIP kann Bilder in Kategorien klassifizieren, die es während des Trainings noch nie gesehen hat – indem ihm einfach die Kategorienamen in einfachem Englisch mitgeteilt werden.</FunFact>
+<FunFact>CLIP kann Bilder in Kategorien klassifizieren, die es während des Trainings noch nie gesehen hat - indem ihm einfach die Kategorienamen in einfachem Englisch mitgeteilt werden.</FunFact>
 
 ## Moderne GPT-Modelle - Vision trifft auf Konversation
 
-OpenAIs GPT-4V zeigte, wie GPT-Familien-Sprachmodelle neben Text auch Bilder akzeptieren können. Heute setzen frontier GPT-Modelle dieses Muster fort: Sie können ein Foto hochladen und Fragen dazu stellen, Erklärungen zu Diagrammen anfordern oder das Modell handschriftliche Notizen lesen und interpretieren lassen.
+OpenAIs GPT-4V zeigte, wie GPT-Familien-Sprachmodelle neben Text auch Bilder akzeptieren können. Heute setzen führende GPT-Modelle dieses Muster fort: Sie können ein Foto hochladen und Fragen dazu stellen, Erklärungen zu Diagrammen anfordern oder das Modell handschriftliche Notizen lesen und interpretieren lassen.
 
 Omni-artige Modelle gingen weiter und verarbeiten Text, Bilder und Audio nativ in einem einzigen Modell. Anstatt verschiedene Modalitäten über separate Systeme zu leiten, werden sie end-to-end über alle drei trainiert, was schnellere und natürlichere Interaktionen ermöglicht.
 
 Dies ist wichtig, weil ein einheitliches Modell subtile modalübergreifende Beziehungen erfassen kann: den Ton von
 die Stimme einer Person, die zu ihrem Gesichtsausdruck passt, oder das visuelle Layout eines Diagramms, das die Daten verstärkt
-im umgebenden Text beschrieben. Es reduziert auch die Latenz – ein einziger Vorwärtsdurchlauf durch ein Modell
+im umgebenden Text beschrieben. Es reduziert auch die Latenz - ein einziger Vorwärtsdurchlauf durch ein Modell
 ist schneller als die Weiterleitung von Daten über mehrere Fachsysteme.
 
 <Quiz question="Was hat CLIP zum Durchbruch für multimodale KI gemacht?" options="Es war das erste Modell, das Bilder aus Text generierte|Es lernte, Bild- und Textdarstellungen in einem gemeinsamen Vektorraum auszurichten|Es könnte zwischen 100 Sprachen übersetzen|Es war das erste Modell, das auf Videodaten trainiert wurde" answer="1" explanation="CLIP hat gelernt, Bilder und Text im selben Einbettungsraum abzubilden, was eine Zero-Shot-Bildklassifizierung ermöglicht und nachgelagerte Systeme wie Stable Diffusion mit Strom versorgt." />
 
-## Gemini – Native Multimodalität von Google
+## Gemini - Native Multimodalität von Google
 
-Die **Gemini**-Modellfamilie von Google wurde von Grund auf multimodal konzipiert – kein Sprachmodell mit fest verankerter Vision. Gemini verarbeitet nativ Text, Bilder, Audio, Video und Code.
+Die **Gemini**-Modellfamilie von Google wurde von Grund auf multimodal konzipiert - kein Sprachmodell mit fest verankerter Vision. Gemini verarbeitet nativ Text, Bilder, Audio, Video und Code.
 
 Zu den wichtigsten Fähigkeiten gehören:
 - Argumentation über lange Videos (Handlung verstehen, Objekte identifizieren, Text auf dem Bildschirm lesen).
@@ -69,12 +69,12 @@ Die architektonische Entscheidung, von Grund auf multimodal zu trainieren, ansta
 
 Zwei klassische multimodale Aufgaben veranschaulichen den Fortschritt des Fachgebiets:
 
-**Bildunterschrift** – Generieren Sie anhand eines Bildes eine Beschreibung in natürlicher Sprache. Frühe Modelle
+**Bildunterschrift** - Generieren Sie anhand eines Bildes eine Beschreibung in natürlicher Sprache. Frühe Modelle
 produzierte gestelzte Sätze; Moderne Systeme generieren umfangreiche, kontextbezogene Beschreibungen
 Erfassen Sie Stimmung, Aktion und Beziehungen zwischen Objekten. Modelle wie BLIP-2 und CoCa können Untertitel erstellen
 Bilder mit nahezu menschlicher Geläufigkeit.
 
-**Visual Question Answering (VQA)** – Geben Sie anhand eines Bildes und einer Frage eine Antwort. Beispiel: *„Wie viele Menschen tragen Hüte?“* erfordert, dass das Modell die Frage versteht (Sprache), Personen lokalisiert (Vision), Hüte identifiziert (Vision + Wissen) und zählt (Begründung).
+**Visual Question Answering (VQA)** - Geben Sie anhand eines Bildes und einer Frage eine Antwort. Beispiel: *„Wie viele Menschen tragen Hüte?“* erfordert, dass das Modell die Frage versteht (Sprache), Personen lokalisiert (Vision), Hüte identifiziert (Vision + Wissen) und zählt (Begründung).
 
 <ThinkAboutIt>Wenn eine multimodale KI ein Foto beschreibt, übersieht sie möglicherweise den kulturellen Kontext, den ein Mensch sofort erfassen würde. Wie können wir das kulturelle Bewusstsein in diesen Systemen messen und verbessern?</ThinkAboutIt>
 
@@ -82,15 +82,15 @@ Bilder mit nahezu menschlicher Geläufigkeit.
 
 Einige multimodale Systeme kombinieren Audio und Vision:
 
-- **Lippenlesen** – Modelle, die Sprache aus dem Video des Gesichts eines Sprechers vorhersagen, auch ohne Audio.
+- **Lippenlesen** - Modelle, die Sprache aus dem Video des Gesichts eines Sprechers vorhersagen, auch ohne Audio.
 - **Audiovisuelle Quellentrennung** - Identifizieren, welche Person in einem Video spricht, indem Lippenbewegungen mit Audiosignalen abgeglichen werden.
-- **Emotionserkennung** – Kombination von Gesichtsausdrücken, Körpersprache und Stimmton für eine genauere Stimmungsanalyse.
+- **Emotionserkennung** - Kombination von Gesichtsausdrücken, Körpersprache und Stimmton für eine genauere Stimmungsanalyse.
 
 Diese Fähigkeiten sind besonders wertvoll für Barrierefreiheitstools, Sicherheitssysteme und die Mensch-Computer-Interaktion.
 
 ## Dokumentverständnis
 
-Moderne multimodale KI zeichnet sich durch das Verständnis komplexer Dokumente – Rechnungen, wissenschaftliche Arbeiten, Rechtsverträge – aus, die Text, Tabellen, Abbildungen und Layouts mischen.
+Moderne multimodale KI zeichnet sich durch das Verständnis komplexer Dokumente - Rechnungen, wissenschaftliche Arbeiten, Rechtsverträge - aus, die Text, Tabellen, Abbildungen und Layouts mischen.
 
 Modelle wie Googles **Document AI** und Microsofts **Layout LM** verarbeiten die visuelle Struktur eines
 Dokument (wo Textblöcke sitzen, wie Tabellen formatiert sind) neben dem Textinhalt selbst. Dies
@@ -125,6 +125,6 @@ Der Trend ist unverkennbar: Die leistungsfähigsten KI-Systeme, die heute gebaut
 
 ## 📚 Weiterführende Literatur
 
-– [Lernen übertragbarer visueller Modelle aus der Überwachung natürlicher Sprache (CLIP-Papier)](https://arxiv.org/abs/2103.00020) – Das Original-CLIP-Papier von OpenAI
-– [Technischer Bericht von Gemini – Google DeepMind](https://arxiv.org/abs/2312.11805) – Architektur und Funktionen der nativen multimodalen Modellfamilie von Google
+- [Lernen übertragbarer visueller Modelle aus der Überwachung natürlicher Sprache (CLIP-Papier)](https://arxiv.org/abs/2103.00020) - Das Original-CLIP-Papier von OpenAI
+- [Technischer Bericht von Gemini - Google DeepMind](https://arxiv.org/abs/2312.11805) - Architektur und Funktionen der nativen multimodalen Modellfamilie von Google
 - [GPT-4o-Systemkarte - OpenAI](https://openai.com/index/gpt-4o-system-card/) - Historische Sicherheits- und Fähigkeitsanalyse eines frühen Omni-Modells

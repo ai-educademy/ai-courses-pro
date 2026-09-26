@@ -31,7 +31,7 @@ Das funktioniert, hat aber zwei große Probleme:
 **1. Verschwindende Farbverläufe über lange Sequenzen**
 Bis das Modell Wort 10 verarbeitet, wurden die Informationen aus Wort 1 durch neun versteckte Zustandsaktualisierungen „verwässert“. Das Modell hat Schwierigkeiten, „it“ (Wort 8) wieder mit „cat“ (Wort 2) zu verbinden, wenn der Satz lang ist.
 
-**2. Langsam – keine Parallelisierung**
+**2. Langsam - keine Parallelisierung**
 Da jedes Wort vom vorherigen verborgenen Zustand abhängt, müssen Sie die Wörter einzeln verarbeiten. Eine Parallelisierung über eine Sequenz hinweg ist nicht möglich. Das Training langer Dokumente ist quälend langsam.
 
 Der Transformer löst beide Probleme mit einem einzigen eleganten Mechanismus: **Aufmerksamkeit**.
@@ -40,15 +40,15 @@ Der Transformer löst beide Probleme mit einem einzigen eleganten Mechanismus: *
 
 Die zentrale Innovation des Transformers ist die **Selbstaufmerksamkeit**: die Fähigkeit jedes Wortes in einer Sequenz, jedes andere Wort gleichzeitig direkt zu berücksichtigen, unabhängig davon, wie weit sie voneinander entfernt sind.
 
-Anstatt Informationen nacheinander weiterzugeben, berechnet die Selbstaufmerksamkeit, **wie relevant jedes Wort für jedes andere Wort in der Sequenz ist** – und zwar auf einmal.
+Anstatt Informationen nacheinander weiterzugeben, berechnet die Selbstaufmerksamkeit, **wie relevant jedes Wort für jedes andere Wort in der Sequenz ist** - und zwar auf einmal.
 
-### Abfrage, Schlüssel und Wert – im Klartext
+### Abfrage, Schlüssel und Wert - im Klartext
 
 Für jedes Wort (oder Token) erstellt der Transformer drei Vektoren:
 
-- **Frage (F)**: *„Wonach suche ich?“* – die Frage, die dieses Wort stellt
-- **Schlüssel (K)**: *„Was enthalte ich?“* – die Werbung, die jedes Wort über sich selbst ausstrahlt
-- **Wert (V)**: *„Welche Informationen stelle ich bereit?“* – der tatsächlich abzurufende Inhalt
+- **Frage (F)**: *„Wonach suche ich?“* - die Frage, die dieses Wort stellt
+- **Schlüssel (K)**: *„Was enthalte ich?“* - die Werbung, die jedes Wort über sich selbst ausstrahlt
+- **Wert (V)**: *„Welche Informationen stelle ich bereit?“* - der tatsächlich abzurufende Inhalt
 
 Der Aufmerksamkeitswert zwischen zwei Wörtern wird berechnet, indem das Skalarprodukt der Suchanfrage eines Wortes mit dem Schlüssel eines anderen Wortes gebildet wird. Eine hohe Punktzahl bedeutet, dass „diese beiden Wörter füreinander von hoher Relevanz sind“.
 
@@ -160,7 +160,7 @@ Encoder Output + Generated tokens so far
 Nicht alle Transformer-basierten Modelle verwenden die vollständige Encoder-Decoder-Struktur. Die beiden vorherrschenden Varianten sind:
 
 ### BERT (nur Encoder)
-– Verwendet nur den **Encoder**-Stack
+- Verwendet nur den **Encoder**-Stack
 - Trainiert mit **Masked Language Modeling**: Einige Eingabetokens sind ausgeblendet und BERT sagt sie voraus
 - Hervorragend darin, Text zu **verstehen**: Klassifizierung, Suche, Fragen und Antworten
 - Liest den gesamten Kontext bidirektional (jedes Wort sieht jedes andere Wort)
@@ -169,7 +169,7 @@ Nicht alle Transformer-basierten Modelle verwenden die vollständige Encoder-Dec
 - Verwendet nur den **Decoder**-Stack  
 - Trainiert mit **Vorhersage des nächsten Tokens**: Sagen Sie anhand aller vorherigen Token den nächsten voraus
 - Hervorragend darin, Text zu **generieren**: Konversation, Schreiben, Code
-- Kausale Maskierung: Jeder Token kann sich nur um frühere Token kümmern (nicht um zukünftige – das wäre Betrug)
+- Kausale Maskierung: Jeder Token kann sich nur um frühere Token kümmern (nicht um zukünftige - das wäre Betrug)
 
 ```
 BERT training:   "The [MASK] sat on the mat"  → predict "cat"
@@ -180,35 +180,35 @@ GPT training:    "The cat sat on the"          → predict "mat"
 
 ## 📈 Warum Skalierung wichtig ist
 
-Die Transformer-Architektur ließ sich bemerkenswert gut skalieren. Größere Modelle mit mehr Parametern, die auf mehr Daten und mehr Rechenleistung trainiert werden, erzielen durchweg eine bessere Leistung – ein Phänomen, das durch **Skalierungsgesetze** beschrieben wird (Kaplan et al., 2020).
+Die Transformer-Architektur ließ sich bemerkenswert gut skalieren. Größere Modelle mit mehr Parametern, die auf mehr Daten und mehr Rechenleistung trainiert werden, erzielen durchweg eine bessere Leistung - ein Phänomen, das durch **Skalierungsgesetze** beschrieben wird (Kaplan et al., 2020).
 
 Dies führte zu einer Entwicklung:
 - GPT-1 (2018): 117 Mio. Parameter
 - GPT-2 (2019): 1,5B Parameter
 - GPT-3 (2020): 175B Parameter
-- Aktuelle frontier Modelle: oft mixture-of-experts oder unveröffentlichte Architekturen mit Hunderten Milliarden bis Billionen effektiver Parameter
+- Aktuelle Spitzenmodelle: oft mixture-of-experts oder unveröffentlichte Architekturen mit Hunderten Milliarden bis Billionen effektiver Parameter
 
-Jeder Sprung brachte qualitative Verbesserungen der Fähigkeiten. Aufgaben, die GPT-2 überhaupt nicht bewältigen konnte (komplexes Schlussfolgern, Codegenerierung), wurden im GPT-3-Maßstab möglich und verbesserten sich in späteren frontier Modellen weiter.
+Jeder Sprung brachte qualitative Verbesserungen der Fähigkeiten. Aufgaben, die GPT-2 überhaupt nicht bewältigen konnte (komplexes Schlussfolgern, Codegenerierung), wurden im GPT-3-Maßstab möglich und verbesserten sich in späteren Spitzenmodellen weiter.
 
 ## ⚡ Training vs. Inferenz
 
 Zwei sehr unterschiedliche Rechenprofile:
 
-**Training**: extrem teuer. Billionen von Token verarbeiten, Gradienten berechnen und riesige Parametersätze über Tausende GPUs wochen- oder monatelang aktualisieren. Das Training aktueller frontier Modelle kann Hunderte Millionen kosten, wenn Compute, Daten, Energie und Engineering einbezogen werden.
+**Training**: extrem teuer. Billionen von Token verarbeiten, Gradienten berechnen und riesige Parametersätze über Tausende GPUs wochen- oder monatelang aktualisieren. Das Training aktueller Spitzenmodelle kann Hunderte Millionen kosten, wenn Compute, Daten, Energie und Engineering einbezogen werden.
 
 **Schlussfolgerung**: viel günstiger. Ein einzelner Vorwärtsdurchlauf durch das Netzwerk, um jedes Token zu generieren. Erfordert immer noch erhebliche Hardware (leistungsstarke GPUs oder spezielle KI-Chips), ist aber im großen Maßstab beherrschbar.
 
 Diese Asymmetrie hat die Branche geprägt: Einige wenige gut ausgestattete Organisationen trainieren Grundlagenmodelle; Alle anderen greifen über APIs darauf zu.
 
-<Quiz question="Welches Problem mit RNNs hat der Aufmerksamkeitsmechanismus des Transformers gelöst?" options="RNNs konnten keinen Text verarbeiten – sie funktionierten nur mit Bildern|RNNs hatten mit weitreichenden Abhängigkeiten zu kämpfen und konnten keine Parallelisierung über die gesamte Sequenzlänge hinweg durchführen|Für das Training von RNNs waren zu viele beschriftete Daten erforderlich|RNNs konnten nur englischen Text verarbeiten" answer="1" explanation="RNNs verarbeiteten Token nacheinander, was zu verschwindenden Gradienten führte, die es schwierig machten, entfernte Wörter zu verbinden (Langstreckenabhängigkeiten). Sie konnten auch nicht über die gesamte Sequenzlänge hinweg parallelisiert werden, was das Training langsam machte. Selbstaufmerksamkeit löst beides: Jeder Token kümmert sich direkt um jeden anderen, und alle Aufmerksamkeitsberechnungen können parallel laufen." />
+<Quiz question="Welches Problem mit RNNs hat der Aufmerksamkeitsmechanismus des Transformers gelöst?" options="RNNs konnten keinen Text verarbeiten - sie funktionierten nur mit Bildern|RNNs hatten mit weitreichenden Abhängigkeiten zu kämpfen und konnten keine Parallelisierung über die gesamte Sequenzlänge hinweg durchführen|Für das Training von RNNs waren zu viele beschriftete Daten erforderlich|RNNs konnten nur englischen Text verarbeiten" answer="1" explanation="RNNs verarbeiteten Token nacheinander, was zu verschwindenden Gradienten führte, die es schwierig machten, entfernte Wörter zu verbinden (Langstreckenabhängigkeiten). Sie konnten auch nicht über die gesamte Sequenzlänge hinweg parallelisiert werden, was das Training langsam machte. Selbstaufmerksamkeit löst beides: Jeder Token kümmert sich direkt um jeden anderen, und alle Aufmerksamkeitsberechnungen können parallel laufen." />
 
 ## Wichtige Erkenntnisse
 
-- **RNNs** verarbeiteten Sequenzen Schritt für Schritt, kämpften mit weitreichenden Abhängigkeiten und konnten nicht parallelisieren – Transformers ersetzten sie
-- **Selbstaufmerksamkeit** ermöglicht es jedem Token, sich über Abfrage-, Schlüssel- und Wertvektoren direkt um jedes andere Token zu kümmern – wodurch beide Probleme gleichzeitig gelöst werden
+- **RNNs** verarbeiteten Sequenzen Schritt für Schritt, kämpften mit weitreichenden Abhängigkeiten und konnten nicht parallelisieren - Transformers ersetzten sie
+- **Selbstaufmerksamkeit** ermöglicht es jedem Token, sich über Abfrage-, Schlüssel- und Wertvektoren direkt um jedes andere Token zu kümmern - wodurch beide Probleme gleichzeitig gelöst werden
 - **Mehrkopfaufmerksamkeit** führt mehrere Aufmerksamkeitsberechnungen parallel aus, sodass das Modell gleichzeitig verschiedene Arten von Beziehungen lernen kann
 - **Positionskodierung** fügt Ordnungsinformationen zum inhärent positionsunabhängigen Aufmerksamkeitsmechanismus hinzu
 - **BERT** (nur Encoder) ist vorab darauf trainiert, Text bidirektional zu verstehen; am besten für Klassifizierungs- und Suchaufgaben geeignet
 - **GPT** (nur Decoder) ist vorab trainiert, um Text von links nach rechts zu generieren; am besten für Generation und Konversation
-- **Skalierung ist enorm wichtig**: Größere Transformers, die auf mehr Daten trainiert werden, schalten konsequent neue Fähigkeiten frei, wie die Entwicklung von GPT-1 über GPT-3 bis zu späteren frontier Systemen zeigt
+- **Skalierung ist enorm wichtig**: Größere Transformers, die auf mehr Daten trainiert werden, schalten konsequent neue Fähigkeiten frei, wie die Entwicklung von GPT-1 über GPT-3 bis zu späteren Spitzensystemen zeigt
 - Schulung ist extrem teuer; Inferenz ist viel billiger - diese Asymmetrie prägt die Art und Weise, wie Basismodelle eingesetzt werden
