@@ -1,6 +1,6 @@
 ---
-title: "Tries మరియు Prefix Trees - Autocomplete, Spell Check, మరియు IP Routing"
-description: "Lightning-fast prefix lookups కోసం trie data structure నేర్చుకోండి. Autocomplete, wildcard search నిర్మించండి, మరియు compressed tries మరియు IP routing అన్వేషించండి."
+title: "Tries మరియు ప్రీఫిక్స్ వృక్షాలు - ఆటోకంప్లీట్, Spell తనిఖీ, మరియు IP రూటింగ్"
+description: "Lightning-వేగంగా ప్రీఫిక్స్ లుక్‌అప్‌లు కోసం ట్రై డేటా నిర్మాణం నేర్చుకోండి. ఆటోకంప్లీట్, wildcard సెర్చ్ నిర్మించండి, మరియు compressed tries మరియు IP రూటింగ్ అన్వేషించండి."
 order: 6
 difficulty: "advanced"
 duration: 18
@@ -8,9 +8,9 @@ icon: "🌳"
 published: true
 ---
 
-## Trie అంటే ఏమిటి?
+## ట్రై అంటే ఏమిటి?
 
-**Trie** (ఉచ్చారణ "try") అనేది ప్రతి node ఒక్క character ను represent చేసే tree లాంటి structure. Root నుండి marked nodes వరకు ఉన్న paths stored words ను spell చేస్తాయి. Hash maps కి భిన్నంగా, tries *ఒక prefix share చేసే అన్ని words* ను ప్రతి key scan చేయకుండా query చేయగలవు.
+**Trie** (ఉచ్చారణ "try") అనేది ప్రతి నోడ్ ఒక్క అక్షరం ను ప్రతినిధ్యం చేస్తుంది చేసే వృక్షం లాంటి నిర్మాణం. రూట్ నుండి marked నోడ్‌లు వరకు ఉన్న మార్గాలు stored words ను spell చేస్తాయి. హ్యాష్ మ్యాప్‌లు కి భిన్నంగా, tries *ఒక ప్రీఫిక్స్ పంచుకోండి చేసే అన్ని words* ను ప్రతి కీ scan చేయకుండా క్వెరీ చేయగలవు.
 
 ```
         root
@@ -25,11 +25,11 @@ published: true
   e
 ```
 
-ప్రతి path ఒక word ను encode చేస్తుంది: **apple**, **ape**, **bat**, **cat**.
+ప్రతి మార్గం ఒక పదం ను encode చేస్తుంది: **apple**, **ape**, **bat**, **cat**.
 
 ## TrieNode Class
 
-ప్రతి node లో children map మరియు word completion ని indicate చేసే flag ఉంటాయి.
+ప్రతి నోడ్ లో children మ్యాప్ మరియు పదం completion ని indicate చేసే flag ఉంటాయి.
 
 ```python
 class TrieNode:
@@ -38,13 +38,13 @@ class TrieNode:
         self.is_end = False
 ```
 
-పూర్తి Trie దీనిని insert, search, మరియు prefix operations తో wrap చేస్తుంది.
+పూర్తి ట్రై దీనిని చేర్చండి, సెర్చ్, మరియు ప్రీఫిక్స్ ఆపరేషన్లు తో wrap చేస్తుంది.
 
-## ప్రధాన Operations
+## ప్రధాన ఆపరేషన్లు
 
-### Insert - O(m) ఇక్కడ m = word యొక్క length
+### చేర్చండి - O(m) ఇక్కడ m = పదం యొక్క length
 
-Character by character నడవండి, అవసరమైతే nodes సృష్టించండి, తర్వాత చివరి node ని mark చేయండి.
+అక్షరం ద్వారా అక్షరం నడవండి, అవసరమైతే నోడ్‌లు సృష్టించండి, తర్వాత చివరి నోడ్ ని mark చేయండి.
 
 ```python
 def insert(self, word):
@@ -56,20 +56,20 @@ def insert(self, word):
     node.is_end = True
 ```
 
-### Search మరియు startsWith
+### సెర్చ్ మరియు startsWith
 
-**Search** path ను follow చేసి `is_end` check చేస్తుంది. **startsWith** path ఉందా లేదా అని మాత్రమే check చేస్తుంది - దీనికి `is_end = True` అవసరం లేదు.
+**సెర్చ్** మార్గం ను అనుసరించండి చేసి `is_end` తనిఖీ చేస్తుంది. **startsWith** మార్గం ఉందా లేదా అని మాత్రమే తనిఖీ చేస్తుంది - దీనికి `is_end = True` అవసరం లేదు.
 
 <Quiz
-  question="'apple' stored ఉండి 'app' stored లేనప్పుడు search('app') మరియు startsWith('app') మధ్య తేడా ఏమిటి?"
-  options="search True return చేస్తుంది, startsWith False return చేస్తుంది|రెండూ True return చేస్తాయి|search False return చేస్తుంది, startsWith True return చేస్తుంది|రెండూ False return చేస్తాయి"
+  question="'apple' stored ఉండి 'app' stored లేనప్పుడు సెర్చ్('app') మరియు startsWith('app') మధ్య తేడా ఏమిటి?"
+  options="సెర్చ్ true రిటర్న్ చేస్తుంది, startsWith తప్పుడు రిటర్న్ చేస్తుంది|రెండూ true రిటర్న్ చేస్తాయి|సెర్చ్ తప్పుడు రిటర్న్ చేస్తుంది, startsWith true రిటర్న్ చేస్తుంది|రెండూ తప్పుడు రిటర్న్ చేస్తాయి"
   answer="2"
-  explanation="search is_end ని check చేస్తుంది ('app' కి False), అయితే startsWith కి path ఉంటే చాలు."
+  explanation="సెర్చ్ is_ముగింపు ని తనిఖీ చేస్తుంది ('app' కి తప్పుడు), అయితే startsWith కి మార్గం ఉంటే చాలు."
 />
 
-## DFS తో Autocomplete
+## DFS తో ఆటోకంప్లీట్
 
-ఒక prefix కోసం suggestions ఇవ్వడానికి, prefix node కి navigate చేసి, తర్వాత DFS run చేసి దాని కింద ఉన్న అన్ని words collect చేయండి.
+ఒక ప్రీఫిక్స్ కోసం suggestions ఇవ్వడానికి, ప్రీఫిక్స్ నోడ్ కి navigate చేసి, తర్వాత DFS నడపండి చేసి దాని కింద ఉన్న అన్ని words collect చేయండి.
 
 ```python
 def autocomplete(self, prefix):
@@ -81,15 +81,15 @@ def autocomplete(self, prefix):
     return results
 ```
 
-`_dfs` helper children లో recursively traverse చేసి `is_end` `True` అయినప్పుడల్లా results కి append చేస్తుంది.
+`_dfs` helper children లో recursively traverse చేసి `is_end` `True` అయినప్పుడల్లా ఫలితాలు కి append చేస్తుంది.
 
-<ThinkAboutIt>Autocomplete ని top-k అత్యధిక frequent suggestions కి ఎలా limit చేస్తారు? ప్రతి node కి ఏ extra data అవసరం?</ThinkAboutIt>
+<ThinkAboutIt>ఆటోకంప్లీట్ ని ముఖ్యమైన-k అత్యధిక frequent suggestions కి ఎలా పరిమితి చేస్తారు? ప్రతి నోడ్ కి ఏ extra డేటా అవసరం?</ThinkAboutIt>
 
-## Wildcard Search - Word Dictionary
+## Wildcard సెర్చ్ - పదం Dictionary
 
-LeetCode యొక్క **Design Add and Search Words Data Structure** లో `.` ని ఏదైనా single character కి match అయ్యే wildcard గా handle చేయాలి.
+LeetCode యొక్క **డిజైన్ జోడించు మరియు సెర్చ్ Words డేటా నిర్మాణం** లో `.` ని ఏదైనా ఒకే అక్షరం కి సరిపోల్చండి అయ్యే wildcard గా నిర్వహించు చేయాలి.
 
-Search సమయంలో `.` వచ్చినప్పుడు, *ప్రతి* child లోకి branch చేసి recursively continue చేయండి. ఇది simple traversal ని bounded backtracking search గా మారుస్తుంది.
+సెర్చ్ సమయంలో `.` వచ్చినప్పుడు, *ప్రతి* child లోకి branch చేసి recursively continue చేయండి. ఇది సులభమైన traversal ని bounded backtracking సెర్చ్ గా మారుస్తుంది.
 
 ```python
 def search_wild(self, node, word, i):
@@ -107,67 +107,67 @@ def search_wild(self, node, word, i):
     )
 ```
 
-## Longest Common Prefix
+## Longest సాధారణ ప్రీఫిక్స్
 
-Root నుండి trie లో నడవండి. Longest common prefix మొదటి node వద్ద ముగుస్తుంది, ఆ node కి ఒకటి కంటే ఎక్కువ children ఉన్నప్పుడు లేదా `is_end` flag ఉన్నప్పుడు.
+రూట్ నుండి ట్రై లో నడవండి. Longest సాధారణ ప్రీఫిక్స్ మొదటి నోడ్ వద్ద ముగుస్తుంది, ఆ నోడ్ కి ఒకటి కంటే ఎక్కువ children ఉన్నప్పుడు లేదా `is_end` flag ఉన్నప్పుడు.
 
-<Illustration src="/images/lessons/tries-and-prefix-trees.svg" alt="Shared prefix paths highlight చేయబడిన Trie structure" caption="Shared prefix paths ఒక single branch లో converge అవుతాయి, split అయ్యే వరకు." />
+<Illustration src="/images/lessons/tries-and-prefix-trees.svg" alt="పంచుకున్న ప్రీఫిక్స్ మార్గాలు highlight చేయబడిన ట్రై నిర్మాణం" title="పంచుకున్న ప్రీఫిక్స్ మార్గాలు ఒక ఒకే branch లో converge అవుతాయి, split అయ్యే వరకు." />
 
-## Tries తో IP Routing
+## Tries తో IP రూటింగ్
 
-Routers IP prefixes ను **binary trie** లో store చేస్తారు - ప్రతి bit (0 లేదా 1) ఒక branch ఏర్పరుస్తుంది. Longest prefix match అత్యంత specific route ని కనుగొంటుంది. మీ packets internet లో తమ దారిని ఇలాగే కనుగొంటాయి.
+Routers IP prefixes ను **binary ట్రై** లో నిల్వ చేస్తారు - ప్రతి బిట్ (0 లేదా 1) ఒక branch ఏర్పరుస్తుంది. Longest ప్రీఫిక్స్ సరిపోల్చండి అత్యంత స్పష్టంగా మార్గం ని కనుగొంటుంది. మీ packets internet లో తమ దారిని ఇలాగే కనుగొంటాయి.
 
-<FunFact>Internet backbone routers TCAMs అనే specialised chips లో నిర్మించిన hardware-optimised tries ఉపయోగించి ప్రతి second బిలియన్ల longest-prefix-match lookups చేస్తాయి.</FunFact>
+<FunFact>Internet backbone routers TCAMs అనే specialised chips లో నిర్మించిన hardware-optimised tries ఉపయోగించి ప్రతి సెకండ్ బిలియన్ల longest-ప్రీఫిక్స్-సరిపోల్చండి లుక్‌అప్‌లు చేస్తాయి.</FunFact>
 
-## Compressed Tries (Radix Trees)
+## Compressed Tries (Radix వృక్షాలు)
 
-Standard tries single-child chains పై space వృథా చేస్తాయి. **Radix tree** ఈ chains ని merge చేసి multi-character labels ఉన్న single edges గా మారుస్తుంది.
+ప్రామాణిక tries ఒకే-child chains పై స్థలం వృథా చేస్తాయి. **Radix వృక్షం** ఈ chains ని మర్జ్ చేసి బహుళ-అక్షరం labels ఉన్న ఒకే ఎడ్జ్‌లు గా మారుస్తుంది.
 
 ```
 Standard:  r → u → n → n → i → n → g
 Radix:     r → "unning"
 ```
 
-ఇది node count ని గణనీయంగా తగ్గిస్తుంది మరియు Linux kernel routing tables మరియు Go యొక్క `httprouter` వంటి HTTP routers లో ఉపయోగించబడుతుంది.
+ఇది నోడ్ లెక్క ని గణనీయంగా తగ్గిస్తుంది మరియు Linux kernel రూటింగ్ tables మరియు Go యొక్క `httprouter` వంటి HTTP routers లో ఉపయోగించబడుతుంది.
 
-## Time మరియు Space Complexity
+## సమయం మరియు స్థలం క్లిష్టత
 
-| Operation    | Trie   | Hash Map |
+| Operation    | ట్రై   | హ్యాష్ మ్యాప్ |
 |--------------|--------|----------|
-| Insert       | O(m)   | O(m)     |
-| Search       | O(m)   | O(m)     |
-| Prefix query | O(m+k) | O(n·m)   |
+| చేర్చండి       | O(m)   | O(m)     |
+| సెర్చ్       | O(m)   | O(m)     |
+| ప్రీఫిక్స్ క్వెరీ | O(m+k) | O(n·m)   |
 
-ఇక్కడ *m* word length, *k* results count, మరియు *n* total keys. Prefix-heavy workloads లో tries ఆధిపత్యం చెలాయిస్తాయి.
+ఇక్కడ *m* పదం length, *k* ఫలితాలు లెక్క, మరియు *n* మొత్తం కీలు. ప్రీఫిక్స్-భారీ workloads లో tries ఆధిపత్యం చెలాయిస్తాయి.
 
 <Quiz
-  question="ఏ scenario లో trie కి hash map కంటే అత్యల్ప ప్రయోజనం ఉంటుంది?"
-  options="Autocomplete suggestions|Exact key-value lookups|Prefix matching తో spell checker|'pre' తో మొదలయ్యే అన్ని words కనుగొనడం"
+  question="ఏ సన్నివేశం లో ట్రై కి హ్యాష్ మ్యాప్ కంటే అత్యల్ప ప్రయోజనం ఉంటుంది?"
+  options="ఆటోకంప్లీట్ suggestions|ఖచ్చితమైన కీ-విలువ లుక్‌అప్‌లు|ప్రీఫిక్స్ matching తో spell checker|'ముందస్తు' తో మొదలయ్యే అన్ని words కనుగొనడం"
   answer="1"
-  explanation="Prefix queries లేకుండా exact lookups కోసం, hash map సరళంగా మరియు అంతే వేగంగా ఉంటుంది."
+  explanation="ప్రీఫిక్స్ క్వెరీలు లేకుండా ఖచ్చితమైన లుక్‌అప్‌లు కోసం, హ్యాష్ మ్యాప్ సరళంగా మరియు అంతే వేగంగా ఉంటుంది."
 />
 
-## Trie ఎప్పుడు ఉపయోగించాలి
+## ట్రై ఎప్పుడు ఉపయోగించాలి
 
-- Prefix-based queries (autocomplete, type-ahead)
+- ప్రీఫిక్స్-ఆధారిత క్వెరీలు (ఆటోకంప్లీట్, type-ahead)
 - Strings పై wildcard లేదా regex-like matching
-- ఒక set లో longest common prefix
-- IP routing / longest prefix match
+- ఒక సెట్ లో longest సాధారణ ప్రీఫిక్స్
+- IP రూటింగ్ / longest ప్రీఫిక్స్ సరిపోల్చండి
 - Edit-distance variations తో spell checking
 
 <Quiz
-  question="సగటు length m ఉన్న n words ని trie లో insert చేయడం యొక్క time complexity ఏమిటి?"
+  question="సగటు length m ఉన్న n words ని ట్రై లో చేర్చండి చేయడం యొక్క సమయం క్లిష్టత ఏమిటి?"
   options="O(n)|O(m)|O(n × m)|O(n × m²)"
   answer="2"
-  explanation="ప్రతి word ని insert చేయడానికి O(m) పడుతుంది, మరియు ఇది n సార్లు చేయాలి, కాబట్టి O(n × m) అవుతుంది."
+  explanation="ప్రతి పదం ని చేర్చండి చేయడానికి O(m) పడుతుంది, మరియు ఇది n సార్లు చేయాలి, కాబట్టి O(n × m) అవుతుంది."
 />
 
-<ThinkAboutIt>Memory మీ bottleneck అయితే, full keys store చేసే hash map ని trie కంటే ఎప్పుడు prefer చేస్తారు, మరియు compressed trie ఎప్పుడు గెలుస్తుంది?</ThinkAboutIt>
+<ThinkAboutIt>మెమరీ మీ bottleneck అయితే, పూర్తి కీలు నిల్వ చేసే హ్యాష్ మ్యాప్ ని ట్రై కంటే ఎప్పుడు prefer చేస్తారు, మరియు compressed ట్రై ఎప్పుడు గెలుస్తుంది?</ThinkAboutIt>
 
 ---
 
 ## 📚 మరింత చదవండి
 
-- [Trie Data Structure - Wikipedia](https://en.wikipedia.org/wiki/Trie) - Trie variants మరియు చరిత్ర యొక్క సమగ్ర overview
-- [Implement Trie - LeetCode 208](https://leetcode.com/problems/implement-trie-prefix-tree/) - Classic trie implementation problem
-- [Radix Trees in the Linux Kernel](https://lwn.net/Articles/175432/) - Compressed tries kernel internals ని ఎలా power చేస్తాయి
+- [ట్రై డేటా నిర్మాణం - Wikipedia](https://en.wikipedia.org/wiki/Trie) - ట్రై variants మరియు చరిత్ర యొక్క సమగ్ర అవలోకనం
+- [అమలు చేయండి ట్రై - LeetCode 208](https://leetcode.com/problems/implement-trie-prefix-tree/) - సాంప్రదాయ ట్రై implementation సమస్య
+- [Radix వృక్షాలు లో the Linux Kernel](https://lwn.net/Articles/175432/) - Compressed tries kernel internals ని ఎలా శక్తి చేస్తాయి
