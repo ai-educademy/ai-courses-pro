@@ -1,6 +1,6 @@
 ---
-title: "Dimensionando leis e treinamento em escala - Por que modelos maiores ficam mais inteligentes"
-description: "Explore as leis empíricas de escalabilidade que regem o desempenho do modelo, as estratégias de treinamento de computação ideal e a engenharia de sistemas distribuídos por trás dos modelos de fronteira de treinamento."
+title: "Leis de escala e treinamento em larga escala - Por que modelos maiores ficam mais inteligentes"
+description: "Explore as leis empíricas de escala que regem o desempenho dos modelos, as estratégias de treinamento computacionalmente ótimas e a engenharia de sistemas distribuídos por trás do treinamento de modelos de fronteira."
 order: 7
 difficulty: "advanced"
 duration: 18
@@ -8,107 +8,112 @@ icon: "📈"
 published: true
 machineTranslated: true
 ---
-# Dimensionando leis e treinamento em escala - Por que modelos maiores ficam mais inteligentes
 
-A revolução moderna da IA ​​não é apenas uma história algorítmica - é uma história de **engenharia e escalonamento**. Os pesquisadores descobriram que o desempenho do modelo segue leis de potência previsíveis em parâmetros, dados e computação, e a exploração dessas leis exigiu a invenção de paradigmas de treinamento distribuído inteiramente novos.
+# Leis de escala e treinamento em larga escala - Por que modelos maiores ficam mais inteligentes
+
+A revolução moderna da IA não é apenas uma história de algoritmos - é uma história de **engenharia e escala**. Pesquisadores descobriram que o desempenho dos modelos segue leis de potência previsíveis em relação a parâmetros, dados e computação, e explorar essas leis exigiu inventar paradigmas de treinamento distribuído totalmente novos.
 
 ## Leis de escala de Kaplan
 
-Em 2020, pesquisadores da OpenAI (Kaplan et al.) publicaram uma descoberta marcante: a perda do transformador segue **relações suaves de lei de potência** com três variáveis:
+Em 2020, pesquisadores da OpenAI (Kaplan et al.) publicaram uma descoberta marcante: a perda em Transformers segue **relações suaves de lei de potência** com três variáveis:
 
 - **N** - Número de parâmetros do modelo
 - **D** - Tamanho do conjunto de dados (tokens)
-- **C** - Orçamento de cálculo (FLOPs)
+- **C** - Orçamento de computação (FLOPs)
 
-O resultado principal: `L(N) ∝ N^(-0.076)` - a perda diminui conforme a lei de potência da contagem de parâmetros. Dobre os parâmetros e a perda cairá de forma previsível. Essas curvas não mostraram nenhum sinal de estabilização em seis ordens de magnitude, sugerindo que o dimensionamento era um caminho confiável para um melhor desempenho.
+O resultado principal: `L(N) ∝ N^(-0.076)` - a perda diminui como uma lei de potência do número de parâmetros. Dobre os parâmetros, e a perda cai de forma previsível. Essas curvas não mostraram sinal de saturação ao longo de seis ordens de magnitude, sugerindo que escalar era um caminho confiável para melhorar o desempenho.
 
-Recomendação de Kaplan: quando a computação é limitada, é mais eficiente **treinar um modelo maior para menos etapas** do que um modelo menor para mais etapas. Isso orientou a decisão de dimensionar o GPT-3 para 175 bilhões de parâmetros.
+A recomendação de Kaplan: quando a computação é limitada, é mais eficiente **treinar um modelo maior por menos etapas** do que um modelo menor por mais etapas. Isso orientou a decisão de escalar o GPT-3 para 175 bilhões de parâmetros.
 
-<Illustration src="/images/lessons/scaling-laws-and-training.svg" alt="Gráfico log-log mostrando diminuição suave da perda conforme parâmetros, dados e cálculo aumentam" caption="As leis de escala mostram que a perda diminui previsivelmente como uma lei de potência de parâmetros, dados e computação." />
+<Illustration src="/images/lessons/scaling-laws-and-training.svg" alt="Gráfico log-log mostrando uma queda suave da perda em lei de potência à medida que parâmetros, dados e computação aumentam" caption="As leis de escala mostram que a perda diminui de forma previsível como uma lei de potência de parâmetros, dados e computação." />
 
-## Chinchila e treinamento otimizado para computação
+## Chinchilla e treinamento computacionalmente ótimo
 
-Em 2022, o **artigo Chinchilla** da DeepMind desafiou as conclusões de Kaplan. Seu principal insight: a alocação ideal entre parâmetros e tokens de treinamento é aproximadamente **1:20** - para cada parâmetro, você deve treinar em aproximadamente 20 tokens.
+Em 2022, o **artigo Chinchilla** da DeepMind desafiou as conclusões de Kaplan. O insight central foi que a alocação ideal entre parâmetros e tokens de treinamento é de aproximadamente **1:20** - para cada parâmetro, você deve treinar com cerca de 20 tokens.
 
 | Modelo | Parâmetros | Tokens de treinamento | Proporção |
 |-------|-----------|----------------|-------|
 | GPT-3 | 175B | 300B | 1.7:1 |
-| Chinchila | 70B | 1.4T | 20:1 |
-| Llama 2 70B | 70B | 2T | 28:1 |
+| Chinchilla | 70B | 1.4T | 20:1 |
+| Llama 4 Scout | 17B active / 109B total | ~40T multimodal | MoE |
 
-Chinchila (parâmetros 70B) **superou** o muito maior Gopher (280B) treinando com 4x mais dados. A lição foi profunda: a maioria dos grandes modelos eram enormemente **sobreparametrizados e mal treinados**.
+Chinchilla (70B parâmetros) **superou** o Gopher, muito maior (280B), ao treinar com 4× mais dados. A lição foi profunda: a maioria dos grandes modelos era massivamente **sobreparametrizada e subtreinada**.
 
-<Quiz question="De acordo com as leis de escalonamento da Chinchilla, qual é a proporção aproximada de cálculo ideal entre tokens de treinamento e parâmetros?" options="1:1 - tokens e parâmetros iguais|1:20 - aproximadamente 20 tokens por parâmetro|100:1 - 100 tokens por parâmetro|Depende inteiramente da arquitetura do modelo, não da contagem de parâmetros" answer="1" explanation="A principal descoberta da Chinchilla foi que o treinamento ideal para computação requer aproximadamente 20 tokens por parâmetro. Modelos como o GPT-3 (1,7 tokens por parâmetro) foram gravemente mal treinados em relação ao seu tamanho, desperdiçando computação em parâmetros excessivos em vez de dados suficientes." />
+<Quiz question="De acordo com as leis de escala de Chinchilla, qual é a proporção aproximadamente computacionalmente ótima entre tokens de treinamento e parâmetros?" options="1:1 - tokens e parâmetros em quantidades iguais|1:20 - cerca de 20 tokens por parâmetro|100:1 - 100 tokens por parâmetro|Depende inteiramente da arquitetura do modelo, não do número de parâmetros" answer="1" explanation="A principal descoberta de Chinchilla foi que o treinamento computacionalmente ótimo exige aproximadamente 20 tokens por parâmetro. Modelos como o GPT-3 (1,7 token por parâmetro) estavam severamente subtreinados em relação ao seu tamanho, desperdiçando computação em parâmetros excedentes em vez de dados suficientes." />
 
 ## Por que a contagem de parâmetros não é tudo
 
-A capacidade de um modelo depende da interação de arquitetura, dados e treinamento. Considerar:
+A capacidade de um modelo depende da interação entre arquitetura, dados e treinamento. Considere:
 
-- **A qualidade dos dados** é mais importante do que o volume bruto. Os modelos treinados em texto curado, desduplicado e de alta qualidade superam consistentemente aqueles treinados em conjuntos de dados maiores, porém mais barulhentos. O LLaMA da Meta mostrou que um modelo 13B treinado em dados cuidadosamente selecionados poderia corresponder ao GPT-3 (175B) em muitos benchmarks.
-- **Opções de arquitetura** - padrões de atenção, funções de ativação (SwiGLU vs ReLU), posicionamento de normalização (pré-norma vs pós-norma) - todos mudam as curvas de escala.
-- **Tokenização** afeta o volume efetivo de dados. Um tokenizador melhor compacta mais informações por token, alterando a proporção entre parâmetro e token.
+- **A qualidade dos dados** importa mais do que o volume bruto. Modelos treinados em texto curado, deduplicado e de alta qualidade superam consistentemente aqueles treinados em conjuntos de dados maiores, porém mais ruidosos. O LLaMA da Meta mostrou que um modelo 13B treinado com dados cuidadosamente curados podia igualar o GPT-3 (175B) em muitos benchmarks.
+- **Escolhas de arquitetura** - padrões de attention, funções de ativação (SwiGLU vs ReLU), posicionamento da normalização (pre-norm vs post-norm) - todas deslocam as curvas de escala.
+- **Tokenização** afeta o volume efetivo de dados. Um tokenizador melhor comprime mais informação por token, alterando a proporção entre parâmetros e tokens.
 
-<FunFact>Treinar um modelo de fronteira pode custar centenas de milhões quando computação, dados, energia e engenharia são incluídos. A eletricidade consumida durante uma única execução de treinamento de modelo de fronteira pode exceder o consumo anual de uma pequena cidade, levantando questões sérias sobre a sustentabilidade ambiental do escalonamento.</FunFact>
+<FunFact>
+Treinar um modelo de fronteira pode custar centenas de milhões quando se incluem computação, dados, energia e engenharia. A eletricidade consumida durante uma única execução de treinamento de um modelo de fronteira pode exceder o consumo anual de uma pequena cidade, levantando questões sérias sobre a sustentabilidade ambiental da escala.
 </FunFact>
 
-## Estratégias de Treinamento Distribuído
+## Estratégias de treinamento distribuído
 
-Nenhuma GPU pode conter um modelo de fronteira. O treinamento requer a distribuição do trabalho entre milhares de aceleradores usando diversas estratégias complementares:
+Nenhuma GPU individual consegue comportar um modelo de fronteira. O treinamento exige distribuir o trabalho por milhares de aceleradores usando várias estratégias complementares:
 
 **Paralelismo de dados** - A abordagem mais simples: replicar o modelo inteiro em cada GPU, dividir o lote de treinamento entre dispositivos e calcular a média dos gradientes após cada etapa. Funciona bem quando o modelo cabe na memória de uma única GPU.
 
-**Paralelismo de modelo (Paralelismo de tensor)** - Divida camadas individuais entre GPUs. Uma única multiplicação de matriz é dividida para que cada GPU calcule uma fatia da saída. Requer interconexões de alta largura de banda (NVLink, InfiniBand) porque as GPUs devem se comunicar em cada passagem de avanço/retrocesso.
+**Paralelismo de modelo (paralelismo de tensores)** - Dividir camadas individuais entre GPUs. Uma única multiplicação de matrizes é dividida para que cada GPU calcule uma fatia da saída. Isso exige interconexões de alta largura de banda (NVLink, InfiniBand), porque as GPUs precisam se comunicar em cada passagem direta/reversa.
 
-**Paralelismo de pipeline** - Atribua diferentes camadas a diferentes GPUs, passando ativações para frente e gradientes para trás através do pipeline. Introduz **bolhas de pipeline** (tempo ocioso enquanto espera por outros estágios), atenuadas por microlotes.
+**Paralelismo de pipeline** - Atribuir camadas diferentes a GPUs diferentes, passando ativações para a frente e gradientes para trás pelo pipeline. Isso introduz **bolhas de pipeline** (tempo ocioso enquanto se espera por outros estágios), mitigadas por microlotes.
 
-Os sistemas modernos combinam todos os três: paralelismo de tensor dentro de um nó (NVLink rápido), paralelismo de pipeline entre nós e paralelismo de dados entre grupos de nós.
+Sistemas modernos combinam as três estratégias: paralelismo de tensores dentro de um nó (NVLink rápido), paralelismo de pipeline entre nós e paralelismo de dados entre grupos de nós.
 
-<ThinkAboutIt>O paralelismo de pipeline introduz um tempo de “bolha” ocioso quando as GPUs aguardam ativações de outros estágios. Quanto maior o pipeline, pior será a sobrecarga da bolha. Como você poderia minimizar esse desperdício - e quais compensações sua solução apresentaria?
+<ThinkAboutIt>
+O paralelismo de pipeline introduz tempo ocioso de "bolha" quando GPUs aguardam ativações de outros estágios. Quanto maior o pipeline, pior o overhead da bolha. Como você poderia minimizar esse desperdício, e quais trade-offs sua solução introduziria?
 </ThinkAboutIt>
 
-## Precisão Mista e Acumulação de Gradiente
+## Precisão mista e acumulação de gradientes
 
-**Treinamento de precisão mista** usa flutuadores de meia precisão (FP16 ou BF16) para a maioria dos cálculos, enquanto mantém uma cópia mestre dos pesos em FP32. Benefícios:
+**Treinamento de precisão mista** usa floats de meia precisão (FP16 ou BF16) para a maioria dos cálculos, mantendo uma cópia mestre dos pesos em FP32. Benefícios:
 
-- **2× redução de memória** para ativações e gradientes
-- **Aumento de rendimento de 2 a 8×** em GPUs modernas com núcleos tensores
-- BF16 (Brain Float 16) é preferido ao FP16 porque sua faixa mais ampla de expoentes evita problemas de overflow comuns no treinamento FP16
+- **Redução de memória de 2×** para ativações e gradientes
+- **Aumento de throughput de 2-8×** em GPUs modernas com núcleos tensores
+- BF16 (Brain Float 16) é preferido ao FP16 porque sua faixa de expoente mais ampla evita problemas de estouro comuns no treinamento com FP16
 
-**Acumulação de gradiente** simula lotes grandes sem custo proporcional de memória: execute várias passagens para frente/para trás, acumule gradientes e atualize pesos somente após N microetapas. Isso permite atingir tamanhos de lote efetivos de milhões de tokens, mesmo em hardware limitado.
+**Acumulação de gradientes** simula grandes tamanhos de lote sem custo proporcional de memória: executa várias passagens diretas/reversas, acumula gradientes e só atualiza os pesos após N microetapas. Isso permite atingir tamanhos de lote efetivos de milhões de tokens mesmo em hardware limitado.
 
-## DeepSpeed ​​e FSDP
+## DeepSpeed e FSDP
 
-Duas estruturas dominam o treinamento distribuído:
+Dois frameworks dominam o treinamento distribuído:
 
-- **DeepSpeed ​​(Microsoft)** - Implementa os estágios 1 a 3 do ZeRO (Zero Redundancy Optimizer), fragmentando progressivamente estados, gradientes e parâmetros do otimizador entre GPUs. ZeRO-3 pode treinar modelos de trilhões de parâmetros, garantindo que nenhuma GPU mantenha uma cópia completa de nada.
-- **FSDP (PyTorch)** - Fully Sharded Data Parallel, equivalente nativo do PyTorch ao ZeRO-3. Integrado diretamente ao ecossistema PyTorch, tornando-o mais acessível aos pesquisadores.
+- **DeepSpeed (Microsoft)** - Implementa os estágios 1-3 do ZeRO (Otimizador de redundância zero), fazendo sharding progressivo de estados do otimizador, gradientes e parâmetros entre GPUs. O ZeRO-3 consegue treinar modelos de trilhões de parâmetros garantindo que nenhuma GPU mantenha uma cópia completa de qualquer componente.
+- **FSDP (PyTorch)** - Paralelismo de dados totalmente fragmentado, o equivalente nativo do PyTorch ao ZeRO-3. Ele é integrado diretamente ao ecossistema PyTorch, tornando-se mais acessível para pesquisadores.
 
-<Quiz question="O que o ZeRO Stage 3 fragmenta nas GPUs para permitir o treinamento de modelos extremamente grandes?" options="Somente os estados do otimizador (por exemplo, momentos de Adam)|Estados e gradientes do otimizador, mas mantém parâmetros completos em cada GPU|Estados do otimizador, gradientes E parâmetros do modelo - nada é totalmente replicado|Somente os lotes de dados de treinamento" answer="2" explanation="O ZeRO Stage 3 elimina toda redundância ao fragmentar estados, gradientes e parâmetros do otimizador entre GPUs. Cada GPU contém apenas uma fração de cada componente e reúne todos os parâmetros sob demanda durante as passagens de avanço/retrocesso, permitindo modelos muito maiores do que a memória de qualquer GPU." />
+<Quiz question="O que o ZeRO Stage 3 fragmenta entre GPUs para permitir o treinamento de modelos extremamente grandes?" options="Apenas os estados do otimizador (por exemplo, momentos do Adam)|Optimiser states e gradientes, mas mantém parâmetros completos em cada GPU|Optimiser states, gradientes E parâmetros do modelo - nada fica totalmente replicado|Apenas os lotes de dados de treinamento" answer="2" explanation="O ZeRO Stage 3 elimina toda a redundância ao fragmentar estados do otimizador, gradientes e parâmetros entre GPUs. Cada GPU mantém apenas uma fração de cada componente e reúne os parâmetros completos sob demanda durante as passagens diretas/reversas, permitindo modelos muito maiores do que a memória de qualquer GPU individual." />
 
 ## Habilidades emergentes e retornos decrescentes
 
-À medida que os modelos são ampliados, certos recursos parecem **emergir repentinamente** em vez de melhorarem gradualmente. Os exemplos incluem:
+À medida que os modelos escalam, certas capacidades parecem **emergir repentinamente** em vez de melhorar de forma gradual. Exemplos incluem:
 
-- Aritmética de várias etapas aparecendo em torno de parâmetros de 100B
-- Raciocínio em cadeia de pensamento melhorando dramaticamente em escala
-- Aprendizado rápido, tornando-se confiável apenas acima de certos limites
+- Aritmética em várias etapas aparecendo por volta de 100B parâmetros
+- Raciocínio cadeia de pensamento melhorando dramaticamente em escala
+- Aprendizado com poucos exemplos tornando-se confiável apenas acima de certos limiares
 
-No entanto, pesquisas recentes debatem se a emergência é real ou um artefato de **métricas de avaliação descontínuas**. Ao usar métricas contínuas (como probabilidade de log por token), o desempenho geralmente melhora suavemente - o "salto repentino" é uma ilusão da medição, não do modelo.
+No entanto, pesquisas recentes debatem se a emergência é real ou um artefato de **métricas de avaliação descontínuas**. Ao usar métricas contínuas (como probabilidade logarítmica por token), o desempenho muitas vezes melhora suavemente. O "salto repentino" é uma ilusão da medição, não do modelo.
 
-O **debate sobre retornos decrescentes** também está se intensificando. Cada ordem de grandeza na computação produz melhorias decrescentes nos benchmarks, levando alguns pesquisadores a argumentar que o escalonamento por si só não alcançará a inteligência artificial geral sem inovações arquitetônicas fundamentais.
+O **debate sobre retornos decrescentes** também está se intensificando. Cada ordem de magnitude em computação produz melhorias menores nos benchmarks, levando alguns pesquisadores a argumentar que a escala sozinha não alcançará inteligência artificial geral sem inovações arquitetônicas fundamentais.
 
-<Quiz question="Por que alguns pesquisadores argumentam que as ”habilidades emergentes” em grandes modelos linguísticos podem ser uma ilusão?" options="Porque modelos maiores são sempre treinados em dados diferentes|Porque as habilidades foram programadas secretamente por pesquisadores|Porque métricas de avaliação descontínuas (como precisão de correspondência exata) podem fazer com que melhorias subjacentes suaves apareçam como saltos repentinos|Porque a emergência ocorre apenas em modelos codificador-decodificador" answer="2" explanation="Schaeffer et al. (2023) mostraram que ao usar métricas suaves e contínuas (por exemplo, probabilidade de log em nível de token), o desempenho melhora de forma previsível com a escala. A ”emergência” nítida é muitas vezes um artefacto de métricas que subitamente passam de 0 para 1 (por exemplo, correspondência exacta em aritmética) num limiar de capacidade subjacente." />
+<Quiz question="Por que alguns pesquisadores argumentam que 'habilidades emergentes' em grandes modelos de linguagem podem ser uma ilusão?" options="Porque modelos maiores são sempre treinados com dados diferentes|Porque as habilidades foram programadas secretamente por pesquisadores|Porque métricas de avaliação descontínuas (como acurácia de correspondência exata) podem fazer melhorias subjacentes suaves parecerem saltos repentinos|Porque emergência só ocorre em modelos codificador-decodificador" answer="2" explanation="Schaeffer et al. (2023) mostraram que, ao usar métricas suaves e contínuas (por exemplo, verossimilhança logarítmica em nível de token), o desempenho melhora de forma previsível com a escala. A 'emergência' abrupta muitas vezes é um artefato de métricas que passam subitamente de 0 para 1 (por exemplo, correspondência exata em aritmética) em um limiar de capacidade subjacente." />
 
-<FunFact>O treinamento PaLM do Google usou 6.144 chips TPU v4 simultaneamente - conectados por uma rede óptica personalizada que abrange todo um data center. Uma única falha de rede poderia desperdiçar milhões de dólares em computação, por isso eles criaram pontos de verificação automatizados que salvam o estado do modelo a cada poucos minutos.
+<FunFact>
+A execução de treinamento do PaLM, do Google, usou 6.144 chips TPU v4 simultaneamente, conectados por uma rede óptica personalizada que abrangia um data centre inteiro. Uma única falha de rede poderia desperdiçar milhões de dólares em computação, então eles criaram pontos de verificação automatizados que salva o estado do modelo a cada poucos minutos.
 </FunFact>
 
-<ThinkAboutIt>Se as leis de dimensionamento preveem que 10 vezes mais computação produz uma melhoria previsível, como os laboratórios de IA deveriam equilibrar o investimento no dimensionamento de arquiteturas existentes versus a pesquisa de abordagens fundamentalmente novas? O que acontece quando o custo dos próximos 10× ultrapassar um bilhão de dólares?
+<ThinkAboutIt>
+Se as leis de escala preveem que 10× mais computação gera uma melhoria previsível, como os laboratórios de IA deveriam equilibrar investimento em escalar arquiteturas existentes versus pesquisar abordagens fundamentalmente novas? O que acontece quando o custo dos próximos 10× passa de um bilhão de dólares?
 </ThinkAboutIt>
 
 ---
 
 ## 📚 Leitura adicional
 
-- [Leis de escala para modelos de linguagem neural (Kaplan et al., 2020)](https://arxiv.org/abs/2001.08361) - O artigo original sobre leis de escala da OpenAI
-- [Treinamento de modelos de linguagem grande otimizados para computação (Hoffmann et al., 2022)](https://arxiv.org/abs/2203.15556) - O artigo da Chinchilla que remodelou a forma como os modelos são dimensionados e treinados
-- [ZeRO: Otimizações de memória para treinamento de trilhões de modelos de parâmetros](https://arxiv.org/abs/1910.02054) - Artigo DeepSpeed ZeRO da Microsoft sobre eficiência de treinamento distribuído
+- [Scaling Laws for Neural Language Models (Kaplan et al., 2020)](https://arxiv.org/abs/2001.08361) - O artigo original de leis de escala da OpenAI
+- [Training Compute-Optimal Large Language Models (Hoffmann et al., 2022)](https://arxiv.org/abs/2203.15556) - O artigo Chinchilla que reformulou como modelos são dimensionados e treinados
+- [ZeRO: Memory Optimizations Toward Training Trillion Parameter Models](https://arxiv.org/abs/1910.02054) - O artigo DeepSpeed ZeRO da Microsoft sobre eficiência em treinamento distribuído
