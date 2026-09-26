@@ -1,6 +1,6 @@
 ---
-title: "टरिएस और परेफ़िक्स ट्री - औटोकोमपलेटे, सपेलल जाँच, और IP रोउटिङ"
-description: "trie data structure सीखें जो lightning-fast prefix lookups देती है। autocomplete, wildcard search बनाएं, और compressed tries व IP routing explore करें।"
+title: "ट्राइ और प्रीफ़िक्स ट्री - ऑटोकम्प्लीट, वर्तनी जाँच, और IP रूटिंग"
+description: "ट्राइ डेटा संरचना सीखें जो बहुत तेज़ प्रीफ़िक्स खोज देती है। ऑटोकम्प्लीट, वाइल्डकार्ड सर्च बनाएं, और कम्प्रेस्ड ट्राइ व IP रूटिंग देखें।"
 order: 6
 difficulty: "advanced"
 duration: 18
@@ -40,7 +40,7 @@ class TrieNode:
 
 एक पूरा टरिए इसे इन्सर्ट, सर्च, और प्रीफ़िक्स ऑपरेशन के साथ वरप करता है।
 
-## Core operations
+## मुख्य ऑपरेशन
 
 ### इनसेरट - O(m) जहाँ m = वोरद की लेङथ
 
@@ -58,13 +58,13 @@ def insert(self, word):
 
 ### Search और startsWith
 
-**Search** रास्ता follow करता है और `is_end` जाँचता है। **startsWith** सिर्फ़ जाँचता है कि रास्ता मौजूद है या नहीं - इसे `is_end = True` की ज़रूरत नहीं।
+**Search** रास्ते का अनुसरण करता है और `is_end` जाँचता है। **startsWith** सिर्फ़ जाँचता है कि रास्ता मौजूद है या नहीं - इसे `is_end = True` की ज़रूरत नहीं।
 
 <Quiz
-  question="जब 'apple' stored है लेकिन 'app' नहीं है, तो search('app') और startsWith('app') में क्या फ़र्क है?"
-  options="search True लौटाता है, startsWith False लौटाता है|दोनों True लौटाते हैं|search False लौटाता है, startsWith True लौटाता है|दोनों False लौटाते हैं"
+  question="जब 'apple' संग्रहित है लेकिन 'app' नहीं है, तो सर्च('app') और startsWith('app') में क्या फ़र्क है?"
+  options="सर्च True लौटाता है, startsWith False लौटाता है|दोनों True लौटाते हैं|सर्च False लौटाता है, startsWith True लौटाता है|दोनों False लौटाते हैं"
   answer="2"
-  explanation="search is_end जाँचता है ('app' के लिए False), जबकि startsWith को सिर्फ़ रास्ता मौजूद होना चाहिए।"
+  explanation="सर्च is_end जाँचता है ('app' के लिए False), जबकि startsWith को सिर्फ़ रास्ता मौजूद होना चाहिए।"
 />
 
 ## DFS के साथ औटोकोमपलेटे
@@ -85,11 +85,11 @@ def autocomplete(self, prefix):
 
 <ThinkAboutIt>आप औटोकोमपलेटे को टोप-क सबसे फ़रेक्वेनट सुझाव तक कैसे लिमिट करेंगे? हर नोड को कौनसा एक्सटर डेटा चाहिए होगा?</ThinkAboutIt>
 
-## Wildcard search - Word Dictionary
+## Wildcard सर्च - Word Dictionary
 
-LeetCode की **Design Add and Search Words Data Structure** समस्या में `.` को wildcard के रूप में संभालना होता है, जो किसी भी single character से match करता है।
+LeetCode की **Design Add and Search Words Data Structure** समस्या में `.` को वाइल्डकार्ड के रूप में संभालना होता है, जो किसी भी एक अक्षर से मेल खाता है।
 
-Search के दौरान, जब `.` मिले तो *हर* child में branch करें और recursively continue करें। यह simple traversal को bounded backtracking search में बदल देता है।
+Search के दौरान, जब `.` मिले तो *हर* चाइल्ड में ब्रांच करें और रिकर्सिव रूप से आगे बढ़ें। यह सरल ट्रैवर्सल को सीमित बैकट्रैकिंग सर्च में बदल देता है।
 
 ```python
 def search_wild(self, node, word, i):
@@ -111,17 +111,17 @@ def search_wild(self, node, word, i):
 
 रूट से ट्राइ में चलें। लोङेसट आम प्रीफ़िक्स वहाँ खत्म होता है जहाँ पहला नोड एक से ज़्यादा चिलदरेन रखता है या `is_end` फ़्लैग मिलता है।
 
-<Illustration src="/images/lessons/tries-and-prefix-trees.svg" alt="Trie structure जिसमें shared prefix paths highlighted हैं" caption="Shared prefix paths एक single branch में converge होते हैं, जब तक split नहीं होता।" />
+<Illustration src="/images/lessons/tries-and-prefix-trees.svg" alt="Trie संरचना जिसमें साझा प्रीफ़िक्स रास्ते हाइलाइट हैं" caption="Shared प्रीफ़िक्स रास्ते एक एकल ब्रांच में मिलते होते हैं, जब तक विभाजन नहीं होता।" />
 
 ## टरिएस के साथ IP रोउटिङ
 
-Routers IP prefixes को **binary trie** में store करते हैं - हर bit (0 या 1) एक branch बनाता है। Longest prefix match सबसे specific route ढूँढता है। इसी तरह आपके packets internet पर अपना रास्ता खोजते हैं।
+Routers IP प्रीफ़िक्स को **बाइनरी ट्राइ** में स्टोर करते हैं - हर bit (0 या 1) एक ब्रांच बनाता है। Longest प्रीफ़िक्स मेल सबसे विशिष्ट रूट ढूँढता है। इसी तरह आपके पैकेट इंटरनेट पर अपना रास्ता खोजते हैं।
 
-<FunFact>Internet backbone routers हर सेकंड अरबों longest-prefix-match lookups करते हैं, hardware-optimised tries की मदद से जो TCAMs नाम के specialised chips में बने होते हैं।</FunFact>
+<FunFact>Internet बैकबोन राउटर हर सेकंड अरबों सबसे-लंबे-प्रीफ़िक्स-मिलान खोज करते हैं, हार्डवेयर-अनुकूलित ट्राइ की मदद से जो TCAMs नाम के विशेष चिप में बने होते हैं।</FunFact>
 
 ## कोमपरेसेद टरिएस (रदिक्स ट्री)
 
-Standard tries single-child chains पर space waste करते हैं। एक **radix tree** इन chains को merge करके single edges बनाता है जिनमें multi-character labels store होते हैं।
+Standard ट्राइ एकल-child चेन पर जगह बर्बाद करते हैं। एक **रैडिक्स ट्री** इन चेन को मर्ज करके एकल एज बनाता है जिनमें मल्टी-character लेबल स्टोर होते हैं।
 
 ```
 Standard:  r → u → n → n → i → n → g
@@ -150,7 +150,7 @@ Radix:     r → "unning"
 ## टरिए कब इस्तेमाल करें
 
 - परेफ़िक्स-बसेद क्वेरी (औटोकोमपलेटे, टयपे-अहेअद)
-- strings पर wildcard या regex-like matching
+- स्ट्रिंग पर वाइल्डकार्ड या रेगेक्स-like मिलान
 - एक सेट में लोङेसट आम प्रीफ़िक्स
 - IP रूटिंग / लोङेसट प्रीफ़िक्स मेल
 - एदिट-दूरी वरिअशनस के साथ सपेलल चेकिङ
@@ -169,5 +169,5 @@ Radix:     r → "unning"
 ## 📚 आगे पढ़ें
 
 - [टरिए डेटा सटरुकटुरे - विकिपेदिअ](https://en.wikipedia.org/wiki/Trie) - टरिए वरिअनटस और इतिहास का व्यापक अवलोकन
-- [Implement Trie - LeetCode 208](https://leetcode.com/problems/implement-trie-prefix-tree/) - classic trie implementation समस्या
-- [Radix Trees in the Linux Kernel](https://lwn.net/Articles/175432/) - compressed tries kernel internals को कैसे power करते हैं
+- [Implement Trie - LeetCode 208](https://leetcode.com/problems/implement-trie-prefix-tree/) - क्लासिक ट्राइ कार्यान्वयन समस्या
+- [Radix Trees in the Linux Kernel](https://lwn.net/Articles/175432/) - कम्प्रेस्ड ट्राइ कर्नेल अंदरूनी-भाग को कैसे चलाते करते हैं

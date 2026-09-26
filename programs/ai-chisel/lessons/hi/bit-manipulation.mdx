@@ -1,6 +1,6 @@
 ---
 title: "बिट मनिपुलशन - XOR टरिकस, पोवेर of टवो, और बिटस गिनना"
-description: "कोडिंग इंटरव्यू के लिए बिट-लेवल सोच सीखें। XOR cancellation, Brian Kernighan की trick, subsets के लिए बिट मास्किंग, और व्यावहारिक ऐप्लिकेशन में महारत हासिल करें।"
+description: "कोडिंग इंटरव्यू के लिए बिट-लेवल सोच सीखें। XOR निरस्तीकरण, Brian Kernighan की युक्ति, उपसमूहों के लिए बिट मास्किंग, और व्यावहारिक ऐप्लिकेशन में महारत हासिल करें।"
 order: 10
 difficulty: "advanced"
 duration: 17
@@ -20,7 +20,7 @@ Decimal:       8+ 4+ 0+ 1 = 13
 
 बिट मैनिपुलेशन इन बिटस पर सीधे बिटविसे ओपेरटोरस से काम करता है - अक्सर लूपस की जगह एक ही ऑपरेशन काफ़ी होता है।
 
-## मुख्य bitwise operations
+## मुख्य बिटवाइज़ ऑपरेशन
 
 | ओपेरटोर | सयमबोल | एक्सैंपल (5 = 101, 3 = 011) | नतीजा |
 |----------|--------|----------------------------|--------|
@@ -45,7 +45,7 @@ Decimal:       8+ 4+ 0+ 1 = 13
 
 ### सेट बिटस गिनना (बरिअन केरनिघन's एल्गोरिदम)
 
-हर `n & (n - 1)` सबसे नीचे वाला सेट बिट हटा देता है। जब तक n = 0 न हो, iterations गिनते रहो।
+हर `n & (n - 1)` सबसे नीचे वाला सेट बिट हटा देता है। जब तक n = 0 न हो, दोहराव गिनें।
 
 ```python
 def count_bits(n):
@@ -69,13 +69,13 @@ a ^= b
 काम करता है क्योंकि XOR अपना ही इनवेरसे है: `a ^ b ^ b = a`।
 
 <Quiz
-  question="n & (n - 1) करने से n के binary representation में क्या होता है?"
+  question="n & (n - 1) करने से n के बाइनरी निरूपण में क्या होता है?"
   options="सभी बिटस 1 हो जाते हैं|सभी बिटस स्पष्ट हो जाते हैं|सबसे नीचे वाला सेट बिट स्पष्ट होता है|सभी बिटस फ़लिप हो जाते हैं"
   answer="2"
   explanation="n - 1 सबसे नीचे वाले सेट बिट से लेकर नीचे तक सभी बिटस फ़लिप कर देता है। n के साथ AND करने पर वो लोवेसट सेट बिट शून्य हो जाता है।"
 />
 
-## Single Number - XOR cancellation
+## एकल संख्या - XOR निरस्तीकरण
 
 हर एलिमेंट दो बार आता है सिवाय एक के। उसे ढूँढो। चूँकि `a ^ a = 0` और `a ^ 0 = a`, सभी एलिमेंट को XOR करो - पैरस कनकेल हो जाएँगे, उनिक्वे नुमबेर बचेगा।
 
@@ -89,7 +89,7 @@ def single_number(nums):
 
 समय O(n), स्पेस O(1)। कोई हैश मैप नहीं चाहिए।
 
-<Illustration src="/images/lessons/bit-manipulation.svg" alt="XOR cancellation में जोड़े शून्य हो जाते हैं और सिर्फ़ एक अलग संख्या बचती है" caption="XOR में जोड़े शून्य हो जाते हैं - सिर्फ़ बिना जोड़ी वाला एलिमेंट बचता है।" />
+<Illustration src="/images/lessons/bit-manipulation.svg" alt="XOR निरस्तीकरण में जोड़े शून्य हो जाते हैं और सिर्फ़ एक अलग संख्या बचती है" caption="XOR में जोड़े शून्य हो जाते हैं - सिर्फ़ बिना जोड़ी वाला एलिमेंट बचता है।" />
 
 ## एकल नुमबेर III - दो उनिक्वे नुमबेरस
 
@@ -114,11 +114,11 @@ def single_number_iii(nums):
 
 ## नुमबेर of 1 बिटस (LeetCode 191)
 
-यह ऊपर वाला Brian Kernighan का एल्गोरिदम ही है - सीधा इंटरव्यू प्रश्न। follow-up पूछता है: अगर इनपुट signed हो तो? Python में integers arbitrary precision के होते हैं, लेकिन Java/C++ में 32-bit सीमाएँ संभालनी पड़ती हैं।
+यह ऊपर वाला Brian Kernighan का एल्गोरिदम ही है - सीधा इंटरव्यू प्रश्न। अगला सवाल पूछता है: अगर इनपुट साइन वाला हो तो? Python में पूर्णांक मनमानी सटीकता के होते हैं, लेकिन Java/C++ में 32-bit सीमाएँ संभालनी पड़ती हैं।
 
 ## सुबसेटस के लिए बिट मसकिङ
 
-लंबाई n का बिटमास्क, n आइटम के एक subset को दर्शाता है। बिट `i` सेट होने का मतलब आइटम `i` शामिल है। `0` से `2^n - 1` तक iterate करने पर सभी subsets बन जाते हैं।
+लंबाई n का बिटमास्क, n आइटम के एक उपसमूह को दर्शाता है। बिट `i` सेट होने का मतलब आइटम `i` शामिल है। `0` से `2^n - 1` तक दोहराने पर सभी उपसमूह बन जाते हैं।
 
 ```python
 def all_subsets(items):
@@ -131,7 +131,7 @@ def all_subsets(items):
 
 यह टेचनिक्वे उन समस्याएँ के लिए काम करती है जहाँ n ≤ 20 हो - 2^n एनुमेरशन के लिए काफ़ी छोटा।
 
-<FunFact>Linux file permissions (rwxr-xr-x = 755) वास्तविक दुनिया के बिटमास्क का बढ़िया उदाहरण हैं। हर अंक तीन permission bits encode करता है: read (4), write (2), execute (1), जिन्हें OR से जोड़ा जाता है।</FunFact>
+<FunFact>Linux फ़ाइल अनुमतियाँ (rwx-r-x-r-x = 755) वास्तविक दुनिया के बिटमास्क का बढ़िया उदाहरण हैं। हर अंक तीन अनुमति बिट एन्कोड करता है: पढ़ना (4), लिखना (2), चलाना (1), जिन्हें OR से जोड़ा जाता है।</FunFact>
 
 ## बिटस वापस करना करना (LeetCode 190)
 
@@ -168,7 +168,7 @@ def hamming_distance(x, y):
 
 ## व्यावहारिक ऐप्लिकेशन
 
-बिट मैनिपुलेशन हर जगह दिखता है: Unix file permissions OR/AND masks इस्तेमाल करती हैं, feature flags अलग-अलग bits में toggles रखते हैं, network subnet masks routing के लिए AND करते हैं, और error detection XOR checksums पर निर्भर करता है।
+बिट मैनिपुलेशन हर जगह दिखता है: Unix फ़ाइल अनुमतियाँ OR/AND मास्क इस्तेमाल करती हैं, फ़ीचर फ़्लैग अलग-अलग बिट में टॉगल रखते हैं, नेटवर्क सबनेट मास्क रूटिंग के लिए AND करते हैं, और त्रुटि पहचान XOR चेकसम पर निर्भर करती है।
 
 <Quiz
   question="इनटेगेर n में बिट k सेट है या नहीं, यह जाँच करने के लिए कौन सा एक्सप्रेशन सही है?"
@@ -184,5 +184,5 @@ def hamming_distance(x, y):
 ## 📚 और पढ़ें
 
 - [बिट मनिपुलशन - LeetCode एक्सप्लोर](https://leetcode.com/tag/bit-manipulation/) - दिफ़फ़िकुलटय के हिसाब से सॉर्टेड समस्या संग्रह
-- [Brian Kernighan's Algorithm - GeeksforGeeks](https://www.geeksforgeeks.org/count-set-bits-in-an-integer/) - visualisations के साथ विस्तृत walkthrough
-- [Bitmask DP - CP-Algorithms](https://cp-algorithms.com/algebra/all-submasks.html) - competitive programming के लिए उन्नत बिटमास्क तकनीकें
+- [Brian Kernighan's Algorithm - GeeksforGeeks](https://www.geeksforgeeks.org/count-set-bits-in-an-integer/) - विज़ुअलाइज़ेशन के साथ विस्तृत व्याख्या
+- [Bitmask DP - CP-Algorithms](https://cp-algorithms.com/algebra/all-submasks.html) - प्रतिस्पर्धी प्रोग्रामिंग के लिए उन्नत बिटमास्क तकनीकें

@@ -60,7 +60,7 @@ def next_greater(nums):
 
 LeetCode का **बड़ेसट रेकटङले in हिसटोगरम** मोनोटोनिक स्टैक समस्याएँ का सबसे शानदार समस्या है।
 
-**मुख्य insight:** हर bar के लिए पता करें कि वह सबसे छोटी bar होते हुए left और right कितनी दूर तक extend कर सकती है। increasing stack इस्तेमाल करें - जब कोई bar pop होती है, वही popping bar उसकी right boundary तय करती है, और नया stack top left boundary तय करता है।
+**मुख्य समझ:** हर बार के लिए पता करें कि वह सबसे छोटी बार होते हुए बाएँ और दाएँ कितनी दूर तक फैल सकती है। बढ़ता स्टैक इस्तेमाल करें - जब कोई बार pop होती है, वही निकली हुई बार उसकी दाईं सीमा तय करती है, और नया स्टैक शीर्ष बाईं सीमा तय करता है।
 
 ```python
 def largest_rectangle(heights):
@@ -139,7 +139,7 @@ def max_sliding_window(nums, k):
   explanation="बढ़ते स्टैक तब पॉप करता है जब इनकोमिङ एलिमेंट छोटा हो, क्योंकि Y > X नीचे से शीर्ष तक बढ़ते इनवेरिएंट को उल्लंघन करता है।"
 />
 
-<ThinkAboutIt>क्या आप next-greater-element template में बस comparison operator change करके "Next Smaller Element" हल कर सकते हैं? invariant क्या बन जाएगा?</ThinkAboutIt>
+<ThinkAboutIt>क्या आप next-greater-element रूपरेखा में बस तुलना ऑपरेटर परिवर्तित करके "Next Smaller Element" हल कर सकते हैं? अपरिवर्त्य शर्त क्या बन जाएगी?</ThinkAboutIt>
 
 ---
 

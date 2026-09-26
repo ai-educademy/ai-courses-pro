@@ -8,17 +8,17 @@ icon: "🗺️"
 published: true
 ---
 
-## Graphs जुड़ी हुई दुनिया को मॉडल करते हैं
+## ग्राफ़ जुड़ी हुई दुनिया को मॉडल करते हैं
 
-दोस्ती, road networks, hyperlinks, neural pathways - जब भी entities आपसी relationships से जुड़ी होती हैं, तो आपके पास एक **graph** होता है। औपचारिक रूप से, graph G = (V, E) vertices (nodes) और edges (connections) से मिलकर बनता है।
+दोस्ती, सड़क नेटवर्क, हाइपरलिंक, न्यूरल पाथवे - जब भी इकाइयाँ आपसी संबंधों से जुड़ी होती हैं, तो आपके पास एक **ग्राफ़** होता है। औपचारिक रूप से, ग्राफ़ G = (V, E) वर्टेक्स (नोड) और एज (कनेक्शन) से मिलकर बनता है।
 
-Graphs **directed** (one-way streets) या **undirected** (two-way) हो सकते हैं, और edges पर **weights** (दूरी, लागत, latencies) हो सकते हैं।
+ग्राफ़ **निर्देशित** (एकतरफ़ा सड़कें) या **अनिर्देशित** (दोतरफ़ा) हो सकते हैं, और एज पर **वज़न** (दूरी, लागत, लेटेंसी) हो सकते हैं।
 
-<Illustration src="/images/lessons/graph-algorithms.svg" alt="छह nodes और labelled edges वाला directed weighted graph, जिसमें shortest path highlight किया गया है" caption="Graphs entities के बीच relationships capture करते हैं; edge weights traversal की लागत बताते हैं।" />
+<Illustration src="/images/lessons/graph-algorithms.svg" alt="छह नोड और लेबल वाली एज वाला निर्देशित भारित ग्राफ़, जिसमें सबसे छोटा रास्ता हाइलाइट किया गया है" caption="ग्राफ़ इकाइयों के बीच संबंधों को कैप्चर करते हैं; एज के वज़न ट्रैवर्सल की लागत बताते हैं।" />
 
-## Graphs को represent कैसे करें
+## ग्राफ़ को निरूपित कैसे करें
 
-दो आम representations:
+दो आम निरूपण:
 
 | निरूपण | जगह | एज खोज | सबसे उपयुक्त |
 |---------------|-------|-------------|-----------------|
@@ -64,7 +64,7 @@ function bfs(graph, start):
 
 ## देपथ-फ़िरसट सर्च (DFS)
 
-DFS **जितना गहरा हो सके** जाता है, फिर backtrack करता है। यह एक **stack** (या recursion) इस्तेमाल करता है।
+DFS **जितना गहरा हो सके** जाता है, फिर बैकट्रैक करता है। यह एक **स्टैक** (या रिकर्शन) इस्तेमाल करता है।
 
 ```
 function dfs(graph, node, visited):
@@ -84,11 +84,11 @@ function dfs(graph, node, visited):
 
 <ThinkAboutIt>एक पैकेज मैनेजर को डिपेंडेंसी को सही क्रम में इंस्टॉल करना है। क्या उसे BFS उपयोग करना चाहिए या DFS-आधारित टोपोलोगिकल सॉर्ट? अगर डिपेंडेंसी ग्राफ़ में साइकिल हो तो क्या होगा?</ThinkAboutIt>
 
-## Dijkstra's Algorithm - weights के साथ shortest path
+## Dijkstra's Algorithm - वज़न के साथ सबसे छोटा रास्ता
 
-जब edges की अलग-अलग लागत हों, तो BFS काफी नहीं है। Dijkstra's algorithm एक source से बाकी सभी nodes तक सबसे छोटा weighted path ढूँढता है।
+जब एज की अलग-अलग लागत हों, तो BFS काफी नहीं है। Dijkstra का एल्गोरिदम एक स्रोत से बाकी सभी नोड तक सबसे छोटा भारित रास्ता ढूँढता है।
 
-**मुख्य विचार:** हमेशा **सबसे सस्ते unvisited node** को min-heap (priority queue) से expand करो।
+**मुख्य विचार:** हमेशा **सबसे सस्ते अनदेखे नोड** को min-heap (प्राथमिकता क्यू) से फैलाएँ।
 
 ```
 function dijkstra(graph, source):
@@ -107,15 +107,15 @@ function dijkstra(graph, source):
 
 **समय जटिलता:** बिनरय हीप के साथ O((V + E) लॉग V)।
 
-<FunFact>Google Maps पूरे road network पर plain Dijkstra नहीं चलाता। यह contraction hierarchies और A* search इस्तेमाल करता है - लेकिन दोनों Dijkstra की बुनियादी insight पर बने हैं: सबसे कम ज्ञात दूरी से greedy expansion।</FunFact>
+<FunFact>Google Maps पूरे सड़क नेटवर्क पर सादा Dijkstra नहीं चलाता। यह संकुचन पदानुक्रम और A* सर्च इस्तेमाल करता है - लेकिन दोनों Dijkstra की बुनियादी समझ पर बने हैं: सबसे कम ज्ञात दूरी से लालची विस्तार।</FunFact>
 
-### Dijkstra के AI use cases
+### Dijkstra के AI उपयोग मामले
 
 - **रास्ता योजना** - नविगशन ऐप सबसे तेज़ रूट फ़ाइंड करने के लिए।
 - **नेटवर्क रूटिंग** - इनटेरनेट पकेटस लोवेसट-लटेनकय रास्ता चुनें करने के लिए।
 - **ज्ञान ग्राफ़** - कोनकेपटस के बीच सबसे छोटा सेमनटिक कोननेकशन फ़ाइंड करने के लिए।
 
-<Quiz question="Dijkstra's algorithm को अगला node कुशलता से चुनने के लिए कौन सी data structure चाहिए?" options="Stack|Queue|Min-heap (priority queue)|Hash table" answer="2" explanation="Min-heap Dijkstra को सबसे छोटी tentative दूरी वाला unvisited node O(log V) समय में extract करने देता है।" />
+<Quiz question="Dijkstra के एल्गोरिदम को अगला नोड कुशलता से चुनने के लिए कौन सी डेटा संरचना चाहिए?" options="स्टैक|क्यू|मिन-हीप (प्राथमिकता क्यू)|हैश टेबल" answer="2" explanation="मिन-हीप Dijkstra को सबसे छोटी अस्थायी दूरी वाला अनदेखा नोड O(log V) समय में निकालने करने देता है।" />
 
 ## कयकले देटेकशन और जुड़े हुए घटक
 
@@ -129,15 +129,15 @@ function dijkstra(graph, source):
 
 हर उनविसिटेद नोड से BFS या DFS रुन करो। हर रुन एक कोननेकटेद कोमपोनेनट खोजना करता है। सामाजिक नेटवोरकस में, कोमपोनेनटस इसोलटेद कोममुनिटिएस को उजागर करते हैं।
 
-<ThinkAboutIt>एक AI fraud detection system transactions को graph के रूप में model करता है जहाँ accounts nodes हैं और transfers edges हैं। Connected components money-laundering rings पहचानने में कैसे मदद कर सकते हैं?</ThinkAboutIt>
+<ThinkAboutIt>एक AI धोखाधड़ी पहचान सिस्टम लेन-देन को ग्राफ़ के रूप में मॉडल करता है जहाँ खाते नोड हैं और ट्रांसफ़र एज हैं। जुड़े घटक मनी-लॉन्डरिंग गिरोह पहचानने में कैसे मदद कर सकते हैं?</ThinkAboutIt>
 
 ## मुख्य बातें
 
 1. **BFS** स्तर by स्तर एक्सप्लोर करता है - बिना वज़न वाले ग्राफ़ में सबसे छोटा रास्ते और नेइघबोउर-बसेद दिसकोवेरय के लिए विचारल।
 2. **DFS** गहरी दिवे करता है - टोपोलोगिकल सॉर्टिंग, साइकिल पहचान, और कोमपोनेनट विश्लेषण की बकबोने।
-3. **Dijkstra** priority queue की मदद से BFS को weighted graphs तक extend करता है - modern route planning की foundation।
+3. **Dijkstra** प्राथमिकता क्यू की मदद से BFS को भारित ग्राफ़ तक बढ़ाता है - आधुनिक मार्ग योजना की बुनियाद।
 4. गरफ एल्गोरिदमस मपस, सोकिअल नेटवोरकस, पैकेज मैनेजर, और ज्ञान ग्राफ़ के पीछे का एङिने हैं।
 
 <FunFact>वोरलद विदे वेब में 50 बिललिओन से ज़्यादा इनदेक्सेद पेज हैं। सर्च एङिने करवलेरस पेज खोजना और रे-इनदेक्स करने के लिए BFS की वरिअशनस उपयोग करते हैं, पगे इमपोरटनके (पगेरनक) के हिसाब से परिओरिटिसे करते हुए।</FunFact>
 
-<Quiz question="directed task-dependency graph में circular dependency detect करने के लिए कौन सा algorithm इस्तेमाल करेंगे?" options="Dijkstra's algorithm|BFS shortest path|DFS with in-progress tracking|Binary search" answer="2" explanation="DFS three-state tracking (unvisited, in-progress, completed) से back edges detect करता है - अगर in-progress node दोबारा मिले तो cycle है।" />
+<Quiz question="निर्देशित कार्य-dependency ग्राफ़ में चक्रीय निर्भरता पहचानने के लिए कौन सा एल्गोरिदम इस्तेमाल करेंगे?" options="Dijkstra का एल्गोरिदम|BFS सबसे-छोटा रास्ता|DFS साथ in-progress ट्रैकिंग|Binary सर्च" answer="2" explanation="DFS तीन-state ट्रैकिंग (अनदेखा, in-progress, पूर्ण) से बैक एज पहचानता है - अगर in-progress नोड दोबारा मिले तो साइकिल है।" />

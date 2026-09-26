@@ -12,7 +12,7 @@ published: true
 
 मान लीजिए आपके पास नोड का एक नेटवर्क है, और बार-बार दो तरह की क्वेरी आ रही हैं: *नोड A को नोड B से कोननेकट करो* और *क्या A और B कोननेकटेद हैं?* अगर हर क्वेरी के लिए BFS/DFS चलाएँ तो पूरा ग्राफ़ ट्रैवर्स करना पड़ेगा - लाखों ऑपरेशन के लिए ये बहुत धीमे है।
 
-**Union-Find** दोनों queries को लगभग constant time में संभालता है।
+**Union-Find** दोनों क्वेरी को लगभग स्थिर समय में संभालता है।
 
 ## नैवे तरीका - क्विक फ़िनद
 
@@ -39,7 +39,7 @@ class UnionFind:
 
 ## फ़िनद के साथ रास्ता कोमपरेसिओन
 
-deep tree में parent pointers follow करना धीमा हो सकता है। **Path compression** tree को flatten कर देता है - हर visited node को directly root से जोड़ देता है।
+गहरे ट्री में पैरेंट पॉइंटर का अनुसरण करना धीमा हो सकता है। **Path कम्प्रेशन** ट्री को समतल कर देता है - हर देखे गए नोड को सीधे रूट से जोड़ देता है।
 
 ```python
 def find(self, x):
@@ -78,7 +78,7 @@ def union(self, x, y):
   question="रास्ता कोमपरेसिओन और यूनियन by रनक दोनों के साथ, हर ऑपरेशन का अमोरटिसेद समय क्या होता है?"
   options="O(लॉग n)|O(n)|O(α(n)) - लगभग O(1)|O(√n)"
   answer="2"
-  explanation="inverse Ackermann function α(n) इतनी धीरे बढ़ती है कि किसी भी practical input के लिए यह 4 से ज़्यादा नहीं होती, जिससे operations effectively O(1) हो जाते हैं।"
+  explanation="inverse Ackermann फ़ंक्शन α(n) इतनी धीरे बढ़ती है कि किसी भी व्यावहारिक इनपुट के लिए यह 4 से ज़्यादा नहीं होती, जिससे ऑपरेशन प्रभावी-रूप-से O(1) हो जाते हैं।"
 />
 
 <Illustration src="/images/lessons/union-find-और-disjoint-sets.svg" alt="रास्ता कोमपरेसिओन से पहले और बाद में उनिओन-फ़िनद ट्री" caption="रास्ता कोमपरेसिओन गहरी चैनस को फ़लट कर देता है, जिससे फ़ुटुरे लूकुपस तेज़ रहती हैं।" />
@@ -107,9 +107,9 @@ def union(self, x, y):
 
 ### Redundant Connection (LeetCode 684)
 
-एक tree दिया है जिसमें एक extra edge है - redundant edge ढूँढो। edges को क्रम में process करो - जिस पहली edge पर `union` `False` लौटाए (already connected), वही उत्तर है।
+एक ट्री दिया है जिसमें एक अतिरिक्त एज है - अनावश्यक एज ढूँढें। एज को क्रम में प्रोसेस करें - जिस पहली एज पर `union` `False` लौटाए (पहले-से जुड़ा), वही उत्तर है।
 
-<FunFact>Union-Find दोनों optimisations के साथ O(α(n)) में चलता है - इसका proof Tarjan ने 1975 में publish किया था और इसे computer science में सबसे elegant amortised analyses में से एक माना जाता है।</FunFact>
+<FunFact>Union-Find दोनों अनुकूलन के साथ O(α(n)) में चलता है - इसका प्रमाण Tarjan ने 1975 में प्रकाशित किया था और इसे कंप्यूटर विज्ञान में सबसे सुरुचिपूर्ण अमोर्टाइज़्ड विश्लेषण में से एक माना जाता है।</FunFact>
 
 ## उनिओन-फ़िनद vs BFS/DFS - कब क्या चुनें
 
@@ -122,13 +122,13 @@ def union(self, x, y):
 | करुसकल's MST | उनिओन-फ़िनद |
 | टोपोलोगिकल सॉर्ट / दिरेकटेद ग्राफ़ में साइकिल | DFS |
 
-Union-Find तब सबसे उपयोगी होता है जब आप edges *incrementally* process कर रहे हों और तेज़ connectivity checks चाहिए। अगर सिर्फ़ एक बार traverse करना है या path information चाहिए, तो BFS/DFS इस्तेमाल करें।
+Union-Find तब सबसे उपयोगी होता है जब आप एज को *क्रमिक-रूप-से* प्रोसेस कर रहे हों और तेज़ कनेक्टिविटी जाँच चाहिए। अगर सिर्फ़ एक बार ट्रैवर्स करना है या रास्ते की जानकारी चाहिए, तो BFS/DFS इस्तेमाल करें।
 
 <Quiz
   question="आपको एक-एक करके एदगेस मिल रही हैं और पहली एज देटेकट करनी है जो साइकिल बनाती है। सबसे अच्छा तरीका कौन सा है?"
   options="हर एज के बाद BFS से शुरुआत|हर एज के बाद DFS से शुरुआत|उनिओन-फ़िनद - साइकिल एज पर यूनियन फ़लसे लौटाएँ करता है|टोपोलोगिकल सॉर्ट"
   answer="2"
-  explanation="Union-Find हर edge पर near O(1) में incrementally cycle detect करता है, जबकि BFS/DFS को हर बार पूरा graph re-traverse करना पड़ेगा।"
+  explanation="Union-Find हर एज पर लगभग O(1) में क्रमिक-रूप-से साइकिल पहचानता है, जबकि BFS/DFS को हर बार पूरा ग्राफ़ re-traverse करना पड़ेगा।"
 />
 
 <Quiz
@@ -138,7 +138,7 @@ Union-Find तब सबसे उपयोगी होता है जब आ
   explanation="उनिओन by रनक ट्री को संतुलित रखता है - हमेशा छोटे ट्री को बड़े के नीचे अटटच करके, जिससे O(n) फ़ाइंड ऑपरेशन नहीं होतीं।"
 />
 
-<ThinkAboutIt>कुछ समस्याओं में unions को *undo* करना पड़ता है (dynamic connectivity with deletions)। Standard Union-Find इसके लिए काफी क्यों नहीं है, और इसमें कौन से modifications मौजूद हैं?</ThinkAboutIt>
+<ThinkAboutIt>कुछ समस्याओं में यूनियन को *वापस लेना* पड़ता है (डायनेमिक कनेक्टिविटी साथ हटाव)। Standard Union-Find इसके लिए काफी क्यों नहीं है, और इसमें कौन से बदलाव मौजूद हैं?</ThinkAboutIt>
 
 ---
 
@@ -146,4 +146,4 @@ Union-Find तब सबसे उपयोगी होता है जब आ
 
 - [दिसजोइनट-सेट डेटा सटरुकटुरे - विकिपेदिअ](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) - उनिओन-फ़िनद की सिद्धांत, परूफ़स, और इतिहास
 - [उनिओन-फ़िनद - परिनकेटोन एल्गोरिदमस](https://algs4.cs.princeton.edu/15uf/) - सेदगेविक का औथोरिटटिवे टरेअटमेनट, जव उदाहरण के साथ
-- [Redundant Connection - LeetCode 684](https://leetcode.com/problems/redundant-connection/) - Union-Find से cycle detection का एक साफ़ application
+- [Redundant Connection - LeetCode 684](https://leetcode.com/problems/redundant-connection/) - Union-Find से साइकिल पहचान का एक साफ़ ऐप्लिकेशन

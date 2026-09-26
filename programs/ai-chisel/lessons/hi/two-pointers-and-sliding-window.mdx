@@ -8,11 +8,11 @@ icon: "👆"
 published: true
 ---
 
-## Smart scanning क्यों ज़रूरी है
+## समझदारी से स्कैन करना क्यों ज़रूरी है
 
 सोचिए कि एक AI किसी लाइव वीडियो फ़ीड पर संदिग्ध गतिविधि मोनिटोर कर रहा है। वो हर सेकंड पूरी रेकोरदिङ दोबारा नहीं देख सकता - उसे सटरेअम पर एक ध्यान की विंडो सलिदे करनी होती है, बस उतना संदर्भ रखते हुए जितना ज़रूरी है। **टवो पॉइंटर** और **स्लाइडिंग विंडो** पैटर्न सेक्वेनटिअल डेटा के साथ बिल्कुल यही करते हैं।
 
-दोनों तकनीकें brute-force O(n²) scans को elegant O(n) passes में बदल देती हैं।
+दोनों तकनीकें ब्रूट-force O(n²) स्कैन को सुंदर O(n) पास में बदल देती हैं।
 
 <Illustration src="/images/lessons/two-pointers-और-sliding-window.svg" alt="टवो पॉइंटर ऐरे के दोनों सिरों से कोनवेरगे हो रहे हैं और एक स्लाइडिंग विंडो डेटा सटरेअम पर मोवे कर रही है" caption="टवो पॉइंटर सर्च स्पेस को छोटा करते हैं; स्लाइडिंग विंडो एक रुननिङ विएव बनाए रखती है।" />
 
@@ -56,11 +56,11 @@ function removeDuplicates(arr):
     return slow + 1
 ```
 
-<Quiz question="sorted array पर converging two-pointer technique में, जब current sum target से कम हो तो क्या करना चाहिए?" options="right pointer को left move करो|left pointer को right move करो|दोनों elements swap करो|बीच से restart करो" answer="1" explanation="left pointer को rightward move करने से sum बढ़ता है क्योंकि array ascending order में sorted है।" />
+<Quiz question="सॉर्टेड ऐरे पर मिलती हुई two-pointer तकनीक में, जब वर्तमान sum लक्ष्य से कम हो तो क्या करना चाहिए?" options="दाएँ पॉइंटर को बाएँ ले जाएँ|बाएँ पॉइंटर को दाएँ ले जाएँ|दोनों एलिमेंट स्वैप करें|बीच से फिर-शुरू करें" answer="1" explanation="बाएँ पॉइंटर को दाईं ओर ले जाने से sum बढ़ता है क्योंकि ऐरे आरोही क्रम में सॉर्टेड है।" />
 
 ## स्लाइडिंग विंडो पटटेरन
 
-Sliding window contiguous sub-sequence बनाए रखती है जिसका size _k_ (fixed) या variable length हो सकता है, और aggregates को scratch से recalculate करने की बजाय incrementally update करती है।
+Sliding विंडो लगातार sub-sequence बनाए रखती है जिसका आकार _k_ (स्थिर) या बदलती लंबाई हो सकता है, और समुच्चय को शुरुआत से दोबारा गणना करने की बजाय क्रमिक रूप से अपडेट करती है।
 
 ### फ़िक्सेद-सिज़े विनदोव
 
@@ -78,11 +78,11 @@ function maxSubarraySum(arr, k):
     return best
 ```
 
-हर step में window में आने वाला नया element add होता है और बाहर जाने वाला subtract होता है - O(1) प्रति move।
+हर चरण में विंडो में आने वाला नया एलिमेंट जोड़ा जाता है और बाहर जाने वाला घटाया जाता है - O(1) प्रति चाल।
 
 ### वरिअबले-सिज़े विनदोव
 
-ज़्यादा data शामिल करने के लिए window expand करो, फिर constraint टूटे तो उसे shrink करो।
+ज़्यादा डेटा शामिल करने के लिए विंडो फैलाएँ, फिर शर्त टूटे तो उसे छोटा करें।
 
 **एक्सैंपल - लोङेसट सब-स्ट्रिंग बिना रेपेअटिङ चरकटेरस:**
 
@@ -115,11 +115,11 @@ function longestUnique(s):
 ## कौन सा पटटेरन कब इस्तेमाल करें
 
 - **टवो पॉइंटर (कोनवेरगिङ):** सॉर्टेड इनपुट, पैर/टरिपलेट सर्च, पैलिंड्रोम चेकस।
-- **Two pointers (same-direction):** in-place modifications, fast/slow runner problems.
+- **Two पॉइंटर (एक ही दिशा):** in-place बदलाव, तेज़/slow रनर समस्याएँ।
 - **फ़िक्सेद स्लाइडिंग विंडो:** एक ज्ञात विंडो आकार पर अगगरेगटे।
 - **वरिअबले स्लाइडिंग विंडो:** किसी शर्त को सटिसफ़य करने वाली सबसे छोटी या सबसे बड़ी विंडो ढूँढो।
 
-<Quiz question="वह सबसे छोटा subarray ढूँढने के लिए कौन सा pattern चुनोगे जिसका sum किसी दिए गए value से ज़्यादा हो?" options="Converging two pointers|Fixed sliding window|Variable sliding window|Binary search" answer="2" explanation="Variable-size window तब तक expand होती है जब तक sum value से ज़्यादा न हो जाए, फिर minimum length ढूँढने के लिए left से contract होती है - सब O(n) में।" />
+<Quiz question="वह सबसे छोटा सबऐरे ढूँढने के लिए कौन सा पैटर्न चुनेंगे जिसका sum किसी दिए गए मान से ज़्यादा हो?" options="Converging two पॉइंटर|Fixed स्लाइडिंग विंडो|Variable स्लाइडिंग विंडो|Binary सर्च" answer="2" explanation="बदलते आकार की विंडो तब तक फैलती है जब तक sum मान से ज़्यादा न हो जाए, फिर न्यूनतम लंबाई ढूँढने के लिए बाएँ से सिकुड़ती है - सब O(n) में।" />
 
 <ThinkAboutIt>क्या आप टवो पॉइंटर को स्लाइडिंग विंडो के साथ जोड़ते कर सकते हो? ऐसे समस्याएँ के बारे में सोचो जहाँ डेटा की एक रोललिङ विंडो में पैर ढूँढना हो - जैसे पाँच मिनट की विंडो में दुपलिकटे ट्रांज़ैक्शनस देटेकट करना।</ThinkAboutIt>
 
@@ -129,4 +129,4 @@ function longestUnique(s):
 2. स्लाइडिंग विंडोस रुननिङ सटटे बनाए करती हैं ताकि हर एलिमेंट ज़्यादा से ज़्यादा दो बार प्रोसेस हो।
 3. दोनों पैटर्न रीयल-टाइम AI पाइपलाइन में बुनियादी हैं - अनोमलय पहचान से लेकर सर्च रैंकिंग तक।
 
-<Quiz question="brute-force nested loop को two-pointer या sliding-window solution में बदलने से आमतौर पर कौन सी time complexity मिलती है?" options="O(n log n)|O(n)|O(n²)|O(1)" answer="1" explanation="दोनों patterns हर element को constant number of times process करते हैं, जिससे कुल O(n) मिलता है - O(n²) brute-force approach से काफ़ी बेहतर।" />
+<Quiz question="ब्रूट-force नेस्टेड लूप को two-pointer या स्लाइडिंग-window समाधान में बदलने से आमतौर पर कौन सी समय जटिलता मिलती है?" options="O(n log n)|O(n)|O(n²)|O(1)" answer="1" explanation="दोनों पैटर्न हर एलिमेंट को स्थिर संख्या में प्रोसेस करते हैं, जिससे कुल O(n) मिलता है - O(n²) ब्रूट-force तरीका से काफ़ी बेहतर।" />
