@@ -16,15 +16,15 @@ Große Sprachmodelle haben die Möglichkeiten von Maschinen mit Text, Code und A
 
 Ein **großes Sprachmodell** ist ein neuronales Netzwerk, das auf enorme Textmengen trainiert wird, um das nächste Token in einer Sequenz vorherzusagen. „Groß“ bezieht sich auf die Anzahl der **Parameter** – lernbare Gewichte, die Muster aus Trainingsdaten kodieren.
 
-- **GPT-4** hat schätzungsweise über 1 Billion Parameter.
-- **Llama 3** gibt es in Größen von 8 Milliarden bis 405 Milliarden Parametern.
+- **GPT-6 Astra** steht für die aktuelle OpenAI frontier, wobei die Modellinterna unveröffentlicht bleiben.
+- **Llama 4 Scout und Maverick** nutzen mixture-of-experts-Designs mit 17 Milliarden aktiven Parametern und deutlich größeren Gesamtparameterzahlen.
 - **Mistral 7B** zeigt, dass kleinere Modelle weit über ihr Gewicht hinaus schlagen können.
 
 Diese Modelle werden anhand von Hunderten Milliarden Wörtern trainiert, die aus Büchern, Websites, Code-Repositories und wissenschaftlichen Arbeiten stammen. Die schiere Größe der Daten und Parameter verleiht LLMs ihre bemerkenswerte Vielseitigkeit.
 
 **Tokens, keine Wörter:** LLMs verarbeiten keine ganzen Wörter – sie arbeiten mit **Tokens**, bei denen es sich um Unterworteinheiten handelt. Das Wort „verstehen“ könnte in „unter“ + „stehen“ + „ing“ aufgeteilt werden. Ein typisches englisches Wort hat durchschnittlich etwa 1,3 Token. Dieses Tokenisierungsschema ermöglicht es Modellen, seltene Wörter, Fachjargon und sogar mehrere Sprachen zu verarbeiten, ohne einen unvorstellbar großen Wortschatz zu haben.
 
-<FunFact>Es wird geschätzt, dass das Training von GPT-4 allein für die Rechenleistung über 100 Millionen US-Dollar gekostet hat. Das entspricht in etwa dem Budget eines Mittelklasse-Hollywoodfilms – nur dass der „Schauspieler“ jede Programmiersprache beherrscht.
+<FunFact>Das Training eines frontier Sprachmodells kann Hunderte Millionen kosten, wenn Rechenleistung, Daten, Energie und Engineering einbezogen werden. Das entspricht in etwa dem Budget eines großen Films, nur dass der „Schauspieler“ jede Programmiersprache beherrscht.</FunFact>
 </FunFact>
 
 ## Die Transformer-Architektur
@@ -54,15 +54,15 @@ Dies wird über mehrere **Aufmerksamkeitsköpfe** hinweg parallel wiederholt, so
 
 | Modell | Ersteller | Bemerkenswerte Funktion |
 |-------|---------|-----------------|
-| **GPT-4o** | OpenAI | Multimodal (Text, Bild, Audio) |
-| **Claude 4** | Anthropisch | Erweitertes Denken, sicherheitsorientiert |
+| **GPT-6 Astra** | OpenAI | Frontier-Reasoning, Coding, Forschung und multimodale Eingabe |
+| **Claude Opus 5.5** | Anthropic | Langlaufende agentische Coding- und Wissensarbeit |
 | **Zwillinge 2,5** | Google DeepMind | Native Multimodalität, langer Kontext |
 | **Lama 3** | Meta | Offenes Gewicht, Community-gesteuert |
 | **Mistral Groß** | Mistral KI | Effiziente europäische Alternative |
 
 Das Feld bewegt sich außerordentlich schnell – wenn Sie dies lesen, gibt es möglicherweise bereits neuere Modelle.
 
-Ein entscheidender Unterschied in dieser Landschaft besteht zwischen **Closed-Source**-Modellen (GPT-4o, Claude, Gemini), bei denen nur die API verfügbar ist, und **Open-Weight**-Modellen (Llama, Mistral), bei denen die Modellgewichte öffentlich veröffentlicht werden. Open-Weight-Modelle ermöglichen es Unternehmen, Rückschlüsse auf ihre eigene Infrastruktur zu ziehen, eine Feinabstimmung für bestimmte Domänen vorzunehmen und das Verhalten des Modells zu überprüfen – Vorteile, die für datenschutzrelevante Branchen von großer Bedeutung sind.
+Ein entscheidender Unterschied in dieser Landschaft besteht zwischen **Closed-Source**-Modellen (GPT, Claude, Gemini), bei denen nur die API verfügbar ist, und **Open-Weight**-Modellen (Llama, Mistral), bei denen die Modellgewichte öffentlich veröffentlicht werden. Open-Weight-Modelle ermöglichen es Unternehmen, Inferenz auf der eigenen Infrastruktur auszuführen, für bestimmte Domänen feinabzustimmen und das Verhalten des Modells zu überprüfen, Vorteile, die für datenschutzrelevante Branchen von großer Bedeutung sind.
 
 <Callout>Nicht alle „offenen“ Modelle sind wirklich Open Source. Einige veröffentlichen Gewichte, schränken jedoch die kommerzielle Nutzung ein oder geben keine Trainingsdaten und keinen Code weiter. Überprüfen Sie immer die Lizenz, bevor Sie ein Open-Weight-Modell in der Produktion bereitstellen.
 </Callout>
@@ -90,7 +90,7 @@ Wenn Modelle größer werden, entwickeln sie Fähigkeiten, die nicht explizit tr
 
 Diese entstehenden Eigenschaften sind einer der faszinierendsten Aspekte der Skalierung – Fähigkeiten, die fast „kostenlos“ erscheinen, sobald ein Modell bestimmte Größenschwellen überschreitet.
 
-<FunFact>GPT-4 hat die Uniform Bar Exam mit der 90. Perzentile bestanden – besser als die meisten Absolventen des Humanrechts. Dennoch kann es mit der Grundrechenart Schwierigkeiten bereiten, wenn die Zahlen ungewöhnlich genug sind.
+<FunFact>Frühe frontier Modelle zeigten das Muster deutlich: Sie konnten schwierige Berufsprüfungen bestehen und trotzdem bei einfacher Arithmetik oder Zählaufgaben stolpern, wenn der Prompt ihre Schwächen offenlegte.</FunFact>
 </FunFact>
 
 ## Einschränkungen, die Sie verstehen müssen
@@ -98,8 +98,8 @@ Diese entstehenden Eigenschaften sind einer der faszinierendsten Aspekte der Ska
 LLMs sind leistungsstark, aber alles andere als perfekt:
 
 - **Halluzinationen** – Models erzeugen selbstbewusst klingenden Text, der sachlich falsch ist. Sie „kennen“ keine Fakten; Sie sagen wahrscheinliche Token-Sequenzen voraus.
-– **Kontextfensterbeschränkungen** – Jedes Modell hat eine maximale Eingabegröße (z. B. 128.000 Token für GPT-4o). Informationen außerhalb dieses Fensters sind einfach unsichtbar.
-– **Kosten und Latenz** – Die Ausführung von Inferenzen auf großen Modellen erfordert teure GPU-Cluster. Eine einzelne GPT-4-Abfrage kostet deutlich mehr als eine GPT-3.5-Abfrage.
+- **Kontextfensterbeschränkungen** - Jedes Modell hat eine maximale Eingabegröße, von Hunderttausenden bis zu über einer Million Token bei aktuellen frontier Systemen. Informationen außerhalb dieses Fensters sind einfach unsichtbar.
+- **Kosten und Latenz** - Die Ausführung von Inferenz auf großen Modellen erfordert teure GPU-Cluster. Eine Top-tier frontier Abfrage kostet deutlich mehr als eine Anfrage an ein kleines oder mittelgroßes Modell.
 - **Mangel an echtem Verständnis** - LLMs manipulieren statistische Muster im Text. Ob dies „Verstehen“ darstellt, ist eine tiefgreifende philosophische Debatte.
 - **Trainingsdaten-Cutoffs** – Modelle wissen nichts über Ereignisse, nachdem ihre Trainingsdaten erfasst wurden, es sei denn, sie werden durch Abrufsysteme ergänzt.
 
@@ -110,7 +110,7 @@ LLMs sind leistungsstark, aber alles andere als perfekt:
 
 ## Die Skalierungsdebatte
 
-Jahrelang herrschte die Überzeugung vor, dass **größer immer besser ist** – mehr Parameter, mehr Daten und mehr Rechenleistung würden die Leistung stetig verbessern. Dieses „Skalierungsgesetz“ hielt sich bemerkenswert gut bei GPT-2, GPT-3 und GPT-4.
+Jahrelang herrschte die Überzeugung vor, dass **größer immer besser ist** - mehr Parameter, mehr Daten und mehr Rechenleistung würden die Leistung stetig verbessern. Dieses „Skalierungsgesetz“ hielt sich bemerkenswert gut über die GPT-2-, GPT-3- und GPT-4-Generation sowie spätere frontier Systeme.
 
 Jüngste Forschungsergebnisse deuten jedoch darauf hin, dass die Erträge allein im reinen Maßstab möglicherweise sinken. Der Schwerpunkt verlagert sich in Richtung:
 - **Bessere Datenqualität** gegenüber Quantität (kuratierte, deduplizierte Datensätze).

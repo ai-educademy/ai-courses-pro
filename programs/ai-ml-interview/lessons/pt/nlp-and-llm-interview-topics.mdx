@@ -61,7 +61,7 @@ O transformador consiste em:
 | Arquitetura | Exemplos | Melhor para |
 |---|---|---|
 | Somente codificador | BERT, RoBERTa | Classificação, NER, embeddings |
-| Somente decodificador | GPT-4, LLaMA, Mistral | Geração de texto, chat, raciocínio |
+| Somente decodificador | GPT, Llama, Mistral | Geração de texto, chat, raciocínio |
 | Codificador-Decodificador | T5, BART | Tradução, resumo |
 
 <Quiz
@@ -115,7 +115,7 @@ A técnica por trás da utilidade do ChatGPT:
 
 ### Janelas de contexto e desafios de contexto longo
 
-- **Janela de contexto**: o número máximo de tokens que um modelo pode processar de uma vez (por exemplo, GPT-4 Turbo: 128K, Claude: 200K)
+- **Janela de contexto**: o número máximo de tokens que um modelo pode processar de uma vez. Os sistemas frontier atuais variam de centenas de milhares a cerca de um milhão de tokens.
 - **Perdidos no meio**: os modelos tendem a prestar menos atenção às informações no meio de contextos longos
 - **Estratégias**: resumir documentos longos, colocar informações críticas no início/fim, usar recuperação hierárquica
 
@@ -136,12 +136,12 @@ Os modelos geram texto plausível, mas factualmente incorreto. Estratégias de m
 
 Esta é uma pergunta favorita das entrevistas: “Dado este caso de uso, qual modelo você escolheria?”
 
-**Use um modelo de fronteira grande (GPT-4, Claude) quando:**
+**Use um modelo frontier grande (GPT-6 Astra, Claude Opus 5.5) quando:**
 - A tarefa requer raciocínio geral ou instruções complexas seguindo
 - Você não possui dados de treinamento rotulados
 - A velocidade da prototipagem é mais importante do que o custo de inferência
 
-**Use um modelo menor ajustado (Mistral 7B, LLaMA 3) quando:**
+**Use um modelo menor ajustado (Mistral, Llama) quando:**
 - Você tem dados específicos de domínio e precisa de resultados consistentes e especializados
 - O custo de inferência é importante (servindo em escala)
 - Os requisitos de latência são rígidos
@@ -154,7 +154,7 @@ Esta é uma pergunta favorita das entrevistas: “Dado este caso de uso, qual mo
 
 <Quiz
   question="Uma empresa de saúde precisa classificar as mensagens dos pacientes em 15 categorias. Eles têm 50.000 exemplos rotulados. Qual abordagem é mais econômica para a produção?"
-  options="GPT-4 com aviso de poucos disparos|Modelo BERT ajustado|RAG com banco de dados vetorial|Classificação zero-shot com LLaMA 70B"
+  options="Um LLM frontier com aviso de poucos disparos|Modelo BERT ajustado|RAG com banco de dados vetorial|Classificação zero-shot com Llama 70B"
   answer="1"
   explanation="Com 50.000 exemplos rotulados e uma tarefa de classificação bem definida, um modelo BERT ajustado será rápido, barato de servir e altamente preciso. Usar um LLM grande para uma tarefa de classificação com dados de treinamento abundantes é desnecessariamente caro e lento."
 />

@@ -65,7 +65,7 @@ DPO loss function implicitly language model के अंदर ही reward mo
 L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
 ```
 
-जहाँ `y_w` preferred response है, `y_l` rejected है, और `π_ref` reference (SFT) model है। DPO simpler, ज़्यादा stable, और train करने में सस्ता है - कोई reward model नहीं, कोई RL loop नहीं, कोई hyperparameter-sensitive PPO नहीं। Meta का LLaMA 2 और कई open-source models अब DPO या इसके variants use करते हैं।
+जहाँ `y_w` preferred response है, `y_l` rejected है, और `π_ref` reference (SFT) model है। DPO simpler, ज़्यादा stable, और train करने में सस्ता है - कोई reward model नहीं, कोई RL loop नहीं, कोई hyperparameter-sensitive PPO नहीं। कई open-weight models अब DPO या related preference-optimisation variants use करते हैं।
 
 <ThinkAboutIt>
 DPO reward model eliminate करता है लेकिन inference time पर arbitrary new responses score करने की ability भी खो देता है। किन scenarios में explicit reward model (full RLHF pipeline) रखना DPO की simplicity से ज़्यादा valuable हो सकता है?
@@ -106,7 +106,7 @@ Alignment research का frontier ऐसी techniques ढूँढना ह�
 <Quiz question="RLHF-trained models के context में 'alignment tax' क्या है?" options="Human labellers hire करने की financial cost|Safety training से model helpfulness और capability में कमी जो model को ज़रूरत से ज़्यादा cautious बना देती है|PPO optimisation चलाने की computational cost|Governments द्वारा AI companies पर safety compliance के लिए लगाया tax" answer="1" explanation="Alignment tax उस capability या helpfulness के loss को refer करता है जो safety training model को excessively cautious बनाने पर होता है - benign requests refuse करना, unnecessarily hedge करना, या generic responses produce करना।" />
 
 <FunFact>
-OpenAI ने GPT-4 के base model को public release version में transform करने के लिए alignment work (SFT data collection, reward modelling, और RLHF training) पर लगभग छह महीने खर्च किए। Pre-training compute का fraction होते हुए भी alignment phase को हज़ारों घंटों की specialised human labelling चाहिए थी।
+Frontier labs base models को release करने लायक safe products में बदलने के लिए alignment work (SFT data collection, reward modelling, preference optimisation, और safety testing) पर महीनों खर्च करते हैं। Pre-training compute का fraction होते हुए भी alignment phase को हज़ारों घंटों की specialised human labelling और evaluation चाहिए होती है।
 </FunFact>
 
 <ThinkAboutIt>

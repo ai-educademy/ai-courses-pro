@@ -34,7 +34,7 @@ Kaplan recommendation: compute limited అయినప్పుడు, smaller m
 |-------|-----------|----------------|-------|
 | GPT-3 | 175B | 300B | 1.7:1 |
 | Chinchilla | 70B | 1.4T | 20:1 |
-| LLaMA 2 70B | 70B | 2T | 28:1 |
+| Llama 4 Scout | 17B active / 109B total | ~40T multimodal | MoE |
 
 Chinchilla (70B parameters) 4× more data పై train అయ్యి చాలా larger Gopher (280B) ని **outperform** చేసింది. Lesson profound: చాలా large models massively **over-parameterised మరియు under-trained**.
 
@@ -49,7 +49,7 @@ Model capability architecture, data, మరియు training interplay పై d
 - **Tokenisation** effective data volume affect చేస్తుంది. Better tokeniser token కి more information compress చేస్తుంది, parameter-to-token ratio change చేస్తుంది.
 
 <FunFact>
-GPT-4 train చేయడానికి compute alone $100 million కంటే ఎక్కువ ఖర్చైనట్లు estimate. Single frontier model training run consume చేసే electricity small town annual consumption exceed చేయవచ్చు - scaling environmental sustainability గురించి serious questions raise చేస్తుంది.
+Frontier model train చేయడానికి compute, data, energy, engineering కలిపి hundreds of millions ఖర్చవచ్చు. Single frontier model training run consume చేసే electricity small town annual consumption exceed చేయవచ్చు, scaling environmental sustainability గురించి serious questions raise చేస్తుంది.
 </FunFact>
 
 ## Distributed Training Strategies

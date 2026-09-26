@@ -105,7 +105,7 @@ Heutzutage dominieren reine Decoder-Modelle, da **die Generierung die universell
 
 <Quiz question="Auf welcher Transformer-Variante basiert BERT und warum ist sie für die Generierung von offenem Text ungeeignet?" options="Nur Decoder; es fehlen Queraufmerksamkeitsebenen|Encoder-Decoder; Für die Textgenerierung ist ein separater Decoder erforderlich|Nur Encoder; Seine bidirektionale Aufmerksamkeit bedeutet, dass es die gesamte Sequenz sieht, was eine autoregressive Generierung unmöglich macht|Nur Encoder; es hat zu wenige Parameter für Generierungsaufgaben" answer="2" explanation="BERT nutzt bidirektionale Aufmerksamkeit (nur Encoder), was bedeutet, dass jeder Token jeden anderen Token, einschließlich zukünftiger, betreut. Dies ist perfekt für das Verständnis von Aufgaben, macht aber die autoregressive Generierung unmöglich – es kann nicht „das nächste Token” vorhersagen, wenn es bereits alle Token sehen kann." />
 
-<FunFact>Der Originalaufsatz *Attention Is All You Need* wurde von einem früheren Veranstaltungsort abgelehnt, bevor er bei NeurIPS 2017 angenommen wurde. Im Jahr 2024 wurde er über 130.000 Mal zitiert – was ihn zu einem der meistzitierten Informatikaufsätze aller Zeiten macht.
+<FunFact>Der Originalaufsatz *Attention Is All You Need* wurde von einem früheren Veranstaltungsort abgelehnt, bevor er bei NeurIPS 2017 angenommen wurde. Seitdem ist er zu einem der meistzitierten Informatikaufsätze aller Zeiten geworden.</FunFact>
 </FunFact>
 
 <ThinkAboutIt>Selbstaufmerksamkeit hat eine O(n²)-Komplexität in der Sequenzlänge – eine Verdoppelung des Kontextfensters vervierfacht die Berechnung. Die Forschung zu linearer Aufmerksamkeit, spärlicher Aufmerksamkeit und Ringaufmerksamkeit zielt darauf ab, diese Barriere zu überwinden. Welche Kompromisse könnten diese Näherungen mit sich bringen?
@@ -117,4 +117,4 @@ Heutzutage dominieren reine Decoder-Modelle, da **die Generierung die universell
 
 – [Aufmerksamkeit ist alles, was Sie brauchen (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762) – Das Grundlagenpapier zur Einführung in die Transformer-Architektur
 - [Andrej Karpathy – Lasst uns GPT erstellen: von Grund auf, im Code](https://www.youtube.com/watch?v=kCc8FmEb1nY) – Eine vollständige Anleitung zum Aufbau eines Transformers von Grund auf
-- [Der illustrierte Transformer (Jay Alammar)](https://jalammar.github.io/illustrated-transformer/) – Visuelle, intuitive Erklärung aller Transformer-Komponenten
+- [Der illustrierte Transformer (Jay Alammar)](https://jalammar.github.io/illustrated-transformer/) - Visuelle, intuitive Erklärung aller Transformer-Komponenten

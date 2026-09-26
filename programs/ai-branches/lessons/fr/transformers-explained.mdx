@@ -1,6 +1,6 @@
 ---
 title: "Les transformateurs expliqués : l'architecture derrière ChatGPT"
-description: "Comprenez l'architecture Transformer qui alimente ChatGPT, GPT-4, BERT et Gemini – le mécanisme d'attention expliqué étape par étape."
+description: "Comprendre l'architecture Transformer qui alimente ChatGPT, Claude, Gemini, BERT et les modèles GPT modernes - le mécanisme d'attention expliqué étape par étape."
 order: 12
 difficulty: "intermediate"
 duration: 35
@@ -10,7 +10,7 @@ machineTranslated: true
 ---
 # Les transformateurs expliqués : l'architecture derrière ChatGPT
 
-En 2017, une équipe de Google a publié un article intitulé *« L'attention est tout ce dont vous avez besoin »*. Il a introduit l'architecture **Transformer** et a changé l'IA pour toujours. Tous les principaux modèles de langage dont vous avez entendu parler – ChatGPT, GPT-4, BERT, Gemini, Claude, LLaMA – sont construits sur Transformers.
+En 2017, une équipe de Google a publié un article intitulé *"Attention Is All You Need"*. Il a introduit l'architecture **Transformer** et a changé l'IA pour toujours. Tous les grands modèles de langage dont vous avez entendu parler - ChatGPT, Claude, Gemini, BERT, Llama et les modèles GPT modernes - reposent sur des Transformers.
 
 Pour comprendre pourquoi les Transformers sont importants, vous devez d’abord comprendre ce qu’ils ont remplacé.
 
@@ -109,7 +109,7 @@ class MultiHeadAttention(nn.Module):
 
 Chaque responsable de l’attention peut se spécialiser dans un type de relation différent. Une tête pourrait suivre les dépendances syntaxiques (accord sujet-verbe), une autre pourrait se concentrer sur la coréférence (les pronoms et leurs antécédents), une autre pourrait capturer la similarité sémantique.
 
-<FunFact>Selon les rumeurs, GPT-4 utiliserait 96 têtes d’attention. Chacun peut apprendre indépendamment à suivre simultanément différentes relations linguistiques dans toute la fenêtre contextuelle.</FunFact>
+<FunFact>Les grands modèles de la famille GPT utilisent de nombreuses têtes d'attention. Chacune peut apprendre indépendamment à suivre différentes relations linguistiques sur toute la fenêtre de contexte simultanément.</FunFact>
 
 ## 📍 Encodage positionnel
 
@@ -186,15 +186,15 @@ Cela a conduit à une progression :
 - GPT-1 (2018) : 117 millions de paramètres
 - GPT-2 (2019) : paramètres 1,5B
 - GPT-3 (2020) : paramètres 175B
-- GPT-4 (2023) : estimé à plus de 1 000 milliards de paramètres
+- Modèles frontier actuels : souvent mixture-of-experts ou architectures non divulguées avec des centaines de milliards à des trillions de paramètres effectifs
 
-Chaque saut a apporté des améliorations qualitatives des capacités. Les tâches que GPT-2 ne pouvait pas du tout effectuer (raisonnement complexe, génération de code) sont devenues possibles à l'échelle GPT-3 et excellentes à l'échelle GPT-4.
+Chaque saut a apporté des améliorations qualitatives de capacité. Les tâches que GPT-2 ne pouvait pas faire du tout (raisonnement complexe, génération de code) sont devenues possibles à l'échelle GPT-3 et ont continué à s'améliorer dans les modèles frontier ultérieurs.
 
 ## ⚡ Formation vs Inférence
 
 Deux profils informatiques très différents :
 
-**Formation** : extrêmement chère. Traiter des milliards de jetons, calculer des gradients et mettre à jour des centaines de milliards de paramètres sur des milliers de GPU pendant des semaines ou des mois. La formation de GPT-4 a été estimée à plus de 100 millions de dollars.
+**Entraînement** : extrêmement coûteux. Traiter des trillions de tokens, calculer les gradients et mettre à jour d'énormes ensembles de paramètres sur des milliers de GPUs pendant des semaines ou des mois. L'entraînement des modèles frontier actuels peut coûter des centaines de millions lorsque le calcul, les données, l'énergie et l'ingénierie sont inclus.
 
 **Inférence** : beaucoup moins cher. Un seul passage à travers le réseau pour générer chaque jeton. Nécessite toujours un matériel important (GPU puissants ou puces IA spécialisées), mais gérable à grande échelle.
 
@@ -210,5 +210,5 @@ Cette asymétrie a façonné le secteur : quelques organisations disposant de re
 - **L'encodage positionnel** ajoute des informations de commande au mécanisme d'attention intrinsèquement indépendant de la position.
 - **BERT** (encodeur uniquement) est pré-entraîné pour comprendre le texte de manière bidirectionnelle ; idéal pour les tâches de classification et de recherche
 - **GPT** (décodeur uniquement) est pré-entraîné pour générer du texte de gauche à droite ; idéal pour la génération et la conversation
-- **L'échelle compte énormément** : des Transformers plus grands formés sur plus de données débloquent constamment de nouvelles capacités, comme le démontre la progression GPT-1 → GPT-4
-- La formation coûte extrêmement cher ; l'inférence est beaucoup moins chère – cette asymétrie façonne la façon dont les modèles de base sont déployés
+- **Le scale compte énormément** : les Transformers plus grands entraînés sur plus de données débloquent constamment de nouvelles capacités, comme le montre la progression de GPT-1 à GPT-3 puis aux systèmes frontier ultérieurs
+- La formation coûte extrêmement cher ; l'inférence est beaucoup moins chère - cette asymétrie façonne la façon dont les modèles de base sont déployés

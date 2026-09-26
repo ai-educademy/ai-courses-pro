@@ -65,7 +65,7 @@ De DPO-lossfunctie definieert impliciet een reward model binnen het taalmodel ze
 L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
 ```
 
-Waarbij `y_w` het geprefereerde antwoord is, `y_l` het afgewezen antwoord, en `π_ref` het referentiemodel (SFT). DPO is eenvoudiger, stabieler en goedkoper om te trainen - geen reward model, geen RL-lus, geen hyperparametergevoelige PPO. Meta's LLaMA 2 en vele open-source modellen gebruiken nu DPO of varianten ervan.
+Waarbij `y_w` het geprefereerde antwoord is, `y_l` het afgewezen antwoord, en `π_ref` het referentiemodel (SFT). DPO is eenvoudiger, stabieler en goedkoper om te trainen - geen reward model, geen RL-lus, geen hyperparametergevoelige PPO. Veel open-weight modellen gebruiken nu DPO of verwante preference-optimisation varianten.
 
 <ThinkAboutIt>
 DPO elimineert het reward model maar verliest daarmee ook de mogelijkheid om willekeurige nieuwe antwoorden te scoren tijdens inferentie. In welke scenario's zou een expliciet reward model (de volledige RLHF-pipeline) waardevoller zijn dan de eenvoud van DPO?
@@ -106,7 +106,7 @@ De frontier van alignment-onderzoek is het vinden van technieken die behulpzaamh
 <Quiz question="Wat is de 'alignment-belasting' in de context van RLHF-getrainde modellen?" options="De financiële kosten van het inhuren van menselijke beoordelaars voor voorkeursdata|De vermindering van modelbehulpzaamheid en -capaciteit die het gevolg is van veiligheidstraining die het model overdreven voorzichtig maakt|De rekenkosten van het draaien van PPO-optimalisatie|De belasting die overheden opleggen aan AI-bedrijven voor veiligheidsnaleving" answer="1" explanation="De alignment-belasting verwijst naar het verlies aan capaciteit of behulpzaamheid wanneer veiligheidstraining een model buitensporig voorzichtig maakt - onschuldige verzoeken weigeren, onnodig nuanceren, of generieke antwoorden produceren. Het balanceren van veiligheid met oprechte behulpzaamheid is een van de moeilijkste open problemen in alignment." />
 
 <FunFact>
-OpenAI besteedde ongeveer zes maanden aan alignment-werk (SFT-dataverzameling, reward modelling en RLHF-training) om het basismodel van GPT-4 te transformeren in de publiek beschikbare versie. De alignment-fase kostte, hoewel een fractie van de pre-training compute, duizenden uren gespecialiseerde menselijke labeling.
+Frontier labs besteden maanden aan alignment-werk (SFT-dataverzameling, reward modelling, preference optimisation en safety testing) om basismodellen om te vormen tot producten die veilig genoeg zijn om uit te brengen. De alignment-fase kost, hoewel een fractie van de pre-training compute, duizenden uren gespecialiseerde menselijke labeling en evaluatie.
 </FunFact>
 
 <ThinkAboutIt>

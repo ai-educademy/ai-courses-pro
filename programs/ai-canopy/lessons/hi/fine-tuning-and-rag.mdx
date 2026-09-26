@@ -14,7 +14,7 @@ published: true
 
 ## Generic Models काफ़ी क्यों नहीं हैं
 
-सोचिए आप GPT-4 से अपनी company की specific return policy, internal product codes, या medical treatment protocols के बारे में customer queries का जवाब माँगें। वह नहीं दे सकता - यह information उसके training data में नहीं है।
+सोचिए आप किसी frontier model से अपनी company की specific return policy, internal product codes, या medical treatment protocols के बारे में customer queries का जवाब माँगें। वह नहीं दे सकता, यह information उसके training data में नहीं है।
 
 Businesses को ऐसा AI चाहिए जो large model की **general intelligence** को उनके domain की **specific knowledge** के साथ combine करे। इसके दो रास्ते हैं, और सही रास्ता चुनना बहुत matter करता है।
 
@@ -35,7 +35,7 @@ Fine-tuning एक pre-trained model लेता है और उसे आप
 
 **Process:**
 1. अपने domain में high-quality examples का dataset तैयार करो (आमतौर पर सैकड़ों से हज़ारों input-output pairs)।
-2. Base model चुनो (जैसे Llama 3, Mistral)।
+2. Base model चुनो (जैसे Llama 4, Mistral)।
 3. Low learning rate के साथ कुछ epochs train करो ताकि catastrophic forgetting से बचा जा सके।
 4. Held-out test data पर evaluate करो।
 

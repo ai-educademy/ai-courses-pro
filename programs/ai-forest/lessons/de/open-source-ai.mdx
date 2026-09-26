@@ -24,7 +24,7 @@ Open Source ist nicht nur freie Software – es ist eine Philosophie, die die En
 
 **Datensouveränität** – Die lokale Ausführung von Modellen bedeutet, dass sensible Daten niemals Ihre Infrastruktur verlassen. Für Anwendungen im Gesundheitswesen, im Rechtswesen und im Finanzwesen ist dies oft eine schwierige Anforderung.
 
-<FunFact>Metas Llama 3 wurde im ersten Monat seiner Veröffentlichung über 30 Millionen Mal heruntergeladen und ist damit das am schnellsten angenommene offene KI-Modell in der Geschichte. Die Einführung von Open-Source beschleunigt sich, nicht verlangsamt sich.
+<FunFact>Metas Llama-Familie hat gezeigt, dass open-weight KI schnell breite Entwicklerakzeptanz erreichen kann. Open-weight adoption beschleunigt sich, statt langsamer zu werden.</FunFact>
 </FunFact>
 
 ## Wichtige Plattformen
@@ -47,13 +47,13 @@ Die offene Modelllandschaft entwickelt sich monatlich weiter, aber diese Familie
 
 | Modellfamilie | Ersteller | Stärken | Am besten für |
 |---|---|---|---|
-| **Lama 3** | Meta | Starke Gesamtleistung, große Community | Allzweck-Feinabstimmungsbasis |
+| **Llama 4** | Meta | Native Multimodalität, langer Kontext, große Community | General-purpose, Fine-tuning-Basis |
 | **Mistral / Mixtral** | Mistral KI | Hervorragende Effizienz, MoE-Architektur | Kostensensitiver Produktionseinsatz |
 | **Phi** | Microsoft | Überraschend leistungsfähig für die Größe | Edge-Geräte, mobil |
 | **Gemma** | Google | Starke Argumentation, gut dokumentiert | Recherche, strukturierte Aufgaben |
 | **Qwen** | Alibaba | Mehrsprachigkeit, Wettbewerbsmaßstäbe | Globale Anwendungen |
 
-<Callout>**Lizenz ist wichtig.** Nicht alle „offenen“ Modelle sind wirklich offen. Llama 3 verfügt über eine Community-Lizenz mit Nutzungsbeschränkungen ab 700 Millionen monatlichen Benutzern. Mistral und Gemma verwenden Apache 2.0. Überprüfen Sie immer die Lizenz, bevor Sie ein Produkt erstellen.
+<Callout>**Lizenz matters.** Nicht alle "offenen" Modelle sind wirklich offen. Llama-Modelle verwenden eine Community-Lizenz mit Nutzungsbeschränkungen für sehr große Dienste. Mistral- und Gemma-Familien enthalten permissive Apache 2.0 Releases. Prüfen Sie immer die Lizenz, bevor Sie ein Produkt bauen.
 </Callout>
 
 ## Modelle lokal ausführen
@@ -84,7 +84,7 @@ ollama run llama3.1:8b "Explain transformer attention in one paragraph"
 Hier erfahren Sie, wie Sie Open-Source-Tools zu einem produktionsbereiten KI-System zusammensetzen.
 
 **Die Referenzarchitektur:**
-1. **Modellebene** – Llama 3 oder Mistral, bereitgestellt über vLLM oder Ollama
+1. **Modellebene** - Llama 4 oder Mistral, bereitgestellt über vLLM oder Ollama
 2. **Orchestrierung** – LangChain oder LlamaIndex für mehrstufige Workflows
 3. **Vektorspeicher** – Chroma, Qdrant oder Weaviate für einbettungsbasierten Abruf
 4. **Datenpipeline** – Apache Airflow oder Prefect für ETL und Datenverarbeitung
@@ -122,7 +122,7 @@ Das Open-Source-Ökosystem gedeiht, weil die Menschen etwas zurückgeben. Hier e
 
 - Open-Source-KI demokratisiert den Zugang, beschleunigt Innovationen und ermöglicht Transparenz
 - Hugging Face, Ollama, LangChain und LlamaIndex bilden das Kernökosystem
-- Offene Modelle wie Llama 3, Mistral und Phi konkurrieren bei vielen Aufgaben mit proprietären Alternativen
+- Offene Modelle wie Llama 4, Mistral und Phi konkurrieren bei vielen Aufgaben mit proprietären Alternativen
 – Das lokale Ausführen von Modellen ist auf Consumer-Hardware mit den richtigen Tools praktisch
 – Ein vollständiger Open-Source-KI-Stack kann aus frei verfügbaren Komponenten zusammengestellt werden
 - Wenn Sie einen Beitrag leisten, stärken Sie das Ökosystem und stärken Ihr berufliches Profil

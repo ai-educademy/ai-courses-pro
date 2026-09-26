@@ -34,7 +34,7 @@ In 2022 daagde DeepMind's **Chinchilla-paper** de conclusies van Kaplan uit. Hun
 |-------|-----------|-----------------|------------|
 | GPT-3 | 175B | 300B | 1,7:1 |
 | Chinchilla | 70B | 1,4T | 20:1 |
-| LLaMA 2 70B | 70B | 2T | 28:1 |
+| Llama 4 Scout | 17B active / 109B total | ~40T multimodal | MoE |
 
 Chinchilla (70 miljard parameters) **presteerde beter** dan het veel grotere Gopher (280 miljard) door op 4× meer data te trainen. De les was diepgaand: de meeste grote modellen waren massaal **overgeparametriseerd en ondergetraind**.
 
@@ -49,7 +49,7 @@ De capaciteit van een model hangt af van het samenspel van architectuur, data en
 - **Tokenisatie** beïnvloedt het effectieve datavolume. Een betere tokeniser comprimeert meer informatie per token, wat de parameter-tokenverhouding verandert.
 
 <FunFact>
-Het trainen van GPT-4 heeft naar schatting meer dan $100 miljoen aan compute gekost. Het elektriciteitsverbruik tijdens een enkele frontier-modeltraining kan het jaarverbruik van een klein stadje overtreffen - wat serieuze vragen oproept over de ecologische duurzaamheid van opschaling.
+Het trainen van een frontier model kan honderden miljoenen kosten wanneer compute, data, energie en engineering worden meegerekend. Het elektriciteitsverbruik tijdens één frontier model training run kan het jaarlijkse verbruik van een kleine stad overtreffen, wat ernstige vragen oproept over de ecologische duurzaamheid van scaling.
 </FunFact>
 
 ## Gedistribueerde Trainingsstrategieën

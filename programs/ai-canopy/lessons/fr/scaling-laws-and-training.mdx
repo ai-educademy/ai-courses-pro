@@ -34,7 +34,7 @@ En 2022, l'article **Chinchilla** de DeepMind a remis en question les conclusion
 |--------|-----------|----------------------|-------|
 | GPT-3 | 175 Md | 300 Md | 1,7:1 |
 | Chinchilla | 70 Md | 1,4 T | 20:1 |
-| LLaMA 2 70B | 70 Md | 2 T | 28:1 |
+| Llama 4 Scout | 17B active / 109B total | ~40T multimodal | MoE |
 
 Chinchilla (70 milliards de paramètres) a **surpassé** le bien plus grand Gopher (280 milliards) en s'entraînant sur 4× plus de données. La leçon était profonde : la plupart des grands modèles étaient massivement **sur-paramétrés et sous-entraînés**.
 
@@ -49,7 +49,7 @@ La capacité d'un modèle dépend de l'interaction entre architecture, données 
 - La **tokenisation** affecte le volume effectif de données. Un meilleur tokeniser compresse plus d'information par token, modifiant le ratio paramètres-tokens.
 
 <FunFact>
-L'entraînement de GPT-4 aurait coûté plus de 100 millions de dollars en calcul seul. L'électricité consommée durant un seul entraînement de modèle de pointe peut dépasser la consommation annuelle d'une petite ville - soulevant de sérieuses questions sur la durabilité environnementale du passage à l'échelle.
+L'entraînement d'un modèle frontier peut coûter des centaines de millions lorsque le calcul, les données, l'énergie et l'ingénierie sont inclus. L'électricité consommée pendant un seul entraînement de modèle frontier peut dépasser la consommation annuelle d'une petite ville, ce qui soulève de sérieuses questions sur la durabilité environnementale du scaling.
 </FunFact>
 
 ## Stratégies d'entraînement distribué

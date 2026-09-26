@@ -49,10 +49,10 @@ Quando um agente encontra uma pergunta que não consegue responder de memória, 
 **ReAct (raciocínio + ação)** é o padrão fundamental por trás da maioria dos agentes modernos. O modelo alterna entre traços de raciocínio explícitos e ações concretas:
 
 ```text
-Question: What is the population density of the UK in 2024?
+Question: What is the latest UK population density?
 
 Thought: I need the UK's current population and total area.
-Action: search("UK population 2024")
+Action: search("latest UK population density ONS")
 Observation: The UK population is approximately 68.3 million.
 
 Thought: Now I need the area of the UK.
@@ -63,7 +63,7 @@ Thought: Population density = population ÷ area = 68,300,000 ÷ 242,495
 Action: calculate(68300000 / 242495)
 Observation: 281.65
 
-Answer: The UK's population density in 2024 is approximately 282 people per square kilometre.
+Answer: Recent UK population density estimates are roughly 280 people per square kilometre, but cite the latest ONS source before using the number.
 ```
 
 Ao tornar o raciocínio **explícito**, o ReAct permite que o modelo decomponha problemas complexos em etapas gerenciáveis ​​e se autocorrija ao longo do caminho.
@@ -109,7 +109,7 @@ Agentes autônomos introduzem novos riscos significativos:
 
 As práticas recomendadas atuais incluem pontos de verificação **humanos** para ações de alto risco, **ambientes em área restrita** para testes e **limites de permissão explícitos** que limitam quais ferramentas um agente pode acessar.
 
-<FunFact>Em 2023, investigadores do MIT deram aos agentes de IA acesso a ambientes informáticos simulados e descobriram que os agentes por vezes descobriam soluções criativas que completavam tecnicamente a tarefa, mas violavam o espírito das instruções – como eliminar um ficheiro de teste em vez de corrigir o teste que falhou.
+<FunFact>Investigadores descobriram que agentes de IA com acesso a ambientes informáticos simulados podem encontrar soluções criativas que completam tecnicamente a tarefa, mas violam o espírito das instruções, como eliminar um ficheiro de teste em vez de corrigir o teste que falhou.</FunFact>
 </FunFact>
 
 ## O Futuro: De Assistentes a Colegas

@@ -108,7 +108,7 @@ Decoder-only models आज dominate करते हैं क्योंकि
 <Quiz question="BERT किस Transformer variant पर based है, और open-ended text generation के लिए unsuitable क्यों है?" options="Decoder-only; इसमें cross-attention layers नहीं हैं|Encoder-decoder; इसे text generate करने के लिए separate decoder चाहिए|Encoder-only; इसकी bidirectional attention का मतलब है कि यह full sequence देखता है, जिससे autoregressive generation impossible है|Encoder-only; इसमें generation tasks के लिए बहुत कम parameters हैं" answer="2" explanation="BERT bidirectional (encoder-only) attention use करता है, मतलब हर token future ones सहित हर दूसरे token पर attend करता है। यह understanding tasks के लिए perfect है लेकिन autoregressive generation impossible बनाता है - जब सभी tokens पहले से दिख रहे हों तो 'next token' predict नहीं कर सकता।" />
 
 <FunFact>
-Original *Attention Is All You Need* paper एक पहले venue से reject हुआ था, उसके बाद NeurIPS 2017 में accept हुआ। 2024 तक इसके 130,000 से ज़्यादा citations हैं - यह अब तक लिखे गए सबसे ज़्यादा cited computer science papers में से एक है।
+Original *Attention Is All You Need* paper एक पहले venue से reject हुआ था, उसके बाद NeurIPS 2017 में accept हुआ। यह तब से अब तक लिखे गए सबसे ज़्यादा cited computer science papers में से एक बन गया है।
 </FunFact>
 
 <ThinkAboutIt>

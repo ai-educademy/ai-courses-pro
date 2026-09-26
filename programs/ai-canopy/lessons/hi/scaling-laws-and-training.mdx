@@ -34,7 +34,7 @@ Kaplan की recommendation: जब compute limited हो, तो **बड़�
 |-------|-----------|----------------|-------|
 | GPT-3 | 175B | 300B | 1.7:1 |
 | Chinchilla | 70B | 1.4T | 20:1 |
-| LLaMA 2 70B | 70B | 2T | 28:1 |
+| Llama 4 Scout | 17B active / 109B total | ~40T multimodal | MoE |
 
 Chinchilla (70B parameters) ने 4× ज़्यादा data पर train करके बहुत बड़े Gopher (280B) को **outperform** किया। सबक गहरा था: ज़्यादातर large models massively **over-parameterised और under-trained** थे।
 
@@ -49,7 +49,7 @@ Model की capability architecture, data और training के interplay प�
 - **Tokenisation** effective data volume affect करता है। Better tokeniser per token ज़्यादा information compress करता है, parameter-to-token ratio बदलते हुए।
 
 <FunFact>
-GPT-4 train करने में अकेले compute पर $100 million से ज़्यादा खर्च हुआ अनुमानतः। एक single frontier model training run में consume होने वाली electricity एक छोटे शहर की annual consumption से ज़्यादा हो सकती है - scaling की environmental sustainability पर गंभीर सवाल उठाते हुए।
+एक frontier model को train करने में compute, data, energy और engineering शामिल करने पर hundreds of millions खर्च हो सकते हैं। एक single frontier model training run की बिजली खपत small town की annual consumption से ज़्यादा हो सकती है, जिससे scaling की environmental sustainability पर serious questions उठते हैं।
 </FunFact>
 
 ## Distributed Training Strategies

@@ -34,7 +34,7 @@ En 2022, el **artículo Chinchilla** de DeepMind cuestionó las conclusiones de 
 |-------|-----------|----------------|-------|
 | GPT-3 | 175B | 300B | 1.7:1 |
 | Chinchillas | 70B | 1,4T | 20:1 |
-| LLaMA 2 70B | 70B | 2T | 28:1 |
+| Llama 4 Scout | 17B active / 109B total | ~40T multimodal | MoE |
 
 Chinchilla (70B de parámetros) **superó** al Gopher, mucho más grande (280B), al entrenar con 4 veces más datos. La lección fue profunda: la mayoría de los modelos grandes estaban enormemente **sobreparametrizados y poco entrenados**.
 
@@ -48,7 +48,7 @@ La capacidad de un modelo depende de la interacción de la arquitectura, los dat
 - **Elecciones de arquitectura** - patrones de atención, funciones de activación (SwiGLU vs ReLU), ubicación de normalización (prenorma vs posnorma): todos cambian las curvas de escala.
 - **La tokenización** afecta el volumen de datos efectivo. Un mejor tokenizador comprime más información por token, cambiando la relación parámetro-token.
 
-<FunFact>Se estima que entrenar GPT-4 ha costado más de 100 millones de dólares sólo en computación. La electricidad consumida durante una ejecución de capacitación del modelo de frontera única puede exceder el consumo anual de una ciudad pequeña, lo que plantea serias dudas sobre la sostenibilidad ambiental del escalamiento.
+<FunFact>Entrenar un modelo frontier puede costar cientos de millones cuando se incluyen computación, datos, energía e ingeniería. La electricidad consumida durante una sola ejecución de entrenamiento de un modelo frontier puede superar el consumo anual de una pequeña ciudad, lo que plantea preguntas serias sobre la sostenibilidad ambiental del escalado.</FunFact>
 </FunFact>
 
 ## Estrategias de formación distribuida

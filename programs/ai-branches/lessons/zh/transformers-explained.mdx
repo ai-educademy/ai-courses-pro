@@ -1,6 +1,6 @@
 ---
 title: "Transformer 解释：ChatGPT 背后的架构"
-description: "了解为 ChatGPT、GPT-4、BERT 和 Gemini 提供支持的 Transformer 架构——逐步解释注意力机制。"
+description: "了解驱动 ChatGPT、Claude、Gemini、BERT 和现代 GPT 模型的 Transformer 架构 - attention mechanism 逐步讲解。"
 order: 12
 difficulty: "intermediate"
 duration: 35
@@ -10,7 +10,7 @@ machineTranslated: true
 ---
 # Transformers 解释：ChatGPT 背后的架构
 
-2017 年，谷歌的一个团队发表了一篇题为“Attention Is All You Need”的论文。它引入了 **Transformer** 架构，并永远改变了人工智能。您听说过的每一种主要语言模型——ChatGPT、GPT-4、BERT、Gemini、Claude、LLaMA——都是基于 Transformers 构建的。
+2017 年，Google 的一个团队发表了一篇题为 *"Attention Is All You Need"* 的论文。它介绍了 **Transformer** 架构，并永远改变了 AI。您听说过的每个主要语言模型 - ChatGPT、Claude、Gemini、BERT、Llama 和现代 GPT 模型 - 都建立在 Transformers 之上。
 
 要了解 Transformer 的重要性，您首先需要了解它们取代了什么。
 
@@ -109,7 +109,7 @@ class MultiHeadAttention(nn.Module):
 
 每个注意力头都可以专注于不同类型的关系。一个头脑可能会跟踪句法依赖性（主谓一致性），另一个头脑可能会关注共指（代词及其先行词），另一个头脑可能会捕获语义相似性。
 
-<FunFact>据传 GPT-4 使用 96 个注意力头。每个人都可以独立学习同时跟踪整个上下文窗口中的不同语言关系。</FunFact>
+<FunFact>大型 GPT-family models 使用许多 attention heads。每个 head 都可以独立学习，在整个上下文窗口中同时跟踪不同的语言关系。</FunFact>
 
 ## 📍 位置编码
 
@@ -186,15 +186,15 @@ GPT training:    "The cat sat on the"          → predict "mat"
 - GPT-1 (2018)：117M 参数
 - GPT-2 (2019)：1.5B 参数
 - GPT-3 (2020)：175B 参数
-- GPT-4 (2023)：估计超过 1 万亿个参数
+- 当前 frontier models：通常是 mixture-of-experts 或未公开架构，拥有数千亿到数万亿有效参数
 
-每一次跳跃都带来了能力的质的提升。 GPT-2 根本无法完成的任务（复杂推理、代码生成）在 GPT-3 规模上变得可能，并且在 GPT-4 规模上表现出色。
+每一次跃迁都带来了能力的质的提升。GPT-2 根本无法完成的任务（复杂推理、代码生成）在 GPT-3 规模上变得可能，并在后来的 frontier models 中继续改进。
 
 ## ⚡ 训练与推理
 
 两种截然不同的计算配置文件：
 
-**培训**：极其昂贵。在数周或数月的时间里，在数千个 GPU 上处理数十亿个令牌、计算梯度并更新数千亿个参数。 GPT-4 的培训费用估计超过 1 亿美元。
+**训练**：极其昂贵。处理数万亿 tokens、计算梯度，并在数千个 GPU 上用数周或数月更新巨大的参数集。当前 frontier model training 在计算、数据、能源和工程都计入后可能花费数亿美元。
 
 **推论**：便宜得多。通过网络的单个前向传递来生成每个令牌。仍然需要大量硬件（强大的 GPU 或专门的人工智能芯片），但可以大规模管理。
 
@@ -210,5 +210,5 @@ GPT training:    "The cat sat on the"          → predict "mat"
 - **位置编码**将顺序信息添加到固有的位置不可知的注意机制中
 - **BERT**（仅编码器）经过预先训练，可以双向理解文本；最适合分类和搜索任务
 - **GPT**（仅解码器）经过预先训练，可以从左到右生成文本；最适合生成和对话
-- **规模非常重要**：接受更多数据训练的大型 Transformer 不断释放新功能，如 GPT-1 → GPT-4 进程所示
-- 培训费用极其昂贵；推理成本要低得多——这种不对称性决定了基础模型的部署方式
+- **规模非常重要**：在更多数据上训练的更大 Transformers 会持续解锁新能力，GPT-1 到 GPT-3 以及后来的 frontier systems 的发展证明了这一点
+- 培训费用极其昂贵；推理成本要低得多--这种不对称性决定了基础模型的部署方式

@@ -61,7 +61,7 @@ Der Transformator besteht aus:
 | Architektur | Beispiele | Am besten für |
 |---|---|---|
 | Nur Encoder | BERT, RoBERTa | Klassifizierung, NER, Einbettungen |
-| Nur Decoder | GPT-4, LLaMA, Mistral | Textgenerierung, Chat, Argumentation |
+| Nur Decoder | GPT, Llama, Mistral | Textgenerierung, Chat, Argumentation |
 | Encoder-Decoder | T5, BART | Übersetzung, Zusammenfassung |
 
 <Quiz
@@ -115,7 +115,7 @@ Die Technik hinter der Hilfsbereitschaft von ChatGPT:
 
 ### Kontextfenster und Herausforderungen mit langem Kontext
 
-- **Kontextfenster**: die maximale Anzahl an Token, die ein Modell gleichzeitig verarbeiten kann (z. B. GPT-4 Turbo: 128.000, Claude: 200.000)
+- **Kontextfenster**: die maximale Anzahl an Token, die ein Modell gleichzeitig verarbeiten kann. Aktuelle frontier Systeme reichen von Hunderttausenden bis zu etwa einer Million Token.
 - **Mittendrin verloren**: Modelle tendieren dazu, Informationen in langen Kontexten weniger Aufmerksamkeit zu schenken
 - **Strategien**: Lange Dokumente zusammenfassen, wichtige Informationen am Anfang/Ende platzieren, hierarchisches Abrufen verwenden
 
@@ -136,12 +136,12 @@ Modelle generieren plausible, aber sachlich falsche Texte. Minderungsstrategien:
 
 Dies ist eine beliebte Interviewfrage: „Welches Modell würden Sie angesichts dieses Anwendungsfalls wählen?“
 
-**Verwenden Sie ein Large-Frontier-Modell (GPT-4, Claude), wenn:**
+**Verwenden Sie ein großes frontier Modell (GPT-6 Astra, Claude Opus 5.5), wenn:**
 - Die Aufgabe erfordert allgemeine Überlegungen oder die Befolgung komplexer Anweisungen
 - Sie haben keine gekennzeichneten Trainingsdaten
 - Die Prototyping-Geschwindigkeit ist wichtiger als die Inferenzkosten
 
-**Verwenden Sie ein fein abgestimmtes kleineres Modell (Mistral 7B, LLaMA 3), wenn:**
+**Verwenden Sie ein fein abgestimmtes kleineres Modell (Mistral, Llama), wenn:**
 - Sie verfügen über domänenspezifische Daten und benötigen konsistente, spezialisierte Ausgaben
 - Inferenzkosten sind wichtig (in großem Maßstab)
 - Die Latenzanforderungen sind streng
@@ -154,7 +154,7 @@ Dies ist eine beliebte Interviewfrage: „Welches Modell würden Sie angesichts 
 
 <Quiz
   question="Ein Gesundheitsunternehmen muss Patientennachrichten in 15 Kategorien einteilen. Sie haben 50.000 beschriftete Exemplare. Welcher Ansatz ist für die Produktion am kostengünstigsten?"
-  options="GPT-4 mit Wenig-Schuss-Eingabeaufforderung|Feinabgestimmtes BERT-Modell|RAG mit einer Vektordatenbank|Nullschussklassifizierung mit LLaMA 70B"
+  options="Ein Frontier-LLM mit Wenig-Schuss-Eingabeaufforderung|Feinabgestimmtes BERT-Modell|RAG mit einer Vektordatenbank|Nullschussklassifizierung mit Llama 70B"
   answer="1"
   explanation="Mit 50.000 beschrifteten Beispielen und einer klar definierten Klassifizierungsaufgabe ist ein fein abgestimmtes BERT-Modell schnell, kostengünstig in der Bereitstellung und äußerst genau. Die Verwendung eines großen LLM für eine Klassifizierungsaufgabe mit zahlreichen Trainingsdaten ist unnötig teuer und langsamer."
 />

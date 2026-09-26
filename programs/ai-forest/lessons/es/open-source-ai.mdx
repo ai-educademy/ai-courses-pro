@@ -24,7 +24,7 @@ El código abierto no es sólo software libre: es una filosofía que da forma al
 
 **Soberanía de datos**: ejecutar modelos localmente significa que los datos confidenciales nunca abandonan su infraestructura. Para aplicaciones sanitarias, legales y financieras, este suele ser un requisito estricto.
 
-<FunFact>Llama 3 de Meta se descargó más de 30 millones de veces en su primer mes de lanzamiento, lo que lo convierte en el modelo de IA abierta más rápido adoptado en la historia. La adopción del código abierto se está acelerando, no desacelerando.
+<FunFact>La familia Llama de Meta ayudó a demostrar que la IA open-weight puede alcanzar rápidamente una adopción masiva entre desarrolladores. La adopción open-weight se está acelerando, no desacelerando.</FunFact>
 </FunFact>
 
 ## Plataformas clave
@@ -47,13 +47,13 @@ El panorama del modelo abierto evoluciona mensualmente, pero estas familias defi
 
 | Familia de modelos | Creador | Fortalezas | Mejor para |
 |---|---|---|---|
-| **Llama 3** | Meta | Fuerte desempeño general, gran comunidad | Base de ajuste fino de uso general |
+| **Llama 4** | Meta | Multimodalidad nativa, contexto largo, gran comunidad | General-purpose, base para fine-tuning |
 | **Mistral / Mixtral** | Mistral IA | Excelente eficiencia, arquitectura MoE | Uso de producción sensible a los costes |
 | **Fi** | microsoft | Sorprendentemente capaz para su tamaño | Dispositivos de borde, móviles |
 | **Gema** | Google | Razonamiento sólido y bien documentado | Investigación, tareas estructuradas |
 | **Qwen** | Alibaba | Fortaleza multilingüe, puntos de referencia competitivos | Aplicaciones globales |
 
-<Callout>**La licencia importa.** No todos los modelos "abiertos" son realmente abiertos. Llama 3 tiene una licencia comunitaria con restricciones de uso superiores a 700 millones de usuarios mensuales. Mistral y Gemma usan Apache 2.0. Compruebe siempre la licencia antes de crear un producto.
+<Callout>**La licencia importa.** No todos los modelos "abiertos" son realmente abiertos. Los modelos Llama usan una licencia comunitaria con restricciones de uso para servicios muy grandes. Las familias Mistral y Gemma incluyen releases permisivos Apache 2.0. Comprueba siempre la licencia antes de construir un producto.
 </Callout>
 
 ## Ejecución de modelos localmente
@@ -84,7 +84,7 @@ ollama run llama3.1:8b "Explain transformer attention in one paragraph"
 A continuación se explica cómo componer herramientas de código abierto en un sistema de inteligencia artificial listo para producción.
 
 **La arquitectura de referencia:**
-1. **Capa de modelo** - Llama 3 o Mistral, servido a través de vLLM u Ollama
+1. **Capa de modelo** - Llama 4 o Mistral, servido mediante vLLM u Ollama
 2. **Orquestación**: LangChain o LlamaIndex para flujos de trabajo de varios pasos
 3. **Tienda de vectores**: Chroma, Qdrant o Weaviate para recuperación basada en incrustaciones
 4. **Canalización de datos**: Apache Airflow o Prefect para ETL y procesamiento de datos
@@ -122,7 +122,7 @@ El ecosistema de código abierto prospera porque la gente retribuye. Aquí se ex
 
 - La IA de código abierto democratiza el acceso, acelera la innovación y permite la transparencia
 - Hugging Face, Ollama, LangChain y LlamaIndex forman el ecosistema central
-- Modelos abiertos como Llama 3, Mistral y Phi rivalizan con alternativas patentadas para muchas tareas
+- Los modelos abiertos como Llama 4, Mistral y Phi rivalizan con alternativas propietarias en muchas tareas
 - Ejecutar modelos localmente es práctico en hardware de consumo con las herramientas adecuadas.
 - Se puede ensamblar una pila completa de IA de código abierto a partir de componentes disponibles gratuitamente
 - Contribuir fortalece el ecosistema y construye su perfil profesional
