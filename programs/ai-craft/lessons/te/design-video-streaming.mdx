@@ -1,6 +1,6 @@
 ---
-title: "వీడియో స్ట్రీమింగ్ వేదిక డిజైన్ చేయండి - YouTube/Netflix ఆర్కిటెక్చర్"
-description: "అప్‌లోడ్ పైప్‌లైన్‌లు, అనుకూల బిట్‌రేట్ ట్రాన్స్‌కోడింగ్, CDN వితరణ, మరియు ప్రత్యక్ష స్ట్రీమింగ్ ఆర్కిటెక్చర్ కవర్ చేసే scalable వీడియో స్ట్రీమింగ్ వేదిక ని డిజైన్ చేయండి."
+title: "వీడియో స్ట్రీమింగ్ వేదికను డిజైన్ చేయండి - YouTube/Netflix ఆర్కిటెక్చర్"
+description: "Upload pipelines, adaptive bitrate transcoding, CDN delivery, live streaming architecture కవర్ చేసే scalable video streaming platform ను డిజైన్ చేయండి."
 order: 8
 difficulty: "advanced"
 duration: 25
@@ -10,15 +10,15 @@ published: true
 
 # వీడియో స్ట్రీమింగ్ వేదిక డిజైన్ చేయండి - YouTube/Netflix ఆర్కిటెక్చర్
 
-వీడియో స్ట్రీమింగ్ మొత్తం ప్రపంచ internet ట్రాఫిక్ లో 65% కంటే ఎక్కువ. ఈ సిస్టమ్ డిజైన్ చేయడంలో ఫైల్ ప్రాసెసింగ్ పైప్‌లైన్‌లు, CDN ఆర్కిటెక్చర్, మరియు అనుకూల స్ట్రీమింగ్ వంటి భావనలు ఉంటాయి - ఇవి వీడియో కి మాత్రమే పరిమితం కాదు.
+వీడియో స్ట్రీమింగ్ ప్రపంచ internet traffic లో 65% కంటే ఎక్కువ. ఈ system design లో file processing pipelines, CDN ఆర్కిటెక్చర్, adaptive streaming వంటి భావనలు ఉంటాయి. ఇవి వీడియోకే పరిమితం కావు.
 
 ## దశ 1 - అవసరాలు సేకరణ
 
 ### Functional అవసరాలు
-- Videos అప్‌లోడ్ చేయడం (ప్రతి ఫైల్ కి 1 GB వరకు)
-- నెట్‌వర్క్ conditions ఆధారంగా అనుకూల నాణ్యత తో videos stream చేయడం
-- శీర్షిక, వివరణ, మరియు tags ద్వారా videos సెర్చ్ చేయడం
-- View counts మరియు నిమగ్నత మెట్రిక్స్ ట్రాక్ చేయడం
+- videos upload చేయడం (ప్రతి file కు 1 GB వరకు)
+- network conditions ఆధారంగా అనుకూల నాణ్యతతో videos stream చేయడం
+- శీర్షిక, వివరణ, tags ద్వారా videos search చేయడం
+- view counts మరియు engagement metrics track చేయడం
 
 ### Non-Functional అవసరాలు
 - **అందుబాటు** - స్ట్రీమింగ్ కోసం 99.99% uptime

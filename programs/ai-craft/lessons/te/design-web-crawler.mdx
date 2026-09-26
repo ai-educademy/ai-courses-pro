@@ -1,6 +1,6 @@
 ---
 title: "వెబ్ క్రాలర్ డిజైన్ చేయండి - Google ఇంటర్నెట్‌ను ఎలా ఇండెక్స్ చేస్తుంది"
-description: "URL అగ్రశ్రేణి నిర్వహణ, politeness policies, SimHash తో కంటెంట్ డీడూప్లికేషన్, మరియు స్థిరమైన హ్యాషింగ్ తో విస్తరిత crawling కవర్ చేసే విస్తరిత వెబ్ క్రాలర్ ను డిజైన్ చేయండి."
+description: "URL frontier నిర్వహణ, politeness policies, SimHash తో content deduplication, consistent hashing తో distributed crawling కవర్ చేసే web crawler ను డిజైన్ చేయండి."
 order: 9
 difficulty: "advanced"
 duration: 22
@@ -10,15 +10,15 @@ published: true
 
 # వెబ్ క్రాలర్ డిజైన్ చేయండి - Google ఇంటర్నెట్‌ను ఎలా ఇండెక్స్ చేస్తుంది
 
-వెబ్ క్రాలర్ క్రమబద్ధంగా ఇంటర్నెట్‌ను బ్రౌజ్ చేసి వెబ్ పేజీలు ను download మరియు ఇండెక్స్ చేస్తుంది. ఇది ప్రతి సెర్చ్ ఇంజిన్ కు పునాది, మరియు దీన్ని డిజైన్ చేయడం వల్ల విస్తరిత సిస్టమ్‌లు, గ్రాఫ్ traversal, మరియు నిజమైన వెబ్ యొక్క complexities ను నిర్వహించు చేయడం నేర్చుకుంటారు.
+వెబ్ క్రాలర్ క్రమబద్ధంగా ఇంటర్నెట్‌ను browse చేసి web pages ను download చేసి index చేస్తుంది. ఇది ప్రతి search engine కు పునాది. దీన్ని డిజైన్ చేయడం ద్వారా distributed systems, graph traversal, నిజమైన వెబ్‌లోని క్లిష్టతలను ఎలా నిర్వహించాలో నేర్చుకుంటారు.
 
 ## దశ 1 - అవసరాలు సేకరణ
 
 ### Functional అవసరాలు
-- Seed URLs సెట్ నుండి వెబ్ పేజీలు క్రాల్ చేయడం
-- Hyperlinks extract చేసి కొత్త పేజీలు గుర్తించండి చేయడం
-- Download చేసిన కంటెంట్ ను ఇండెక్సింగ్ మరియు ప్రాసెసింగ్ కోసం నిల్వ చేయడం
-- robots.txt మరియు క్రాల్ politeness rules పాటించడం
+- seed URLs సెట్ నుంచి web pages crawl చేయడం
+- hyperlinks extract చేసి కొత్త pages గుర్తించడం
+- downloaded content ను indexing మరియు processing కోసం నిల్వ చేయడం
+- robots.txt మరియు crawl politeness rules పాటించడం
 
 ### Non-Functional అవసరాలు
 - **స్కేల్** - నెలకు 1 బిలియన్ పేజీలు క్రాల్ చేయడం
