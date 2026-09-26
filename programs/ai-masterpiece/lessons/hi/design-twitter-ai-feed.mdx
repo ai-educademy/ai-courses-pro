@@ -1,6 +1,6 @@
 ---
-title: "Twitter का AI Feed Design करें - एक End-to-End Case Study"
-description: "अरबों tweets में से करोड़ों users को personalised timeline serve करने वाले architecture को समझें।"
+title: "Twitter का AI फ़ीद डिज़ाइन करें - एक शुरू से अंत तक की केस स्टडी"
+description: "अरबों टवीटस में से करोड़ों यूज़र को वैयक्तिकृत समयसीमा सर्व करने वाले आर्किटेक्चर को समझें।"
 order: 3
 difficulty: "advanced"
 duration: 30
@@ -8,152 +8,152 @@ icon: "🐦"
 published: true
 ---
 
-# Twitter का AI Feed Design करें
+# Twitter का AI फ़ीद डिज़ाइन करें
 
-सोचिए आपको एक task दिया गया है: हर बार जब user app खोले, उसे अरबों possibilities में से सबसे valuable tweets दिखाएँ - वो भी 200 milliseconds से कम में।
+सोचिए आपको एक काम दिया गया है: हर बार जब यूज़र ऐप खोले, उसे अरबों पोसिबिलिटिएस में से सबसे मूल्यवान टवीटस दिखाएँ - वो भी 200 मिललिसेकोनदस से कम में।
 
-ये industry की सबसे कठिन recommendation problems में से एक है। चलिए इसे scratch से design करते हैं।
+ये इंडस्ट्री की सबसे कठिन अनुशंसा समस्याएँ में से एक है। चलिए इसे शुरुआत से डिज़ाइन करते हैं।
 
-<Illustration src="/images/lessons/design-twitter-ai-feed.svg" alt="Tweet candidates को ranking और filtering stages से गुज़रकर personalised feed बनते दिखाने वाला pipeline diagram" caption="एक tweet की यात्रा - creation से लेकर आपकी timeline तक" />
+<Illustration src="/images/lessons/design-twitter-ai-feed.svg" alt="टवीट उम्मीदवार को रैंकिंग और फ़िल्टरिंग सटगेस से गुज़रकर वैयक्तिकृत फ़ीड बनते दिखाने वाला पाइपलाइन दिअगरम" caption="एक टवीट की यात्रा - करेअशन से लेकर आपकी समयसीमा तक" />
 
-## Scale पर Problem
+## बड़े पैमाने पर समस्या
 
-Twitter (अब X) रोज़ाना लगभग 500 million tweets handle करता है। इसके 350+ million monthly active users में से हर कोई एक ऐसी feed चाहता है जो **personally curated** लगे - relevant, timely, और engaging।
+Twitter (अब X) रोज़ाना लगभग 500 मिलियन टवीटस संभाल करता है। इसके 350+ मिलियन मोनथलय अकटिवे यूज़र में से हर कोई एक ऐसी फ़ीड चाहता है जो **पेरसोनललय कुरटेद** लगे - प्रासंगिक, टिमेलय, और एङगिङ।
 
-इस scale पर chronological feed काम नहीं करता। अगर आप 500 accounts follow करते हैं, तो शायद 10,000 unread tweets हों। ज़्यादातर irrelevant होंगे। AI feed का काम है उन 50 को surface करना जो **आपके लिए** सबसे ज़्यादा matter करती हैं।
+इस स्केल पर कालानुक्रमिक फ़ीड काम नहीं करता। अगर आप 500 अकाउंट फ़ॉलो करते हैं, तो शायद 10,000 न पढ़े गए टवीटस हों। ज़्यादातर अप्रासंगिक होंगे। AI फ़ीड का काम है उन 50 को सतह पर लाना करना जो **आपके लिए** सबसे ज़्यादा मटटेर करती हैं।
 
 <Callout>
-ये सिर्फ़ ranking problem नहीं है - ये एक multi-stage system है जिसमें candidate generation, feature engineering, real-time scoring, content safety, और massive-scale serving शामिल है।
+ये सिर्फ़ रैंकिंग समस्या नहीं है - ये एक बहु-चरणीय सयसटेम है जिसमें उम्मीदवार चयन, फ़ीचर इंजीनियरिंग, रीयल-टाइम सकोरिङ, कंटेंट सुरक्षा, और विशाल पैमाने सर्विंग शामिल है।
 </Callout>
 
-## Stage 1: Candidate Generation
+## चरण 1: उम्मीदवार चयन
 
-आप हर user के लिए सभी 500 million daily tweets score नहीं कर सकते। इसलिए पहले **field को narrow** करते हैं।
+आप हर यूज़र के लिए सभी 500 मिलियन दैनिक टवीटस स्कोर नहीं कर सकते। इसलिए पहले **क्षेत्र को सीमित** करते हैं।
 
-### Candidates के sources:
-- **In-network**: जिन accounts को आप follow करते हैं उनके tweets (highest recall, moderate relevance)।
-- **Out-of-network**: ऐसे tweets जो आपके followed लोगों ने like या retweet किए, या आपके interest graph में trending हैं।
-- **Topic-based**: ऐसे tweets जो उन topics से match करते हैं जिनसे आपने हाल ही में engage किया।
+### कनदिदटेस के स्रोत:
+- **इन-नेटवोरक**: जिन अकाउंट को आप फ़ॉलो करते हैं उनके टवीटस (सबसे अधिक रिकॉल, मध्यम प्रासंगिकता)।
+- **ओउट-ओफ़-नेटवोरक**: ऐसे टवीटस जो आपके फ़ोललोवेद लोगों ने लिके या रेटवीट किए, या आपके इनटेरेसट ग्राफ़ में टरेनदिङ हैं।
+- **टोपिक-बसेद**: ऐसे टवीटस जो उन विषय से मेल करते हैं जिनसे आपने हाल ही में जुड़ें किया।
 
 ### कैसे काम करता है:
-एक lightweight retrieval model (अक्सर embedding-based) हर user के लिए ~1,000–5,000 tweets का candidate set generate करता है। ये schedule पर या user के app खोलने पर trigger होता है।
+एक हल्के प्राप्ति मॉडल (अक्सर एम्बेडिंग-आधारित) हर यूज़र के लिए ~1,000-5,000 टवीटस का उम्मीदवार सेट जनरेट करता है। ये शेड्यूल पर या यूज़र के ऐप खोलने पर ट्रिगर होता है।
 
-<Quiz question="Twitter candidate generation क्यों इस्तेमाल करता है बजाय हर tweet को हर user के लिए score करने के?" options="क्योंकि हर tweet score करना बहुत fast होगा|क्योंकि हर user request पर अरबों tweets पर heavy ranking model चलाना computationally impossible है|क्योंकि users random tweets prefer करते हैं|क्योंकि ranking model सिर्फ़ छोटे datasets पर काम करता है" answer="1" explanation="500 million daily tweets और 350 million users के साथ, हर tweet को हर user के लिए score करने में astronomical compute लगेगा। Candidate generation महंगे ranking model से पहले set को manageable size में ला देता है।" />
+<Quiz question="Twitter उम्मीदवार चयन क्यों इस्तेमाल करता है बजाय हर टवीट को हर यूज़र के लिए स्कोर करने के?" options="क्योंकि हर टवीट स्कोर करना बहुत तेज़ होगा|क्योंकि हर यूज़र रिक्वेस्ट पर अरबों टवीटस पर भारी रैंकिंग मॉडल चलाना कोमपुटशनललय इमपोसिबले है|क्योंकि यूज़र रनदोम टवीटस परेफ़ेर करते हैं|क्योंकि रैंकिंग मॉडल सिर्फ़ छोटे डेटासेट पर काम करता है" answer="1" explanation="500 मिलियन दैनिक टवीटस और 350 मिलियन यूज़र के साथ, हर टवीट को हर यूज़र के लिए स्कोर करने में असटरोनोमिकल कम्प्यूट लगेगा। उम्मीदवार जनरेशन महंगे रैंकिंग मॉडल से पहले सेट को मनगेअबले आकार में ला देता है।" />
 
-## Stage 2: Ranking Model
+## चरण 2: रैंकिंग मॉडल
 
-कुछ हज़ार candidates मिलने के बाद, एक **heavy ranking model** हर एक को score करता है। असली intelligence यहीं है।
+कुछ हज़ार उम्मीदवार मिलने के बाद, एक **भारी रैंकिंग मॉडल** हर एक को स्कोर करता है। असली बुद्धिमत्ता यहीं है।
 
-### Model इन features इस्तेमाल करता है:
+### मॉडल इन फ़ीचर इस्तेमाल करता है:
 
-**User features:**
-- Past engagement से inferred interests (likes, retweets, replies, dwell time)।
-- Social graph: आप किनसे सबसे ज़्यादा interact करते हैं।
-- Demographics और language preferences।
+**यूज़र फ़ीचर:**
+- पिछले एङगेमेनट से अनुमानित रुचियाँ (लाइक, रीट्वीट, रिप्लाई, ठहराव समय)।
+- सामाजिक ग्राफ़: आप किनसे सबसे ज़्यादा बातचीत करते हैं।
+- जनसांख्यिकी और भाषा प्राथमिकताएँ।
 
-**Tweet features:**
-- Content: text embeddings, media type, hashtags।
-- Author: follower count, engagement rate, trust score।
-- Freshness: tweet की age minutes में।
+**टवीट फ़ीचर:**
+- कंटेंट: टेक्स्ट एम्बेडिंग, मीडिया type, हैशटैग।
+- लेखक: फ़ॉलोअर गणना, एङगेमेनट दर, भरोसा स्कोर।
+- ताज़गी: टवीट की उम्र मिनट में।
 
-**Cross features:**
-- User-author affinity: आप इस author से कितना engage करते हैं।
-- User-topic affinity: tweet का topic आपकी interest profile से match करता है?
-- Social proof: आप जैसे लोगों ने इस tweet से engage किया है?
+**क्रॉस फ़ीचर:**
+- उसेर-औथोर निकटता: आप इस लेखक से कितना जुड़ें करते हैं।
+- उसेर-टोपिक निकटता: टवीट का विषय आपकी इनटेरेसट प्रोफ़ाइल से मेल करता है?
+- सामाजिक प्रमाण: आप जैसे लोगों ने इस टवीट से जुड़ें किया है?
 
-### Model architecture:
-एक deep neural network (अक्सर multi-task model) एक साथ कई engagement types predict करता है:
+### मॉडल आर्किटेक्चर:
+एक गहरी न्यूरल नेटवर्क (अक्सर मुलटि-टसक मॉडल) एक साथ कई एङगेमेनट प्रकार भविष्यवाणी करता है:
 
-- Like की probability।
-- Retweet की probability।
-- Reply की probability।
-- Extended dwell time की probability (दो seconds से ज़्यादा पढ़ना)।
+- लिके की संभावना।
+- रेटवीट की संभावना।
+- रेपलय की संभावना।
+- विस्तारित ठहराव समय की संभावना (दो सेकंड से ज़्यादा पढ़ना)।
 
-Final score इन predictions का **weighted combination** होता है, जिसे "healthy engagement" जैसे platform-level objective को optimise करने के लिए tune किया जाता है।
+फ़िनल स्कोर इन भविष्यवाणियाँ का **भारित संयोजन** होता है, जिसे "स्वस्थ एङगेमेनट" जैसे पलटफ़ोरम-लेवेल उद्देश्य को ऑप्टिमाइज़ करने के लिए टुने किया जाता है।
 
 <ThinkAboutIt>
-अगर आप purely clicks और likes के लिए optimise करें, तो sensational या outrage-driven content promote होने का ख़तरा है। आप scoring formula कैसे design करेंगे जो engagement और content quality दोनों balance करे?
+अगर आप सिर्फ़ क्लिक और लाइक के लिए ऑप्टिमाइज़ करें, तो सेनसशनल या ओउटरगे-दरिवेन कंटेंट बढ़ावा होने का ख़तरा है। आप सकोरिङ फ़ॉर्मूला कैसे डिज़ाइन करेंगे जो एङगेमेनट और कंटेंट गुणवत्ता दोनों संतुलन करे?
 </ThinkAboutIt>
 
-## Stage 3: Real-Time Features
+## चरण 3: रीयल-टाइम फ़ीचर
 
-Static features काफ़ी नहीं हैं। Feed को **अभी** जो हो रहा है उस पर respond करना होता है।
+स्थिर फ़ीचर काफ़ी नहीं हैं। फ़ीद को **अभी** जो हो रहा है उस पर प्रतिक्रिया करना होता है।
 
-- **Recency decay**: 30 seconds पहले के tweet को तीन घंटे पुराने tweet पर boost मिलता है।
-- **Trending topics**: अगर कोई बड़ी event हो रही है, तो related tweets surface करें - भले ही user की usual interests से बाहर हों।
-- **Session context**: अगर user दस minute से scroll कर रहा है, तो fatigue कम करने के लिए content diversify करें।
-- **Real-time engagement signals**: पिछले पाँच minutes में viral हो रहे tweet को temporary boost मिलता है।
+- **ताज़गी क्षय**: 30 सेकंड पहले के टवीट को तीन घंटे पुराने टवीट पर बूस्ट मिलता है।
+- **ट्रेंडिंग विषय**: अगर कोई बड़ी घटना हो रही है, तो संबंधित टवीटस सतह पर लाना करें - भले ही यूज़र की सामान्य रुचियाँ से बाहर हों।
+- **सेशन संदर्भ**: अगर यूज़र दस मिनुटे से सकरोलल कर रहा है, तो थकान कम करने के लिए कंटेंट विविध करें।
+- **रेअल-टिमे एङगेमेनट सिग्नल**: पिछले पाँच मिनट में वायरल हो रहे टवीट को अस्थायी बूस्ट मिलता है।
 
-इन features के लिए **streaming infrastructure** चाहिए - अक्सर Apache Kafka जो Redis या Feast जैसे feature store में feed करता है - जो near real-time में update होता है।
+इन फ़ीचर के लिए **स्ट्रीमिंग इन्फ़्रास्ट्रक्चर** चाहिए - अक्सर अपचे Kafka जो Redis या Feast जैसे फ़ीचर स्टोर में फ़ीड करता है - जो नेअर रीयल-टाइम में अपडेट होता है।
 
 <FunFact>
-Twitter की engineering team ने report किया कि ranking model में real-time features जोड़ने से user engagement में 8% increase हुआ - उनके scale पर एक massive improvement, जो रोज़ाना millions additional interactions में translate होता है।
+Twitter की इंजीनियरिंग टीम ने रिपोर्ट किया कि रैंकिंग मॉडल में रीयल-टाइम फ़ीचर जोड़ने से यूज़र एङगेमेनट में 8% वृद्धि हुआ - उनके स्केल पर एक बहुत बड़ा सुधार, जो रोज़ाना मिलियन अतिरिक्त इंटरैक्शन में टरनसलटे होता है।
 </FunFact>
 
-## "For You" Algorithm: Explore vs Exploit
+## "आपके लिए" अलगोरिथम: खोज बनाम उपयोग
 
-Feed एक classic **exploration-exploitation dilemma** face करता है:
+फ़ीद एक क्लासिक **एक्सपलोरशन-एक्सपलोइटशन दुविधा** face करता है:
 
-- **Exploit**: ऐसा content दिखाएँ जो user ने पहले engage किया है। Safe, predictable, high short-term engagement।
-- **Explore**: नए topics, नए authors, और नए formats introduce करें। Risky, लेकिन long-term retention और content diversity के लिए ज़रूरी।
+- **एक्सपलोइट**: ऐसा कंटेंट दिखाएँ जो यूज़र ने पहले जुड़ें किया है। सुरक्षित, पूर्वानुमेय, हिघ अल्पकालिक एङगेमेनट।
+- **एक्सपलोरे**: नए विषय, नए औथोरस, और नए फ़ॉर्मैट पेश करें। रिसकय, लेकिन दीर्घकालिक रिटेंशन और कंटेंट विविधता के लिए ज़रूरी।
 
-Twitter का approach दोनों को blend करता है:
+Twitter का तरीका दोनों को मिलाता करता है:
 
-- Feed का ~80% exploitation है - ऐसा content जिसे model को confidence है कि user enjoy करेगा।
-- ~20% exploration है - user के evolving interests test करने के लिए inject किया गया नया content।
+- फ़ीद का ~80% एक्सपलोइटशन है - ऐसा कंटेंट जिसे मॉडल को विश्वास है कि यूज़र पसंद करेगा।
+- ~20% एक्सपलोरशन है - यूज़र के बदलती रुचियाँ टेस्ट करने के लिए इनजेकट किया गया नया कंटेंट।
 
-Exploration ratio ख़ुद एक parameter है जिसे millions of users पर A/B testing से tune किया जाता है।
+एक्सपलोरशन अनुपात ख़ुद एक पैरामीटर है जिसे मिलियन of यूज़र पर A/B परीक्षण से टुने किया जाता है।
 
-<Quiz question="जो feed सिर्फ़ 'exploit' करे और कभी 'explore' न करे, उसका मुख्य ख़तरा क्या है?" options="Feed बहुत diverse और confusing हो जाता है|User filter bubble में फँस जाता है और platform उसके बदलते interests discover नहीं कर पाता|System बहुत ज़्यादा compute इस्तेमाल करता है|Feed बहुत धीरे load होता है" answer="1" explanation="Pure exploitation filter bubbles बनाता है - user सिर्फ़ वही देखता है जो पहले से पसंद है, platform बदलती preferences adapt नहीं कर पाता, और content diversity ख़त्म हो जाती है। Long-term health के लिए exploration ज़रूरी है।" />
+<Quiz question="जो फ़ीड सिर्फ़ 'एक्सपलोइट' करे और कभी 'एक्सपलोरे' न करे, उसका मुख्य ख़तरा क्या है?" options="फ़ीद बहुत दिवेरसे और कोनफ़ुसिङ हो जाता है|यूज़र फ़िल्टर बबल में फँस जाता है और प्लैटफ़ॉर्म उसके बदलते रुचियाँ खोजना नहीं कर पाता|सयसटेम बहुत ज़्यादा कम्प्यूट इस्तेमाल करता है|फ़ीद बहुत धीरे लोड होता है" answer="1" explanation="पुरे एक्सपलोइटशन फ़िल्टर बबल बनाता है - यूज़र सिर्फ़ वही देखता है जो पहले से पसंद है, प्लैटफ़ॉर्म बदलती प्राथमिकताएँ अनुकूल नहीं कर पाता, और कंटेंट विविधता ख़त्म हो जाती है। लोङ-टेरम स्वास्थ्य के लिए एक्सपलोरशन ज़रूरी है।" />
 
-## Content Moderation और Safety
+## कंटेंट मॉडरेशन और सफ़ेटय
 
-किसी भी tweet के feed में पहुँचने से पहले, वो एक **safety layer** से गुज़रता है:
+किसी भी टवीट के फ़ीड में पहुँचने से पहले, वो एक **सुरक्षा परत** से गुज़रता है:
 
-1. **Pre-ranking filter**: Known spam, harassment, और policy-violating content को ranking से पहले हटा दिया जाता है।
-2. **Post-ranking filter**: Ranking के बाद, एक secondary check edge cases पकड़ता है - जैसे कोई tweet individually acceptable हो लेकिन similar content के साथ cluster होने पर harmful हो।
-3. **User-level controls**: Users topics mute, accounts block, और content को "not interested" mark कर सकते हैं, जो सब personalisation model में feedback होता है।
+1. **परे-रनकिङ फ़िल्टर**: ज्ञात स्पैम, उत्पीड़न, और पोलिकय-विओलटिङ कंटेंट को रैंकिंग से पहले हटा दिया जाता है।
+2. **पोसट-रनकिङ फ़िल्टर**: रैंकिंग के बाद, एक दूसरी जाँच बढ़त मामले पकड़ता है - जैसे कोई टवीट इनदिविदुअललय स्वीकार्य हो लेकिन मिलते-जुलते कंटेंट के साथ क्लस्टर होने पर हानिकारक हो।
+3. **उसेर-लेवेल नियंत्रण**: यूज़र विषय म्यूट, अकाउंट ब्लॉक, और कंटेंट को "नोट इनटेरेसटेद" मरक कर सकते हैं, जो सब वैयक्तिकरण मॉडल में फ़ीडबैक होता है।
 
-Safety layer **fast** होनी चाहिए (10–20ms से ज़्यादा latency नहीं) और **conservative** (doubt हो तो filter करो और human review को भेजो)।
+सुरक्षा परत **तेज़** होनी चाहिए (10-20ms से ज़्यादा लेटेंसी नहीं) और **सतर्क** (संदेह हो तो फ़िल्टर करो और मानव समीक्षा को भेजो)।
 
 <Callout>
-Content moderation कोई अलग system नहीं है जो बाद में जोड़ा गया हो। ये ranking pipeline में deeply integrated है, हर stage पर scores influence करता है और filtering करता है।
+कंटेंट मोदेरशन कोई अलग सयसटेम नहीं है जो बाद में जोड़ा गया हो। ये रैंकिंग पाइपलाइन में गहराई से जुड़ा है, हर चरण पर सकोरेस प्रभावित करता है और फ़िल्टरिंग करता है।
 </Callout>
 
-## Scaling: Fan-Out on Read vs Fan-Out on Write
+## सकलिङ: फ़न-ओउट on रेअद vs फ़न-ओउट on वरिटे
 
-ये वो architectural decision है जो Twitter के infrastructure को define करता है।
+ये वो आर्किटेक्चरल निर्णय है जो Twitter के इन्फ़्रास्ट्रक्चर को परिभाषित करता है।
 
-### Fan-out on write:
-जब कोई user tweet करता है, तो उस tweet को हर follower के feed cache में **push** करो। Fast reads, लेकिन expensive writes - ख़ासकर millions of followers वाले accounts के लिए।
+### फ़न-ओउट on राइट:
+जब कोई यूज़र टवीट करता है, तो उस टवीट को हर फ़ॉलोअर के फ़ीड कैश में **पुश** करो। तेज़ रीड, लेकिन महँगा राइट - ख़ासकर मिलियन of फ़ोललोवेरस वाले अकाउंट के लिए।
 
-### Fan-out on read:
-जब user app खोलता है, तो सभी followed accounts से latest tweets **pull** करो और on the fly rank करो। Cheap writes, लेकिन expensive reads।
+### फ़न-ओउट on रेअद:
+जब यूज़र ऐप खोलता है, तो सभी फ़ोललोवेद अकाउंट से नवीनतम टवीटस **खींचें** करो और on the फ़लय रनक करो। चेअप राइट, लेकिन महँगा रीड।
 
-### Twitter का hybrid approach:
-- ज़्यादातर users (10,000 से कम followers): fan-out on write। Feed pre-compute और cache करो।
-- Celebrity accounts (millions of followers): fan-out on read। Request time पर feed compute करो ताकि हर tweet पर millions of caches flood न हों।
+### Twitter का हाइब्रिड तरीका:
+- ज़्यादातर यूज़र (10,000 से कम फ़ोललोवेरस): लिखते समय फ़ैन-आउट। फ़ीद परे-कोमपुटे और कैश करो।
+- केलेबरिटय अकाउंट (मिलियन of फ़ोललोवेरस): पढ़ते समय फ़ैन-आउट। रिक्वेस्ट समय पर फ़ीड कम्प्यूट करो ताकि हर टवीट पर मिलियन of कचेस भरें न हों।
 
-ये hybrid strategy write amplification और read latency को balance करती है, एक normal user के tweet और एक pop star की viral post दोनों efficiently handle करती है।
+ये हाइब्रिड रणनीति राइट अमपलिफ़िकशन और रेअद लेटेंसी को संतुलन करती है, एक सामान्य यूज़र के टवीट और एक पोप सटर की वायरल पोस्ट दोनों एफ़फ़िकिएनटलय संभाल करती है।
 
 <FunFact>
-जब 50 million followers वाली कोई celebrity tweet करती है, तो fan-out on write में 50 million cache insertions चाहिए - जिसमें minutes लगते और भारी bandwidth खपत होती। Hybrid approach इसे milliseconds में handle करता है - काम read time पर defer करके।
+जब 50 मिलियन फ़ोललोवेरस वाली कोई सेलिब्रिटी टवीट करती है, तो लिखते समय फ़ैन-आउट में 50 मिलियन कैश इनसेरशनस चाहिए - जिसमें मिनट लगते और भारी बैंडविड्थ खपत होती। हाइब्रिड तरीका इसे मिललिसेकोनदस में संभाल करता है - काम रेअद समय पर स्थगित करके।
 </FunFact>
 
 ## सब कुछ एक साथ
 
-एक single feed request का पूरा pipeline:
+एक एकल फ़ीड रिक्वेस्ट का पूरा पाइपलाइन:
 
-1. User app खोलता है → request feed service पर पहुँचती है।
-2. Candidate generation in-network और out-of-network sources से ~3,000 tweets retrieve करता है।
-3. Feature store हर candidate के लिए real-time और batch features provide करता है।
-4. Ranking model एक single batched inference call में सभी candidates score करता है।
-5. Safety filters policy-violating content remove करते हैं।
-6. Exploration logic 20% diverse content inject करता है।
-7. Final ranked list 200ms से कम में client को return होती है।
+1. यूज़र ऐप खोलता है → रिक्वेस्ट फ़ीड सर्विस पर पहुँचती है।
+2. उम्मीदवार जनरेशन इन-नेटवोरक और ओउट-ओफ़-नेटवोरक स्रोत से ~3,000 टवीटस लाता करता है।
+3. फ़ीचर सटोरे हर उम्मीदवार के लिए रीयल-टाइम और बैच फ़ीचर परोविदे करता है।
+4. रैंकिंग मॉडल एक एकल बैच्ड इन्फ़रेंस कॉल में सभी उम्मीदवार स्कोर करता है।
+5. सफ़ेटय फ़िल्टर पोलिकय-विओलटिङ कंटेंट रेमोवे करते हैं।
+6. एक्सपलोरशन तर्क 20% दिवेरसे कंटेंट इनजेकट करता है।
+7. फ़िनल रैंक किए गए लिस्ट 200ms से कम में क्लाइंट को लौटाएँ होती है।
 
 <ThinkAboutIt>
-Interview में आपसे पूछा जाए: "अगर आप feed improve करने के लिए एक नया signal add कर सकते, तो वो क्या होगा और क्यों?" ऐसे signals सोचिए जो commonly discuss नहीं होते - शायद user wellbeing या content credibility से related कोई चीज़।
+इंटरव्यू में आपसे पूछा जाए: "अगर आप फ़ीड इमपरोवे करने के लिए एक नया सिग्नल जोड़ें कर सकते, तो वो क्या होगा और क्यों?" ऐसे सिग्नल सोचिए जो कोममोनलय दिसकुस नहीं होते - शायद यूज़र कल्याण या कंटेंट विश्वसनीयता से संबंधित कोई चीज़।
 </ThinkAboutIt>
 
-<Quiz question="Twitter की hybrid fan-out strategy में celebrity accounts के tweets कैसे handle होते हैं?" options="उन्हें तुरंत हर follower के cache में push किया जाता है|जब follower अपनी feed खोलता है तब read time पर compute होते हैं|उन्हें AI feed से पूरी तरह exclude कर दिया जाता है|सिर्फ़ verified users को दिखाए जाते हैं" answer="1" explanation="Celebrity tweets fan-out on read इस्तेमाल करते हैं - feed तब compute होती है जब follower request करता है, जिससे एक single tweet को millions of caches में push करने की भारी cost से बचा जाता है।" />
+<Quiz question="Twitter की हाइब्रिड फ़न-ओउट रणनीति में सेलिब्रिटी अकाउंट के टवीटस कैसे संभाल होते हैं?" options="उन्हें तुरंत हर फ़ॉलोअर के कैश में पुश किया जाता है|जब फ़ॉलोअर अपनी फ़ीड खोलता है तब रेअद समय पर कम्प्यूट होते हैं|उन्हें AI फ़ीड से पूरी तरह बाहर कर दिया जाता है|सिर्फ़ सत्यापित यूज़र को दिखाए जाते हैं" answer="1" explanation="केलेबरिटय टवीटस पढ़ते समय फ़ैन-आउट इस्तेमाल करते हैं - फ़ीड तब कम्प्यूट होती है जब फ़ॉलोअर रिक्वेस्ट करता है, जिससे एक एकल टवीट को मिलियन of कचेस में पुश करने की भारी लागत से बचा जाता है।" />
