@@ -1,6 +1,6 @@
 ---
 title: "Scaling Laws en Training op Schaal - Waarom Grotere Modellen Slimmer Worden"
-description: "Verken de empirische scaling laws die modelprestaties bepalen, compute-optimale trainingsstrategieën en de distributed systems-engineering achter het trainen van frontier-modellen."
+description: "Verken de empirische scaling laws die modelprestaties bepalen, compute-optimale trainingsstrategieën en de distributed systems-engineering achter het trainen van toonaangevende modellen."
 order: 7
 difficulty: "advanced"
 duration: 18
@@ -49,12 +49,12 @@ De capaciteit van een model hangt af van het samenspel van architectuur, data en
 - **Tokenisatie** beïnvloedt het effectieve datavolume. Een betere tokeniser comprimeert meer informatie per token, wat de parameter-tokenverhouding verandert.
 
 <FunFact>
-Het trainen van een frontier model kan honderden miljoenen kosten wanneer compute, data, energie en engineering worden meegerekend. Het elektriciteitsverbruik tijdens één frontier model training run kan het jaarlijkse verbruik van een kleine stad overtreffen, wat ernstige vragen oproept over de ecologische duurzaamheid van scaling.
+Het trainen van een toonaangevend model kan honderden miljoenen kosten wanneer compute, data, energie en engineering worden meegerekend. Het elektriciteitsverbruik tijdens één toonaangevend model training run kan het jaarlijkse verbruik van een kleine stad overtreffen, wat ernstige vragen oproept over de ecologische duurzaamheid van scaling.
 </FunFact>
 
 ## Gedistribueerde Trainingsstrategieën
 
-Geen enkele GPU kan een frontier-model bevatten. Training vereist het verdelen van werk over duizenden accelerators met behulp van verschillende complementaire strategieën:
+Geen enkele GPU kan een toonaangevend model bevatten. Training vereist het verdelen van werk over duizenden accelerators met behulp van verschillende complementaire strategieën:
 
 **Data Parallelism** - De eenvoudigste aanpak: repliceer het volledige model op elke GPU, splits de trainingsbatch over apparaten, en middel de gradiënten na elke stap. Werkt goed wanneer het model in het geheugen van één GPU past.
 
@@ -92,7 +92,7 @@ Twee frameworks domineren gedistribueerde training:
 Naarmate modellen schalen, lijken bepaalde capaciteiten **plotseling op te duiken** in plaats van geleidelijk te verbeteren. Voorbeelden zijn:
 
 - Meerstapsrekenen dat rond 100 miljard parameters verschijnt
-- Chain-of-thought reasoning die dramatisch verbetert bij schaal
+- Chain-of-thought redeneren die dramatisch verbetert bij schaal
 - Few-shot learning dat pas boven bepaalde drempels betrouwbaar wordt
 
 Recent onderzoek debatteert echter of emergence reëel is of een artefact van **discontinue evaluatiemetrics**. Bij gebruik van continue metrics (zoals per-token log-waarschijnlijkheid) verbetert de prestatie vaak gestaag - de "plotselinge sprong" is een illusie van de meting, niet van het model.

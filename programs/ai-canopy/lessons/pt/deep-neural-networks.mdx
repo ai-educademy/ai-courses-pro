@@ -14,15 +14,15 @@ Três arquiteturas moldaram o aprendizado profundo moderno: **CNNs** para dados 
 
 ## Redes Neurais Convolucionais (CNNs)
 
-As CNNs foram projetadas para **dados espaciais** – imagens, quadros de vídeo e qualquer coisa com uma estrutura semelhante a uma grade. Eles funcionam deslizando pequenos filtros pela entrada para detectar padrões.
+As CNNs foram projetadas para **dados espaciais** - imagens, quadros de vídeo e qualquer coisa com uma estrutura semelhante a uma grade. Eles funcionam deslizando pequenos filtros pela entrada para detectar padrões.
 
 A genialidade das CNNs reside em duas propriedades:
 - **Compartilhamento de parâmetros** - O mesmo filtro é aplicado em toda a imagem, reduzindo drasticamente o número de pesos em comparação com camadas totalmente conectadas.
 - **Conectividade local** - Cada neurônio se conecta apenas a uma pequena região da entrada, refletindo o fato de que os pixels próximos estão mais relacionados do que os distantes.
 
 **Operações principais:**
-1. **Convolução** - Um pequeno filtro (por exemplo, 3×3) desliza pela imagem, calculando um produto escalar em cada posição. Cada filtro aprende a detectar um recurso específico – bordas, texturas ou formas.
-2. **Pooling** – Reduz dimensões espaciais tomando o valor máximo ou médio em regiões pequenas. Isso torna a representação mais compacta e um tanto invariante a pequenos deslocamentos.
+1. **Convolução** - Um pequeno filtro (por exemplo, 3×3) desliza pela imagem, calculando um produto escalar em cada posição. Cada filtro aprende a detectar um recurso específico - bordas, texturas ou formas.
+2. **Pooling** - Reduz dimensões espaciais tomando o valor máximo ou médio em regiões pequenas. Isso torna a representação mais compacta e um tanto invariante a pequenos deslocamentos.
 3. **Mapas de recursos** - Cada camada convolucional produz vários mapas de recursos, construindo desde detectores de bordas simples em camadas iniciais até reconhecedores de objetos complexos em camadas mais profundas.
 
 Uma CNN típica para classificação de imagens empilha várias camadas convolucionais e de pooling, depois nivela o resultado e o passa por camadas totalmente conectadas para a previsão final.
@@ -33,14 +33,14 @@ Uma CNN típica para classificação de imagens empilha várias camadas convoluc
 - **ResNet** (2015) - Introduziu conexões residuais (skip), habilitando redes com mais de 150 camadas. Essa ideia de "conexões de atalho" influenciou mais tarde o design do Transformer.
 - **EfficientNet** (2019) - Dimensiona sistematicamente a profundidade, largura e resolução para obter desempenho ideal de acordo com o orçamento de computação.
 
-<FunFact>A arquitetura das CNNs foi inspirada no córtex visual dos gatos. Na década de 1960, Hubel e Wiesel descobriram que os neurônios no cérebro de um gato respondem a padrões visuais específicos em regiões específicas do campo visual – quase exatamente como funcionam os filtros convolucionais.
+<FunFact>A arquitetura das CNNs foi inspirada no córtex visual dos gatos. Na década de 1960, Hubel e Wiesel descobriram que os neurônios no cérebro de um gato respondem a padrões visuais específicos em regiões específicas do campo visual - quase exatamente como funcionam os filtros convolucionais.
 </FunFact>
 
 <Quiz question="Qual é o objetivo principal de agrupar camadas em uma CNN?" options="Para adicionar mais parâmetros que podem ser aprendidos à rede|Para reduzir dimensões espaciais e fornecer invariância de tradução|Para converter imagens em sequências de texto|Para aumentar a resolução dos mapas de recursos" answer="1" explanation="O pooling reduz o tamanho espacial dos mapas de recursos, o que reduz o custo computacional e ajuda a rede a se tornar menos sensível à posição exata dos recursos na entrada." />
 
 ## Redes Neurais Recorrentes (RNNs) e LSTMs
 
-RNNs foram projetados para **dados sequenciais** – texto, fala, séries temporais e qualquer coisa em que a ordem seja importante. A ideia principal: a rede mantém um **estado oculto** que é atualizado a cada intervalo de tempo, criando uma forma de memória.
+RNNs foram projetados para **dados sequenciais** - texto, fala, séries temporais e qualquer coisa em que a ordem seja importante. A ideia principal: a rede mantém um **estado oculto** que é atualizado a cada intervalo de tempo, criando uma forma de memória.
 
 Em cada etapa, o RNN recebe duas entradas: o token atual e o estado oculto anterior. Produz um novo estado oculto que codifica tudo o que a rede “viu” até agora. Em teoria, isso dá aos RNNs memória ilimitada. Na prática, a história é mais complicada.
 
@@ -65,7 +65,7 @@ Esses portões permitem que os LSTMs lembrem ou esqueçam seletivamente informa�
 <ThinkAboutIt>Se uma RNN processa um token de cada vez e precisa transportar informações através de seu estado oculto, o que acontece quando o contexto relevante aparece há 500 tokens? Como isso se compara à abordagem do Transformer?
 </ThinkAboutIt>
 
-## Transformers – A arquitetura por trás de tudo
+## Transformers - A arquitetura por trás de tudo
 
 O Transformer, lançado em 2017, substituiu a recorrência pela **autoatenção**, permitindo que o modelo observe cada token na entrada simultaneamente.
 
@@ -75,7 +75,7 @@ O Transformer, lançado em 2017, substituiu a recorrência pela **autoatenção*
 
 **Codificação posicional** - Como os Transformers processam todos os tokens em paralelo (sem senso inerente de ordem), as informações posicionais são injetadas adicionando funções seno e cosseno de diferentes frequências aos embeddings de entrada.
 
-**Atenção multicabeças** - Em vez de um único cálculo de atenção, o modelo executa vários em paralelo. Cada “cabeça” pode aprender a atender a diferentes tipos de relacionamentos – um pode capturar a sintaxe, outro captura a correferência, outro captura a similaridade semântica.
+**Atenção multicabeças** - Em vez de um único cálculo de atenção, o modelo executa vários em paralelo. Cada “cabeça” pode aprender a atender a diferentes tipos de relacionamentos - um pode capturar a sintaxe, outro captura a correferência, outro captura a similaridade semântica.
 
 **Camadas feed-forward** - Após atenção, cada token passa por uma pequena rede neural de forma independente. É aqui que grande parte do “conhecimento” do modelo é armazenado.
 
@@ -108,15 +108,15 @@ Além disso, a autoatenção captura **dependências de longo alcance** diretame
 
 Os transformadores agora dominam não apenas a linguagem, mas também:
 - **Visão** - Os Transformadores de Visão (ViT) correspondem ou excedem as CNNs em tarefas de imagem.
-- **Áudio** – Whisper e outros modelos transcrevem a fala usando codificadores Transformer.
-- **Multimodal** - Modelos frontier atuais processam texto, imagens e áudio em um único sistema baseado em Transformer.
+- **Áudio** - Whisper e outros modelos transcrevem a fala usando codificadores Transformer.
+- **Multimodal** - Modelos de fronteira atuais processam texto, imagens e áudio em um único sistema baseado em Transformer.
 - **Biologia** - AlphaFold usa mecanismos de atenção para prever estruturas de proteínas.
 
 As fronteiras entre essas arquiteturas estão se confundindo. Os modelos modernos da "CNN" geralmente incluem camadas de atenção, e os Transformers às vezes emprestam ideias convolucionais para eficiência.
 
 **Modelos de espaço de estados (SSMs)**, como o Mamba, representam uma alternativa emergente que processa sequências em tempo linear em vez de quadrático. Embora ainda sejam iniciais, eles sugerem que o domínio do Transformer pode não ser permanente - a busca por melhores arquiteturas continua.
 
-A lição desta história é clara: nenhuma arquitetura é definitiva. Cada inovação – das CNNs às RNNs e aos Transformers – resolveu problemas que seus antecessores não conseguiram. A próxima mudança de paradigma pode já estar tomando forma nos laboratórios de pesquisa hoje.
+A lição desta história é clara: nenhuma arquitetura é definitiva. Cada inovação - das CNNs às RNNs e aos Transformers - resolveu problemas que seus antecessores não conseguiram. A próxima mudança de paradigma pode já estar tomando forma nos laboratórios de pesquisa hoje.
 
 Compreender todas as três arquiteturas lhe dá o vocabulário conceitual para avaliar novas ideias à medida que surgem - e para escolher a ferramenta certa para cada problema que você enfrenta.
 

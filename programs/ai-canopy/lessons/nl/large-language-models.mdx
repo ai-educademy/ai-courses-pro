@@ -30,7 +30,7 @@ Voor het woord "bank":
   "bank" ←→ "steil"   = 0.30  (medium - ondersteunt "oever" betekenis)
 ```
 
-Elke Transformer-laag volgt: **Zelf-Aandacht → Optellen + Normaliseren → Feed-Forward → Optellen + Normaliseren**. Stapel 50–100+ blokken en je hebt een modern LLM.
+Elke Transformer-laag volgt: **Zelf-Aandacht → Optellen + Normaliseren → Feed-Forward → Optellen + Normaliseren**. Stapel 50-100+ blokken en je hebt een modern LLM.
 
 ---
 
@@ -39,7 +39,7 @@ Elke Transformer-laag volgt: **Zelf-Aandacht → Optellen + Normaliseren → Fee
 ### Fase 1: Voortraining (taal leren)
 Het model leest biljoenen tokens uit boeken, websites en code - leert grammatica, feiten en redeneerpatronen.
 
-### Fase 2: Fine-tuning (instructies leren volgen)
+### Fase 2: fijnafstemming (instructies leren volgen)
 Getraind op vraag-antwoord paren om instructies te leren volgen.
 
 ### Fase 3: RLHF (menselijke voorkeuren leren)
@@ -79,7 +79,7 @@ LLM's zijn als briljante maar onbetrouwbare stagiairs. Ze kunnen geweldig werk o
 
 ## Token-Economie en Contextvensters 📊
 
-LLM's lezen **tokens** (ongeveer ¾ van een woord). Het **contextvenster** is het maximum aantal tokens tegelijk. Huidige frontier systemen lopen uiteen van honderdduizenden tot ongeveer een miljoen tokens.
+LLM's lezen **tokens** (ongeveer ¾ van een woord). Het **contextvenster** is het maximum aantal tokens tegelijk. Huidige toonaangevende systemen lopen uiteen van honderdduizenden tot ongeveer een miljoen tokens.
 
 ```python
 input_tokens = 1000
@@ -122,7 +122,7 @@ Het `messages`-array is je gespreksgeschiedenis. Het model "onthoudt" niets - je
 
 1. **LLM's** voorspellen het volgende token - schaal creëert intelligent gedrag
 2. **Transformers** gebruiken zelf-aandacht om context te begrijpen
-3. **Trainingspijplijn**: voortraining → fine-tuning → RLHF
+3. **Trainingspijplijn**: voortraining → fijnafstemming → RLHF
 4. Elk **groot model** heeft verschillende sterktes
 5. LLM's zijn krachtig maar **niet perfect**
 6. **Tokens** zijn de valuta van LLM's

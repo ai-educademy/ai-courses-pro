@@ -10,7 +10,7 @@ machineTranslated: true
 ---
 # RLHF e Alinhamento - Como o ChatGPT aprende os valores humanos
 
-Um modelo de linguagem pré-treinado é um mecanismo poderoso, mas não controlado. Ele pode escrever poesia, gerar código e raciocinar sobre física – mas também pode produzir conteúdo tóxico, fabricar fatos com confiança e ignorar as instruções do usuário. **Alinhamento** é o processo de direcionar essa capacidade bruta para ser genuinamente útil, honesto e inofensivo.
+Um modelo de linguagem pré-treinado é um mecanismo poderoso, mas não controlado. Ele pode escrever poesia, gerar código e raciocinar sobre física - mas também pode produzir conteúdo tóxico, fabricar fatos com confiança e ignorar as instruções do usuário. **Alinhamento** é o processo de direcionar essa capacidade bruta para ser genuinamente útil, honesto e inofensivo.
 
 ## O problema do alinhamento
 
@@ -28,7 +28,7 @@ O SFT por si só produz um modelo visivelmente melhor, mas tem limitações. Os 
 
 ## Estágio 2: Treinamento de modelo de recompensa
 
-Em vez de escrever respostas ideais, os rotuladores humanos recebem **pares de resultados do modelo** e são solicitados a classificar qual é o melhor. Isto é cognitivamente mais fácil – comparar é mais simples do que criar – e permite coletar muito mais dados de preferências.
+Em vez de escrever respostas ideais, os rotuladores humanos recebem **pares de resultados do modelo** e são solicitados a classificar qual é o melhor. Isto é cognitivamente mais fácil - comparar é mais simples do que criar - e permite coletar muito mais dados de preferências.
 
 Esses pares classificados treinam um **modelo de recompensa (RM)**: uma rede neural separada que recebe um prompt e uma resposta como entrada e gera uma pontuação escalar que representa a preferência humana. O RM aprende padrões como:
 
@@ -47,11 +47,11 @@ Com um modelo de recompensa em mãos, o modelo SFT é ainda mais otimizado usand
 3. PPO atualiza os pesos do modelo para aumentar a recompensa esperada
 4. Uma **penalidade de divergência KL** evita que o modelo se desvie muito da linha de base do SFT (evitando hacking de recompensa)
 
-A penalidade KL é crítica. Sem ele, o modelo aprenderia a explorar as peculiaridades do modelo de recompensa – gerando respostas com pontuação elevada, mas que seriam absurdas ou repetitivas. Ao restringir até que ponto a política pode divergir do modelo SFT, o PPO mantém a coerência dos resultados, ao mesmo tempo que melhora o alinhamento.
+A penalidade KL é crítica. Sem ele, o modelo aprenderia a explorar as peculiaridades do modelo de recompensa - gerando respostas com pontuação elevada, mas que seriam absurdas ou repetitivas. Ao restringir até que ponto a política pode divergir do modelo SFT, o PPO mantém a coerência dos resultados, ao mesmo tempo que melhora o alinhamento.
 
 Este processo de três estágios - SFT → Modelo de recompensa → PPO - é precisamente como a OpenAI transformou o GPT-3.5 em ChatGPT, conforme descrito em seu artigo **InstructGPT**.
 
-<FunFact>O artigo do InstructGPT revelou um resultado surpreendente: um modelo de parâmetro 1,3B alinhado com RLHF foi preferido pelos juízes humanos em vez do 175B GPT-3 não alinhado – um modelo 100× maior. O alinhamento pode ser mais importante do que a escala bruta.
+<FunFact>O artigo do InstructGPT revelou um resultado surpreendente: um modelo de parâmetro 1,3B alinhado com RLHF foi preferido pelos juízes humanos em vez do 175B GPT-3 não alinhado - um modelo 100× maior. O alinhamento pode ser mais importante do que a escala bruta.
 </FunFact>
 
 ## DPO: Eliminando o intermediário
@@ -64,7 +64,7 @@ A função de perda do DPO define implicitamente um modelo de recompensa dentro 
 L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
 ```
 
-Onde `y_w` é a resposta preferida, `y_l` é a rejeitada e `π_ref` é o modelo de referência (SFT). O DPO é mais simples, mais estável e mais barato de treinar - sem modelo de recompensa, sem loop RL, sem PPO sensível a hiperparâmetros. Muitos modelos open-weight agora usam DPO ou variantes relacionadas de preference-optimisation.
+Onde `y_w` é a resposta preferida, `y_l` é a rejeitada e `π_ref` é o modelo de referência (SFT). O DPO é mais simples, mais estável e mais barato de treinar - sem modelo de recompensa, sem loop RL, sem PPO sensível a hiperparâmetros. Muitos modelos de pesos abertos agora usam DPO ou variantes relacionadas de preference-optimisation.
 
 <ThinkAboutIt>O DPO elimina o modelo de recompensa, mas também perde a capacidade de pontuar novas respostas arbitrárias no momento da inferência. Em quais cenários ter um modelo de recompensa explícito (o pipeline RLHF completo) pode ser mais valioso do que a simplicidade do DPO?
 </ThinkAboutIt>
@@ -77,7 +77,7 @@ A Anthropic introduziu a **IA Constitucional (CAI)** para reduzir a dependência
 2. Gere pares de respostas e use o **modelo em si** para julgar qual resposta atende melhor à constituição
 3. Use essas preferências geradas por IA para treinar o modelo de recompensa (RLAIF - RL do AI Feedback)
 
-A CAI dimensiona drasticamente a coleta de preferências – a IA pode gerar e avaliar milhões de comparações por uma fração do custo da rotulagem humana. Também torna os critérios de alinhamento **explícitos e auditáveis**, codificados na constituição, em vez de aprendidos implicitamente com os preconceitos dos rotuladores.
+A CAI dimensiona drasticamente a coleta de preferências - a IA pode gerar e avaliar milhões de comparações por uma fração do custo da rotulagem humana. Também torna os critérios de alinhamento **explícitos e auditáveis**, codificados na constituição, em vez de aprendidos implicitamente com os preconceitos dos rotuladores.
 
 <Quiz question="Qual é a principal inovação da IA ​​Constitucional em comparação com o RLHF padrão?" options="Ele usa um modelo base muito maior|Ele substitui os rotuladores de preferências humanas pelo próprio modelo de IA, guiado por princípios escritos explícitos|Elimina a necessidade de qualquer ajuste fino|Ele treina apenas em dados sintéticos" answer="1" explanation="A IA constitucional utiliza o próprio modelo para gerar julgamentos de preferência, guiados por um conjunto de princípios explicitamente escritos (a constituição). Isso dimensiona enormemente a coleta de dados de preferência, ao mesmo tempo que torna os critérios de alinhamento transparentes e modificáveis." />
 
@@ -94,19 +94,19 @@ Os principais laboratórios agora conduzem extensas equipes vermelhas antes de l
 
 ## O imposto de alinhamento
 
-O alinhamento tem um custo. Os modelos treinados em RLHF às vezes tornam-se **excessivamente cautelosos** – recusando solicitações benignas, acrescentando advertências desnecessárias ou produzindo respostas brandas para evitar qualquer risco percebido. Este “imposto de alinhamento” é um verdadeiro desafio de engenharia:
+O alinhamento tem um custo. Os modelos treinados em RLHF às vezes tornam-se **excessivamente cautelosos** - recusando solicitações benignas, acrescentando advertências desnecessárias ou produzindo respostas brandas para evitar qualquer risco percebido. Este “imposto de alinhamento” é um verdadeiro desafio de engenharia:
 
 - Pouco alinhamento → resultados prejudiciais
 - Muito alinhamento → recusas inúteis e irritantes
 
-A fronteira da pesquisa de alinhamento é encontrar técnicas que maximizem a utilidade e, ao mesmo tempo, mantenham limites de segurança genuínos – e não apenas a correspondência de padrões em respostas superficialmente “seguras”.
+A fronteira da pesquisa de alinhamento é encontrar técnicas que maximizem a utilidade e, ao mesmo tempo, mantenham limites de segurança genuínos - e não apenas a correspondência de padrões em respostas superficialmente “seguras”.
 
-<Quiz question="O que é a ”imposto de alinhamento” no contexto dos modelos treinados em RLHF?" options="O custo financeiro da contratação de rotuladores humanos para dados de preferência|A redução na utilidade e capacidade do modelo resultante do treinamento de segurança, tornando o modelo excessivamente cauteloso|O custo computacional de execução da otimização de PPO|O imposto que os governos impõem às empresas de IA para conformidade com a segurança" answer="1" explanation="A taxa de alinhamento refere-se à capacidade ou utilidade perdida quando o treinamento em segurança torna um modelo excessivamente cauteloso – recusando solicitações benignas, protegendo-se desnecessariamente ou produzindo respostas genéricas. Equilibrar a segurança com a ajuda genuína é um dos problemas mais difíceis do alinhamento." />
+<Quiz question="O que é a ”imposto de alinhamento” no contexto dos modelos treinados em RLHF?" options="O custo financeiro da contratação de rotuladores humanos para dados de preferência|A redução na utilidade e capacidade do modelo resultante do treinamento de segurança, tornando o modelo excessivamente cauteloso|O custo computacional de execução da otimização de PPO|O imposto que os governos impõem às empresas de IA para conformidade com a segurança" answer="1" explanation="A taxa de alinhamento refere-se à capacidade ou utilidade perdida quando o treinamento em segurança torna um modelo excessivamente cauteloso - recusando solicitações benignas, protegendo-se desnecessariamente ou produzindo respostas genéricas. Equilibrar a segurança com a ajuda genuína é um dos problemas mais difíceis do alinhamento." />
 
-<FunFact>Laboratórios frontier passam meses em trabalho de alinhamento (coleta de dados SFT, modelagem de recompensas, preference optimisation e testes de segurança) para transformar modelos base em produtos seguros o suficiente para lançamento. A fase de alinhamento, embora seja uma fração da computação pré-treinamento, exige milhares de horas de rotulagem humana especializada e avaliação.</FunFact>
+<FunFact>Laboratórios de fronteira passam meses em trabalho de alinhamento (coleta de dados SFT, modelagem de recompensas, otimização de preferências e testes de segurança) para transformar modelos base em produtos seguros o suficiente para lançamento. A fase de alinhamento, embora seja uma fração da computação pré-treinamento, exige milhares de horas de rotulagem humana especializada e avaliação.</FunFact>
 </FunFact>
 
-<ThinkAboutIt>Os rotuladores humanos inevitavelmente trazem os seus próprios preconceitos, perspectivas culturais e inconsistências para os dados de preferência. Se o alinhamento é, em última análise, “aprender o que os humanos preferem”, quais preferências devem contar – e como lidamos com divergências fundamentais sobre valores entre culturas?
+<ThinkAboutIt>Os rotuladores humanos inevitavelmente trazem os seus próprios preconceitos, perspectivas culturais e inconsistências para os dados de preferência. Se o alinhamento é, em última análise, “aprender o que os humanos preferem”, quais preferências devem contar - e como lidamos com divergências fundamentais sobre valores entre culturas?
 </ThinkAboutIt>
 
 ---

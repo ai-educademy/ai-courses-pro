@@ -1,5 +1,5 @@
 ---
-title: "Dimensionando leis e treinamento em escala – Por que modelos maiores ficam mais inteligentes"
+title: "Dimensionando leis e treinamento em escala - Por que modelos maiores ficam mais inteligentes"
 description: "Explore as leis empíricas de escalabilidade que regem o desempenho do modelo, as estratégias de treinamento de computação ideal e a engenharia de sistemas distribuídos por trás dos modelos de fronteira de treinamento."
 order: 7
 difficulty: "advanced"
@@ -10,7 +10,7 @@ machineTranslated: true
 ---
 # Dimensionando leis e treinamento em escala - Por que modelos maiores ficam mais inteligentes
 
-A revolução moderna da IA ​​não é apenas uma história algorítmica – é uma história de **engenharia e escalonamento**. Os pesquisadores descobriram que o desempenho do modelo segue leis de potência previsíveis em parâmetros, dados e computação, e a exploração dessas leis exigiu a invenção de paradigmas de treinamento distribuído inteiramente novos.
+A revolução moderna da IA ​​não é apenas uma história algorítmica - é uma história de **engenharia e escalonamento**. Os pesquisadores descobriram que o desempenho do modelo segue leis de potência previsíveis em parâmetros, dados e computação, e a exploração dessas leis exigiu a invenção de paradigmas de treinamento distribuído inteiramente novos.
 
 ## Leis de escala de Kaplan
 
@@ -28,17 +28,17 @@ Recomendação de Kaplan: quando a computação é limitada, é mais eficiente *
 
 ## Chinchila e treinamento otimizado para computação
 
-Em 2022, o **artigo Chinchilla** da DeepMind desafiou as conclusões de Kaplan. Seu principal insight: a alocação ideal entre parâmetros e tokens de treinamento é aproximadamente **1:20** – para cada parâmetro, você deve treinar em aproximadamente 20 tokens.
+Em 2022, o **artigo Chinchilla** da DeepMind desafiou as conclusões de Kaplan. Seu principal insight: a alocação ideal entre parâmetros e tokens de treinamento é aproximadamente **1:20** - para cada parâmetro, você deve treinar em aproximadamente 20 tokens.
 
 | Modelo | Parâmetros | Tokens de treinamento | Proporção |
 |-------|-----------|----------------|-------|
 | GPT-3 | 175B | 300B | 1.7:1 |
 | Chinchila | 70B | 1.4T | 20:1 |
-| Lhama 2 70B | 70B | 2T | 28:1 |
+| Llama 2 70B | 70B | 2T | 28:1 |
 
 Chinchila (parâmetros 70B) **superou** o muito maior Gopher (280B) treinando com 4x mais dados. A lição foi profunda: a maioria dos grandes modelos eram enormemente **sobreparametrizados e mal treinados**.
 
-<Quiz question="De acordo com as leis de escalonamento da Chinchilla, qual é a proporção aproximada de cálculo ideal entre tokens de treinamento e parâmetros?" options="1:1 – tokens e parâmetros iguais|1:20 - aproximadamente 20 tokens por parâmetro|100:1 - 100 tokens por parâmetro|Depende inteiramente da arquitetura do modelo, não da contagem de parâmetros" answer="1" explanation="A principal descoberta da Chinchilla foi que o treinamento ideal para computação requer aproximadamente 20 tokens por parâmetro. Modelos como o GPT-3 (1,7 tokens por parâmetro) foram gravemente mal treinados em relação ao seu tamanho, desperdiçando computação em parâmetros excessivos em vez de dados suficientes." />
+<Quiz question="De acordo com as leis de escalonamento da Chinchilla, qual é a proporção aproximada de cálculo ideal entre tokens de treinamento e parâmetros?" options="1:1 - tokens e parâmetros iguais|1:20 - aproximadamente 20 tokens por parâmetro|100:1 - 100 tokens por parâmetro|Depende inteiramente da arquitetura do modelo, não da contagem de parâmetros" answer="1" explanation="A principal descoberta da Chinchilla foi que o treinamento ideal para computação requer aproximadamente 20 tokens por parâmetro. Modelos como o GPT-3 (1,7 tokens por parâmetro) foram gravemente mal treinados em relação ao seu tamanho, desperdiçando computação em parâmetros excessivos em vez de dados suficientes." />
 
 ## Por que a contagem de parâmetros não é tudo
 
@@ -48,22 +48,22 @@ A capacidade de um modelo depende da interação de arquitetura, dados e treinam
 - **Opções de arquitetura** - padrões de atenção, funções de ativação (SwiGLU vs ReLU), posicionamento de normalização (pré-norma vs pós-norma) - todos mudam as curvas de escala.
 - **Tokenização** afeta o volume efetivo de dados. Um tokenizador melhor compacta mais informações por token, alterando a proporção entre parâmetro e token.
 
-<FunFact>Treinar um modelo frontier pode custar centenas de milhões quando computação, dados, energia e engenharia são incluídos. A eletricidade consumida durante uma única execução de treinamento de modelo frontier pode exceder o consumo anual de uma pequena cidade, levantando questões sérias sobre a sustentabilidade ambiental do escalonamento.</FunFact>
+<FunFact>Treinar um modelo de fronteira pode custar centenas de milhões quando computação, dados, energia e engenharia são incluídos. A eletricidade consumida durante uma única execução de treinamento de modelo de fronteira pode exceder o consumo anual de uma pequena cidade, levantando questões sérias sobre a sustentabilidade ambiental do escalonamento.</FunFact>
 </FunFact>
 
 ## Estratégias de Treinamento Distribuído
 
 Nenhuma GPU pode conter um modelo de fronteira. O treinamento requer a distribuição do trabalho entre milhares de aceleradores usando diversas estratégias complementares:
 
-**Paralelismo de dados** – A abordagem mais simples: replicar o modelo inteiro em cada GPU, dividir o lote de treinamento entre dispositivos e calcular a média dos gradientes após cada etapa. Funciona bem quando o modelo cabe na memória de uma única GPU.
+**Paralelismo de dados** - A abordagem mais simples: replicar o modelo inteiro em cada GPU, dividir o lote de treinamento entre dispositivos e calcular a média dos gradientes após cada etapa. Funciona bem quando o modelo cabe na memória de uma única GPU.
 
 **Paralelismo de modelo (Paralelismo de tensor)** - Divida camadas individuais entre GPUs. Uma única multiplicação de matriz é dividida para que cada GPU calcule uma fatia da saída. Requer interconexões de alta largura de banda (NVLink, InfiniBand) porque as GPUs devem se comunicar em cada passagem de avanço/retrocesso.
 
-**Paralelismo de pipeline** – Atribua diferentes camadas a diferentes GPUs, passando ativações para frente e gradientes para trás através do pipeline. Introduz **bolhas de pipeline** (tempo ocioso enquanto espera por outros estágios), atenuadas por microlotes.
+**Paralelismo de pipeline** - Atribua diferentes camadas a diferentes GPUs, passando ativações para frente e gradientes para trás através do pipeline. Introduz **bolhas de pipeline** (tempo ocioso enquanto espera por outros estágios), atenuadas por microlotes.
 
 Os sistemas modernos combinam todos os três: paralelismo de tensor dentro de um nó (NVLink rápido), paralelismo de pipeline entre nós e paralelismo de dados entre grupos de nós.
 
-<ThinkAboutIt>O paralelismo de pipeline introduz um tempo de “bolha” ocioso quando as GPUs aguardam ativações de outros estágios. Quanto maior o pipeline, pior será a sobrecarga da bolha. Como você poderia minimizar esse desperdício – e quais compensações sua solução apresentaria?
+<ThinkAboutIt>O paralelismo de pipeline introduz um tempo de “bolha” ocioso quando as GPUs aguardam ativações de outros estágios. Quanto maior o pipeline, pior será a sobrecarga da bolha. Como você poderia minimizar esse desperdício - e quais compensações sua solução apresentaria?
 </ThinkAboutIt>
 
 ## Precisão Mista e Acumulação de Gradiente
@@ -99,7 +99,7 @@ O **debate sobre retornos decrescentes** também está se intensificando. Cada o
 
 <Quiz question="Por que alguns pesquisadores argumentam que as ”habilidades emergentes” em grandes modelos linguísticos podem ser uma ilusão?" options="Porque modelos maiores são sempre treinados em dados diferentes|Porque as habilidades foram programadas secretamente por pesquisadores|Porque métricas de avaliação descontínuas (como precisão de correspondência exata) podem fazer com que melhorias subjacentes suaves apareçam como saltos repentinos|Porque a emergência ocorre apenas em modelos codificador-decodificador" answer="2" explanation="Schaeffer et al. (2023) mostraram que ao usar métricas suaves e contínuas (por exemplo, probabilidade de log em nível de token), o desempenho melhora de forma previsível com a escala. A ”emergência” nítida é muitas vezes um artefacto de métricas que subitamente passam de 0 para 1 (por exemplo, correspondência exacta em aritmética) num limiar de capacidade subjacente." />
 
-<FunFact>O treinamento PaLM do Google usou 6.144 chips TPU v4 simultaneamente – conectados por uma rede óptica personalizada que abrange todo um data center. Uma única falha de rede poderia desperdiçar milhões de dólares em computação, por isso eles criaram pontos de verificação automatizados que salvam o estado do modelo a cada poucos minutos.
+<FunFact>O treinamento PaLM do Google usou 6.144 chips TPU v4 simultaneamente - conectados por uma rede óptica personalizada que abrange todo um data center. Uma única falha de rede poderia desperdiçar milhões de dólares em computação, por isso eles criaram pontos de verificação automatizados que salvam o estado do modelo a cada poucos minutos.
 </FunFact>
 
 <ThinkAboutIt>Se as leis de dimensionamento preveem que 10 vezes mais computação produz uma melhoria previsível, como os laboratórios de IA deveriam equilibrar o investimento no dimensionamento de arquiteturas existentes versus a pesquisa de abordagens fundamentalmente novas? O que acontece quando o custo dos próximos 10× ultrapassar um bilhão de dólares?

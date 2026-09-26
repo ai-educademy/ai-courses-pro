@@ -69,7 +69,7 @@ Exécutez le même prompt plusieurs fois avec une température > 0, puis prenez 
 
 Au lieu d'une seule chaîne de raisonnement, le modèle explore simultanément plusieurs chemins de raisonnement, évalue chacun et sélectionne la branche la plus prometteuse. Imaginez que vous donnez au modèle un tableau blanc mental plutôt qu'un simple bloc-notes.
 
-### ReAct (Reasoning + Acting)
+### ReAct (raisonnement + action)
 
 Le modèle alterne entre **réflexion** (raisonner sur la suite) et **action** (appeler des outils, chercher ou calculer). Ce patron est à la base de la plupart des agents IA modernes.
 
@@ -100,7 +100,7 @@ Se défendre contre l'injection nécessite :
 - **Architecture en couches** - Ne jamais se fier à une seule barrière de prompt ; utiliser des modèles séparés pour la validation.
 - **Principe du moindre privilège** - Ne pas donner au modèle accès à des outils ou des données dont il n'a pas besoin.
 
-<Quiz question="Qu'est-ce que l'injection de prompt ?" options="Une technique pour améliorer la qualité des prompts|Une méthode de fine-tuning de modèles avec des données personnalisées|Une attaque où l'entrée utilisateur supplante le system prompt ou le comportement prévu|Un moyen de compresser les longs prompts en versions plus courtes" answer="2" explanation="L'injection de prompt est une vulnérabilité de sécurité où une entrée utilisateur soigneusement conçue manipule le modèle pour qu'il ignore ses instructions, révèle des system prompts ou produise des sorties nuisibles." />
+<Quiz question="Qu'est-ce que l'injection de prompt ?" options="Une technique pour améliorer la qualité des prompts|Une méthode de réglage fin de modèles avec des données personnalisées|Une attaque où l'entrée utilisateur supplante le system prompt ou le comportement prévu|Un moyen de compresser les longs prompts en versions plus courtes" answer="2" explanation="L'injection de prompt est une vulnérabilité de sécurité où une entrée utilisateur soigneusement conçue manipule le modèle pour qu'il ignore ses instructions, révèle des system prompts ou produise des sorties nuisibles." />
 
 ## Concevoir des templates de prompts réutilisables
 

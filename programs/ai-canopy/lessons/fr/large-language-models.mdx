@@ -35,7 +35,7 @@ Pour le mot "banque", les scores d'attention :
   "banque" ←→ "La"       = 0.05  (bas - peu informatif)
 ```
 
-Les Transformers ont **plusieurs têtes d'attention** en parallèle, chacune apprenant des relations différentes. Chaque couche suit : **Auto-attention → Ajouter + Normaliser → Réseau Feed-Forward → Ajouter + Normaliser**. Empilez 50–100+ de ces blocs et vous avez un LLM moderne.
+Les Transformers ont **plusieurs têtes d'attention** en parallèle, chacune apprenant des relations différentes. Chaque couche suit : **Auto-attention → Ajouter + Normaliser → Réseau Feed-Forward → Ajouter + Normaliser**. Empilez 50-100+ de ces blocs et vous avez un LLM moderne.
 
 ---
 
@@ -93,7 +93,7 @@ Le RLHF est ce qui fait la différence entre un modèle qui complète du texte e
 
 ## Économie des Tokens et Fenêtres de Contexte 📊
 
-Les LLM lisent des **tokens** (environ ¾ d'un mot). La **fenêtre de contexte** est le maximum de tokens traitables en une fois. Les systèmes frontier actuels vont de centaines de milliers à environ un million de tokens.
+Les LLM lisent des **tokens** (environ ¾ d'un mot). La **fenêtre de contexte** est le maximum de tokens traitables en une fois. Les systèmes de pointe actuels vont de centaines de milliers à environ un million de tokens.
 
 ```python
 # Estimation approximative du coût

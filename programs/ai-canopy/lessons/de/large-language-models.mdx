@@ -1,5 +1,5 @@
 ---
-title: "Große Sprachmodelle – Die Motoren hinter moderner KI"
+title: "Große Sprachmodelle - Die Motoren hinter moderner KI"
 description: "Entdecken Sie, wie LLMs funktionieren, von der Transformatorarchitektur bis hin zu neuen Fähigkeiten und realen Einschränkungen."
 order: 1
 difficulty: "advanced"
@@ -8,28 +8,28 @@ icon: "🤖"
 published: true
 machineTranslated: true
 ---
-# Große Sprachmodelle – Die Motoren hinter moderner KI
+# Große Sprachmodelle - Die Motoren hinter moderner KI
 
 Große Sprachmodelle haben die Möglichkeiten von Maschinen mit Text, Code und Argumentation grundlegend verändert. In dieser Lektion zeigen wir Ihnen, wie sie funktionieren, warum sie so leistungsstark sind und wo sie immer noch zu kurz kommen.
 
 ## Was genau ist ein LLM?
 
-Ein **großes Sprachmodell** ist ein neuronales Netzwerk, das auf enorme Textmengen trainiert wird, um das nächste Token in einer Sequenz vorherzusagen. „Groß“ bezieht sich auf die Anzahl der **Parameter** – lernbare Gewichte, die Muster aus Trainingsdaten kodieren.
+Ein **großes Sprachmodell** ist ein neuronales Netzwerk, das auf enorme Textmengen trainiert wird, um das nächste Token in einer Sequenz vorherzusagen. „Groß“ bezieht sich auf die Anzahl der **Parameter** - lernbare Gewichte, die Muster aus Trainingsdaten kodieren.
 
-- **GPT-6 Astra** steht für die aktuelle OpenAI frontier, wobei die Modellinterna unveröffentlicht bleiben.
+- **GPT-6 Astra** steht für die aktuellen Spitzenmodelle von OpenAI, wobei die Modellinterna unveröffentlicht bleiben.
 - **Llama 4 Scout und Maverick** nutzen mixture-of-experts-Designs mit 17 Milliarden aktiven Parametern und deutlich größeren Gesamtparameterzahlen.
 - **Mistral 7B** zeigt, dass kleinere Modelle weit über ihr Gewicht hinaus schlagen können.
 
 Diese Modelle werden anhand von Hunderten Milliarden Wörtern trainiert, die aus Büchern, Websites, Code-Repositories und wissenschaftlichen Arbeiten stammen. Die schiere Größe der Daten und Parameter verleiht LLMs ihre bemerkenswerte Vielseitigkeit.
 
-**Tokens, keine Wörter:** LLMs verarbeiten keine ganzen Wörter – sie arbeiten mit **Tokens**, bei denen es sich um Unterworteinheiten handelt. Das Wort „verstehen“ könnte in „unter“ + „stehen“ + „ing“ aufgeteilt werden. Ein typisches englisches Wort hat durchschnittlich etwa 1,3 Token. Dieses Tokenisierungsschema ermöglicht es Modellen, seltene Wörter, Fachjargon und sogar mehrere Sprachen zu verarbeiten, ohne einen unvorstellbar großen Wortschatz zu haben.
+**Tokens, keine Wörter:** LLMs verarbeiten keine ganzen Wörter - sie arbeiten mit **Tokens**, bei denen es sich um Unterworteinheiten handelt. Das Wort „verstehen“ könnte in „unter“ + „stehen“ + „ing“ aufgeteilt werden. Ein typisches englisches Wort hat durchschnittlich etwa 1,3 Token. Dieses Tokenisierungsschema ermöglicht es Modellen, seltene Wörter, Fachjargon und sogar mehrere Sprachen zu verarbeiten, ohne einen unvorstellbar großen Wortschatz zu haben.
 
-<FunFact>Das Training eines frontier Sprachmodells kann Hunderte Millionen kosten, wenn Rechenleistung, Daten, Energie und Engineering einbezogen werden. Das entspricht in etwa dem Budget eines großen Films, nur dass der „Schauspieler“ jede Programmiersprache beherrscht.</FunFact>
+<FunFact>Das Training eines führenden Sprachmodells kann Hunderte Millionen kosten, wenn Rechenleistung, Daten, Energie und Engineering einbezogen werden. Das entspricht in etwa dem Budget eines großen Films, nur dass der „Schauspieler“ jede Programmiersprache beherrscht.</FunFact>
 </FunFact>
 
 ## Die Transformer-Architektur
 
-Jedes moderne LLM basiert auf dem **Transformator**, der in der Veröffentlichung *Attention Is All You Need* aus dem Jahr 2017 vorgestellt wurde. Die wichtigste Neuerung ist **Selbstaufmerksamkeit** – ein Mechanismus, der es dem Modell ermöglicht, abzuwägen, wie wichtig jedes Wort im Verhältnis zu jedem anderen Wort in der Eingabe ist.
+Jedes moderne LLM basiert auf dem **Transformator**, der in der Veröffentlichung *Attention Is All You Need* aus dem Jahr 2017 vorgestellt wurde. Die wichtigste Neuerung ist **Selbstaufmerksamkeit** - ein Mechanismus, der es dem Modell ermöglicht, abzuwägen, wie wichtig jedes Wort im Verhältnis zu jedem anderen Wort in der Eingabe ist.
 
 **Wie Selbstaufmerksamkeit funktioniert (vereinfacht):**
 1. Jeder Token wird in drei Vektoren umgewandelt: **Abfrage**, **Schlüssel** und **Wert**.
@@ -43,39 +43,39 @@ Die mathematische Formel, die im Mittelpunkt steht, lautet:
 
 Die Division durch √d (die Quadratwurzel der Schlüsseldimension) verhindert, dass die Skalarprodukte zu groß werden, was die Softmax-Funktion in Bereiche mit extrem kleinen Steigungen drängen würde. Dieser einfache Skalierungstrick war eine der wichtigsten Erkenntnisse, die das Training tiefer Transformers stabil machten.
 
-Dies wird über mehrere **Aufmerksamkeitsköpfe** hinweg parallel wiederholt, sodass das Modell verschiedene Arten von Beziehungen gleichzeitig erfassen kann – Syntax in einem Kopf, Semantik in einem anderen.
+Dies wird über mehrere **Aufmerksamkeitsköpfe** hinweg parallel wiederholt, sodass das Modell verschiedene Arten von Beziehungen gleichzeitig erfassen kann - Syntax in einem Kopf, Semantik in einem anderen.
 
 <Illustration src="/images/lessons/large-language-models.svg" alt="Diagramm, das den Selbstaufmerksamkeitsmechanismus des Transformators mit Abfrage-, Schlüssel- und Wertvektoren zeigt" caption="Durch die Selbstaufmerksamkeit kann sich jeder Token um jeden anderen Token kümmern und so weitreichende Abhängigkeiten erfassen." />
 
-<ThinkAboutIt>Wenn ein Satz 500 Token hat, vergleicht die Selbstaufmerksamkeit jeden Token mit jedem anderen – das sind 250.000 Vergleiche pro Ebene. Wie könnten sich diese quadratischen Kosten darauf auswirken, was LLMs verarbeiten können?
+<ThinkAboutIt>Wenn ein Satz 500 Token hat, vergleicht die Selbstaufmerksamkeit jeden Token mit jedem anderen - das sind 250.000 Vergleiche pro Ebene. Wie könnten sich diese quadratischen Kosten darauf auswirken, was LLMs verarbeiten können?
 </ThinkAboutIt>
 
 ## Schlüsselmodelle in der Landschaft
 
 | Modell | Ersteller | Bemerkenswerte Funktion |
 |-------|---------|-----------------|
-| **GPT-6 Astra** | OpenAI | Spitzen-Reasoning, Programmierung, Forschung und multimodale Eingabe |
+| **GPT-6 Astra** | OpenAI | Spitzen-Schlussfolgern, Programmierung, Forschung und multimodale Eingabe |
 | **Claude Opus 5.5** | Anthropic | Langlaufende agentische Programmierung und Wissensarbeit |
 | **Gemini 3.1 Pro** | Google DeepMind | Fortgeschrittenes Schlussfolgern, Programmierung und Multimodalität |
 | **Llama 4** | Meta | Offene Gewichte, native Multimodalität, langer Kontext |
 | **Mistral Large** | Mistral AI | Effiziente europäische Alternative |
 
-Das Feld bewegt sich außerordentlich schnell – wenn Sie dies lesen, gibt es möglicherweise bereits neuere Modelle.
+Das Feld bewegt sich außerordentlich schnell - wenn Sie dies lesen, gibt es möglicherweise bereits neuere Modelle.
 
-Ein entscheidender Unterschied in dieser Landschaft besteht zwischen **Closed-Source**-Modellen (GPT, Claude, Gemini), bei denen nur die API verfügbar ist, und **Open-Weight**-Modellen (Llama, Mistral), bei denen die Modellgewichte öffentlich veröffentlicht werden. Open-Weight-Modelle ermöglichen es Unternehmen, Inferenz auf der eigenen Infrastruktur auszuführen, für bestimmte Domänen feinabzustimmen und das Verhalten des Modells zu überprüfen, Vorteile, die für datenschutzrelevante Branchen von großer Bedeutung sind.
+Ein entscheidender Unterschied in dieser Landschaft besteht zwischen **Closed-Source**-Modellen (GPT, Claude, Gemini), bei denen nur die API verfügbar ist, und **Modellen mit offenen Gewichten** (Llama, Mistral), bei denen die Modellgewichte öffentlich veröffentlicht werden. Modelle mit offenen Gewichten ermöglichen es Unternehmen, Inferenz auf der eigenen Infrastruktur auszuführen, für bestimmte Domänen feinabzustimmen und das Verhalten des Modells zu überprüfen, Vorteile, die für datenschutzrelevante Branchen von großer Bedeutung sind.
 
-<Callout>Nicht alle „offenen“ Modelle sind wirklich Open Source. Einige veröffentlichen Gewichte, schränken jedoch die kommerzielle Nutzung ein oder geben keine Trainingsdaten und keinen Code weiter. Überprüfen Sie immer die Lizenz, bevor Sie ein Open-Weight-Modell in der Produktion bereitstellen.
+<Callout>Nicht alle „offenen“ Modelle sind wirklich Open Source. Einige veröffentlichen Gewichte, schränken jedoch die kommerzielle Nutzung ein oder geben keine Trainingsdaten und keinen Code weiter. Überprüfen Sie immer die Lizenz, bevor Sie ein Modell mit offenen Gewichten in der Produktion bereitstellen.
 </Callout>
 
 ## Vortraining, Feinabstimmung und RLHF
 
 LLMs werden in Etappen aufgebaut:
 
-1. **Vortraining** – Das Modell liest große Textmengen und lernt, das nächste Token vorherzusagen. Diese Phase ist enorm teuer und erzeugt ein Basismodell, das Text vervollständigen kann, aber nicht besonders hilfreich ist.
+1. **Vortraining** - Das Modell liest große Textmengen und lernt, das nächste Token vorherzusagen. Diese Phase ist enorm teuer und erzeugt ein Basismodell, das Text vervollständigen kann, aber nicht besonders hilfreich ist.
 
-2. **Supervised Fine-Tuning (SFT)** – Von Menschen geschriebene Beispiele idealer Antworten lehren das Modell, Anweisungen zu befolgen und Fragen richtig zu beantworten.
+2. **Überwachte Feinabstimmung (SFT)** - Von Menschen geschriebene Beispiele idealer Antworten lehren das Modell, Anweisungen zu befolgen und Fragen richtig zu beantworten.
 
-3. **RLHF (Reinforcement Learning from Human Feedback)** – Menschliche Bewerter ordnen die Modellergebnisse vom besten zum schlechtesten. Ein Belohnungsmodell lernt diese Präferenzen und der LLM wird darauf trainiert, die Belohnung zu maximieren. Das macht Models hilfreich, harmlos und ehrlich.
+3. **RLHF (Reinforcement Learning from Human Feedback)** - Menschliche Bewerter ordnen die Modellergebnisse vom besten zum schlechtesten. Ein Belohnungsmodell lernt diese Präferenzen und der LLM wird darauf trainiert, die Belohnung zu maximieren. Das macht Models hilfreich, harmlos und ehrlich.
 
 <Quiz question="Was ist der Hauptzweck von RLHF in der LLM-Ausbildung?" options="Um die Parameteranzahl des Modells zu erhöhen|Um die Ergebnisse des Modells an menschlichen Vorlieben auszurichten|Um die Kosten für die Vorschulung zu senken|Damit das Modell Bilder verarbeiten kann" answer="1" explanation="RLHF nutzt menschliches Feedback, um ein Belohnungsmodell zu trainieren, das den LLM dann anleitet, Ergebnisse zu erzeugen, die von Menschen als hilfreich, sicher und genau bewertet werden." />
 
@@ -84,42 +84,42 @@ LLMs werden in Etappen aufgebaut:
 Wenn Modelle größer werden, entwickeln sie Fähigkeiten, die nicht explizit trainiert wurden:
 
 - **Komplexes Denken** - Mehrstufige logische Schlussfolgerung und mathematische Problemlösung.
-- **Codegenerierung** – Schreiben, Debuggen und Erklären von Code in Dutzenden von Sprachen.
-- **Mehrsprachige Sprachkompetenz** – Übersetzen und Generieren von Texten in Sprachen mit relativ wenigen Trainingsdaten.
+- **Codegenerierung** - Schreiben, Debuggen und Erklären von Code in Dutzenden von Sprachen.
+- **Mehrsprachige Sprachkompetenz** - Übersetzen und Generieren von Texten in Sprachen mit relativ wenigen Trainingsdaten.
 - **In-Kontext-Lernen** - Verhaltensanpassung basierend auf den in der Eingabeaufforderung bereitgestellten Beispielen, ohne Gewichtsaktualisierungen.
 
-Diese entstehenden Eigenschaften sind einer der faszinierendsten Aspekte der Skalierung – Fähigkeiten, die fast „kostenlos“ erscheinen, sobald ein Modell bestimmte Größenschwellen überschreitet.
+Diese entstehenden Eigenschaften sind einer der faszinierendsten Aspekte der Skalierung - Fähigkeiten, die fast „kostenlos“ erscheinen, sobald ein Modell bestimmte Größenschwellen überschreitet.
 
-<FunFact>Frühe frontier Modelle zeigten das Muster deutlich: Sie konnten schwierige Berufsprüfungen bestehen und trotzdem bei einfacher Arithmetik oder Zählaufgaben stolpern, wenn der Prompt ihre Schwächen offenlegte.</FunFact>
+<FunFact>Frühe Spitzenmodelle zeigten das Muster deutlich: Sie konnten schwierige Berufsprüfungen bestehen und trotzdem bei einfacher Arithmetik oder Zählaufgaben stolpern, wenn der Prompt ihre Schwächen offenlegte.</FunFact>
 </FunFact>
 
 ## Einschränkungen, die Sie verstehen müssen
 
 LLMs sind leistungsstark, aber alles andere als perfekt:
 
-- **Halluzinationen** – Models erzeugen selbstbewusst klingenden Text, der sachlich falsch ist. Sie „kennen“ keine Fakten; Sie sagen wahrscheinliche Token-Sequenzen voraus.
-- **Kontextfensterbeschränkungen** - Jedes Modell hat eine maximale Eingabegröße, von Hunderttausenden bis zu über einer Million Token bei aktuellen frontier Systemen. Informationen außerhalb dieses Fensters sind einfach unsichtbar.
-- **Kosten und Latenz** - Die Ausführung von Inferenz auf großen Modellen erfordert teure GPU-Cluster. Eine Top-tier frontier Abfrage kostet deutlich mehr als eine Anfrage an ein kleines oder mittelgroßes Modell.
+- **Halluzinationen** - Modelle erzeugen selbstbewusst klingenden Text, der sachlich falsch ist. Sie „kennen“ keine Fakten; Sie sagen wahrscheinliche Token-Sequenzen voraus.
+- **Kontextfensterbeschränkungen** - Jedes Modell hat eine maximale Eingabegröße, von Hunderttausenden bis zu über einer Million Token bei aktuellen Spitzensystemen. Informationen außerhalb dieses Fensters sind einfach unsichtbar.
+- **Kosten und Latenz** - Die Ausführung von Inferenz auf großen Modellen erfordert teure GPU-Cluster. Eine Abfrage an ein führendes Spitzenmodell kostet deutlich mehr als eine Anfrage an ein kleines oder mittelgroßes Modell.
 - **Mangel an echtem Verständnis** - LLMs manipulieren statistische Muster im Text. Ob dies „Verstehen“ darstellt, ist eine tiefgreifende philosophische Debatte.
-- **Trainingsdaten-Cutoffs** – Modelle wissen nichts über Ereignisse, nachdem ihre Trainingsdaten erfasst wurden, es sei denn, sie werden durch Abrufsysteme ergänzt.
+- **Trainingsdaten-Cutoffs** - Modelle wissen nichts über Ereignisse, nachdem ihre Trainingsdaten erfasst wurden, es sei denn, sie werden durch Abrufsysteme ergänzt.
 
-<Callout>Überprüfen Sie kritische Fakten aus LLM-Ergebnissen stets anhand maßgeblicher Quellen. Behandeln Sie LLMs als brillante, aber unzuverlässige Forschungsassistenten – außerordentlich nützlich, aber nie das letzte Wort in Sachfragen.
+<Callout>Überprüfen Sie kritische Fakten aus LLM-Ergebnissen stets anhand maßgeblicher Quellen. Behandeln Sie LLMs als brillante, aber unzuverlässige Forschungsassistenten - außerordentlich nützlich, aber nie das letzte Wort in Sachfragen.
 </Callout>
 
-<Quiz question="Warum lösen LLMs manchmal Halluzinationen aus?" options="Weil sie auf unzuverlässige Datenbanken zugreifen|Weil sie statistisch wahrscheinliche Token-Sequenzen vorhersagen, anstatt verifizierte Fakten abzurufen|Weil ihre Trainingsdaten bewusst ungenau sind|Denn Halluzinationen sind ein Merkmal, das der Kreativität dient" answer="1" explanation="LLMs generieren Text, indem sie die wahrscheinlichsten nächsten Token vorhersagen. Sie verfügen über keinen Mechanismus, um die sachliche Richtigkeit zu überprüfen – sie modellieren Sprachmuster, nicht die Wahrheit." />
+<Quiz question="Warum lösen LLMs manchmal Halluzinationen aus?" options="Weil sie auf unzuverlässige Datenbanken zugreifen|Weil sie statistisch wahrscheinliche Token-Sequenzen vorhersagen, anstatt verifizierte Fakten abzurufen|Weil ihre Trainingsdaten bewusst ungenau sind|Denn Halluzinationen sind ein Merkmal, das der Kreativität dient" answer="1" explanation="LLMs generieren Text, indem sie die wahrscheinlichsten nächsten Token vorhersagen. Sie verfügen über keinen Mechanismus, um die sachliche Richtigkeit zu überprüfen - sie modellieren Sprachmuster, nicht die Wahrheit." />
 
 ## Die Skalierungsdebatte
 
-Jahrelang herrschte die Überzeugung vor, dass **größer immer besser ist** - mehr Parameter, mehr Daten und mehr Rechenleistung würden die Leistung stetig verbessern. Dieses „Skalierungsgesetz“ hielt sich bemerkenswert gut über die GPT-2-, GPT-3- und GPT-4-Generation sowie spätere frontier Systeme.
+Jahrelang herrschte die Überzeugung vor, dass **größer immer besser ist** - mehr Parameter, mehr Daten und mehr Rechenleistung würden die Leistung stetig verbessern. Dieses „Skalierungsgesetz“ hielt sich bemerkenswert gut über die GPT-2-, GPT-3- und GPT-4-Generation sowie spätere Spitzensysteme.
 
 Jüngste Forschungsergebnisse deuten jedoch darauf hin, dass die Erträge allein im reinen Maßstab möglicherweise sinken. Der Schwerpunkt verlagert sich in Richtung:
 - **Bessere Datenqualität** gegenüber Quantität (kuratierte, deduplizierte Datensätze).
-- **Inferenzzeitberechnung** – Modelle über schwierige Probleme „länger nachdenken“ lassen, anstatt das Modell selbst zu vergrößern.
-- **Spezialisierte Architekturen** – Expertenmischungsmodelle, die nur einen Bruchteil der Parameter pro Abfrage aktivieren und so die Effizienz verbessern, ohne die Leistungsfähigkeit zu beeinträchtigen.
+- **Inferenzzeitberechnung** - Modelle über schwierige Probleme „länger nachdenken“ lassen, anstatt das Modell selbst zu vergrößern.
+- **Spezialisierte Architekturen** - Expertenmischungsmodelle, die nur einen Bruchteil der Parameter pro Abfrage aktivieren und so die Effizienz verbessern, ohne die Leistungsfähigkeit zu beeinträchtigen.
 
 ## Zusammenfassung
 
-Große Sprachmodelle stellen einen echten Paradigmenwechsel in der Informatik dar. Das Verständnis ihrer Architektur, Trainingspipeline und Einschränkungen ist für jeden, der ernsthaft mit KI arbeitet, nicht optional – es ist grundlegendes Wissen, das Ihnen bei der Weiterentwicklung des Fachgebiets von großem Nutzen sein wird.
+Große Sprachmodelle stellen einen echten Paradigmenwechsel in der Informatik dar. Das Verständnis ihrer Architektur, Trainingspipeline und Einschränkungen ist für jeden, der ernsthaft mit KI arbeitet, nicht optional - es ist grundlegendes Wissen, das Ihnen bei der Weiterentwicklung des Fachgebiets von großem Nutzen sein wird.
 
 <Quiz question="Welche Phase der LLM-Ausbildung ist die rechenintensivste?" options="Beaufsichtigte Feinabstimmung|RLHF|Vorschulung für große Textkorpora|Prompte Technik" answer="2" explanation="Das Vortraining umfasst die Verarbeitung von Hunderten Milliarden Token auf Tausenden von GPUs über Wochen oder Monate hinweg. Feinabstimmung und RLHF sind vergleichsweise leichte Stufen." />
 
