@@ -1,6 +1,6 @@
 ---
-title: "RLHF और Alignment - ChatGPT कैसे सीखता है Human Values"
-description: "समझिए कैसे raw language models को supervised fine-tuning, reward modelling और reinforcement learning from human feedback के ज़रिए helpful, harmless assistants में बदला जाता है।"
+title: "RLHF और अलिगनमेनट - ChatGPT कैसे सीखता है हुमन वलुएस"
+description: "समझिए कैसे रव भाषा मॉडल को सुपेरविसेद फ़ाइन-ट्यूनिंग, रेवरद मॉडलिंग और रेइनफ़ोरकेमेनट लेअरनिङ from मानव फ़ीडबैक के ज़रिए हेलपफ़ुल, हरमलेस असिसटनटस में बदला जाता है।"
 order: 8
 difficulty: "advanced"
 duration: 18
@@ -8,115 +8,115 @@ icon: "🎯"
 published: true
 ---
 
-# RLHF और Alignment - ChatGPT कैसे सीखता है Human Values
+# RLHF और अलिगनमेनट - ChatGPT कैसे सीखता है हुमन वलुएस
 
-एक pre-trained language model एक powerful लेकिन uncontrolled engine है। यह poetry लिख सकता है, code generate कर सकता है, physics पर reason कर सकता है - लेकिन toxic content भी produce कर सकता है, confidently facts fabricate कर सकता है, और user instructions ignore कर सकता है। **Alignment** वह process है जिसमें इस raw capability को genuinely helpful, honest और harmless बनने की दिशा में steer किया जाता है।
+एक परे-टरैनेद भाषा मॉडल एक पोवेरफ़ुल लेकिन उनकोनटरोललेद एङिने है। यह पोएटरय लिख सकता है, कोड जनरेट कर सकता है, फयसिकस पर रेअसोन कर सकता है - लेकिन टोक्सिक कंटेंट भी बनाने कर सकता है, कोनफ़िदेनटलय फ़कटस फ़बरिकटे कर सकता है, और यूज़र निर्देश नज़रअंदाज़ कर सकता है। **अलिगनमेनट** वह प्रोसेस है जिसमें इस रव कपबिलिटय को गेनुइनेलय हेलपफ़ुल, ईमानदार और हरमलेस बनने की दिशा में सटीर किया जाता है।
 
-## Alignment Problem
+## अलिगनमेनट समस्या
 
-Pre-training एक single objective optimise करती है: **next token predict करो**। इससे model को broad knowledge मिलती है लेकिन यह समझ नहीं आती कि human actually *क्या चाहता है*। Base model से सवाल पूछो और वह text को ऐसे complete कर सकता है जैसे forum post लिख रहा हो, advertisement हो, या conspiracy theory - क्योंकि ये सभी patterns उसके training data में हैं।
+परे-टरैनिङ एक एकल उद्देश्य ऑप्टिमाइज़ करती है: **नेक्सट टोकन भविष्यवाणी करो**। इससे मॉडल को बरोअद ज्ञान मिलती है लेकिन यह समझ नहीं आती कि मानव वास्तव में *क्या चाहता है*। बसे मॉडल से सवाल पूछो और वह टेक्स्ट को ऐसे पूरा कर सकता है जैसे फ़ोरुम पोस्ट लिख रहा हो, अदवेरटिसेमेनट हो, या कोनसपिरकय सिद्धांत - क्योंकि ये सभी पैटर्न उसके ट्रेनिंग डेटा में हैं।
 
-"Capable" और "useful" के बीच का gap alignment problem है। जो model medical advice लिख सकता है लेकिन refuse करना नहीं जानता, वह potentially dangerous है। इस gap को पाटने के लिए model को **human preferences** सिखानी होंगी - सिर्फ यह नहीं कि आगे क्या *आ सकता* है, बल्कि यह कि आगे क्या *आना चाहिए*।
+"कपबले" और "उपयोगी" के बीच का गप अलिगनमेनट समस्या है। जो मॉडल चिकित्सा अदविके लिख सकता है लेकिन रेफ़ुसे करना नहीं जानता, वह पोटेनटिअललय दङेरोउस है। इस गप को पाटने के लिए मॉडल को **मानव प्राथमिकताएँ** सिखानी होंगी - सिर्फ यह नहीं कि आगे क्या *आ सकता* है, बल्कि यह कि आगे क्या *आना चाहिए*।
 
-<Illustration src="/images/lessons/rlhf-and-alignment.svg" alt="तीन-stage pipeline: SFT demonstrations पर train करता है, reward model preferences सीखता है, PPO reward model के against policy optimise करता है" caption="RLHF pipeline base model को तीन stages में aligned assistant में बदलती है: SFT, reward modelling, और RL optimisation।" />
+<Illustration src="/images/lessons/rlhf-and-alignment.svg" alt="तीन-सटगे पाइपलाइन: SFT देमोनसटरशनस पर ट्रेन करता है, रेवरद मॉडल प्राथमिकताएँ सीखता है, PPO रेवरद मॉडल के अगैनसट पोलिकय ऑप्टिमाइज़ करता है" caption="RLHF पाइपलाइन बेस मॉडल को तीन सटगेस में अलिगनेद असिसटनट में बदलती है: SFT, रेवरद मॉडलिंग, और RL ऑप्टिमाइज़ेशन।" />
 
-## Stage 1: Supervised Fine-Tuning (SFT)
+## चरण 1: सुपेरविसेद फ़िने-टुनिङ (SFT)
 
-पहला step straightforward है: हज़ारों high-quality **demonstration examples** collect करो - user और assistant के बीच ideal conversations - और base model को उन पर fine-tune करो। इससे model helpful होने का *format* सीखता है: सवालों का directly जवाब देना, instructions follow करना, uncertainty acknowledge करना, और harmful requests refuse करना।
+पहला चरण सटरैघटफ़ोरवरद है: हज़ारों हिघ-क्वलिटय **देमोनसटरशन एक्समपलेस** कोललेकट करो - यूज़र और असिसटनट के बीच इदेअल कोनवेरसशनस - और बेस मॉडल को उन पर फ़िने-टुने करो। इससे मॉडल हेलपफ़ुल होने का *फ़ोरमट* सीखता है: सवालों का दिरेकटलय जवाब देना, निर्देश फ़ॉलो करना, उनकेरटैनटय स्वीकार करना, और हानिकारक रिक्वेस्ट रेफ़ुसे करना।
 
-SFT अकेला noticeably better model produce करता है, लेकिन इसकी limitations हैं। Human demonstrators सीमित examples ही लिख सकते हैं, और model उन demonstrations की *average* quality imitate करना सीखता है, consistently best possible response produce करने की बजाय।
+SFT अकेला नोटिकेअबलय बेटटेर मॉडल बनाने करता है, लेकिन इसकी लिमिटशनस हैं। हुमन देमोनसटरटोरस सीमित एक्समपलेस ही लिख सकते हैं, और मॉडल उन देमोनसटरशनस की *औसत* गुणवत्ता इमिटटे करना सीखता है, कोनसिसटेनटलय श्रेष्ठ पोसिबले प्रतिक्रिया बनाने करने की बजाय।
 
-## Stage 2: Reward Model Training
+## चरण 2: रेवरद मॉडल ट्रेनिंग
 
-Ideal responses लिखने की बजाय, human labellers को **model outputs के pairs** दिए जाते हैं और पूछा जाता है कौन सा बेहतर है। यह cognitively आसान है - compare करना create करने से simpler है - और काफ़ी ज़्यादा preference data collect करने देता है।
+इदेअल रेसपोनसेस लिखने की बजाय, मानव लबेललेरस को **मॉडल आउटपुट के पैरस** दिए जाते हैं और पूछा जाता है कौन सा बेहतर है। यह कोगनिटिवेलय आसान है - कोमपरे करना करेअटे करने से सिमपलेर है - और काफ़ी ज़्यादा परेफ़ेरेनके डेटा कोललेकट करने देता है।
 
-ये ranked pairs एक **reward model (RM)** train करते हैं: एक अलग neural network जो prompt और response input लेता है और human preference represent करने वाला scalar score output करता है। RM ऐसे patterns सीखता है:
+ये रैंक किए गए पैरस एक **रेवरद मॉडल (RM)** ट्रेन करते हैं: एक अलग न्यूरल नेटवर्क जो प्रॉम्प्ट और प्रतिक्रिया इनपुट लेता है और मानव परेफ़ेरेनके रेपरेसेनट करने वाला सकलर स्कोर आउटपुट करता है। RM ऐसे पैटर्न सीखता है:
 
-- Accurate, sourced responses vague ones से higher score पाते हैं
-- Uncertainty acknowledge करने वाले responses confident fabrications से higher score पाते हैं
-- Helpful refusals harmful requests comply करने से higher score पाते हैं
+- अककुरटे, सोउरकेद रेसपोनसेस वगुए ओनेस से हिघेर स्कोर पाते हैं
+- उनकेरटैनटय स्वीकार करने वाले रेसपोनसेस कोनफ़िदेनट फ़बरिकशनस से हिघेर स्कोर पाते हैं
+- हेलपफ़ुल रेफ़ुसलस हानिकारक रिक्वेस्ट कोमपलय करने से हिघेर स्कोर पाते हैं
 
-<Quiz question="Comparison data (दो outputs rank करना) collect करना demonstration data (ideal outputs लिखना) से आसान और ज़्यादा scalable क्यों है?" options="Comparison को कम computational power चाहिए|Humans relative quality बहुत तेज़ और consistently judge कर सकते हैं, expert-level text scratch से produce करने की तुलना में|Comparison data को कम labellers चाहिए|Demonstration data language models के लिए use नहीं हो सकता" answer="1" explanation="Perfect assistant response लिखने के लिए expertise और काफ़ी समय चाहिए। दो responses compare करके judge करना कि कौन बेहतर है, बहुत तेज़ cognitive task है और different annotators में ज़्यादा consistent labels produce करता है, जिससे यह कहीं ज़्यादा scalable है।" />
+<Quiz question="कोमपरिसोन डेटा (दो आउटपुट रनक करना) कोललेकट करना देमोनसटरशन डेटा (इदेअल आउटपुट लिखना) से आसान और ज़्यादा सकलबले क्यों है?" options="कोमपरिसोन को कम कोमपुटशनल पोवेर चाहिए|हुमनस रेलटिवे गुणवत्ता बहुत तेज़ और कोनसिसटेनटलय जुदगे कर सकते हैं, एक्सपेरट-लेवेल टेक्स्ट शुरुआत से बनाने करने की तुलना में|कोमपरिसोन डेटा को कम लबेललेरस चाहिए|देमोनसटरशन डेटा भाषा मॉडल के लिए उपयोग नहीं हो सकता" answer="1" explanation="पेरफ़ेकट असिसटनट प्रतिक्रिया लिखने के लिए विशेषज्ञता और काफ़ी समय चाहिए। दो रेसपोनसेस कोमपरे करके जुदगे करना कि कौन बेहतर है, बहुत तेज़ कोगनिटिवे काम है और अलग अननोटटोरस में ज़्यादा कोनसिसटेनट लबेलस बनाने करता है, जिससे यह कहीं ज़्यादा सकलबले है।" />
 
-## Stage 3: Reinforcement Learning (PPO)
+## चरण 3: रेइनफ़ोरकेमेनट लेअरनिङ (PPO)
 
-Reward model तैयार होने पर, SFT model को **Proximal Policy Optimisation (PPO)** से further optimise किया जाता है:
+रेवरद मॉडल तैयार होने पर, SFT मॉडल को **परोक्सिमल पोलिकय ओपटिमिसशन (PPO)** से फ़ुरtheर ऑप्टिमाइज़ किया जाता है:
 
-1. Model एक prompt पर response generate करता है
-2. Reward model response score करता है
-3. PPO model weights update करता है ताकि expected reward बढ़े
-4. **KL divergence penalty** model को SFT baseline से बहुत दूर drift होने से रोकती है (reward hacking avoid करने के लिए)
+1. मॉडल एक प्रॉम्प्ट पर प्रतिक्रिया जनरेट करता है
+2. रेवरद मॉडल प्रतिक्रिया स्कोर करता है
+3. PPO मॉडल वेट्स अपडेट करता है ताकि एक्सपेकटेद रेवरद बढ़े
+4. **KL दिवेरगेनके पेनलटय** मॉडल को SFT बसेलिने से बहुत दूर दरिफ़ट होने से रोकती है (रेवरद हकिङ अवोइद करने के लिए)
 
-KL penalty critical है। इसके बिना, model reward model की quirks exploit करना सीख जाएगा - ऐसे responses generate करेगा जो highly score होते हैं लेकिन nonsensical या repetitive होते हैं। Policy को SFT model से कितना diverge हो सकती है यह constrain करके, PPO alignment improve करते हुए outputs coherent रखता है।
+KL पेनलटय करिटिकल है। इसके बिना, मॉडल रेवरद मॉडल की क्विरकस एक्सपलोइट करना सीख जाएगा - ऐसे रेसपोनसेस जनरेट करेगा जो हिघलय स्कोर होते हैं लेकिन नोनसेनसिकल या रेपेटिटिवे होते हैं। पोलिकय को SFT मॉडल से कितना दिवेरगे हो सकती है यह कोनसटरैन करके, PPO अलिगनमेनट इमपरोवे करते हुए आउटपुट कोहेरेनट रखता है।
 
-यह तीन-stage process - SFT → Reward Model → PPO - बिल्कुल वही है जिससे OpenAI ने GPT-3.5 को ChatGPT में transform किया, जैसा उनके **InstructGPT** paper में describe है।
+यह तीन-सटगे प्रोसेस - SFT → रेवरद मॉडल → PPO - बिल्कुल वही है जिससे OpenAI ने GPT-3.5 को ChatGPT में टरनसफ़ोरम किया, जैसा उनके **InstructGPT** पेपर में देसकरिबे है।
 
 <FunFact>
-InstructGPT paper ने एक striking result reveal किया: RLHF से aligned 1.3B parameter model को human judges ने unaligned 175B GPT-3 - 100× बड़े model - के ऊपर prefer किया। Alignment raw scale से ज़्यादा matter कर सकती है।
+InstructGPT पेपर ने एक सटरिकिङ रेसुलट उजागर किया: RLHF से अलिगनेद 1.3B पैरामीटर मॉडल को मानव जुदगेस ने उनलिगनेद 175B GPT-3 - 100× बड़े मॉडल - के ऊपर परेफ़ेर किया। अलिगनमेनट रव स्केल से ज़्यादा मटटेर कर सकती है।
 </FunFact>
 
 ## DPO: बिचौलिया हटाना
 
-**Direct Preference Optimisation (DPO)** RLHF pipeline को simplify करता है separate reward model पूरी तरह eliminate करके। DPO alignment को classification problem के रूप में frame करता है: preferred response और rejected response दिए जाने पर, language model के weights directly update करो ताकि preferred response की probability बढ़े।
+**दिरेकट परेफ़ेरेनके ओपटिमिसशन (DPO)** RLHF पाइपलाइन को सिमपलिफ़य करता है सेपरटे रेवरद मॉडल पूरी तरह एलिमिनटे करके। DPO अलिगनमेनट को कलसिफ़िकशन समस्या के रूप में फ़्रेम करता है: परेफ़ेररेद प्रतिक्रिया और रेजेकटेद प्रतिक्रिया दिए जाने पर, भाषा मॉडल के वेट्स दिरेकटलय अपडेट करो ताकि परेफ़ेररेद प्रतिक्रिया की संभावना बढ़े।
 
-DPO loss function implicitly language model के अंदर ही reward model define करता है:
+DPO लोस फ़ुनकशन इमपलिकिटलय भाषा मॉडल के अंदर ही रेवरद मॉडल परिभाषित करता है:
 
 ```
 L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
 ```
 
-जहाँ `y_w` preferred response है, `y_l` rejected है, और `π_ref` reference (SFT) model है। DPO simpler, ज़्यादा stable, और train करने में सस्ता है - कोई reward model नहीं, कोई RL loop नहीं, कोई hyperparameter-sensitive PPO नहीं। कई open-weight models अब DPO या related preference-optimisation variants use करते हैं।
+जहाँ `y_w` परेफ़ेररेद प्रतिक्रिया है, `y_l` रेजेकटेद है, और `π_ref` रेफ़ेरेनके (SFT) मॉडल है। DPO सिमपलेर, ज़्यादा सटबले, और ट्रेन करने में सस्ता है - कोई रेवरद मॉडल नहीं, कोई RL लूप नहीं, कोई हयपेरपरमेटेर-सेनसिटिवे PPO नहीं। कई ओपेन-वेइघट मॉडल अब DPO या संबंधित परेफ़ेरेनके-ओपटिमिसशन वरिअनटस उपयोग करते हैं।
 
 <ThinkAboutIt>
-DPO reward model eliminate करता है लेकिन inference time पर arbitrary new responses score करने की ability भी खो देता है। किन scenarios में explicit reward model (full RLHF pipeline) रखना DPO की simplicity से ज़्यादा valuable हो सकता है?
+DPO रेवरद मॉडल एलिमिनटे करता है लेकिन इन्फ़रेंस समय पर अरबिटररय नया रेसपोनसेस स्कोर करने की क्षमता भी खो देता है। किन सकेनरिओस में एक्सपलिकिट रेवरद मॉडल (फ़ुलल RLHF पाइपलाइन) रखना DPO की सिमपलिकिटय से ज़्यादा मूल्यवान हो सकता है?
 </ThinkAboutIt>
 
-## Constitutional AI: Scale पर Self-Supervision
+## कोनसटिटुशनल AI: बड़े पैमाने पर सेलफ़-सुपेरविसिओन
 
-Anthropic ने **Constitutional AI (CAI)** introduce किया ताकि human labellers पर निर्भरता कम हो। Approach:
+Anthropic ने **कोनसटिटुशनल AI (CAI)** पेश किया ताकि मानव लबेललेरस पर निर्भरता कम हो। तरीका:
 
-1. Principles का set define करो (एक "constitution") - जैसे *"Choose the response that is most helpful while being honest and harmless"*
-2. Response pairs generate करो और **model खुद** judge करे कि कौन सा response constitution को बेहतर follow करता है
-3. इन AI-generated preferences से reward model train करो (RLAIF - RL from AI Feedback)
+1. सिद्धांत का सेट परिभाषित करो (एक "कोनसटिटुशन") - जैसे *"चुनें the प्रतिक्रिया कि is मोसट हेलपफ़ुल जबकि बेइङ ईमानदार and हरमलेस"*
+2. रेसपोनसे पैरस जनरेट करो और **मॉडल खुद** जुदगे करे कि कौन सा प्रतिक्रिया कोनसटिटुशन को बेहतर फ़ॉलो करता है
+3. इन ऐ-गेनेरटेद प्राथमिकताएँ से रेवरद मॉडल ट्रेन करो (RLAIF - RL from AI फ़ीदबक)
 
-CAI preference collection dramatically scale करता है - AI millions of comparisons human labelling के fraction cost पर generate और evaluate कर सकता है। यह alignment criteria को **explicit और auditable** भी बनाता है।
+CAI परेफ़ेरेनके संग्रह दरमटिकललय स्केल करता है - AI मिलियन of कोमपरिसोनस मानव लबेललिङ के फ़रकशन लागत पर जनरेट और एवलुअटे कर सकता है। यह अलिगनमेनट करिटेरिअ को **एक्सपलिकिट और औदिटबले** भी बनाता है।
 
-<Quiz question="Standard RLHF की तुलना में Constitutional AI का core innovation क्या है?" options="यह बहुत बड़ा base model use करता है|यह human preference labellers को AI model से ही replace करता है, explicit written principles द्वारा guided|यह किसी fine-tuning की ज़रूरत eliminate करता है|यह सिर्फ synthetic data पर train करता है" answer="1" explanation="Constitutional AI model खुद से preference judgements generate करता है, explicitly written principles (constitution) द्वारा guided। इससे preference data collection enormously scale होती है जबकि alignment criteria transparent और modifiable रहते हैं।" />
+<Quiz question="सटनदरद RLHF की तुलना में कोनसटिटुशनल AI का कोरे इननोवशन क्या है?" options="यह बहुत बड़ा बेस मॉडल उपयोग करता है|यह मानव परेफ़ेरेनके लबेललेरस को AI मॉडल से ही रेपलके करता है, एक्सपलिकिट वरिटटेन सिद्धांत द्वारा गुइदेद|यह किसी फ़ाइन-ट्यूनिंग की ज़रूरत एलिमिनटे करता है|यह सिर्फ सयनtheटिक डेटा पर ट्रेन करता है" answer="1" explanation="कोनसटिटुशनल AI मॉडल खुद से परेफ़ेरेनके जुदगेमेनटस जनरेट करता है, एक्सपलिकिटलय वरिटटेन सिद्धांत (कोनसटिटुशन) द्वारा गुइदेद। इससे परेफ़ेरेनके डेटा संग्रह एनोरमोउसलय स्केल होती है जबकि अलिगनमेनट करिटेरिअ टरनसपरेनट और मोदिफ़िअबले रहते हैं।" />
 
-## Red Teaming
+## रेड टीमिंग
 
-कोई alignment technique perfect नहीं है। **Red teaming** में deliberately model से harmful, biased, या untruthful outputs produce करवाने की कोशिश की जाती है। Red teamers probe करते हैं:
+कोई अलिगनमेनट टेचनिक्वे पेरफ़ेकट नहीं है। **रेड टीमिंग** में जानबूझकर मॉडल से हानिकारक, पक्षपाती, या असत्य आउटपुट बनाने करवाने की कोशिश की जाती है। रेड टीमर जाँच करते हैं:
 
-- Safety training bypass करने वाले jailbreaks
-- Demographics के across responses में systematic biases
-- High-stakes domains (medical, legal) में factual errors
-- Refusal boundaries में inconsistencies
+- सफ़ेटय ट्रेनिंग बयपस करने वाले जैलबरेअकस
+- जनसांख्यिकी के अकरोस रेसपोनसेस में सयसटेमटिक बिअसेस
+- हिघ-सटकेस दोमैनस (चिकित्सा, कानूनी) में फ़कटुअल एररोरस
+- रेफ़ुसल बोउनदरिएस में इनकोनसिसटेनकिएस
 
-Major labs अब models release करने से पहले extensive red teaming conduct करते हैं, अक्सर external security researchers और domain experts को involve करते हुए।
+मजोर लबस अब मॉडल रेलेअसे करने से पहले एक्सटेनसिवे रेड टीमिंग कोनदुकट करते हैं, अक्सर एक्सटेरनल सुरक्षा शोधकर्ताओं और डोमेन एक्सपेरटस को इनवोलवे करते हुए।
 
-## Alignment Tax
+## अलिगनमेनट टक्स
 
-Alignment एक cost लेकर आती है। RLHF-trained models कभी-कभी **ज़रूरत से ज़्यादा cautious** हो जाते हैं - benign requests refuse करते हैं, unnecessary caveats add करते हैं, या perceived risk avoid करने के लिए bland responses produce करते हैं। यह "alignment tax" एक real engineering challenge है:
+अलिगनमेनट एक लागत लेकर आती है। रलहफ़-टरैनेद मॉडल कभी-कभी **ज़रूरत से ज़्यादा कौटिओउस** हो जाते हैं - बेनिगन रिक्वेस्ट रेफ़ुसे करते हैं, उननेकेसरय कवेअटस जोड़ें करते हैं, या पेरकेइवेद जोखिम अवोइद करने के लिए बलनद रेसपोनसेस बनाने करते हैं। यह "अलिगनमेनट टक्स" एक वास्तविक इंजीनियरिंग चललेङे है:
 
-- बहुत कम alignment → harmful outputs
-- बहुत ज़्यादा alignment → unhelpful, annoying refusals
+- बहुत कम अलिगनमेनट → हानिकारक आउटपुट
+- बहुत ज़्यादा अलिगनमेनट → उनहेलपफ़ुल, अननोयिङ रेफ़ुसलस
 
-Alignment research का frontier ऐसी techniques ढूँढना है जो genuine safety boundaries maintain करते हुए helpfulness maximise करें।
+अलिगनमेनट शोध का फ़रोनटिएर ऐसी तकनीकें ढूँढना है जो गेनुइने सुरक्षा बोउनदरिएस मैनटैन करते हुए हेलपफ़ुलनेस मक्सिमिसे करें।
 
-<Quiz question="RLHF-trained models के context में 'alignment tax' क्या है?" options="Human labellers hire करने की financial cost|Safety training से model helpfulness और capability में कमी जो model को ज़रूरत से ज़्यादा cautious बना देती है|PPO optimisation चलाने की computational cost|Governments द्वारा AI companies पर safety compliance के लिए लगाया tax" answer="1" explanation="Alignment tax उस capability या helpfulness के loss को refer करता है जो safety training model को excessively cautious बनाने पर होता है - benign requests refuse करना, unnecessarily hedge करना, या generic responses produce करना।" />
+<Quiz question="रलहफ़-टरैनेद मॉडल के संदर्भ में 'अलिगनमेनट टक्स' क्या है?" options="हुमन लबेललेरस नियुक्त करने की फ़िननकिअल लागत|सफ़ेटय ट्रेनिंग से मॉडल हेलपफ़ुलनेस और कपबिलिटय में कमी जो मॉडल को ज़रूरत से ज़्यादा कौटिओउस बना देती है|PPO ऑप्टिमाइज़ेशन चलाने की कोमपुटशनल लागत|गोवेरनमेनटस द्वारा AI कंपनियाँ पर सुरक्षा अनुपालन के लिए लगाया टक्स" answer="1" explanation="अलिगनमेनट टक्स उस कपबिलिटय या हेलपफ़ुलनेस के लोस को रेफ़ेर करता है जो सुरक्षा ट्रेनिंग मॉडल को एक्सकेसिवेलय कौटिओउस बनाने पर होता है - बेनिगन रिक्वेस्ट रेफ़ुसे करना, उननेकेसरिलय हेदगे करना, या गेनेरिक रेसपोनसेस बनाने करना।" />
 
 <FunFact>
-Frontier labs base models को release करने लायक safe products में बदलने के लिए alignment work (SFT data collection, reward modelling, preference optimisation, और safety testing) पर महीनों खर्च करते हैं। Pre-training compute का fraction होते हुए भी alignment phase को हज़ारों घंटों की specialised human labelling और evaluation चाहिए होती है।
+फ़रोनटिएर लबस बेस मॉडल को रेलेअसे करने लायक सुरक्षित परोदुकटस में बदलने के लिए अलिगनमेनट काम (SFT डेटा संग्रह, रेवरद मॉडलिंग, परेफ़ेरेनके ऑप्टिमाइज़ेशन, और सुरक्षा परीक्षण) पर महीनों खर्च करते हैं। परे-टरैनिङ कम्प्यूट का फ़रकशन होते हुए भी अलिगनमेनट फसे को हज़ारों घंटों की सपेकिअलिसेद मानव लबेललिङ और मूल्यांकन चाहिए होती है।
 </FunFact>
 
 <ThinkAboutIt>
-Human labellers inevitably अपने biases, cultural perspectives और inconsistencies preference data में लेकर आते हैं। अगर alignment ultimately "humans क्या prefer करते हैं यह सीखना" है, तो किसकी preferences count होनी चाहिए - और cultures के बीच values पर fundamental disagreements कैसे handle करें?
+हुमन लबेललेरस इनेविटबलय अपने बिअसेस, कुलटुरल पेरसपेकटिवेस और इनकोनसिसटेनकिएस परेफ़ेरेनके डेटा में लेकर आते हैं। अगर अलिगनमेनट उलटिमटेलय "हुमनस क्या परेफ़ेर करते हैं यह सीखना" है, तो किसकी प्राथमिकताएँ गणना होनी चाहिए - और कुलटुरेस के बीच वलुएस पर फ़ुनदमेनटल दिसगरीमेनटस कैसे संभालें?
 </ThinkAboutIt>
 
 ---
 
 ## 📚 आगे पढ़ें
 
-- [Training language models to follow instructions with human feedback (InstructGPT)](https://arxiv.org/abs/2203.02155) - OpenAI का foundational RLHF paper
-- [Direct Preference Optimization (Rafailov et al., 2023)](https://arxiv.org/abs/2305.18290) - DPO paper जिसने alignment training simplify किया
-- [Constitutional AI: Harmlessness from AI Feedback (Anthropic)](https://arxiv.org/abs/2212.08073) - AI self-supervision से scalable alignment पर Anthropic का approach
+- [ट्रेनिंग भाषा मॉडल to फ़ॉलो निर्देश के साथ मानव फ़ीडबैक (InstructGPT)](https://arxiv.org/abs/2203.02155) - OpenAI का फ़ोउनदशनल RLHF पेपर
+- [दिरेकट परेफ़ेरेनके ओपटिमिज़शन (रफ़ैलोव et al., 2023)](https://arxiv.org/abs/2305.18290) - DPO पेपर जिसने अलिगनमेनट ट्रेनिंग सिमपलिफ़य किया
+- [कोनसटिटुशनल AI: हरमलेसनेस from AI फ़ीदबक (Anthropic)](https://arxiv.org/abs/2212.08073) - AI सेलफ़-सुपेरविसिओन से सकलबले अलिगनमेनट पर Anthropic का तरीका
