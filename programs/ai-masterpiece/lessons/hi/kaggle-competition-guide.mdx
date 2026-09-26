@@ -1,6 +1,6 @@
 ---
-title: "Kaggle प्रतियोगिता गुइदे - Kaggle पर कैसे प्रतिस्पर्धा करें (और सीखें)"
-description: "पहली सबमिशन से Grandmaster तकनीकें तक: EDA वर्कफ़्लो, फ़ीचर इंजीनियरिंग तरकीबें, एन्सेम्बल तरीके, और शीर्ष 1% में लगातार बने रहने की रणनीतियाँ।"
+title: "Kaggle Competition Guide - Kaggle पर कैसे प्रतिस्पर्धा करें और सीखें"
+description: "पहली submission से grandmaster techniques तक: EDA workflows, feature engineering tricks, ensemble methods और वे strategies जो लगातार top 1% में जगह दिलाती हैं।"
 order: 7
 difficulty: "advanced"
 duration: 20
@@ -8,30 +8,30 @@ icon: "🏆"
 published: true
 ---
 
-# Kaggle प्रतियोगिता गुइदे - Kaggle पर कैसे प्रतिस्पर्धा करें (और सीखें)
+# Kaggle Competition Guide - Kaggle पर कैसे प्रतिस्पर्धा करें और सीखें
 
-Kaggle सिर्फ एक प्रतियोगिता प्लैटफ़ॉर्म नहीं - यह दुनिया की सबसे बड़ी अपपलिएद ML कक्षा है। 15 मिलियन से ज़्यादा डेटा वैज्ञानिक इसे कौशल शरपेन करने, पोर्टफ़ोलियो बनाने, और जॉब पाने के लिए उपयोग करते हैं। यह पाठ आपको सिखाएगा कि एफ़फ़ेकटिवेलय प्रतिस्पर्धा कैसे करें और हर प्रतियोगिता से मक्सिमुम लर्निंग कैसे निकालें।
+Kaggle सिर्फ़ competition platform नहीं है, यह दुनिया की सबसे बड़ी applied ML classroom है। 15 million से अधिक data scientists इसका उपयोग कौशल निखारने, portfolios बनाने और नौकरियां पाने के लिए करते हैं। यह पाठ आपको प्रभावी रूप से प्रतिस्पर्धा करना और हर competition से अधिकतम सीख निकालना सिखाता है।
 
-## 🎯 Kaggle आपके करियर के लिए क्यों मायने रखता है
+## 🎯 आपके करियर के लिए Kaggle क्यों मायने रखता है
 
-Kaggle अनुभव एक ऐसा सिग्नल देता है जो CVs नहीं दे सकते: **आप अव्यवस्थित, वास्तविक दुनिया डेटा पर काम करने वाले मॉडल भेज सकते हैं**। Google, Meta, और शीर्ष नव-उद्यम के भर्ती मैनेजर Kaggle लीडरबोर्ड से सक्रिय रूप से भर्ती करते हैं। जीतने के बिना भी, अच्छी तरह दस्तावेज़ीकृत नोटबुक वाला एक मज़बूत प्रोफ़ाइल व्यावहारिक प्रतिस्पर्धात्मक क्षमता दिखाता है।
+Kaggle experience वह signal देता है जो CV नहीं दे सकता: **आप messy, real-world data पर काम करने वाले models ship कर सकते हैं**। Google, Meta और top startups के hiring managers Kaggle leaderboards से सक्रिय रूप से recruit करते हैं। जीत न भी मिले, तो भी अच्छी तरह documented notebooks वाला मजबूत profile practical competence दिखाता है।
 
-<Illustration src="/images/lessons/kaggle-competition-guide.svg" alt="Kaggle प्रतियोगिता वर्कफ़्लो - डेटा एक्सप्लोरेशन से अंतिम सबमिशन तक" caption="टयचुनताल Kaggle वर्कफ़्लो - EDA, फ़ीचर इंजीनियरिंग, और वैलिडेशन के बीच दोहराएँ करते रहें जब तक कोनवेरगेनके न हो।" />
+<Illustration src="/images/lessons/kaggle-competition-guide.svg" alt="Data exploration से final submission तक Kaggle competition workflow" caption="Typical Kaggle workflow, convergence तक EDA, feature engineering और validation के बीच लगातार सुधार करें।" />
 
-## 📊 प्रतियोगिता टयपेस और जीतने की रणनीतियाँ
+## 📊 Competition Types और Winning Strategies
 
-| टयपे | उदाहरण | टयचुनताल विजेता तरीका |
+| Type | Example | Typical Winning Approach |
 |------|---------|------------------------|
-| **टैबुलर** | घर कीमतें, धोखाधड़ी पहचान | ग्रेडिएंट बूस्टिंग (XGBoost/LightGBM) + भारी फ़ीचर इंजीनियरिंग |
-| **कंप्यूटर विज़न** | इमेज वर्गीकरण, सेगमेंटेशन | प्री-प्रशिक्षित CNNs (EfficientNet, ConvNeXt) + ऑग्मेंटेशन |
-| **NLP** | भावना, प्रश्न अनसवेरिङ | फ़िने-टुनेद transformers (देबेरट, रोबेरट) |
-| **सिमुलेशन** | गमे AI, ऑप्टिमाइज़ेशन | रीइन्फोर्समेंट लर्निंग + डोमेन ह्यूरिस्टिक |
+| **Tabular** | House prices, fraud detection | Gradient boosting (XGBoost/LightGBM) + भारी feature engineering |
+| **Computer Vision** | Image classification, segmentation | Pre-trained CNNs (EfficientNet, ConvNeXt) + augmentation |
+| **NLP** | Sentiment, question answering | Fine-tuned transformers (DeBERTa, RoBERTa) |
+| **Simulation** | Game AI, optimisation | Reinforcement learning + domain heuristics |
 
-<FunFact>Kaggle प्रतियोगिता विजेता में सबसे लोकप्रिय एल्गोरिदम LightGBM है - यह 60% से ज़्यादा टोप-पलकिङ टैबुलर समाधान में दिखता है, अक्सर कटबूसट या XGBoost के साथ एन्सेम्बल में।</FunFact>
+<FunFact>Kaggle competition winners में सबसे लोकप्रिय single algorithm LightGBM है। यह top-placing tabular solutions के 60% से अधिक में दिखता है, अक्सर ensembles में CatBoost या XGBoost के साथ।</FunFact>
 
 ## 🔍 EDA - आपके पहले 48 घंटे
 
-डेटा समझे बिना कभी मॉडलिंग शुरू न करें। एक अनुशासित EDA वर्कफ़्लो:
+Data समझे बिना modelling कभी शुरू न करें। Disciplined EDA workflow:
 
 ```python
 import pandas as pd
@@ -39,30 +39,30 @@ import matplotlib.pyplot as plt
 
 df = pd.read_csv("train.csv")
 
-# Shape और types - जानें कि आप किसके साथ काम कर रहे हैं
+# Shape and types - know what you're working with
 print(f"Shape: {df.shape}")
 print(f"Missing values:\n{df.isnull().sum().sort_values(ascending=False).head(10)}")
 
-# Target distribution - क्या यह balanced है?
+# Target distribution - is it balanced?
 df["target"].value_counts(normalize=True).plot(kind="bar")
 plt.title("Target Distribution")
 plt.show()
 
-# Correlations - quick signal खोजें
+# Correlations - find quick signal
 correlations = df.select_dtypes(include="number").corr()["target"].sort_values()
 print(correlations.head(10))  # Strongest negative correlations
 print(correlations.tail(10))  # Strongest positive correlations
 ```
 
-**लेअकगे जाँच करें** - ऐसे फ़ीचर जो पूर्वानुमान समय पर मौजूद नहीं करेंगे। यह शुरुआती की नंबर एक गलती है। अगर कोई फ़ीचर लक्षित के साथ संदिग्ध तरीके से कोररेलटे करता है, तो खुशी मनाने से पहले जाँच करें।
+**Leakage जांचें** - ऐसे features जो prediction time पर मौजूद नहीं होंगे। Beginners की यह number-one गलती है। अगर कोई feature target से suspiciously अच्छी तरह correlate करता है, तो celebrate करने से पहले जांच करें।
 
-<Quiz question="EDA के दौरान आपको एक फ़ीचर मिलता है जिसका लक्षित के साथ 0.98 सहसंबंध है। आपकी पहली प्रतिक्रिया क्या होनी चाहिए?" options="खुशी मनाएँ - यह फ़ीचर मॉडल दोमिनटे करेगा|डेटा लेअकगे की जाँच करें - यह सहसंबंध संदिग्ध रूप से उच्च है|इसे हटा दें - उच्च सहसंबंध मतलब ओवरफ़िटिंग|इसे सिर्फ एन्सेम्बल में इस्तेमाल करें, बेसलाइन में नहीं" answer="1" explanation="0.98 सहसंबंध लगभग निश्चित रूप से डेटा लेअकगे है। यह फ़ीचर शायद भविष्य की की जानकारी रखता है या लक्षित से देरिवे किया गया है। इसे उपयोग करने पर वैलिडेशन सकोरेस बढ़ेंगे लेकिन परिवटे लीडरबोर्ड पर गिर जाएँगे।" />
+<Quiz question="EDA के दौरान आपको target से 0.98 correlation वाला feature मिलता है। आपकी FIRST reaction क्या होनी चाहिए?" options="Celebrate करें, यह feature आपके model पर हावी होगा|Data leakage की जांच करें, यह correlation suspiciously high है|इसे remove करें, high correlation का मतलब overfitting है|इसे केवल ensemble में इस्तेमाल करें, baseline में नहीं" answer="1" explanation="0.98 correlation लगभग निश्चित रूप से data leakage है। Feature में शायद future की जानकारी है या वह target से derived है। इसका उपयोग validation scores को inflated करेगा, जो private leaderboard पर collapse हो जाएंगे।" />
 
-## 🛠️ फ़ीचर इंजीनियरिंग जो जिताती है
+## 🛠️ जीत दिलाने वाली Feature Engineering
 
-शीर्ष प्रतिस्पर्धी अपना 70% समय फ़ीचर पर लगाते हैं, मॉडल टुनिङ पर नहीं। आज़माई हुई तकनीकें:
+Top competitors अपना 70% समय features पर लगाते हैं, model tuning पर नहीं। Battle-tested techniques:
 
-**एग्रीगेशन फ़ीचर** - अलग-अलग गरनुलरिटिएस पर समूह सांख्यिकी:
+**Aggregation features** - अलग-अलग granularities पर group statistics:
 ```python
 for col in ["category", "store_id", "day_of_week"]:
     stats = df.groupby(col)["sales"].agg(["mean", "std", "median"])
@@ -70,17 +70,17 @@ for col in ["category", "store_id", "day_of_week"]:
     df = df.merge(stats, on=col, how="left")
 ```
 
-**लक्षित एनCoding** - कटेगोरिएस को समूथेद लक्षित माध्य से रेपलके करें (लेअकगे रोकने के लिए फ़ोलद-बसेद एनCoding इस्तेमाल करें)।
+**Target encoding** - categories को smoothed target means से replace करें (leakage रोकने के लिए fold-based encoding इस्तेमाल करें)।
 
-**लग फ़ीचर** - समय सेरिएस के लिए, पिछले वलुएस सोने जैसे हैं:
+**Lag features** - time series में previous values सोना हैं:
 ```python
 for lag in [1, 7, 14, 28]:
     df[f"sales_lag_{lag}"] = df.groupby("store_id")["sales"].shift(lag)
 ```
 
-## ✅ क्रॉस-वैलिडेशन - अपने स्थानीय स्कोर पर भरोसा करें
+## ✅ Cross-Validation - अपने Local Score पर भरोसा करें
 
-आपका स्थानीय CV स्कोर सार्वजनिक लीडरबोर्ड से ज़्यादा मायने रखता है। एक मज़बूत वैलिडेशन रणनीति:
+आपका local CV score public leaderboard से ज़्यादा मायने रखता है। Robust validation strategy:
 
 ```python
 from sklearn.model_selection import StratifiedKFold
@@ -100,69 +100,69 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
 print(f"OOF AUC: {roc_auc_score(y, oof_predictions):.5f}")
 ```
 
-**गोल्डेन रुले**: अगर स्थानीय CV और सार्वजनिक LB दिसगरी करें, तो CV पर भरोसा करें। सार्वजनिक लीडरबोर्ड टेस्ट डेटा का सिर्फ एक हिस्सा उपयोग करता है - इस पर ओवेरफ़िट होना एक जाल है।
+**Golden rule**: अगर आपका local CV और public LB असहमत हों, तो अपने CV पर भरोसा करें। Public leaderboard test data के केवल fraction का उपयोग करता है, उस पर ओवरफ़िट करना trap है।
 
-<ThinkAboutIt>आप सार्वजनिक लीडरबोर्ड पर 15वें हैं लेकिन स्थानीय CV बता रहा है कि मॉडल ओवेरफ़िट है। फ़िनल सबमिशन के लिए श्रेष्ठ LB स्कोर सबमिट करेंगे या श्रेष्ठ CV स्कोर? क्यों?</ThinkAboutIt>
+<ThinkAboutIt>आप public leaderboard पर 15th हैं, लेकिन आपका local CV बताता है कि आपका model overfit है। Final submission के लिए आप अपना best LB score submit करेंगे या best CV score? क्यों?</ThinkAboutIt>
 
-## 🎭 एन्सेम्बल तरीके - आखिरी पुश
+## 🎭 Ensemble Methods - अंतिम धक्का
 
-लगभग हर विजेता समाधान एन्सेम्बल उपयोग करती है। तीन की तकनीकें:
+लगभग हर winning solution ensembles इस्तेमाल करता है। तीन प्रमुख techniques:
 
-**बगगिङ** - समान मॉडल को अलग-अलग डेटा उपसमूह पर ट्रेन करें, भविष्यवाणियाँ औसत करें। वरिअनके कम करता है।
+**Bagging** - same model को अलग data subsets पर train करें, predictions average करें। Variance घटता है।
 
-**Stacking** - विविध बेस मॉडल के out-of-fold भविष्यवाणियाँ पर एक मेटा-मॉडल ट्रेन करें:
+**Stacking** - diverse base models की out-of-fold predictions पर meta-model को ट्रेन करें:
 ```python
-# Level 1: diverse base models OOF predictions बनाते हैं
+# Level 1: diverse base models produce OOF predictions
 base_preds = np.column_stack([lgbm_oof, xgb_oof, catboost_oof, nn_oof])
 
-# Level 2: logistic regression optimal combination सीखता है
+# Level 2: logistic regression learns optimal combination
 from sklearn.linear_model import LogisticRegression
 meta = LogisticRegression()
 meta.fit(base_preds, y_train)
 ```
 
-**बलेनदिङ** - मॉडल भविष्यवाणियाँ का भारित औसत। Stacking से सरल लेकिन प्रभावी:
+**Blending** - model predictions का weighted average. Stacking से सरल लेकिन प्रभावी:
 ```python
 final = 0.4 * lgbm_pred + 0.35 * xgb_pred + 0.25 * catboost_pred
 ```
 
-<Quiz question="Kaggle प्रतियोगिताएँ में एन्सेम्बल तरीके लगभग हमेशा एकल मॉडल से बेहतर क्यों प्रदर्शन करते हैं?" options="वे ज़्यादा ट्रेनिंग डेटा उपयोग करते हैं|वे दीपेर मॉडल उपयोग करके पूर्वाग्रह कम करते हैं|वे विविध मॉडल जोड़ते करके वरिअनके कम करते हैं जो अलग-अलग त्रुटियाँ करते हैं|वे ट्रेन करने में तेज़ होते हैं" answer="2" explanation="एन्सेम्बल इसलिए काम करते हैं क्योंकि विविध मॉडल उनकोररेलटेद त्रुटियाँ करते हैं। अवेरगे करने पर अलग-अलग गलतियाँ रद्द हो जाती हैं और सही सिग्नल एक-दूसरे को रेइनफ़ोर्के करते हैं - बिना पूर्वाग्रह बढ़ाए कुल वरिअनके कम होता है।" />
+<Quiz question="Kaggle competitions में ensemble methods लगभग हमेशा single models से बेहतर प्रदर्शन क्यों करते हैं?" options="वे अधिक training data इस्तेमाल करते हैं|वे deeper models इस्तेमाल करके bias घटाते हैं|वे अलग-अलग errors करने वाले diverse models को जोड़कर variance घटाते हैं|वे train करने में तेज़ होते हैं" answer="2" explanation="Ensembles इसलिए काम करते हैं क्योंकि diverse models uncorrelated errors करते हैं। Average करने पर individual mistakes cancel होती हैं और सही signals एक-दूसरे को reinforce करते हैं, जिससे bias बढ़ाए बिना overall variance घटता है।" />
 
-## 📓 बेहतरीन Kaggle नोटबुक लिखना
+## 📓 बेहतरीन Kaggle Notebooks लिखना
 
-सार्वजनिक नोटबुक आपकी प्रतिष्ठा बनाते हैं। मेडल-योग्य नोटबुक में होना चाहिए:
+Public notebooks आपकी reputation बनाते हैं। Medal-worthy notebook में ये बातें होती हैं:
 
-1. **साफ कहानी** - अपनी तर्क एक्सपलैन करें, सिर्फ कोड नहीं
-2. **पुनरुत्पादकता** - रैंडम सीड सेट करें, लाइब्रेरी वर्ज़न दस्तावेज़ करें
-3. **विज़ुअलाइज़ेशन** - अंतरदृष्टि दिखाने वाले प्लॉट, सजावट नहीं
-4. **ईमानदार नतीजों** - जो काम नहीं किया उसे भी साझा करें
+1. **Clear narrative** - केवल code नहीं, अपना reasoning समझाएँ
+2. **Reproducibility** - random seeds set करें, library versions दस्तावेज़ित करें
+3. **Visualisations** - ऐसी plots जो insights दिखाएँ, सिर्फ़ सजावट न करें
+4. **Honest results** - जो काम नहीं किया उसे भी साझा करें, सिर्फ़ सफल चीज़ें नहीं
 
-<Quiz question="Kaggle Contributor से Expert रैंक तक पहुँचने का सबसे प्रभावी तरीका क्या है?" options="एक Featured प्रतियोगिता में सोलो गोल्ड मेडल जीतना|कई प्रतियोगिताएँ और नोटबुक में लगातार ब्रॉन्ज़ और सिल्वर मेडल कमाना|नतीजा की परवाह किए बिना ज़्यादा से ज़्यादा प्रतियोगिताएँ में सबमिट करना|top-स्कोरिंग सार्वजनिक नोटबुक फ़ोर्क करना" answer="1" explanation="प्रतियोगिताएँ में कोनसिसटेनट प्रदर्शन मेडल जमा करती है। आपको प्रतियोगिता मेडल और नोटबुक/discussion मेडल दोनों चाहिए। एक किस्मत वाला नतीजा से ज़्यादा योगदान की चौड़ाई मायने रखती है।" />
+<Quiz question="Kaggle Contributor से Expert rank तक बढ़ने का MOST effective तरीका क्या है?" options="Featured competition में solo gold medal जीतना|कई competitions और notebooks में लगातार bronze और silver medals कमाना|Result चाहे जैसा हो, अधिकतम competitions में submissions करना|Top-scoring public notebooks fork करना" answer="1" explanation="Competitions में consistent performance medals जमा करता है। आपको competition medals और notebook/discussion medals दोनों चाहिए। Contribution की breadth, एक lucky result से ज़्यादा मायने रखती है।" />
 
-## 📈 Kaggle रैंक और परोगरेसिओन
+## 📈 Kaggle Ranks और Progression
 
-| रैंक | ज़रूरत | सामान्य समयरेखा |
-|------|--------|-----------------|
-| **नोविके** | खाता बनाएँ | पहला दिन |
-| **कोनटरिबुटोर** | परोफ़ाइल पूरा करें, नोटबुक चलाएँ | पहला हफ्ता |
-| **एक्सपेरट** | 2 ब्रॉन्ज़ मेडल (प्रतियोगिताएँ) | 3-6 महीने |
-| **मास्टर** | 1 गोल्ड + 2 सिल्वर मेडल | 1-2 साल |
-| **Grandmaster** | 5 गोल्ड मेडल (1 सोलो) | 3-5+ साल |
+| Rank | Requirement | Typical Timeline |
+|------|------------|-----------------|
+| **Novice** | Account बनाएँ | Day 1 |
+| **Contributor** | Profile पूरा करें, notebook चलाएँ | Week 1 |
+| **Expert** | 2 bronze medals (competitions) | 3-6 months |
+| **Master** | 1 gold + 2 silver medals | 1-2 years |
+| **Grandmaster** | 5 gold medals (1 solo) | 3-5+ years |
 
-<ThinkAboutIt>रैंकिङस के अलावा, ML भूमिकाएँ के लिए लागू करें करते समय अपने Kaggle प्रोफ़ाइल को पोर्टफ़ोलियो पिएके के रूप में कैसे इस्तेमाल करेंगे? भर्ती मैनेजर आपकी प्रतियोगिता इतिहास में क्या देखेगा?</ThinkAboutIt>
+<ThinkAboutIt>Rankings से आगे, ML roles के लिए apply करते समय आप अपने Kaggle profile को portfolio piece के रूप में कैसे इस्तेमाल करेंगे? Hiring manager आपकी competition history में क्या खोजेगा?</ThinkAboutIt>
 
 ## 🎯 मुख्य बातें
 
-- पहले EDA, फिर मॉडलिंग - हमेशा डेटा लेअकगे जाँच करें
-- फ़ीचर इंजीनियरिंग, हाइपरपैरामीटर टुनिङ से ज़्यादा लिफ़ट देती है
-- सार्वजनिक लीडरबोर्ड पर नहीं, अपने स्थानीय CV पर भरोसा करें
-- फ़िनल पुश के लिए विविध मॉडल एन्सेम्बल करें
-- अपना काम सार्वजनिक नोटबुक में दस्तावेज़ करें - यही आपका पोर्टफ़ोलियो है
+- EDA पहले, modelling बाद में। हमेशा data leakage जांचें
+- Feature engineering, hyperparameter tuning से ज़्यादा lift देती है
+- Public leaderboard से ज़्यादा अपने local CV पर भरोसा करें
+- अंतिम धक्के के लिए diverse models ensemble करें
+- अपना काम public notebooks में दस्तावेज़ित करें, यही आपका portfolio है
 
 ---
 
 ## 📚 आगे पढ़ें
 
-- [Kaggle बूक by Konrad बनचेविकज़ & लुक मसरोन](https://www.kaggle.com/discussions/general/320744) - Grandmasters की रणनीतियाँ को लागू करने योग्य अदविके में दिसटिलल किया गया
-- [कैसे to विन a डेटा विज्ञान प्रतियोगिता (Coursera)](https://www.coursera.org/learn/competitive-data-science) - NRU HSE का ऊपर-से-नीचे Kaggle रणनीति कोर्स
-- [पेपर के साथ कोड - बेंचचिह्नित](https://paperswithcode.com/sota) - सभी ML कार्यों के अत्याधुनिक नतीजों
+- [Kaggle Book by Konrad Banachewicz & Luca Massaron](https://www.kaggle.com/discussions/general/320744) - Grandmasters की strategies को actionable advice में बदला गया
+- [How to Win a Data Science Competition (Coursera)](https://www.coursera.org/learn/competitive-data-science) - NRU HSE का top-down Kaggle strategy course
+- [Papers With Code - Benchmarks](https://paperswithcode.com/sota) - सभी ML tasks में state-of-the-art results
