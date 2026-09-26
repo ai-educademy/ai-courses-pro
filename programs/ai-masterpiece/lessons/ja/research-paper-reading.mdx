@@ -92,14 +92,14 @@ machineTranslated: true
 数学的記法は言語です。 ML 論文用のフレーズブックは次のとおりです。
 
 ```
-θ (theta)      - model parameters (weights)
-∇ (nabla)      - gradient operator
-𝔼 (E)          - expected value (average over a distribution)
-argmax          - the input that maximises a function
-∑ (sigma)      - summation
-∏ (pi)         - product
-‖x‖            - norm (magnitude) of vector x
-softmax(z_i)   - e^(z_i) / Σ e^(z_j) - converts logits to probabilities
+θ (theta)     - model parameters (weights)
+∇ (nabla)     - gradient operator
+𝔼 (E)         - expected value (average over a distribution)
+argmax         - the input that maximises a function
+∑ (sigma)     - summation
+∏ (pi)        - product
+‖x‖           - norm (magnitude) of vector x
+softmax(z_i)  - e^(z_i) / Σ e^(z_j) - converts logits to probabilities
 ```
 
 **プロのヒント**: 複雑な方程式が表示された場合は、実際の数値を置き換えてください。紙に`L = -Σ y_i log(ŷ_i)`と書かれている場合は、`y = [1, 0]`と`ŷ = [0.9, 0.1]`を差し込んで手計算します。抽象化は瞬時に具体化されます。

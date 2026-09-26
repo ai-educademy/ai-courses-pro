@@ -1,5 +1,5 @@
 ---
-title: "阅读研究论文——如何理解和实施人工智能论文"
+title: "阅读研究论文 - 如何理解和实施人工智能论文"
 description: "用于阅读、理解和实施人工智能研究论文的实用框架 - 从解码数学符号到将算法转化为工作代码。"
 order: 8
 difficulty: "advanced"
@@ -10,7 +10,7 @@ machineTranslated: true
 ---
 # 阅读研究论文 - 如何理解和实施人工智能论文
 
-“我使用人工智能”和“我构建人工智能”之间的差距可以通过阅读研究论文来弥补。每一项突破——变压器、扩散模型、RLHF——都是从一篇论文开始的。阅读论文的工程师不只是追随趋势；他们还关注趋势。他们**期待**他们。
+“我使用人工智能”和“我构建人工智能”之间的差距可以通过阅读研究论文来弥补。每一项突破 - 变压器、扩散模型、RLHF - 都是从一篇论文开始的。阅读论文的工程师不只是追随趋势；他们还关注趋势。他们**期待**他们。
 
 ## 🤔 为什么要阅读论文？
 
@@ -30,7 +30,7 @@ machineTranslated: true
 | **摘要** |整个贡献的 200 字摘要 | 2 分钟 |
 | **简介** |问题动机，现有解决方案为何失败 | 5 分钟 |
 | **相关工作** |之前发生过什么，这篇论文有何不同|第一遍略读 |
-| **方法** |核心贡献——架构、算法、数学 | 60% 的时间 |
+| **方法** |核心贡献 - 架构、算法、数学 | 60% 的时间 |
 | **实验** |证明它有效 - 数据集、基线、消融 | 20% 的时间 |
 | **结论** |总结和未来方向| 2 分钟 |
 
@@ -71,7 +71,7 @@ machineTranslated: true
 
 ## 📚 每个人工智能工程师都应该阅读的重要论文
 
-这些论文构成了现代人工智能的基础——阅读它们是没有商量余地的：
+这些论文构成了现代人工智能的基础 - 阅读它们是没有商量余地的：
 
 **架构：**
 - *注意力就是你所需要的* (Vaswani et al., 2017) - 变压器
@@ -92,14 +92,14 @@ machineTranslated: true
 数学符号是一种语言。这是 ML 论文的短语手册：
 
 ```
-θ (theta)      - model parameters (weights)
-∇ (nabla)      - gradient operator
-𝔼 (E)          - expected value (average over a distribution)
-argmax          - the input that maximises a function
-∑ (sigma)      - summation
-∏ (pi)         - product
-‖x‖            - norm (magnitude) of vector x
-softmax(z_i)   - e^(z_i) / Σ e^(z_j) - converts logits to probabilities
+θ (theta)     - model parameters (weights)
+∇ (nabla)     - gradient operator
+𝔼 (E)         - expected value (average over a distribution)
+argmax         - the input that maximises a function
+∑ (sigma)     - summation
+∏ (pi)        - product
+‖x‖           - norm (magnitude) of vector x
+softmax(z_i)  - e^(z_i) / Σ e^(z_j) - converts logits to probabilities
 ```
 
 **专业提示**：当您看到复杂的方程式时，请替换实际数字。如果纸上写的是`L = -Σ y_i log(ŷ_i)`，则代入`y = [1, 0]`和`ŷ = [0.9, 0.1]`并手动计算。抽象立即变得具体。
