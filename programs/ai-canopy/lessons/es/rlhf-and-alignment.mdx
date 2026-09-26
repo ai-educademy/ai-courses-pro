@@ -49,9 +49,10 @@ Con un modelo de recompensa en mano, el modelo SFT se optimiza aún más utiliza
 
 La pena de KL es crítica. Sin él, el modelo aprendería a explotar las peculiaridades del modelo de recompensa, generando respuestas con puntuaciones altas pero sin sentido o repetitivas. Al limitar hasta qué punto la política puede desviarse del modelo SFT, PPO mantiene los resultados coherentes al tiempo que mejora la alineación.
 
-Este proceso de tres etapas (SFT → Modelo de recompensa → PPO) es precisamente cómo OpenAI transformó GPT-3.5 en ChatGPT, como se describe en su artículo **InstructGPT**.
+Este proceso de tres etapas (SFT → Modelo de recompensa → PPO) es la forma en que OpenAI convirtió los primeros modelos base de la familia GPT en asistentes útiles, como se describe en su artículo **InstructGPT**.
 
-<FunFact>El artículo de InstructGPT reveló un resultado sorprendente: los jueces humanos prefirieron un modelo de parámetros de 1.3B alineado con RLHF al 175B GPT-3 no alineado, un modelo 100 veces más grande. La alineación puede importar más que la escala bruta.
+<FunFact>
+El artículo de InstructGPT reveló un resultado sorprendente: los jueces humanos prefirieron un modelo de parámetros de 1.3B alineado con RLHF al 175B GPT-3 no alineado, un modelo 100 veces más grande. La alineación puede importar más que la escala bruta.
 </FunFact>
 
 ## DPO: Eliminar al intermediario
@@ -103,7 +104,8 @@ La frontera de la investigación de la alineación es encontrar técnicas que ma
 
 <Quiz question="¿Qué es el 'impuesto de alineación' en el contexto de los modelos entrenados por RLHF?" options="El costo financiero de contratar etiquetadores humanos para datos de preferencias|La reducción en la utilidad y capacidad del modelo que resulta de la capacitación en seguridad hace que el modelo sea demasiado cauteloso.|El costo computacional de ejecutar la optimización de PPO|El impuesto que los gobiernos imponen a las empresas de IA por el cumplimiento de la seguridad" answer="1" explanation="El impuesto de alineación se refiere a la capacidad o utilidad que se pierde cuando la capacitación en seguridad hace que un modelo sea excesivamente cauteloso: rechazando solicitudes benignas, cubriendo innecesariamente o produciendo respuestas genéricas. Equilibrar la seguridad con la ayuda genuina es uno de los problemas abiertos más difíciles de la alineación." />
 
-<FunFact>Los laboratorios de frontera pasan meses en trabajo de alineación (recopilación de datos SFT, modelado de recompensas, optimización de preferencias y pruebas de seguridad) para convertir modelos base en productos lo bastante seguros para lanzarse. La fase de alineación, aunque es una fracción del cálculo previo al entrenamiento, requiere miles de horas de etiquetado y evaluación humana especializada.</FunFact>
+<FunFact>
+Los laboratorios de frontera pasan meses en trabajo de alineación (recopilación de datos SFT, modelado de recompensas, optimización de preferencias y pruebas de seguridad) para convertir modelos base en productos lo bastante seguros para lanzarse. La fase de alineación, aunque es una fracción del cálculo previo al entrenamiento, requiere miles de horas de etiquetado y evaluación humana especializada.
 </FunFact>
 
 <ThinkAboutIt>Los etiquetadores humanos inevitablemente aportan sus propios prejuicios, perspectivas culturales e inconsistencias a los datos de preferencias. Si la alineación es, en última instancia, "aprender lo que los humanos prefieren", ¿qué preferencias deberían contar y cómo manejamos los desacuerdos fundamentales sobre los valores entre culturas?
