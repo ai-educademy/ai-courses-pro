@@ -1,6 +1,6 @@
 ---
-title: "इंटरवल समस्याएँ - Merge, Insert और Schedule"
-description: "merge और insert से लेकर meeting rooms और sweep lines तक interval-आधारित समस्याओं में महारत पाएँ। वे sorting strategies और patterns सीखें जिनकी interviewer अपेक्षा करते हैं।"
+title: "अंतराल समस्याएँ - मर्ज, इंसर्ट और Schedule"
+description: "मर्ज और इंसर्ट से लेकर बैठक कमरों और स्वीप लाइन तक अंतराल-आधारित समस्याओं में महारत पाएँ। वे सॉर्टिंग रणनीतियाँ और पैटर्न सीखें जिनकी इंटरव्यूअर अपेक्षा करते हैं।"
 order: 9
 difficulty: "advanced"
 duration: 16
@@ -8,18 +8,18 @@ icon: "📅"
 published: true
 ---
 
-## इंटरवल निरूपण
+## अंतराल निरूपण
 
-इंटरवल एक जोड़ा है: `[start, end]`। अधिकतर इंटरवल समस्याएँ एक महत्वपूर्ण कदम से शुरू होती हैं: **start time से sort करें**। इससे अस्त-व्यस्त सूची ऐसे क्रम में बदल जाती है जिसे आप सरल तुलना से बाएँ से दाएँ प्रोसेस कर सकते हैं।
+अंतराल एक जोड़ा है: `[start, end]`। अधिकतर अंतराल समस्याएँ एक महत्वपूर्ण कदम से शुरू होती हैं: **शुरुआती समय से सॉर्ट करें**। इससे अस्त-व्यस्त सूची ऐसे क्रम में बदल जाती है जिसे आप सरल तुलना से बाएँ से दाएँ प्रोसेस कर सकते हैं।
 
 ```
 Unsorted: [3,6] [1,4] [8,10] [2,5]
 Sorted:   [1,4] [2,5] [3,6] [8,10]
 ```
 
-## ओवरलैप होते इंटरवल मिलाना
+## ओवरलैप होते अंतराल मिलाना
 
-यह बुनियादी इंटरवल समस्या है (LeetCode 56)। सॉर्ट करने के बाद, दो लगातार इंटरवल तब ओवरलैप करते हैं जब current start ≤ previous end हो।
+यह बुनियादी अंतराल समस्या है (LeetCode 56)। सॉर्ट करने के बाद, दो लगातार अंतराल तब ओवरलैप करते हैं जब वर्तमान शुरुआत ≤ पिछला अंत हो।
 
 ```python
 def merge(intervals):
@@ -34,32 +34,32 @@ def merge(intervals):
 ```
 
 `[1,4] [2,5] [3,6] [8,10]` पर चलकर देखें:
-- `[2,5]`, `[1,4]` से ओवरलैप करता है → `[1,5]` में merge
-- `[3,6]`, `[1,5]` से ओवरलैप करता है → `[1,6]` में merge
-- `[8,10]` में overlap नहीं → नया इंटरवल
+- `[2,5]`, `[1,4]` से ओवरलैप करता है → `[1,5]` में मर्ज
+- `[3,6]`, `[1,5]` से ओवरलैप करता है → `[1,6]` में मर्ज
+- `[8,10]` में ओवरलैप नहीं → नया अंतराल
 
 नतीजा: `[1,6] [8,10]`
 
 <Quiz
-  question="इंटरवल को start से sort करने के बाद, कौन सी शर्त बताती है कि दो लगातार interval overlap करते हैं?"
-  options="current.start > previous.end|current.start == previous.start|current.start <= previous.end|current.end < previous.start"
+  question="अंतराल को शुरुआत से सॉर्ट करने के बाद, कौन सी शर्त बताती है कि दो लगातार अंतराल ओवरलैप करते हैं?"
+  options="वर्तमान.शुरुआत > पिछला.अंत|वर्तमान.शुरुआत == पिछला.शुरुआत|वर्तमान.शुरुआत <= पिछला.अंत|वर्तमान.अंत < पिछला.शुरुआत"
   answer="2"
-  explanation="अगर वर्तमान interval पिछले interval के ख़त्म होने से पहले या ठीक उसी समय शुरू होता है, तो वे overlap करते हैं और उन्हें merge करना चाहिए।"
+  explanation="अगर वर्तमान अंतराल पिछले अंतराल के ख़त्म होने से पहले या ठीक उसी समय शुरू होता है, तो वे ओवरलैप करते हैं और उन्हें मर्ज करना चाहिए।"
 />
 
-## Insert Interval
+## इंसर्ट अंतराल
 
-क्रमबद्ध और non-overlapping intervals दिए हैं, और एक नया interval है। उसे डालें और ज़रूरत के अनुसार merge करें (LeetCode 57)। इसे तीन चरणों में बाँटें:
+क्रमबद्ध और non-ओवरलैपिंग अंतराल दिए हैं, और एक नया अंतराल है। उसे डालें और ज़रूरत के अनुसार मर्ज करें (LeetCode 57)। इसे तीन चरणों में बाँटें:
 
-1. वे सभी intervals जोड़ें जो नए interval के शुरू होने से पहले समाप्त हो जाते हैं
-2. नए interval से overlap करने वाले सभी intervals merge करें
-3. बचे हुए intervals बिना बदलाव जोड़ें
+1. वे सभी अंतराल जोड़ें जो नए अंतराल के शुरू होने से पहले समाप्त हो जाते हैं
+2. नए अंतराल से ओवरलैप करने वाले सभी अंतराल मर्ज करें
+3. बचे हुए अंतराल बिना बदलाव जोड़ें
 
-<ThinkAboutIt>Insert Interval अक्सर इस तरह पूछा जाता है कि merge step तुरंत स्पष्ट नहीं होता। इंटरव्यू में आप इसे merge problem के रूप में कैसे पहचानेंगे?</ThinkAboutIt>
+<ThinkAboutIt>इंसर्ट अंतराल अक्सर इस तरह पूछा जाता है कि मर्ज चरण तुरंत स्पष्ट नहीं होता। इंटरव्यू में आप इसे मर्ज समस्या के रूप में कैसे पहचानेंगे?</ThinkAboutIt>
 
-## Meeting Rooms I - क्या सभी बैठकों में जा सकते हैं?
+## बैठक कमरे I - क्या सभी बैठकों में जा सकते हैं?
 
-start time से sort करें। अगर किसी interval का start पिछले interval के end से पहले है, तो conflict है।
+शुरुआती समय से सॉर्ट करें। अगर किसी अंतराल का शुरुआत पिछले अंतराल के अंत से पहले है, तो टकराव है।
 
 ```python
 def can_attend(intervals):
@@ -70,9 +70,9 @@ def can_attend(intervals):
     return True
 ```
 
-## Meeting Rooms II - न्यूनतम कमरों की संख्या
+## बैठक कमरे II - न्यूनतम कमरों की संख्या
 
-यहीं **event-based approach** चमकती है। starts और ends को दो sorted सूचियों में बाँटें, फिर sweep करें:
+यहीं **इवेंट-आधारित तरीका** चमकती है। शुरुआतों और अंतों को दो क्रमबद्ध सूचियों में बाँटें, फिर स्वीप करें:
 
 ```python
 import heapq
@@ -87,15 +87,15 @@ def min_rooms(intervals):
     return len(heap)
 ```
 
-हीप सबसे पहले समाप्त होने वाली meeting को ट्रैक करता है। अगर वह अगली meeting शुरू होने से पहले समाप्त हो जाती है, तो हम वही कमरा फिर इस्तेमाल करते हैं। हीप का अधिकतम आकार ही उत्तर है।
+हीप सबसे पहले समाप्त होने वाली बैठक को ट्रैक करता है। अगर वह अगली बैठक शुरू होने से पहले समाप्त हो जाती है, तो हम वही कमरा फिर इस्तेमाल करते हैं। हीप का अधिकतम आकार ही उत्तर है।
 
-<Illustration src="/images/lessons/interval-problems.svg" alt="timeline जिसमें overlapping meeting intervals कई rooms की ज़रूरत दिखाते हैं" caption="हर vertical slice एक साथ चल रही meetings दिखाती है। peak ही न्यूनतम rooms की संख्या है।" />
+<Illustration src="/images/lessons/interval-problems.svg" alt="समयरेखा जिसमें ओवरलैपिंग बैठक अंतराल कई कमरे की ज़रूरत दिखाते हैं" caption="हर ऊर्ध्वाधर खंड एक साथ चल रही बैठकों को दिखाता है। चरम ही न्यूनतम कमरे की संख्या है।" />
 
-<FunFact>Meeting Rooms II मूल रूप से किसी भी बिंदु पर overlapping intervals की अधिकतम संख्या खोजने जैसी ही समस्या है। यही विचार CPU thread scheduling, bandwidth allocation और hospital bed planning में इस्तेमाल होता है।</FunFact>
+<FunFact>बैठक कमरे II मूल रूप से किसी भी बिंदु पर ओवरलैपिंग अंतराल की अधिकतम संख्या खोजने जैसी ही समस्या है। यही विचार CPU थ्रेड शेड्यूलिंग, बैंडविड्थ आवंटन और अस्पताल बेड योजना में इस्तेमाल होता है।</FunFact>
 
-## Non-Overlapping Intervals - न्यूनतम हटाना
+## Non-Overlapping अंतराल - न्यूनतम हटाना
 
-intervals दिए हैं। न्यूनतम कितने हटाएँ ताकि कोई overlap न रहे (LeetCode 435)। Greedy तरीका: **end time** से sort करें और हमेशा वह interval रखें जो सबसे पहले समाप्त होता है। इससे आगे के intervals के लिए सबसे ज़्यादा जगह बचती है।
+अंतराल दिए हैं। न्यूनतम कितने हटाएँ ताकि कोई ओवरलैप न रहे (LeetCode 435)। Greedy तरीका: **समाप्ति समय** से सॉर्ट करें और हमेशा वह अंतराल रखें जो सबसे पहले समाप्त होता है। इससे आगे के अंतराल के लिए सबसे ज़्यादा जगह बचती है।
 
 ```python
 def erase_overlap(intervals):
@@ -110,53 +110,53 @@ def erase_overlap(intervals):
 ```
 
 <Quiz
-  question="non-overlapping intervals समस्या में start time नहीं, END time से sort करना क्यों काम करता है?"
-  options="यह time complexity घटाता है|सबसे पहले समाप्त होने वाला interval बाद के intervals के लिए सबसे ज़्यादा जगह छोड़ता है|यह ties को बेहतर संभालता है|यह negative intervals से बचाता है"
+  question="non-ओवरलैपिंग अंतराल समस्या में शुरुआती समय नहीं, END समय से सॉर्ट करना क्यों काम करता है?"
+  options="यह समय जटिलता घटाता है|सबसे पहले समाप्त होने वाला अंतराल बाद के अंतराल के लिए सबसे ज़्यादा जगह छोड़ता है|यह बराबरी के मामलों को बेहतर संभालता है|यह ऋणात्मक अंतराल से बचाता है"
   answer="1"
-  explanation="जो interval सबसे जल्दी समाप्त होता है उसे greedy तरीके से रखने पर भविष्य के non-overlapping intervals के लिए timeline में अधिकतम जगह बचती है।"
+  explanation="जो अंतराल सबसे जल्दी समाप्त होता है उसे ग्रीडी तरीके से रखने पर भविष्य के non-ओवरलैपिंग अंतराल के लिए समयरेखा में अधिकतम जगह बचती है।"
 />
 
-## Interval List Intersections
+## अंतराल List Intersections
 
-दो sorted interval lists दी हैं। सभी intersections खोजें (LeetCode 986)। दो pointers इस्तेमाल करें, हर list के लिए एक। `[a1, a2]` और `[b1, b2]` का intersection `[max(a1, b1), min(a2, b2)]` है, अगर वह मान्य हो (start ≤ end)। जिस pointer का interval पहले समाप्त होता है, उसे आगे बढ़ाएँ।
+दो क्रमबद्ध अंतराल सूचियाँ दी हैं। सभी प्रतिच्छेदन खोजें (LeetCode 986)। दो पॉइंटर इस्तेमाल करें, हर सूची के लिए एक। `[a1, a2]` और `[b1, b2]` का प्रतिच्छेदन `[max(a1, b1), min(a2, b2)]` है, अगर वह मान्य हो (शुरुआत ≤ अंत)। जिस पॉइंटर का अंतराल पहले समाप्त होता है, उसे आगे बढ़ाएँ।
 
 ## Sweep Line तकनीक
 
-intervals की जोड़े-जोड़ तुलना करने के बजाय, हर interval को events में तोड़ें:
+अंतराल की जोड़े-जोड़ तुलना करने के बजाय, हर अंतराल को इवेंट में तोड़ें:
 
 ```
 [1,4] → +1 at 1, -1 at 4
 [2,6] → +1 at 2, -1 at 6
 ```
 
-events को time से sort करें। बाएँ से दाएँ sweep करते हुए running count रखें। peak count "maximum overlap" वाले प्रश्नों का उत्तर देता है। यह Meeting Rooms II को मनमाने event-processing problems तक सामान्य करता है।
+इवेंट को समय से सॉर्ट करें। बाएँ से दाएँ स्वीप करते हुए चलती गिनती रखें। चरम गिनती "अधिकतम ओवरलैप" वाले प्रश्नों का उत्तर देता है। यह बैठक कमरे II को मनमाने इवेंट-प्रोसेसिंग समस्याएँ तक सामान्य करता है।
 
 ## Calendar Booking
 
-**My Calendar I** (LeetCode 729): booked intervals रखें और overlaps अस्वीकार करें। **My Calendar II**: single overlap की अनुमति दें, लेकिन triple-bookings अस्वीकार करें। sweep line multi-layer overlap detection को सीधा बना देता है।
+**My Calendar I** (LeetCode 729): बुक किए गए अंतराल रखें और ओवरलैप अस्वीकार करें। **My Calendar II**: एकल ओवरलैप की अनुमति दें, लेकिन तीनहरी बुकिंग अस्वीकार करें। स्वीप लाइन बहु-स्तरीय ओवरलैप पहचान को सीधा बना देता है।
 
-## Pattern Recognition - कब intervals का संदेह करें
+## Pattern Recognition - कब अंतराल का संदेह करें
 
-problem statement में ये संकेत देखें:
+समस्या-विवरण में ये संकेत देखें:
 
-- "overlapping", "conflicting", "schedule", "range" जैसे शब्द
-- start/end मानों के जोड़े
-- "कितने simultaneous" या "minimum resources" जैसे प्रश्न
-- ऐसा डेटा जिसे number line पर segments की तरह दर्शाया जा सके
+- "ओवरलैपिंग", "टकराव", "शेड्यूल", "रेंज" जैसे शब्द
+- शुरुआत/end मानों के जोड़े
+- "कितने एक साथ" या "न्यूनतम संसाधन" जैसे प्रश्न
+- ऐसा डेटा जिसे संख्या लाइन पर खंड की तरह दर्शाया जा सके
 
 <Quiz
-  question="'हटाने के लिए intervals की न्यूनतम संख्या' समस्या में कौन सी sorting strategy BEST है?"
-  options="start time ascending से sort करें|end time ascending से sort करें|interval length descending से sort करें|sorting की ज़रूरत नहीं"
+  question="'हटाने के लिए अंतराल की न्यूनतम संख्या' समस्या में कौन सी सॉर्टिंग रणनीति सबसे अच्छी है?"
+  options="शुरुआती समय आरोही से सॉर्ट करें|समाप्ति समय आरोही से सॉर्ट करें|अंतराल लंबाई अवरोही से सॉर्ट करें|सॉर्टिंग की ज़रूरत नहीं"
   answer="1"
-  explanation="end time से sorting greedy approach सम्भव बनाती है: हमेशा सबसे पहले समाप्त होने वाला interval रखें ताकि दूसरों के लिए सबसे ज़्यादा जगह बचे।"
+  explanation="समाप्ति समय से सॉर्टिंग ग्रीडी तरीका सम्भव बनाती है: हमेशा सबसे पहले समाप्त होने वाला अंतराल रखें ताकि दूसरों के लिए सबसे ज़्यादा जगह बचे।"
 />
 
-<ThinkAboutIt>sweep line तकनीक interval problems को event-processing problems में बदल देती है। क्या आप coding interviews से बाहर ऐसा कोई real-world system सोच सकते हैं जो यही approach इस्तेमाल करता हो?</ThinkAboutIt>
+<ThinkAboutIt>स्वीप लाइन तकनीक अंतराल समस्याएँ को इवेंट-प्रोसेसिंग समस्याएँ में बदल देती है। क्या आप कोडिंग इंटरव्यू से बाहर ऐसा कोई वास्तविक दुनिया का सिस्टम सोच सकते हैं जो यही तरीका इस्तेमाल करता हो?</ThinkAboutIt>
 
 ---
 
 ## 📚 और पढ़ें
 
-- [Merge Intervals - LeetCode 56](https://leetcode.com/problems/merge-intervals/) - interval mastery के लिए ज़रूरी शुरुआती समस्या
-- [Sweep Line Algorithm - CP-Algorithms](https://cp-algorithms.com/geometry/intersecting_segments.html) - sweep line paradigm की गहरी समझ
-- [Meeting Rooms II - LeetCode 253](https://leetcode.com/problems/meeting-rooms-ii/) - क्लासिक min-heap interval scheduling समस्या
+- [मर्ज अंतराल - LeetCode 56](https://leetcode.com/problems/merge-intervals/) - अंतराल महारत के लिए ज़रूरी शुरुआती समस्या
+- [Sweep Line एल्गोरिदम - CP-Algorithms](https://cp-algorithms.com/geometry/intersecting_segments.html) - स्वीप लाइन प्रतिमान की गहरी समझ
+- [बैठक कमरे II - LeetCode 253](https://leetcode.com/problems/meeting-rooms-ii/) - क्लासिक मिन-हीप अंतराल शेड्यूलिंग समस्या

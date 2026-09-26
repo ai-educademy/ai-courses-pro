@@ -1,6 +1,6 @@
 ---
 title: "Union-Find - कनेक्टेड कॉम्पोनेंट और नेटवर्क पहचान"
-description: "path compression और union by rank के साथ Union-Find (disjoint set) डेटा संरचना सीखें। connectivity, MST और ग्राफ़ कॉम्पोनेंट समस्याएँ कुशलता से हल करें।"
+description: "पथ कंप्रेशन और यूनियन से रैंक के साथ Union-Find (डिसजॉइंट सेट) डेटा संरचना सीखें। कनेक्टिविटी, MST और ग्राफ़ कॉम्पोनेंट समस्याएँ कुशलता से हल करें।"
 order: 7
 difficulty: "advanced"
 duration: 17
@@ -16,7 +16,7 @@ published: true
 
 ## भोला तरीका - Quick Find
 
-हर नोड के लिए component ID रखें। कनेक्टिविटी जाँचने के लिए ID की तुलना O(1) में करें। लेकिन दो कॉम्पोनेंट मिलाने पर एक समूह के हर सदस्य को अपडेट करना पड़ता है। हर union पर O(n)।
+हर नोड के लिए कॉम्पोनेंट ID रखें। कनेक्टिविटी जाँचने के लिए ID की तुलना O(1) में करें। लेकिन दो कॉम्पोनेंट मिलाने पर एक समूह के हर सदस्य को अपडेट करना पड़ता है। हर यूनियन पर O(n)।
 
 ```
 IDs:  [0, 0, 0, 3, 3]
@@ -28,7 +28,7 @@ union(0, 3) → update all 3s to 0 → O(n)
 
 ## Union-Find डेटा संरचना
 
-हर नोड एक **parent** की ओर इशारा करता है। हर ट्री की जड़ component representative होती है। दो नोड तभी जुड़े हैं जब उनकी जड़ समान हो।
+हर नोड एक **पैरेंट** की ओर इशारा करता है। हर ट्री की जड़ कॉम्पोनेंट प्रतिनिधि होती है। दो नोड तभी जुड़े हैं जब उनकी जड़ समान हो।
 
 ```python
 class UnionFind:
@@ -39,7 +39,7 @@ class UnionFind:
 
 ## Path Compression के साथ Find
 
-गहरे ट्री में parent pointers पर ऊपर चलना धीमा हो सकता है। **Path compression** हर देखे गए नोड को सीधे जड़ की ओर इंगित कराकर ट्री को सपाट कर देता है।
+गहरे ट्री में पैरेंट पॉइंटर पर ऊपर चलना धीमा हो सकता है। **Path कंप्रेशन** हर देखे गए नोड को सीधे जड़ की ओर इंगित कराकर ट्री को सपाट कर देता है।
 
 ```python
 def find(self, x):
@@ -57,7 +57,7 @@ Before:  0←1←2←3←4     After:  0←1
                                 0←4
 ```
 
-## Union by Rank
+## Union से Rank
 
 हमेशा छोटे ट्री को बड़े ट्री के नीचे जोड़ें। इससे ट्री की ऊँचाई लॉगरिद्मिक रहती है और बिगड़ी हुई लंबी चेन नहीं बनती।
 
@@ -75,20 +75,20 @@ def union(self, x, y):
 ```
 
 <Quiz
-  question="path compression और union by rank दोनों के साथ हर ऑपरेशन का amortised समय क्या है?"
+  question="पथ कंप्रेशन और यूनियन से रैंक दोनों के साथ हर ऑपरेशन का औसतित समय क्या है?"
   options="O(log n)|O(n)|O(α(n)) - लगभग O(1)|O(√n)"
   answer="2"
-  explanation="inverse Ackermann function α(n) इतनी धीमी बढ़ती है कि व्यावहारिक इनपुट पर यह कभी 4 से ऊपर नहीं जाती। इसलिए ऑपरेशन प्रभावी रूप से O(1) होते हैं।"
+  explanation="प्रतिलोम Ackermann फ़ंक्शन α(n) इतनी धीमी बढ़ती है कि व्यावहारिक इनपुट पर यह कभी 4 से ऊपर नहीं जाती। इसलिए ऑपरेशन प्रभावी रूप से O(1) होते हैं।"
 />
 
-<Illustration src="/images/lessons/union-find-and-disjoint-sets.svg" alt="path compression से पहले और बाद के Union-Find ट्री" caption="Path compression गहरी चेन को सपाट करता है, जिससे आगे के लुकअप तेज़ रहते हैं।" />
+<Illustration src="/images/lessons/union-find-और-disjoint-sets.svg" alt="पथ कंप्रेशन से पहले और बाद के Union-Find ट्री" caption="Path कंप्रेशन गहरी चेन को सपाट करता है, जिससे आगे के खोज तेज़ रहते हैं।" />
 
-## Kruskal's MST Algorithm
+## Kruskal's MST एल्गोरिदम
 
-Union-Find **Kruskal's algorithm** को शक्ति देता है, जो Minimum Spanning Trees के लिए है:
+Union-Find **Kruskal's एल्गोरिदम** को शक्ति देता है, जो Minimum Spanning Trees के लिए है:
 
 1. सभी एज को वेट के अनुसार सॉर्ट करें
-2. हर edge (u, v) के लिए, अगर `find(u) ≠ find(v)`, तो उसे जोड़ें और `union(u, v)` करें
+2. हर एज (u, v) के लिए, अगर `find(u) ≠ find(v)`, तो उसे जोड़ें और `union(u, v)` करें
 3. n − 1 एज मिलने पर रुकें
 
 Union-Find उन एज को अस्वीकार करके चक्र रोकता है जिनके दोनों सिरों की जड़ पहले से समान है। कुल समय: **O(E log E)**, जिसमें सॉर्टिंग प्रमुख है।
@@ -97,48 +97,48 @@ Union-Find उन एज को अस्वीकार करके चक्�
 
 ## क्लासिक समस्याएँ
 
-### Number of Connected Components
+### संख्या of Connected Components
 
 n नोड के साथ Union-Find आरम्भ करें। हर एज को `union` से प्रोसेस करें। अंत में अलग-अलग जड़ों की गिनती करें।
 
-### Accounts Merge (LeetCode 721)
+### Accounts मर्ज (LeetCode 721)
 
-हर account में email होते हैं। अगर दो account कोई email साझा करते हैं, तो वे उसी व्यक्ति के हैं। साझा email से account को union करें, फिर group और sort करें।
+हर अकाउंट में ईमेल होते हैं। अगर दो अकाउंट कोई ईमेल साझा करते हैं, तो वे उसी व्यक्ति के हैं। साझा ईमेल से अकाउंट को यूनियन करें, फिर समूह और सॉर्ट करें।
 
 ### Redundant Connection (LeetCode 684)
 
-एक ट्री और एक अतिरिक्त edge दी है। redundant edge खोजें। edge को क्रम में प्रोसेस करें। जिस पहली edge पर `union` `False` लौटाए (पहले से connected), वही उत्तर है।
+एक ट्री और एक अतिरिक्त एज दी है। अनावश्यक एज खोजें। एज को क्रम में प्रोसेस करें। जिस पहली एज पर `union` `False` लौटाए (पहले से जुड़ी हुई), वही उत्तर है।
 
-<FunFact>दोनों optimisations के साथ Union-Find के O(α(n)) में चलने का प्रमाण Tarjan ने 1975 में प्रकाशित किया था। इसे कंप्यूटर विज्ञान की सबसे सुंदर amortised analyses में गिना जाता है।</FunFact>
+<FunFact>दोनों ऑप्टिमाइज़ेशन के साथ Union-Find के O(α(n)) में चलने का प्रमाण Tarjan ने 1975 में प्रकाशित किया था। इसे कंप्यूटर विज्ञान की सबसे सुंदर औसतित विश्लेषण में गिना जाता है।</FunFact>
 
 ## Union-Find बनाम BFS/DFS कब चुनें
 
 | स्थिति | बेहतर चुनाव |
 |----------|-------------|
-| बार-बार connectivity queries | Union-Find |
-| एकल traversal / shortest path | BFS/DFS |
-| क्रमिक edge additions | Union-Find |
-| edge removals (dynamic graph) | BFS/DFS (या offline UF) |
+| बार-बार कनेक्टिविटी क्वेरी | Union-Find |
+| एकल ट्रैवर्सल / सबसे छोटा पथ | BFS/DFS |
+| क्रमिक एज जोड़ना | Union-Find |
+| एज हटाना (डायनेमिक ग्राफ़) | BFS/DFS (या offline UF) |
 | Kruskal's MST | Union-Find |
-| दिशित ग्राफ़ में topological sort / cycle | DFS |
+| दिशित ग्राफ़ में टोपोलॉजिकल सॉर्ट / चक्र | DFS |
 
-Union-Find तब चमकता है जब आप edge को *क्रमिक रूप से* प्रोसेस करते हैं और तेज़ connectivity checks चाहिए। अगर आपको बस एक बार traversal करना है या path की जानकारी चाहिए, तो BFS/DFS पर टिके रहें।
+Union-Find तब चमकता है जब आप एज को *क्रमिक रूप से* प्रोसेस करते हैं और तेज़ कनेक्टिविटी जाँच चाहिए। अगर आपको बस एक बार ट्रैवर्सल करना है या पथ की जानकारी चाहिए, तो BFS/DFS पर टिके रहें।
 
 <Quiz
-  question="आपको edge एक-एक करके दिए जा रहे हैं और पहली ऐसी edge पहचाननी है जो cycle बनाती है। कौन सा तरीका सबसे अच्छा है?"
-  options="हर edge के बाद BFS शुरू से चलाना|हर edge के बाद DFS शुरू से चलाना|Union-Find - cycle edge पर union False लौटाता है|Topological sort"
+  question="आपको एज एक-एक करके दिए जा रहे हैं और पहली ऐसी एज पहचाननी है जो चक्र बनाती है। कौन सा तरीका सबसे अच्छा है?"
+  options="हर एज के बाद BFS शुरू से चलाना|हर एज के बाद DFS शुरू से चलाना|Union-Find - चक्र एज पर यूनियन False लौटाता है|Topological सॉर्ट"
   answer="2"
-  explanation="Union-Find edge को क्रमिक रूप से लगभग O(1) प्रति edge में cycle पहचानता है, जबकि BFS/DFS हर बार पूरा ग्राफ़ फिर traverses करेगा।"
+  explanation="Union-Find एज को क्रमिक रूप से लगभग O(1) प्रति एज में चक्र पहचानता है, जबकि BFS/DFS हर बार पूरा ग्राफ़ फिर ट्रैवर्स करेगा।"
 />
 
 <Quiz
-  question="Union-Find में union by rank क्या रोकता है?"
-  options="Duplicate edges|Disconnected components|बिगड़ी हुई linear chains (ऊँचे ट्री)|Negative edge weights"
+  question="Union-Find में यूनियन से रैंक क्या रोकता है?"
+  options="Duplicate एज|Disconnected कॉम्पोनेंट|बिगड़ी हुई रैखिक चेन (ऊँचे ट्री)|Negative एज वेट"
   answer="2"
-  explanation="Union by rank हमेशा छोटे ट्री को बड़े ट्री के नीचे जोड़कर ट्री संतुलित रखता है। इससे O(n) find operations से बचाव होता है।"
+  explanation="Union से रैंक हमेशा छोटे ट्री को बड़े ट्री के नीचे जोड़कर ट्री संतुलित रखता है। इससे O(n) find ऑपरेशन से बचाव होता है।"
 />
 
-<ThinkAboutIt>कुछ समस्याओं में unions को *undo* करना पड़ता है, यानी deletions के साथ dynamic connectivity। मानक Union-Find क्यों काफ़ी नहीं है, और कौन से बदलाव मौजूद हैं?</ThinkAboutIt>
+<ThinkAboutIt>कुछ समस्याओं में यूनियन को *undo* करना पड़ता है, यानी हटाना के साथ डायनेमिक कनेक्टिविटी। मानक Union-Find क्यों काफ़ी नहीं है, और कौन से बदलाव मौजूद हैं?</ThinkAboutIt>
 
 ---
 
@@ -146,4 +146,4 @@ Union-Find तब चमकता है जब आप edge को *क्रम
 
 - [Disjoint-Set Data Structure - Wikipedia](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) - Union-Find का सिद्धांत, प्रमाण और इतिहास
 - [Union-Find - Princeton Algorithms](https://algs4.cs.princeton.edu/15uf/) - Java उदाहरणों के साथ Sedgewick की प्रामाणिक व्याख्या
-- [Redundant Connection - LeetCode 684](https://leetcode.com/problems/redundant-connection/) - Union-Find से cycle detection का साफ़ उपयोग
+- [Redundant Connection - LeetCode 684](https://leetcode.com/problems/redundant-connection/) - Union-Find से चक्र पहचान का साफ़ उपयोग
