@@ -1,6 +1,6 @@
 ---
-title: "AI Agents మరియు Autonomous Systems - తదుపరి సరిహద్దు"
-description: "AI agents ఎలా observe చేస్తాయి, reason చేస్తాయి, act చేస్తాయి - మరియు multi-agent collaboration artificial intelligence భవిష్యత్తును ఎలా రూపొందిస్తుందో తెలుసుకోండి."
+title: "AI ఏజెంట్లు మరియు Autonomous సిస్టమ్‌లు - తదుపరి సరిహద్దు"
+description: "AI ఏజెంట్లు ఎలా observe చేస్తాయి, తర్కించండి చేస్తాయి, చర్య తీసుకోండి చేస్తాయి - మరియు బహుళ-ఏజెంట్ సహకారం artificial intelligence భవిష్యత్తును ఎలా రూపొందిస్తుందో తెలుసుకోండి."
 order: 5
 difficulty: "advanced"
 duration: 18
@@ -8,47 +8,47 @@ icon: "🤝"
 published: true
 ---
 
-# AI Agents మరియు Autonomous Systems - తదుపరి సరిహద్దు
+# AI ఏజెంట్లు మరియు Autonomous సిస్టమ్‌లు - తదుపరి సరిహద్దు
 
-ఇప్పటి వరకు మనం single prompt కి respond చేసే AI models గురించి explore చేశాం. కానీ AI లో అత్యంత exciting frontier **agents** - తమ environment ని observe చేయగల, ఏమి చేయాలో reason చేయగల, actions తీసుకోగల, results నుండి నేర్చుకోగల systems - ఇవన్నీ continuous loop లో జరుగుతాయి.
+ఇప్పటి వరకు మనం ఒకే ప్రాంప్ట్ కి respond చేసే AI మోడళ్లు గురించి అన్వేషించండి చేశాం. కానీ AIలో అత్యంత exciting అగ్రశ్రేణి **ఏజెంట్లు** - తమ environment ని observe చేయగల, ఏమి చేయాలో తర్కించండి చేయగల, చర్యలు తీసుకోగల, ఫలితాలు నుండి నేర్చుకోగల సిస్టమ్‌లు - ఇవన్నీ continuous లూప్ లో జరుగుతాయి.
 
-## AI Agent అంటే ఏమిటి?
+## AI ఏజెంట్ అంటే ఏమిటి?
 
-AI agent అంటే single-turn question-and-answer కి మించి పనిచేసే LLM-powered system. ఇది ఒక loop లో operate అవుతుంది:
+AI ఏజెంట్ అంటే ఒకే-turn ప్రశ్న-మరియు-సమాధానం కి మించి పనిచేసే LLM-powered సిస్టమ్. ఇది ఒక లూప్ లో operate అవుతుంది:
 
-1. **Observe** - ప్రస్తుత state ని గ్రహించడం (file చదవడం, database check చేయడం, search results చూడడం).
-2. **Think** - Goal మరియు observations ఆధారంగా తదుపరి ఏ action తీసుకోవాలో reason చేయడం.
-3. **Act** - Action execute చేయడం (web search చేయడం, code రాయడం, API call చేయడం, message పంపడం).
-4. **Learn** - Result evaluate చేసి తదుపరి step decide చేయడం.
+1. **Observe** - ప్రస్తుత స్థితి ని గ్రహించడం (ఫైల్ చదవడం, డేటాబేస్ తనిఖీ చేయడం, సెర్చ్ ఫలితాలు చూడడం).
+2. **Think** - Goal మరియు observations ఆధారంగా తదుపరి ఏ చర్య తీసుకోవాలో తర్కించండి చేయడం.
+3. **చర్య తీసుకోండి** - చర్య execute చేయడం (వెబ్ సెర్చ్ చేయడం, కోడ్ రాయడం, API కాల్ చేయడం, సందేశం పంపడం).
+4. **నేర్చుకోవడం** - ఫలితం మూల్యాంకనం చేయండి చేసి తదుపరి దశ decide చేయడం.
 
-Task complete అయ్యే వరకు లేదా agent proceed చేయలేనని determine చేసే వరకు ఈ loop repeat అవుతుంది. Chatbot కంటే ముఖ్యమైన తేడా **autonomy** - ప్రతి సారి human input కోసం ఎదురు చూడకుండా agent తన next steps తానే decide చేస్తుంది.
+పని పూర్తి చేయండి అయ్యే వరకు లేదా ఏజెంట్ proceed చేయలేనని నిర్ణయిస్తుంది చేసే వరకు ఈ లూప్ repeat అవుతుంది. Chatbot కంటే ముఖ్యమైన తేడా **autonomy** - ప్రతి సారి మానవ ఇన్‌పుట్ కోసం ఎదురు చూడకుండా ఏజెంట్ తన తర్వాతి దశలు తానే decide చేస్తుంది.
 
-<Illustration src="/images/lessons/ai-agents.svg" alt="Observe-think-act-learn agent loop చూపించే circular diagram - tool connections తో" caption="AI agents continuous loop లో operate అవుతాయి, complex tasks autonomously accomplish చేయడానికి tools మరియు reasoning ఉపయోగిస్తాయి." />
+<Illustration src="/images/lessons/ai-agents.svg" alt="Observe-think-చర్య తీసుకోండి-నేర్చుకోవడం ఏజెంట్ లూప్ చూపించే circular చిత్రం - టూల్ కనెక్షన్‌లు తో" title="AI ఏజెంట్లు continuous లూప్ లో operate అవుతాయి, క్లిష్టమైన పనులు autonomously accomplish చేయడానికి టూల్స్ మరియు తర్కం ఉపయోగిస్తాయి." />
 
-## Tool Use: పనులు చేయగల AI
+## టూల్ వాడండి: పనులు చేయగల AI
 
-Agents ని practical గా చేసిన breakthrough **tool use**. Weights లో store అయిన knowledge పై మాత్రమే ఆధారపడకుండా, agent external tools call చేయగలదు:
+ఏజెంట్లు ని ప్రాయోగిక గా చేసిన breakthrough **టూల్ వాడండి**. బరువులు లో నిల్వ అయిన జ్ఞానం పై మాత్రమే ఆధారపడకుండా, ఏజెంట్ బాహ్య టూల్స్ కాల్ చేయగలదు:
 
-- **Web search** - Training data cutoff కి మించిన current information కనుగొనడం.
-- **Code execution** - Answers compute చేయడానికి Python, JavaScript, లేదా ఇతర code రాసి run చేయడం.
-- **API calls** - Databases, services, external platforms తో interact చేయడం.
-- **File operations** - System పై files read, write, modify చేయడం.
+- **వెబ్ సెర్చ్** - శిక్షణ డేటా cutoff కి మించిన ప్రస్తుత సమాచారం కనుగొనడం.
+- **కోడ్ execution** - సమాధానాలు కంప్యూట్ చేయడానికి Python, JavaScript, లేదా ఇతర కోడ్ రాసి నడపండి చేయడం.
+- **API కాల్‌లు** - డేటాబేస్‌లు, సేవలు, బాహ్య వేదికలు తో interact చేయడం.
+- **ఫైల్ ఆపరేషన్లు** - సిస్టమ్ పై files చదవడం, రాయండి, modify చేయడం.
 
-Agent memory నుండి answer చేయలేని question ఎదురైనప్పుడు, tool call formulate చేసి, result interpret చేసి, reasoning లో incorporate చేస్తుంది.
+ఏజెంట్ మెమరీ నుండి సమాధానం చేయలేని ప్రశ్న ఎదురైనప్పుడు, టూల్ కాల్ formulate చేసి, ఫలితం interpret చేసి, తర్కం లో incorporate చేస్తుంది.
 
-**Function calling** tool use వెనుక ఉన్న technical mechanism. LLM ఏ tool call చేయాలో, ఏ parameters తో call చేయాలో specify చేసే structured JSON output ఇవ్వడానికి train అవుతుంది. Orchestration layer tool execute చేసి result model కి తిరిగి feed చేస్తుంది.
+**ఫంక్షన్ calling** టూల్ వాడండి వెనుక ఉన్న సాంకేతిక mechanism. LLM ఏ టూల్ కాల్ చేయాలో, ఏ పరామీటర్లు తో కాల్ చేయాలో specify చేసే నిర్మిత JSON అవుట్‌పుట్ ఇవ్వడానికి శిక్షణ ఇవ్వండి అవుతుంది. Orchestration పొర టూల్ execute చేసి ఫలితం మోడల్ కి తిరిగి ఫీడ్ చేస్తుంది.
 
 <Callout>
-Agent quality tool descriptions quality పై heavily depend అవుతుంది. Clear parameter definitions తో well-documented tool model ని correctly use చేయడానికి enable చేస్తుంది. Poorly described tools frequent errors మరియు retries కి దారి తీస్తాయి.
+ఏజెంట్ నాణ్యత టూల్ descriptions నాణ్యత పై heavily depend అవుతుంది. స్పష్టమైన పరామీటర్ definitions తో well-documented టూల్ మోడల్ ని సరిగ్గా వాడండి చేయడానికి enable చేస్తుంది. Poorly described టూల్స్ frequent errors మరియు మళ్లీ ప్రయత్నాలు కి దారి తీస్తాయి.
 </Callout>
 
 <FunFact>
-GitHub Copilot - మీరు ఇప్పుడు use చేస్తూ ఉండవచ్చు - ఒక AI agent. ఇది మీ codebase observe చేస్తుంది, మీకు ఏమి కావాలో reason చేస్తుంది, code రాస్తుంది, tests run చేస్తుంది, results ఆధారంగా iterate చేస్తుంది. Terminal commands, web search, version control తో కూడా interact చేయగలదు.
+GitHub Copilot - మీరు ఇప్పుడు వాడండి చేస్తూ ఉండవచ్చు - ఒక AI ఏజెంట్. ఇది మీ codebase observe చేస్తుంది, మీకు ఏమి కావాలో తర్కించండి చేస్తుంది, కోడ్ రాస్తుంది, పరీక్షలు నడపండి చేస్తుంది, ఫలితాలు ఆధారంగా iterate చేస్తుంది. Terminal commands, వెబ్ సెర్చ్, వెర్షన్ నియంత్రణ తో కూడా interact చేయగలదు.
 </FunFact>
 
-## ReAct Pattern
+## ReAct నమూనా
 
-**ReAct (Reasoning + Acting)** చాలా modern agents వెనుక ఉన్న foundational pattern. Model explicit reasoning traces మరియు concrete actions మధ్య alternate అవుతుంది:
+**ReAct (తర్కం + Acting)** చాలా ఆధునిక ఏజెంట్లు వెనుక ఉన్న foundational నమూనా. మోడల్ స్పష్టమైన తర్కం traces మరియు concrete చర్యలు మధ్య alternate అవుతుంది:
 
 ```text
 Question: తాజా UK population density ఎంత?
@@ -68,49 +68,49 @@ Observation: 281.65
 Answer: తాజా UK population density estimates roughly 280 people per square kilometre, కానీ number use చేసే ముందు latest ONS source cite చేయండి.
 ```
 
-Reasoning ని **explicit** గా చేయడం ద్వారా, ReAct model ని complex problems ని manageable steps గా decompose చేయడానికి మరియు దారిలో self-correct చేయడానికి అనుమతిస్తుంది.
+తర్కం ని **స్పష్టమైన** గా చేయడం ద్వారా, ReAct మోడల్ ని క్లిష్టమైన సమస్యలు ని manageable దశలు గా decompose చేయడానికి మరియు దారిలో self-సరైన చేయడానికి అనుమతిస్తుంది.
 
-<Quiz question="Standard prompting నుండి ReAct pattern ని ఏది distinguish చేస్తుంది?" options="ReAct costs save చేయడానికి smaller model use చేస్తుంది|ReAct structured loop లో reasoning traces మరియు tool actions మధ్య alternate అవుతుంది|ReAct language model అవసరాన్ని పూర్తిగా eliminate చేస్తుంది|ReAct image-based inputs తో మాత్రమే work చేస్తుంది" answer="1" explanation="ReAct explicit reasoning ('Thought') ని concrete actions ('Action') మరియు వాటి results ('Observation') తో interleave చేస్తుంది. ఈ structured loop agents ని planning, executing, మరియు dynamically adapting ద్వారా multi-step problems tackle చేయడానికి అనుమతిస్తుంది." />
+<Quiz question="ప్రామాణిక prompting నుండి ReAct నమూనా ని ఏది distinguish చేస్తుంది?" options="ReAct ఖర్చులు save చేయడానికి చిన్న మోడల్ వాడండి చేస్తుంది|ReAct నిర్మిత లూప్ లో తర్కం traces మరియు టూల్ చర్యలు మధ్య alternate అవుతుంది|ReAct భాషా మోడల్ అవసరాన్ని పూర్తిగా eliminate చేస్తుంది|ReAct image-ఆధారిత inputs తో మాత్రమే పని చేస్తుంది" answer="1" explanation="ReAct స్పష్టమైన తర్కం ('Thought') ని concrete చర్యలు ('చర్య') మరియు వాటి ఫలితాలు ('Observation') తో interleave చేస్తుంది. ఈ నిర్మిత లూప్ ఏజెంట్లు ని planning, executing, మరియు dynamically adapting ద్వారా బహుళ-దశ సమస్యలు tackle చేయడానికి అనుమతిస్తుంది." />
 
-## Multi-Agent Systems
+## బహుళ-ఏజెంట్ సిస్టమ్‌లు
 
-Single agent కి limits ఉంటాయి. **Multi-agent systems** complex tasks tackle చేయడానికి collaborate అయ్యే specialised agents teams ని use చేస్తాయి:
+ఒకే ఏజెంట్ కి పరిమితులు ఉంటాయి. **Multi-ఏజెంట్ సిస్టమ్‌లు** క్లిష్టమైన పనులు tackle చేయడానికి collaborate అయ్యే specialised ఏజెంట్లు బృందాలు ని వాడండి చేస్తాయి:
 
-- **Planner agent** - Overall goal ని subtasks గా break చేసి assign చేస్తుంది.
-- **Researcher agent** - Documents, databases, లేదా web నుండి information gather చేస్తుంది.
-- **Coder agent** - Solutions implement చేయడానికి code రాసి test చేస్తుంది.
-- **Reviewer agent** - Errors, quality, consistency కోసం work check చేస్తుంది.
+- **Planner ఏజెంట్** - Overall goal ని subtasks గా break చేసి assign చేస్తుంది.
+- **Researcher ఏజెంట్** - పత్రాలు, డేటాబేస్‌లు, లేదా వెబ్ నుండి సమాచారం gather చేస్తుంది.
+- **Coder ఏజెంట్** - పరిష్కారాలు అమలు చేయండి చేయడానికి కోడ్ రాసి పరీక్ష చేస్తుంది.
+- **Reviewer ఏజెంట్** - Errors, నాణ్యత, స్థిరత్వం కోసం పని తనిఖీ చేస్తుంది.
 
-ఈ agents structured messages ద్వారా communicate చేస్తారు, human team లాగానే. Planner coordinate చేస్తుంది, specialists execute చేస్తారు, reviewers validate చేస్తారు - ఏ single agent కంటే more capable system create అవుతుంది.
+ఈ ఏజెంట్లు నిర్మిత సందేశాలు ద్వారా కమ్యూనికేట్ చేయండి చేస్తారు, మానవ బృందం లాగానే. Planner coordinate చేస్తుంది, specialists execute చేస్తారు, reviewers ధృవీకరించండి చేస్తారు - ఏ ఒకే ఏజెంట్ కంటే మరిన్ని capable సిస్టమ్ సృష్టించండి అవుతుంది.
 
 <ThinkAboutIt>
-ఒక agent code రాసి మరొకటి review చేసే AI agents team ఉంటే, రెండు agents ఒకే systematic error చేస్తే ఏమి జరుగుతుంది? అన్ని agents share చేసే blind spots catch చేయడానికి system ని ఎలా design చేయవచ్చు?
+ఒక ఏజెంట్ కోడ్ రాసి మరొకటి సమీక్ష చేసే AI ఏజెంట్లు బృందం ఉంటే, రెండు ఏజెంట్లు ఒకే systematic error చేస్తే ఏమి జరుగుతుంది? అన్ని ఏజెంట్లు పంచుకోండి చేసే blind spots catch చేయడానికి సిస్టమ్ ని ఎలా డిజైన్ చేయవచ్చు?
 </ThinkAboutIt>
 
-## Real-World Agent Applications
+## నిజమైన-ప్రపంచం ఏజెంట్ అప్లికేషన్‌లు
 
-**Coding assistants** - GitHub Copilot, Cursor, మరియు similar tools coding agents గా act చేస్తాయి - మీ codebase అర్థం చేసుకుని, changes suggest చేసి, tests run చేసి, code work అయ్యే వరకు iterate చేస్తాయి.
+**కోడింగ్ assistants** - GitHub Copilot, Cursor, మరియు సారూప్య టూల్స్ కోడింగ్ ఏజెంట్లు గా చర్య తీసుకోండి చేస్తాయి - మీ codebase అర్థం చేసుకుని, మార్పులు suggest చేసి, పరీక్షలు నడపండి చేసి, కోడ్ పని అయ్యే వరకు iterate చేస్తాయి.
 
-**Research agents** - Perplexity మరియు Deep Research వంటి systems complex research questions ని sub-queries గా decompose చేసి, multiple sources search చేసి, findings synthesise చేసి, referenced reports produce చేస్తాయి.
+**పరిశోధన ఏజెంట్లు** - Perplexity మరియు లోతైన పరిశోధన వంటి సిస్టమ్‌లు క్లిష్టమైన పరిశోధన ప్రశ్నలు ని ఉప-క్వెరీలు గా decompose చేసి, అనేక sources సెర్చ్ చేసి, findings synthesise చేసి, referenced reports ఉత్పత్తి చేయండి చేస్తాయి.
 
-**Customer service** - Companies orders look up చేయగల, refunds process చేయగల, inventory check చేయగల agents deploy చేస్తాయి - 60–80% queries autonomously handle చేస్తూ, అవసరమైనప్పుడు మాత్రమే humans కి escalate చేస్తాయి.
+**కస్టమర్ సేవ** - కంపెనీలు ఆర్డర్లు look up చేయగల, refunds ప్రక్రియ చేయగల, inventory తనిఖీ చేయగల ఏజెంట్లు డిప్లాయ్ చేయండి చేస్తాయి - 60–80% క్వెరీలు autonomously నిర్వహించు చేస్తూ, అవసరమైనప్పుడు మాత్రమే humans కి escalate చేస్తాయి.
 
-**Data analysis** - SQL queries రాయగల, visualisations generate చేయగల, results interpret చేయగల, data లో discover అయిన దాని ఆధారంగా analysis refine చేయగల agents.
+**డేటా విశ్లేషణ** - SQL క్వెరీలు రాయగల, visualisations సృష్టించు చేయగల, ఫలితాలు interpret చేయగల, డేటా లో గుర్తించండి అయిన దాని ఆధారంగా విశ్లేషణ refine చేయగల ఏజెంట్లు.
 
-**DevOps మరియు infrastructure** - System health monitor చేసే, logs మరియు metrics చదివి incidents diagnose చేసే, common issues remediate చేయడానికి runbooks execute చేయగల agents - mean time to resolution గంటల నుండి నిమిషాలకి తగ్గిస్తాయి.
+**DevOps మరియు మౌలిక సదుపాయాలు** - సిస్టమ్ health monitor చేసే, లాగ్‌లు మరియు మెట్రిక్స్ చదివి incidents diagnose చేసే, సాధారణ ఇష్యూలు remediate చేయడానికి runbooks execute చేయగల ఏజెంట్లు - mean సమయం కు resolution గంటల నుండి నిమిషాలకి తగ్గిస్తాయి.
 
-<Quiz question="Single powerful agent కంటే multi-agent systems ఎందుకు ఎక్కువగా effective అవుతాయి?" options="Multiple agents ఒక large model కంటే ఎల్లప్పుడూ cheaper|Specialised agents complex task యొక్క different aspects handle చేయగలవు, diverse expertise ఉన్న human team లాగా|Multi-agent systems కి language models అవసరం లేదు|Multiple agents errors యొక్క possibility ని పూర్తిగా eliminate చేస్తాయి" answer="1" explanation="Complex projects పై human specialists team ఒక generalist కంటే ఎలా outperform చేస్తుందో, specialised agents కూడా అదే - planning, researching, coding, లేదా reviewing - ప్రతి ఒక్కటి తాను best చేసే దాని పై focus చేయగలదు, collaboration ద్వారా higher quality results produce చేస్తాయి." />
+<Quiz question="ఒకే powerful ఏజెంట్ కంటే బహుళ-ఏజెంట్ సిస్టమ్‌లు ఎందుకు ఎక్కువగా ప్రభావవంతమైన అవుతాయి?" options="అనేక ఏజెంట్లు ఒక పెద్ద మోడల్ కంటే ఎల్లప్పుడూ cheaper|Specialised ఏజెంట్లు క్లిష్టమైన పని యొక్క వేర్వేరు aspects నిర్వహించు చేయగలవు, diverse నైపుణ్యం ఉన్న మానవ బృందం లాగా|బహుళ-ఏజెంట్ సిస్టమ్‌లు కి భాష మోడళ్లు అవసరం లేదు|అనేక ఏజెంట్లు errors యొక్క possibility ని పూర్తిగా eliminate చేస్తాయి" answer="1" explanation="క్లిష్టమైన ప్రాజెక్టులు పై మానవ specialists బృందం ఒక generalist కంటే ఎలా outperform చేస్తుందో, specialised ఏజెంట్లు కూడా అదే - planning, researching, కోడింగ్, లేదా reviewing - ప్రతి ఒక్కటి తాను ఉత్తమ చేసే దాని పై దృష్టి పెట్టడం చేయగలదు, సహకారం ద్వారా higher నాణ్యత ఫలితాలు ఉత్పత్తి చేయండి చేస్తాయి." />
 
-## Risks మరియు Safety Considerations
+## Risks మరియు భద్రత Considerations
 
-Autonomous agents కొత్త significant risks introduce చేస్తాయి:
+Autonomous ఏజెంట్లు కొత్త significant risks introduce చేస్తాయి:
 
-- **Unintended actions** - "Ad spend optimise చేయు" అని task ఇచ్చిన agent technically optimal కానీ ethically questionable decisions తీసుకోవచ్చు.
-- **Cascading errors** - Agent actions chain లో early mistake చేస్తే, human oversight లేకుండా subsequent steps error ని compound చేయవచ్చు.
-- **Control మరియు alignment** - Agents మనం *నిజంగా* కోరుకునే goals ని pursue చేస్తాయని ensure చేయడం, intent miss చేసే literal interpretations కాదు.
-- **Accountability** - Autonomous agent harmful decision తీసుకుంటే, responsible ఎవరు?
+- **Unintended చర్యలు** - "Ad ఖర్చవుతుంది optimise చేయు" అని పని ఇచ్చిన ఏజెంట్ technically అనుకూలమైన కానీ ethically questionable నిర్ణయాలు తీసుకోవచ్చు.
+- **Cascading errors** - ఏజెంట్ చర్యలు chain లో early mistake చేస్తే, మానవ oversight లేకుండా subsequent దశలు error ని compound చేయవచ్చు.
+- **Control మరియు సమలేఖనం** - ఏజెంట్లు మనం *నిజంగా* కోరుకునే goals ని pursue చేస్తాయని నిర్ధారించండి చేయడం, intent మిస్ అవడం చేసే literal interpretations కాదు.
+- **జవాబుదారీతనం** - Autonomous ఏజెంట్ హానికరమైన నిర్ణయం తీసుకుంటే, బాధ్యతాయుత ఎవరు?
 
-ప్రస్తుత best practices లో high-stakes actions కోసం **human-in-the-loop** checkpoints, testing కోసం **sandboxed environments**, మరియు agent access చేయగల tools ని limit చేసే **explicit permission boundaries** ఉన్నాయి.
+ప్రస్తుత ఉత్తమ పద్ధతులు లో అధిక-stakes చర్యలు కోసం **మానవ-లో-the-లూప్** checkpoints, పరీక్షలు కోసం **sandboxed పరిసరాలు**, మరియు ఏజెంట్ యాక్సెస్ చేయగల టూల్స్ ని పరిమితి చేసే **స్పష్టమైన permission boundaries** ఉన్నాయి.
 
 <FunFact>
 
@@ -118,15 +118,15 @@ Autonomous agents కొత్త significant risks introduce చేస్తా
 
 ## భవిష్యత్తు: Assistants నుండి Colleagues వరకు
 
-Trajectory స్పష్టంగా ఉంది. AI ఇలా move అవుతోంది:
-- **Tools** (మీరు operate చేస్తారు) → **Assistants** (అడిగినప్పుడు help చేస్తాయి) → **Agents** (autonomously work చేస్తాయి) → **Colleagues** (peers గా collaborate చేస్తాయి).
+Trajectory స్పష్టంగా ఉంది. AI ఇలా మారడం అవుతోంది:
+- **టూల్స్** (మీరు operate చేస్తారు) → **Assistants** (అడిగినప్పుడు సహాయం చేస్తాయి) → **ఏజెంట్లు** (autonomously పని చేస్తాయి) → **Colleagues** (peers గా collaborate చేస్తాయి).
 
-మనం ప్రస్తుతం assistants నుండి agents వైపు transition లో ఉన్నాం. రాబోయే కొన్ని సంవత్సరాలు genuinely useful అయ్యేంత powerful గా, పెరుగుతున్న autonomy తో trust చేయగలిగేంత safe గా agents ని ఎంత effectively build చేయగలమో నిర్ణయిస్తాయి.
+మనం ప్రస్తుతం assistants నుండి ఏజెంట్లు వైపు మారడం లో ఉన్నాం. రాబోయే కొన్ని సంవత్సరాలు genuinely ఉపయోగకరమైన అయ్యేంత powerful గా, పెరుగుతున్న autonomy తో నమ్మకం చేయగలిగేంత safe గా ఏజెంట్లు ని ఎంత effectively నిర్మించండి చేయగలమో నిర్ణయిస్తాయి.
 
-Key challenge agents ని more capable చేయడం కాదు - వాటిని మరింత **reliable**, **predictable**, మరియు human values తో **aligned** చేయడం. దీన్ని solve చేసే organizations artificial intelligence తదుపరి era ని define చేస్తాయి.
+కీ సవాలు ఏజెంట్లు ని మరిన్ని capable చేయడం కాదు - వాటిని మరింత **reliable**, **predictable**, మరియు మానవ విలువలు తో **aligned** చేయడం. దీన్ని పరిష్కరించండి చేసే organizations artificial intelligence తదుపరి era ని define చేస్తాయి.
 
-<Quiz question="Production లో autonomous AI agents deploy చేయడంలో అత్యంత critical challenge ఏమిటి?" options="Text generate చేయడంలో వేగం పెంచడం|Intended goals తో reliable గా, aligned గా, human oversight లో safe గా ఉండేలా ensure చేయడం|Underlying language model size తగ్గించడం|Human involvement అవసరాన్ని పూర్తిగా eliminate చేయడం" answer="1" explanation="Speed మరియు size engineering concerns. కానీ fundamental challenge trust. Agents reliably intended goals pursue చేయాలి, edge cases safely handle చేయాలి, appropriate human oversight maintain చేయాలి - ముఖ్యంగా high-stakes decisions కోసం." />
+<Quiz question="ప్రొడక్షన్ లో autonomous AI ఏజెంట్లు డిప్లాయ్ చేయండి చేయడంలో అత్యంత కీలకమైన సవాలు ఏమిటి?" options="టెక్స్ట్ సృష్టించు చేయడంలో వేగం పెంచడం|Intended goals తో reliable గా, aligned గా, మానవ oversight లో safe గా ఉండేలా నిర్ధారించండి చేయడం|Underlying భాషా మోడల్ పరిమాణం తగ్గించడం|మానవ involvement అవసరాన్ని పూర్తిగా eliminate చేయడం" answer="1" explanation="వేగం మరియు పరిమాణం ఇంజినీరింగ్ concerns. కానీ fundamental సవాలు నమ్మకం. ఏజెంట్లు reliably intended goals pursue చేయాలి, ముందంజ సందర్భాలు safely నిర్వహించు చేయాలి, appropriate మానవ oversight నిర్వహించండి చేయాలి - ముఖ్యంగా అధిక-stakes నిర్ణయాలు కోసం." />
 
 <ThinkAboutIt>
-AI agents మరింత capable అవుతున్నకొద్దీ, నిజమైన వ్యక్తులను ప్రభావితం చేసే decisions ఎక్కువగా తీసుకుంటాయి - hiring, lending, medical treatment. Autonomous AI efficiency gains మరియు human accountability, oversight అవసరం మధ్య society ఎలా balance చేయాలి?
+AI ఏజెంట్లు మరింత capable అవుతున్నకొద్దీ, నిజమైన వ్యక్తులను ప్రభావితం చేసే నిర్ణయాలు ఎక్కువగా తీసుకుంటాయి - నియామకం, lending, వైద్య treatment. Autonomous AI efficiency gains మరియు మానవ జవాబుదారీతనం, oversight అవసరం మధ్య society ఎలా బ్యాలెన్స్ చేయాలి?
 </ThinkAboutIt>

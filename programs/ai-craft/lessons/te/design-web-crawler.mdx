@@ -1,6 +1,6 @@
 ---
-title: "Web Crawler డిజైన్ చేయండి - Google ఇంటర్నెట్‌ను ఎలా Index చేస్తుంది"
-description: "URL frontier management, politeness policies, SimHash తో content deduplication, మరియు consistent hashing తో distributed crawling కవర్ చేసే distributed web crawler ను డిజైన్ చేయండి."
+title: "వెబ్ క్రాలర్ డిజైన్ చేయండి - Google ఇంటర్నెట్‌ను ఎలా ఇండెక్స్ చేస్తుంది"
+description: "URL అగ్రశ్రేణి నిర్వహణ, politeness policies, SimHash తో కంటెంట్ డీడూప్లికేషన్, మరియు స్థిరమైన హ్యాషింగ్ తో విస్తరిత crawling కవర్ చేసే విస్తరిత వెబ్ క్రాలర్ ను డిజైన్ చేయండి."
 order: 9
 difficulty: "advanced"
 duration: 22
@@ -8,25 +8,25 @@ icon: "🕷️"
 published: true
 ---
 
-# Web Crawler డిజైన్ చేయండి - Google ఇంటర్నెట్‌ను ఎలా Index చేస్తుంది
+# వెబ్ క్రాలర్ డిజైన్ చేయండి - Google ఇంటర్నెట్‌ను ఎలా ఇండెక్స్ చేస్తుంది
 
-Web crawler క్రమబద్ధంగా ఇంటర్నెట్‌ను browse చేసి web pages ను download మరియు index చేస్తుంది. ఇది ప్రతి search engine కు పునాది, మరియు దీన్ని డిజైన్ చేయడం వల్ల distributed systems, graph traversal, మరియు real web యొక్క complexities ను handle చేయడం నేర్చుకుంటారు.
+వెబ్ క్రాలర్ క్రమబద్ధంగా ఇంటర్నెట్‌ను బ్రౌజ్ చేసి వెబ్ పేజీలు ను download మరియు ఇండెక్స్ చేస్తుంది. ఇది ప్రతి సెర్చ్ ఇంజిన్ కు పునాది, మరియు దీన్ని డిజైన్ చేయడం వల్ల విస్తరిత సిస్టమ్‌లు, గ్రాఫ్ traversal, మరియు నిజమైన వెబ్ యొక్క complexities ను నిర్వహించు చేయడం నేర్చుకుంటారు.
 
-## Step 1 - Requirements సేకరణ
+## దశ 1 - అవసరాలు సేకరణ
 
-### Functional Requirements
-- Seed URLs సెట్ నుండి web pages crawl చేయడం
-- Hyperlinks extract చేసి కొత్త pages discover చేయడం
-- Download చేసిన content ను indexing మరియు processing కోసం store చేయడం
-- robots.txt మరియు crawl politeness rules పాటించడం
+### Functional అవసరాలు
+- Seed URLs సెట్ నుండి వెబ్ పేజీలు క్రాల్ చేయడం
+- Hyperlinks extract చేసి కొత్త పేజీలు గుర్తించండి చేయడం
+- Download చేసిన కంటెంట్ ను ఇండెక్సింగ్ మరియు ప్రాసెసింగ్ కోసం నిల్వ చేయడం
+- robots.txt మరియు క్రాల్ politeness rules పాటించడం
 
-### Non-Functional Requirements
-- **Scale** - నెలకు 1 billion pages crawl చేయడం
-- **Politeness** - ఏ ఒక్క web server ను overload చేయకపోవడం
-- **Freshness** - ముఖ్యమైన pages ను క్రమం తప్పకుండా re-crawl చేయడం
-- **Robustness** - malformed HTML, infinite loops, మరియు spider traps ను handle చేయడం
+### Non-Functional అవసరాలు
+- **స్కేల్** - నెలకు 1 బిలియన్ పేజీలు క్రాల్ చేయడం
+- **Politeness** - ఏ ఒక్క వెబ్ సర్వర్ ను overload చేయకపోవడం
+- **Freshness** - ముఖ్యమైన పేజీలు ను క్రమం తప్పకుండా re-క్రాల్ చేయడం
+- **Robustness** - malformed HTML, infinite loops, మరియు spider traps ను నిర్వహించు చేయడం
 
-## Step 2 - High-Level Architecture
+## దశ 2 - అధిక-స్థాయి ఆర్కిటెక్చర్
 
 ```
 Seed URLs → URL Frontier (priority queue)
@@ -42,19 +42,19 @@ Seed URLs → URL Frontier (priority queue)
                                  URL Frontier (loop)
 ```
 
-<Illustration src="/images/lessons/design-web-crawler.svg" alt="URL frontier నుండి fetcher, parser, URL extraction, deduplication మరియు తిరిగి frontier వరకు crawl loop చూపించే web crawler architecture" caption="Crawler ఒక continuous loop గా పని చేస్తుంది: page fetch చేయడం, కొత్త URLs extract చేయడం, deduplicate చేయడం, మరియు భవిష్యత్తు crawling కోసం enqueue చేయడం" />
+<Illustration src="/images/lessons/design-web-crawler.svg" alt="URL అగ్రశ్రేణి నుండి fetcher, parser, URL extraction, డీడూప్లికేషన్ మరియు తిరిగి అగ్రశ్రేణి వరకు క్రాల్ లూప్ చూపించే వెబ్ క్రాలర్ ఆర్కిటెక్చర్" title="క్రాలర్ ఒక continuous లూప్ గా పని చేస్తుంది: పేజీ fetch చేయడం, కొత్త URLs extract చేయడం, deduplicate చేయడం, మరియు భవిష్యత్తు crawling కోసం enqueue చేయడం" />
 
-## Step 3 - Crawl Loop
+## దశ 3 - క్రాల్ లూప్
 
-### BFS vs DFS Crawling
-- **BFS (Breadth-First)** - web crawling కోసం ఇష్టపడతారు. త్వరగా అనేక domains discover చేస్తుంది మరియు ఒకే site లో లోతుగా చిక్కుకోకుండా నిరోధిస్తుంది
-- **DFS (Depth-First)** - ఇతర domains discover చేయకముందే dynamically generated pages లో infinitely deep గా వెళ్ళే risk ఉంది
+### BFS వర్సెస్ DFS Crawling
+- **BFS (Breadth-First)** - వెబ్ crawling కోసం ఇష్టపడతారు. త్వరగా అనేక domains గుర్తించండి చేస్తుంది మరియు ఒకే సైట్ లో లోతుగా చిక్కుకోకుండా నిరోధిస్తుంది
+- **DFS (లోతు-First)** - ఇతర domains గుర్తించండి చేయకముందే dynamically సృష్టించిన పేజీలు లో infinitely లోతైన గా వెళ్ళే రిస్క్ ఉంది
 
-### URL Frontier Design
-Frontier ఒక simple queue కాదు - ఇది రెండు sub-components తో ఉన్న sophisticated priority system:
+### URL అగ్రశ్రేణి డిజైన్
+అగ్రశ్రేణి ఒక సులభమైన క్యూ కాదు - ఇది రెండు ఉప-భాగాలు తో ఉన్న sophisticated ప్రాధాన్యం సిస్టమ్:
 
-1. **Priority Queue (Front)** - URLs ను importance ఆధారంగా rank చేస్తుంది. PageRank, update frequency, మరియు domain authority వంటి factors ఉంటాయి
-2. **Politeness Queue (Back)** - ప్రతి domain కు దాని స్వంత FIFO queue ఉంటుంది. ఒక scheduler వివిధ domain queues నుండి pick చేస్తుంది, తద్వారా ఏ ఒక్క server పై అధిక load పడదు
+1. **ప్రాధాన్యం క్యూ (Front)** - URLs ను importance ఆధారంగా ర్యాంక్ చేస్తుంది. PageRank, నవీకరించు frequency, మరియు డొమైన్ authority వంటి factors ఉంటాయి
+2. **Politeness క్యూ (Back)** - ప్రతి డొమైన్ కు దాని స్వంత FIFO క్యూ ఉంటుంది. ఒక scheduler వివిధ డొమైన్ క్యూలు నుండి pick చేస్తుంది, తద్వారా ఏ ఒక్క సర్వర్ పై అధిక లోడ్ పడదు
 
 ```
 Front (Priority):       Back (Politeness):
@@ -67,12 +67,12 @@ Front (Priority):       Back (Politeness):
                         └───────────────────────┘
 ```
 
-<Quiz question="Web crawler general-purpose crawling కోసం DFS కాకుండా BFS ఎందుకు ఉపయోగిస్తుంది?" options="BFS తక్కువ memory ఉపయోగిస్తుంది|BFS వేగంగా ఎక్కువ unique domains discover చేస్తుంది మరియు ఒకే website లో లోతుగా చిక్కుకోకుండా నిరోధిస్తుంది|BFS, DFS కంటే వేగవంతం|DFS URLs తో పని చేయదు" answer="1" explanation="BFS level by level explore చేస్తుంది, అంటే అనేక వేర్వేరు domains లోని pages ను త్వరగా discover చేస్తుంది. DFS ఒకే site లో links ను లోతుగా follow చేయవచ్చు - potentially millions dynamically generated pages ను hit చేస్తూ - మరొక domain ను visit చేయకముందే." />
+<Quiz question="వెబ్ క్రాలర్ సాధారణ-purpose crawling కోసం DFS కాకుండా BFS ఎందుకు ఉపయోగిస్తుంది?" options="BFS తక్కువ మెమరీ ఉపయోగిస్తుంది|BFS వేగంగా ఎక్కువ ప్రత్యేక domains గుర్తించండి చేస్తుంది మరియు ఒకే వెబ్‌సైట్ లో లోతుగా చిక్కుకోకుండా నిరోధిస్తుంది|BFS, DFS కంటే వేగవంతం|DFS URLs తో పని చేయదు" answer="1" explanation="BFS స్థాయి ద్వారా స్థాయి అన్వేషించండి చేస్తుంది, అంటే అనేక వేర్వేరు domains లోని పేజీలు ను త్వరగా గుర్తించండి చేస్తుంది. DFS ఒకే సైట్ లో లింకులు ను లోతుగా అనుసరించండి చేయవచ్చు - potentially మిలియన్లు dynamically సృష్టించిన పేజీలు ను హిట్ చేస్తాయి చేస్తూ - మరొక డొమైన్ ను సందర్శన చేయకముందే." />
 
-## Step 4 - Politeness మరియు Robots.txt
+## దశ 4 - Politeness మరియు Robots.txt
 
 ### Robots.txt పాటించడం
-ఏదైనా domain ను crawl చేయడానికి ముందు, దాని `robots.txt` file ను fetch మరియు cache చేయండి:
+ఏదైనా డొమైన్ ను క్రాల్ చేయడానికి ముందు, దాని `robots.txt` ఫైల్ ను fetch మరియు క్యాష్ చేయండి:
 
 ```
 # Example robots.txt
@@ -82,28 +82,28 @@ Disallow: /private/
 Crawl-delay: 2
 ```
 
-ప్రతి domain యొక్క robots.txt ను TTL (24 గంటలు) తో cache చేయండి. `Disallow` rules మరియు `Crawl-delay` directives ను ఎల్లప్పుడూ పాటించండి.
+ప్రతి డొమైన్ యొక్క robots.txt ను TTL (24 గంటలు) తో క్యాష్ చేయండి. `Disallow` rules మరియు `Crawl-delay` directives ను ఎల్లప్పుడూ పాటించండి.
 
-### Crawl Rate Limiting
-Explicit `Crawl-delay` లేకపోయినా politeness కొనసాగించండి:
-- ప్రతి domain కు second కు maximum 1 request (configurable)
-- ప్రతి domain కు separate download queues ఉపయోగించండి
-- Response times track చేయండి - server slow అయితే, automatically back off అవ్వండి
+### క్రాల్ రేట్ పరిమితం చేసే
+స్పష్టమైన `Crawl-delay` లేకపోయినా politeness కొనసాగించండి:
+- ప్రతి డొమైన్ కు సెకండ్ కు గరిష్ట 1 రిక్వెస్ట్ (మార్చుకోగల)
+- ప్రతి డొమైన్ కు separate download క్యూలు ఉపయోగించండి
+- రెస్పాన్స్ సార్లు ట్రాక్ చేయండి - సర్వర్ నెమ్మది అయితే, automatically back ఆఫ్ అవ్వండి
 
-<FunFact>Google యొక్క web crawler (Googlebot) వందల billions pages crawl చేస్తుంది. Polite గా ఉండటానికి, ఇది server response times monitor చేస్తుంది మరియు ఒక site slow గా respond చేయడం మొదలుపెడితే crawl rate తగ్గిస్తుంది - effectively website ను crawler కు వ్యతిరేకంగా "push back" చేయనిస్తుంది.</FunFact>
+<FunFact>Google యొక్క వెబ్ క్రాలర్ (Googlebot) వందల billions పేజీలు క్రాల్ చేస్తుంది. Polite గా ఉండటానికి, ఇది సర్వర్ రెస్పాన్స్ సార్లు monitor చేస్తుంది మరియు ఒక సైట్ నెమ్మది గా respond చేయడం మొదలుపెడితే క్రాల్ రేట్ తగ్గిస్తుంది - effectively వెబ్‌సైట్ ను క్రాలర్ కు వ్యతిరేకంగా "పుష్ back" చేయనిస్తుంది.</FunFact>
 
-## Step 5 - Deduplication
+## దశ 5 - డీడూప్లికేషన్
 
-### URL Deduplication (Bloom Filter)
-Billions URLs తో, ఒక URL ను ఇంతకు ముందు చూశామా అని check చేయడానికి efficient data structure అవసరం. Bloom filter O(1) lookups ను చిన్న memory footprint తో అందిస్తుంది:
+### URL డీడూప్లికేషన్ (బ్లూమ్ ఫిల్టర్)
+Billions URLs తో, ఒక URL ను ఇంతకు ముందు చూశామా అని తనిఖీ చేయడానికి efficient డేటా నిర్మాణం అవసరం. బ్లూమ్ ఫిల్టర్ O(1) లుక్‌అప్‌లు ను చిన్న మెమరీ footprint తో అందిస్తుంది:
 
-- **Space:** 1 billion URLs కు ~1 GB, 1% false positive rate తో
-- **Trade-off:** అప్పుడప్పుడు page re-crawl అవ్వవచ్చు (false positive) కానీ కొత్త URL ఎప్పటికీ miss కాదు (no false negatives)
+- **Space:** 1 బిలియన్ URLs కు ~1 GB, 1% తప్పుడు పాజిటివ్ రేట్ తో
+- **Trade-ఆఫ్:** అప్పుడప్పుడు పేజీ re-క్రాల్ అవ్వవచ్చు (తప్పుడు పాజిటివ్) కానీ కొత్త URL ఎప్పటికీ మిస్ అవడం కాదు (no తప్పుడు negatives)
 
-Check చేయడానికి ముందు URLs normalize చేయండి: fragments (#) తొలగించండి, query parameters sort చేయండి, hostname lowercase చేయండి, మరియు relative paths resolve చేయండి.
+తనిఖీ చేయడానికి ముందు URLs normalize చేయండి: fragments (#) తొలగించండి, క్వెరీ పరామీటర్లు క్రమబద్ధీకరించండి చేయండి, hostname lowercase చేయండి, మరియు relative మార్గాలు resolve చేయండి.
 
-### Content Deduplication (SimHash)
-వేర్వేరు URLs identical content serve చేయవచ్చు (mirrors, copied articles). SimHash page content యొక్క fingerprint generate చేస్తుంది - similar fingerprints (చిన్న Hamming distance) ఉన్న pages likely duplicates:
+### కంటెంట్ డీడూప్లికేషన్ (SimHash)
+వేర్వేరు URLs identical కంటెంట్ సర్వ్ చేయండి చేయవచ్చు (mirrors, copied articles). SimHash పేజీ కంటెంట్ యొక్క fingerprint సృష్టించు చేస్తుంది - సారూప్య fingerprints (చిన్న Hamming distance) ఉన్న పేజీలు likely duplicates:
 
 ```
 Page A content → SimHash → 10110010...
@@ -111,48 +111,48 @@ Page B content → SimHash → 10110011...
 Hamming distance = 1 → likely duplicate, skip storing
 ```
 
-<Quiz question="Bloom filter ఒక URL ఇంతకు ముందు చూసినట్లు report చేస్తుంది. మీరు ఏమి conclude చేయవచ్చు?" options="URL ఖచ్చితంగా crawl అయ్యింది|URL బహుశా crawl అయ్యింది, కానీ false positive అయ్యే చిన్న chance ఉంది|URL crawl కాలేదు|Bloom filter rebuild చేయాలి" answer="1" explanation="Bloom filters లో చిన్న false positive rate ఉంటుంది - ఇవి చూడని URL కు 'అవును, చూశాం' అని చెప్పవచ్చు, కానీ actually add చేసిన URL కు ఎప్పుడూ 'లేదు' అని చెప్పవు. అంటే అప్పుడప్పుడు page re-crawl అవుతుంది, ఇది చాలా crawlers కు acceptable." />
+<Quiz question="బ్లూమ్ ఫిల్టర్ ఒక URL ఇంతకు ముందు చూసినట్లు నివేదిక చేస్తుంది. మీరు ఏమి conclude చేయవచ్చు?" options="URL ఖచ్చితంగా క్రాల్ అయ్యింది|URL బహుశా క్రాల్ అయ్యింది, కానీ తప్పుడు పాజిటివ్ అయ్యే చిన్న chance ఉంది|URL క్రాల్ కాలేదు|బ్లూమ్ ఫిల్టర్ rebuild చేయాలి" answer="1" explanation="బ్లూమ్ ఫిల్టర్లు లో చిన్న తప్పుడు పాజిటివ్ రేట్ ఉంటుంది - ఇవి చూడని URL కు 'అవును, చూశాం' అని చెప్పవచ్చు, కానీ నిజంగా జోడించు చేసిన URL కు ఎప్పుడూ 'లేదు' అని చెప్పవు. అంటే అప్పుడప్పుడు పేజీ re-క్రాల్ అవుతుంది, ఇది చాలా crawlers కు acceptable." />
 
-## Step 6 - Distributed Crawling
+## దశ 6 - విస్తరిత Crawling
 
-### Horizontally Scale చేయడం
-ఒక్క machine నెలకు billion pages crawl చేయలేదు. పనిని distribute చేయండి:
+### Horizontally స్కేల్ చేయడం
+ఒక్క machine నెలకు బిలియన్ పేజీలు క్రాల్ చేయలేదు. పనిని విస్తరించండి చేయండి:
 
-- Domain names పై **consistent hashing** ప్రతి domain ను specific crawler node కు assign చేస్తుంది. ఇది politeness ensure చేస్తుంది - ఒక given domain ను ఒకే node crawl చేస్తుంది
-- **URL frontier** hash ring ఆధారంగా nodes మధ్య partition అవుతుంది
-- Node assignments manage చేసి, nodes join లేదా leave అయినప్పుడు rebalance చేసే lightweight service ద్వారా **coordination**
+- డొమైన్ names పై **స్థిరమైన హ్యాషింగ్** ప్రతి డొమైన్ ను స్పష్టంగా క్రాలర్ నోడ్ కు assign చేస్తుంది. ఇది politeness నిర్ధారించండి చేస్తుంది - ఒక given డొమైన్ ను ఒకే నోడ్ క్రాల్ చేస్తుంది
+- **URL అగ్రశ్రేణి** హ్యాష్ ring ఆధారంగా నోడ్‌లు మధ్య పార్టిషన్ అవుతుంది
+- నోడ్ assignments manage చేసి, నోడ్‌లు join లేదా leave అయినప్పుడు rebalance చేసే తేలికపాటి సేవ ద్వారా **coordination**
 
-### DNS Resolution Caching
-DNS lookups ప్రతి request కు 10-100ms add చేస్తాయి. Scale వద్ద ఇది major bottleneck:
-- ప్రతి crawler node కు local DNS cache ఉంచండి
-- Queue లో ఉన్న URLs కోసం batch DNS pre-resolution చేయండి
-- Public DNS servers overload కాకుండా dedicated DNS resolver ఉపయోగించండి
+### DNS Resolution క్యాషింగ్
+DNS లుక్‌అప్‌లు ప్రతి రిక్వెస్ట్ కు 10-100ms జోడించు చేస్తాయి. స్కేల్ వద్ద ఇది ప్రధాన bottleneck:
+- ప్రతి క్రాలర్ నోడ్ కు స్థానిక DNS క్యాష్ ఉంచండి
+- క్యూ లో ఉన్న URLs కోసం బ్యాచ్ DNS ముందస్తు-resolution చేయండి
+- పబ్లిక్ DNS సర్వర్‌లు overload కాకుండా dedicated DNS resolver ఉపయోగించండి
 
-### Spider Trap Detection
-Malicious లేదా poorly built sites infinite URL spaces create చేయవచ్చు:
-- `/page/1/page/1/page/1/...` - repeating path patterns
-- ప్రతి future date కు URLs generate చేసే calendar pages
-- Identical content కు unique URLs create చేసే URLs లో Session IDs
+### Spider Trap గుర్తింపు
+హానికరమైన లేదా poorly built sites infinite URL spaces సృష్టించండి చేయవచ్చు:
+- `/page/1/page/1/page/1/...` - repeating మార్గం నమూనాలు
+- ప్రతి భవిష్యత్ date కు URLs సృష్టించు చేసే calendar పేజీలు
+- Identical కంటెంట్ కు ప్రత్యేక URLs సృష్టించండి చేసే URLs లో Session IDs
 
-**రక్షణలు:** maximum URL length, ప్రతి domain కు maximum crawl depth, repetitive URL structures కోసం pattern detection, మరియు domain-level page count limits.
+**రక్షణలు:** గరిష్ట URL length, ప్రతి డొమైన్ కు గరిష్ట క్రాల్ లోతు, repetitive URL structures కోసం నమూనా గుర్తింపు, మరియు డొమైన్-స్థాయి పేజీ లెక్క పరిమితులు.
 
-<ThinkAboutIt>Search index ను fresh గా ఉంచాలంటే, ఏ pages ను ముందుగా re-crawl చేయాలో ఎలా decide చేస్తారు? ప్రతి గంటకు update అయ్యే news site vs నెలకోసారి మారే Wikipedia article గురించి ఆలోచించండి. Re-crawl scheduling prioritise చేయడానికి ఏ signals ఉపయోగిస్తారు?</ThinkAboutIt>
+<ThinkAboutIt>సెర్చ్ ఇండెక్స్ ను fresh గా ఉంచాలంటే, ఏ పేజీలు ను ముందుగా re-క్రాల్ చేయాలో ఎలా decide చేస్తారు? ప్రతి గంటకు నవీకరించు అయ్యే news సైట్ వర్సెస్ నెలకోసారి మారే Wikipedia వ్యాసం గురించి ఆలోచించండి. Re-క్రాల్ scheduling prioritise చేయడానికి ఏ సంకేతాలు ఉపయోగిస్తారు?</ThinkAboutIt>
 
-## Step 7 - Bottlenecks మరియు Optimisations
+## దశ 7 - Bottlenecks మరియు Optimisations
 
-| Bottleneck | Solution |
+| Bottleneck | పరిష్కారం |
 |-----------|----------|
-| DNS resolution latency | Local DNS cache, batch pre-resolution |
-| Slow/unresponsive servers | Timeouts (30s), async I/O, retries తర్వాత skip |
-| Crawled content storage | Pages compress చేయడం, changed content మాత్రమే store చేయడం |
-| URL frontier memory | Disk-backed priority queue (RocksDB) |
-| Duplicate content | SimHash fingerprinting, canonical URL detection |
+| DNS resolution లేటెన్సీ | స్థానిక DNS క్యాష్, బ్యాచ్ ముందస్తు-resolution |
+| నెమ్మది/unresponsive సర్వర్‌లు | Timeouts (30s), async I/O, మళ్లీ ప్రయత్నాలు తర్వాత skip |
+| Crawled కంటెంట్ నిల్వ | పేజీలు compress చేయడం, changed కంటెంట్ మాత్రమే నిల్వ చేయడం |
+| URL అగ్రశ్రేణి మెమరీ | Disk-backed ప్రాధాన్యం క్యూ (RocksDB) |
+| Duplicate కంటెంట్ | SimHash fingerprinting, canonical URL గుర్తింపు |
 
-<ThinkAboutIt>Search engines crawl freshness (pages ను తరచుగా re-crawl చేయడం) మరియు discovery (కొత్త pages కనుగొనడం) మధ్య balance చేయాలి. మీ crawler కు రోజుకు 1 million pages అనే fixed budget ఉంటే, ఆ budget ను existing pages re-crawl చేయడం మరియు కొత్త pages discover చేయడం మధ్య ఎలా విభజిస్తారు?</ThinkAboutIt>
+<ThinkAboutIt>సెర్చ్ ఇంజిన్‌లు క్రాల్ freshness (పేజీలు ను తరచుగా re-క్రాల్ చేయడం) మరియు ఆవిష్కరణ (కొత్త పేజీలు కనుగొనడం) మధ్య బ్యాలెన్స్ చేయాలి. మీ క్రాలర్ కు రోజుకు 1 మిలియన్ పేజీలు అనే స్థిర బడ్జెట్ ఉంటే, ఆ బడ్జెట్ ను ఉన్న పేజీలు re-క్రాల్ చేయడం మరియు కొత్త పేజీలు గుర్తించండి చేయడం మధ్య ఎలా విభజిస్తారు?</ThinkAboutIt>
 
 ---
 
 ## 📚 మరింత చదవండి
-- [Web Crawler - System Design Interview Vol. 1, Ch. 9](https://bytebytego.com/) - Alex Xu యొక్క detailed web crawler design walkthrough
-- [Mercator: A Scalable Web Crawler](https://courses.cs.washington.edu/courses/cse454/15wi/papers/mercator.pdf) - scalable crawler architecture పై foundational paper
-- [Bloom Filters by Example](https://llimllib.github.io/bloomfilter-tutorial/) - Bloom filters ఎలా పని చేస్తాయో interactive tutorial
+- [వెబ్ క్రాలర్ - సిస్టమ్ డిజైన్ ఇంటర్వ్యూ Vol. 1, Ch. 9](https://bytebytego.com/) - Alex Xu యొక్క detailed వెబ్ క్రాలర్ డిజైన్ walkthrough
+- [Mercator: A Scalable వెబ్ క్రాలర్](https://courses.cs.washington.edu/courses/cse454/15wi/papers/mercator.pdf) - scalable క్రాలర్ ఆర్కిటెక్చర్ పై foundational పేపర్
+- [బ్లూమ్ ఫిల్టర్లు ద్వారా ఉదాహరణ](https://llimllib.github.io/bloomfilter-tutorial/) - బ్లూమ్ ఫిల్టర్లు ఎలా పని చేస్తాయో interactive ట్యుటోరియల్

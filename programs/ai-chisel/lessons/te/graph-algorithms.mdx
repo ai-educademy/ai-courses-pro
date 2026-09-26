@@ -1,6 +1,6 @@
 ---
-title: "Graph Algorithms - AI నెట్‌వర్క్‌లలో ఎలా నావిగేట్ చేస్తుంది"
-description: "Maps, social networks మరియు web crawlers ను నడిపించే traversal మరియు shortest-path algorithms నేర్చుకోండి."
+title: "గ్రాఫ్ అల్గారిథమ్‌లు - AI నెట్‌వర్క్‌లలో ఎలా నావిగేట్ చేస్తుంది"
+description: "మ్యాప్‌లు, సోషల్ networks మరియు వెబ్ crawlers ను నడిపించే traversal మరియు చిన్నదైన-మార్గం అల్గారిథమ్‌లు నేర్చుకోండి."
 order: 3
 difficulty: "intermediate"
 duration: 20
@@ -8,22 +8,22 @@ icon: "🗺️"
 published: true
 ---
 
-## Graphs అనుసంధానిత ప్రపంచాన్ని మోడల్ చేస్తాయి
+## గ్రాఫ్‌లు అనుసంధానిత ప్రపంచాన్ని మోడల్ చేస్తాయి
 
-స్నేహాలు, రోడ్ నెట్‌వర్క్‌లు, hyperlinks, నాడీ మార్గాలు - entities సంబంధాల ద్వారా అనుసంధానమైనప్పుడల్లా, మీకు ఒక **graph** ఉంటుంది. అధికారికంగా, ఒక graph G = (V, E) vertices (nodes) మరియు edges (connections) తో కూడి ఉంటుంది.
+స్నేహాలు, రోడ్ నెట్‌వర్క్‌లు, hyperlinks, నాడీ మార్గాలు - entities సంబంధాల ద్వారా అనుసంధానమైనప్పుడల్లా, మీకు ఒక **గ్రాఫ్** ఉంటుంది. అధికారికంగా, ఒక గ్రాఫ్ G = (V, E) vertices (నోడ్‌లు) మరియు ఎడ్జ్‌లు (కనెక్షన్‌లు) తో కూడి ఉంటుంది.
 
-Graphs **directed** (ఏకదిశ వీధులు) లేదా **undirected** (ద్విదిశ) కావచ్చు, మరియు edges పై **weights** (దూరాలు, ఖర్చులు, latencies) ఉండవచ్చు.
+గ్రాఫ్‌లు **directed** (ఏకదిశ వీధులు) లేదా **undirected** (ద్విదిశ) కావచ్చు, మరియు ఎడ్జ్‌లు పై **బరువులు** (దూరాలు, ఖర్చులు, latencies) ఉండవచ్చు.
 
-<Illustration src="/images/lessons/graph-algorithms.svg" alt="A directed weighted graph with six nodes and labelled edges, showing a shortest path highlighted" caption="Graphs entities మధ్య సంబంధాలను సంగ్రహిస్తాయి; edge weights traversal ఖర్చును సూచిస్తాయి." />
+<Illustration src="/images/lessons/graph-algorithms.svg" alt="A directed బరువులు ఇచ్చిన గ్రాఫ్ తో six నోడ్‌లు మరియు లేబుల్ చేసిన ఎడ్జ్‌లు, showing a చిన్నదైన మార్గం highlighted" title="గ్రాఫ్‌లు entities మధ్య సంబంధాలను సంగ్రహిస్తాయి; ముందంజ బరువులు traversal ఖర్చును సూచిస్తాయి." />
 
-## Graphs ను ఎలా Represent చేయాలి
+## గ్రాఫ్‌లు ను ఎలా ప్రతినిధ్యం చేస్తుంది చేయాలి
 
 రెండు సాధారణ representations:
 
-| Representation | Space | Edge lookup | దేనికి అనువైనది |
+| Representation | స్థలం | ముందంజ lookup | దేనికి అనువైనది |
 |---------------|-------|-------------|-----------------|
-| **Adjacency list** | O(V + E) | O(degree) | Sparse graphs (చాలావరకు real-world networks) |
-| **Adjacency matrix** | O(V²) | O(1) | Dense graphs, వేగవంతమైన edge ఉనికి తనిఖీలు |
+| **Adjacency జాబితా** | O(V + E) | O(డిగ్రీ) | Sparse గ్రాఫ్‌లు (చాలావరకు నిజమైన-ప్రపంచం networks) |
+| **Adjacency matrix** | O(V²) | O(1) | Dense గ్రాఫ్‌లు, వేగవంతమైన ముందంజ ఉనికి తనిఖీలు |
 
 ```
 // Adjacency list example
@@ -35,9 +35,9 @@ graph = {
 }
 ```
 
-## Breadth-First Search (BFS)
+## Breadth-మొదటి సెర్చ్ (BFS)
 
-BFS **స్థాయి వారీగా** అన్వేషిస్తుంది - లోతుగా వెళ్ళే ముందు అన్ని పొరుగువారిని సందర్శిస్తుంది. ఇది ఒక **queue** ను ఉపయోగిస్తుంది.
+BFS **స్థాయి వారీగా** అన్వేషిస్తుంది - లోతుగా వెళ్ళే ముందు అన్ని పొరుగువారిని సందర్శిస్తుంది. ఇది ఒక **క్యూ** ను ఉపయోగిస్తుంది.
 
 ```
 function bfs(graph, start):
@@ -52,19 +52,19 @@ function bfs(graph, start):
                 queue.enqueue(neighbour)
 ```
 
-**ముఖ్య లక్షణం:** BFS unweighted graphs లో **shortest path** కనుగొంటుంది ఎందుకంటే ఇది source నుండి దూరం క్రమంలో nodes ను ప్రాసెస్ చేస్తుంది.
+**ముఖ్య లక్షణం:** BFS unweighted గ్రాఫ్‌లు లో **చిన్నదైన మార్గం** కనుగొంటుంది ఎందుకంటే ఇది సోర్స్ నుండి దూరం క్రమంలో నోడ్‌లు ను ప్రాసెస్ చేస్తుంది.
 
-### BFS యొక్క AI Use Cases
+### BFS యొక్క AI వాడండి సందర్భాలు
 
-- **Social network friend suggestions** - 2–3 connections లోపల వ్యక్తులను కనుగొనడం.
-- **Web crawlers** - seed URL నుండి పొర పొరగా pages ను index చేయడం.
+- **సోషల్ నెట్‌వర్క్ friend suggestions** - 2–3 కనెక్షన్‌లు లోపల వ్యక్తులను కనుగొనడం.
+- **వెబ్ crawlers** - seed URL నుండి పొర పొరగా పేజీలు ను ఇండెక్స్ చేయడం.
 - **Puzzle solvers** - కనీస సంఖ్యలో కదలికలు కనుగొనడం (ఉదా. Rubik's cube states).
 
-<Quiz question="BFS unweighted graph లో shortest path ను ఎందుకు guarantee చేస్తుంది?" options="ఇది ఎల్లప్పుడూ అత్యంత తేలికైన edge ను ఎంచుకుంటుంది|ఇది source నుండి పెరుగుతున్న దూరం క్రమంలో nodes ను అన్వేషిస్తుంది|ఇది backtracking కోసం stack ను ఉపయోగిస్తుంది|ఇది traversal కు ముందు అన్ని edges ను sort చేస్తుంది" answer="1" explanation="BFS distance d వద్ద ఉన్న అన్ని nodes ను distance d+1 వద్ద ఏ node కంటే ముందు ప్రాసెస్ చేస్తుంది, కాబట్టి ఇది ఒక node ను మొదటిసారి చేరుకున్నప్పుడు అది shortest path ద్వారా అవుతుంది." />
+<Quiz question="BFS unweighted గ్రాఫ్ లో చిన్నదైన మార్గం ను ఎందుకు guarantee చేస్తుంది?" options="ఇది ఎల్లప్పుడూ అత్యంత తేలికైన ముందంజ ను ఎంచుకుంటుంది|ఇది సోర్స్ నుండి పెరుగుతున్న దూరం క్రమంలో నోడ్‌లు ను అన్వేషిస్తుంది|ఇది backtracking కోసం స్టాక్ ను ఉపయోగిస్తుంది|ఇది traversal కు ముందు అన్ని ఎడ్జ్‌లు ను క్రమబద్ధీకరించండి చేస్తుంది" answer="1" explanation="BFS distance d వద్ద ఉన్న అన్ని నోడ్‌లు ను distance d+1 వద్ద ఏ నోడ్ కంటే ముందు ప్రాసెస్ చేస్తుంది, కాబట్టి ఇది ఒక నోడ్ ను మొదటిసారి చేరుకున్నప్పుడు అది చిన్నదైన మార్గం ద్వారా అవుతుంది." />
 
-## Depth-First Search (DFS)
+## లోతు-మొదటి సెర్చ్ (DFS)
 
-DFS **సాధ్యమైనంత లోతుగా** వెళ్తుంది, తర్వాత backtrack చేస్తుంది. ఇది ఒక **stack** (లేదా recursion) ఉపయోగిస్తుంది.
+DFS **సాధ్యమైనంత లోతుగా** వెళ్తుంది, తర్వాత backtrack చేస్తుంది. ఇది ఒక **స్టాక్** (లేదా recursion) ఉపయోగిస్తుంది.
 
 ```
 function dfs(graph, node, visited):
@@ -75,20 +75,20 @@ function dfs(graph, node, visited):
             dfs(graph, neighbour, visited)
 ```
 
-### DFS యొక్క Applications
+### DFS యొక్క అప్లికేషన్‌లు
 
-- **Topological sort** - ప్రతి dependency ముందు వచ్చేలా tasks ను క్రమం చేయడం (build systems, course prerequisites).
-- **Cycle detection** - DFS ప్రస్తుతం call stack పై ఉన్న node ను మళ్ళీ సందర్శిస్తే, cycle ఉన్నట్లు.
+- **Topological క్రమబద్ధీకరించండి** - ప్రతి dependency ముందు వచ్చేలా పనులు ను క్రమం చేయడం (నిర్మించండి సిస్టమ్‌లు, కోర్సు prerequisites).
+- **Cycle గుర్తింపు** - DFS ప్రస్తుతం కాల్ స్టాక్ పై ఉన్న నోడ్ ను మళ్ళీ సందర్శిస్తే, చక్రం ఉన్నట్లు.
 - **Maze solving** - ప్రత్యామ్నాయాలను ప్రయత్నించే ముందు ఒక మార్గాన్ని పూర్తిగా అన్వేషించడం.
-- **Connected components** - ప్రతి సందర్శించని node నుండి DFS నడపడం ద్వారా వేర్వేరు clusters ను గుర్తించడం.
+- **Connected భాగాలు** - ప్రతి సందర్శించని నోడ్ నుండి DFS నడపడం ద్వారా వేర్వేరు clusters ను గుర్తించడం.
 
-<ThinkAboutIt>ఒక package manager dependencies ను సరైన క్రమంలో install చేయాలి. BFS ఉపయోగించాలా లేదా DFS-based topological sort ఉపయోగించాలా? dependency graph లో cycle ఉంటే ఏమి జరుగుతుంది?</ThinkAboutIt>
+<ThinkAboutIt>ఒక package మేనేజర్ dependencies ను సరైన క్రమంలో install చేయాలి. BFS ఉపయోగించాలా లేదా DFS-ఆధారిత topological క్రమబద్ధీకరించండి ఉపయోగించాలా? dependency గ్రాఫ్ లో చక్రం ఉంటే ఏమి జరుగుతుంది?</ThinkAboutIt>
 
-## Dijkstra's Algorithm - Weights తో Shortest Path
+## Dijkstra's అల్గారిథమ్ - బరువులు తో చిన్నదైన మార్గం
 
-Edges కు వేర్వేరు costs ఉన్నప్పుడు, BFS సరిపోదు. Dijkstra's algorithm ఒక source నుండి అన్ని ఇతర nodes కు shortest weighted path కనుగొంటుంది.
+ఎడ్జ్‌లు కు వేర్వేరు ఖర్చులు ఉన్నప్పుడు, BFS సరిపోదు. Dijkstra's అల్గారిథమ్ ఒక సోర్స్ నుండి అన్ని ఇతర నోడ్‌లు కు చిన్నదైన బరువులు ఇచ్చిన మార్గం కనుగొంటుంది.
 
-**ప్రధాన ఆలోచన:** ఎల్లప్పుడూ min-heap (priority queue) ఉపయోగించి **అత్యంత చౌకైన unvisited node** ను విస్తరించండి.
+**ప్రధాన ఆలోచన:** ఎల్లప్పుడూ నిమి-హీప్ (ప్రాధాన్యం క్యూ) ఉపయోగించి **అత్యంత చౌకైన unvisited నోడ్** ను విస్తరించండి.
 
 ```
 function dijkstra(graph, source):
@@ -105,39 +105,39 @@ function dijkstra(graph, source):
     return dist
 ```
 
-**Time complexity:** Binary heap తో O((V + E) log V).
+**సమయం క్లిష్టత:** Binary హీప్ తో O((V + E) లాగ్ V).
 
-<FunFact>Google Maps మొత్తం road network పై plain Dijkstra నడపదు. ఇది contraction hierarchies మరియు A* search ఉపయోగిస్తుంది - కానీ రెండూ Dijkstra యొక్క మౌలిక అంతర్దృష్టిపై ఆధారపడి ఉన్నాయి: shortest known distance ద్వారా greedy expansion.</FunFact>
+<FunFact>Google మ్యాప్‌లు మొత్తం road నెట్‌వర్క్ పై plain Dijkstra నడపదు. ఇది contraction hierarchies మరియు A* సెర్చ్ ఉపయోగిస్తుంది - కానీ రెండూ Dijkstra యొక్క మౌలిక అంతర్దృష్టిపై ఆధారపడి ఉన్నాయి: చిన్నదైన తెలిసిన distance ద్వారా greedy expansion.</FunFact>
 
-### Dijkstra యొక్క AI Use Cases
+### Dijkstra యొక్క AI వాడండి సందర్భాలు
 
-- **Route planning** - అత్యంత వేగవంతమైన మార్గాన్ని కనుగొనే navigation apps.
-- **Network routing** - అత్యల్ప latency path ఎంచుకునే internet packets.
-- **Knowledge graphs** - concepts మధ్య shortest semantic connection కనుగొనడం.
+- **మార్గం planning** - అత్యంత వేగవంతమైన మార్గాన్ని కనుగొనే navigation apps.
+- **నెట్‌వర్క్ రూటింగ్** - అత్యల్ప లేటెన్సీ మార్గం ఎంచుకునే internet packets.
+- **జ్ఞానం గ్రాఫ్‌లు** - భావనలు మధ్య చిన్నదైన semantic కనెక్షన్ కనుగొనడం.
 
-<Quiz question="Dijkstra's algorithm తదుపరి node ను సమర్థవంతంగా ఎంచుకోవడానికి ఏ data structure అవసరం?" options="Stack|Queue|Min-heap (priority queue)|Hash table" answer="2" explanation="Min-heap Dijkstra కు అత్యల్ప tentative distance ఉన్న unvisited node ను O(log V) సమయంలో extract చేయడానికి అనుమతిస్తుంది." />
+<Quiz question="Dijkstra's అల్గారిథమ్ తదుపరి నోడ్ ను సమర్థవంతంగా ఎంచుకోవడానికి ఏ డేటా నిర్మాణం అవసరం?" options="స్టాక్|క్యూ|నిమి-హీప్ (ప్రాధాన్యం క్యూ)|హ్యాష్ పట్టిక" answer="2" explanation="నిమి-హీప్ Dijkstra కు అత్యల్ప tentative distance ఉన్న unvisited నోడ్ ను O(లాగ్ V) సమయంలో extract చేయడానికి అనుమతిస్తుంది." />
 
-## Cycle Detection మరియు Connected Components
+## చక్రం గుర్తింపు మరియు కలిసిన భాగాలు
 
-### Cycle Detection
+### చక్రం గుర్తింపు
 
-ఒక **directed graph** లో, nodes ను మూడు states లో track చేయండి: unvisited, in-progress (ప్రస్తుత DFS path పై), మరియు completed. In-progress node ను మళ్ళీ ఎదుర్కోవడం అంటే cycle ఉన్నట్లు.
+ఒక **directed గ్రాఫ్** లో, నోడ్‌లు ను మూడు states లో ట్రాక్ చేయండి: unvisited, లో-progress (ప్రస్తుత DFS మార్గం పై), మరియు completed. లో-progress నోడ్ ను మళ్ళీ ఎదుర్కోవడం అంటే చక్రం ఉన్నట్లు.
 
-ఒక **undirected graph** లో, DFS immediate parent కాని visited node ను చేరుకుంటే cycle ఉన్నట్లు.
+ఒక **undirected గ్రాఫ్** లో, DFS తక్షణ parent కాని visited నోడ్ ను చేరుకుంటే చక్రం ఉన్నట్లు.
 
-### Connected Components
+### కలిసిన భాగాలు
 
-ప్రతి సందర్శించని node నుండి BFS లేదా DFS నడపండి. ప్రతి run ఒక connected component ను కనుగొంటుంది. Social networks లో, components ఒంటరి సముదాయాలను వెల్లడిస్తాయి.
+ప్రతి సందర్శించని నోడ్ నుండి BFS లేదా DFS నడపండి. ప్రతి నడపండి ఒక కలిసిన భాగం ను కనుగొంటుంది. సోషల్ networks లో, భాగాలు ఒంటరి సముదాయాలను వెల్లడిస్తాయి.
 
-<ThinkAboutIt>ఒక AI fraud detection system transactions ను graph గా మోడల్ చేస్తుంది, ఇక్కడ accounts nodes మరియు transfers edges. Connected components money-laundering rings ను గుర్తించడంలో ఎలా సహాయపడగలవు?</ThinkAboutIt>
+<ThinkAboutIt>ఒక AI మోసం గుర్తింపు సిస్టమ్ transactions ను గ్రాఫ్ గా మోడల్ చేస్తుంది, ఇక్కడ ఖాతాలు నోడ్‌లు మరియు transfers ఎడ్జ్‌లు. కలిసిన భాగాలు money-laundering rings ను గుర్తించడంలో ఎలా సహాయపడగలవు?</ThinkAboutIt>
 
 ## ముఖ్యమైన విషయాలు
 
-1. **BFS** స్థాయి వారీగా అన్వేషిస్తుంది - unweighted graphs లో shortest paths మరియు neighbour-based discovery కు అనువైనది.
-2. **DFS** లోతుగా వెళ్తుంది - topological sorting, cycle detection, మరియు component analysis కు వెన్నెముక.
-3. **Dijkstra** priority queue ఉపయోగించి BFS ను weighted graphs కు విస్తరిస్తుంది - ఆధునిక route planning కు పునాది.
-4. Graph algorithms maps, social networks, package managers, మరియు knowledge graphs వెనుక ఉన్న engine.
+1. **BFS** స్థాయి వారీగా అన్వేషిస్తుంది - unweighted గ్రాఫ్‌లు లో చిన్నదైన మార్గాలు మరియు neighbour-ఆధారిత ఆవిష్కరణ కు అనువైనది.
+2. **DFS** లోతుగా వెళ్తుంది - topological sorting, చక్రం గుర్తింపు, మరియు భాగం విశ్లేషణ కు వెన్నెముక.
+3. **Dijkstra** ప్రాధాన్యం క్యూ ఉపయోగించి BFS ను బరువులు ఇచ్చిన గ్రాఫ్‌లు కు విస్తరిస్తుంది - ఆధునిక మార్గం planning కు పునాది.
+4. గ్రాఫ్ అల్గారిథమ్‌లు మ్యాప్‌లు, సోషల్ networks, package మేనేజర్లు, మరియు జ్ఞానం గ్రాఫ్‌లు వెనుక ఉన్న ఇంజిన్.
 
-<FunFact>World Wide Web లో 50 billion కంటే ఎక్కువ indexed pages ఉన్నాయి. Search engine crawlers pages ను కనుగొని మళ్ళీ index చేయడానికి BFS variations ఉపయోగిస్తాయి, page importance (PageRank) ఆధారంగా ప్రాధాన్యత ఇస్తూ.</FunFact>
+<FunFact>ప్రపంచం Wide వెబ్ లో 50 బిలియన్ కంటే ఎక్కువ indexed పేజీలు ఉన్నాయి. సెర్చ్ ఇంజిన్ crawlers పేజీలు ను కనుగొని మళ్ళీ ఇండెక్స్ చేయడానికి BFS variations ఉపయోగిస్తాయి, పేజీ importance (PageRank) ఆధారంగా ప్రాధాన్యత ఇస్తూ.</FunFact>
 
-<Quiz question="ఒక directed task-dependency graph లో circular dependency ఉందో లేదో detect చేయడానికి ఏ algorithm ఉపయోగిస్తారు?" options="Dijkstra's algorithm|BFS shortest path|DFS with in-progress tracking|Binary search" answer="2" explanation="DFS three-state tracking (unvisited, in-progress, completed) తో back edges ను detect చేస్తుంది - in-progress node ను మళ్ళీ ఎదుర్కోవడం అంటే cycle ఉన్నట్లు." />
+<Quiz question="ఒక directed పని-dependency గ్రాఫ్ లో circular dependency ఉందో లేదో గుర్తించండి చేయడానికి ఏ అల్గారిథమ్ ఉపయోగిస్తారు?" options="Dijkstra's అల్గారిథమ్|BFS చిన్నదైన మార్గం|DFS తో లో-progress ట్రాకింగ్|Binary సెర్చ్" answer="2" explanation="DFS మూడు-స్థితి ట్రాకింగ్ (unvisited, లో-progress, completed) తో back ఎడ్జ్‌లు ను గుర్తించండి చేస్తుంది - లో-progress నోడ్ ను మళ్ళీ ఎదుర్కోవడం అంటే చక్రం ఉన్నట్లు." />

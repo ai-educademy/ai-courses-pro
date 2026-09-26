@@ -1,6 +1,6 @@
 ---
-title: "Notification System Design చేయండి - Push, Email, మరియు SMS Billion Scale లో"
-description: "Push, email, SMS, మరియు in-app notifications ను message queues, deduplication, మరియు user preference management తో handle చేసే scalable multi-channel notification system ను design చేయండి."
+title: "నోటిఫికేషన్ సిస్టమ్ డిజైన్ చేయండి - పుష్, ఇమెయిల్, మరియు SMS బిలియన్ స్కేల్ లో"
+description: "పుష్, ఇమెయిల్, SMS, మరియు లో-app నోటిఫికేషన్‌లు ను సందేశం క్యూలు, డీడూప్లికేషన్, మరియు వినియోగదారు అభిరుచి నిర్వహణ తో నిర్వహించు చేసే scalable బహుళ-channel నోటిఫికేషన్ సిస్టమ్ ను డిజైన్ చేయండి."
 order: 7
 difficulty: "advanced"
 duration: 22
@@ -8,27 +8,27 @@ icon: "🔔"
 published: true
 ---
 
-# Notification System Design చేయండి - Push, Email, మరియు SMS Billion Scale లో
+# నోటిఫికేషన్ సిస్టమ్ డిజైన్ చేయండి - పుష్, ఇమెయిల్, మరియు SMS బిలియన్ స్కేల్ లో
 
-ఆధునిక applications రోజూ బిలియన్ల notifications ను అనేక channels ద్వారా పంపుతాయి. ఈ system ను design చేయడం వల్ల message queues, third-party integrations, మరియు scale లో failures ను gracefully handle చేయడం నేర్చుకుంటారు.
+ఆధునిక అప్లికేషన్‌లు రోజూ బిలియన్ల నోటిఫికేషన్‌లు ను అనేక channels ద్వారా పంపుతాయి. ఈ సిస్టమ్ ను డిజైన్ చేయడం వల్ల సందేశం క్యూలు, third-party integrations, మరియు స్కేల్ లో failures ను gracefully నిర్వహించు చేయడం నేర్చుకుంటారు.
 
-## Step 1 - Requirements సేకరణ
+## దశ 1 - అవసరాలు సేకరణ
 
-### Functional Requirements
-- అనేక channels కు support: push notifications, email, SMS, మరియు in-app
-- Users తమ notification preferences configure చేసుకోగలగాలి మరియు ప్రతి channel కు opt out చేయగలగాలి
-- Personalisation తో templated messages (ఉదా., "Hi {name}, మీ order ship అయింది")
-- Scheduled మరియు immediate notifications కు support
+### Functional అవసరాలు
+- అనేక channels కు మద్దతు: పుష్ నోటిఫికేషన్‌లు, ఇమెయిల్, SMS, మరియు లో-app
+- వినియోగదారులు తమ నోటిఫికేషన్ అభిరుచులు configure చేసుకోగలగాలి మరియు ప్రతి channel కు opt out చేయగలగాలి
+- వ్యక్తిగతీకరణ తో templated సందేశాలు (ఉదా., "Hi {పేరు}, మీ క్రమం షిప్ చేయడం అయింది")
+- Scheduled మరియు తక్షణ నోటిఫికేషన్‌లు కు మద్దతు
 
-### Non-Functional Requirements
-- **Scalability** - రోజుకు 10 million+ notifications handle చేయగలగాలి
-- **Reliability** - ఏ notification కూడా పోకూడదు; at-least-once delivery
-- **Low latency** - urgent notifications సెకన్లలో deliver అవ్వాలి
-- **Extensible** - కొత్త channels (WhatsApp, Slack) సులభంగా add చేయగలగాలి
+### Non-Functional అవసరాలు
+- **Scalability** - రోజుకు 10 మిలియన్+ నోటిఫికేషన్‌లు నిర్వహించు చేయగలగాలి
+- **నమ్మకత** - ఏ నోటిఫికేషన్ కూడా పోకూడదు; at-least-once డెలివరీ
+- **Low లేటెన్సీ** - urgent నోటిఫికేషన్‌లు సెకన్లలో deliver అవ్వాలి
+- **Extensible** - కొత్త channels (WhatsApp, Slack) సులభంగా జోడించు చేయగలగాలి
 
-<ThinkAboutIt>Notification delivery exactly-once ఉండాలా లేదా at-least-once ఉండాలా? ఆలోచించండి - duplicate SMS రావడం vs ఒక critical security alert miss అవడం.</ThinkAboutIt>
+<ThinkAboutIt>నోటిఫికేషన్ డెలివరీ ఖచ్చితంగా-once ఉండాలా లేదా at-least-once ఉండాలా? ఆలోచించండి - duplicate SMS రావడం వర్సెస్ ఒక కీలకమైన భద్రత alert మిస్ అవడం అవడం.</ThinkAboutIt>
 
-## Step 2 - High-Level Architecture
+## దశ 2 - అధిక-స్థాయి ఆర్కిటెక్చర్
 
 ```
 Caller Services → Notification Service → Validation + Preference Check
@@ -41,18 +41,18 @@ Caller Services → Notification Service → Validation + Preference Check
                                  FCM   SendGrid  Twilio  WebSocket
 ```
 
-<Illustration src="/images/lessons/design-notification-system.svg" alt="Caller services, notification service, Kafka message queues, channel-specific workers, మరియు third-party providers తో notification system architecture" caption="Message queues notification service ను delivery workers నుండి decouple చేస్తాయి, ప్రతి channel independently scale అవడానికి వీలు కల్పిస్తాయి" />
+<Illustration src="/images/lessons/design-notification-system.svg" alt="Caller సేవలు, నోటిఫికేషన్ సేవ, Kafka సందేశం క్యూలు, channel-స్పష్టంగా workers, మరియు third-party providers తో నోటిఫికేషన్ సిస్టమ్ ఆర్కిటెక్చర్" title="సందేశం క్యూలు నోటిఫికేషన్ సేవ ను డెలివరీ workers నుండి decouple చేస్తాయి, ప్రతి channel independently స్కేల్ అవడానికి వీలు కల్పిస్తాయి" />
 
-### Core Components
-1. **Notification Service** - requests validate చేస్తుంది, user preferences check చేస్తుంది, templates render చేస్తుంది, మరియు messages enqueue చేస్తుంది
-2. **Message Queues** - ప్రతి channel కు విడిగా queues, independent scaling మరియు isolation కోసం
-3. **Delivery Workers** - channel-specific workers, third-party API calls handle చేస్తాయి
-4. **Template Service** - variable substitution తో notification templates store మరియు render చేస్తుంది
+### మూల భాగాలు
+1. **నోటిఫికేషన్ సేవ** - రిక్వెస్ట్‌లు ధృవీకరించండి చేస్తుంది, వినియోగదారు అభిరుచులు తనిఖీ చేస్తుంది, templates render చేస్తుంది, మరియు సందేశాలు enqueue చేస్తుంది
+2. **సందేశం క్యూలు** - ప్రతి channel కు విడిగా క్యూలు, independent స్కేలింగ్ మరియు isolation కోసం
+3. **డెలివరీ Workers** - channel-స్పష్టంగా workers, third-party API కాల్‌లు నిర్వహించు చేస్తాయి
+4. **Template సేవ** - variable substitution తో నోటిఫికేషన్ templates నిల్వ మరియు render చేస్తుంది
 
-## Step 3 - Deep Dive: Key Components
+## దశ 3 - లోతైన అధ్యయనం: కీ భాగాలు
 
-### User Preferences మరియు Opt-Out
-ప్రతి user మరియు notification type కు preferences store చేయండి:
+### వినియోగదారు అభిరుచులు మరియు Opt-Out
+ప్రతి వినియోగదారు మరియు నోటిఫికేషన్ type కు అభిరుచులు నిల్వ చేయండి:
 
 ```
 user_preferences:
@@ -66,21 +66,21 @@ user_preferences:
     security: { enabled: true, override_quiet_hours: true }
 ```
 
-Notification service enqueue చేయడానికి **ముందే** preferences check చేస్తుంది - user కోరుకోనిది ఎప్పుడూ పంపకూడదు.
+నోటిఫికేషన్ సేవ enqueue చేయడానికి **ముందే** అభిరుచులు తనిఖీ చేస్తుంది - వినియోగదారు కోరుకోనిది ఎప్పుడూ పంపకూడదు.
 
-### Priority Queues
-అన్ని notifications సమానం కావు. Priority levels వాడండి:
-- **Critical** - security alerts, OTP codes → వెంటనే process
-- **High** - order confirmations, payment receipts → సెకన్లలో
-- **Medium** - social interactions, comments → నిమిషాల్లో ఆమోదయోగ్యం
-- **Low** - marketing, recommendations → batch చేయవచ్చు
+### ప్రాధాన్యం క్యూలు
+అన్ని నోటిఫికేషన్‌లు సమానం కావు. ప్రాధాన్యం స్థాయులు వాడండి:
+- **కీలకమైన** - భద్రత alerts, OTP కోడ్‌లు → వెంటనే ప్రక్రియ
+- **అధిక** - క్రమం confirmations, చెల్లింపు receipts → సెకన్లలో
+- **Medium** - సోషల్ interactions, comments → నిమిషాల్లో ఆమోదయోగ్యం
+- **Low** - marketing, సిఫార్సులు → బ్యాచ్ చేయవచ్చు
 
-<Quiz question="Notification system ఒక shared queue బదులు ప్రతి channel కు విడిగా message queues ఎందుకు వాడాలి?" options="Storage costs తగ్గించడానికి|Independent scaling కు వీలు కల్పించడానికి మరియు ఒక slow channel మిగిలిన వాటిని block చేయకుండా ఆపడానికి|Kafka కు ప్రతి consumer కు విడి topics అవసరం కాబట్టి|System ను simple చేయడానికి" answer="1" explanation="Twilio outage వల్ల SMS delivery slow అయితే, shared queue లో backlog ఏర్పడి push మరియు email delivery కూడా delay అవుతుంది. ప్రతి channel కు విడి queues fault isolation ఇస్తాయి మరియు ప్రతి channel independently scale అవడానికి అనుమతిస్తాయి." />
+<Quiz question="నోటిఫికేషన్ సిస్టమ్ ఒక పంచుకున్న క్యూ బదులు ప్రతి channel కు విడిగా సందేశం క్యూలు ఎందుకు వాడాలి?" options="నిల్వ ఖర్చులు తగ్గించడానికి|Independent స్కేలింగ్ కు వీలు కల్పించడానికి మరియు ఒక నెమ్మది channel మిగిలిన వాటిని బ్లాక్ చేయకుండా ఆపడానికి|Kafka కు ప్రతి కన్స్యూమర్ కు విడి విషయాలు అవసరం కాబట్టి|సిస్టమ్ ను సులభమైన చేయడానికి" answer="1" explanation="Twilio outage వల్ల SMS డెలివరీ నెమ్మది అయితే, పంచుకున్న క్యూ లో backlog ఏర్పడి పుష్ మరియు ఇమెయిల్ డెలివరీ కూడా delay అవుతుంది. ప్రతి channel కు విడి క్యూలు లోపం isolation ఇస్తాయి మరియు ప్రతి channel independently స్కేల్ అవడానికి అనుమతిస్తాయి." />
 
-## Step 4 - Reliability మరియు Failure Handling
+## దశ 4 - నమ్మకత మరియు విఫలం నిర్వహణ
 
-### Deduplication
-Idempotency key వాడి duplicate notifications ను ఆపండి. Process చేయడానికి ముందు, notification ID deduplication store (Redis with TTL) లో ఉందో లేదో check చేయండి:
+### డీడూప్లికేషన్
+ఐడెంపోటెన్సీ కీ వాడి duplicate నోటిఫికేషన్‌లు ను ఆపండి. ప్రక్రియ చేయడానికి ముందు, నోటిఫికేషన్ ID డీడూప్లికేషన్ నిల్వ (Redis తో TTL) లో ఉందో లేదో తనిఖీ చేయండి:
 
 ```
 Key: "dedup:{notification_id}" → TTL: 24 hours
@@ -88,8 +88,8 @@ If key exists → skip (already sent)
 If not → process and set key
 ```
 
-### Retry with Exponential Backoff
-Third-party services fail అవుతాయి. పెరుగుతున్న delays తో retries implement చేయండి:
+### మళ్లీ ప్రయత్నం తో Exponential Backoff
+Third-party సేవలు విఫలమవుతుంది అవుతాయి. పెరుగుతున్న delays తో మళ్లీ ప్రయత్నాలు అమలు చేయండి చేయండి:
 
 ```
 Attempt 1: immediate
@@ -99,49 +99,49 @@ Attempt 4: wait 16 seconds
 Attempt 5: move to dead-letter queue
 ```
 
-### Per User Rate Limiting
-Users ను notification fatigue నుండి రక్షించండి:
-- ప్రతి user కు గంటకు గరిష్టంగా 3 push notifications
-- రోజుకు గరిష్టంగా 1 marketing email
-- Security notifications rate limits ను bypass చేస్తాయి
+### ప్రతి వినియోగదారు రేట్ పరిమితం చేసే
+వినియోగదారులు ను నోటిఫికేషన్ fatigue నుండి రక్షించండి:
+- ప్రతి వినియోగదారు కు గంటకు గరిష్టంగా 3 పుష్ నోటిఫికేషన్‌లు
+- రోజుకు గరిష్టంగా 1 marketing ఇమెయిల్
+- భద్రత నోటిఫికేషన్‌లు రేట్ పరిమితులు ను bypass చేస్తాయి
 
-<FunFact>Facebook రోజూ 10 billion కంటే ఎక్కువ push notifications పంపుతుంది. దీన్ని handle చేయడానికి వారు ఒక custom notification pipeline నిర్మించారు, ఇది సెకనుకు మిలియన్ల messages process చేయగలదు, iOS (APNs) మరియు Android (FCM) కు విడి delivery paths తో.</FunFact>
+<FunFact>Facebook రోజూ 10 బిలియన్ కంటే ఎక్కువ పుష్ నోటిఫికేషన్‌లు పంపుతుంది. దీన్ని నిర్వహించు చేయడానికి వారు ఒక కస్టమ్ నోటిఫికేషన్ పైప్‌లైన్ నిర్మించారు, ఇది సెకనుకు మిలియన్ల సందేశాలు ప్రక్రియ చేయగలదు, iOS (APNs) మరియు Android (FCM) కు విడి డెలివరీ మార్గాలు తో.</FunFact>
 
-## Step 5 - Third-Party Integration
+## దశ 5 - Third-Party Integration
 
 | Channel | Provider | Protocol | సవాళ్లు |
 |---------|----------|----------|---------|
-| Push (iOS) | APNs | HTTP/2 | Token management, silent push limits |
-| Push (Android) | FCM | HTTP | Topic-based broadcasting |
-| Email | SendGrid/SES | SMTP/API | Deliverability, spam filters |
-| SMS | Twilio | REST API | ప్రతి message కు cost, regional compliance |
-| In-App | WebSocket | WS | Connection management, offline buffering |
+| పుష్ (iOS) | APNs | HTTP/2 | టోకెన్ నిర్వహణ, silent పుష్ పరిమితులు |
+| పుష్ (Android) | FCM | HTTP | విషయం-ఆధారిత broadcasting |
+| ఇమెయిల్ | SendGrid/SES | SMTP/API | Deliverability, spam ఫిల్టర్లు |
+| SMS | Twilio | REST API | ప్రతి సందేశం కు ఖర్చు, regional అనుసరణ |
+| లో-App | WebSocket | WS | కనెక్షన్ నిర్వహణ, offline buffering |
 
-### Analytics Pipeline
-ప్రతి message యొక్క notification lifecycle ను track చేయండి:
+### విశ్లేషణలు పైప్‌లైన్
+ప్రతి సందేశం యొక్క నోటిఫికేషన్ జీవనచక్రం ను ట్రాక్ చేయండి:
 - **Created** → **Queued** → **Sent** → **Delivered** → **Opened** → **Clicked**
 
-Dashboard reporting కోసం events ను time-series database లేదా event stream లో store చేయండి: delivery rates, open rates, మరియు click-through rates ప్రతి channel మరియు notification type వారీగా.
+Dashboard reporting కోసం ఈవెంట్లు ను సమయం-series డేటాబేస్ లేదా ఈవెంట్ stream లో నిల్వ చేయండి: డెలివరీ రేట్లు, open రేట్లు, మరియు క్లిక్-ద్వారా రేట్లు ప్రతి channel మరియు నోటిఫికేషన్ type వారీగా.
 
-<Quiz question="ఒక notification system fail అయిన SMS delivery ను 3 సార్లు retry చేస్తుంది. Deduplication లేకుండా, మొదటి attempt actually succeed అయి acknowledgement lost అయితే ఏమి జరగవచ్చు?" options="Message శాశ్వతంగా పోతుంది|User కు అదే SMS యొక్క 4 copies వరకు రావచ్చు|System automatically duplicate ను detect చేస్తుంది|Retry mechanism ఈ scenario ను prevent చేస్తుంది" answer="1" explanation="Provider request ను process చేసినా acknowledgement lost అయితే, system fail అయిందని అనుకుని retry చేస్తుంది. Provider-level deduplication లేదా idempotency keys లేకుండా, user కు అదే SMS అనేక సార్లు రావచ్చు." />
+<Quiz question="ఒక నోటిఫికేషన్ సిస్టమ్ విఫలమవుతుంది అయిన SMS డెలివరీ ను 3 సార్లు మళ్లీ ప్రయత్నం చేస్తుంది. డీడూప్లికేషన్ లేకుండా, మొదటి attempt నిజంగా succeed అయి acknowledgement lost అయితే ఏమి జరగవచ్చు?" options="సందేశం శాశ్వతంగా పోతుంది|వినియోగదారు కు అదే SMS యొక్క 4 copies వరకు రావచ్చు|సిస్టమ్ automatically duplicate ను గుర్తించండి చేస్తుంది|మళ్లీ ప్రయత్నం mechanism ఈ సన్నివేశం ను నిరోధించండి చేస్తుంది" answer="1" explanation="Provider రిక్వెస్ట్ ను ప్రక్రియ చేసినా acknowledgement lost అయితే, సిస్టమ్ విఫలమవుతుంది అయిందని అనుకుని మళ్లీ ప్రయత్నం చేస్తుంది. Provider-స్థాయి డీడూప్లికేషన్ లేదా ఐడెంపోటెన్సీ కీలు లేకుండా, వినియోగదారు కు అదే SMS అనేక సార్లు రావచ్చు." />
 
-## Step 6 - Bottlenecks మరియు Optimisations
+## దశ 6 - Bottlenecks మరియు Optimisations
 
-| Bottleneck | Solution |
+| Bottleneck | పరిష్కారం |
 |-----------|----------|
-| Third-party rate limits | ప్రతి provider కు controlled throughput తో queue |
-| Scale లో template rendering | Common templates ను pre-render మరియు cache చేయండి |
-| ప్రతి message కు preference lookups | Redis లో user preferences cache చేయండి |
-| Peak traffic spikes | Queue depth ఆధారంగా workers ను auto-scale చేయండి |
-| Cross-region delivery | Provider endpoints కు దగ్గరగా workers deploy చేయండి |
+| Third-party రేట్ పరిమితులు | ప్రతి provider కు controlled థ్రూపుట్ తో క్యూ |
+| స్కేల్ లో template rendering | సాధారణ templates ను ముందస్తు-render మరియు క్యాష్ చేయండి |
+| ప్రతి సందేశం కు అభిరుచి లుక్‌అప్‌లు | Redis లో వినియోగదారు అభిరుచులు క్యాష్ చేయండి |
+| పీక్ ట్రాఫిక్ spikes | క్యూ లోతు ఆధారంగా workers ను ఆటో-స్కేల్ చేయండి |
+| Cross-region డెలివరీ | Provider endpoints కు దగ్గరగా workers డిప్లాయ్ చేయండి చేయండి |
 
-<ThinkAboutIt>Black Friday sale కోసం 2 గంటల్లో 50 million personalised emails పంపగలిగే, అదే సమయంలో sub-second latency తో real-time security alerts deliver చేయగలిగే notification system ను మీరు ఎలా design చేస్తారు?</ThinkAboutIt>
+<ThinkAboutIt>Black Friday sale కోసం 2 గంటల్లో 50 మిలియన్ personalised emails పంపగలిగే, అదే సమయంలో ఉప-సెకండ్ లేటెన్సీ తో రియల్ టైమ్ భద్రత alerts deliver చేయగలిగే నోటిఫికేషన్ సిస్టమ్ ను మీరు ఎలా డిజైన్ చేస్తారు?</ThinkAboutIt>
 
-<Quiz question="User notification preferences ను ఏ component check చేయాలి?" options="Delivery worker, third-party API call కు ముందే|Caller service, notification service కు పంపడానికి ముందు|Notification service, message enqueue చేయడానికి ముందు|Message queue, routing సమయంలో" answer="2" explanation="Notification service లో enqueue చేయడానికి ముందు preferences check చేయడం వల్ల user కోరుకోని notifications పై queue capacity మరియు worker processing వృథా కాదు. ఇది centralised preference logic apply చేయగలిగే అత్యంత తొలి point." />
+<Quiz question="వినియోగదారు నోటిఫికేషన్ అభిరుచులు ను ఏ భాగం తనిఖీ చేయాలి?" options="డెలివరీ worker, third-party API కాల్ కు ముందే|Caller సేవ, నోటిఫికేషన్ సేవ కు పంపడానికి ముందు|నోటిఫికేషన్ సేవ, సందేశం enqueue చేయడానికి ముందు|సందేశం క్యూ, రూటింగ్ సమయంలో" answer="2" explanation="నోటిఫికేషన్ సేవ లో enqueue చేయడానికి ముందు అభిరుచులు తనిఖీ చేయడం వల్ల వినియోగదారు కోరుకోని నోటిఫికేషన్‌లు పై క్యూ capacity మరియు worker ప్రాసెసింగ్ వృథా కాదు. ఇది centralised అభిరుచి logic apply చేయగలిగే అత్యంత తొలి స్థానం." />
 
 ---
 
 ## 📚 ఇంకా చదవండి
-- [Notification System - System Design Interview Vol. 1, Ch. 10](https://bytebytego.com/) - Alex Xu యొక్క సమగ్రమైన notification system design
-- [How Airbnb Built a Notification Platform](https://medium.com/airbnb-engineering) - real-world multi-channel notification architecture
-- [Firebase Cloud Messaging Docs](https://firebase.google.com/docs/cloud-messaging) - push notification delivery mechanics ను అర్థం చేసుకోండి
+- [నోటిఫికేషన్ సిస్టమ్ - సిస్టమ్ డిజైన్ ఇంటర్వ్యూ Vol. 1, Ch. 10](https://bytebytego.com/) - Alex Xu యొక్క సమగ్రమైన నోటిఫికేషన్ సిస్టమ్ డిజైన్
+- [How Airbnb Built a నోటిఫికేషన్ వేదిక](https://medium.com/airbnb-engineering) - నిజమైన-ప్రపంచం బహుళ-channel నోటిఫికేషన్ ఆర్కిటెక్చర్
+- [Firebase క్లౌడ్ Messaging Docs](https://firebase.google.com/docs/cloud-messaging) - పుష్ నోటిఫికేషన్ డెలివరీ mechanics ను అర్థం చేసుకోండి

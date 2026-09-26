@@ -1,6 +1,6 @@
 ---
-title: "URL Shortener డిజైన్ చేయండి - మీ మొదటి System Design Interview"
-description: "Structured interview framework ఉపయోగించి ఒక complete URL shortener design ను step-by-step తెలుసుకోండి."
+title: "URL సంక్షిప్తీకరణ సేవ డిజైన్ చేయండి - మీ మొదటి సిస్టమ్ డిజైన్ ఇంటర్వ్యూ"
+description: "నిర్మిత ఇంటర్వ్యూ ఫ్రేమ్‌వర్క్ ఉపయోగించి ఒక పూర్తి URL సంక్షిప్తీకరణ సేవ డిజైన్ ను దశ-ద్వారా-దశ తెలుసుకోండి."
 order: 2
 difficulty: "advanced"
 duration: 25
@@ -8,33 +8,33 @@ icon: "🔗"
 published: true
 ---
 
-## Interview Prompt
+## ఇంటర్వ్యూ ప్రాంప్ట్
 
-*"bit.ly లాంటి URL shortening service డిజైన్ చేయండి - పొడవైన URLs తీసుకుని చిన్న, unique codes ఇవ్వాలి."*
+*"బిట్.ly లాంటి URL సంక్షిప్తీకరణ సేవ డిజైన్ చేయండి - పొడవైన URLs తీసుకుని చిన్న, ప్రత్యేక కోడ్‌లు ఇవ్వాలి."*
 
-ఇది system design లో అత్యంత సాధారణ మొదటి ప్రశ్న, ఎందుకంటే ఇది చూడటానికి సింపుల్‌గా కనిపిస్తుంది కానీ core concepts అన్నీ cover చేస్తుంది: API design, encoding strategies, database choices, caching మరియు scaling. Lesson 1 లోని structured framework ఉపయోగించి దీన్ని solve చేద్దాం.
+ఇది సిస్టమ్ డిజైన్ లో అత్యంత సాధారణ మొదటి ప్రశ్న, ఎందుకంటే ఇది చూడటానికి సింపుల్‌గా కనిపిస్తుంది కానీ మూల భావనలు అన్నీ కవర్ చేస్తుంది చేస్తుంది: API డిజైన్, ఎన్‌కోడింగ్ వ్యూహాలు, డేటాబేస్ ఎంపికలు, క్యాషింగ్ మరియు స్కేలింగ్. పాఠం 1 లోని నిర్మిత ఫ్రేమ్‌వర్క్ ఉపయోగించి దీన్ని పరిష్కరించండి చేద్దాం.
 
-## Step 1: Requirements సేకరణ (5 నిమిషాలు)
+## దశ 1: అవసరాలు సేకరణ (5 నిమిషాలు)
 
-**Functional requirements:**
-- పొడవైన URL నుండి చిన్న unique URL generate చేయడం
-- Short URL ద్వారా redirect చేస్తే original long URL రావాలి
-- Users optional గా custom short codes set చేసుకోవచ్చు
-- Links configurable period తర్వాత expire అవ్వాలి (default: 5 సంవత్సరాలు)
-- Basic analytics: click count, referrer, geography
+**Functional అవసరాలు:**
+- పొడవైన URL నుండి చిన్న ప్రత్యేక URL సృష్టించు చేయడం
+- చిన్న URL రీడైరెక్ట్ అయినప్పుడు అసలు పొడవైన URL రావాలి
+- వినియోగదారులు ఐచ్చిక గా కస్టమ్ చిన్న కోడ్‌లు సెట్ చేసుకోవచ్చు
+- లింకులు మార్చుకోగల కాలం తర్వాత గడువు ముగియాలి అవ్వాలి (డిఫాల్ట్: 5 సంవత్సరాలు)
+- ప్రాథమిక విశ్లేషణలు: క్లిక్ లెక్క, రిఫరర్, భౌగోళికం
 
-**Non-functional requirements:**
-- నెలకు 100 million URLs generate (~40 per second)
-- Read-heavy: 100:1 read-to-write ratio → 4,000 redirects per second
-- URL redirection latency 50ms కంటే తక్కువ
-- Short URLs సాధ్యమైనంత చిన్నగా ఉండాలి
-- High availability - పనిచేయని link terrible user experience
+**Non-functional అవసరాలు:**
+- నెలకు 100 మిలియన్ URLs సృష్టించు (~40 ప్రతి సెకండ్)
+- చదవడం-భారీ: 100:1 చదవడం-కు-రాయండి నిష్పత్తి → 4,000 redirects ప్రతి సెకండ్
+- URL redirection లేటెన్సీ 50ms కంటే తక్కువ
+- చిన్న URLs సాధ్యమైనంత చిన్నగా ఉండాలి
+- అధిక అందుబాటు - పనిచేయని లింక్ చెడు వినియోగదారు అనుభవం
 
 <Callout>
-ప్రతి system design interview ను clarifying questions అడగడంతో మొదలుపెట్టండి. Explicit numbers రాయడం (40 writes/sec, 4,000 reads/sec) మీరు scale గురించి quantitatively ఆలోచించగలరని చూపిస్తుంది.
+ప్రతి సిస్టమ్ డిజైన్ ఇంటర్వ్యూ ను స్పష్టత కోసం ప్రశ్నలు అడగడంతో మొదలుపెట్టండి. స్పష్టమైన సంఖ్యలు రాయడం (40 రైట్‌లు/sec, 4,000 రీడ్‌లు/sec) మీరు స్కేల్ గురించి పరిమాణాత్మకంగా ఆలోచించగలరని చూపిస్తుంది.
 </Callout>
 
-## Step 2: API Design (5 నిమిషాలు)
+## దశ 2: API డిజైన్ (5 నిమిషాలు)
 
 ```
 POST /api/shorten
@@ -49,50 +49,50 @@ Response: { "clicks": 14523, "created_at": "...", "top_referrers": [...] }
 ```
 
 **HTTP 301 vs 302 ఎందుకు?**
-- **301 (Permanent Redirect)** - browsers దీన్ని cache చేస్తాయి, servers పై load తగ్గిస్తుంది
-- **302 (Temporary Redirect)** - browsers ఎల్లప్పుడూ మన servers ని hit చేస్తాయి, accurate analytics వచ్చేలా
+- **301 (శాశ్వత రీడైరెక్ట్)** - బ్రౌజర్లు దీన్ని క్యాష్ చేస్తాయి, సర్వర్‌లు పై లోడ్ తగ్గిస్తుంది
+- **302 (తాత్కాలిక రీడైరెక్ట్)** - బ్రౌజర్లు ఎల్లప్పుడూ మన సర్వర్‌లు ని హిట్ చేస్తాయి చేస్తాయి, ఖచ్చితమైన విశ్లేషణలు వచ్చేలా
 
-Clicks track చేసే service కి **302 మెరుగైన choice** ఎందుకంటే ప్రతి redirect మన servers ద్వారా వెళ్తుంది.
+Clicks ట్రాక్ చేసే సేవ కి **302 మెరుగైన ఎంపిక** ఎందుకంటే ప్రతి రీడైరెక్ట్ మన సర్వర్‌లు ద్వారా వెళ్తుంది.
 
-<Quiz question="మీ URL shortener కి accurate click analytics కావాలి. ఏ HTTP redirect status code వాడాలి మరియు ఎందుకు?" options="200 OK - page content నేరుగా return చేయండి|301 Permanent Redirect - browsers speed కోసం cache చేస్తాయి|302 Temporary Redirect - ప్రతి click మన server కి వస్తుంది counting కోసం|404 Not Found - తర్వాత JavaScript ద్వారా client-side redirect చేయండి" answer="2" explanation="302 Temporary Redirect browser ప్రతి click లో మన server ని contact చేసేలా ensure చేస్తుంది, analytics కోసం visit record చేయడానికి. 301 browser cache అయిపోతుంది, అంటే repeat visits count కావు." />
+<Quiz question="మీ URL సంక్షిప్తీకరణ సేవ కి ఖచ్చితమైన క్లిక్ విశ్లేషణలు కావాలి. ఏ HTTP రీడైరెక్ట్ స్థితి కోడ్ వాడాలి మరియు ఎందుకు?" options="200 OK - పేజీ కంటెంట్ నేరుగా తిరిగి ఇవ్వండి|301 శాశ్వత రీడైరెక్ట్ - బ్రౌజర్లు వేగం కోసం క్యాష్ చేస్తాయి|302 తాత్కాలిక రీడైరెక్ట్ - ప్రతి క్లిక్ మన సర్వర్ కి వస్తుంది counting కోసం|404 Not Found - తర్వాత JavaScript ద్వారా client-side రీడైరెక్ట్ చేయండి" answer="2" explanation="302 తాత్కాలిక రీడైరెక్ట్ బ్రౌజర్ ప్రతి క్లిక్ లో మన సర్వర్ ని సంప్రదిస్తుంది చేసేలా నిర్ధారించండి చేస్తుంది, విశ్లేషణలు కోసం సందర్శన రికార్డు చేయడానికి. 301 బ్రౌజర్ క్యాష్ అయిపోతుంది, అంటే repeat సందర్శనలు లెక్క కావు." />
 
-## Step 3: Encoding Strategy
+## దశ 3: ఎన్‌కోడింగ్ వ్యూహం
 
-ప్రధాన challenge: చిన్న, unique codes ఎలా generate చేయాలి?
+ప్రధాన సవాలు: చిన్న, ప్రత్యేక కోడ్‌లు ఎలా సృష్టించు చేయాలి?
 
-**Base62 encoding** `[a-zA-Z0-9]` వాడుతుంది - 62 characters. 7-character code తో 62⁷ = **3.5 trillion** unique combinations వస్తాయి, మన scale కి చాలా సరిపోతుంది.
+**బేస్62 ఎన్‌కోడింగ్** `[a-zA-Z0-9]` వాడుతుంది - 62 అక్షరాలు. 7-అక్షరం కోడ్ తో 62⁷ = **3.5 ట్రిలియన్** ప్రత్యేక కాంబినేషన్లు వస్తాయి, మన స్కేల్ కి చాలా సరిపోతుంది.
 
-**Option A - Counter-based:**
-- Auto-incrementing counter (1, 2, 3, ...) ని base62 కి convert చేయండి
-- Counter 1000 → `g8` | Counter 1000000 → `4c92`
-- **ప్రయోజనాలు:** guaranteed unique, simple, collisions ఉండవు
-- **అప్రయోజనాలు:** predictable (users తదుపరి URL ఊహించగలరు), centralised counter అవసరం
+**ఎంపిక A - కౌంటర్-ఆధారిత:**
+- ఆటో ఇంక్రిమెంటింగ్ కౌంటర్ (1, 2, 3, ...) ని బేస్62 కి మార్చండి చేయండి
+- కౌంటర్ 1000 → `g8` | కౌంటర్ 1000000 → `4c92`
+- **ప్రయోజనాలు:** guaranteed ప్రత్యేక, సులభమైన, collisions ఉండవు
+- **అప్రయోజనాలు:** predictable (వినియోగదారులు తదుపరి URL ఊహించగలరు), centralised కౌంటర్ అవసరం
 
-**Option B - Hash-based:**
-- Long URL ని MD5/SHA-256 తో hash చేసి, base62 యొక్క మొదటి 7 characters తీసుకోండి
+**ఎంపిక B - హ్యాష్-ఆధారిత:**
+- పొడవైన URL ని MD5/SHA-256 తో హ్యాష్ చేసి, బేస్62 యొక్క మొదటి 7 అక్షరాలు తీసుకోండి
 - **ప్రయోజనాలు:** stateless, central coordination అవసరం లేదు
-- **అప్రయోజనాలు:** collisions possible - database check చేసి retry చేయాలి
+- **అప్రయోజనాలు:** collisions సాధ్యమైన - డేటాబేస్ తనిఖీ చేసి మళ్లీ ప్రయత్నం చేయాలి
 
-**Option C - Pre-generated keys (recommended):**
-- Background service ముందుగానే millions of unique base62 codes generate చేసి key pool లో store చేస్తుంది
-- కొత్త URL వచ్చినప్పుడు pool నుండి తదుపరి available code తీసుకోండి
-- **ప్రయోజనాలు:** fast, collision risk లేదు, predictable కాదు
-- **అప్రయోజనాలు:** key generation service manage చేయాలి
+**ఎంపిక C - ముందస్తు-సృష్టించిన కీలు (recommended):**
+- నేపథ్యం సేవ ముందుగానే మిలియన్లు of ప్రత్యేక బేస్62 కోడ్‌లు సృష్టించు చేసి కీ pool లో నిల్వ చేస్తుంది
+- కొత్త URL వచ్చినప్పుడు pool నుండి తదుపరి available కోడ్ తీసుకోండి
+- **ప్రయోజనాలు:** వేగంగా, collision రిస్క్ లేదు, predictable కాదు
+- **అప్రయోజనాలు:** కీ సృష్టి సేవ manage చేయాలి
 
 <FunFact>
-Original TinyURL service 2002 లో launch అయింది మరియు ఇప్పటికీ నడుస్తోంది. ఒక సమయంలో ఇది రోజుకు 10 లక్షల కంటే ఎక్కువ short URLs generate చేసేది. tinyurl.com domain చాలా iconic అయింది, "tinyurl" అనే పదం URL shortening కి generic term గా మారింది.
+అసలు TinyURL సేవ 2002 లో launch అయింది మరియు ఇప్పటికీ నడుస్తోంది. ఒక సమయంలో ఇది రోజుకు 10 లక్షల కంటే ఎక్కువ చిన్న URLs సృష్టించు చేసేది. tinyurl.com డొమైన్ చాలా iconic అయింది, "tinyurl" అనే పదం URL సంక్షిప్తీకరణ కి సాధారణ కాలవ్యవధి గా మారింది.
 </FunFact>
 
-## Step 4: Database Choice మరియు Schema
+## దశ 4: డేటాబేస్ ఎంపిక మరియు స్కీమా
 
-నెలకు 100 million కొత్త URLs మరియు 5 సంవత్సరాల retention తో, మనం దాదాపు **6 billion records** store చేస్తాం. ఇది simple key-value lookups తో read-heavy workload.
+నెలకు 100 మిలియన్ కొత్త URLs మరియు 5 సంవత్సరాల retention తో, మనం దాదాపు **6 బిలియన్ records** నిల్వ చేస్తాం. ఇది సులభమైన కీ-విలువ లుక్‌అప్‌లు తో చదవడం-భారీ workload.
 
-**Database choice: DynamoDB లేదా Cassandra**
-- Lookups ఎల్లప్పుడూ short code (partition key) ద్వారా - complex joins అవసరం లేదు
-- రెండూ horizontal scaling తో massive read throughput handle చేస్తాయి
-- రెండూ partition key ద్వారా sub-10ms lookups ఇస్తాయి
+**డేటాబేస్ ఎంపిక: DynamoDB లేదా Cassandra**
+- లుక్‌అప్‌లు ఎల్లప్పుడూ చిన్న కోడ్ (పార్టిషన్ కీ) ద్వారా - క్లిష్టమైన joins అవసరం లేదు
+- రెండూ horizontal స్కేలింగ్ తో massive చదవడం థ్రూపుట్ నిర్వహించు చేస్తాయి
+- రెండూ పార్టిషన్ కీ ద్వారా ఉప-10ms లుక్‌అప్‌లు ఇస్తాయి
 
-**Schema:**
+**స్కీమా:**
 ```
 Table: urls
   short_code (partition key): "aB3kx9"
@@ -103,7 +103,7 @@ Table: urls
   click_count: 14523
 ```
 
-Analytics కోసం, ప్రత్యేక time-series table individual click events store చేస్తుంది:
+విశ్లేషణలు కోసం, ప్రత్యేక సమయం-series పట్టిక వ్యక్తిగత క్లిక్ ఈవెంట్లు నిల్వ చేస్తుంది:
 ```
 Table: clicks
   short_code (partition key): "aB3kx9"
@@ -113,79 +113,79 @@ Table: clicks
   device: "mobile"
 ```
 
-<Illustration src="/images/lessons/design-url-shortener.svg" alt="API servers, key generation service, cache మరియు database తో URL shortener architecture" caption="URL shortener architecture - read requests మొదట cache ని hit చేస్తాయి, miss అయితే database కి fallback అవుతుంది." />
+<Illustration src="/images/lessons/design-url-shortener.svg" alt="API సర్వర్‌లు, కీ సృష్టి సేవ, క్యాష్ మరియు డేటాబేస్ తో URL సంక్షిప్తీకరణ సేవ ఆర్కిటెక్చర్" title="URL సంక్షిప్తీకరణ సేవ ఆర్కిటెక్చర్ - చదవడం రిక్వెస్ట్‌లు మొదట క్యాష్ ని హిట్ చేస్తాయి చేస్తాయి, మిస్ అవడం అయితే డేటాబేస్ కి fallback అవుతుంది." />
 
-## Step 5: Caching Strategy
+## దశ 5: క్యాషింగ్ వ్యూహం
 
-4,000 reads per second మరియు heavy-tailed distribution (కొన్ని URLs కి millions of clicks వస్తాయి, చాలా వాటికి చాలా తక్కువ) తో caching తప్పనిసరి.
+4,000 రీడ్‌లు ప్రతి సెకండ్ మరియు భారీ-tailed వితరణ (కొన్ని URLs కి మిలియన్లు of clicks వస్తాయి, చాలా వాటికి చాలా తక్కువ) తో క్యాషింగ్ తప్పనిసరి.
 
-**Redis cache** అత్యధికంగా access అయ్యే mappings store చేస్తుంది:
+**Redis క్యాష్** అత్యధికంగా యాక్సెస్ అయ్యే mappings నిల్వ చేస్తుంది:
 ```
 Key:   url:aB3kx9
 Value: "https://example.com/very/long/path"
 TTL:   24 hours
 ```
 
-**Cache hit flow (fast path):**
-1. Request వస్తుంది: `GET /aB3kx9`
-2. Redis check → cache hit → 302 redirect return
-3. Asynchronously click event ని Kafka లో log చేయడం
+**క్యాష్ హిట్ చేస్తాయి ప్రవాహం (వేగంగా మార్గం):**
+1. రిక్వెస్ట్ వస్తుంది: `GET /aB3kx9`
+2. Redis తనిఖీ → క్యాష్ హిట్ చేస్తాయి → 302 రీడైరెక్ట్ రిటర్న్
+3. Asynchronously క్లిక్ ఈవెంట్ ని Kafka లో లాగ్ చేయడం
 
-**Cache miss flow:**
-1. Redis check → miss
-2. Database query → found
-3. Redis cache populate చేయడం
-4. 302 redirect return
+**క్యాష్ మిస్ అవడం ప్రవాహం:**
+1. Redis తనిఖీ → మిస్ అవడం
+2. డేటాబేస్ క్వెరీ → found
+3. Redis క్యాష్ populate చేయడం
+4. 302 రీడైరెక్ట్ రిటర్న్
 
-80% cache hit rate తో, 4,000 requests లో 800 మాత్రమే database ని చేరుకుంటాయి.
+80% క్యాష్ హిట్ చేస్తాయి రేట్ తో, 4,000 రిక్వెస్ట్‌లు లో 800 మాత్రమే డేటాబేస్ ని చేరుకుంటాయి.
 
-<Quiz question="మీ URL shortener 4,000 redirects per second serve చేస్తుంది. Cache hit rate 80%. Database ఎన్ని reads per second handle చేయాలి?" options="4,000|3,200|800|0 - cache అంతా handle చేస్తుంది" answer="2" explanation="80% cache hit rate తో, 20% requests cache miss అవుతాయి: 4,000 × 0.20 = 800 database reads per second." />
+<Quiz question="మీ URL సంక్షిప్తీకరణ సేవ 4,000 redirects ప్రతి సెకండ్ సర్వ్ చేయండి చేస్తుంది. క్యాష్ హిట్ చేస్తాయి రేట్ 80%. డేటాబేస్ ఎన్ని రీడ్‌లు ప్రతి సెకండ్ నిర్వహించు చేయాలి?" options="4,000|3,200|800|0 - క్యాష్ అంతా నిర్వహించు చేస్తుంది" answer="2" explanation="80% క్యాష్ హిట్ చేస్తాయి రేట్ తో, 20% రిక్వెస్ట్‌లు క్యాష్ మిస్ అవడం అవుతాయి: 4,000 × 0.20 = 800 డేటాబేస్ రీడ్‌లు ప్రతి సెకండ్." />
 
-## Step 6: Analytics మరియు Click Tracking
+## దశ 6: విశ్లేషణలు మరియు క్లిక్ ట్రాకింగ్
 
-Click tracking వల్ల redirects slow కాకూడదు. Redirect response వెంటనే return అవ్వాలి, analytics asynchronously process అవ్వాలి.
+క్లిక్ ట్రాకింగ్ వల్ల redirects నెమ్మది కాకూడదు. రీడైరెక్ట్ రెస్పాన్స్ వెంటనే రిటర్న్ అవ్వాలి, విశ్లేషణలు asynchronously ప్రక్రియ అవ్వాలి.
 
-**Architecture:**
-1. Redirect handler click event ని **Kafka** కి publish చేస్తుంది
-2. Click-processing service events consume చేసి:
-   - URL record లో `click_count` increment చేస్తుంది
-   - Clicks table లో detailed click data రాస్తుంది
-   - Streaming aggregation ద్వారా real-time dashboards update చేస్తుంది
+**ఆర్కిటెక్చర్:**
+1. రీడైరెక్ట్ handler క్లిక్ ఈవెంట్ ని **Kafka** కి ప్రచురించండి చేస్తుంది
+2. క్లిక్-ప్రాసెసింగ్ సేవ ఈవెంట్లు వినియోగిస్తాయి చేసి:
+   - URL రికార్డు లో `click_count` increment చేస్తుంది
+   - Clicks పట్టిక లో detailed క్లిక్ డేటా రాస్తుంది
+   - స్ట్రీమింగ్ aggregation ద్వారా రియల్ టైమ్ డ్యాష్‌బోర్డ్‌లు నవీకరించు చేస్తుంది
 
-ఈ decoupling slow analytics pipeline redirect latency ని ఎప్పుడూ impact చేయదని ensure చేస్తుంది.
+ఈ decoupling నెమ్మది విశ్లేషణలు పైప్‌లైన్ రీడైరెక్ట్ లేటెన్సీ ని ఎప్పుడూ ప్రభావం చేయదని నిర్ధారించండి చేస్తుంది.
 
 <ThinkAboutIt>
-URL shorteners కొన్నిసార్లు malicious links దాచడానికి వాడతారు. మీరు bit.ly డిజైన్ చేస్తుంటే, destination URLs ను phishing లేదా malware కోసం scan చేసే safety check ఎలా implement చేస్తారు - shortening process లో significant latency add చేయకుండా?
+URL shorteners కొన్నిసార్లు హానికరమైన లింకులు దాచడానికి వాడతారు. మీరు బిట్.ly డిజైన్ చేస్తుంటే, destination URLs ను phishing లేదా malware కోసం scan చేసే భద్రత తనిఖీ ఎలా అమలు చేయండి చేస్తారు - సంక్షిప్తీకరణ ప్రక్రియ లో significant లేటెన్సీ జోడించు చేయకుండా?
 </ThinkAboutIt>
 
-## Step 7: System ను Scale చేయడం
+## దశ 7: సిస్టమ్ ను స్కేల్ చేయడం
 
-**Horizontal scaling approach:**
-- **API servers** stateless - load balancer వెనుక instances add చేసి scale చేయండి
-- **Key generation service** ప్రత్యేక microservice గా నడుస్తుంది, దాని స్వంత pre-generated codes database తో
-- **Redis cluster** consistent hashing ద్వారా nodes మధ్య cache distribute చేస్తుంది
-- **Database sharding** short code యొక్క మొదటి character ద్వారా data సమానంగా distribute చేస్తుంది
+**Horizontal స్కేలింగ్ విధానం:**
+- **API సర్వర్‌లు** stateless - లోడ్ బ్యాలెన్సర్ వెనుక ఇన్‌స్టాన్స్‌లు జోడించు చేసి స్కేల్ చేయండి
+- **కీ సృష్టి సేవ** ప్రత్యేక microservice గా నడుస్తుంది, దాని స్వంత ముందస్తు-సృష్టించిన కోడ్‌లు డేటాబేస్ తో
+- **Redis క్లస్టర్** స్థిరమైన హ్యాషింగ్ ద్వారా నోడ్‌లు మధ్య క్యాష్ విస్తరించండి చేస్తుంది
+- **డేటాబేస్ షార్డింగ్** చిన్న కోడ్ యొక్క మొదటి అక్షరం ద్వారా డేటా సమానంగా విస్తరించండి చేస్తుంది
 
-**Peak loads handle చేయడం:**
-- Viral events లో ఒక URL కి per minute millions of hits రావచ్చు
-- Redis cache సహజంగానే దీన్ని absorb చేస్తుంది - ఒక cache entry unlimited reads serve చేస్తుంది
-- Kafka click events buffer చేస్తుంది, analytics database పై write load smooth చేస్తుంది
+**పీక్ loads నిర్వహించు చేయడం:**
+- Viral ఈవెంట్లు లో ఒక URL కి ప్రతి నిమిషం మిలియన్లు of hits రావచ్చు
+- Redis క్యాష్ సహజంగానే దీన్ని absorb చేస్తుంది - ఒక క్యాష్ entry unlimited రీడ్‌లు సర్వ్ చేయండి చేస్తుంది
+- Kafka క్లిక్ ఈవెంట్లు buffer చేస్తుంది, విశ్లేషణలు డేటాబేస్ పై రాయండి లోడ్ smooth చేస్తుంది
 
-<Quiz question="ఒక URL viral అవుతుంది మరియు per minute 500,000 clicks వస్తాయి. ఏ component అత్యంత తక్కువగా affect అవుతుంది?" options="Redis cache (single key అన్ని requests serve చేస్తుంది)|Kafka click-event consumers|Analytics database write path|API server CPU" answer="0" explanation="Redis ఒక cached key కి millions of reads per second అవలీలగా handle చేస్తుంది. Kafka consumers మరియు analytics database 500K writes/minute face చేస్తాయి, API servers 500K requests/minute handle చేస్తాయి - అన్నీ significant load లో ఉంటాయి." />
+<Quiz question="ఒక URL viral అవుతుంది మరియు ప్రతి నిమిషం 500,000 clicks వస్తాయి. ఏ భాగం అత్యంత తక్కువగా affect అవుతుంది?" options="Redis క్యాష్ (ఒకే కీ అన్ని రిక్వెస్ట్‌లు సర్వ్ చేయండి చేస్తుంది)|Kafka క్లిక్-ఈవెంట్ consumers|విశ్లేషణలు డేటాబేస్ రాయండి మార్గం|API సర్వర్ CPU" answer="0" explanation="Redis ఒక cached కీ కి మిలియన్లు of రీడ్‌లు ప్రతి సెకండ్ అవలీలగా నిర్వహించు చేస్తుంది. Kafka consumers మరియు విశ్లేషణలు డేటాబేస్ 500K రైట్‌లు/నిమిషం face చేస్తాయి, API సర్వర్‌లు 500K రిక్వెస్ట్‌లు/నిమిషం నిర్వహించు చేస్తాయి - అన్నీ significant లోడ్ లో ఉంటాయి." />
 
 <ThinkAboutIt>
-bit.ly లాంటి companies నెలకు billions of redirects handle చేస్తాయి. Short URL billboard లేదా TV ad లో share అయితే, traffic సెకన్లలో zero నుండి millions కి spike అవ్వవచ్చు. Caching కాకుండా, ఈ sudden, unpredictable traffic bursts absorb చేయడానికి మీరు ఇంకా ఏ strategies వాడతారు?
+బిట్.ly లాంటి కంపెనీలు నెలకు billions of redirects నిర్వహించు చేస్తాయి. చిన్న URL billboard లేదా TV ad లో పంచుకోండి అయితే, ట్రాఫిక్ సెకన్లలో zero నుండి మిలియన్లు కి spike అవ్వవచ్చు. క్యాషింగ్ కాకుండా, ఈ sudden, unpredictable ట్రాఫిక్ bursts absorb చేయడానికి మీరు ఇంకా ఏ వ్యూహాలు వాడతారు?
 </ThinkAboutIt>
 
 <FunFact>
-2009 లో bit.ly రోజుకు 80 million కంటే ఎక్కువ clicks process చేసేది. Libya - దాని country code .ly - political instability కారణంగా .ly domains తాత్కాలికంగా down చేసినప్పుడు, internet అంతటా panic వచ్చింది ఎందుకంటే millions of shortened links తాత్కాలికంగా పనిచేయడం ఆగిపోయాయి.
+2009 లో బిట్.ly రోజుకు 80 మిలియన్ కంటే ఎక్కువ clicks ప్రక్రియ చేసేది. Libya - దాని country కోడ్ .ly - political instability కారణంగా .ly domains తాత్కాలికంగా down చేసినప్పుడు, internet అంతటా panic వచ్చింది ఎందుకంటే మిలియన్లు of shortened లింకులు తాత్కాలికంగా పనిచేయడం ఆగిపోయాయి.
 </FunFact>
 
 ## ముఖ్యమైన విషయాలు
 
-- Framework follow చేయండి: requirements → API → encoding → data model → architecture → deep dives
-- 7 characters తో Base62 3.5 trillion unique codes ఇస్తుంది - చాలా సరిపోతుంది
-- Pre-generated key pools collision issues మరియు central counter bottlenecks నివారిస్తాయి
-- Accurate click analytics కావాలంటే 302 redirects వాడండి (301 కాదు)
-- Redis caching read-heavy workloads కోసం database load గణనీయంగా తగ్గిస్తుంది
-- Kafka తో async processing చేసి analytics ని redirect path నుండి decouple చేయండి
+- ఫ్రేమ్‌వర్క్ అనుసరించండి చేయండి: అవసరాలు → API → ఎన్‌కోడింగ్ → డేటా మోడల్ → ఆర్కిటెక్చర్ → లోతైన dives
+- 7 అక్షరాలు తో బేస్62 3.5 ట్రిలియన్ ప్రత్యేక కోడ్‌లు ఇస్తుంది - చాలా సరిపోతుంది
+- ముందస్తు-సృష్టించిన కీ pools collision ఇష్యూలు మరియు central కౌంటర్ bottlenecks నివారిస్తాయి
+- ఖచ్చితమైన క్లిక్ విశ్లేషణలు కావాలంటే 302 redirects వాడండి (301 కాదు)
+- Redis క్యాషింగ్ చదవడం-భారీ workloads కోసం డేటాబేస్ లోడ్ గణనీయంగా తగ్గిస్తుంది
+- Kafka తో async ప్రాసెసింగ్ చేసి విశ్లేషణలు ని రీడైరెక్ట్ మార్గం నుండి decouple చేయండి

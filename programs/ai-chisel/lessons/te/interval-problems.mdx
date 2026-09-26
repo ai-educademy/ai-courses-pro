@@ -1,6 +1,6 @@
 ---
-title: "Interval Problems - Merge, Insert మరియు Schedule"
-description: "Merge మరియు insert నుండి meeting rooms మరియు sweep lines వరకు interval-based problems లో నైపుణ్యం సాధించండి। Interviewers expect చేసే sorting strategies మరియు patterns నేర్చుకోండి."
+title: "ఇంటర్వల్ సమస్యలు - మర్జ్, చేర్చండి మరియు షెడ్యూల్"
+description: "మర్జ్ మరియు చేర్చండి నుండి సమావేశం rooms మరియు sweep lines వరకు ఇంటర్వల్-ఆధారిత సమస్యలు లో నైపుణ్యం సాధించండి। ఇంటర్వ్యూయర్లు ఆశించాలి చేసే sorting వ్యూహాలు మరియు నమూనాలు నేర్చుకోండి."
 order: 9
 difficulty: "advanced"
 duration: 16
@@ -8,18 +8,18 @@ icon: "📅"
 published: true
 ---
 
-## Interval Representation
+## ఇంటర్వల్ Representation
 
-ఒక interval అంటే `[start, end]` జత. చాలా interval problems ఒక critical step తో మొదలవుతాయి: **start time ప్రకారం sort చేయడం**. ఇది ఒక అస్తవ్యస్తమైన list ను ఎడమ నుండి కుడికి simple comparisons తో process చేయగల sequence గా మారుస్తుంది.
+ఒక ఇంటర్వల్ అంటే `[start, end]` జత. చాలా ఇంటర్వల్ సమస్యలు ఒక కీలకమైన దశ తో మొదలవుతాయి: **ప్రారంభించండి సమయం ప్రకారం క్రమబద్ధీకరించండి చేయడం**. ఇది ఒక అస్తవ్యస్తమైన జాబితా ను ఎడమ నుండి కుడికి సులభమైన comparisons తో ప్రక్రియ చేయగల sequence గా మారుస్తుంది.
 
 ```
 Unsorted: [3,6] [1,4] [8,10] [2,5]
 Sorted:   [1,4] [2,5] [3,6] [8,10]
 ```
 
-## Overlapping Intervals ను Merge చేయడం
+## Overlapping ఇంటర్వల్‌లు ను మర్జ్ చేయడం
 
-ఇది foundational interval problem (LeetCode 56). Sort చేసిన తర్వాత, current start ≤ previous end అయితే రెండు consecutive intervals overlap అవుతాయి.
+ఇది foundational ఇంటర్వల్ సమస్య (LeetCode 56). క్రమబద్ధీకరించండి చేసిన తర్వాత, ప్రస్తుత ప్రారంభించండి ≤ మునుపటి ముగింపు అయితే రెండు consecutive ఇంటర్వల్‌లు ఓవర్‌ల్యాప్ అవుతాయి.
 
 ```python
 def merge(intervals):
@@ -34,32 +34,32 @@ def merge(intervals):
 ```
 
 `[1,4] [2,5] [3,6] [8,10]` ను చూద్దాం:
-- `[2,5]` `[1,4]` తో overlap అవుతుంది → `[1,5]` గా merge
-- `[3,6]` `[1,5]` తో overlap అవుతుంది → `[1,6]` గా merge
-- `[8,10]` overlap లేదు → కొత్త interval
+- `[2,5]` `[1,4]` తో ఓవర్‌ల్యాప్ అవుతుంది → `[1,5]` గా మర్జ్
+- `[3,6]` `[1,5]` తో ఓవర్‌ల్యాప్ అవుతుంది → `[1,6]` గా మర్జ్
+- `[8,10]` ఓవర్‌ల్యాప్ లేదు → కొత్త ఇంటర్వల్
 
 ఫలితం: `[1,6] [8,10]`
 
 <Quiz
-  question="Start ప్రకారం sort చేసిన తర్వాత, రెండు consecutive intervals overlap అవుతాయని ఏ condition నిర్ణయిస్తుంది?"
-  options="current.start > previous.end|current.start == previous.start|current.start <= previous.end|current.end < previous.start"
+  question="ప్రారంభించండి ప్రకారం క్రమబద్ధీకరించండి చేసిన తర్వాత, రెండు consecutive ఇంటర్వల్‌లు ఓవర్‌ల్యాప్ అవుతాయని ఏ condition నిర్ణయిస్తుంది?"
+  options="ప్రస్తుత.ప్రారంభించండి > మునుపటి.ముగింపు|ప్రస్తుత.ప్రారంభించండి == మునుపటి.ప్రారంభించండి|ప్రస్తుత.ప్రారంభించండి <= మునుపటి.ముగింపు|ప్రస్తుత.ముగింపు < మునుపటి.ప్రారంభించండి"
   answer="2"
-  explanation="Current interval మునుపటి interval అయిపోయే సమయానికి లేదా అంతకు ముందే మొదలైతే, అవి overlap అవుతాయి మరియు merge చేయాలి."
+  explanation="ప్రస్తుత ఇంటర్వల్ మునుపటి ఇంటర్వల్ అయిపోయే సమయానికి లేదా అంతకు ముందే మొదలైతే, అవి ఓవర్‌ల్యాప్ అవుతాయి మరియు మర్జ్ చేయాలి."
 />
 
-## Insert Interval
+## చేర్చండి ఇంటర్వల్
 
-Sorted non-overlapping intervals మరియు ఒక కొత్త interval ఇవ్వబడ్డాయి, దాన్ని insert చేసి అవసరమైతే merge చేయండి (LeetCode 57). మూడు phases గా విభజించండి:
+Sorted non-overlapping ఇంటర్వల్‌లు మరియు ఒక కొత్త ఇంటర్వల్ ఇవ్వబడ్డాయి, దాన్ని చేర్చండి చేసి అవసరమైతే మర్జ్ చేయండి (LeetCode 57). మూడు phases గా విభజించండి:
 
-1. కొత్త interval మొదలయ్యే ముందే అయిపోయే intervals అన్నీ add చేయండి
-2. కొత్త interval తో overlap అయ్యే intervals అన్నింటినీ merge చేయండి
-3. మిగిలిన intervals ను మార్పులు లేకుండా add చేయండి
+1. కొత్త ఇంటర్వల్ మొదలయ్యే ముందే అయిపోయే ఇంటర్వల్‌లు అన్నీ జోడించు చేయండి
+2. కొత్త ఇంటర్వల్ తో ఓవర్‌ల్యాప్ అయ్యే ఇంటర్వల్‌లు అన్నింటినీ మర్జ్ చేయండి
+3. మిగిలిన ఇంటర్వల్‌లు ను మార్పులు లేకుండా జోడించు చేయండి
 
-<ThinkAboutIt>Insert Interval తరచుగా merge step స్పష్టంగా కనిపించకుండా present చేయబడుతుంది. Interview లో దీన్ని merge problem గా మీరు ఎలా గుర్తిస్తారు?</ThinkAboutIt>
+<ThinkAboutIt>చేర్చండి ఇంటర్వల్ తరచుగా మర్జ్ దశ స్పష్టంగా కనిపించకుండా present చేయబడుతుంది. ఇంటర్వ్యూ లో దీన్ని మర్జ్ సమస్య గా మీరు ఎలా గుర్తిస్తారు?</ThinkAboutIt>
 
-## Meeting Rooms I - అన్నీ Attend చేయగలరా?
+## సమావేశం Rooms I - అన్నీ హాజరుకండి చేయగలరా?
 
-Start time ప్రకారం sort చేయండి. ఏదైనా interval యొక్క start మునుపటి interval యొక్క end కంటే ముందు ఉంటే, conflict ఉంది.
+ప్రారంభించండి సమయం ప్రకారం క్రమబద్ధీకరించండి చేయండి. ఏదైనా ఇంటర్వల్ యొక్క ప్రారంభించండి మునుపటి ఇంటర్వల్ యొక్క ముగింపు కంటే ముందు ఉంటే, ఘర్షణ ఉంది.
 
 ```python
 def can_attend(intervals):
@@ -70,9 +70,9 @@ def can_attend(intervals):
     return True
 ```
 
-## Meeting Rooms II - కనీసం ఎన్ని Rooms కావాలి
+## సమావేశం Rooms II - కనీసం ఎన్ని Rooms కావాలి
 
-ఇక్కడ **event-based approach** ప్రకాశిస్తుంది. Starts మరియు ends ను రెండు sorted lists గా విడదీయండి, తర్వాత sweep చేయండి:
+ఇక్కడ **ఈవెంట్-ఆధారిత విధానం** ప్రకాశిస్తుంది. Starts మరియు ends ను రెండు sorted lists గా విడదీయండి, తర్వాత sweep చేయండి:
 
 ```python
 import heapq
@@ -87,15 +87,15 @@ def min_rooms(intervals):
     return len(heap)
 ```
 
-Heap అత్యంత త్వరగా అయిపోయే meeting ను track చేస్తుంది. అది తదుపరి meeting మొదలయ్యే ముందు అయిపోతే, మనం room ను reuse చేస్తాము. Heap యొక్క maximum sizeే answer.
+హీప్ అత్యంత త్వరగా అయిపోయే సమావేశం ను ట్రాక్ చేస్తుంది. అది తదుపరి సమావేశం మొదలయ్యే ముందు అయిపోతే, మనం గది ను reuse చేస్తాము. హీప్ యొక్క గరిష్ట పరిమాణంే సమాధానం.
 
-<Illustration src="/images/lessons/interval-problems.svg" alt="బహుళ rooms అవసరమైన overlapping meeting intervals చూపించే Timeline" caption="ప్రతి vertical slice ఏకకాల meetings ను చూపిస్తుంది - peak అనేది కనీస rooms సంఖ్య." />
+<Illustration src="/images/lessons/interval-problems.svg" alt="బహుళ rooms అవసరమైన overlapping సమావేశం ఇంటర్వల్‌లు చూపించే సమయరేఖ" title="ప్రతి vertical slice ఏకకాల meetings ను చూపిస్తుంది - పీక్ అనేది కనీస rooms సంఖ్య." />
 
-<FunFact>Meeting Rooms II అనేది ఏ point వద్దైనా maximum overlapping intervals సంఖ్యను కనుగొనడం అనే problem తోనే సమానం - ఈ concept CPU thread scheduling, bandwidth allocation మరియు hospital bed planning లో ఉపయోగించబడుతుంది.</FunFact>
+<FunFact>సమావేశం Rooms II అనేది ఏ స్థానం వద్దైనా గరిష్ట overlapping ఇంటర్వల్‌లు సంఖ్యను కనుగొనడం అనే సమస్య తోనే సమానం - ఈ భావన CPU thread scheduling, bandwidth allocation మరియు hospital bed planning లో ఉపయోగించబడుతుంది.</FunFact>
 
-## Non-Overlapping Intervals - కనీసం ఎన్ని Remove చేయాలి
+## Non-Overlapping ఇంటర్వల్‌లు - కనీసం ఎన్ని తొలగించండి చేయాలి
 
-Intervals ఇవ్వబడ్డాయి, ఏ overlap లేకుండా ఉండేందుకు కనీసం ఎన్ని remove చేయాలో కనుగొనండి (LeetCode 435). Greedy: **end time** ప్రకారం sort చేయండి, ఎల్లప్పుడూ అత్యంత త్వరగా అయిపోయే interval ను ఉంచండి - ఇది భవిష్యత్ intervals కోసం ఎక్కువ స్థలం మిగులుస్తుంది.
+ఇంటర్వల్‌లు ఇవ్వబడ్డాయి, ఏ ఓవర్‌ల్యాప్ లేకుండా ఉండేందుకు కనీసం ఎన్ని తొలగించండి చేయాలో కనుగొనండి (LeetCode 435). Greedy: **ముగింపు సమయం** ప్రకారం క్రమబద్ధీకరించండి చేయండి, ఎల్లప్పుడూ అత్యంత త్వరగా అయిపోయే ఇంటర్వల్ ను ఉంచండి - ఇది భవిష్యత్ ఇంటర్వల్‌లు కోసం ఎక్కువ స్థలం మిగులుస్తుంది.
 
 ```python
 def erase_overlap(intervals):
@@ -110,53 +110,53 @@ def erase_overlap(intervals):
 ```
 
 <Quiz
-  question="Non-overlapping intervals problem లో END time ప్రకారం sort చేయడం (start time కాకుండా) ఎందుకు పని చేస్తుంది?"
-  options="ఇది time complexity తగ్గిస్తుంది|అత్యంత త్వరగా అయిపోవడం తదుపరి intervals కోసం గరిష్ట స్థలం వదులుతుంది|ఇది ties ను బాగా handle చేస్తుంది|ఇది negative intervals ను నివారిస్తుంది"
+  question="Non-overlapping ఇంటర్వల్‌లు సమస్య లో ముగింపు సమయం ప్రకారం క్రమబద్ధీకరించండి చేయడం (ప్రారంభించండి సమయం కాకుండా) ఎందుకు పని చేస్తుంది?"
+  options="ఇది సమయం క్లిష్టత తగ్గిస్తుంది|అత్యంత త్వరగా అయిపోవడం తదుపరి ఇంటర్వల్‌లు కోసం గరిష్ట స్థలం వదులుతుంది|ఇది ties ను బాగా నిర్వహించు చేస్తుంది|ఇది negative ఇంటర్వల్‌లు ను నివారిస్తుంది"
   answer="1"
-  explanation="అత్యంత త్వరగా అయిపోయే interval ను greedy గా ఉంచడం భవిష్యత్ non-overlapping intervals కోసం అందుబాటులో ఉన్న timeline ను maximize చేస్తుంది."
+  explanation="అత్యంత త్వరగా అయిపోయే ఇంటర్వల్ ను greedy గా ఉంచడం భవిష్యత్ non-overlapping ఇంటర్వల్‌లు కోసం అందుబాటులో ఉన్న సమయరేఖ ను maximize చేస్తుంది."
 />
 
-## Interval List Intersections
+## ఇంటర్వల్ జాబితా Intersections
 
-రెండు sorted interval lists ఇవ్వబడ్డాయి, అన్ని intersections కనుగొనండి (LeetCode 986). రెండు pointers ఉపయోగించండి - ప్రతి list కు ఒకటి. `[a1, a2]` మరియు `[b1, b2]` యొక్క intersection `[max(a1, b1), min(a2, b2)]` - ఇది valid అయితే (start ≤ end). ఏ pointer యొక్క interval ముందు అయిపోతుందో దాన్ని ముందుకు జరపండి.
+రెండు sorted ఇంటర్వల్ lists ఇవ్వబడ్డాయి, అన్ని intersections కనుగొనండి (LeetCode 986). రెండు పాయింటర్లు ఉపయోగించండి - ప్రతి జాబితా కు ఒకటి. `[a1, a2]` మరియు `[b1, b2]` యొక్క intersection `[max(a1, b1), min(a2, b2)]` - ఇది valid అయితే (ప్రారంభించండి ≤ ముగింపు). ఏ పాయింటర్ యొక్క ఇంటర్వల్ ముందు అయిపోతుందో దాన్ని ముందుకు జరపండి.
 
-## Sweep Line Technique
+## Sweep లైన్ Technique
 
-Intervals ను pairwise compare చేయడానికి బదులు, ప్రతి interval ను events గా విడగొట్టండి:
+ఇంటర్వల్‌లు ను pairwise పోల్చండి చేయడానికి బదులు, ప్రతి ఇంటర్వల్ ను ఈవెంట్లు గా విడగొట్టండి:
 
 ```
 [1,4] → +1 at 1, -1 at 4
 [2,6] → +1 at 2, -1 at 6
 ```
 
-Events ను time ప్రకారం sort చేయండి. ఎడమ నుండి కుడికి sweep చేయండి, running count maintain చేస్తూ. Peak count "maximum overlap" ప్రశ్నలకు answer ఇస్తుంది. ఇది Meeting Rooms II ను arbitrary event-processing problems కు generalise చేస్తుంది.
+ఈవెంట్లు ను సమయం ప్రకారం క్రమబద్ధీకరించండి చేయండి. ఎడమ నుండి కుడికి sweep చేయండి, నడుస్తున్న లెక్క నిర్వహించండి చేస్తూ. పీక్ లెక్క "గరిష్ట ఓవర్‌ల్యాప్" ప్రశ్నలకు సమాధానం ఇస్తుంది. ఇది సమావేశం Rooms II ను arbitrary ఈవెంట్-ప్రాసెసింగ్ సమస్యలు కు generalise చేస్తుంది.
 
 ## Calendar Booking
 
-**My Calendar I** (LeetCode 729): booked intervals maintain చేయండి మరియు overlaps reject చేయండి. **My Calendar II**: single overlaps allow చేయండి కానీ triple-bookings reject చేయండి. Sweep line multi-layer overlap detection ను straightforward గా చేస్తుంది.
+**My Calendar I** (LeetCode 729): booked ఇంటర్వల్‌లు నిర్వహించండి చేయండి మరియు overlaps తిరస్కరించండి చేయండి. **My Calendar II**: ఒకే overlaps అనుమతించండి చేయండి కానీ triple-bookings తిరస్కరించండి చేయండి. Sweep లైన్ బహుళ-పొర ఓవర్‌ల్యాప్ గుర్తింపు ను straightforward గా చేస్తుంది.
 
-## Pattern Recognition - Intervals ఎప్పుడు అనుమానించాలి
+## నమూనా Recognition - ఇంటర్వల్‌లు ఎప్పుడు అనుమానించాలి
 
-Problem statements లో ఈ clues చూడండి:
+సమస్య statements లో ఈ clues చూడండి:
 
-- "overlapping", "conflicting", "schedule", "range" వంటి పదాలు
-- Start/end values జతలు
-- "how many simultaneous" లేదా "minimum resources" గురించి ప్రశ్నలు
-- Number line పై segments గా represent చేయగల data
+- "overlapping", "conflicting", "షెడ్యూల్", "పరిధి" వంటి పదాలు
+- ప్రారంభించండి/ముగింపు విలువలు జతలు
+- "how many simultaneous" లేదా "కనిష్ఠ resources" గురించి ప్రశ్నలు
+- సంఖ్య లైన్ పై segments గా ప్రతినిధ్యం చేస్తుంది చేయగల డేటా
 
 <Quiz
-  question="'Minimum number of intervals to remove' problem కోసం ఏ sorting strategy BEST?"
-  options="Start time ascending ప్రకారం sort చేయండి|End time ascending ప్రకారం sort చేయండి|Interval length descending ప్రకారం sort చేయండి|Sorting అవసరం లేదు"
+  question="'కనిష్ఠ సంఖ్య of ఇంటర్వల్‌లు కు తొలగించండి' సమస్య కోసం ఏ sorting వ్యూహం ఉత్తమ?"
+  options="ప్రారంభించండి సమయం ascending ప్రకారం క్రమబద్ధీకరించండి చేయండి|ముగింపు సమయం ascending ప్రకారం క్రమబద్ధీకరించండి చేయండి|ఇంటర్వల్ length descending ప్రకారం క్రమబద్ధీకరించండి చేయండి|Sorting అవసరం లేదు"
   answer="1"
-  explanation="End time ప్రకారం sort చేయడం greedy approach ను సాధ్యం చేస్తుంది: మిగతా వాటికి గరిష్ట స్థలం ఉంచేందుకు ఎల్లప్పుడూ అత్యంత త్వరగా అయిపోయే interval ను ఉంచండి."
+  explanation="ముగింపు సమయం ప్రకారం క్రమబద్ధీకరించండి చేయడం greedy విధానం ను సాధ్యం చేస్తుంది: మిగతా వాటికి గరిష్ట స్థలం ఉంచేందుకు ఎల్లప్పుడూ అత్యంత త్వరగా అయిపోయే ఇంటర్వల్ ను ఉంచండి."
 />
 
-<ThinkAboutIt>Sweep line technique interval problems ను event-processing problems గా convert చేస్తుంది. Coding interviews బయట, ఈ exact approach ఉపయోగించే real-world system గురించి మీరు ఆలోచించగలరా?</ThinkAboutIt>
+<ThinkAboutIt>Sweep లైన్ technique ఇంటర్వల్ సమస్యలు ను ఈవెంట్-ప్రాసెసింగ్ సమస్యలు గా మార్చండి చేస్తుంది. కోడింగ్ ఇంటర్వ్యూలు బయట, ఈ ఖచ్చితమైన విధానం ఉపయోగించే నిజమైన-ప్రపంచం సిస్టమ్ గురించి మీరు ఆలోచించగలరా?</ThinkAboutIt>
 
 ---
 
 ## 📚 మరింత చదవండి
 
-- [Merge Intervals - LeetCode 56](https://leetcode.com/problems/merge-intervals/) - Interval mastery కోసం essential starting problem
-- [Sweep Line Algorithm - CP-Algorithms](https://cp-algorithms.com/geometry/intersecting_segments.html) - Sweep line paradigm యొక్క లోతైన అన్వేషణ
-- [Meeting Rooms II - LeetCode 253](https://leetcode.com/problems/meeting-rooms-ii/) - Classic min-heap interval scheduling problem
+- [మర్జ్ ఇంటర్వల్‌లు - LeetCode 56](https://leetcode.com/problems/merge-intervals/) - ఇంటర్వల్ mastery కోసం essential ప్రారంభ సమస్య
+- [Sweep లైన్ అల్గారిథమ్ - CP-అల్గారిథమ్‌లు](https://cp-algorithms.com/geometry/intersecting_segments.html) - Sweep లైన్ paradigm యొక్క లోతైన అన్వేషణ
+- [సమావేశం Rooms II - LeetCode 253](https://leetcode.com/problems/meeting-rooms-ii/) - సాంప్రదాయ నిమి-హీప్ ఇంటర్వల్ scheduling సమస్య
