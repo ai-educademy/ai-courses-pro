@@ -1,6 +1,6 @@
 ---
-title: "साक्षात्कार में एआई नैतिकता"
-description: "एआई नैतिकता साक्षात्कार प्रश्नों को बारीकियों के साथ नेविगेट करें - निष्पक्षता, पूर्वाग्रह, पारदर्शिता और जिम्मेदार एआई अब मानक साक्षात्कार विषय हैं।"
+title: "इंटरव्यू में AI Ethics"
+description: "AI ethics interview questions को nuance के साथ संभालें। fairness, bias, transparency और responsible AI अब standard interview topics हैं।"
 order: 7
 difficulty: "intermediate"
 duration: 15
@@ -8,77 +8,79 @@ icon: "⚖️"
 published: true
 machineTranslated: true
 ---
-# ⚖️ साक्षात्कार में एआई नैतिकता
+# ⚖️ इंटरव्यू में AI Ethics
 
-आपने अभी-अभी कोडिंग राउंड और सिस्टम डिज़ाइन प्रश्न को हल किया है। फिर साक्षात्कारकर्ता आगे झुकता है और पूछता है, "आप यह कैसे सुनिश्चित करेंगे कि आपका मॉडल संरक्षित समूहों के खिलाफ भेदभाव नहीं करता है?" कमरा शांत हो जाता है. यदि आपके पास एआई नैतिकता के बारे में सोचने का कोई संरचित तरीका नहीं है, तो यह प्रश्न एक उत्कृष्ट साक्षात्कार को पटरी से उतार सकता है। यहाँ अच्छी खबर है: नैतिकता के प्रश्न सही उत्तर देने के बारे में नहीं हैं - वे यह प्रदर्शित करने के बारे में हैं कि आप अपने द्वारा बनाए गए सिस्टम के प्रभाव के बारे में सावधानी से सोचते हैं।
+आपने coding round और system design question शानदार ढंग से पूरा कर लिया। फिर interviewer आगे झुककर पूछता है, "आप कैसे सुनिश्चित करेंगे कि आपका model protected groups के खिलाफ भेदभाव नहीं करता?" कमरा शांत हो जाता है। अगर AI ethics पर सोचने का आपके पास structured तरीका नहीं है, तो यह सवाल अच्छे interview को पटरी से उतार सकता है। अच्छी बात यह है: ethics questions perfect answers के बारे में नहीं होते। वे यह दिखाने के बारे में होते हैं कि आप अपने बनाए systems के impact पर गंभीरता से सोचते हैं।
 
 ---
 
-## 🤔 कंपनियाँ AI नैतिकता के बारे में क्यों पूछती हैं
+## 🤔 Companies AI Ethics के बारे में क्यों पूछती हैं
 
-यह बॉक्स-टिकिंग अभ्यास नहीं है. कंपनियाँ बहुत व्यावहारिक कारणों से नैतिकता के बारे में पूछती हैं:
+यह box-ticking exercise नहीं है। Companies बहुत practical reasons से ethics पूछती हैं:
 
-- **नियामक दबाव**: ईयू एआई अधिनियम, एनवाईसी का स्थानीय कानून 144 (एल्गोरिदम को काम पर रखने के लिए पूर्वाग्रह ऑडिट), और जीडीपीआर सभी वास्तविक अनुपालन आवश्यकताओं को लागू करते हैं
-- **प्रतिष्ठा जोखिम**: एक पक्षपातपूर्ण मॉडल सुर्खियाँ उत्पन्न कर सकता है जिससे ब्रांड को लाखों का नुकसान होता है
-- **कानूनी दायित्व**: भेदभावपूर्ण एआई आउटपुट मुकदमों का कारण बन सकते हैं
-- **उपयोगकर्ता का भरोसा**: उपयोगकर्ता एल्गोरिथम संबंधी अनुचितता के प्रति तेज़ी से जागरूक और संवेदनशील हो रहे हैं
-- **प्रतिभा प्रतिधारण**: इंजीनियर उन कंपनियों में काम करना चाहते हैं जो जिम्मेदार एआई को गंभीरता से लेती हैं
+- **Regulatory pressure**: EU AI Act, NYC's Local Law 144 (hiring algorithms के लिए bias audits) और GDPR वास्तविक compliance requirements लगाते हैं
+- **Reputation risk**: एक biased model ऐसी headlines बना सकता है जिनसे brand damage में millions खर्च हों
+- **Legal liability**: discriminatory AI outputs lawsuits तक ले जा सकते हैं
+- **User trust**: users algorithmic unfairness को लेकर अधिक aware और sensitive होते जा रहे हैं
+- **Talent retention**: engineers ऐसी companies में काम करना चाहते हैं जो responsible AI को गंभीरता से लेती हैं
 
-<Callout>नैतिकता के प्रश्नों को "नरम" विचार के रूप में न लें। सबसे मजबूत उम्मीदवार इसे एक अलग विषय मानने के बजाय अपने तकनीकी उत्तरों में स्वाभाविक रूप से नैतिक सोच बुनते हैं।
+<Callout>
+Ethics questions को "soft" afterthought की तरह न लें। सबसे मजबूत candidates ethical thinking को अपने technical answers में स्वाभाविक रूप से बुनते हैं, उसे अलग topic की तरह नहीं रखते।
 </Callout>
 
 ---
 
-## 🔍 AI सिस्टम में पूर्वाग्रह के प्रकार
+## 🔍 AI systems में bias के प्रकार
 
-पूर्वाग्रह वर्गीकरण को समझना प्रत्येक नैतिकता चर्चा का आधार है।
+Bias taxonomy समझना हर ethics discussion की नींव है।
 
-### डेटा पूर्वाग्रह
+### Data Bias
 
-मॉडल को प्रशिक्षित करने के लिए उपयोग किया गया डेटा वास्तविक दुनिया का निष्पक्ष रूप से प्रतिनिधित्व नहीं करता है।
+Model train करने के लिए इस्तेमाल data real world को fair तरीके से represent नहीं करता।
 
-- **ऐतिहासिक पूर्वाग्रह**: प्रशिक्षण डेटा पिछले भेदभाव को दर्शाता है। ऐतिहासिक निर्णयों पर प्रशिक्षित एक भर्ती मॉडल उन उम्मीदवारों को प्राथमिकता देना सीखता है जो पहले से काम पर रखे गए लोगों की तरह दिखते हैं - मौजूदा जनसांख्यिकीय असंतुलन को कायम रखते हुए।
-- **प्रतिनिधित्व पूर्वाग्रह**: कुछ समूहों को डेटा में कम प्रतिनिधित्व दिया गया है। ज्यादातर गोरी त्वचा वाले चेहरों पर प्रशिक्षित चेहरे की पहचान प्रणाली गहरे रंग की त्वचा वाले चेहरों पर खराब प्रदर्शन करती है।
-- **माप पूर्वाग्रह**: जिस तरह से डेटा एकत्र किया जाता है वह व्यवस्थित रूप से इसे विकृत कर देता है। गिरफ्तारी डेटा पर प्रशिक्षित अपराध भविष्यवाणी मॉडल पुलिसिंग पैटर्न को दर्शाते हैं, वास्तविक अपराध दर को नहीं।
+- **Historical bias**: training data पुराने भेदभाव को reflect करता है। Historical decisions पर trained hiring model ऐसे candidates पसंद करना सीखता है जो पहले hire हुए लोगों जैसे दिखते हैं, जिससे existing demographic imbalances जारी रहते हैं।
+- **Representation bias**: data में कुछ groups कम represent होते हैं। mostly light-skinned faces पर trained facial recognition system darker-skinned faces पर खराब perform करता है।
+- **Measurement bias**: data collect करने का तरीका उसे systematic रूप से distort करता है। Arrest data पर trained crime prediction models actual crime rates नहीं, policing patterns reflect करते हैं।
 
-### एल्गोरिथम पूर्वाग्रह
+### Algorithmic Bias
 
-मॉडल अपनी सीखने की प्रक्रिया के माध्यम से पूर्वाग्रह को बढ़ाता है या पेश करता है।
+Model अपनी learning process के ज़रिए bias को amplify या introduce करता है।
 
-- **प्रॉक्सी चर**: भले ही आप संरक्षित विशेषताओं (जाति, लिंग) को हटा दें, मॉडल प्रॉक्सी के रूप में सहसंबद्ध सुविधाओं (ज़िप कोड, नाम) का उपयोग कर सकता है
-- **फीडबैक लूप्स**: एक मॉडल की भविष्यवाणियां भविष्य के डेटा संग्रह को प्रभावित करती हैं। एक सामग्री मॉडरेशन प्रणाली जो कुछ समुदायों की सामग्री को ओवर-फ्लैग करती है, उन समुदायों के लिए अधिक "उल्लंघन" उत्पन्न करती है, जो पैटर्न को मजबूत करती है
-- **अनुकूलन पूर्वाग्रह**: उद्देश्य फ़ंक्शन स्वयं कुछ परिणामों का पक्ष ले सकता है - समग्र सटीकता को अधिकतम करना अक्सर अल्पसंख्यक समूह के प्रदर्शन का त्याग करता है
+- **Proxy variables**: protected attributes (race, gender) हटाने पर भी model correlated features (zip code, name) को proxies की तरह इस्तेमाल कर सकता है
+- **Feedback loops**: model predictions future data collection को प्रभावित करती हैं। Content moderation system जो कुछ communities के content को over-flag करता है, उन communities के लिए अधिक "violations" बनाता है और pattern को मजबूत करता है
+- **Optimisation bias**: objective function स्वयं कुछ outcomes को favour कर सकता है। overall accuracy maximize करना अक्सर minority group performance की कीमत पर होता है
 
-### सामाजिक पूर्वाग्रह
+### Societal Bias
 
-व्यापक प्रणालीगत असमानताएँ जो एआई प्रणालियों द्वारा परिलक्षित और प्रबलित होती हैं।
+व्यापक systemic inequalities जो AI systems में reflect और reinforce होती हैं।
 
-- **स्वचालन पूर्वाग्रह**: मनुष्य एआई आउटपुट पर अत्यधिक भरोसा करते हैं, खासकर जब उच्च आत्मविश्वास स्कोर के साथ प्रस्तुत किया जाता है
-- **पुष्टि पूर्वाग्रह**: डेवलपर्स अपनी अपेक्षाओं के विरुद्ध मॉडल का परीक्षण करते हैं, विफलता मोड गायब हैं जो विभिन्न आबादी को प्रभावित करते हैं
+- **Automation bias**: humans AI outputs पर अत्यधिक भरोसा करते हैं, खासकर जब high confidence scores दिखाए जाएं
+- **Confirmation bias**: developers अपने expectations के against models test करते हैं और अलग populations को प्रभावित करने वाले failure modes छोड़ देते हैं
 
-<ThinkAboutIt>एक बैंक ऋण अनुमोदन मॉडल का उपयोग करता है। मॉडल दौड़ को इनपुट के रूप में उपयोग नहीं करता है, लेकिन यह ज़िप कोड का उपयोग करता है, जो दौड़ के साथ दृढ़ता से संबंधित है। क्या मॉडल पक्षपातपूर्ण है? मॉडल को स्थानीय संपत्ति मूल्यों जैसी भौगोलिक दृष्टि से प्रासंगिक सुविधाओं का उपयोग करने की अनुमति देते हुए भी आप इस समस्या से कैसे निपटेंगे?
+<ThinkAboutIt>
+एक bank loan approval model इस्तेमाल करता है। Model race को input की तरह इस्तेमाल नहीं करता, लेकिन zip code इस्तेमाल करता है, जिसका race से मजबूत correlation है। क्या model biased है? Local property values जैसे geographically relevant features इस्तेमाल करने की अनुमति रखते हुए आप इस समस्या को कैसे approach करेंगे?
 </ThinkAboutIt>
 
 ---
 
-## 📏 निष्पक्षता मेट्रिक्स और ट्रेड-ऑफ़
+## 📏 Fairness Metrics और Trade-Offs
 
-यहीं पर नैतिकता गणितीय हो जाती है - और जहां साक्षात्कार के उत्तर वास्तव में प्रभावशाली हो जाते हैं।
+यहीं ethics mathematical हो जाती है, और यहीं interview answers सच में प्रभावशाली बनते हैं।
 
-### प्रमुख निष्पक्षता मेट्रिक्स
+### मुख्य Fairness Metrics
 
-| मीट्रिक | परिभाषा | अंतर्ज्ञान |
+| Metric | Definition | Intuition |
 |---|---|---|
-| **जनसांख्यिकीय समानता** | P(Ŷ=1 \| A=0) = P(Ŷ=1 \| A=1) | सभी समूहों में समान सकारात्मक भविष्यवाणी दरें |
-| **समान संभावनाएँ** | सभी समूहों में समान टीपीआर और एफपीआर | प्रत्येक समूह के लिए समान सटीकता |
-| **भविष्य कहनेवाला समता** | समूहों में समान परिशुद्धता | सकारात्मक भविष्यवाणियाँ भी उतनी ही विश्वसनीय हैं |
-| **व्यक्तिगत निष्पक्षता** | समान व्यक्तियों को समान भविष्यवाणियाँ मिलती हैं | व्यक्तियों पर दूरी मीट्रिक की आवश्यकता है |
+| **Demographic parity** | P(Ŷ=1 \| A=0) = P(Ŷ=1 \| A=1) | Groups में equal positive prediction rates |
+| **Equalised odds** | Groups में equal TPR और FPR | हर group के लिए equal accuracy |
+| **Predictive parity** | Groups में equal precision | Positive predictions बराबर reliable हैं |
+| **Individual fairness** | Similar individuals को similar predictions | Individuals पर distance metric चाहिए |
 
-### असंभवता प्रमेय
+### Impossibility Theorem
 
-यहां साक्षात्कारों के लिए एक महत्वपूर्ण जानकारी दी गई है: **आप एक साथ सभी निष्पक्षता मेट्रिक्स को संतुष्ट नहीं कर सकते** (मामूली मामलों को छोड़कर)। इसे निष्पक्षता की असंभवता प्रमेय के रूप में जाना जाता है।
+Interviews के लिए यह critical insight है: **आप सभी fairness metrics को एक साथ satisfy नहीं कर सकते** (trivial cases छोड़कर)। इसे fairness का impossibility theorem कहा जाता है।
 
-उदाहरण के लिए, यदि आधार दरें समूहों के बीच भिन्न हैं (समूह ए में 5% सकारात्मक दर है, समूह बी में 15%), तो आप जनसांख्यिकीय समानता और समान अंतर दोनों को एक साथ प्राप्त नहीं कर सकते हैं।
+उदाहरण के लिए, अगर groups में base rates अलग हैं (Group A का positive rate 5%, Group B का 15%), तो आप demographic parity और equalised odds दोनों साथ-साथ नहीं पा सकते।
 
 ```
 Group A: 1,000 people, 50 positive (5% base rate)
@@ -91,26 +93,26 @@ If base rates differ → these two goals conflict mathematically
 ```
 
 <Quiz
-  question="एक नियुक्ति एल्गोरिथ्म जनसांख्यिकीय समूहों में समान सटीकता प्राप्त करता है, लेकिन सकारात्मक भविष्यवाणी दर (किराए पर लेना) समूह ए के लिए 30% और समूह बी के लिए 15% है। यह किस निष्पक्षता मानदंड का उल्लंघन करता है?"
-  options="समान संभावनाएँ|जनसांख्यिकीय समता|पूर्वानुमानित समता|व्यक्तिगत निष्पक्षता"
+  question="Hiring algorithm demographic groups में equal accuracy पाता है, लेकिन positive prediction rate (hire होना) Group A के लिए 30% और Group B के लिए 15% है। यह कौन-सा fairness criteria violate करता है?"
+  options="Equalised odds|Demographic parity|Predictive parity|Individual fairness"
   answer="1"
-  explanation="जनसांख्यिकीय समानता के लिए सभी समूहों में समान सकारात्मक पूर्वानुमान दर की आवश्यकता होती है। यहां, ग्रुप ए में किराया दर 30% है जबकि ग्रुप बी में केवल 15% है। यद्यपि सटीकता समान है (समान बाधाओं को संतुष्ट करते हुए), असमान चयन दरें जनसांख्यिकीय समानता का उल्लंघन करती हैं।"
+  explanation="Demographic parity groups में equal positive prediction rates मांगती है। यहां Group A का hire rate 30% है जबकि Group B का केवल 15%। Accuracy equal होने के बावजूद (equalised odds satisfy करते हुए), unequal selection rates demographic parity violate करते हैं।"
 />
 
 ---
 
-## 🔦 व्याख्यात्मकता एवं पारदर्शिता
+## 🔦 Explainability और Transparency
 
-यदि आप यह नहीं बता सकते कि आपके मॉडल ने निर्णय क्यों लिया, तो आप यह कैसे सत्यापित कर सकते हैं कि यह उचित है?
+अगर आप यह नहीं समझा सकते कि model ने decision क्यों लिया, तो आप कैसे verify करेंगे कि वह fair है?
 
-### मॉडल-स्तर की व्याख्या
+### Model-Level Explainability
 
-- **स्वाभाविक रूप से व्याख्या करने योग्य मॉडल**: रैखिक प्रतिगमन, निर्णय वृक्ष, लॉजिस्टिक प्रतिगमन - आप सीधे वजन का निरीक्षण कर सकते हैं
-- **पोस्ट-हॉक स्पष्टीकरण विधियाँ**: आकार, चूना, ध्यान दृश्य - जटिल मॉडलों की व्यक्तिगत भविष्यवाणियों की व्याख्या करें
+- **Inherently interpretable models**: linear regression, decision trees, logistic regression। आप weights सीधे inspect कर सकते हैं
+- **Post-hoc explanation methods**: SHAP, LIME, attention visualisation। complex models की individual predictions समझाते हैं
 
-### SHAP (शपलेय अददिटिवे स्पष्टीकरण)
+### SHAP (SHapley Additive exPlanations)
 
-गेम थ्योरी के आधार पर, SHAP प्रत्येक सुविधा को प्रत्येक व्यक्तिगत भविष्यवाणी के लिए एक महत्वपूर्ण मान प्रदान करता है:
+Game theory पर आधारित SHAP हर individual prediction के लिए हर feature को importance value देता है:
 
 ```python
 import shap
@@ -122,94 +124,97 @@ shap_values = explainer.shap_values(X_test)
 shap.force_plot(explainer.expected_value, shap_values[0], X_test.iloc[0])
 ```
 
-### स्पष्टीकरण का अधिकार
+### Right to Explanation
 
-जीडीपीआर के अनुच्छेद 22 के तहत, व्यक्तियों को स्वचालित निर्णयों में "शामिल तर्क के बारे में सार्थक जानकारी" का अधिकार है जो उन्हें महत्वपूर्ण रूप से प्रभावित करता है। इसका मतलब यह है कि कई वास्तविक दुनिया के अनुप्रयोगों के लिए व्याख्यात्मकता वैकल्चुनता नहीं है।
+GDPR के Article 22 के तहत, individuals को automated decisions में "meaningful information about the logic involved" पाने का अधिकार है जब वे decisions उन्हें काफी प्रभावित करते हैं। इसका मतलब है कि कई real-world applications में explainability optional नहीं है।
 
-<FunFact>2019 में, अपपले कार्ड पर लैंगिक भेदभाव का आरोप लगाया गया था, जब कई उपयोगकर्ताओं ने रिपोर्ट किया था कि एल्गोरिदम पत्नियों को उनके पतियों की तुलना में काफ़ी कम क्रेडिट सीमा की पेशकश करता है - साझा वित्त के बावजूद। न्यूयॉर्क डिपार्टमेंट ऑफ फाइनेंशियल सर्विसेज की एक जांच में पाया गया कि मॉडल जानबूझकर भेदभावपूर्ण नहीं था, लेकिन इसकी पारदर्शिता की कमी ने असमानता का शीघ्र निदान और समाधान करना असंभव बना दिया।
+<FunFact>
+2019 में Apple Card पर gender discrimination का आरोप लगा, जब कई users ने बताया कि algorithm ने wives को उनके husbands की तुलना में काफी कम credit limits दीं, shared finances के बावजूद। New York Department of Financial Services की investigation ने पाया कि model जानबूझकर discriminatory नहीं था, लेकिन transparency की कमी ने disparity को जल्दी diagnose और address करना असंभव बना दिया।
 </FunFact>
 
 ---
 
-## 🏛️ जिम्मेदार एआई फ्रेमवर्क
+## 🏛️ Responsible AI Frameworks
 
-कंपनियाँ और सरकारें जिम्मेदार एआई के लिए संरचित दृष्टिकोण का निर्माण कर रही हैं:
+Companies और governments responsible AI के लिए structured approaches बना रही हैं:
 
-### प्रमुख सिद्धांत (सभी फ़्रेमवर्क में समान)
+### मुख्य सिद्धांत (frameworks में आम)
 
-1. **निष्पक्षता**: सिस्टम को सभी लोगों के साथ समान व्यवहार करना चाहिए
-2. **पारदर्शिता**: हितधारकों को समझना चाहिए कि निर्णय कैसे लिए जाते हैं
-3. **गोपनीयता**: व्यक्तिगत डेटा को पूरे एमएल पाइपलाइन में सुरक्षित रखा जाना चाहिए
-4. **सुरक्षा**: सिस्टम मजबूत होना चाहिए और शालीनता से विफल होना चाहिए
-5. **जवाबदेही**: एआई सिस्टम परिणामों के लिए स्पष्ट स्वामित्व
-6. **मानवीय निरीक्षण**: उच्च जोखिम वाले निर्णयों पर सार्थक मानवीय नियंत्रण
+1. **Fairness**: systems को सभी लोगों के साथ equitable व्यवहार करना चाहिए
+2. **Transparency**: stakeholders को समझना चाहिए कि decisions कैसे लिए जाते हैं
+3. **Privacy**: personal data को पूरे एमएल pipeline में protect किया जाना चाहिए
+4. **Safety**: systems robust होने चाहिए और fail gracefully करना चाहिए
+5. **Accountability**: AI system outcomes के लिए clear ownership
+6. **Human oversight**: high-stakes decisions पर meaningful human control
 
-### व्यावहारिक कार्यान्वयन
+### Practical Implementation
 
-- **पूर्वाग्रह ऑडिट**: तैनाती से पहले और बाद में जनसांख्यिकीय समूहों में मॉडल का नियमित परीक्षण करें
-- **मॉडल कार्ड**: दस्तावेज़ मॉडल उद्देश्य, समूहों में प्रदर्शन, इच्छित उपयोग और सीमाएँ
-- **डेटासेट के लिए डेटाशीट**: दस्तावेज़ डेटा संग्रह प्रक्रिया, संरचना, और ज्ञात पूर्वाग्रह
-- **रेड-टीमिंग**: विशेष रूप से निष्पक्षता और सुरक्षा को लक्षित करते हुए प्रतिकूल परीक्षण
+- **Bias audits**: deployment से पहले और बाद में demographic groups में models को regularly test करें
+- **Model cards**: model purpose, groups में performance, intended use और limitations document करें
+- **Datasheets for datasets**: data collection process, composition और known biases document करें
+- **Red-teaming**: fairness और safety को target करने वाली adversarial testing
 
 ---
 
-## 📖 वास्तविक दुनिया के मामले का अध्ययन
+## 📖 वास्तविक case studies
 
-साक्षात्कारकर्ता केस स्टडीज़ को पसंद करते हैं क्योंकि वे केवल सिद्धांतों को दोहराने के बजाय वास्तविक स्थितियों का विश्लेषण करने की आपकी क्षमता का परीक्षण करते हैं।
+Interviewers case studies पसंद करते हैं क्योंकि वे principles रटने के बजाय real situations analyse करने की क्षमता जांचते हैं।
 
-### चेहरे की पहचान में पूर्वाग्रह
+### Facial Recognition Bias
 
-जॉय बुओलामविनी और टिमनिट गेब्रू के एक ऐतिहासिक अध्ययन में पाया गया कि वाणिज्यिक चेहरे की पहचान प्रणालियों में त्रुटि दर थी:
-- **0.8%** गोरी त्वचा वाले पुरुषों के लिए
-- **34.7%** सांवली त्वचा वाली महिलाओं के लिए
+Joy Buolamwini और Timnit Gebru की landmark study ने पाया कि commercial facial recognition systems की error rates थीं:
+- **0.8%** light-skinned males के लिए
+- **34.7%** dark-skinned females के लिए
 
-इसका कारण प्रतिनिधित्व पूर्वाग्रह (गोरी चमड़ी वाले चेहरों की ओर झुका हुआ प्रशिक्षण डेटा) और मूल्यांकन पूर्वाग्रह (जनसांख्यिकीय समूहों में बेंचचिह्नित का परीक्षण नहीं किया गया) का एक संयोजन था।
+कारण representation bias (training data light-skinned faces की ओर झुका था) और evaluation bias (benchmarks ने demographic groups में test नहीं किया) का combination था।
 
-### एल्गोरिथम पूर्वाग्रह को काम पर रखना
+### Hiring Algorithm Bias
 
-अमेज़ॅन ने 10 साल के रेज़्यूमे डेटा पर प्रशिक्षित एक हायरिंग एल्गोरिदम बनाया। मॉडल ने "महिला" शब्द वाले बायोडाटा को दंडित करना सीखा (जैसे, "महिला शतरंज क्लब") क्योंकि ऐतिहासिक डेटा पुरुष-प्रधान तकनीकी कार्यबल को दर्शाता है। अंततः इस परियोजना को रद्द कर दिया गया।
+Amazon ने 10 साल के résumé data पर trained hiring algorithm बनाया। Model ने "women's" शब्द वाले résumés (जैसे "women's chess club") को penalise करना सीख लिया, क्योंकि historical data male-dominated tech workforce को reflect करता था। Project अंततः बंद कर दिया गया।
 
-### सामग्री मॉडरेशन
+### Content Moderation
 
-स्वचालित सामग्री मॉडरेशन सिस्टम को असंगत रूप से अफ्रीकी अमेरिकी वर्नाक्युलर अंग्रेजी (एएवीई) को विषाक्त के रूप में चिह्नित करते हुए दिखाया गया है, क्योंकि प्रशिक्षण डेटासेट ने एएवीई अभिव्यक्तियों को मानक अमेरिकी अंग्रेजी की तुलना में उच्च दरों पर आक्रामक के रूप में लेबल किया है।
+Automated content moderation systems में दिखा है कि वे African American Vernacular English (AAVE) को disproportionate रूप से toxic flag करते हैं, क्योंकि training datasets ने AAVE expressions को Standard American English की तुलना में अधिक दर पर offensive label किया था।
 
 <Quiz
-  question="अमेज़ॅन के हायरिंग एल्गोरिदम ने 'महिलाओं' वाले बायोडाटा को दंडित किया (जैसा कि 'महिला शतरंज क्लब' में)। यह किस प्रकार के पूर्वाग्रह को दर्शाता है?"
-  options="मापन पूर्वाग्रह|प्रशिक्षण डेटा में ऐतिहासिक पूर्वाग्रह|एल्गोरिथम अनुकूलन त्रुटि|पुष्टि पूर्वाग्रह"
+  question="Amazon's hiring algorithm ने 'women's' वाले résumés (जैसे 'women's chess club') को penalise किया। यह किस प्रकार का bias है?"
+  options="Measurement bias|Historical bias in the training data|Algorithmic optimisation error|Confirmation bias"
   answer="1"
-  explanation="मॉडल को मुख्य रूप से पुरुषों द्वारा और उनके लिए लिए गए 10 वर्षों के नियुक्ति निर्णयों पर प्रशिक्षित किया गया था। इस ऐतिहासिक डेटा ने लिंग पूर्वाग्रह को कूटबद्ध किया, जिसे मॉडल ने ईमानदारी से सीखा और बढ़ाया। एल्गोरिदम के छूने से पहले डेटा में पूर्वाग्रह मौजूद था।"
+  explanation="Model 10 साल के hiring decisions पर trained था, जिन्हें अधिकतर men ने और men के लिए लिया था। इस historical data में gender bias encoded था, जिसे model ने faithfully सीखकर amplify किया। Bias algorithm के छूने से पहले data में मौजूद था।"
 />
 
 ---
 
-## 💡 अपने नैतिक उत्तरों की संरचना कैसे करें
+## 💡 अपने Ethics Answers कैसे संरचित करें
 
-साक्षात्कार में नैतिकता संबंधी प्रश्नों का उत्तर देते समय इस ढाँचे का उपयोग करें:
+Interviews में ethics questions का जवाब देते समय यह framework इस्तेमाल करें:
 
-1. **चिंता को स्वीकार करें**: दिखाएं कि आप इसे गंभीरता से लेते हैं ("यह एक महत्वपूर्ण विचार है क्योंकि...")
-2. **विशिष्ट जोखिमों की पहचान करें**: होने वाले पूर्वाग्रह या नुकसान के प्रकारों का नाम बताएं
-3. **तकनीकी शमन का प्रस्ताव**: पूर्वाग्रह ऑडिट, निष्पक्षता बाधाएं, व्याख्यात्मक उपकरण
-4. **लेन-देन पर ईमानदारी से चर्चा करें**: स्वीकार करें कि निष्पक्षता की बाधाएं समग्र सटीकता को कम कर सकती हैं
-5. **प्रक्रिया सुरक्षा उपायों का उल्लेख करें**: मॉडल कार्ड, मानव समीक्षा, निगरानी, एस्केलेशन पथ
-6. **सीमाओं को स्वीकार करें**: इस बारे में ईमानदार रहें कि तकनीक क्या समाधान कर सकती है और क्या नहीं
+1. **Concern स्वीकार करें**: दिखाएं कि आप इसे गंभीरता से लेते हैं ("This is an important consideration because...")
+2. **Specific risks पहचानें**: हो सकने वाले bias या harm के types नाम से बताएं
+3. **Technical mitigations प्रस्तावित करें**: bias audits, fairness constraints, explainability tools
+4. **Trade-offs ईमानदारी से discuss करें**: स्वीकार करें कि fairness constraints overall accuracy घटा सकती हैं
+5. **Process safeguards बताएं**: model cards, human review, monitoring, escalation paths
+6. **Limitations स्वीकार करें**: technology क्या हल कर सकती है और क्या नहीं, इसे ईमानदारी से बताएं
 
-**उदाहरण प्रतिक्रिया पैटर्न**:
+**Example response pattern**:
 
-> "क्रेडिट स्कोरिंग मॉडल के लिए, मैं डेटा उधार देने में ऐतिहासिक पूर्वाग्रह के बारे में चिंतित हूं जो अल्पसंख्यक आवेदकों को असमान रूप से प्रभावित कर रहा है। मैं समान बाधाओं और जनसांख्यिकीय समता मेट्रिक्स का उपयोग करके जनसांख्यिकीय समूहों में मॉडल प्रदर्शन का ऑडिट करके शुरू करूंगा। यदि असमानताएं मौजूद हैं, तो मैं निष्पक्षता-जागरूक प्रशिक्षण का पता लगाऊंगा, जैसे कि अनुकूलन उद्देश्य में निष्पक्षता बाधाओं को जोड़ना। हालांकि, मैं पारदर्शी हूं कि वंचित समूहों के लिए निष्पक्षता में सुधार करने से समग्र एयूसी में थोड़ी कमी आ सकती है, और मैं उस समझौते को हितधारकों के सामने पेश करूंगा, तैनाती के बाद, मैं जनसांख्यिकीय समूह द्वारा पूर्वानुमान वितरण की निगरानी करूंगा और विचलन के लिए अलर्ट सेट करूंगा।"
+> "Credit scoring model के लिए मुझे lending data में historical bias की चिंता होगी, जो minority applicants को disproportionate रूप से प्रभावित कर सकता है। मैं equalised odds और demographic parity metrics से demographic groups में model performance audit करके शुरू करूंगा। अगर disparities मिलती हैं, तो मैं fairness-aware training explore करूंगा, जैसे optimisation objective में fairness constraints जोड़ना। हालांकि मैं transparent रहूंगा कि underserved groups के लिए fairness सुधारने से overall AUC थोड़ा घट सकता है, और मैं यह trade-off stakeholders के सामने रखूंगा। Post-deployment, मैं demographic group के हिसाब से prediction distributions monitor करूंगा और divergence के लिए alerts set up करूंगा।"
 
-<ThinkAboutIt>आपको पता चलता है कि आपकी कंपनी का ऋण अनुमोदन मॉडल एक जातीय समूह से दूसरे जातीय समूह के 40% अधिक आवेदनों को अस्वीकार करता है। आपके मैनेजर का कहना है, "मॉडल केवल डेटा को दर्शाता है - यह हमारी गलती नहीं है।" आप कैसे प्रतिक्रिया देते हैं? आप क्या कदम उठाएंगे और किसे शामिल करेंगे?
+<ThinkAboutIt>
+आपको पता चलता है कि आपकी company का loan approval model एक ethnic group की applications को दूसरे group की तुलना में 40% अधिक reject करता है। आपका manager कहता है, "Model तो data reflect करता है। यह हमारी गलती नहीं है।" आप कैसे जवाब देंगे? आप कौन-से कदम उठाएंगे, और किसे involve करेंगे?
 </ThinkAboutIt>
 
 ---
 
 ## 🔑 मुख्य बातें
 
-- **नैतिकता के प्रश्न आपके निर्णय का परीक्षण करते हैं**, न कि केवल आपके ज्ञान का - यह दर्शाते हैं कि आप सटीकता से परे सोचते हैं
-- **पूर्वाग्रह वर्गीकरण को जानें**: डेटा पूर्वाग्रह, एल्गोरिथम पूर्वाग्रह, सामाजिक पूर्वाग्रह - और ठोस उदाहरण दें
-- **निष्पक्षता में गणितीय व्यापार-बंद होते हैं**: आप सभी निष्पक्षता मेट्रिक्स को एक साथ संतुष्ट नहीं कर सकते (असंभवता प्रमेय)
-- **व्याख्यात्मकता एक तकनीकी उपकरण और कानूनी आवश्यकता दोनों है** - SHAP, LIME को जानें, और जब व्याख्यात्मकता सबसे अधिक मायने रखती है
-- **वास्तविक केस स्टडीज का उपयोग करें**: चेहरे की पहचान, हायरिंग एल्गोरिदम और सामग्री मॉडरेशन अच्छी तरह से प्रलेखित उदाहरण हैं
-- **अपने उत्तरों की संरचना करें**: स्वीकार करें → जोखिमों की पहचान करें → शमन का प्रस्ताव करें → व्यापार-बंद पर चर्चा करें → प्रक्रियाओं का उल्लेख करें → सीमाएं स्वीकार करें
+- **Ethics questions आपकी judgement जांचते हैं**, सिर्फ़ knowledge नहीं। दिखाएं कि आप accuracy से आगे सोचते हैं
+- **Bias taxonomy जानें**: data bias, algorithmic bias, societal bias, और concrete examples दें
+- **Fairness में mathematical trade-offs हैं**: आप सभी fairness metrics को साथ-साथ satisfy नहीं कर सकते (impossibility theorem)
+- **Explainability technical tool भी है और legal requirement भी**। SHAP, LIME और interpretability कब सबसे ज़रूरी है, यह जानें
+- **Real case studies इस्तेमाल करें**: facial recognition, hiring algorithms और content moderation well-documented examples हैं
+- **अपने answers संरचित करें**: acknowledge → identify risks → propose mitigations → discuss trade-offs → mention processes → acknowledge limitations
 
-<Callout>जो उम्मीदवार नैतिकता के सवालों पर खड़े होते हैं, वे केवल समस्याएं ही सूचीबद्ध नहीं करते हैं - वे ईमानदारी से स्वीकार करते हुए समाधान भी प्रस्तावित करते हैं कि कुछ समस्याओं के सटीक उत्तर नहीं होते हैं। वह बौद्धिक ईमानदारी बिल्कुल वही है जिसकी साक्षात्कारकर्ता तलाश कर रहे हैं।
+<Callout>
+Ethics questions में अलग दिखने वाले candidates सिर्फ़ problems list नहीं करते। वे solutions propose करते हैं और ईमानदारी से मानते हैं कि कुछ problems के perfect answers नहीं होते। Interviewers ठीक इसी intellectual honesty की तलाश करते हैं।
 </Callout>
