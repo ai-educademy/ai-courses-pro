@@ -24,7 +24,7 @@ A tokenização converte texto bruto em unidades discretas que o modelo pode pro
 
 - **Nível de palavra**: simples, mas não consegue lidar com palavras fora do vocabulário ("hostilidade" → desconhecido)
 - **Nível de personagem**: lida com qualquer palavra, mas as sequências são muito longas
-- **Subword (BPE, WordPiece, SentencePiece)**: o padrão moderno — divide palavras raras em pedaços significativos
+- **Subword (BPE, WordPiece, SentencePiece)**: o padrão moderno - divide palavras raras em pedaços significativos
 
 ```
 "unfriendliness" → ["un", "friend", "li", "ness"]  (BPE)
@@ -38,7 +38,7 @@ A tokenização converte texto bruto em unidades discretas que o modelo pode pro
 
 Os embeddings mapeiam tokens discretos para vetores contínuos densos onde os relacionamentos semânticos são preservados:
 
-- **Word2Vec / GloVe**: incorporações estáticas — cada palavra recebe um vetor, independentemente do contexto ("banco" tem a mesma incorporação, quer signifique uma margem de rio ou uma instituição financeira)
+- **Word2Vec / GloVe**: incorporações estáticas - cada palavra recebe um vetor, independentemente do contexto ("banco" tem a mesma incorporação, quer signifique uma margem de rio ou uma instituição financeira)
 - **Incorporações contextuais (BERT, GPT)**: a incorporação de cada token depende do contexto circundante - "banco" obtém representações diferentes em frases diferentes
 
 ### O Mecanismo de Atenção
@@ -68,7 +68,7 @@ O transformador consiste em:
   question="Por que os transformadores usam atenção de múltiplas cabeças em vez de um único mecanismo de atenção?"
   options="É computacionalmente mais barato que atenção única|Múltiplos chefes podem atender a diferentes tipos de relacionamentos simultaneamente|Evita o sobreajuste|Reduz o comprimento da sequência"
   answer="1"
-  explanation="A atenção multicabeças permite que o modelo atenda conjuntamente às informações de diferentes subespaços de representação em diferentes posições. Uma cabeça pode capturar relações sintáticas, outra semelhança semântica, outra proximidade posicional – tudo em paralelo."
+  explanation="A atenção multicabeças permite que o modelo atenda conjuntamente às informações de diferentes subespaços de representação em diferentes posições. Uma cabeça pode capturar relações sintáticas, outra semelhança semântica, outra proximidade posicional - tudo em paralelo."
 />
 
 ---
@@ -115,7 +115,7 @@ A técnica por trás da utilidade do ChatGPT:
 
 ### Janelas de contexto e desafios de contexto longo
 
-- **Janela de contexto**: o número máximo de tokens que um modelo pode processar de uma vez. Os sistemas frontier atuais variam de centenas de milhares a cerca de um milhão de tokens.
+- **Janela de contexto**: o número máximo de tokens que um modelo pode processar de uma vez. Os sistemas de fronteira atuais variam de centenas de milhares a cerca de um milhão de tokens.
 - **Perdidos no meio**: os modelos tendem a prestar menos atenção às informações no meio de contextos longos
 - **Estratégias**: resumir documentos longos, colocar informações críticas no início/fim, usar recuperação hierárquica
 
@@ -136,7 +136,7 @@ Os modelos geram texto plausível, mas factualmente incorreto. Estratégias de m
 
 Esta é uma pergunta favorita das entrevistas: “Dado este caso de uso, qual modelo você escolheria?”
 
-**Use um modelo frontier grande (GPT-6 Astra, Claude Opus 5.5) quando:**
+**Use um modelo de fronteira grande (GPT-6 Astra, Claude Opus 5.5) quando:**
 - A tarefa requer raciocínio geral ou instruções complexas seguindo
 - Você não possui dados de treinamento rotulados
 - A velocidade da prototipagem é mais importante do que o custo de inferência
@@ -154,7 +154,7 @@ Esta é uma pergunta favorita das entrevistas: “Dado este caso de uso, qual mo
 
 <Quiz
   question="Uma empresa de saúde precisa classificar as mensagens dos pacientes em 15 categorias. Eles têm 50.000 exemplos rotulados. Qual abordagem é mais econômica para a produção?"
-  options="Um LLM frontier com aviso de poucos disparos|Modelo BERT ajustado|RAG com banco de dados vetorial|Classificação zero-shot com Llama 70B"
+  options="Um LLM de fronteira com aviso de poucos disparos|Modelo BERT ajustado|RAG com banco de dados vetorial|Classificação zero-shot com Llama 70B"
   answer="1"
   explanation="Com 50.000 exemplos rotulados e uma tarefa de classificação bem definida, um modelo BERT ajustado será rápido, barato de servir e altamente preciso. Usar um LLM grande para uma tarefa de classificação com dados de treinamento abundantes é desnecessariamente caro e lento."
 />
@@ -197,7 +197,7 @@ As entrevistas de PNL incluem cada vez mais questões éticas:
   question="Qual é o principal risco de usar um LLM treinado em texto da Internet para um sistema de recomendação de contratação?"
   options="O modelo será muito lento para uso em produção|O modelo pode perpetuar vieses históricos presentes nos dados de treinamento|O modelo fará previsões aleatórias|O modelo requer muito armazenamento"
   answer="1"
-  explanation="LLMs treinados em textos da Internet absorvem preconceitos sociais – de gênero, raciais, socioeconômicos – presentes em seus dados de treinamento. Quando utilizados para contratação, estes preconceitos podem levar a recomendações discriminatórias que perpetuam desigualdades históricas."
+  explanation="LLMs treinados em textos da Internet absorvem preconceitos sociais - de gênero, raciais, socioeconômicos - presentes em seus dados de treinamento. Quando utilizados para contratação, estes preconceitos podem levar a recomendações discriminatórias que perpetuam desigualdades históricas."
 />
 
 ---
@@ -206,9 +206,9 @@ As entrevistas de PNL incluem cada vez mais questões éticas:
 
 - **Conheça seus fundamentos**: tokenização, incorporações, atenção e arquitetura de transformador não são negociáveis
 - **Entenda o espectro de ajuste fino**: desde a solicitação de disparo zero até o ajuste fino completo e quando cada um é apropriado
-- **RAG é o padrão LLM mais prático** — entenda agrupamento, recuperação e reclassificação
+- **RAG é o padrão LLM mais prático** - entenda agrupamento, recuperação e reclassificação
 - **A seleção do modelo envolve compensações**: capacidade versus custo versus latência versus privacidade
-- **A avaliação de modelos generativos é um problema em aberto** — conheça múltiplas abordagens
+- **A avaliação de modelos generativos é um problema em aberto** - conheça múltiplas abordagens
 - **A ética não é opcional**: preconceito, alucinação e privacidade agora são tópicos padrão nas entrevistas
 
 <Callout>O campo da PNL está se movendo incrivelmente rápido. Antes da entrevista, verifique quais modelos e técnicas foram lançados nos últimos três meses. Ser capaz de discutir desenvolvimentos recentes (enquanto entende os fundamentos) sinaliza que você está ativamente engajado na área.

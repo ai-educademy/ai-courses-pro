@@ -24,7 +24,7 @@ La tokenisation convertit le texte brut en unités discrètes que le modèle peu
 
 - **Au niveau des mots** : simple mais ne peut pas gérer les mots hors vocabulaire ("hostilité" → inconnu)
 - **Au niveau du personnage** : gère n'importe quel mot mais les séquences sont très longues
-- **Sous-mot (BPE, WordPièce, SentencePièce)** : le standard moderne – divise les mots rares en morceaux significatifs
+- **Sous-mot (BPE, WordPièce, SentencePièce)** : le standard moderne - divise les mots rares en morceaux significatifs
 
 ```
 "unfriendliness" → ["un", "friend", "li", "ness"]  (BPE)
@@ -38,8 +38,8 @@ La tokenisation convertit le texte brut en unités discrètes que le modèle peu
 
 Les intégrations mappent les jetons discrets sur des vecteurs continus denses où les relations sémantiques sont préservées :
 
-- **Word2Vec / GloVe** : intégrations statiques — chaque mot obtient un vecteur quel que soit le contexte ("banque" a la même intégration, qu'il s'agisse d'une berge de rivière ou d'une institution financière)
-- **Incorporations contextuelles (BERT, GPT)** : l'intégration de chaque jeton dépend du contexte environnant — "banque" obtient différentes représentations dans différentes phrases
+- **Word2Vec / GloVe** : intégrations statiques - chaque mot obtient un vecteur quel que soit le contexte ("banque" a la même intégration, qu'il s'agisse d'une berge de rivière ou d'une institution financière)
+- **Incorporations contextuelles (BERT, GPT)** : l'intégration de chaque jeton dépend du contexte environnant - "banque" obtient différentes représentations dans différentes phrases
 
 ### Le mécanisme d'attention
 
@@ -61,14 +61,14 @@ Le transformateur est composé de :
 | Architecture | Exemples | Idéal pour |
 |---|---|---|
 | Encodeur uniquement | BERT, RoBERTa | Classification, NER, intégrations |
-**Utilisez un grand modèle frontier (GPT-6 Astra, Claude Opus 5.5) lorsque :**
+**Utilisez un grand modèle de pointe (GPT-6 Astra, Claude Opus 5.5) lorsque :**
 | Encodeur-Décodeur | T5, BART | Traduction, résumé |
 
 <Quiz
   question="Pourquoi les transformateurs utilisent-ils une attention multi-têtes au lieu d’un mécanisme d’attention unique ?"
   options="C'est moins cher en termes de calcul qu'une seule attention|Plusieurs responsables peuvent s’occuper simultanément de différents types de relations|Cela évite le surapprentissage|Il réduit la longueur de la séquence"
   answer="1"
-  explanation="L'attention multi-têtes permet au modèle de s'occuper conjointement des informations provenant de différents sous-espaces de représentation à différentes positions. Une tête peut capturer des relations syntaxiques, une autre similitude sémantique, une autre proximité positionnelle – le tout en parallèle."
+  explanation="L'attention multi-têtes permet au modèle de s'occuper conjointement des informations provenant de différents sous-espaces de représentation à différentes positions. Une tête peut capturer des relations syntaxiques, une autre similitude sémantique, une autre proximité positionnelle - le tout en parallèle."
 />
 
 ---
@@ -115,7 +115,7 @@ La technique derrière l'utilité de ChatGPT :
 
 ### Fenêtres de contexte et défis de contexte long
 
-- **Fenêtre contextuelle** : le nombre maximum de jetons qu'un modèle peut traiter à la fois. Les systèmes frontier actuels vont de centaines de milliers à environ un million de tokens.
+- **Fenêtre contextuelle** : le nombre maximum de jetons qu'un modèle peut traiter à la fois. Les systèmes de pointe actuels vont de centaines de milliers à environ un million de tokens.
 - **Perdu au milieu** : les modèles ont tendance à accorder moins d'attention aux informations au milieu de contextes longs
 - **Stratégies** : résumer des documents longs, placer les informations critiques au début/à la fin, utiliser la récupération hiérarchique
 
@@ -136,7 +136,7 @@ Les modèles génèrent un texte plausible mais factuellement incorrect. Straté
 
 C'est l'une des questions d'entretien préférées : « Compte tenu de ce cas d'utilisation, quel modèle choisiriez-vous ? »
 
-**Utilisez un grand modèle frontier (GPT-6 Astra, Claude Opus 5.5) lorsque :**
+**Utilisez un grand modèle de pointe (GPT-6 Astra, Claude Opus 5.5) lorsque :**
 - La tâche nécessite un raisonnement général ou le suivi d'instructions complexes
 - Vous n'avez aucune donnée d'entraînement étiquetée
 - La vitesse de prototypage compte plus que le coût d'inférence
@@ -154,7 +154,7 @@ C'est l'une des questions d'entretien préférées : « Compte tenu de ce cas 
 
 <Quiz
   question="Une entreprise de soins de santé doit classer les messages destinés aux patients en 15 catégories. Ils ont 50 000 exemples étiquetés. Quelle approche est la plus rentable pour la production ?"
-  options="Un LLM frontier avec invite à quelques tirs|Modèle BERT affiné|RAG avec une base de données vectorielles|Classement zéro tir avec Llama 70B"
+  options="Un LLM de pointe avec invite à quelques tirs|Modèle BERT affiné|RAG avec une base de données vectorielles|Classement zéro tir avec Llama 70B"
   answer="1"
   explanation="Avec 50 000 exemples étiquetés et une tâche de classification bien définie, un modèle BERT affiné sera rapide, peu coûteux à mettre en œuvre et très précis. L'utilisation d'un LLM volumineux pour une tâche de classification avec des données de formation abondantes est inutilement coûteuse et plus lente."
 />
@@ -197,7 +197,7 @@ Les entretiens PNL incluent de plus en plus de questions éthiques :
   question="Quel est le principal risque lié à l'utilisation d'un LLM formé sur Internet pour un système de recommandation d'embauche ?"
   options="Le modèle sera trop lent pour une utilisation en production|Le modèle peut perpétuer les biais historiques présents dans les données de formation|Le modèle fera des prédictions aléatoires|Le modèle nécessite trop de stockage"
   answer="1"
-  explanation="Les LLM formés sur Internet absorbent les préjugés sociétaux – sexistes, raciaux, socio-économiques – présents dans leurs données de formation. Lorsqu’ils sont utilisés à l’embauche, ces préjugés peuvent conduire à des recommandations discriminatoires qui perpétuent les inégalités historiques."
+  explanation="Les LLM formés sur Internet absorbent les préjugés sociétaux - sexistes, raciaux, socio-économiques - présents dans leurs données de formation. Lorsqu’ils sont utilisés à l’embauche, ces préjugés peuvent conduire à des recommandations discriminatoires qui perpétuent les inégalités historiques."
 />
 
 ---
@@ -206,9 +206,9 @@ Les entretiens PNL incluent de plus en plus de questions éthiques :
 
 - **Connaissez vos fondamentaux** : la tokenisation, les intégrations, l'attention et l'architecture du transformateur ne sont pas négociables
 - **Comprendre le spectre des réglages précis** : de l'invite de tir zéro au réglage précis complet, et quand chacun est approprié
-- **RAG est le modèle LLM le plus pratique** — comprenez le découpage, la récupération et le reclassement
+- **RAG est le modèle LLM le plus pratique** - comprenez le découpage, la récupération et le reclassement
 - **La sélection du modèle repose sur des compromis** : capacité, coût, latence et confidentialité.
-- **L'évaluation des modèles génératifs est un problème ouvert** — connaître plusieurs approches
+- **L'évaluation des modèles génératifs est un problème ouvert** - connaître plusieurs approches
 - **L'éthique n'est pas facultative** : les préjugés, les hallucinations et la vie privée sont désormais des sujets d'entretien standard
 
 <Callout>Le domaine de la PNL évolue incroyablement vite. Avant votre entretien, vérifiez quels modèles et techniques ont été publiés au cours des trois derniers mois. Être capable de discuter des développements récents (tout en comprenant les principes fondamentaux) indique que vous êtes activement engagé dans le domaine.
