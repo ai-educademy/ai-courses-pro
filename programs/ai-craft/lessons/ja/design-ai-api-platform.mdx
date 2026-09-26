@@ -43,8 +43,8 @@ POST /v1/embeddings
 Headers: Authorization: Bearer sk-abc123
 Body: { "model": "text-embedding-3", "input": "Hello world" }
 
-GET  /v1/models                    - list available models
-GET  /v1/usage?start=2024-01-01    - usage and billing data
+GET  /v1/models                   - list available models
+GET  /v1/usage?start=2024-01-01   - usage and billing data
 
 SSE: POST /v1/completions (stream: true)
      → returns Server-Sent Events with incremental tokens

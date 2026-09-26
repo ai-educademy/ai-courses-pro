@@ -69,10 +69,10 @@ a ^= b
 之所以有效，是因为 XOR 是它自己的逆：`a ^ b ^ b = a`。
 
 <Quiz
-  question="n & (n - 1) 对 n 的二进制表示有何作用？"
-  options="将所有位设置为 1|清除所有位|清除最低设置位|翻转所有位"
-  answer="2"
-  explanation="n - 1 将所有位从最低设置位向下翻转。与 n 的与运算将最低设置位清零。"
+ question="n & (n - 1) 对 n 的二进制表示有何作用？"
+ options="将所有位设置为 1|清除所有位|清除最低设置位|翻转所有位"
+ answer="2"
+ explanation="n - 1 将所有位从最低设置位向下翻转。与 n 的与运算将最低设置位清零。"
 />
 
 ## 单数-异或取消
@@ -160,10 +160,10 @@ def hamming_distance(x, y):
 ```
 
 <Quiz
-  question="7 (0111) 和 1 (0001) 之间的汉明距离是多少？"
-  options="1|2|3|4"
-  answer="1"
-  explanation="7 XOR 1 = 0110，有两个设置位。这些位在位置 1 和 2 处不同。"
+ question="7 (0111) 和 1 (0001) 之间的汉明距离是多少？"
+ options="1|2|3|4"
+ answer="1"
+ explanation="7 XOR 1 = 0110，有两个设置位。这些位在位置 1 和 2 处不同。"
 />
 
 ## 实际应用
@@ -171,10 +171,10 @@ def hamming_distance(x, y):
 位操作无处不在：Unix 文件权限使用 OR/AND 掩码，功能标志将切换存储为单独的位，网络子网掩码使用 AND 进行路由，错误检测依赖于 XOR 校验和。
 
 <Quiz
-  question="要检查整数 n 中是否设置了位 k，哪个表达式是正确的？"
-  options="恩和克|n & (1 << k)|n|(1 << k)|n ^ (1 << k)"
-  answer="1"
-  explanation="(1 << k) 创建仅设置了位 k 的掩码。仅当 n 中设置了位 k 时，与 n 进行 AND 运算才返回非零。"
+ question="要检查整数 n 中是否设置了位 k，哪个表达式是正确的？"
+ options="恩和克|n & (1 << k)|n|(1 << k)|n ^ (1 << k)"
+ answer="1"
+ explanation="(1 << k) 创建仅设置了位 k 的掩码。仅当 n 中设置了位 k 时，与 n 进行 AND 运算才返回非零。"
 />
 
 <ThinkAboutIt>许多位操作解决方案在面试中感觉像是“魔术”。您如何向从未见过的队友解释基于 XOR 的缺失数字解决方案？</ThinkAboutIt>
