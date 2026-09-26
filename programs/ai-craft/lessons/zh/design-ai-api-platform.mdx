@@ -43,8 +43,8 @@ POST /v1/embeddings
 Headers: Authorization: Bearer sk-abc123
 Body: { "model": "text-embedding-3", "input": "Hello world" }
 
-GET  /v1/models                    - list available models
-GET  /v1/usage?start=2024-01-01    - usage and billing data
+GET  /v1/models                   - list available models
+GET  /v1/usage?start=2024-01-01   - usage and billing data
 
 SSE: POST /v1/completions (stream: true)
      → returns Server-Sent Events with incremental tokens
@@ -110,7 +110,7 @@ model: "gpt-6-astra"  →  95% → gpt-6-astra (current)
                 →   5% → claude-opus-5-5 (candidate)
 ```
 
-<ThinkAboutIt>评估新的法学硕士版本是否“更好”出奇地困难——与分类模型不同，没有简单的准确性指标。您将如何为生成式人工智能模型设计自动化质量评估系统？
+<ThinkAboutIt>评估新的法学硕士版本是否“更好”出奇地困难 - 与分类模型不同，没有简单的准确性指标。您将如何为生成式人工智能模型设计自动化质量评估系统？
 </ThinkAboutIt>
 
 ## 步骤 6：使用情况跟踪和计费
