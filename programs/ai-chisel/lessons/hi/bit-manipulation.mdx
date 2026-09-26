@@ -1,6 +1,6 @@
 ---
-title: "बिट मैनिपुलेशन - XOR युक्तियाँ, दो की घात, और बिट गिनना"
-description: "कोडिंग इंटरव्यू के लिए बिट-लेवल सोच सीखें। XOR निरस्तीकरण, Brian Kernighan की युक्ति, उpassमूहों के लिए बिट मास्किंग, और व्यावहारिक ऐप्लिकेशन में महारत हासिल करें।"
+title: "बिट मैनिपुलेशन - XOR ट्रिक्स, दो की घात और बिट गिनना"
+description: "कोडिंग इंटरव्यू के लिए बिट-स्तर की सोच सीखें। XOR cancellation, Brian Kernighan's trick, subsets के लिए bit masking और व्यावहारिक उपयोगों में महारत पाएँ।"
 order: 10
 difficulty: "advanced"
 duration: 17
@@ -8,9 +8,9 @@ icon: "⚡"
 published: true
 ---
 
-## बाइनरी संख्या रिव्यू
+## बाइनरी संख्या की समीक्षा
 
-हर पूर्णांक बिट की एक क्रम होता है। 13 को बाइनरी में लिखें तो `1101` मिलता है:
+हर पूर्णांक बिटों की एक श्रृंखला है। 13 को बाइनरी में `1101` लिखा जाता है:
 
 ```
 Bit position:  3  2  1  0
@@ -18,24 +18,24 @@ Bit value:     1  1  0  1
 Decimal:       8+ 4+ 0+ 1 = 13
 ```
 
-बिट मैनिपुलेशन इन बिट पर सीधे बिटवाइज़ ऑपरेटर से काम करता है - अक्सर लूप की जगह एक ही ऑपरेशन काफ़ी होता है।
+बिट मैनिपुलेशन इन बिटों पर bitwise operators से सीधे काम करता है। अक्सर loops की जगह एक ही operation ले लेता है।
 
-## मुख्य बिटवाइज़ ऑपरेशन
+## मुख्य bitwise operations
 
-| ऑपरेटर | चिह्न | उदाहरण (5 = 101, 3 = 011) | नतीजा |
+| Operator | Symbol | Example (5 = 101, 3 = 011) | Result |
 |----------|--------|----------------------------|--------|
 | AND      | `&`    | `101 & 011`                | `001` (1) |
 | OR       | `\|`   | `101 \| 011`               | `111` (7) |
 | XOR      | `^`    | `101 ^ 011`                | `110` (6) |
 | NOT      | `~`    | `~101`                     | `...010` |
-| बाएँ शिफ़ट  | `<<` | `101 << 1`              | `1010` (10) |
-| दाएँ शिफ़ट | `>>` | `101 >> 1`              | `10` (2) |
+| बायाँ shift  | `<<` | `101 << 1`              | `1010` (10) |
+| दायाँ shift | `>>` | `101 >> 1`              | `10` (2) |
 
-## ज़रूरी बिट युक्तियाँ
+## ज़रूरी बिट ट्रिक्स
 
-### दो की घात चेक करना
+### दो की घात जाँचना
 
-दो की घात में सिर्फ़ एक सेट बिट होता है: `n & (n - 1) == 0`।
+2 की घात में ठीक एक set bit होता है: `n & (n - 1) == 0`।
 
 ```
   n = 8:  1000          n = 6:  0110
@@ -43,9 +43,9 @@ Decimal:       8+ 4+ 0+ 1 = 13
   &    :  0000 ✓ power  &    :  0100 ✗ not power
 ```
 
-### सेट बिट गिनना (Brian Kernighan's एल्गोरिदम)
+### Set Bits गिनना (Brian Kernighan's Algorithm)
 
-हर `n & (n - 1)` सबसे नीचे वाला सेट बिट हटा देता है। जब तक n = 0 न हो, दोहराव गिनें।
+हर `n & (n - 1)` सबसे निचला set bit हटा देता है। n = 0 होने तक iterations गिनें।
 
 ```python
 def count_bits(n):
@@ -56,9 +56,9 @@ def count_bits(n):
     return count
 ```
 
-यह O(k) में चलता है जहाँ k सेट बिट की संख्या है - O(32) नहीं।
+यह O(k) में चलता है, जहाँ k set bits की संख्या है। यह O(32) नहीं है।
 
-### बिना अस्थायी बदलती के स्वैप
+### Temp Variable के बिना Swap
 
 ```python
 a ^= b
@@ -66,18 +66,18 @@ b ^= a
 a ^= b
 ```
 
-काम करता है क्योंकि XOR अपना ही इनवर्स है: `a ^ b ^ b = a`।
+यह इसलिए काम करता है क्योंकि XOR स्वयं का inverse है: `a ^ b ^ b = a`।
 
 <Quiz
-  question="n & (n - 1) करने से n के बाइनरी निरूपण में क्या होता है?"
-  options="सभी बिट 1 हो जाते हैं|सभी बिट स्पष्ट हो जाते हैं|सबसे नीचे वाला सेट बिट स्पष्ट होता है|सभी बिट फ्लिप हो जाते हैं"
+  question="n & (n - 1), n के binary representation पर क्या करता है?"
+  options="सभी bits को 1 कर देता है|सभी bits साफ़ कर देता है|सबसे निचला set bit साफ़ कर देता है|सभी bits पलट देता है"
   answer="2"
-  explanation="n - 1 सबसे नीचे वाले सेट बिट से लेकर नीचे तक सभी बिट फ्लिप कर देता है। n के साथ AND करने पर वो सबसे निचला सेट बिट शून्य हो जाता है।"
+  explanation="n - 1 सबसे निचले set bit से नीचे तक के सभी bits पलट देता है। n के साथ AND करने पर वही सबसे निचला set bit zero हो जाता है।"
 />
 
-## एकल संख्या - XOR निरस्तीकरण
+## Single Number - XOR Cancellation
 
-हर एलिमेंट दो बार आता है सिवाय एक के। उसे ढूँढें। चूँकि `a ^ a = 0` और `a ^ 0 = a`, सभी एलिमेंट को XOR करें - जोड़े निरस्त हो जाएँगे, अलग संख्या बचेगा।
+हर element दो बार आता है, सिर्फ़ एक को छोड़कर। उसे खोजें। क्योंकि `a ^ a = 0` और `a ^ 0 = a`, सभी elements को XOR करें। जोड़े cancel हो जाते हैं और unique number बचता है।
 
 ```python
 def single_number(nums):
@@ -87,13 +87,13 @@ def single_number(nums):
     return result
 ```
 
-समय O(n), स्पेस O(1)। कोई हैश मैप नहीं चाहिए।
+समय O(n), space O(1)। hash map की ज़रूरत नहीं।
 
-<Illustration src="/images/lessons/bit-manipulation.svg" alt="XOR निरस्तीकरण में जोड़े शून्य हो जाते हैं और सिर्फ़ एक अलग संख्या बचती है" caption="XOR में जोड़े शून्य हो जाते हैं - सिर्फ़ बिना जोड़ी वाला एलिमेंट बचता है।" />
+<Illustration src="/images/lessons/bit-manipulation.svg" alt="XOR cancellation में जोड़े zero होकर हटते हैं और एक unique number बचता है" caption="XOR में जोड़े zero होकर cancel हो जाते हैं। सिर्फ़ बिना जोड़ी वाला element बचता है।" />
 
-## एकल संख्या III - दो अलग संख्यास
+## Single Number III - दो Unique Numbers
 
-जब *दो* नंबार अलग हों, तो सbackो XOR करें - `x = a ^ b` मिलेगा। `x` में कोई भी सेट बिट ढूँढें (वहाँ दोनों नंबार अलग हैं)। उस बिट से सभी नंबार को दो समूह में बाँटो और हर समूह को XOR करें - हर समूह में ठीक एक अलग संख्या होगा।
+जब *दो* numbers unique हों, तो सबको XOR करके `x = a ^ b` पाएँ। `x` में कोई भी set bit खोजें (वहाँ दोनों numbers अलग हैं)। उसी bit से सभी numbers को बाँटें और हर group को XOR करें। हर group में ठीक एक unique number होगा।
 
 ```python
 def single_number_iii(nums):
@@ -110,15 +110,15 @@ def single_number_iii(nums):
     return [a, b]
 ```
 
-<ThinkAboutIt>`xor & (-xor)` सबसे दाएँ सेट बिट को अलग क्यों करता है? सोचें कि two's टर्म में नेगेटिव नंबार कैसे दर्शाते होते हैं।</ThinkAboutIt>
+<ThinkAboutIt>`xor & (-xor)` सबसे दाएँ set bit को अलग क्यों करता है? सोचें कि negative numbers को two's complement में कैसे दर्शाया जाता है।</ThinkAboutIt>
 
-## संख्या of 1 बिट (LeetCode 191)
+## Number of 1 Bits (LeetCode 191)
 
-यह ऊपर वाला Brian Kernighan का एल्गोरिदम ही है - सीधा इंटरव्यू प्रश्न। अगला सवाल पूछता है: अगर इनपुट साइन वाला हो तो? Python में पूर्णांक मनमानी सटीकता के होते हैं, लेकिन Java/C++ में 32-bit सीमाएँ संभालनी पड़ती हैं।
+यह ऊपर वाला Brian Kernighan's algorithm ही है। यह सीधा interview question है। follow-up पूछता है: अगर input signed हो तो क्या? Python में integers arbitrary precision रखते हैं, लेकिन Java/C++ में आपको 32-bit boundaries संभालनी पड़ती हैं।
 
-## उpassमूह के लिए बिट मास्किंग
+## Subsets के लिए Bit Masking
 
-लंबाई n का बिटमास्क, n आइटम के एक उpassमूह को दर्शाता है। बिट `i` सेट होने का मतलब आइटम `i` शामिल है। `0` से `2^n - 1` तक दोहराने पर सभी उpassमूह बन जाते हैं।
+लंबाई n का bitmask, n items के subset को दर्शाता है। bit `i` set होने का मतलब item `i` शामिल है। `0` से `2^n - 1` तक iterate करने से सभी subsets बनते हैं।
 
 ```python
 def all_subsets(items):
@@ -129,13 +129,13 @@ def all_subsets(items):
         yield subset
 ```
 
-यह तकनीक उन समस्याएँ के लिए काम करती है जहाँ n ≤ 20 हो - 2^n टर्म के लिए काफ़ी छोटा।
+यह तकनीक n ≤ 20 वाली problems के लिए काम करती है। 2^n enumeration के लिए इतना छोटा है।
 
-<FunFact>Linux फ़ाइल अनुमतियाँ (rwx-r-x-r-x = 755) वास्तविक दुनिया के बिटमास्क का बढ़िया उदाहरण हैं। हर अंक तीन अनुमति बिट एन्कोड करता है: पढ़ना (4), लिखना (2), चलाना (1), जिन्हें OR से जोड़ा जाता है।</FunFact>
+<FunFact>Linux file permissions (rwxr-xr-x = 755) असल दुनिया का bitmask हैं। हर digit तीन permission bits encode करता है: read (4), write (2), execute (1), जिन्हें OR से मिलाया जाता है।</FunFact>
 
-## बिट वापास करना करना (LeetCode 190)
+## Bits उलटना (LeetCode 190)
 
-एक 32-बिट टर्म पूर्णांक को बिट-दर-बिट टर्म करें। नतीजे को बाएँ शिफ़ट करें और इनपुट का सबसे निचला बिट OR करें, फिर इनपुट को दाएँ शिफ़ट करें।
+32-bit unsigned integer को bit by bit उलटें। result को बाएँ shift करें और input का सबसे निचला bit OR करें, फिर input को दाएँ shift करें।
 
 ```python
 def reverse_bits(n):
@@ -146,13 +146,13 @@ def reverse_bits(n):
     return result
 ```
 
-## मिसिंग संख्या (LeetCode 268)
+## Missing Number (LeetCode 268)
 
-0 से n तक के n नंबार की ऐरे जिसमें एक मिसिंग है। सभी ऐरे एलिमेंट को इंडेक्स 0 से n के साथ XOR करें - जोड़े निरस्त होंगे, मिसिंग संख्या बचेगा। टर्म फ़ॉर्मूला भी चलेगा, लेकिन XOR में ओवरफ़्लो का ख़तरा नहीं।
+0 से n तक के n numbers का array है, जिसमें एक number missing है। सभी array elements को indices 0 से n के साथ XOR करें। जोड़े cancel हो जाते हैं और missing number बचता है। विकल्प के रूप में sum formula भी इस्तेमाल कर सकते हैं, लेकिन XOR संभावित overflow से बचाता है।
 
-## Hamming दूरी (LeetCode 461)
+## Hamming Distance (LeetCode 461)
 
-वो स्थितियाँ जहाँ टर्म बिट अलग हैं, उनकी संख्या। दोनों नंबार को XOR करें - नतीजा में सेट बिट ही टर्म स्थितियाँ हैं। Brian Kernighan's युक्ति से गिनें।
+संबंधित bits जहाँ अलग हों, उन positions की संख्या। दोनों numbers को XOR करें। result में set bits ही अलग positions हैं। उन्हें Brian Kernighan's trick से गिनें।
 
 ```python
 def hamming_distance(x, y):
@@ -160,29 +160,29 @@ def hamming_distance(x, y):
 ```
 
 <Quiz
-  question="7 (0111) और 1 (0001) के बीच Hamming दूरी कितना है?"
+  question="7 (0111) और 1 (0001) के बीच Hamming distance क्या है?"
   options="1|2|3|4"
   answer="1"
-  explanation="7 XOR 1 = 0110, जिसमें दो सेट बिट हैं। बिट स्थिति 1 और 2 पर अलग हैं।"
+  explanation="7 XOR 1 = 0110, जिसमें दो set bits हैं। bits positions 1 और 2 पर अलग हैं।"
 />
 
-## व्यावहारिक ऐप्लिकेशन
+## व्यावहारिक उपयोग
 
-बिट मैनिपुलेशन हर जगह दिखता है: Unix फ़ाइल अनुमतियाँ OR/AND मास्क इस्तेमाल करती हैं, फ़ीचर फ़्लैग अलग-अलग बिट में टॉगल रखते हैं, नेटवर्क सबनेट मास्क रूटिंग के लिए AND करते हैं, और त्रुटि पहचान XOR टर्म पर निर्भर करती है।
+बिट मैनिपुलेशन हर जगह दिखता है: Unix file permissions OR/AND masks इस्तेमाल करती हैं, feature flags toggles को अलग-अलग bits में रखते हैं, network subnet masks routing के लिए AND इस्तेमाल करते हैं, और error detection XOR checksums पर निर्भर करता है।
 
 <Quiz
-  question="पूर्णांक n में बिट k सेट है या नहीं, यह जाँच करने के लिए कौन सा एक्सप्रेशन सही है?"
+  question="integer n में bit k set है या नहीं जाँचने के लिए कौन सा expression सही है?"
   options="n & k|n & (1 << k)|n | (1 << k)|n ^ (1 << k)"
   answer="1"
-  explanation="(1 << k) एक ऐसा मास्क बनाता है जिसमें सिर्फ़ बिट k सेट है। n के साथ AND करने पर non-zero तभी मिलता है जब n में बिट k सेट हो।"
+  explanation="(1 << k) ऐसा mask बनाता है जिसमें केवल bit k set होता है। n के साथ AND करने पर non-zero तभी लौटता है जब n में bit k set हो।"
 />
 
-<ThinkAboutIt>कई बिट मैनिपुलेशन समाधान इंटरव्यू में "टर्म युक्तियाँ" लगते हैं। अगर आपको XOR-आधारित मिसिंग संख्या समाधान किसी ऐसे सहकर्मी को समझाना हो जिसने पहले कभी नहीं देखा, तो कैसे समझाएँगे?</ThinkAboutIt>
+<ThinkAboutIt>कई बिट मैनिपुलेशन solutions interview में "magic tricks" जैसे लगते हैं। XOR-आधारित missing number solution को आप ऐसे teammate को कैसे समझाएँगे जिसने इसे पहले कभी नहीं देखा?</ThinkAboutIt>
 
 ---
 
 ## 📚 और पढ़ें
 
-- [बिट मैनिपुलेशन - LeetCode एक्सप्लोर](https://leetcode.com/tag/bit-manipulation/) - difficulty के हिसाब से सॉर्टेड समस्या संग्रह
-- [Brian Kernighan's Algorithm - GeeksforGeeks](https://www.geeksforgeeks.org/count-set-bits-in-an-integer/) - विज़ुअलाइज़ेशन के साथ विस्तृत व्याख्या
-- [Bitmask DP - CP-Algorithms](https://cp-algorithms.com/algebra/all-submasks.html) - प्रतिस्पर्धी प्रोग्रामिंग के लिए उन्नत बिटमास्क तकनीकें
+- [Bit Manipulation - LeetCode Explore](https://leetcode.com/tag/bit-manipulation/) - कठिनाई के अनुसार क्रमबद्ध चुना हुआ problem collection
+- [Brian Kernighan's Algorithm - GeeksforGeeks](https://www.geeksforgeeks.org/count-set-bits-in-an-integer/) - visualisations के साथ विस्तृत walkthrough
+- [Bitmask DP - CP-Algorithms](https://cp-algorithms.com/algebra/all-submasks.html) - competitive programming के लिए उन्नत bitmask techniques
