@@ -61,10 +61,10 @@ def insert(self, word):
 **検索** はパスをたどり、`is_end`をチェックします。 **startsWith** はパスが存在するかどうかのみをチェックします。`is_end = True` は必要ありません。
 
 <Quiz
-  question="「apple」は保存されているが「app」は保存されていない場合、search('app') とstartsWith('app') の違いは何ですか?"
-  options="検索は True を返し、startsWith は False を返します|どちらも True を返します|検索は False を返し、startsWith は True を返します|どちらも False を返します"
-  answer="2"
-  explanation="search は is_end (「app」の場合は False) をチェックしますが、startsWith は存在するパスのみを必要とします。"
+ question="「apple」は保存されているが「app」は保存されていない場合、search('app') とstartsWith('app') の違いは何ですか?"
+ options="検索は True を返し、startsWith は False を返します|どちらも True を返します|検索は False を返し、startsWith は True を返します|どちらも False を返します"
+ answer="2"
+ explanation="search は is_end (「app」の場合は False) をチェックしますが、startsWith は存在するパスのみを必要とします。"
 />
 
 ## DFS によるオートコンプリート
@@ -141,10 +141,10 @@ Radix:     r → "unning"
 ここで、*m* は単語長、*k* は結果数、*n* はキーの総数です。プレフィックスが多いワークロードでは試行が優勢です。
 
 <Quiz
-  question="ハッシュ マップ上のトライによるメリットが最も少ないシナリオはどれですか?"
-  options="オートコンプリートの提案|正確なキーと値の検索|接頭辞一致を備えたスペルチェッカー|「pre」で始まるすべての単語の検索"
-  answer="1"
-  explanation="プレフィックス クエリを使用しない正確なルックアップの場合、ハッシュ マップはより単純で、同様に高速です。"
+ question="ハッシュ マップ上のトライによるメリットが最も少ないシナリオはどれですか?"
+ options="オートコンプリートの提案|正確なキーと値の検索|接頭辞一致を備えたスペルチェッカー|「pre」で始まるすべての単語の検索"
+ answer="1"
+ explanation="プレフィックス クエリを使用しない正確なルックアップの場合、ハッシュ マップはより単純で、同様に高速です。"
 />
 
 ## トライに手を伸ばすとき
@@ -156,10 +156,10 @@ Radix:     r → "unning"
 - 編集距離のバリエーションによるスペルチェック
 
 <Quiz
-  question="平均長が m の n ワードをトライに挿入すると、時間計算量はどれくらいになりますか?"
-  options="の上）|オ(メートル)|O(n × m)|O(n × 平方メートル)"
-  answer="2"
-  explanation="各単語の挿入には O(m) かかり、これを n 回行うと、O(n × m) になります。"
+ question="平均長が m の n ワードをトライに挿入すると、時間計算量はどれくらいになりますか?"
+ options="の上）|オ(メートル)|O(n × m)|O(n × 平方メートル)"
+ answer="2"
+ explanation="各単語の挿入には O(m) かかり、これを n 回行うと、O(n × m) になります。"
 />
 
 <ThinkAboutIt>メモリがボトルネックである場合、トライよりも完全なキーを格納するハッシュ マップをいつ選択しますか?</ThinkAboutIt>

@@ -61,10 +61,10 @@ def insert(self, word):
 **搜索**沿着路径并检查`is_end`。 **startsWith** 仅检查路径是否存在 - 它不需要 `is_end = True`。
 
 <Quiz
-  question="当存储”apple”但不存储”app”时，search('app') 与startsWith('app') 有什么区别？"
-  options="search 返回 True，startsWith 返回 False|两者都返回 True|search 返回 False，startsWith 返回 True|两者都返回 False"
-  answer="2"
-  explanation="search 检查 is_end （'app' 为 False），而startsWith 只需要存在的路径。"
+ question="当存储”apple”但不存储”app”时，search('app') 与startsWith('app') 有什么区别？"
+ options="search 返回 True，startsWith 返回 False|两者都返回 True|search 返回 False，startsWith 返回 True|两者都返回 False"
+ answer="2"
+ explanation="search 检查 is_end （'app' 为 False），而startsWith 只需要存在的路径。"
 />
 
 ## 使用 DFS 自动完成
@@ -141,10 +141,10 @@ Radix:     r → "unning"
 这里 *m* 是字长，*k* 是结果计数，*n* 是总键数。尝试在前缀繁重的工作负载中占主导地位。
 
 <Quiz
-  question="哪种情况从哈希映射中受益最少？"
-  options="自动完成建议|精确的键值查找|具有前缀匹配的拼写检查器|查找所有以 'pre' 开头的单词"
-  answer="1"
-  explanation="对于没有前缀查询的精确查找，哈希映射更简单并且同样快速。"
+ question="哪种情况从哈希映射中受益最少？"
+ options="自动完成建议|精确的键值查找|具有前缀匹配的拼写检查器|查找所有以 'pre' 开头的单词"
+ answer="1"
+ explanation="对于没有前缀查询的精确查找，哈希映射更简单并且同样快速。"
 />
 
 ## 何时使用 Trie
@@ -156,10 +156,10 @@ Radix:     r → "unning"
 - 使用编辑距离变化进行拼写检查
 
 <Quiz
-  question="将平均长度为 m 的 n 个单词插入到 trie 中的时间复杂度是多少？"
-  options="在）|氧(米)|O(n×m)|O(n × 平方米)"
-  answer="2"
-  explanation="插入每个单词需要 O(m)，并且执行 n 次，得到 O(n × m)。"
+ question="将平均长度为 m 的 n 个单词插入到 trie 中的时间复杂度是多少？"
+ options="在）|氧(米)|O(n×m)|O(n × 平方米)"
+ answer="2"
+ explanation="插入每个单词需要 O(m)，并且执行 n 次，得到 O(n × m)。"
 />
 
 <ThinkAboutIt>如果内存是您的瓶颈，您什么时候会选择在 trie 上存储完整键的哈希映射，以及什么时候压缩 trie 会获胜？</ThinkAboutIt>

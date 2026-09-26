@@ -75,10 +75,10 @@ def union(self, x, y):
 ```
 
 <Quiz
-  question="通过路径压缩和按等级并集，每个操作的摊余时间是多少？"
-  options="O(logn)|在）|O(α(n)) - 接近 O(1)|O(√n)"
-  answer="2"
-  explanation="反阿克曼函数 α(n) 增长得非常缓慢，对于任何实际输入都不会超过 4，从而使运算效率为 O(1)。"
+ question="通过路径压缩和按等级并集，每个操作的摊余时间是多少？"
+ options="O(logn)|在）|O(α(n)) - 接近 O(1)|O(√n)"
+ answer="2"
+ explanation="反阿克曼函数 α(n) 增长得非常缓慢，对于任何实际输入都不会超过 4，从而使运算效率为 O(1)。"
 />
 
 <Illustration src="/images/lessons/union-find-and-disjoint-sets.svg" alt="路径压缩前后的并查找树" caption="路径压缩使深层链变平，从而保持未来的快速查找。" />
@@ -125,17 +125,17 @@ def union(self, x, y):
 当您*增量*处理边缘并需要快速连接检查时，Union-Find 会大放异彩。如果您只遍历一次或需要路径信息，请坚持使用 BFS/DFS。
 
 <Quiz
-  question="一次给您一个边沿，并且必须检测创建循环的第一个边沿。哪种方法最好？"
-  options="每条边之后从头开始 BFS|每条边之后从头开始 DFS|联合查找 - 并集在循环边缘返回 False|拓扑排序"
-  answer="2"
-  explanation="Union-Find 在每条边上以接近 O(1) 的速度增量检测循环，而 BFS/DFS 每次都会重新遍历整个图。"
+ question="一次给您一个边沿，并且必须检测创建循环的第一个边沿。哪种方法最好？"
+ options="每条边之后从头开始 BFS|每条边之后从头开始 DFS|联合查找 - 并集在循环边缘返回 False|拓扑排序"
+ answer="2"
+ explanation="Union-Find 在每条边上以接近 O(1) 的速度增量检测循环，而 BFS/DFS 每次都会重新遍历整个图。"
 />
 
 <Quiz
-  question="在 Union-Find 中，按等级并集可以防止什么？"
-  options="重复的边|断开的组件|简并线性链（高树）|负边权重"
-  answer="2"
-  explanation="按等级并集始终将较短的树附加在较高的树下，从而保持树的平衡，从而防止 O(n) 查找操作。"
+ question="在 Union-Find 中，按等级并集可以防止什么？"
+ options="重复的边|断开的组件|简并线性链（高树）|负边权重"
+ answer="2"
+ explanation="按等级并集始终将较短的树附加在较高的树下，从而保持树的平衡，从而防止 O(n) 查找操作。"
 />
 
 <ThinkAboutIt>有些问题需要“取消”联合（带有删除的动态连接）。为什么标准 Union-Find 不足，存在哪些修改？</ThinkAboutIt>
