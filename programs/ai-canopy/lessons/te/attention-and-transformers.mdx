@@ -1,6 +1,6 @@
 ---
 title: "అటెన్షన్ మరియు Transformers - ప్రతిదీ మార్చిన ఆర్కిటెక్చర్"
-description: "Self-అటెన్షన్, బహుళ-head అటెన్షన్, positional ఎన్‌కోడింగ్, మరియు ప్రతి ఆధునిక పెద్ద భాషా మోడల్ ని శక్తి చేసే Transformer ఆర్కిటెక్చర్ లోకి లోతైన dive."
+description: "Self-attention, multi-head attention, positional encoding, ప్రతి ఆధునిక పెద్ద భాషా మోడల్‌కు శక్తినిచ్చే Transformer ఆర్కిటెక్చర్ లోకి లోతుగా వెళ్లండి."
 order: 6
 difficulty: "advanced"
 duration: 20
@@ -10,11 +10,11 @@ published: true
 
 # అటెన్షన్ మరియు Transformers - ప్రతిదీ మార్చిన ఆర్కిటెక్చర్
 
-నేటి ప్రతి ప్రధాన భాషా మోడల్, GPT, Claude, Gemini మరియు Llama అన్నీ, Transformer ఆర్కిటెక్చర్ పై నిర్మించండి అయ్యాయి. 2017 landmark పేపర్ *అటెన్షన్ Is All You Need* లో ప్రచురించండి అయిన ఇది recurrence ని **self-అటెన్షన్** mechanism తో మార్చండి చేసి, unprecedented parallelism మరియు పనితీరు unlock చేసింది.
+నేటి ప్రతి ప్రధాన భాషా మోడల్, GPT, Claude, Gemini మరియు Llama అన్నీ Transformer ఆర్కిటెక్చర్‌పై నిర్మించబడ్డాయి. 2017 లో వచ్చిన ముఖ్యమైన paper *Attention Is All You Need* లో ఈ ఆర్కిటెక్చర్ recurrence ను **self-attention** పద్ధతితో మార్చి, అపూర్వమైన సమాంతరత మరియు పనితీరును తెరిచింది.
 
 ## RNNs ఎందుకు గోడకు తగిలాయి
 
-Recurrent న్యూరల్ Networks sequences ని ఒక టోకెన్ చొప్పున ప్రక్రియ చేస్తాయి, hidden స్థితి ని forward తీసుకువెళ్తాయి చేస్తాయి. ఇది రెండు crippling సమస్యలు సృష్టించండి చేస్తుంది:
+Recurrent neural networks sequences ను ఒక token చొప్పున ప్రాసెస్ చేస్తాయి, దాగిన state ను ముందుకు తీసుకువెళ్తాయి. ఇది రెండు తీవ్రమైన సమస్యలు సృష్టిస్తుంది:
 
 - **Vanishing గ్రేడియెంట్లు** - Gradient hundreds of సమయం దశలు ద్వారా back propagate అయ్యేసరికి, దాదాపు zero కి shrink అవుతుంది, పొడవైన-పరిధి dependencies నేర్చుకోవడం impossible అవుతుంది.
 - **Sequential bottleneck** - ప్రతి దశ ముందు దశ పై depend అవుతుంది, కాబట్టి sequence అంతటా శిక్షణ parallelise చేయలేరు. 1,000-టోకెన్ ఇన్‌పుట్ కి 1,000 serial ఆపరేషన్లు అవసరం.

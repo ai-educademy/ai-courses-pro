@@ -1,6 +1,6 @@
 ---
-title: "విస్తరిత క్యాష్ డిజైన్ చేయండి - Redis ఆర్కిటెక్చర్ మొదటి నుంచి"
-description: "క్యాష్ వ్యూహాలు, స్థిరమైన హ్యాషింగ్, తొలగింపు policies, క్యాష్ stampede prevention, మరియు Redis క్లస్టర్ ఆర్కిటెక్చర్ కవర్ చేసే విస్తరిత క్యాషింగ్ సిస్టమ్ డిజైన్ చేయండి."
+title: "విస్తరిత cache డిజైన్ చేయండి - Redis ఆర్కిటెక్చర్ మొదటి నుంచి"
+description: "Caching strategies, consistent hashing, eviction policies, cache stampede prevention, Redis cluster ఆర్కిటెక్చర్ కవర్ చేసే distributed caching system డిజైన్ చేయండి."
 order: 10
 difficulty: "advanced"
 duration: 23
@@ -10,14 +10,14 @@ published: true
 
 # విస్తరిత క్యాష్ డిజైన్ చేయండి - Redis ఆర్కిటెక్చర్ మొదటి నుంచి
 
-సిస్టమ్ పనితీరు మెరుగుపరచడానికి క్యాషింగ్ అత్యంత ప్రభావవంతమైన టెక్నిక్. బాగా డిజైన్ చేసిన విస్తరిత క్యాష్ డేటాబేస్ లోడ్ ను 90%+ తగ్గించగలదు మరియు రెస్పాన్స్ సార్లు ను వందల milliseconds నుండి ఉప-millisecond కు తీసుకురాగలదు.
+సిస్టమ్ పనితీరు మెరుగుపరచడానికి caching అత్యంత ప్రభావవంతమైన technique. బాగా డిజైన్ చేసిన distributed cache, database load ను 90% కంటే ఎక్కువ తగ్గించగలదు. response times ను వందల milliseconds నుంచి sub-millisecond స్థాయికి తీసుకురాగలదు.
 
 ## దశ 1 - అవసరాలు సేకరణ
 
 ### Functional అవసరాలు
-- ఐచ్చిక TTL (సమయం-కు-ప్రత్యక్ష) తో కీ-విలువ pairs నిల్వ చేయడం
-- సాధారణ ఆపరేషన్లు మద్దతు చేయడం: GET, సెట్, DELETE, మరియు bulk ఆపరేషన్లు
-- Horizontal స్కేలింగ్ కోసం డేటా ను అనేక నోడ్‌లు లో విస్తరించండి చేయడం
+- ఐచ్చిక TTL (time-to-live) తో key-value pairs నిల్వ చేయడం
+- సాధారణ operations కు మద్దతు ఇవ్వడం: GET, SET, DELETE, bulk operations
+- horizontal scaling కోసం డేటాను అనేక nodes లో విస్తరించడం
 
 ### Non-Functional అవసరాలు
 - **Low లేటెన్సీ** - క్యాష్ hits కోసం ఉప-millisecond రీడ్‌లు

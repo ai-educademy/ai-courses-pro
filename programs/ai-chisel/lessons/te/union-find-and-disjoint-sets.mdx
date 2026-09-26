@@ -1,6 +1,6 @@
 ---
 title: "Union-Find - కలిసిన భాగాలు మరియు నెట్‌వర్క్ గుర్తింపు"
-description: "Union-Find (disjoint సెట్) డేటా నిర్మాణం నేర్చుకోండి - మార్గం compression మరియు union ద్వారా ర్యాంక్ తో. Connectivity, MST, మరియు గ్రాఫ్ భాగం సమస్యలను సమర్థవంతంగా పరిష్కరించండి."
+description: "Union-Find (disjoint set) data structure నేర్చుకోండి: path compression, union by rank తో connectivity, MST, graph component సమస్యలను సమర్థవంతంగా పరిష్కరించండి."
 order: 7
 difficulty: "advanced"
 duration: 17
@@ -10,9 +10,9 @@ published: true
 
 ## Connectivity సమస్య
 
-మీ దగ్గర నోడ్‌లు తో ఒక నెట్‌వర్క్ ఉందని అనుకోండి, మీకు రెండు రకాల క్వెరీలు వస్తూ ఉంటాయి: *నోడ్ A ని నోడ్ B కి connect చేయండి* మరియు *A మరియు B connected గా ఉన్నాయా?* ప్రతి క్వెరీ కి BFS/DFS చేస్తే మొత్తం గ్రాఫ్ traverse చేయాల్సి వస్తుంది - లక్షల ఆపరేషన్లు కి ఇది చాలా నెమ్మది.
+మీ దగ్గర nodes ఉన్న నెట్‌వర్క్ ఉందనుకోండి. మీకు రెండు రకాల queries వస్తూ ఉంటాయి: *node A ను node B తో connect చేయండి* మరియు *A, B connected గా ఉన్నాయా?* ప్రతి query కి BFS/DFS చేస్తే మొత్తం graph traverse చేయాల్సి వస్తుంది. లక్షల operations ఉన్నప్పుడు ఇది చాలా నెమ్మదిగా ఉంటుంది.
 
-**Union-Find** రెండు క్వెరీలు ని దాదాపు constant సమయం లో సమాధానం చేస్తుంది.
+**Union-Find** ఈ రెండు queries కు దాదాపు constant time లో సమాధానం ఇస్తుంది.
 
 ## Naive విధానం - Quick Find
 
