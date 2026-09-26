@@ -1,6 +1,6 @@
 ---
-title: "Web Crawler डिज़ाइन करें - Google इंटरनेट को कैसे Index करता है"
-description: "एक distributed web crawler डिज़ाइन करें जिसमें URL frontier management, politeness policies, SimHash से content deduplication, और consistent hashing से distributed crawling शामिल है।"
+title: "वेब करवलेर डिज़ाइन करें - Google इंटरनेट को कैसे इनदेक्स करता है"
+description: "एक वितरित वेब क्रॉलर डिज़ाइन करें जिसमें URL फ़रोनटिएर प्रबंधन, पोलिटेनेस पोलिकिएस, सिमहश से कंटेंट देदुपलिकशन, और कोनसिसटेनट हशिङ से वितरित करवलिङ शामिल है।"
 order: 9
 difficulty: "advanced"
 duration: 22
@@ -8,25 +8,25 @@ icon: "🕷️"
 published: true
 ---
 
-# Web Crawler डिज़ाइन करें - Google इंटरनेट को कैसे Index करता है
+# वेब करवलेर डिज़ाइन करें - Google इंटरनेट को कैसे इनदेक्स करता है
 
-एक web crawler व्यवस्थित तरीके से इंटरनेट ब्राउज़ करता है ताकि web pages को download और index किया जा सके। यह हर search engine की नींव है, और इसे डिज़ाइन करने से आप distributed systems, graph traversal, और real web की complexities को handle करना सीखते हैं।
+एक वेब क्रॉलर व्यवस्थित तरीके से इंटरनेट ब्राउज़ करता है ताकि वेब पेज को दोवनलोअद और इंडेक्स किया जा सके। यह हर सर्च एङिने की नींव है, और इसे डिज़ाइन करने से आप वितरित सिस्टम, ग्राफ़ टरवेरसल, और वास्तविक वेब की कोमपलेक्सिटिएस को संभाल करना सीखते हैं।
 
-## Step 1 - Requirements इकट्ठा करना
+## चरण 1 - ज़रूरतें इकट्ठा करना
 
-### Functional Requirements
-- Seed URLs के एक set से शुरू करके web pages crawl करना
-- Hyperlinks extract करके नए pages discover करना
-- Downloaded content को indexing और processing के लिए store करना
-- robots.txt और crawl politeness rules का पालन करना
+### फ़ुनकशनल ज़रूरतें
+- सीद उरलस के एक सेट से शुरू करके वेब पेज करवल करना
+- हयपेरलिनकस एक्सटरकट करके नए पेज खोजना करना
+- दोवनलोअदेद कंटेंट को इनदेक्सिङ और प्रोसेसिंग के लिए सटोरे करना
+- रोबोटस.टक्सट और करवल पोलिटेनेस रुलेस का पालन करना
 
-### Non-Functional Requirements
-- **Scale** - हर महीने 1 billion pages crawl करना
-- **Politeness** - किसी भी single web server पर overload नहीं डालना
-- **Freshness** - important pages को नियमित रूप से re-crawl करना
-- **Robustness** - malformed HTML, infinite loops, और spider traps को handle करना
+### नोन-फ़ुनकशनल ज़रूरतें
+- **सकले** - हर महीने 1 बिललिओन पेज करवल करना
+- **पोलिटेनेस** - किसी भी एकल वेब सर्वर पर ओवेरलोअद नहीं डालना
+- **ताज़गी** - महत्वपूर्ण पेज को नियमित रूप से रे-करवल करना
+- **रोबुसटनेस** - मलफ़ोरमेद HTML, इनफ़िनिटे लूपस, और सपिदेर टरपस को संभाल करना
 
-## Step 2 - High-Level Architecture
+## चरण 2 - हिघ-लेवेल आर्किटेक्चर
 
 ```
 Seed URLs → URL Frontier (priority queue)
@@ -42,19 +42,19 @@ Seed URLs → URL Frontier (priority queue)
                                  URL Frontier (loop)
 ```
 
-<Illustration src="/images/lessons/design-web-crawler.svg" alt="Web crawler architecture जो URL frontier से fetcher, parser, URL extraction, deduplication और वापस frontier तक के crawl loop को दर्शाती है" caption="Crawler एक continuous loop में काम करता है: page fetch करो, नए URLs extract करो, deduplicate करो, और future crawling के लिए enqueue करो" />
+<Illustration src="/images/lessons/design-web-crawler.svg" alt="वेब करवलेर आर्किटेक्चर जो URL फ़रोनटिएर से फ़ेटचेर, PRsेर, URL एक्सटरकशन, देदुपलिकशन और वापस फ़रोनटिएर तक के करवल लूप को दर्शाती है" caption="करवलेर एक कोनटिनुओउस लूप में काम करता है: पगे फ़ेटच करो, नए उरलस एक्सटरकट करो, देदुपलिकटे करो, और फ़ुटुरे करवलिङ के लिए एनक्वेउए करो" />
 
-## Step 3 - Crawl Loop
+## चरण 3 - करवल लूप
 
-### BFS vs DFS Crawling
-- **BFS (Breadth-First)** - web crawling के लिए preferred। जल्दी से कई domains discover करता है और किसी single site में deep फँसने से बचाता है
-- **DFS (Depth-First)** - dynamically generated pages में infinitely deep जाने का risk है, बिना दूसरे domains discover किए
+### BFS vs DFS करवलिङ
+- **BFS (बरेअदथ-फ़िरसट)** - वेब करवलिङ के लिए परेफ़ेररेद। जल्दी से कई दोमैनस खोजना करता है और किसी एकल सिटे में गहरी फँसने से बचाता है
+- **DFS (देपथ-फ़िरसट)** - दयनमिकललय गेनेरटेद पेज में इनफ़िनिटेलय गहरी जाने का जोखिम है, बिना दूसरे दोमैनस खोजना किए
 
-### URL Frontier Design
-Frontier एक simple queue नहीं है - यह दो sub-components वाला एक sophisticated priority system है:
+### URL फ़रोनटिएर डिज़ाइन
+फ़रोनटिएर एक सरल क्यू नहीं है - यह दो सुब-कोमपोनेनटस वाला एक सोफिसटिकटेद प्राथमिकता सयसटेम है:
 
-1. **Priority Queue (Front)** - URLs को importance के आधार पर rank करता है। इसमें PageRank, update frequency, और domain authority जैसे factors शामिल हैं
-2. **Politeness Queue (Back)** - हर domain की अपनी FIFO queue होती है। एक scheduler अलग-अलग domain queues से pick करता है ताकि किसी single server पर ज़्यादा load न पड़े
+1. **परिओरिटय क्वेउए (फ़रोनट)** - उरलस को इमपोरटनके के आधार पर रनक करता है। इसमें पगेरनक, अपडेट फ़रेक्वेनकय, और डोमेन औथोरिटय जैसे फ़कटोरस शामिल हैं
+2. **पोलिटेनेस क्वेउए (बक)** - हर डोमेन की अपनी FIFO क्यू होती है। एक सचेदुलेर अलग-अलग डोमेन क्यू से पिक करता है ताकि किसी एकल सर्वर पर ज़्यादा लोड न पड़े
 
 ```
 Front (Priority):       Back (Politeness):
@@ -67,12 +67,12 @@ Front (Priority):       Back (Politeness):
                         └───────────────────────┘
 ```
 
-<Quiz question="Web crawler general-purpose crawling के लिए DFS की बजाय BFS क्यों use करता है?" options="BFS कम memory use करता है|BFS तेज़ी से ज़्यादा unique domains discover करता है और किसी single website में deep फँसने से बचाता है|BFS, DFS से faster है|DFS URLs के साथ काम नहीं करता" answer="1" explanation="BFS level by level explore करता है, जिसका मतलब है कि यह कई अलग-अलग domains के pages जल्दी discover करता है। DFS किसी single site में deep links follow कर सकता है - potentially millions dynamically generated pages hit करते हुए - बिना किसी दूसरे domain पर जाए।" />
+<Quiz question="वेब करवलेर गेनेरल-पुरपोसे करवलिङ के लिए DFS की बजाय BFS क्यों उपयोग करता है?" options="BFS कम मेमोरी उपयोग करता है|BFS तेज़ी से ज़्यादा उनिक्वे दोमैनस खोजना करता है और किसी एकल वेबसिटे में गहरी फँसने से बचाता है|BFS, DFS से तेज़ है|DFS उरलस के साथ काम नहीं करता" answer="1" explanation="BFS स्तर by स्तर एक्सपलोरे करता है, जिसका मतलब है कि यह कई अलग-अलग दोमैनस के पेज जल्दी खोजना करता है। DFS किसी एकल सिटे में गहरी लिंक फ़ॉलो कर सकता है - पोटेनटिअललय मिलियन दयनमिकललय गेनेरटेद पेज हिट करते हुए - बिना किसी दूसरे डोमेन पर जाए।" />
 
-## Step 4 - Politeness और Robots.txt
+## चरण 4 - पोलिटेनेस और रोबोटस.टक्सट
 
-### Robots.txt का पालन करना
-किसी भी domain को crawl करने से पहले, उसकी `robots.txt` file fetch और cache करें:
+### रोबोटस.टक्सट का पालन करना
+किसी भी डोमेन को करवल करने से पहले, उसकी `robots.txt` फ़ाइल फ़ेटच और कैश करें:
 
 ```
 # Example robots.txt
@@ -82,28 +82,28 @@ Disallow: /private/
 Crawl-delay: 2
 ```
 
-हर domain की robots.txt को TTL (24 घंटे) के साथ cache करें। `Disallow` rules और `Crawl-delay` directives का हमेशा पालन करें।
+हर डोमेन की रोबोटस.टक्सट को TTL (24 घंटे) के साथ कैश करें। `Disallow` रुलेस और `Crawl-delay` दिरेकटिवेस का हमेशा पालन करें।
 
-### Crawl Rate Limiting
-Explicit `Crawl-delay` न होने पर भी politeness बनाए रखें:
-- हर domain पर maximum 1 request per second (configurable)
-- हर domain के लिए separate download queues use करें
-- Response times track करें - अगर server slow हो जाए तो automatically back off करें
+### करवल दर लिमिटिङ
+एक्सपलिकिट `Crawl-delay` न होने पर भी पोलिटेनेस बनाए रखें:
+- हर डोमेन पर मक्सिमुम 1 रिक्वेस्ट प्रति सेकंड (कोनफ़िगुरबले)
+- हर डोमेन के लिए सेपरटे दोवनलोअद क्यू इस्तेमाल करें
+- रेसपोनसे टिमेस रिकॉर्ड करें - अगर सर्वर धीमे हो जाए तो औटोमटिकललय बक ओफ़फ़ करें
 
-<FunFact>Google का web crawler (Googlebot) सैकड़ों billions pages crawl करता है। Polite रहने के लिए, यह server response times monitor करता है और अगर कोई site slow respond करने लगे तो crawl rate कम कर देता है - effectively website को crawler के खिलाफ "push back" करने देता है।</FunFact>
+<FunFact>Google का वेब क्रॉलर (गूगलेबोट) सैकड़ों बिललिओनस पेज करवल करता है। पोलिटे रहने के लिए, यह सर्वर प्रतिक्रिया टिमेस मोनिटोर करता है और अगर कोई सिटे धीमे प्रतिक्रिया करने लगे तो करवल दर कम कर देता है - एफ़फ़ेकटिवेलय वेबसिटे को करवलेर के खिलाफ "आपत्ति" करने देता है।</FunFact>
 
-## Step 5 - Deduplication
+## चरण 5 - देदुपलिकशन
 
-### URL Deduplication (Bloom Filter)
-Billions URLs के साथ, किसी URL को पहले देखा गया है या नहीं - यह check करने के लिए एक efficient data structure चाहिए। Bloom filter O(1) lookups देता है कम memory footprint के साथ:
+### URL देदुपलिकशन (बलूम फ़िल्टर)
+बिललिओनस उरलस के साथ, किसी URL को पहले देखा गया है या नहीं - यह जाँच करने के लिए एक कुशल डेटा संरचना चाहिए। बलूम फ़िल्टर O(1) लूकुपस देता है कम मेमोरी फ़ूटपरिनट के साथ:
 
-- **Space:** 1 billion URLs के लिए ~1 GB, 1% false positive rate पर
-- **Trade-off:** कभी-कभी page re-crawl हो सकता है (false positive) लेकिन कोई नया URL कभी miss नहीं होगा (no false negatives)
+- **सपके:** 1 बिललिओन उरलस के लिए ~1 GB, 1% false पोसिटिवे दर पर
+- **टरदे-ओफ़फ़:** कभी-कभी पगे रे-करवल हो सकता है (false पोसिटिवे) लेकिन कोई नया URL कभी मिस नहीं होगा (no false नेगटिवेस)
 
-Check करने से पहले URLs normalise करें: fragments (#) हटाएँ, query parameters sort करें, hostname lowercase करें, और relative paths resolve करें।
+जाँच करने से पहले उरलस नॉर्मलाइज़ करें: फ़्रैगमेंट (#) हटाएँ, क्वेरी पैरामीटर सॉर्ट करें, होसटनमे लोवेरकसे करें, और रेलटिवे रास्ते रेसोलवे करें।
 
-### Content Deduplication (SimHash)
-अलग-अलग URLs identical content serve कर सकते हैं (mirrors, copied articles)। SimHash page content का fingerprint generate करता है - similar fingerprints (छोटी Hamming distance) वाले pages likely duplicates हैं:
+### कंटेंट देदुपलिकशन (सिमहश)
+अलग-अलग उरलस इदेनटिकल कंटेंट सर्व कर सकते हैं (मिररोरस, कोपिएद अरटिकलेस)। सिमहश पगे कंटेंट का फ़िङेरपरिनट जनरेट करता है - मिलते-जुलते फ़िङेरपरिनटस (छोटी हममिङ दिसटनके) वाले पेज लिकेलय दुपलिकटेस हैं:
 
 ```
 Page A content → SimHash → 10110010...
@@ -111,48 +111,48 @@ Page B content → SimHash → 10110011...
 Hamming distance = 1 → likely duplicate, skip storing
 ```
 
-<Quiz question="Bloom filter बताता है कि एक URL पहले देखा जा चुका है। आप क्या निष्कर्ष निकाल सकते हैं?" options="URL definitely crawl हो चुका है|URL probably crawl हो चुका है, लेकिन false positive की थोड़ी संभावना है|URL crawl नहीं हुआ है|Bloom filter को rebuild करना होगा" answer="1" explanation="Bloom filters में थोड़ी false positive rate होती है - वे किसी unseen URL के लिए 'हाँ, देखा है' बोल सकते हैं, लेकिन जो URL actually add किया गया है उसके लिए कभी 'नहीं' नहीं बोलते। इसका मतलब है कभी-कभी page re-crawl होगा, जो ज़्यादातर crawlers के लिए acceptable है।" />
+<Quiz question="बलूम फ़िल्टर बताता है कि एक URL पहले देखा जा चुका है। आप क्या निष्कर्ष निकाल सकते हैं?" options="URL देफ़िनिटेलय करवल हो चुका है|URL परोबबलय करवल हो चुका है, लेकिन false पोसिटिवे की थोड़ी संभावना है|URL करवल नहीं हुआ है|बलूम फ़िल्टर को रेबुइलद करना होगा" answer="1" explanation="बलूम फ़िल्टर में थोड़ी false पोसिटिवे दर होती है - वे किसी उनसीन URL के लिए 'हाँ, देखा है' बोल सकते हैं, लेकिन जो URL वास्तव में जोड़ें किया गया है उसके लिए कभी 'नहीं' नहीं बोलते। इसका मतलब है कभी-कभी पगे रे-करवल होगा, जो ज़्यादातर करवलेरस के लिए स्वीकार्य है।" />
 
-## Step 6 - Distributed Crawling
+## चरण 6 - दिसटरिबुटेद करवलिङ
 
-### Horizontally Scale करना
-एक single machine monthly billion pages crawl नहीं कर सकती। काम distribute करें:
+### होरिज़ोनटललय सकले करना
+एक एकल मचिने मोनथलय बिललिओन पेज करवल नहीं कर सकती। काम दिसटरिबुटे करें:
 
-- **Consistent hashing** domain names पर - हर domain को एक specific crawler node assign करता है। इससे politeness ensure होती है - एक given domain को सिर्फ़ एक node crawl करता है
-- **URL frontier** hash ring के basis पर nodes में partition होता है
-- **Coordination** एक lightweight service से जो node assignments manage करती है और nodes join/leave होने पर rebalance करती है
+- **कोनसिसटेनट हशिङ** डोमेन नमेस पर - हर डोमेन को एक विशिष्ट करवलेर नोड असाइन करता है। इससे पोलिटेनेस सुनिश्चित होती है - एक गिवेन डोमेन को सिर्फ़ एक नोड करवल करता है
+- **URL फ़रोनटिएर** हैश रिङ के आधार पर नोड में पार्टिशन होता है
+- **कूरदिनशन** एक हल्के सर्विस से जो नोड असिगनमेनटस मनगे करती है और नोड जोइन/लेअवे होने पर रेबलनके करती है
 
-### DNS Resolution Caching
-DNS lookups हर request में 10-100ms add करते हैं। Scale पर यह एक major bottleneck है:
-- हर crawler node पर local DNS cache रखें
-- Queued URLs के लिए batch DNS pre-resolution करें
-- Public DNS servers पर overload से बचने के लिए dedicated DNS resolver use करें
+### DNS रेसोलुशन कचिङ
+DNS लूकुपस हर रिक्वेस्ट में 10-100ms जोड़ें करते हैं। बड़े पैमाने पर यह एक मुख्य बोटटलेनेक है:
+- हर करवलेर नोड पर स्थानीय DNS कैश रखें
+- क्वेउएद उरलस के लिए बैच DNS परे-रेसोलुशन करें
+- पुबलिक DNS सर्वर पर ओवेरलोअद से बचने के लिए समर्पित DNS रेसोलवेर इस्तेमाल करें
 
-### Spider Trap Detection
-Malicious या poorly built sites infinite URL spaces create कर सकती हैं:
-- `/page/1/page/1/page/1/...` - repeating path patterns
-- Calendar pages जो हर future date के लिए URLs generate करते हैं
-- URLs में Session IDs जो identical content के लिए unique URLs create करते हैं
+### सपिदेर टरप देटेकशन
+मलिकिओउस या पूरलय बुइलट सिटेस इनफ़िनिटे URL Spaces करेअटे कर सकती हैं:
+- `/page/1/page/1/page/1/...` - रेपेअटिङ रास्ता पैटर्न
+- कलेनदर पेज जो हर फ़ुटुरे दटे के लिए उरलस जनरेट करते हैं
+- उरलस में सेशन इदस जो इदेनटिकल कंटेंट के लिए उनिक्वे उरलस करेअटे करते हैं
 
-**बचाव:** maximum URL length, हर domain के लिए maximum crawl depth, repetitive URL structures के लिए pattern detection, और domain-level page count limits।
+**बचाव:** मक्सिमुम URL लेङथ, हर डोमेन के लिए मक्सिमुम करवल गहराई, रेपेटिटिवे URL सटरुकटुरेस के लिए पैटर्न पहचान, और दोमैन-लेवेल पगे गणना सीमाएँ।
 
-<ThinkAboutIt>अगर आपको search index fresh रखना है, तो कौन से pages पहले re-crawl करेंगे? एक news site जो hourly update होती है vs एक Wikipedia article जो monthly बदलता है - इसके बारे में सोचें। Re-crawl scheduling prioritise करने के लिए आप कौन से signals use करेंगे?</ThinkAboutIt>
+<ThinkAboutIt>अगर आपको सर्च इंडेक्स फ़रेश रखना है, तो कौन से पेज पहले रे-करवल करेंगे? एक नेवस सिटे जो होउरलय अपडेट होती है vs एक विकिपेदिअ अरटिकले जो मोनथलय बदलता है - इसके बारे में सोचें। रे-करवल सचेदुलिङ परिओरिटिसे करने के लिए आप कौन से सिग्नल इस्तेमाल करेंगे?</ThinkAboutIt>
 
-## Step 7 - Bottlenecks और Optimisations
+## चरण 7 - बोटटलेनेकस और ओपटिमिसशनस
 
-| Bottleneck | Solution |
+| बोटटलेनेक | सोलुशन |
 |-----------|----------|
-| DNS resolution latency | Local DNS cache, batch pre-resolution |
-| Slow/unresponsive servers | Timeouts (30s), async I/O, retries के बाद skip करें |
-| Crawled content का storage | Pages compress करें, सिर्फ़ changed content store करें |
-| URL frontier memory | Disk-backed priority queue (RocksDB) |
-| Duplicate content | SimHash fingerprinting, canonical URL detection |
+| DNS रेसोलुशन लेटेंसी | स्थानीय DNS कैश, बैच परे-रेसोलुशन |
+| सलोव/उनरेसपोनसिवे सर्वर | टिमेओउटस (30s), असयनक I/O, रेटरिएस के बाद सकिप करें |
+| करवलेद कंटेंट का स्टोरेज | पगेस कोमपरेस करें, सिर्फ़ चङेद कंटेंट सटोरे करें |
+| URL फ़रोनटिएर मेमोरी | दिसक-बकेद प्राथमिकता क्यू (रोकसदब) |
+| दुपलिकटे कंटेंट | सिमहश फ़िङेरपरिनटिङ, कनोनिकल URL पहचान |
 
-<ThinkAboutIt>Search engines को crawl freshness (pages बार-बार re-crawl करना) और discovery (नए pages ढूँढना) के बीच balance बनाना होता है। अगर आपके crawler का fixed budget per day 1 million pages है, तो आप उसे existing pages re-crawl करने और नए pages discover करने में कैसे बाँटेंगे?</ThinkAboutIt>
+<ThinkAboutIt>सर्च इंजन को करवल ताज़गी (पेज बार-बार रे-करवल करना) और दिसकोवेरय (नए पेज ढूँढना) के बीच संतुलन बनाना होता है। अगर आपके करवलेर का फ़िक्सेद बजट प्रति दय 1 मिलियन पेज है, तो आप उसे मौजूदा पेज रे-करवल करने और नए पेज खोजना करने में कैसे बाँटेंगे?</ThinkAboutIt>
 
 ---
 
 ## 📚 आगे पढ़ें
-- [Web Crawler - System Design Interview Vol. 1, Ch. 9](https://bytebytego.com/) - Alex Xu का detailed web crawler design walkthrough
-- [Mercator: A Scalable Web Crawler](https://courses.cs.washington.edu/courses/cse454/15wi/papers/mercator.pdf) - scalable crawler architecture पर foundational paper
-- [Bloom Filters by Example](https://llimllib.github.io/bloomfilter-tutorial/) - Bloom filters कैसे काम करते हैं, इस पर interactive tutorial
+- [वेब करवलेर - सयसटेम डिज़ाइन इंटरव्यू वोल. 1, Ch. 9](https://bytebytego.com/) - अलेक्स Xu का देटैलेद वेब क्रॉलर डिज़ाइन वलकथरोउघ
+- [मेरकटोर: A सकलबले वेब करवलेर](https://courses.cs.washington.edu/courses/cse454/15wi/papers/mercator.pdf) - सकलबले करवलेर आर्किटेक्चर पर फ़ोउनदशनल पेपर
+- [बलूम फ़िलटेरस by एक्समपले](https://llimllib.github.io/bloomfilter-tutorial/) - बलूम फ़िल्टर कैसे काम करते हैं, इस पर इनटेरकटिवे टुटोरिअल

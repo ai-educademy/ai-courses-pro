@@ -1,6 +1,6 @@
 ---
-title: "Recommendation Engine डिज़ाइन करें - AI-Powered Personalisation at Scale"
-description: "Collaborative filtering, embeddings, और real-time serving को मिलाकर एक production recommendation system architect करें।"
+title: "अनुशंसा इंजन डिज़ाइन करें - ऐ-पोवेरेद पेरसोनलिसशन बड़े पैमाने पर"
+description: "कोलैबोरेटिव फ़िल्टरिंग, एम्बेडिंग, और रीयल-टाइम सर्विंग को मिलाकर एक प्रोडक्शन अनुशंसा सिस्टम अरचिटेकट करें।"
 order: 4
 difficulty: "advanced"
 duration: 25
@@ -8,78 +8,78 @@ icon: "🎯"
 published: true
 ---
 
-## Interview Prompt
+## इंटरव्यू प्रॉम्प्ट
 
-*"एक e-commerce platform के लिए recommendation engine डिज़ाइन करें जो 100 million users को personalised product suggestions serve करे।"*
+*"एक ए-कोममेरके प्लैटफ़ॉर्म के लिए अनुशंसा इंजन डिज़ाइन करें जो 100 मिलियन यूज़र को वैयक्तिकृत उत्पाद सुझाव सर्व करे।"*
 
-यह question आपकी **machine learning pipelines** और **scalable system design** को combine करने की ability test करता है - senior-level interviews में यह combination काफ़ी common हो गया है।
+यह question आपकी **मशीन लर्निंग पाइपलाइन** और **सकलबले सिस्टम डिज़ाइन** को जोड़ते करने की क्षमता टेस्ट करता है - सेनिओर-लेवेल इंटरव्यू में यह संयोजन काफ़ी आम हो गया है।
 
-## Step 1: Requirements Gathering
+## चरण 1: ज़रूरतें समझना
 
-**Functional requirements:**
-- Homepage पर personalised "Recommended for You" (top-20 products)
-- Product pages पर "Customers who bought this also bought"
-- Regional activity के basis पर "Trending in your area"
-- Real-time updates: recommendations recent browsing को minutes में reflect करें
+**कार्यात्मक ज़रूरतें:**
+- होमपेज पर वैयक्तिकृत "आपके लिए अनुशंसित" (टोप20 परोदुकटस)
+- परोदुकट पेज पर "इसे खरीदने वाले ग्राहकों ने यह भी खरीदा"
+- क्षेत्रीय गतिविधि के आधार पर "आपके क्षेत्र में ट्रेंडिंग"
+- रेअल-टिमे अपडेट: अनुशंसाएँ हालिया ब्राउज़िंग को मिनट में दिखाएँ
 
-**Non-functional requirements:**
-- 100ms (p99) से कम में recommendations serve करें
-- Peak पर 50,000 requests per second handle करें
-- 100 million users और 10 million products support करें
-- Graceful degradation: अगर personalisation fail हो तो popular items दिखाएँ
+**गैर-कार्यात्मक ज़रूरतें:**
+- 100ms (p99) से कम में अनुशंसाएँ सर्व करें
+- पीक पर 50,000 रिक्वेस्ट प्रति सेकंड संभालें
+- 100 मिलियन यूज़र और 10 मिलियन परोदुकटस सपोर्ट करें
+- सुचारु गिरावट: अगर वैयक्तिकरण फ़ेल हो तो लोकप्रिय आइटम दिखाएँ
 
 <Callout>
-हमेशा एक fallback strategy define करें। Interviewers को यह सुनना अच्छा लगता है - "अगर ML model fail हो जाए, तो हम gracefully popularity-based recommendations पर degrade करेंगे" - इससे production thinking दिखती है।
+हमेशा एक फ़ॉलबैक रणनीति परिभाषित करें। इनटेरविएवेरस को यह सुनना अच्छा लगता है - "अगर ML मॉडल फ़ेल हो जाए, तो हम गरकेफ़ुललय पोपुलरिटय-बसेद अनुशंसाएँ पर गिरावट करेंगे" - इससे प्रोडक्शन सोच दिखती है।
 </Callout>
 
-## Step 2: Recommendation Approaches
+## चरण 2: अनुशंसा अपपरोअचेस
 
-तीन core techniques ज़्यादातर recommendation systems को power करती हैं:
+तीन कोरे तकनीकें ज़्यादातर अनुशंसा सिस्टम को पोवेर करती हैं:
 
-**Collaborative filtering** - "आपसे मिलते-जुलते users को ये items पसंद आए"
-- User-item interaction matrices (views, purchases, ratings) analyse करें
-- Matrix factorisation से similar users या similar items खोजें
-- Sufficient interaction data होने पर अच्छे से काम करता है
+**कोलैबोरेटिव फ़िल्टरिंग** - "आपसे मिलते-जुलते यूज़र को ये आइटम पसंद आए"
+- उसेर-इटेम इंटरैक्शन मैट्रिक्स (व्यू, खरीदारी, रेटिंग) विश्लेषण करें
+- मटरिक्स फैक्टराइज़ेशन से मिलते-जुलते यूज़र या मिलते-जुलते आइटम खोजें
+- पर्याप्त इंटरैक्शन डेटा होने पर अच्छे से काम करता है
 
-**Content-based filtering** - "क्योंकि आपको इन features वाले items पसंद आए"
-- Product attributes (category, brand, price range, description) use करें
-- Transformer models से product descriptions के embeddings generate करें
-- Embedding space में items के बीच similarity compute करें
+**कंटेंट-आधारित फ़िल्टरिंग** - "क्योंकि आपको इन फ़ीचर वाले आइटम पसंद आए"
+- परोदुकट गुण (श्रेणी, ब्रांड, कीमत रेंज, description) इस्तेमाल करें
+- ट्रांसफ़ॉर्मर मॉडल से उत्पाद विवरण के एम्बेडिंग जनरेट करें
+- एमबेददिङ स्पेस में आइटम के बीच समानता गणना करें
 
-**Hybrid approach** - stronger recommendations के लिए दोनों signals combine करें
-- ज़्यादातर production systems hybrid use करते हैं: personalisation के लिए collaborative signals, diversity और cold-start coverage के लिए content signals
+**हाइब्रिड तरीका** - सटरोङेर अनुशंसाएँ के लिए दोनों सिग्नल जोड़ते करें
+- ज़्यादातर प्रोडक्शन सिस्टम हाइब्रिड उपयोग करते हैं: वैयक्तिकरण के लिए कोलैबोरेटिव सिग्नल, विविधता और कोल्ड-स्टार्ट कवरेज के लिए कंटेंट सिग्नल
 
-<Quiz question="एक नया user sign up करता है जिसका कोई purchase या browsing history नहीं है। कौन सा recommendation approach इस 'cold-start' scenario को सबसे अच्छे से handle करता है?" options="Similar users पर based collaborative filtering|User की stated preferences use करके content-based filtering|Interaction matrix की matrix factorisation|सिर्फ़ popularity-based recommendations" answer="1" explanation="Content-based filtering initial signals जैसे stated preferences, selected categories, या demographic data leverage कर सकता है - बिना interaction history के भी matching attributes वाले items recommend करने के लिए।" />
+<Quiz question="एक नया यूज़र सिगन up करता है जिसका कोई खरीदारी या ब्राउज़िंग इतिहास नहीं है। कौन सा अनुशंसा तरीका इस 'कोल्ड-स्टार्ट' स्थिति को सबसे अच्छे से संभाल करता है?" options="सिमिलर यूज़र पर आधारित कोलैबोरेटिव फ़िल्टरिंग|यूज़र की सटटेद प्राथमिकताएँ उपयोग करके कोनटेनट-बसेद फ़िल्टरिंग|इनटेरकशन मैट्रिक्स की मैट्रिक्स फैक्टराइज़ेशन|सिर्फ़ पोपुलरिटय-बसेद अनुशंसाएँ" answer="1" explanation="कंटेंट-आधारित फ़िल्टरिंग शुरुआती सिग्नल जैसे सटटेद प्राथमिकताएँ, सेलेकटेद कटेगोरिएस, या जनसांख्यिकीय डेटा लाभ कर सकता है - बिना इंटरैक्शन इतिहास के भी मटचिङ गुण वाले आइटम अनुशंसा करने के लिए।" />
 
-## Step 3: Recommendation Pipeline
+## चरण 3: अनुशंसा पाइपलाइन
 
-Production recommendation systems आमतौर पर **two-stage architecture** use करते हैं:
+परोदुकशन अनुशंसा सिस्टम आमतौर पर **दो-चरणीय आर्किटेक्चर** उपयोग करते हैं:
 
-**Stage 1 - Candidate Generation (offline/near-real-time)**
-- 10 million products को ~1,000 candidates per user तक narrow करें
-- Lightweight models use करें: collaborative filtering, embedding similarity
-- Batch jobs (hourly/daily) या streaming से near-real-time चलता है
+**चरण 1 - उम्मीदवार चयन (ओफ़फ़लिने/नेअर-रेअल-टिमे)**
+- 10 मिलियन परोदुकटस को ~1,000 उम्मीदवार प्रति यूज़र तक सीमित करें
+- हल्के मॉडल इस्तेमाल करें: कोलैबोरेटिव फ़िल्टरिंग, एमबेददिङ समानता
+- बैच जॉब (होउरलय/दैनिक) या स्ट्रीमिंग से लगभग रीयल-टाइम चलता है
 
-**Stage 2 - Ranking (real-time)**
-- ~1,000 candidates को एक richer model से score करें
-- Context consider करें: time of day, device, recent activity, cart contents
-- Top-20 ranked items return करें
-- 100ms latency budget में execute होना चाहिए
+**चरण 2 - रैंकिंग (रीयल-टाइम)**
+- ~1,000 उम्मीदवार को एक समृद्ध मॉडल से स्कोर करें
+- संदर्भ विचार करें: समय of दय, डिवाइस, हालिया गतिविधि, कार्ट सामग्री
+- टोप20 रैंक किए गए आइटम लौटाएँ
+- 100ms लेटेंसी बजट में चलना होना चाहिए
 
-<Illustration src="/images/lessons/design-recommendation-engine.svg" alt="Two-stage recommendation pipeline - candidate generation, ranking, और serving layers" caption="Candidate generation catalogue को narrow करता है; ranking model final selection को personalise करता है।" />
+<Illustration src="/images/lessons/design-recommendation-engine.svg" alt="टवो-सटगे अनुशंसा पाइपलाइन - उम्मीदवार चयन, रैंकिंग, और सर्विंग परतें" caption="उम्मीदवार जनरेशन कैटलॉग को सीमित करता है; रैंकिंग मॉडल अंतिम चयन को पेरसोनलिसे करता है।" />
 
-## Step 4: Data Model और Feature Store
+## चरण 4: डेटा मॉडल और फ़ीचर स्टोर
 
-Recommendations multiple data sources से compute किए गए rich features पर depend करती हैं:
+अनुशंसाएँ कई डेटा स्रोत से कम्प्यूट किए गए रिच फ़ीचर पर निर्भर करती हैं:
 
-**User features:** purchase history, browsing patterns, demographic segment, favourite categories
-**Item features:** category, price, ratings, description embeddings, sales velocity
-**Interaction features:** click-through rates, time spent viewing, add-to-cart rates
+**यूज़र फ़ीचर:** खरीदारी इतिहास, ब्राउज़िंग पैटर्न, जनसांख्यिकीय सेगमेनट, पसंदीदा कटेगोरिएस
+**आइटम फ़ीचर:** श्रेणी, कीमत, रेटिंग, description एम्बेडिंग, बिक्री वेग
+**इनटेरकशन फ़ीचर:** कलिक-थरोउघ दरें, समय सपेनट विएविङ, अदद-टो-करट दरें
 
-एक **feature store** (जैसे Feast, Tecton) provide करता है:
-- **Offline features** - model training के लिए precomputed batch features
-- **Online features** - real-time ranking के लिए low-latency feature retrieval
-- **Consistency** - training और serving में same feature definitions
+एक **फ़ीचर स्टोर** (जैसे Feast, Tecton) परोविदे करता है:
+- **ओफ़फ़लिने फ़ीचर** - मॉडल ट्रेनिंग के लिए परेकोमपुटेद बैच फ़ीचर
+- **ऑनलाइन फ़ीचर** - रीयल-टाइम रैंकिंग के लिए कम-लेटेंसी फ़ीचर प्राप्ति
+- **संगति** - ट्रेनिंग और सर्विंग में समान फ़ीचर परिभाषाएँ
 
 ```
 Feature Store Schema:
@@ -89,80 +89,80 @@ Feature Store Schema:
 ```
 
 <FunFact>
-Netflix का अनुमान है कि उसका recommendation system subscriber churn कम करके कंपनी को सालाना $1 billion बचाता है। जिन users को relevant suggestions मिलते हैं, वे अपनी subscription cancel करने की काफ़ी कम संभावना रखते हैं।
+Netflix का अनुमान है कि उसका अनुशंसा सिस्टम सब्सक्राइबर छोड़ना कम करके कंपनी को सालाना $1 बिललिओन बचाता है। जिन यूज़र को प्रासंगिक सुझाव मिलते हैं, वे अपनी सुबसकरिपशन कनकेल करने की काफ़ी कम संभावना रखते हैं।
 </FunFact>
 
-## Step 5: Real-Time vs Batch Recommendations
+## चरण 5: रीयल-टाइम vs बैच अनुशंसाएँ
 
-| पहलू | Batch | Real-Time |
+| पहलू | बैच | रीयल-टाइम |
 |-------|-------|-----------|
-| Freshness | घंटों पुराना | सेकंडों पुराना |
-| Compute cost | कम (scheduled jobs) | ज़्यादा (per-request inference) |
-| Complexity | सरल pipeline | Streaming infrastructure ज़रूरी |
-| Use case | Homepage "for you" | "Because you just viewed X" |
+| ताज़गी | घंटों पुराना | सेकंडों पुराना |
+| कम्प्यूट लागत | कम (निर्धारित जॉब) | ज़्यादा (पेर-रेक्वेसट इन्फ़रेंस) |
+| जटिलता | सरल पाइपलाइन | स्ट्रीमिंग इन्फ़्रास्ट्रक्चर ज़रूरी |
+| उपयोग मामला | होमपेज "के लिए योउ" | "क्योंकि योउ जुसट देखा X" |
 
-**Practical hybrid approach:**
-- हर कुछ घंटों में batch में candidate lists pre-compute करें
-- Latest session context से real time में re-rank करें
-- Streaming (Kafka) use करके events आने पर user features near-real-time update करें
+**व्यावहारिक हाइब्रिड तरीका:**
+- हर कुछ घंटों में बैच में उम्मीदवार लिस्ट परे-कोमपुटे करें
+- नवीनतम सेशन संदर्भ से वास्तविक समय में फिर से रैंक करें
+- स्ट्रीमिंग (Kafka) उपयोग करके इवेंट आने पर यूज़र फ़ीचर लगभग रीयल-टाइम अपडेट करें
 
 <ThinkAboutIt>
-जब आप Amazon पर कोई product browse करते हैं, तो recommendations लगभग तुरंत update हो जाती हैं। लेकिन collaborative filtering models को train करने में घंटों लगते हैं। आपके हिसाब से Amazon batch model training और real-time personalisation के बीच इस gap को कैसे bridge करता है?
+जब आप Amazon पर कोई उत्पाद बरोवसे करते हैं, तो अनुशंसाएँ लगभग तुरंत अपडेट हो जाती हैं। लेकिन कोलैबोरेटिव फ़िल्टरिंग मॉडल को ट्रेन करने में घंटों लगते हैं। आपके हिसाब से Amazon बैच मॉडल ट्रेनिंग और रीयल-टाइम वैयक्तिकरण के बीच इस गप को कैसे पुल करता है?
 </ThinkAboutIt>
 
-## Step 6: A/B Testing Framework
+## चरण 6: A/B परीक्षण ढाँचा
 
-Recommendation systems को rigorous experimentation चाहिए:
+अनुशंसा सिस्टम को कठोर प्रयोग चाहिए:
 
-- **Traffic splitting** - users का एक percentage नए model पर route करें
-- **Metrics** - click-through rate (CTR), conversion rate, revenue per session, diversity
-- **Statistical significance** - reliable conclusions तक पहुँचने के लिए tests काफ़ी समय तक चलाएँ
-- **Guardrail metrics** - ensure करें कि नए models overall revenue या engagement degrade न करें
+- **ट्रैफ़िक विभाजन** - यूज़र का एक प्रतिशत नए मॉडल पर रूट करें
+- **मेट्रिक्स** - क्लिक-थ्रू दर (CTR), कन्वर्ज़न दर, राजस्व प्रति सेशन, विविधता
+- **सटटिसटिकल महत्व** - रेलिअबले कोनकलुसिओनस तक पहुँचने के लिए टेस्ट काफ़ी समय तक चलाएँ
+- **गार्डरेल मेट्रिक्स** - सुनिश्चित करें कि नए मॉडल कुल राजस्व या एङगेमेनट गिरावट न करें
 
-एक typical setup **feature flag service** use करता है जो users को experiment buckets में consistently assign करे (same user हमेशा test के दौरान same variant देखे)।
+एक आम सेटअप **फ़ीचर फ़्लैग सर्विस** उपयोग करता है जो यूज़र को एक्सपेरिमेनट बुकेटस में कोनसिसटेनटलय असाइन करे (समान यूज़र हमेशा टेस्ट के दौरान समान वैरिएंट देखे)।
 
-<Quiz question="आप एक नया recommendation model deploy करते हैं जो CTR 15% बढ़ाता है लेकिन purchase conversion 5% कम करता है। आप क्या करेंगे?" options="Ship करो - ज़्यादा CTR मतलब better engagement|Roll back करो - conversion clicks से ज़्यादा important है|Investigate करो - model शायद genuinely relevant products की जगह clickbait recommend कर रहा है|Test और लंबा चलाओ - results अभी significant नहीं हैं" answer="2" explanation="ज़्यादा CTR लेकिन कम conversion suggest करता है कि model ऐसे attention-grabbing items recommend कर रहा है जिन पर users click तो करते हैं लेकिन खरीदते नहीं। इस disconnect को investigate करने से पता चलता है कि model गलत metric के लिए optimise कर रहा है।" />
+<Quiz question="आप एक नया अनुशंसा मॉडल तैनात करते हैं जो CTR 15% बढ़ाता है लेकिन खरीदारी कन्वर्ज़न 5% कम करता है। आप क्या करेंगे?" options="भेज करो - ज़्यादा CTR मतलब बेटटेर एङगेमेनट|रोलल बक करो - कन्वर्ज़न क्लिक से ज़्यादा महत्वपूर्ण है|जाँच करें करो - मॉडल शायद गेनुइनेलय प्रासंगिक परोदुकटस की जगह क्लिकबेट अनुशंसा कर रहा है|टेसट और लंबा चलाओ - नतीजे अभी सिगनिफ़िकनट नहीं हैं" answer="2" explanation="ज़्यादा CTR लेकिन कम कन्वर्ज़न सुगगेसट करता है कि मॉडल ऐसे अटटेनशन-गरबबिङ आइटम अनुशंसा कर रहा है जिन पर यूज़र कलिक तो करते हैं लेकिन खरीदते नहीं। इस दिसकोननेकट को जाँच करने से पता चलता है कि मॉडल गलत मेट्रिक के लिए ऑप्टिमाइज़ कर रहा है।" />
 
-## Step 7: Cold-Start Solutions
+## चरण 7: कोल्ड-स्टार्ट सोलुशनस
 
-Cold-start problem नए users और नए items दोनों के लिए आता है:
+कोल्ड-स्टार्ट समस्या नए यूज़र और नए आइटम दोनों के लिए आता है:
 
-**नए users:**
-- शुरू में popularity-based recommendations दिखाएँ
-- Onboarding questions पूछें ("अपनी पसंदीदा categories select करें")
-- Initial features के लिए demographic या geographic signals use करें
-- 5-10 interactions के बाद personalised recommendations पर transition करें
+**नए यूज़र:**
+- शुरू में पोपुलरिटय-बसेद अनुशंसाएँ दिखाएँ
+- ऑनबोर्डिंग प्रश्न पूछें ("अपनी पसंदीदा कटेगोरिएस चुनें")
+- शुरुआती फ़ीचर के लिए जनसांख्यिकीय या भौगोलिक सिग्नल इस्तेमाल करें
+- 5-10 इंटरैक्शन के बाद वैयक्तिकृत अनुशंसाएँ पर बदलाव करें
 
-**नए items:**
-- Content-based features (description, category, price) से items को embedding space में place करें
-- एक dedicated "New arrivals" section में नए items को boost करें
-- Exploration/exploitation strategies चलाएँ (interaction data gather करने के लिए नए items को users के subset को दिखाएँ)
+**नए आइटम:**
+- कंटेंट-आधारित फ़ीचर (description, श्रेणी, कीमत) से आइटम को एमबेददिङ स्पेस में रखें करें
+- एक समर्पित "नई आवक" सेक्शन में नए आइटम को बूस्ट करें
+- एक्सपलोरशन/एक्सपलोइटशन रणनीतियाँ चलाएँ (इंटरैक्शन डेटा इकट्ठा करने के लिए नए आइटम को यूज़र के उपसमूह को दिखाएँ)
 
-## Step 8: System को Scale करना
+## चरण 8: सयसटेम को सकले करना
 
-**50K requests per second के लिए architecture:**
-- **API gateway** - rate limiting, authentication, request routing
-- **Recommendation service** - stateless, load balancer के पीछे horizontally scaled
-- **Feature store** - low-latency feature retrieval के लिए Redis cluster
-- **Model serving** - memory में pre-loaded models (TensorFlow Serving, Triton)
-- **Pre-computed cache** - हर user के top recommendations का Redis cache, batch jobs से refresh
-- **Fallback** - cache miss और model timeout होने पर popularity-based defaults return करें
+**50K रिक्वेस्ट प्रति सेकंड के लिए आर्किटेक्चर:**
+- **API गेटवे** - दर लिमिटिङ, प्रमाणीकरण, रिक्वेस्ट रूटिंग
+- **अनुशंसा सर्विस** - स्टेटलेस, लोड बैलेंसर के पीछे होरिज़ोनटललय स्केल
+- **फ़ीचर सटोरे** - कम-लेटेंसी फ़ीचर प्राप्ति के लिए Redis क्लस्टर
+- **मॉडल सर्विंग** - मेमोरी में पहले से लोड मॉडल (TensorFlow सेरविङ, Triton)
+- **परे-कोमपुटेद कैश** - हर यूज़र के शीर्ष अनुशंसाएँ का Redis कैश, बैच जॉब से रीफ़्रेश
+- **फ़ॉलबैक** - कैश मिस और मॉडल टाइमआउट होने पर पोपुलरिटय-बसेद डिफ़ॉल्ट लौटाएँ
 
-<Quiz question="आपकी recommendation service average 40ms latency देती है लेकिन peak load पर 500ms तक spike करती है। सबसे effective पहला optimisation क्या होगा?" options="Model inference के लिए faster GPUs पर upgrade करें|Pre-computed recommendations के लिए Redis cache layer add करें|Ranking model को faster language में rewrite करें|Candidate generation pool size बढ़ाएँ" answer="1" explanation="ज़्यादातर users के लिए pre-computed recommendations cache करने से peak load में real-time inference की ज़रूरत ही खत्म हो जाती है। सिर्फ़ cache misses (नई activity, expired TTL) को live model inference चाहिए।" />
+<Quiz question="आपकी अनुशंसा सर्विस औसत 40ms लेटेंसी देती है लेकिन पीक लोड पर 500ms तक स्पाइक करती है। सबसे प्रभावी पहला ऑप्टिमाइज़ेशन क्या होगा?" options="मॉडल इन्फ़रेंस के लिए तेज़ GPUs पर अपग्रेड करें|परे-कोमपुटेद अनुशंसाएँ के लिए Redis कैश परत जोड़ें करें|रैंकिंग मॉडल को तेज़ भाषा में फिर लिखें करें|उम्मीदवार जनरेशन पूल आकार बढ़ाएँ" answer="1" explanation="ज़्यादातर यूज़र के लिए परे-कोमपुटेद अनुशंसाएँ कैश करने से पीक लोड में रीयल-टाइम इन्फ़रेंस की ज़रूरत ही खत्म हो जाती है। सिर्फ़ कैश मिसेस (नई गतिविधि, समाप्त TTL) को लाइव मॉडल इन्फ़रेंस चाहिए।" />
 
 <FunFact>
-Spotify का Discover Weekly playlist हर Monday एक batch recommendation pipeline से generate होता है जो 100 million से ज़्यादा users की listening habits analyse करता है। यह feature इतना successful हुआ कि यह users के लिए नया music discover करने का primary तरीका बन गया।
+Spotify का खोजना वीकलय प्लेलिस्ट हर मोनदय एक बैच अनुशंसा पाइपलाइन से जनरेट होता है जो 100 मिलियन से ज़्यादा यूज़र की सुनने आदतें विश्लेषण करता है। यह फ़ीचर इतना सफल हुआ कि यह यूज़र के लिए नया संगीत खोजना करने का मुख्य तरीका बन गया।
 </FunFact>
 
 <ThinkAboutIt>
-Recommendation engines "filter bubbles" बना सकते हैं जहाँ users को सिर्फ़ वही items दिखते हैं जो उन्होंने पहले consume किए हैं। आप एक ऐसा recommendation system कैसे design करेंगे जो personalisation और diversity-serendipity के बीच balance बनाए?
+अनुशंसा इंजन "फ़िल्टर बबल" बना सकते हैं जहाँ यूज़र को सिर्फ़ वही आइटम दिखते हैं जो उन्होंने पहले लेते किए हैं। आप एक ऐसा अनुशंसा सिस्टम कैसे डिज़ाइन करेंगे जो वैयक्तिकरण और दिवेरसिटय-सेरेनदिपिटय के बीच संतुलन बनाए?
 </ThinkAboutIt>
 
 ## मुख्य बातें
 
-- Two-stage architecture use करें: candidate generation (broad) → ranking (precise)
-- Hybrid approaches (collaborative + content-based) single-method systems से बेहतर perform करते हैं
-- Feature stores model training और real-time serving के बीच consistency ensure करते हैं
-- A/B testing ज़रूरी है - सिर्फ़ ML metrics नहीं, business metrics के लिए optimise करें
-- Cold-start strategies नए users और items के लिए खराब experience रोकती हैं
-- Peak traffic handle करने के लिए aggressively cache करें और gracefully degrade करें
+- टवो-सटगे आर्किटेक्चर इस्तेमाल करें: उम्मीदवार चयन (बरोअद) → रैंकिंग (परेकिसे)
+- हाइब्रिड अपपरोअचेस (कोलैबोरेटिव + कोनटेनट-बसेद) सिङले-मेथोद सिस्टम से बेहतर पेरफ़ोरम करते हैं
+- फ़ीचर सटोरेस मॉडल ट्रेनिंग और रीयल-टाइम सर्विंग के बीच संगति सुनिश्चित करते हैं
+- A/B परीक्षण ज़रूरी है - सिर्फ़ ML मेट्रिक्स नहीं, व्यापारिक मेट्रिक्स के लिए ऑप्टिमाइज़ करें
+- कोल्ड-स्टार्ट रणनीतियाँ नए यूज़र और आइटम के लिए खराब अनुभव रोकती हैं
+- पीक ट्रैफ़िक संभाल करने के लिए आक्रामक रूप से कैश करें और गरकेफ़ुललय गिरावट करें

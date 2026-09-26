@@ -1,6 +1,6 @@
 ---
-title: "Notification System Design करें - Push, Email, और SMS Billion Scale पर"
-description: "एक scalable multi-channel notification system design करें जो push, email, SMS, और in-app notifications को message queues, deduplication, और user preference management के साथ handle करता है।"
+title: "नोटिफ़िकशन सयसटेम डिज़ाइन करें - पुश, एमैल, और SMS बिललिओन बड़े पैमाने पर"
+description: "एक सकलबले मुलटि-चननेल नोटिफ़िकशन सिस्टम डिज़ाइन करें जो पुश, एमैल, SMS, और इन-अपप नोटिफ़िकशनस को संदेश क्यू, देदुपलिकशन, और यूज़र परेफ़ेरेनके प्रबंधन के साथ संभाल करता है।"
 order: 7
 difficulty: "advanced"
 duration: 22
@@ -8,27 +8,27 @@ icon: "🔔"
 published: true
 ---
 
-# Notification System Design करें - Push, Email, और SMS Billion Scale पर
+# नोटिफ़िकशन सयसटेम डिज़ाइन करें - पुश, एमैल, और SMS बिललिओन बड़े पैमाने पर
 
-Modern applications हर दिन अरबों notifications भेजती हैं, वो भी कई channels पर। इस system को design करना आपको message queues, third-party integrations, और scale पर failures को gracefully handle करना सिखाता है।
+मोदेरन अपपलिकशनस हर दिन अरबों नोटिफ़िकशनस भेजती हैं, वो भी कई चननेलस पर। इस सयसटेम को डिज़ाइन करना आपको संदेश क्यू, थिरद-परटय इनटेगरशनस, और स्केल पर फ़ैलुरेस को गरकेफ़ुललय संभाल करना सिखाता है।
 
-## Step 1 - Requirements Gathering
+## चरण 1 - ज़रूरतें समझना
 
-### Functional Requirements
-- Multiple channels support करें: push notifications, email, SMS, और in-app
-- Users अपनी notification preferences configure कर सकें और per channel opt out कर सकें
-- Templated messages with personalisation (जैसे, "Hi {name}, आपका order ship हो गया है")
-- Scheduled और immediate notifications का support
+### फ़ुनकशनल ज़रूरतें
+- मुलटिपले चननेलस सपोर्ट करें: पुश नोटिफ़िकशनस, एमैल, SMS, और इन-अपप
+- यूज़र अपनी नोटिफ़िकशन प्राथमिकताएँ कोनफ़िगुरे कर सकें और प्रति चननेल ओपट ओउट कर सकें
+- टेमपलटेद संदेश के साथ वैयक्तिकरण (जैसे, "Hi {नमे}, आपका order भेज हो गया है")
+- सचेदुलेद और इममेदिअटे नोटिफ़िकशनस का सपोर्ट
 
-### Non-Functional Requirements
-- **Scalability** - 10 million+ notifications प्रतिदिन handle करें
-- **Reliability** - कोई notification lost न हो; at-least-once delivery
-- **Low latency** - urgent notifications सेकंडों में deliver हों
-- **Extensible** - नए channels (WhatsApp, Slack) आसानी से add करें
+### नोन-फ़ुनकशनल ज़रूरतें
+- **सकलबिलिटय** - 10 मिलियन+ नोटिफ़िकशनस प्रतिदिन संभालें
+- **रेलिअबिलिटय** - कोई नोटिफ़िकशन लोसट न हो; अट-लेअसट-ओनके डिलीवरी
+- **कम लेटेंसी** - उरगेनट नोटिफ़िकशनस सेकंडों में देलिवेर हों
+- **एक्सटेनसिबले** - नए चननेलस (वहटसपप, Slack) आसानी से जोड़ें करें
 
-<ThinkAboutIt>Notification delivery exactly-once होनी चाहिए या at-least-once? सोचिए - duplicate SMS मिलने का experience बनाम एक critical security alert miss हो जाने का।</ThinkAboutIt>
+<ThinkAboutIt>नोटिफ़िकशन डिलीवरी एक्सकटलय-ओनके होनी चाहिए या अट-लेअसट-ओनके? सोचिए - दुपलिकटे SMS मिलने का अनुभव बनाम एक करिटिकल सुरक्षा अलेरट मिस हो जाने का।</ThinkAboutIt>
 
-## Step 2 - High-Level Architecture
+## चरण 2 - हिघ-लेवेल आर्किटेक्चर
 
 ```
 Caller Services → Notification Service → Validation + Preference Check
@@ -41,18 +41,18 @@ Caller Services → Notification Service → Validation + Preference Check
                                  FCM   SendGrid  Twilio  WebSocket
 ```
 
-<Illustration src="/images/lessons/design-notification-system.svg" alt="Notification system architecture जिसमें caller services, notification service, Kafka message queues, channel-specific workers, और third-party providers हैं" caption="Message queues notification service को delivery workers से decouple करते हैं, जिससे हर channel independently scale हो सके" />
+<Illustration src="/images/lessons/design-notification-system.svg" alt="नोटिफ़िकशन सयसटेम आर्किटेक्चर जिसमें कललेर सेरविकेस, नोटिफ़िकशन सर्विस, Kafka संदेश क्यू, चननेल-सपेकिफ़िक वोरकेरस, और थिरद-परटय परोविदेरस हैं" caption="मेसगे क्यू नोटिफ़िकशन सर्विस को डिलीवरी वोरकेरस से देकोउपले करते हैं, जिससे हर चननेल इनदेपेनदेनटलय स्केल हो सके" />
 
-### Core Components
-1. **Notification Service** - requests validate करता है, user preferences check करता है, templates render करता है, और messages enqueue करता है
-2. **Message Queues** - हर channel के लिए अलग queue ताकि independent scaling और isolation मिले
-3. **Delivery Workers** - channel-specific workers जो third-party API calls handle करते हैं
-4. **Template Service** - notification templates store और render करता है variable substitution के साथ
+### कोरे कोमपोनेनटस
+1. **नोटिफ़िकशन सर्विस** - रिक्वेस्ट वलिदटे करता है, यूज़र प्राथमिकताएँ जाँच करता है, टेमपलटेस रेनदेर करता है, और संदेश एनक्वेउए करता है
+2. **मेसगे क्वेउएस** - हर चननेल के लिए अलग क्यू ताकि इनदेपेनदेनट स्केलिंग और इसोलशन मिले
+3. **देलिवेरय वोरकेरस** - चननेल-सपेकिफ़िक वोरकेरस जो थिरद-परटय API कललस संभाल करते हैं
+4. **टेमपलटे सर्विस** - नोटिफ़िकशन टेमपलटेस सटोरे और रेनदेर करता है वरिअबले सुबसटिटुशन के साथ
 
-## Step 3 - Deep Dive: Key Components
+## चरण 3 - दीप दिवे: मुख्य बात कोमपोनेनटस
 
-### User Preferences और Opt-Out
-हर user और notification type के लिए preferences store करें:
+### यूज़र परेफ़ेरेनकेस और ओपट-ओउट
+हर यूज़र और नोटिफ़िकशन type के लिए प्राथमिकताएँ सटोरे करें:
 
 ```
 user_preferences:
@@ -66,21 +66,21 @@ user_preferences:
     security: { enabled: true, override_quiet_hours: true }
 ```
 
-Notification service enqueue करने **से पहले** preferences check करता है - जो user नहीं चाहता वो कभी send न करें।
+नोटिफ़िकशन सर्विस एनक्वेउए करने **से पहले** प्राथमिकताएँ जाँच करता है - जो यूज़र नहीं चाहता वो कभी सेनद न करें।
 
-### Priority Queues
-सभी notifications equal नहीं होतीं। Priority levels use करें:
-- **Critical** - security alerts, OTP codes → तुरंत process
-- **High** - order confirmations, payment receipts → सेकंडों में
-- **Medium** - social interactions, comments → मिनटों में ठीक है
-- **Low** - marketing, recommendations → batch किया जा सकता है
+### परिओरिटय क्वेउएस
+सभी नोटिफ़िकशनस एक्वल नहीं होतीं। परिओरिटय लेवेलस इस्तेमाल करें:
+- **करिटिकल** - सुरक्षा अलेरटस, OTP कोदेस → तुरंत प्रोसेस
+- **हिघ** - order कोनफ़िरमशनस, पेमेंट रेकेइपटस → सेकंडों में
+- **मेदिउम** - सोकिअल इंटरैक्शन, टिप्पणियाँ → मिनटों में ठीक है
+- **कम** - मरकेटिङ, अनुशंसाएँ → बैच किया जा सकता है
 
-<Quiz question="Notification system को एक shared queue की जगह per channel अलग message queues क्यों use करनी चाहिए?" options="Storage costs कम करने के लिए|Independent scaling allow करने और एक slow channel को बाकियों को block करने से रोकने के लिए|क्योंकि Kafka को per consumer अलग topics चाहिए|System को simple बनाने के लिए" answer="1" explanation="अगर Twilio outage की वजह से SMS delivery slow हो जाए, तो shared queue में backlog बनेगा जो push और email delivery को भी delay करेगा। Per channel अलग queues fault isolation देते हैं और हर channel को independently scale करने देते हैं।" />
+<Quiz question="नोटिफ़िकशन सयसटेम को एक शरेद क्यू की जगह प्रति चननेल अलग संदेश क्यू क्यों उपयोग करनी चाहिए?" options="सटोरगे कोसटस कम करने के लिए|इनदेपेनदेनट स्केलिंग अललोव करने और एक धीमे चननेल को बाकियों को ब्लॉक करने से रोकने के लिए|क्योंकि Kafka को प्रति कोनसुमेर अलग विषय चाहिए|सयसटेम को सरल बनाने के लिए" answer="1" explanation="अगर टविलिओ ओउटगे की वजह से SMS डिलीवरी धीमे हो जाए, तो शरेद क्यू में बकलोग बनेगा जो पुश और एमैल डिलीवरी को भी देलय करेगा। प्रति चननेल अलग क्यू फ़ौलट इसोलशन देते हैं और हर चननेल को इनदेपेनदेनटलय स्केल करने देते हैं।" />
 
-## Step 4 - Reliability और Failure Handling
+## चरण 4 - रेलिअबिलिटय और फ़ैलुरे हनदलिङ
 
-### Deduplication
-Duplicate notifications रोकने के लिए idempotency key use करें। Process करने से पहले check करें कि notification ID deduplication store (Redis with TTL) में exist करती है या नहीं:
+### देदुपलिकशन
+दुपलिकटे नोटिफ़िकशनस रोकने के लिए इदेमपोटेनकय की इस्तेमाल करें। परोकेस करने से पहले जाँच करें कि नोटिफ़िकशन ID देदुपलिकशन सटोरे (Redis के साथ TTL) में मौजूद करती है या नहीं:
 
 ```
 Key: "dedup:{notification_id}" → TTL: 24 hours
@@ -88,8 +88,8 @@ If key exists → skip (already sent)
 If not → process and set key
 ```
 
-### Retry with Exponential Backoff
-Third-party services fail होती हैं। बढ़ते delays के साथ retries implement करें:
+### रेटरय के साथ एक्सपोनेनटिअल बकोफ़फ़
+थिरद-परटय सेरविकेस फ़ेल होती हैं। बढ़ते देलयस के साथ रेटरिएस लागू करें:
 
 ```
 Attempt 1: immediate
@@ -99,49 +99,49 @@ Attempt 4: wait 16 seconds
 Attempt 5: move to dead-letter queue
 ```
 
-### Per User Rate Limiting
-Users को notification fatigue से बचाएं:
-- Maximum 3 push notifications per hour per user
-- Maximum 1 marketing email per day
-- Security notifications rate limits bypass करती हैं
+### प्रति यूज़र दर लिमिटिङ
+यूज़र को नोटिफ़िकशन थकान से बचाएं:
+- अधिकतम 3 पुश नोटिफ़िकशनस प्रति होउर प्रति यूज़र
+- अधिकतम 1 मरकेटिङ एमैल प्रति दय
+- सुरक्षा नोटिफ़िकशनस दर सीमाएँ बयपस करती हैं
 
-<FunFact>Facebook रोज़ 10 billion से ज़्यादा push notifications भेजता है। इसके लिए उन्होंने एक custom notification pipeline बनाया जो per second millions of messages process कर सकता है, iOS (APNs) और Android (FCM) के लिए अलग delivery paths के साथ।</FunFact>
+<FunFact>फ़केबूक रोज़ 10 बिललिओन से ज़्यादा पुश नोटिफ़िकशनस भेजता है। इसके लिए उन्होंने एक कुसटोम नोटिफ़िकशन पाइपलाइन बनाया जो प्रति सेकंड मिलियन of संदेश प्रोसेस कर सकता है, इओस (अपनस) और अनदरोइद (FCM) के लिए अलग डिलीवरी रास्ते के साथ।</FunFact>
 
-## Step 5 - Third-Party Integration
+## चरण 5 - थिरद-परटय इनटेगरशन
 
-| Channel | Provider | Protocol | Challenges |
+| चननेल | परोविदेर | परोटोकोल | चललेङेस |
 |---------|----------|----------|------------|
-| Push (iOS) | APNs | HTTP/2 | Token management, silent push limits |
-| Push (Android) | FCM | HTTP | Topic-based broadcasting |
-| Email | SendGrid/SES | SMTP/API | Deliverability, spam filters |
-| SMS | Twilio | REST API | Per message cost, regional compliance |
-| In-App | WebSocket | WS | Connection management, offline buffering |
+| पुश (इओस) | अपनस | HTTP/2 | टोकेन प्रबंधन, सिलेनट पुश सीमाएँ |
+| पुश (अनदरोइद) | FCM | HTTP | टोपिक-बसेद बरोअदकसटिङ |
+| एमैल | सेनदगरिद/SES | SMTP/API | देलिवेरबिलिटय, स्पैम फ़िल्टर |
+| SMS | टविलिओ | REST API | प्रति संदेश लागत, रेगिओनल अनुपालन |
+| इन-अपप | WebSocket | WS | कोननेकशन प्रबंधन, ऑफ़लाइन बुफ़फ़ेरिङ |
 
-### Analytics Pipeline
-हर message का notification lifecycle track करें:
-- **Created** → **Queued** → **Sent** → **Delivered** → **Opened** → **Clicked**
+### विश्लेषण पाइपलाइन
+हर संदेश का नोटिफ़िकशन लिफ़ेकयकले रिकॉर्ड करें:
+- **करेअटेद** → **क्वेउएद** → **सेनट** → **देलिवेरेद** → **ओपेनेद** → **कलिकेद**
 
-Dashboard reporting के लिए events को time-series database या event stream में store करें: delivery rates, open rates, और click-through rates per channel और notification type।
+दशबोअरद रेपोरटिङ के लिए इवेंट को टिमे-सेरिएस डेटाबेस या घटना सटरेअम में सटोरे करें: डिलीवरी दरें, ओपेन दरें, और कलिक-थरोउघ दरें प्रति चननेल और नोटिफ़िकशन type।
 
-<Quiz question="एक notification system failed SMS delivery को 3 बार retry करता है। बिना deduplication के, अगर पहला attempt actually succeed हो गया लेकिन acknowledgement lost हो गया तो क्या होगा?" options="Message permanently lost हो जाएगा|User को same SMS की 4 copies तक मिल सकती हैं|System automatically duplicate detect कर लेगा|Retry mechanism इस scenario को prevent करता है" answer="1" explanation="अगर provider ने request process कर दी लेकिन acknowledgement lost हो गया, तो system सोचता है कि fail हो गया और retry करता है। बिना provider-level deduplication या idempotency keys के, user को same SMS कई बार मिल सकता है।" />
+<Quiz question="एक नोटिफ़िकेशन सिस्टम फ़ैलेद SMS डिलीवरी को 3 बार फिर कोशिश करता है। बिना देदुपलिकशन के, अगर पहला अटटेमपट वास्तव में सुककीद हो गया लेकिन अकनोवलेदगेमेनट लोसट हो गया तो क्या होगा?" options="मेसगे पेरमनेनटलय लोसट हो जाएगा|यूज़र को समान SMS की 4 कोपिएस तक मिल सकती हैं|सयसटेम औटोमटिकललय दुपलिकटे देटेकट कर लेगा|रेटरय मेचनिसम इस स्थिति को परेवेनट करता है" answer="1" explanation="अगर परोविदेर ने रिक्वेस्ट प्रोसेस कर दी लेकिन अकनोवलेदगेमेनट लोसट हो गया, तो सयसटेम सोचता है कि फ़ेल हो गया और फिर कोशिश करता है। बिना परोविदेर-लेवेल देदुपलिकशन या इदेमपोटेनकय की के, यूज़र को समान SMS कई बार मिल सकता है।" />
 
-## Step 6 - Bottlenecks और Optimisations
+## चरण 6 - बोटटलेनेकस और ओपटिमिसशनस
 
-| Bottleneck | Solution |
+| बोटटलेनेक | सोलुशन |
 |-----------|----------|
-| Third-party rate limits | Per provider controlled throughput वाली queue |
-| Scale पर template rendering | Common templates pre-render और cache करें |
-| Per message preference lookups | Redis में user preferences cache करें |
-| Peak traffic spikes | Queue depth के basis पर workers auto-scale करें |
-| Cross-region delivery | Provider endpoints के पास workers deploy करें |
+| थिरद-परटय दर सीमाएँ | प्रति परोविदेर कोनटरोललेद थरोउघपुट वाली क्यू |
+| बड़े पैमाने पर टेमपलटे रेनदेरिङ | कोममोन टेमपलटेस परे-रेनदेर और कैश करें |
+| प्रति संदेश परेफ़ेरेनके लूकुपस | Redis में यूज़र प्राथमिकताएँ कैश करें |
+| पीक ट्रैफ़िक सपिकेस | क्वेउए गहराई के आधार पर वोरकेरस औटो-सकले करें |
+| करोस-रेगिओन डिलीवरी | परोविदेर एनदपोइनटस के पास वोरकेरस तैनात करें |
 
-<ThinkAboutIt>आप एक ऐसा notification system कैसे design करेंगे जो Black Friday sale के लिए 2 घंटे के अंदर 50 million personalised emails भेज सके, और साथ ही real-time security alerts sub-second latency के साथ deliver करे?</ThinkAboutIt>
+<ThinkAboutIt>आप एक ऐसा नोटिफ़िकेशन सिस्टम कैसे डिज़ाइन करेंगे जो बलक फ़रिदय सले के लिए 2 घंटे के अंदर 50 मिलियन वैयक्तिकृत एमैलस भेज सके, और साथ ही रीयल-टाइम सुरक्षा अलेरटस सुब-सेकोनद लेटेंसी के साथ देलिवेर करे?</ThinkAboutIt>
 
-<Quiz question="User notification preferences कौन सा component check करे?" options="Delivery worker, third-party API call से ठीक पहले|Caller service, notification service को भेजने से पहले|Notification service, message enqueue करने से पहले|Message queue, routing के दौरान" answer="2" explanation="Notification service में enqueue करने से पहले preferences check करने से queue capacity और worker processing waste नहीं होती उन notifications पर जो user नहीं चाहता। यह सबसे पहला point है जहाँ centralised preference logic apply हो सकती है।" />
+<Quiz question="यूज़र नोटिफ़िकशन प्राथमिकताएँ कौन सा कोमपोनेनट जाँच करे?" options="देलिवेरय वोरकेर, थिरद-परटय API कॉल से ठीक पहले|कललेर सर्विस, नोटिफ़िकशन सर्विस को भेजने से पहले|नोटिफ़िकशन सर्विस, संदेश एनक्वेउए करने से पहले|मेसगे क्यू, रूटिंग के दौरान" answer="2" explanation="नोटिफ़िकशन सर्विस में एनक्वेउए करने से पहले प्राथमिकताएँ जाँच करने से क्यू कपकिटय और वोरकेर प्रोसेसिंग वसटे नहीं होती उन नोटिफ़िकशनस पर जो यूज़र नहीं चाहता। यह सबसे पहला बिंदु है जहाँ केनटरलिसेद परेफ़ेरेनके तर्क अपपलय हो सकती है।" />
 
 ---
 
 ## 📚 और पढ़ें
-- [Notification System - System Design Interview Vol. 1, Ch. 10](https://bytebytego.com/) - Alex Xu का comprehensive notification system design
-- [How Airbnb Built a Notification Platform](https://medium.com/airbnb-engineering) - real-world multi-channel notification architecture
-- [Firebase Cloud Messaging Docs](https://firebase.google.com/docs/cloud-messaging) - push notification delivery mechanics को समझें
+- [नोटिफ़िकशन सयसटेम - सयसटेम डिज़ाइन इंटरव्यू वोल. 1, Ch. 10](https://bytebytego.com/) - अलेक्स Xu का कोमपरेहेनसिवे नोटिफ़िकशन सिस्टम डिज़ाइन
+- [कैसे ऐरबनब बुइलट a नोटिफ़िकशन प्लैटफ़ॉर्म](https://medium.com/airbnb-engineering) - रेअल-वोरलद मुलटि-चननेल नोटिफ़िकशन आर्किटेक्चर
+- [फ़िरेबसे Cloud मेसगिङ दोकस](https://firebase.google.com/docs/cloud-messaging) - पुश नोटिफ़िकशन डिलीवरी मेचनिकस को समझें
