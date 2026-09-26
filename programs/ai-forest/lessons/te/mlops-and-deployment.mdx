@@ -1,6 +1,6 @@
 ---
-title: "MLOps మరియు Deployment - మోడల్‌ను Notebook నుండి Production కు తీసుకెళ్ళడం"
-description: "పూర్తి MLOps lifecycle నేర్చుకోండి: model registries, ML కోసం CI/CD, containerisation, serving infrastructure, drift monitoring, మరియు పెద్ద ఎత్తున cost optimisation."
+title: "MLOps మరియు డిప్లాయ్‌మెంట్ - మోడల్‌ను Notebook నుండి ప్రొడక్షన్ కు తీసుకెళ్ళడం"
+description: "పూర్తి MLOps జీవనచక్రం నేర్చుకోండి: మోడల్ registries, ML కోసం CI/CD, containerisation, సర్వింగ్ మౌలిక సదుపాయాలు, డ్రిఫ్ట్ పర్యవేక్షణ, మరియు పెద్ద ఎత్తున ఖర్చు ఆప్టిమైజేషన్."
 order: 6
 difficulty: "advanced"
 duration: 18
@@ -8,124 +8,124 @@ icon: "⚙️"
 published: true
 ---
 
-# MLOps మరియు Deployment
+# MLOps మరియు డిప్లాయ్‌మెంట్
 
-94% accuracy ఉన్న Jupyter notebook ఒక product కాదు. మీరు laptop మూసేసిన క్షణం, ఆ model ఎవరికీ పనికిరాదు. MLOps అనేది experimentation మరియు production మధ్య గల అంతరాన్ని తగ్గించే discipline - మరియు ఇక్కడే చాలా AI teams అత్యంత కష్టపడతాయి.
+94% ఖచ్చితత్వం ఉన్న Jupyter notebook ఒక ప్రోడక్ట్ కాదు. మీరు laptop మూసేసిన క్షణం, ఆ మోడల్ ఎవరికీ పనికిరాదు. MLOps అనేది ప్రయోగాలు మరియు ప్రొడక్షన్ మధ్య గల అంతరాన్ని తగ్గించే discipline - మరియు ఇక్కడే చాలా AI బృందాలు అత్యంత కష్టపడతాయి.
 
-## Notebooks ఎందుకు Production కాదు
+## Notebooks ఎందుకు ప్రొడక్షన్ కాదు
 
-Notebooks చెడ్డ engineering అలవాట్లను ప్రోత్సహిస్తాయి: cells క్రమం తప్పి execute అవడం వల్ల hidden state, hardcoded file paths, dependency management లేకపోవడం, మరియు reproducibility సున్నా. Notebook లో train చేసిన model కొత్త data వచ్చినప్పుడు స్వయంచాలకంగా retrain కాదు, విఫలమైనప్పుడు rollback కాదు, మరియు degradation కోసం monitor చేయబడదు.
+Notebooks చెడ్డ ఇంజినీరింగ్ అలవాట్లను ప్రోత్సహిస్తాయి: సెల్‌లు క్రమం తప్పి execute అవడం వల్ల hidden స్థితి, hardcoded ఫైల్ మార్గాలు, dependency నిర్వహణ లేకపోవడం, మరియు reproducibility సున్నా. Notebook లో శిక్షణ ఇవ్వండి చేసిన మోడల్ కొత్త డేటా వచ్చినప్పుడు స్వయంచాలకంగా retrain కాదు, విఫలమైనప్పుడు rollback కాదు, మరియు degradation కోసం monitor చేయబడదు.
 
-Production ML కి **versioned code, versioned data, versioned models, మరియు automated pipelines** అవసరం. మిగతావన్నీ కేవలం demo మాత్రమే.
+ప్రొడక్షన్ ML కి **versioned కోడ్, versioned డేటా, versioned మోడళ్లు, మరియు ఆటోమేటెడ్ పైప్‌లైన్‌లు** అవసరం. మిగతావన్నీ కేవలం డెమో మాత్రమే.
 
-## MLOps Lifecycle
+## MLOps జీవనచక్రం
 
-MLOps lifecycle ఒక continuous loop, linear pipeline కాదు. ప్రతి stage మిగతా వాటికి feedback ఇస్తుంది, మరియు మీ organisation యొక్క maturity ఈ transitions ఎంత automated గా ఉంటాయో నిర్ణయిస్తుంది.
+MLOps జీవనచక్రం ఒక continuous లూప్, linear పైప్‌లైన్ కాదు. ప్రతి stage మిగతా వాటికి ఫీడ్‌బ్యాక్ ఇస్తుంది, మరియు మీ organisation యొక్క maturity ఈ మార్పులు ఎంత ఆటోమేటెడ్ గా ఉంటాయో నిర్ణయిస్తుంది.
 
-Google మూడు MLOps maturity levels నిర్వచిస్తుంది:
-- **Level 0** - Manual, script-driven process. Data scientists models ను engineers కు handoff చేస్తారు.
-- **Level 1** - Automated training pipelines. కొత్త data పై retraining స్వయంచాలకంగా trigger అవుతుంది.
-- **Level 2** - ML కోసం పూర్తి CI/CD. Code, data, మరియు model changes అన్నీ automated pipelines ద్వారా వెళ్తాయి.
+Google మూడు MLOps maturity స్థాయులు నిర్వచిస్తుంది:
+- **స్థాయి 0** - Manual, స్క్రిప్ట్-driven ప్రక్రియ. డేటా scientists మోడళ్లు ను ఇంజినీర్లు కు handoff చేస్తారు.
+- **స్థాయి 1** - ఆటోమేటెడ్ శిక్షణ పైప్‌లైన్‌లు. కొత్త డేటా పై retraining స్వయంచాలకంగా ప్రేరేపణ అవుతుంది.
+- **స్థాయి 2** - ML కోసం పూర్తి CI/CD. కోడ్, డేటా, మరియు మోడల్ మార్పులు అన్నీ ఆటోమేటెడ్ పైప్‌లైన్‌లు ద్వారా వెళ్తాయి.
 
-Loop యొక్క stages:
+లూప్ యొక్క stages:
 
-1. **Data ingestion మరియు validation** - Incoming data ను collect, clean, మరియు schemas కు validate చేయడం
-2. **Feature engineering** - Raw data ను feature store ద్వారా model-ready features గా transform చేయడం
-3. **Training** - Tracked hyperparameters తో reproducible training jobs run చేయడం
-4. **Evaluation** - Held-out test sets పై candidate models ను baselines తో compare చేయడం
-5. **Registry** - Approved models ను metadata, lineage, మరియు approval status తో store చేయడం
-6. **Deployment** - Model ను canary లేదా blue-green rollout తో API వెనుక serve చేయడం
-7. **Monitoring** - Prediction quality, latency, throughput, మరియు data drift ను track చేయడం
-8. **Retraining** - Performance తగ్గినప్పుడు కొత్త training runs trigger చేయడం
+1. **డేటా ingestion మరియు ధృవీకరణ** - Incoming డేటా ను collect, clean, మరియు స్కీమాలు కు ధృవీకరించండి చేయడం
+2. **ఫీచర్ ఇంజినీరింగ్** - ముడి డేటా ను ఫీచర్ నిల్వ ద్వారా మోడల్-ready ఫీచర్లు గా transform చేయడం
+3. **శిక్షణ** - Tracked hyperparameters తో reproducible శిక్షణ ఉద్యోగాలు నడపండి చేయడం
+4. **మూల్యాంకనం** - Held-out పరీక్ష సెట్లు పై అభ్యర్థి మోడళ్లు ను baselines తో పోల్చండి చేయడం
+5. **రిజిస్ట్రీ** - Approved మోడళ్లు ను metadata, lineage, మరియు approval స్థితి తో నిల్వ చేయడం
+6. **డిప్లాయ్‌మెంట్** - మోడల్ ను canary లేదా blue-green rollout తో API వెనుక సర్వ్ చేయండి చేయడం
+7. **పర్యవేక్షణ** - అంచనా నాణ్యత, లేటెన్సీ, థ్రూపుట్, మరియు డేటా డ్రిఫ్ట్ ను ట్రాక్ చేయడం
+8. **Retraining** - పనితీరు తగ్గినప్పుడు కొత్త శిక్షణ నడుస్తుంది ప్రేరేపణ చేయడం
 
-<Illustration src="/images/lessons/mlops-and-deployment.svg" alt="MLOps lifecycle diagram - data నుండి deployment నుండి monitoring వరకు continuous loop చూపిస్తుంది" caption="MLOps lifecycle ఒక loop - monitoring retraining లోకి తిరిగి feed అవుతుంది." />
+<Illustration src="/images/lessons/mlops-and-deployment.svg" alt="MLOps జీవనచక్రం చిత్రం - డేటా నుండి డిప్లాయ్‌మెంట్ నుండి పర్యవేక్షణ వరకు continuous లూప్ చూపిస్తుంది" title="MLOps జీవనచక్రం ఒక లూప్ - పర్యవేక్షణ retraining లోకి తిరిగి ఫీడ్ అవుతుంది." />
 
-## Model Registries
+## మోడల్ Registries
 
-Model registry మీ trained models కోసం version control system. **MLflow**, **Weights & Biases**, మరియు **Neptune** వంటి tools model artefacts ను వాటి training metrics, hyperparameters, dataset versions, మరియు promotion status (staging → production → archived) తో కలిపి store చేయడానికి అనుమతిస్తాయి.
+మోడల్ రిజిస్ట్రీ మీ శిక్షణ పొందిన మోడళ్లు కోసం వెర్షన్ నియంత్రణ సిస్టమ్. **MLflow**, **బరువులు & Biases**, మరియు **Neptune** వంటి టూల్స్ మోడల్ artefacts ను వాటి శిక్షణ మెట్రిక్స్, hyperparameters, డేటాసెట్ వెర్షన్‌లు, మరియు promotion స్థితి (staging → ప్రొడక్షన్ → archived) తో కలిపి నిల్వ చేయడానికి అనుమతిస్తాయి.
 
-Registry కీలకమైన ప్రశ్నలకు సమాధానం ఇస్తుంది: *ప్రస్తుతం production లో ఏ model ఉంది? దాన్ని ఏ data పై train చేశారు? ఎవరు approve చేశారు? Evaluation metrics ఏమిటి?*
+రిజిస్ట్రీ కీలకమైన ప్రశ్నలకు సమాధానం ఇస్తుంది: *ప్రస్తుతం ప్రొడక్షన్ లో ఏ మోడల్ ఉంది? దాన్ని ఏ డేటా పై శిక్షణ ఇవ్వండి చేశారు? ఎవరు approve చేశారు? మూల్యాంకనం మెట్రిక్స్ ఏమిటి?*
 
-<Quiz question="Model registry యొక్క ప్రాథమిక ఉద్దేశ్యం ఏమిటి?" options="Training data store చేయడం|Trained models ను metadata తో version మరియు track చేయడం|Hyperparameter tuning run చేయడం|End users కు models serve చేయడం" answer="1" explanation="Model registry trained models ను వాటి metadata - metrics, parameters, lineage, మరియు promotion status - తో version చేస్తుంది, reproducibility మరియు governance ను సాధ్యం చేస్తుంది." />
+<Quiz question="మోడల్ రిజిస్ట్రీ యొక్క ప్రాథమిక ఉద్దేశ్యం ఏమిటి?" options="శిక్షణ డేటా నిల్వ చేయడం|శిక్షణ పొందిన మోడళ్లు ను metadata తో వెర్షన్ మరియు ట్రాక్ చేయడం|Hyperparameter tuning నడపండి చేయడం|ముగింపు వినియోగదారులు కు మోడళ్లు సర్వ్ చేయండి చేయడం" answer="1" explanation="మోడల్ రిజిస్ట్రీ శిక్షణ పొందిన మోడళ్లు ను వాటి metadata - మెట్రిక్స్, పరామీటర్లు, lineage, మరియు promotion స్థితి - తో వెర్షన్ చేస్తుంది, reproducibility మరియు governance ను సాధ్యం చేస్తుంది." />
 
-## Machine Learning కోసం CI/CD
+## మెషిన్ లెర్నింగ్ కోసం CI/CD
 
-Traditional CI/CD code ను test చేస్తుంది. ML CI/CD మూడు విషయాలను test చేయాలి: **code, data, మరియు models**.
+సాంప్రదాయ CI/CD కోడ్ ను పరీక్ష చేస్తుంది. ML CI/CD మూడు విషయాలను పరీక్ష చేయాలి: **కోడ్, డేటా, మరియు మోడళ్లు**.
 
-- **Code tests** - Feature engineering logic, data transformations, మరియు API contracts కోసం unit tests
-- **Data tests** - Schema validation, distribution checks (కొత్త data expected ranges లో ఉందా?), మరియు completeness checks (missing columns లేవా)
-- **Model tests** - Validation sets పై performance thresholds, latency benchmarks, bias metrics, మరియు ప్రస్తుత production model తో comparison
+- **కోడ్ పరీక్షలు** - ఫీచర్ ఇంజినీరింగ్ logic, డేటా transformations, మరియు API ఒప్పందాలు కోసం యూనిట్ పరీక్షలు
+- **డేటా పరీక్షలు** - స్కీమా ధృవీకరణ, వితరణ తనిఖీలు (కొత్త డేటా expected ranges లో ఉందా?), మరియు completeness తనిఖీలు (missing కాలమ్‌లు లేవా)
+- **మోడల్ పరీక్షలు** - ధృవీకరణ సెట్లు పై పనితీరు thresholds, లేటెన్సీ benchmarks, పక్షపాతం మెట్రిక్స్, మరియు ప్రస్తుత ప్రొడక్షన్ మోడల్ తో పోలిక
 
-Feature pipeline ను మార్చే pull request స్వయంచాలకంగా retraining మరియు evaluation trigger చేయాలి. కొత్త model baseline కంటే తక్కువ perform చేస్తే, PR block అవుతుంది.
+ఫీచర్ పైప్‌లైన్ ను మార్చే పుల్ రిక్వెస్ట్ స్వయంచాలకంగా retraining మరియు మూల్యాంకనం ప్రేరేపణ చేయాలి. కొత్త మోడల్ baseline కంటే తక్కువ perform చేస్తే, PR బ్లాక్ అవుతుంది.
 
 ## ML కోసం Containerisation
 
-Production ML కు Docker తప్పనిసరి. మీ training environment మరియు serving environment ఒకేలా ఉండాలి - "నా machine లో పని చేస్తోంది" సమస్య GPU drivers, CUDA versions, మరియు Python dependencies అన్నీ match అవ్వాల్సినప్పుడు మరింత తీవ్రమవుతుంది.
+ప్రొడక్షన్ ML కు Docker తప్పనిసరి. మీ శిక్షణ environment మరియు సర్వింగ్ environment ఒకేలా ఉండాలి - "నా machine లో పని చేస్తోంది" సమస్య GPU డ్రైవర్లు, CUDA వెర్షన్‌లు, మరియు Python dependencies అన్నీ సరిపోల్చండి అవ్వాల్సినప్పుడు మరింత తీవ్రమవుతుంది.
 
-ఒక typical ML Dockerfile layers: base CUDA image → Python dependencies → model artefacts → serving framework. Multi-stage builds final image ను lean గా ఉంచుతాయి.
+ఒక సాధారణ ML Dockerfile పొరలు: బేస్ CUDA image → Python dependencies → మోడల్ artefacts → సర్వింగ్ ఫ్రేమ్‌వర్క్. బహుళ-stage builds final image ను lean గా ఉంచుతాయి.
 
-ML containerisation కోసం కీలక practices:
-- **ప్రతి dependency ని pin చేయండి** - `requirements.txt` లో exact versions ఉపయోగించండి, ranges కాదు
-- **Digest-based base images వాడండి** - `nvidia/cuda@sha256:...` కానీ `:latest` కాదు
-- **Training మరియు serving images వేరు చేయండి** - Training images కు compilers మరియు dev tools కావాలి; serving images కు runtime మాత్రమే
-- **Vulnerabilities కోసం scan చేయండి** - ML images deep dependency trees నుండి CVEs inherit చేస్తాయి
+ML containerisation కోసం కీలక పద్ధతులు:
+- **ప్రతి dependency ని పిన్ చేయండి** - `requirements.txt` లో ఖచ్చితమైన వెర్షన్‌లు ఉపయోగించండి, ranges కాదు
+- **Digest-ఆధారిత బేస్ images వాడండి** - `nvidia/cuda@sha256:...` కానీ `:latest` కాదు
+- **శిక్షణ మరియు సర్వింగ్ images వేరు చేయండి** - శిక్షణ images కు compilers మరియు dev టూల్స్ కావాలి; సర్వింగ్ images కు runtime మాత్రమే
+- **Vulnerabilities కోసం scan చేయండి** - ML images లోతైన dependency వృక్షాలు నుండి CVEs inherit చేస్తాయి
 
-<FunFact>NVIDIA CUDA base image ఒక్కటే 3 GB కంటే ఎక్కువ. Production teams cold-start times మరియు container registry costs తగ్గించడానికి Docker images optimize చేయడంలో రోజులు గడుపుతాయి.</FunFact>
+<FunFact>NVIDIA CUDA బేస్ image ఒక్కటే 3 GB కంటే ఎక్కువ. ప్రొడక్షన్ బృందాలు cold-ప్రారంభించండి సార్లు మరియు container రిజిస్ట్రీ ఖర్చులు తగ్గించడానికి Docker images optimize చేయడంలో రోజులు గడుపుతాయి.</FunFact>
 
-## Serving Infrastructure
+## సర్వింగ్ మౌలిక సదుపాయాలు
 
-Model ను ఎలా serve చేయాలనేది మీ latency మరియు throughput requirements పై ఆధారపడుతుంది:
+మోడల్ ను ఎలా సర్వ్ చేయండి చేయాలనేది మీ లేటెన్సీ మరియు థ్రూపుట్ అవసరాలు పై ఆధారపడుతుంది:
 
-| Tool | దేనికి ఉత్తమం | కీలక Feature |
+| టూల్ | దేనికి ఉత్తమం | కీలక ఫీచర్ |
 |------|-------------|--------------|
-| **TorchServe** | PyTorch models | Built-in batching, model versioning |
-| **Triton Inference Server** | Multi-framework, GPU | Dynamic batching, concurrent model execution |
-| **vLLM** | Large language models | PagedAttention, continuous batching |
-| **TensorFlow Serving** | TF/Keras models | gRPC + REST, automatic model reload |
-| **BentoML** | ఏ framework అయినా | Pythonic API, built-in containerisation |
+| **TorchServe** | PyTorch మోడళ్లు | Built-లో batching, మోడల్ versioning |
+| **Triton ఇన్‌ఫరెన్స్ సర్వర్** | బహుళ-ఫ్రేమ్‌వర్క్, GPU | Dynamic batching, సమకాలిక మోడల్ execution |
+| **vLLM** | పెద్ద భాష మోడళ్లు | PagedAttention, continuous batching |
+| **TensorFlow సర్వింగ్** | TF/Keras మోడళ్లు | gRPC + REST, automatic మోడల్ reload |
+| **BentoML** | ఏ ఫ్రేమ్‌వర్క్ అయినా | Pythonic API, built-లో containerisation |
 
-LLM serving కోసం ప్రత్యేకంగా, **vLLM** industry standard గా మారింది ఎందుకంటే దాని PagedAttention mechanism naive serving తో పోలిస్తే GPU memory waste ను 90% వరకు తగ్గిస్తుంది.
+LLM సర్వింగ్ కోసం ప్రత్యేకంగా, **vLLM** industry ప్రామాణిక గా మారింది ఎందుకంటే దాని PagedAttention mechanism naive సర్వింగ్ తో పోలిస్తే GPU మెమరీ waste ను 90% వరకు తగ్గిస్తుంది.
 
-<Quiz question="Large language models కోసం vLLM preferred serving solution ఎందుకు అయింది?" options="ఇది PyTorch models ను మాత్రమే support చేస్తుంది|దాని PagedAttention mechanism GPU memory waste ను గణనీయంగా తగ్గిస్తుంది|ఇది అందుబాటులో ఉన్న ఏకైక open-source option|దీనికి GPU hardware అవసరం లేదు" answer="1" explanation="vLLM యొక్క PagedAttention operating systems లోని virtual memory నుండి ఆలోచనలు తీసుకొని KV cache memory ను సమర్థవంతంగా manage చేస్తుంది, memory waste ను 90% వరకు తగ్గిస్తుంది." />
+<Quiz question="పెద్ద భాష మోడళ్లు కోసం vLLM preferred సర్వింగ్ పరిష్కారం ఎందుకు అయింది?" options="ఇది PyTorch మోడళ్లు ను మాత్రమే మద్దతు చేస్తుంది|దాని PagedAttention mechanism GPU మెమరీ waste ను గణనీయంగా తగ్గిస్తుంది|ఇది అందుబాటులో ఉన్న ఏకైక ఓపెన్ సోర్స్ ఎంపిక|దీనికి GPU hardware అవసరం లేదు" answer="1" explanation="vLLM యొక్క PagedAttention operating సిస్టమ్‌లు లోని virtual మెమరీ నుండి ఆలోచనలు తీసుకొని KV క్యాష్ మెమరీ ను సమర్థవంతంగా manage చేస్తుంది, మెమరీ waste ను 90% వరకు తగ్గిస్తుంది." />
 
-## Model Drift Monitoring
+## మోడల్ డ్రిఫ్ట్ పర్యవేక్షణ
 
-Deployment సమయంలో accurate గా ఉన్న model కాలక్రమేణా degrade అవుతుంది. **Data drift** input distribution మారినప్పుడు సంభవిస్తుంది (ఉదా., pandemic తర్వాత customer behaviour మారడం). **Concept drift** inputs మరియు outputs మధ్య relationship మారినప్పుడు సంభవిస్తుంది (ఉదా., fraud patterns evolve అవడం).
+డిప్లాయ్‌మెంట్ సమయంలో ఖచ్చితమైన గా ఉన్న మోడల్ కాలక్రమేణా degrade అవుతుంది. **డేటా డ్రిఫ్ట్** ఇన్‌పుట్ వితరణ మారినప్పుడు సంభవిస్తుంది (ఉదా., pandemic తర్వాత కస్టమర్ ప్రవర్తన మారడం). **భావన డ్రిఫ్ట్** inputs మరియు అవుట్‌పుట్‌లు మధ్య relationship మారినప్పుడు సంభవిస్తుంది (ఉదా., మోసం నమూనాలు evolve అవడం).
 
-ఈ signals ను monitor చేయండి:
-- **Prediction distribution** - Outputs shift అవుతున్నాయా? సాధారణం కంటే ఎక్కువ high-confidence predictions ఉన్నాయా?
-- **Feature distributions** - Current data ను training data తో compare చేసే statistical tests (KS test, PSI)
-- **Ground truth feedback** - Labels వచ్చినప్పుడు, live accuracy/F1 compute చేసి baseline తో compare చేయండి
-- **Latency మరియు error rates** - Infrastructure health పరోక్షంగా model quality ను ప్రభావితం చేస్తుంది
+ఈ సంకేతాలు ను monitor చేయండి:
+- **Prediction వితరణ** - అవుట్‌పుట్‌లు shift అవుతున్నాయా? సాధారణం కంటే ఎక్కువ అధిక-confidence అంచనాలు ఉన్నాయా?
+- **ఫీచర్ distributions** - ప్రస్తుత డేటా ను శిక్షణ డేటా తో పోల్చండి చేసే గణాంక పరీక్షలు (KS పరీక్ష, PSI)
+- **Ground truth ఫీడ్‌బ్యాక్** - Labels వచ్చినప్పుడు, ప్రత్యక్ష ఖచ్చితత్వం/F1 కంప్యూట్ చేసి baseline తో పోల్చండి చేయండి
+- **లేటెన్సీ మరియు error రేట్లు** - మౌలిక సదుపాయాలు health పరోక్షంగా మోడల్ నాణ్యత ను ప్రభావితం చేస్తుంది
 
-<ThinkAboutIt>మీ e-commerce recommendation model pandemic కి ముందు train అయింది. Pandemic తర్వాత shopping patterns పూర్తిగా భిన్నంగా ఉన్నాయి. ఈ drift ను మీరు ఎలా automatically detect చేస్తారు, మరియు మీ retraining strategy ఎలా ఉంటుంది?</ThinkAboutIt>
+<ThinkAboutIt>మీ e-commerce సిఫార్సు మోడల్ pandemic కి ముందు శిక్షణ ఇవ్వండి అయింది. Pandemic తర్వాత shopping నమూనాలు పూర్తిగా భిన్నంగా ఉన్నాయి. ఈ డ్రిఫ్ట్ ను మీరు ఎలా automatically గుర్తించండి చేస్తారు, మరియు మీ retraining వ్యూహం ఎలా ఉంటుంది?</ThinkAboutIt>
 
-## Feature Stores
+## ఫీచర్ నిల్వలు
 
-Feature store అనేది feature definitions మరియు values కోసం ఒక centralised repository, training మరియు serving రెండింటిలో shared అవుతుంది. **Feast**, **Tecton**, మరియు **Hopsworks** వంటి tools **training-serving skew** అనే critical problem ను solve చేస్తాయి - training సమయంలో మరియు inference సమయంలో features వేర్వేరుగా compute అయినప్పుడు.
+ఫీచర్ నిల్వ అనేది ఫీచర్ definitions మరియు విలువలు కోసం ఒక centralised రిపాజిటరీ, శిక్షణ మరియు సర్వింగ్ రెండింటిలో పంచుకున్న అవుతుంది. **Feast**, **Tecton**, మరియు **Hopsworks** వంటి టూల్స్ **శిక్షణ-సర్వింగ్ skew** అనే కీలకమైన సమస్య ను పరిష్కరించండి చేస్తాయి - శిక్షణ సమయంలో మరియు ఇన్‌ఫరెన్స్ సమయంలో ఫీచర్లు వేర్వేరుగా కంప్యూట్ అయినప్పుడు.
 
-Feature stores అందిస్తాయి: offline store (training కోసం batch features), online store (serving కోసం low-latency features), మరియు registry (feature definitions, ownership, lineage).
+ఫీచర్ నిల్వలు అందిస్తాయి: offline నిల్వ (శిక్షణ కోసం బ్యాచ్ ఫీచర్లు), ఆన్‌లైన్ నిల్వ (సర్వింగ్ కోసం low-లేటెన్సీ ఫీచర్లు), మరియు రిజిస్ట్రీ (ఫీచర్ definitions, యాజమాన్యం, lineage).
 
-## Batch vs Real-Time Inference
+## బ్యాచ్ వర్సెస్ నిజమైన-సమయం ఇన్‌ఫరెన్స్
 
-ప్రతి prediction real time లో జరగాల్సిన అవసరం లేదు. Cost తేడా చాలా పెద్దది:
+ప్రతి అంచనా నిజమైన సమయం లో జరగాల్సిన అవసరం లేదు. ఖర్చు తేడా చాలా పెద్దది:
 
-- **Batch inference** - ఒక schedule పై predictions run చేయండి (hourly, daily). చవకైనది, spot instances వాడుతుంది. Recommendations, risk scoring, report generation కు ideal.
-- **Real-time inference** - API ద్వారా sub-second predictions. ఖరీదైనది, always-on GPU instances అవసరం. Chatbots, fraud detection, autonomous systems కు తప్పనిసరి.
-- **Near-real-time (streaming)** - Kafka లేదా Pub/Sub ద్వారా events వచ్చినప్పుడే process చేయండి. Personalisation మరియు anomaly detection వంటి use cases కోసం latency మరియు cost ను balance చేస్తుంది.
+- **బ్యాచ్ ఇన్‌ఫరెన్స్** - ఒక షెడ్యూల్ పై అంచనాలు నడపండి చేయండి (hourly, రోజువారీ). చవకైనది, spot ఇన్‌స్టాన్స్‌లు వాడుతుంది. సిఫార్సులు, రిస్క్ scoring, నివేదిక సృష్టి కు ideal.
+- **రియల్ టైమ్ ఇన్‌ఫరెన్స్** - API ద్వారా ఉప-సెకండ్ అంచనాలు. ఖరీదైనది, ఎప్పుడూ ఆన్‌లో ఉండే GPU ఇన్‌స్టాన్స్‌లు అవసరం. Chatbots, మోసం గుర్తింపు, autonomous సిస్టమ్‌లు కు తప్పనిసరి.
+- **Near-రియల్ టైమ్ (స్ట్రీమింగ్)** - Kafka లేదా Pub/ఉప ద్వారా ఈవెంట్లు వచ్చినప్పుడే ప్రక్రియ చేయండి. వ్యక్తిగతీకరణ మరియు anomaly గుర్తింపు వంటి వాడండి సందర్భాలు కోసం లేటెన్సీ మరియు ఖర్చు ను బ్యాలెన్స్ చేస్తుంది.
 
-ఒక common pattern ఏమిటంటే 95% predictable cases కోసం batch predictions ముందుగా compute చేసి, మిగిలిన 5% ను మాత్రమే real-time endpoint కు route చేయడం.
+ఒక సాధారణ నమూనా ఏమిటంటే 95% predictable సందర్భాలు కోసం బ్యాచ్ అంచనాలు ముందుగా కంప్యూట్ చేసి, మిగిలిన 5% ను మాత్రమే రియల్ టైమ్ endpoint కు మార్గం చేయడం.
 
-Cost optimisation tip: **Inference endpoints ను autoscale చేయండి** request queue depth ఆధారంగా, CPU utilisation కాదు. ML workloads bursty గా ఉంటాయి - queue depth పై scaling over-provisioning మరియు traffic spikes సమయంలో request timeouts రెండింటినీ నిరోధిస్తుంది.
+ఖర్చు ఆప్టిమైజేషన్ tip: **ఇన్‌ఫరెన్స్ endpoints ను autoscale చేయండి** రిక్వెస్ట్ క్యూ లోతు ఆధారంగా, CPU utilisation కాదు. ML workloads bursty గా ఉంటాయి - క్యూ లోతు పై స్కేలింగ్ over-provisioning మరియు ట్రాఫిక్ spikes సమయంలో రిక్వెస్ట్ timeouts రెండింటినీ నిరోధిస్తుంది.
 
-<Quiz question="Real-time inference కంటే batch inference ఎప్పుడు ఉత్తమం?" options="Predictions 100ms లోపు అవసరమైనప్పుడు|Predictions ను schedule పై ముందుగా compute చేయగలిగినప్పుడు మరియు latency critical కానప్పుడు|Model GPU serving కు చాలా చిన్నదైనప్పుడు|Concurrent users ను handle చేయాల్సినప్పుడు" answer="1" explanation="Predictions ను ముందుగా schedule చేయగలిగినప్పుడు batch inference ideal - ఇది చాలా చవకైనది ఎందుకంటే spot instances వాడవచ్చు మరియు always-on GPU infrastructure అవసరం లేదు." />
+<Quiz question="రియల్ టైమ్ ఇన్‌ఫరెన్స్ కంటే బ్యాచ్ ఇన్‌ఫరెన్స్ ఎప్పుడు ఉత్తమం?" options="అంచనాలు 100ms లోపు అవసరమైనప్పుడు|అంచనాలు ను షెడ్యూల్ పై ముందుగా కంప్యూట్ చేయగలిగినప్పుడు మరియు లేటెన్సీ కీలకమైన కానప్పుడు|మోడల్ GPU సర్వింగ్ కు చాలా చిన్నదైనప్పుడు|సమకాలిక వినియోగదారులు ను నిర్వహించు చేయాల్సినప్పుడు" answer="1" explanation="అంచనాలు ను ముందుగా షెడ్యూల్ చేయగలిగినప్పుడు బ్యాచ్ ఇన్‌ఫరెన్స్ ideal - ఇది చాలా చవకైనది ఎందుకంటే spot ఇన్‌స్టాన్స్‌లు వాడవచ్చు మరియు ఎప్పుడూ ఆన్‌లో ఉండే GPU మౌలిక సదుపాయాలు అవసరం లేదు." />
 
-<ThinkAboutIt>మీరు ఒక పెద్ద retailer కోసం ML platform design చేస్తున్నారు. ఏ components (feature store, model registry, serving layer, monitoring) మీరు ముందు build చేస్తారు, మరియు ఏవి managed services గా adopt చేస్తారు? ఆ నిర్ణయాన్ని ఏ factors drive చేస్తాయి?</ThinkAboutIt>
+<ThinkAboutIt>మీరు ఒక పెద్ద retailer కోసం ML వేదిక డిజైన్ చేస్తున్నారు. ఏ భాగాలు (ఫీచర్ నిల్వ, మోడల్ రిజిస్ట్రీ, సర్వింగ్ పొర, పర్యవేక్షణ) మీరు ముందు నిర్మించండి చేస్తారు, మరియు ఏవి managed సేవలు గా adopt చేస్తారు? ఆ నిర్ణయాన్ని ఏ factors drive చేస్తాయి?</ThinkAboutIt>
 
 ---
 
 ## 📚 మరింత చదవండి
 
-- [Designing Machine Learning Systems by Chip Huyen](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/) - Production ML systems design పై అత్యంత authoritative పుస్తకం
-- [MLOps Maturity Model by Google](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning) - Level 0 నుండి level 2 వరకు MLOps maturity assess చేయడానికి Google యొక్క framework
-- [vLLM: Easy, Fast, and Cheap LLM Serving](https://docs.vllm.ai/) - ప్రముఖ open-source LLM serving engine యొక్క official documentation
+- [Designing మెషిన్ లెర్నింగ్ సిస్టమ్‌లు ద్వారా Chip Huyen](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/) - ప్రొడక్షన్ ML సిస్టమ్‌లు డిజైన్ పై అత్యంత authoritative పుస్తకం
+- [MLOps Maturity మోడల్ ద్వారా Google](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning) - స్థాయి 0 నుండి స్థాయి 2 వరకు MLOps maturity assess చేయడానికి Google యొక్క ఫ్రేమ్‌వర్క్
+- [vLLM: Easy, వేగంగా, మరియు Cheap LLM సర్వింగ్](https://docs.vllm.ai/) - ప్రముఖ ఓపెన్ సోర్స్ LLM సర్వింగ్ ఇంజిన్ యొక్క official డాక్యుమెంటేషన్
