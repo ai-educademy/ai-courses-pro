@@ -1,134 +1,133 @@
 ---
-title: "Grote Taalmodellen - De Motoren Achter Moderne AI"
-description: "Begrijp wat LLM's zijn, hoe de Transformer-architectuur werkt, de trainingspijplijn van voortraining tot RLHF, en vergelijk grote modellen zoals GPT, Claude en Llama."
+title: "Grote taalmodellen - De motoren achter moderne AI"
+description: "Ontdek hoe LLM's werken, van Transformer-architectuur tot emergente mogelijkheden en beperkingen in de praktijk."
 order: 1
 difficulty: "advanced"
 duration: 20
-icon: "📝"
+icon: "🤖"
 published: true
 ---
 
-## Wat Is een LLM? 🤖
+# Grote taalmodellen - De motoren achter moderne AI
 
-Een **Groot Taalmodel** (LLM) is een neuraal netwerk getraind op enorme hoeveelheden tekst om menselijke taal te begrijpen en te genereren. In de kern doet een LLM één ding: **het volgende token voorspellen**.
+Grote taalmodellen hebben fundamenteel veranderd wat machines met tekst, code en redeneren kunnen doen. In deze les kijken we achter de schermen: hoe ze werken, waarom ze zo krachtig zijn en waar ze nog tekortschieten.
 
-<ThinkAboutIt>
-Stel je voor dat je elk boek, artikel en website ooit geschreven hebt gelezen. Na al dat lezen zou je behoorlijk goed zijn in het voorspellen welk woord er volgt. Dat is wat een LLM doet, maar met wiskundige precisie.
-</ThinkAboutIt>
+## Wat is een LLM precies?
 
----
+Een **groot taalmodel** is een neuraal netwerk dat op enorme hoeveelheden tekst is getraind om het volgende token in een reeks te voorspellen. "Groot" verwijst naar het aantal **parameters**: leerbare gewichten die patronen uit trainingsdata vastleggen.
 
-## De Transformer-Architectuur 🏗️
+- **GPT-6 Astra** vertegenwoordigt de huidige grens van OpenAI, met niet-gepubliceerde modelinterne details.
+- **Llama 4 Scout and Maverick** gebruiken mixture-of-experts-ontwerpen met 17 miljard actieve parameters en veel grotere totale aantallen parameters.
+- **Mistral 7B** laat zien dat kleinere modellen veel beter kunnen presteren dan hun omvang doet vermoeden.
 
-Elk modern LLM is gebouwd op de **Transformer**-architectuur. De sleutelinnovatie: **zelf-aandacht** - in plaats van tekst woord voor woord te lezen, kijkt het naar alle woorden tegelijk.
+Deze modellen worden getraind op honderden miljarden woorden uit boeken, websites, code-repositories en academische papers. De enorme schaal van data en parameters geeft LLM's hun opmerkelijke veelzijdigheid.
 
-```
-"De bank bij de rivier was steil"
+**Tokens, geen woorden:** LLM's verwerken geen volledige woorden. Ze werken met **tokens**, eenheden die kleiner zijn dan woorden. Het woord "understanding" kan bijvoorbeeld worden gesplitst in "under" + "stand" + "ing". Een gemiddeld Engels woord is ongeveer 1,3 token. Deze tokenisatie helpt modellen zeldzame woorden, technisch jargon en zelfs meerdere talen te verwerken zonder een onmogelijk grote woordenschat.
 
-Voor het woord "bank":
-  "bank" ←→ "rivier"  = 0.45  (hoog - verduidelijkt betekenis)
-  "bank" ←→ "steil"   = 0.30  (medium - ondersteunt "oever" betekenis)
-```
+<FunFact>
+Het trainen van een frontier-taalmodel kan honderden miljoenen kosten aan rekenkracht, data, energie en engineering. Dat is ongeveer het budget van een grote film, behalve dat de "acteur" elke programmeertaal kan spreken.
+</FunFact>
 
-Elke Transformer-laag volgt: **Zelf-Aandacht → Optellen + Normaliseren → Feed-Forward → Optellen + Normaliseren**. Stapel 50-100+ blokken en je hebt een modern LLM.
+## De Transformer-architectuur
 
----
+Elk modern LLM is gebouwd op de **Transformer**, geïntroduceerd in het paper uit 2017 *Attention Is All You Need*. De kerninnovatie is **self-attention**, een mechanisme waarmee het model weegt hoe belangrijk elk woord is ten opzichte van elk ander woord in de invoer.
 
-## De Trainingspijplijn 🔄
+**Hoe self-attention werkt (vereenvoudigd):**
+1. Elk token wordt omgezet in drie vectoren: **Query**, **Key** en **Value**.
+2. Het model berekent attentiescores door elke Query met elke Key te vergelijken.
+3. Deze scores bepalen hoeveel elk token "aandacht besteedt" aan elk ander token.
+4. De gewogen som van Values levert een contextbewuste representatie op.
 
-### Fase 1: Voortraining (taal leren)
-Het model leest biljoenen tokens uit boeken, websites en code - leert grammatica, feiten en redeneerpatronen.
+De wiskundige formule in het hart van attention is:
 
-### Fase 2: fijnafstemming (instructies leren volgen)
-Getraind op vraag-antwoord paren om instructies te leren volgen.
+**Attention(Q, K, V) = softmax(QK^T / √d) × V**
 
-### Fase 3: RLHF (menselijke voorkeuren leren)
-**Reinforcement Learning from Human Feedback** leert het model wat mensen als behulpzaam en veilig beschouwen.
+De deling door √d (de vierkantswortel van de key-dimensie) voorkomt dat de dotproducten te groot worden, waardoor de softmax-functie in gebieden met extreem kleine gradiënten terecht zou komen. Deze eenvoudige schaaltruc was een van de belangrijkste inzichten die het trainen van diepe Transformers stabiel maakte.
 
-<Callout>
-RLHF maakt het verschil tussen een model dat tekst aanvult en een behulpzame assistent. Het is niet perfect - daarom blijft AI-veiligheidsonderzoek cruciaal.
-</Callout>
+Dit wordt parallel herhaald over meerdere **attention heads**, waardoor het model tegelijk verschillende soorten relaties kan vastleggen, bijvoorbeeld syntaxis in de ene head en semantiek in een andere.
 
----
-
-## Vergelijking van Grote Modellen 🏆
-
-```
-┌──────────────┬─────────────┬────────────────────────────────────┐
-│ Modelfamilie │ Maker       │ Kenmerken                          │
-├──────────────┼─────────────┼────────────────────────────────────┤
-│ GPT-6 Astra │ OpenAI │ Geavanceerd redeneren, code, onderzoek, multimodaal │
-│ Claude       │ Anthropic   │ Veiligheidsgericht, lange context  │
-│ Llama        │ Meta        │ Open gewichten, lokaal uitvoerbaar │
-│ Gemini 3.1 Pro │ Google DeepMind │ Geavanceerd redeneren, code, multimodaal │
-│ Mistral      │ Mistral AI  │ Efficiënt, Europees               │
-└──────────────┴─────────────┴────────────────────────────────────┘
-```
-
----
-
-## Mogelijkheden en Beperkingen ⚖️
-
-LLM's genereren vloeiende tekst, vatten samen, vertalen en schrijven code. Maar ze worstelen met **hallucinaties**, **wiskunde**, **recentheid** en **echte redenering**.
+<Illustration src="/images/lessons/large-language-models.svg" alt="Diagram dat het Transformer self-attention-mechanisme toont met Query-, Key- en Value-vectoren" caption="Self-attention laat elk token op elk ander token letten, waardoor afhankelijkheden over lange afstand worden vastgelegd." />
 
 <ThinkAboutIt>
-LLM's zijn als briljante maar onbetrouwbare stagiairs. Ze kunnen geweldig werk opstellen, maar controleer altijd hun output. Vertrouw, maar verifieer.
+Als een zin 500 tokens heeft, vergelijkt self-attention elk token met elk ander token. Dat zijn 250.000 vergelijkingen per laag. Welk effect kan deze kwadratische kost hebben op wat LLM's kunnen verwerken?
 </ThinkAboutIt>
 
----
+## Belangrijke modellen in het landschap
 
-## Token-Economie en Contextvensters 📊
+| Model | Maker | Opvallende eigenschap |
+|-------|---------|-----------------|
+| **GPT-6 Astra** | OpenAI | Frontier-redeneren, coderen, onderzoek en multimodale invoer |
+| **Claude Opus 5.5** | Anthropic | Langlopende agentische codering en kenniswerk |
+| **Gemini 3.1 Pro** | Google DeepMind | Geavanceerd redeneren, coderen en multimodaliteit |
+| **Llama 4** | Meta | Open gewichten, native multimodaliteit, lange context |
+| **Mistral Large** | Mistral AI | Efficiënt Europees alternatief |
 
-LLM's lezen **tokens** (ongeveer ¾ van een woord). Het **contextvenster** is het maximum aantal tokens tegelijk. Huidige toonaangevende systemen lopen uiteen van honderdduizenden tot ongeveer een miljoen tokens.
+Het vakgebied beweegt buitengewoon snel. Tegen de tijd dat je dit leest, kunnen er alweer nieuwere modellen bestaan.
 
-```python
-input_tokens = 1000
-output_tokens = 500
-prijs_per_1k = 0.01
-
-kosten = ((input_tokens + output_tokens) / 1000) * prijs_per_1k
-print(f"Kosten per verzoek: ${kosten:.4f}")
-```
-
----
-
-## Praktijk: Een LLM API Gebruiken 🛠️
-
-```python
-from openai import OpenAI
-
-client = OpenAI()
-
-response = client.chat.completions.create(
-    model="gpt-6-astra",
-    messages=[
-        {"role": "system", "content": "Je bent een wetenschapstutor voor tieners."},
-        {"role": "user", "content": "Leg fotosynthese eenvoudig uit."}
-    ],
-    temperature=0.7,
-    max_tokens=300
-)
-
-print(response.choices[0].message.content)
-```
+Een cruciaal onderscheid in dit landschap is dat tussen **gesloten** modellen (GPT, Claude, Gemini), waarbij alleen de API beschikbaar is, en **open-weight** modellen (Llama, Mistral), waarbij de modelgewichten openbaar zijn vrijgegeven. Open-weight modellen laten organisaties inferentie draaien op hun eigen infrastructuur, fine-tunen voor specifieke domeinen en het gedrag van het model inspecteren, voordelen die bijzonder belangrijk zijn voor privacygevoelige sectoren.
 
 <Callout>
-Het `messages`-array is je gespreksgeschiedenis. Het model "onthoudt" niets - je stuurt elke keer de volledige context. Daarom zijn contextvensters belangrijk.
+Niet alle "open" modellen zijn echt open source. Sommige geven gewichten vrij, maar beperken commercieel gebruik of delen de trainingsdata en code niet. Controleer altijd de licentie voordat je een open-weight model in productie inzet.
 </Callout>
 
----
+## Pre-training, fine-tuning en RLHF
 
-## Samenvatting 🎯
+LLM's worden in fases gebouwd:
 
-1. **LLM's** voorspellen het volgende token - schaal creëert intelligent gedrag
-2. **Transformers** gebruiken zelf-aandacht om context te begrijpen
-3. **Trainingspijplijn**: voortraining → fijnafstemming → RLHF
-4. Elk **groot model** heeft verschillende sterktes
-5. LLM's zijn krachtig maar **niet perfect**
-6. **Tokens** zijn de valuta van LLM's
+1. **Pre-training** - Het model leest enorme hoeveelheden tekst en leert het volgende token te voorspellen. Deze fase is extreem duur en levert een basismodel op dat tekst kan aanvullen, maar nog niet bijzonder behulpzaam is.
 
----
+2. **Supervised fine-tuning (SFT)** - Door mensen geschreven voorbeelden van ideale antwoorden leren het model instructies volgen en vragen goed beantwoorden.
 
-## Wat Volgt? 🚀
+3. **RLHF (Reinforcement Learning from Human Feedback)** - Menselijke beoordelaars rangschikken modeluitvoer van best naar slechtst. Een reward model leert deze voorkeuren, waarna het LLM wordt getraind om de beloning te maximaliseren. Dit maakt modellen behulpzaam, onschadelijk en eerlijk.
 
-In de volgende les beheersen we **prompt engineering**: de kunst om de beste resultaten uit LLM's te halen. ✨
+<Quiz question="Wat is het primaire doel van RLHF in LLM-training?" options="Het aantal parameters van het model vergroten|De uitvoer van het model afstemmen op menselijke voorkeuren|De kosten van pre-training verlagen|Het model beelden laten verwerken" answer="1" explanation="RLHF gebruikt menselijke feedback om een reward model te trainen, dat het LLM vervolgens stuurt naar uitvoer die mensen als behulpzaam, veilig en accuraat beoordelen." />
+
+## Emergent capabilities
+
+Naarmate modellen groter worden, ontwikkelen ze vaardigheden waarvoor ze niet expliciet zijn getraind:
+
+- **Complex redeneren** - Logische deductie in meerdere stappen en wiskundige probleemoplossing.
+- **Code genereren** - Code schrijven, debuggen en uitleggen in tientallen talen.
+- **Meertalige vloeiendheid** - Tekst vertalen en genereren in talen met relatief weinig trainingsdata.
+- **In-context learning** - Gedrag aanpassen op basis van voorbeelden in de prompt, zonder updates van de gewichten.
+
+Deze emergente eigenschappen zijn een van de fascinerendste aspecten van schaalvergroting: vaardigheden die bijna "gratis" lijken te verschijnen zodra een model bepaalde groottedrempels overschrijdt.
+
+<FunFact>
+Vroege frontier-modellen lieten het patroon duidelijk zien: ze konden moeilijke beroepsexamens halen, maar struikelden nog steeds over eenvoudige reken- of teltaken wanneer de prompt hun zwaktes blootlegde.
+</FunFact>
+
+## Beperkingen die je moet begrijpen
+
+LLM's zijn krachtig, maar verre van perfect:
+
+- **Hallucinaties** - Modellen genereren tekst die zelfverzekerd klinkt, maar feitelijk onjuist is. Ze "kennen" geen feiten. Ze voorspellen waarschijnlijke tokenreeksen.
+- **Contextvensterlimieten** - Elk model heeft een maximale invoergrootte, van honderdduizenden tot meer dan een miljoen tokens voor huidige frontier-systemen. Informatie buiten dit venster is simpelweg onzichtbaar.
+- **Kosten en latency** - Inferentie op grote modellen vereist dure GPU-clusters. Een topklasse frontier-query kost aanzienlijk meer dan een query naar een klein of middelgroot model.
+- **Gebrek aan echt begrip** - LLM's manipuleren statistische patronen in tekst. Of dat als "begrip" telt, is een diep filosofisch debat.
+- **Training data cutoffs** - Modellen weten niets over gebeurtenissen nadat hun trainingsdata is verzameld, tenzij ze worden aangevuld met retrieval-systemen.
+
+<Callout>
+Controleer kritieke feiten uit LLM-uitvoer altijd bij gezaghebbende bronnen. Behandel LLM's als een briljante maar onbetrouwbare onderzoeksassistent: buitengewoon nuttig, maar nooit het laatste woord over feitelijke zaken.
+</Callout>
+
+<Quiz question="Waarom produceren LLM's soms hallucinaties?" options="Omdat ze onbetrouwbare databases raadplegen|Omdat ze statistisch waarschijnlijke tokenreeksen voorspellen in plaats van geverifieerde feiten op te halen|Omdat hun trainingsdata bewust onnauwkeurig is|Omdat hallucinaties een functie zijn die voor creativiteit is ontworpen" answer="1" explanation="LLM's genereren tekst door de meest waarschijnlijke volgende tokens te voorspellen. Ze hebben geen mechanisme om feitelijke juistheid te verifiëren. Ze modelleren taalpatronen, geen waarheid." />
+
+## Het schaaldebat
+
+Jarenlang was de dominante overtuiging dat **groter altijd beter is**: meer parameters, meer data en meer rekenkracht zouden de prestaties gestaag verbeteren. Deze "scaling law" hield opmerkelijk goed stand gedurende de GPT-2-, GPT-3- en GPT-4-generatie en latere frontier-systemen.
+
+Recent onderzoek suggereert echter dat we mogelijk afnemende meeropbrengsten bereiken met ruwe schaal alleen. De focus verschuift naar:
+- **Betere datakwaliteit** boven kwantiteit (gecureerde, gededupliceerde datasets).
+- **Inference-time compute**, waarbij modellen "langer nadenken" over moeilijke problemen in plaats van het model zelf groter te maken.
+- **Gespecialiseerde architecturen**, zoals mixture-of-experts-modellen die per query maar een fractie van de parameters activeren, waardoor efficiëntie verbetert zonder capaciteit op te offeren.
+
+## Afronding
+
+Grote taalmodellen vormen een echte paradigmaverschuiving in computing. Hun architectuur, trainingspijplijn en beperkingen begrijpen is niet optioneel voor wie serieus met AI werkt. Het is basiskennis die je goed van pas komt terwijl het vakgebied zich blijft ontwikkelen.
+
+<Quiz question="Welke fase van LLM-training is computationeel het duurst?" options="Supervised fine-tuning|RLHF|Pre-training op grote tekstcorpora|Prompt engineering" answer="2" explanation="Pre-training verwerkt honderden miljarden tokens over duizenden GPU's gedurende weken of maanden. Fine-tuning en RLHF zijn relatief lichte fases." />
+
+<ThinkAboutIt>
+Als een LLM het balie-examen kan halen, maar niet betrouwbaar het aantal letters in een woord kan tellen, wat zegt dat dan over het verschil tussen menselijke intelligentie en de mogelijkheden van taalmodellen?
+</ThinkAboutIt>

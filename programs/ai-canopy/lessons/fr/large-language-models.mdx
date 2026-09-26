@@ -1,151 +1,133 @@
 ---
-title: "Grands Modèles de Langage - Les Moteurs de l'IA Moderne"
-description: "Comprenez ce que sont les LLM, comment fonctionne l'architecture Transformer, le pipeline d'entraînement du pré-entraînement au RLHF, et comparez les principaux modèles comme GPT, Claude et Llama."
+title: "Grands modèles de langage - Les moteurs de l'IA moderne"
+description: "Explorez le fonctionnement des LLM, de l'architecture Transformer aux capacités émergentes et aux limites réelles."
 order: 1
 difficulty: "advanced"
 duration: 20
-icon: "📝"
+icon: "🤖"
 published: true
 ---
 
-## Qu'est-ce qu'un LLM ? 🤖
+# Grands modèles de langage - Les moteurs de l'IA moderne
 
-Un **Grand Modèle de Langage** (LLM) est un réseau de neurones entraîné sur d'énormes quantités de texte pour comprendre et générer du langage humain. Le mot « grand » fait référence à trois choses : des milliards de paramètres, des trillions de tokens d'entraînement, et des millions de dollars de coût.
+Les grands modèles de langage ont profondément changé ce que les machines peuvent faire avec le texte, le code et le raisonnement. Dans cette leçon, nous allons lever le voile sur leur fonctionnement, les raisons de leur puissance et les domaines où ils restent limités.
 
-À son cœur, un LLM fait une seule chose : **prédire le prochain token**. Étant donné « Le chat s'est assis sur le », il prédit « tapis » avec la plus haute probabilité. Cet objectif simple, à grande échelle, produit un comportement remarquablement intelligent.
+## Qu'est-ce exactement qu'un LLM ?
+
+Un **grand modèle de langage** est un réseau de neurones entraîné sur d'énormes quantités de texte pour prédire le prochain token dans une séquence. Le mot « grand » renvoie au nombre de **paramètres**, c'est-à-dire les poids apprenables qui encodent les motifs issus des données d'entraînement.
+
+- **GPT-6 Astra** représente la frontière actuelle d'OpenAI, avec des détails internes non publiés.
+- **Llama 4 Scout and Maverick** utilisent des architectures à mélange d'experts avec 17 milliards de paramètres actifs et un nombre total de paramètres beaucoup plus élevé.
+- **Mistral 7B** montre que des modèles plus petits peuvent obtenir des performances bien supérieures à ce que leur taille laisse attendre.
+
+Ces modèles sont entraînés sur des centaines de milliards de mots issus de livres, de sites web, de dépôts de code et d'articles universitaires. C'est l'ampleur des données et des paramètres qui donne aux LLM leur polyvalence remarquable.
+
+**Des tokens, pas des mots :** les LLM ne traitent pas des mots entiers. Ils travaillent avec des **tokens**, c'est-à-dire des unités plus petites que les mots. Le mot « understanding » peut être découpé en « under » + « stand » + « ing ». Un mot anglais typique représente en moyenne environ 1,3 token. Ce système de tokenisation permet aux modèles de gérer les mots rares, le jargon technique et même plusieurs langues sans vocabulaire démesuré.
+
+<FunFact>
+L'entraînement d'un modèle de langage de pointe peut coûter des centaines de millions en calcul, données, énergie et ingénierie. C'est à peu près le budget d'un grand film, sauf que « l'acteur » peut parler tous les langages de programmation.
+</FunFact>
+
+## L'architecture Transformer
+
+Chaque LLM moderne repose sur le **Transformer**, introduit dans l'article de 2017 *Attention Is All You Need*. L'innovation clé est l'**auto-attention**, un mécanisme qui permet au modèle de pondérer l'importance de chaque mot par rapport à tous les autres mots de l'entrée.
+
+**Fonctionnement simplifié de l'auto-attention :**
+1. Chaque token est converti en trois vecteurs : **Query**, **Key** et **Value**.
+2. Le modèle calcule des scores d'attention en comparant chaque Query à chaque Key.
+3. Ces scores déterminent à quel point chaque token « prête attention » à chaque autre token.
+4. La somme pondérée des Values produit une représentation consciente du contexte.
+
+La formule mathématique au coeur de l'attention est :
+
+**Attention(Q, K, V) = softmax(QK^T / √d) × V**
+
+La division par √d (la racine carrée de la dimension des clés) empêche les produits scalaires de devenir trop grands, ce qui pousserait la fonction softmax dans des zones aux gradients extrêmement faibles. Cette simple mise à l'échelle a été l'une des idées clés qui ont stabilisé l'entraînement de Transformers profonds.
+
+Ce processus est répété en parallèle sur plusieurs **têtes d'attention**, ce qui permet au modèle de capturer simultanément différents types de relations, par exemple la syntaxe dans une tête et la sémantique dans une autre.
+
+<Illustration src="/images/lessons/large-language-models.svg" alt="Schéma montrant le mécanisme d'auto-attention du Transformer avec les vecteurs Query, Key et Value" caption="L'auto-attention permet à chaque token de prêter attention à tous les autres tokens, ce qui capture les dépendances à longue portée." />
 
 <ThinkAboutIt>
-Imaginez avoir lu chaque livre, article et site web jamais écrit. Après toute cette lecture, vous seriez assez bon pour prédire quel mot vient ensuite dans n'importe quelle phrase. C'est essentiellement ce que fait un LLM, mais avec une précision mathématique.
+Si une phrase contient 500 tokens, l'auto-attention compare chaque token à tous les autres, soit 250 000 comparaisons par couche. Quel effet ce coût quadratique peut-il avoir sur ce que les LLM peuvent traiter ?
 </ThinkAboutIt>
 
----
+## Modèles clés dans le paysage
 
-## L'Architecture Transformer 🏗️
+| Modèle | Créateur | Fonctionnalité notable |
+|-------|---------|-----------------|
+| **GPT-6 Astra** | OpenAI | Raisonnement de pointe, code, recherche et entrée multimodale |
+| **Claude Opus 5.5** | Anthropic | Codage agentique de longue durée et travail de connaissance |
+| **Gemini 3.1 Pro** | Google DeepMind | Raisonnement avancé, code et multimodalité |
+| **Llama 4** | Meta | Poids ouverts, multimodalité native, long contexte |
+| **Mistral Large** | Mistral AI | Alternative européenne efficace |
 
-Chaque LLM moderne est construit sur l'architecture **Transformer** (du papier de 2017 « Attention Is All You Need »). L'innovation clé : l'**auto-attention**.
+Le domaine évolue à une vitesse extraordinaire. Au moment où vous lirez ceci, des modèles plus récents existeront peut-être déjà.
 
-Les modèles traditionnels lisent le texte séquentiellement. Les Transformers lisent **tout en même temps** et déterminent quels mots sont pertinents les uns pour les autres.
-
-```
-Phrase : "La banque au bord de la rivière était escarpée"
-
-Pour le mot "banque", les scores d'attention :
-  "banque" ←→ "rivière"  = 0.45  (élevé - clarifie le sens)
-  "banque" ←→ "escarpée" = 0.30  (moyen - soutient le sens "rive")
-  "banque" ←→ "La"       = 0.05  (bas - peu informatif)
-```
-
-Les Transformers ont **plusieurs têtes d'attention** en parallèle, chacune apprenant des relations différentes. Chaque couche suit : **Auto-attention → Ajouter + Normaliser → Réseau Feed-Forward → Ajouter + Normaliser**. Empilez 50-100+ de ces blocs et vous avez un LLM moderne.
-
----
-
-## Le Pipeline d'Entraînement 🔄
-
-### Phase 1 : Pré-entraînement (apprendre le langage)
-
-Le modèle lit des trillions de tokens provenant de livres, sites web et code. Il apprend la grammaire, les faits et les patterns de raisonnement - tout en prédisant le prochain token.
-
-### Phase 2 : Ajustement (apprendre à suivre les instructions)
-
-Le modèle de base est ajusté sur des paires question-réponse pour apprendre à suivre les instructions.
-
-### Phase 3 : RLHF (apprendre les préférences humaines)
-
-L'**Apprentissage par Renforcement à partir du Feedback Humain** enseigne au modèle ce que les humains considèrent comme utile, inoffensif et honnête.
+Une distinction cruciale dans ce paysage oppose les modèles **fermés** (GPT, Claude, Gemini), pour lesquels seule l'API est disponible, aux modèles à **poids ouverts** (Llama, Mistral), dont les poids sont publiquement diffusés. Les modèles à poids ouverts permettent aux organisations d'exécuter l'inférence sur leur propre infrastructure, de les ajuster pour des domaines précis et d'inspecter leur comportement, des avantages très importants dans les secteurs sensibles à la confidentialité.
 
 <Callout>
-Le RLHF est ce qui fait la différence entre un modèle qui complète du texte et un assistant utile. Il aligne le modèle avec les valeurs humaines - mais ce n'est pas parfait, d'où l'importance de la recherche en sécurité de l'IA.
+Tous les modèles dits « ouverts » ne sont pas réellement open source. Certains publient les poids, mais limitent l'usage commercial ou ne partagent pas les données et le code d'entraînement. Vérifiez toujours la licence avant de déployer un modèle à poids ouverts en production.
 </Callout>
 
----
+## Pré-entraînement, ajustement fin et RLHF
 
-## Comparaison des Principaux Modèles 🏆
+Les LLM sont construits en plusieurs étapes :
 
-```
-┌──────────────┬─────────────┬────────────────────────────────────┐
-│ Famille      │ Créateur    │ Caractéristiques Clés              │
-├──────────────┼─────────────┼────────────────────────────────────┤
-│ GPT-6 Astra │ OpenAI │ Raisonnement de pointe, code, recherche, multimodal │
-│ Claude       │ Anthropic   │ Axé sécurité, contexte long        │
-│ Llama        │ Meta        │ Poids ouverts, exécutable localement│
-│ Gemini 3.1 Pro │ Google DeepMind │ Raisonnement avancé, code, multimodalité │
-│ Mistral      │ Mistral AI  │ Efficace, européen                 │
-└──────────────┴─────────────┴────────────────────────────────────┘
-```
+1. **Pré-entraînement** - Le modèle lit d'immenses volumes de texte et apprend à prédire le prochain token. Cette étape est extrêmement coûteuse et produit un modèle de base capable de compléter du texte, mais pas particulièrement utile.
 
----
+2. **Ajustement fin supervisé (SFT)** - Des exemples de réponses idéales écrits par des humains apprennent au modèle à suivre les instructions et à répondre correctement aux questions.
 
-## Capacités et Limites ⚖️
+3. **RLHF (Reinforcement Learning from Human Feedback)** - Des évaluateurs humains classent les sorties du modèle de la meilleure à la pire. Un modèle de récompense apprend ces préférences, puis le LLM est entraîné à maximiser la récompense. C'est ce qui rend les modèles utiles, inoffensifs et honnêtes.
 
-### Ce que les LLM font bien
-- Générer du texte fluide en plusieurs langues
-- Résumer, traduire et transformer du texte
-- Écrire et expliquer du code
-- Raisonner à travers des problèmes multi-étapes
+<Quiz question="Quel est l'objectif principal du RLHF dans l'entraînement des LLM ?" options="Augmenter le nombre de paramètres du modèle|Aligner les sorties du modèle sur les préférences humaines|Réduire le coût du pré-entraînement|Permettre au modèle de traiter des images" answer="1" explanation="Le RLHF utilise le feedback humain pour entraîner un modèle de récompense, qui guide ensuite le LLM vers des sorties que les humains jugent utiles, sûres et exactes." />
 
-### Ce avec quoi les LLM ont du mal
-- **Hallucinations** - affirmer des faits incorrects avec confiance
-- **Mathématiques** - peu fiables sans outils
-- **Récence** - les connaissances ont une date limite
-- **Raisonnement véritable** - la correspondance de patterns peut échouer sur des problèmes nouveaux
+## Capacités émergentes
 
----
+Quand les modèles changent d'échelle, ils développent des capacités qui n'ont pas été explicitement entraînées :
 
-## Économie des Tokens et Fenêtres de Contexte 📊
+- **Raisonnement complexe** - Déduction logique en plusieurs étapes et résolution de problèmes mathématiques.
+- **Génération de code** - Écriture, débogage et explication de code dans des dizaines de langages.
+- **Fluidité multilingue** - Traduction et génération de texte dans des langues disposant de relativement peu de données d'entraînement.
+- **Apprentissage en contexte** - Adaptation du comportement à partir d'exemples fournis dans le prompt, sans mise à jour des poids.
 
-Les LLM lisent des **tokens** (environ ¾ d'un mot). La **fenêtre de contexte** est le maximum de tokens traitables en une fois. Les systèmes de pointe actuels vont de centaines de milliers à environ un million de tokens.
+Ces propriétés émergentes sont l'un des aspects les plus fascinants du passage à l'échelle : des capacités qui semblent apparaître presque « gratuitement » une fois qu'un modèle franchit certains seuils de taille.
 
-```python
-# Estimation approximative du coût
-input_tokens = 1000
-output_tokens = 500
-prix_par_1k = 0.01
+<FunFact>
+Les premiers modèles de pointe montraient clairement ce schéma : ils pouvaient réussir des examens professionnels difficiles tout en trébuchant encore sur de simples tâches d'arithmétique ou de comptage lorsque le prompt exposait leurs faiblesses.
+</FunFact>
 
-cout = ((input_tokens + output_tokens) / 1000) * prix_par_1k
-print(f"Coût par requête : ${cout:.4f}")
-print(f"Coût pour 10 000 requêtes : ${cout * 10000:.2f}")
-```
+## Limites à comprendre absolument
 
----
+Les LLM sont puissants, mais loin d'être parfaits :
 
-## Pratique : Utiliser une API LLM 🛠️
-
-```python
-from openai import OpenAI
-
-client = OpenAI()
-
-response = client.chat.completions.create(
-    model="gpt-6-astra",
-    messages=[
-        {"role": "system", "content": "Vous êtes un tuteur scientifique pour adolescents."},
-        {"role": "user", "content": "Expliquez la photosynthèse simplement."}
-    ],
-    temperature=0.7,
-    max_tokens=300
-)
-
-answer = response.choices[0].message.content
-print(answer)
-```
+- **Hallucinations** - Les modèles génèrent du texte assuré, mais factuellement faux. Ils ne « connaissent » pas les faits. Ils prédisent des séquences probables de tokens.
+- **Limites de fenêtre de contexte** - Chaque modèle a une taille d'entrée maximale, de centaines de milliers à plus d'un million de tokens pour les systèmes de pointe actuels. Les informations au-delà de cette fenêtre sont tout simplement invisibles.
+- **Coût et latence** - Exécuter l'inférence sur de grands modèles nécessite des clusters GPU coûteux. Une requête vers un modèle de pointe haut de gamme coûte nettement plus cher qu'une requête vers un petit modèle ou un modèle intermédiaire.
+- **Absence de véritable compréhension** - Les LLM manipulent des motifs statistiques dans le texte. Savoir si cela constitue une « compréhension » est un débat philosophique profond.
+- **Dates limites des données d'entraînement** - Les modèles ne connaissent pas les événements postérieurs à la collecte de leurs données d'entraînement, sauf s'ils sont complétés par des systèmes de recherche d'information.
 
 <Callout>
-Le tableau `messages` est votre historique de conversation. Le modèle ne « se souvient » pas - vous envoyez le contexte complet à chaque fois. C'est pourquoi les fenêtres de contexte comptent.
+Vérifiez toujours les faits critiques issus des sorties de LLM auprès de sources faisant autorité. Traitez les LLM comme un assistant de recherche brillant, mais peu fiable : extrêmement utile, mais jamais le dernier mot sur les questions factuelles.
 </Callout>
 
----
+<Quiz question="Pourquoi les LLM produisent-ils parfois des hallucinations ?" options="Parce qu'ils accèdent à des bases de données peu fiables|Parce qu'ils prédisent des séquences de tokens statistiquement probables au lieu de récupérer des faits vérifiés|Parce que leurs données d'entraînement sont délibérément inexactes|Parce que les hallucinations sont une fonctionnalité conçue pour la créativité" answer="1" explanation="Les LLM génèrent du texte en prédisant les prochains tokens les plus probables. Ils n'ont aucun mécanisme pour vérifier l'exactitude factuelle. Ils modélisent des motifs de langage, pas la vérité." />
 
-## Récapitulatif 🎯
+## Le débat sur le passage à l'échelle
 
-1. Les **LLM** sont des réseaux de neurones entraînés sur des trillions de tokens pour prédire le prochain mot
-2. Les **Transformers** utilisent l'auto-attention pour comprendre le contexte
-3. **Pipeline d'entraînement** : pré-entraînement → ajustement → RLHF
-4. Les **principaux modèles** ont chacun des forces différentes
-5. Les LLM sont puissants mais **pas parfaits** - hallucinations et limites sont réelles
-6. Les **tokens** sont la monnaie des LLM
+Pendant des années, l'idée dominante était que **plus grand, c'est toujours mieux** : plus de paramètres, plus de données et plus de calcul amélioreraient régulièrement les performances. Cette « loi d'échelle » s'est remarquablement bien vérifiée jusqu'à la génération GPT-2, GPT-3, GPT-4 et les systèmes de pointe ultérieurs.
 
----
+Cependant, des recherches récentes suggèrent que nous approchons peut-être de rendements décroissants avec l'échelle brute seule. L'attention se déplace vers :
+- **Une meilleure qualité des données** plutôt qu'une plus grande quantité (jeux de données sélectionnés et dédupliqués).
+- **Le calcul au moment de l'inférence**, qui laisse les modèles « réfléchir plus longtemps » aux problèmes difficiles au lieu d'agrandir le modèle lui-même.
+- **Des architectures spécialisées**, comme les modèles à mélange d'experts qui n'activent qu'une fraction des paramètres par requête, améliorant l'efficacité sans sacrifier les capacités.
 
-## Et Ensuite ? 🚀
+## Conclusion
 
-Dans la prochaine leçon, nous maîtriserons l'**ingénierie des prompts** : l'art d'obtenir les meilleurs résultats des LLM. ✨
+Les grands modèles de langage représentent un véritable changement de paradigme en informatique. Comprendre leur architecture, leur pipeline d'entraînement et leurs limites n'est pas facultatif pour quiconque travaille sérieusement avec l'IA. C'est une base qui vous servira à mesure que le domaine continue d'évoluer.
+
+<Quiz question="Quelle étape de l'entraînement des LLM est la plus coûteuse en calcul ?" options="Ajustement fin supervisé|RLHF|Pré-entraînement sur de grands corpus de texte|Ingénierie des prompts" answer="2" explanation="Le pré-entraînement consiste à traiter des centaines de milliards de tokens sur des milliers de GPU pendant des semaines ou des mois. L'ajustement fin et le RLHF sont des étapes relativement légères." />
+
+<ThinkAboutIt>
+Si un LLM peut réussir l'examen du barreau, mais ne peut pas compter de manière fiable le nombre de lettres dans un mot, qu'est-ce que cela nous apprend sur la différence entre l'intelligence humaine et les capacités des modèles de langage ?
+</ThinkAboutIt>
