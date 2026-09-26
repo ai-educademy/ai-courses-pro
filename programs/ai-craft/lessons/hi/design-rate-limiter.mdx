@@ -20,7 +20,7 @@ published: true
 - एक साथ कई रेट लिमिटिंग नियमों का समर्थन करें
 
 ### नॉन-फ़ंक्शनल आवश्यकताएं
-- **कम लेटेंसी** - लिमिटर को महत्वपूर्ण overhead नहीं जोड़ना चाहिए
+- **कम लेटेंसी** - लिमिटर को महत्वपूर्ण ओवरहेड नहीं जोड़ना चाहिए
 - **वितरित** - कई सर्वरों पर काम करे
 - **फ़ॉल्ट-टॉलरेंट** - लिमिटर विफल हो तो भी ट्रैफ़िक चलता रहे (विफल-open)
 
@@ -28,13 +28,13 @@ published: true
 
 ## चरण 2 - रेट लिमिटिंग एल्गोरिदम
 
-### Fixed विंडो Counter
+### Fixed विंडो काउंटर
 समय को तय विंडो में बांटें (जैसे 60-सेकंड अंतराल)। हर अनुरोध पर काउंटर बढ़ाएं। विंडो सीमा पर रीसेट करें। **समस्या:** विंडो के किनारों पर बर्स्ट ट्रैफ़िक सीमा का 2× तक अनुमति दे सकता है।
 
 ### स्लाइडिंग विंडो Log
 हर अनुरोध का टाइमस्टैम्प स्टोर करें। पिछली विंडो के भीतर की एंट्री गिनें। सटीक है लेकिन **मेमोरी-प्रधान** है। स्केल पर हर टाइमस्टैम्प स्टोर करना महंगा है।
 
-### स्लाइडिंग विंडो Counter
+### स्लाइडिंग विंडो काउंटर
 एक हाइब्रिड: वर्तमान विंडो काउंट को पिछली विंडो के weighted हिस्से के साथ मिलाएं। सटीकता और मेमोरी दक्षता का संतुलन देता है।
 
 ### Token Bucket Algorithm (सबसे लोकप्रिय)
@@ -54,10 +54,10 @@ Time 1s: refill +2 → [🪙🪙🪙🪙] → 4 tokens
 |-----------|--------|----------|----------------|
 | Fixed विंडो | कम | कम (किनारे के बर्स्ट) | खराब |
 | स्लाइडिंग Log | अधिक | बिल्कुल सटीक | अच्छा |
-| स्लाइडिंग Counter | मध्यम | लगभग सटीक | अच्छा |
+| स्लाइडिंग काउंटर | मध्यम | लगभग सटीक | अच्छा |
 | Token Bucket | कम | अच्छा | उत्कृष्ट |
 
-<Quiz question="कौन सा एल्गोरिदम स्थिर दीर्घकालिक दर बनाए रखते हुए नियंत्रित बर्स्ट की अनुमति देता है?" options="Fixed विंडो Counter|स्लाइडिंग विंडो Log|Token Bucket|स्लाइडिंग विंडो Counter" answer="2" explanation="Token Bucket बकेट क्षमता तक छोटे बर्स्ट की अनुमति देता है, जबकि refill mechanism से औसत दर लागू करता है। यह बर्स्टी ट्रैफ़िक पैटर्न संभालने वाली API के लिए आदर्श है।" />
+<Quiz question="कौन सा एल्गोरिदम स्थिर दीर्घकालिक दर बनाए रखते हुए नियंत्रित बर्स्ट की अनुमति देता है?" options="Fixed विंडो काउंटर|स्लाइडिंग विंडो Log|Token Bucket|स्लाइडिंग विंडो काउंटर" answer="2" explanation="Token Bucket बकेट क्षमता तक छोटे बर्स्ट की अनुमति देता है, जबकि refill mechanism से औसत दर लागू करता है। यह बर्स्टी ट्रैफ़िक पैटर्न संभालने वाली API के लिए आदर्श है।" />
 
 ## चरण 3 - उच्च-स्तरीय आर्किटेक्चर
 
@@ -68,7 +68,7 @@ Client → API Gateway (Rate Limiter Middleware) → Backend Services
          (counters + token buckets)
 ```
 
-<Illustration src="/images/lessons/design-रेट-limiter.svg" alt="क्लाइंट, रेट लिमिटिंग middleware वाला API गेटवे, वितरित स्टेट के लिए Redis क्लस्टर और बैकएंड सेवाएं दिखाने वाला रेट लिमिटर आर्किटेक्चर" caption="रेट लिमिटर API गेटवे में बैठता है और वितरित काउंटर स्टोरेज के लिए Redis इस्तेमाल करता है" />
+<Illustration src="/images/lessons/डिज़ाइन-रेट-limiter.svg" alt="क्लाइंट, रेट लिमिटिंग middleware वाला API गेटवे, वितरित स्टेट के लिए Redis क्लस्टर और बैकएंड सेवाएं दिखाने वाला रेट लिमिटर आर्किटेक्चर" caption="रेट लिमिटर API गेटवे में बैठता है और वितरित काउंटर स्टोरेज के लिए Redis इस्तेमाल करता है" />
 
 ### रेट लिमिटर कहां रखें
 - **क्लाइंट-साइड** - नकली बनाना आसान, अविश्वसनीय
@@ -78,9 +78,9 @@ Client → API Gateway (Rate Limiter Middleware) → Backend Services
 ## चरण 4 - डीप डाइव: वितरित रेट लिमिटिंग
 
 ### Redis + Lua Scripts
-वितरित व्यवस्था में कई सर्वरों को रेट लिमिटिंग स्टेट साझा करनी होती है। Redis अपनी atomic ऑपरेशन और sub-millisecond लेटेंसी के कारण मानक चुनाव है।
+वितरित व्यवस्था में कई सर्वरों को रेट लिमिटिंग स्टेट साझा करनी होती है। Redis अपनी एटॉमिक ऑपरेशन और sub-millisecond लेटेंसी के कारण मानक चुनाव है।
 
-Lua script atomicity सुनिश्चित करती है। check-and-decrement एक ही Redis operation में होता है, जिससे race conditions रुकती हैं:
+Lua स्क्रिप्ट atomicity सुनिश्चित करती है। check-and-decrement एक ही Redis operation में होता है, जिससे race conditions रुकती हैं:
 
 ```
 -- Token Bucket in Redis (pseudocode)
@@ -98,32 +98,32 @@ local last_refill = redis.call('GET', key..':time')
 - `X-RateLimit-Reset: 1672531200` - UTC epoch जब विंडो रीसेट होगी
 - HTTP `429 Too Many Requests` के साथ `Retry-After` header
 
-<Quiz question="रेट लिमिटिंग के लिए Redis के साथ अलग GET और SET कमांड की जगह Lua scripts क्यों इस्तेमाल होते हैं?" options="Lua Redis commands से तेज़ है|Lua scripts Redis पर atomic रूप से चलते हैं, जिससे race conditions रुकती हैं|Redis मूल रूप से GET/SET का समर्थन नहीं करता|Lua network बैंडविड्थ घटाता है" answer="1" explanation="Lua scripts Redis server पर atomic रूप से चलते हैं। Atomicity के बिना, दो समवर्ती अनुरोध वही टोकन count पढ़ सकते हैं, दोनों उपलब्ध टोकन देख सकते हैं और दोनों decrement कर सकते हैं, जिससे अनुमति से अधिक अनुरोध निकल जाते हैं।" />
+<Quiz question="रेट लिमिटिंग के लिए Redis के साथ अलग GET और SET कमांड की जगह Lua स्क्रिप्ट क्यों इस्तेमाल होते हैं?" options="Lua Redis commands से तेज़ है|Lua स्क्रिप्ट Redis पर एटॉमिक रूप से चलते हैं, जिससे race conditions रुकती हैं|Redis मूल रूप से GET/SET का समर्थन नहीं करता|Lua नेटवर्क बैंडविड्थ घटाता है" answer="1" explanation="Lua स्क्रिप्ट Redis सर्वर पर एटॉमिक रूप से चलते हैं। Atomicity के बिना, दो समवर्ती अनुरोध वही टोकन संख्या पढ़ सकते हैं, दोनों उपलब्ध टोकन देख सकते हैं और दोनों decrement कर सकते हैं, जिससे अनुमति से अधिक अनुरोध निकल जाते हैं।" />
 
 ## चरण 5 - Edge Cases संभालना
 
 ### Race Conditions
-Atomic ऑपरेशन के बिना समवर्ती अनुरोध सीमाएं पार कर सकते हैं। समाधान: Redis Lua scripts या Redis `MULTI/EXEC` transactions।
+एटॉमिक ऑपरेशन के बिना समवर्ती अनुरोध सीमाएं पार कर सकते हैं। समाधान: Redis Lua स्क्रिप्ट या Redis `MULTI/EXEC` transactions।
 
 ### रेट Limiting Dimensions
-एक साथ कई स्तरों पर limits लागू करें:
+एक साथ कई स्तरों पर लिमिट लागू करें:
 - **हर उपयोगकर्ता** - authenticated उपयोगकर्ता के लिए 100 अनुरोध/मिनट
-- **हर IP** - anonymous traffic के लिए 50 अनुरोध/मिनट
-- **हर API कुंजी** - tiered plans (free: 10/min, pro: 1000/min)
+- **हर IP** - anonymous ट्रैफ़िक के लिए 50 अनुरोध/मिनट
+- **हर API कुंजी** - tiered plans (फ्री: 10/min, pro: 1000/min)
 
 ### वितरित घड़ी का अंतर
-सर्वरों की घड़ियां थोड़ी अलग हो सकती हैं। ऐप्लिकेशन सर्वर टाइमस्टैम्प पर निर्भर रहने के बजाय Redis server time को single स्रोत of truth की तरह इस्तेमाल करें।
+सर्वरों की घड़ियां थोड़ी अलग हो सकती हैं। ऐप्लिकेशन सर्वर टाइमस्टैम्प पर निर्भर रहने के बजाय Redis सर्वर समय को single स्रोत of truth की तरह इस्तेमाल करें।
 
-<FunFact>GitHub की REST API authenticated उपयोगकर्ता को हर घंटे 5,000 अनुरोध देती है, लेकिन unauthenticated अनुरोध को केवल 60 प्रति घंटे। Stripe live और test mode API कुंजियां के लिए अलग limits के साथ स्लाइडिंग विंडो तरीका इस्तेमाल करता है।</FunFact>
+<FunFact>GitHub की REST API authenticated उपयोगकर्ता को हर घंटे 5,000 अनुरोध देती है, लेकिन unauthenticated अनुरोध को केवल 60 प्रति घंटे। Stripe live और test मोड API कुंजियां के लिए अलग लिमिट के साथ स्लाइडिंग विंडो तरीका इस्तेमाल करता है।</FunFact>
 
 ## चरण 6 - बाधाएं और ऑप्टिमाइज़ेशन
 
 | बाधा | समाधान |
 |-----------|----------|
-| Redis single point of failure | replication के साथ Redis Cluster |
-| Redis तक network लेटेंसी | periodic sync के साथ local in-memory कैश |
+| Redis single point of विफलता | replication के साथ Redis Cluster |
+| Redis तक नेटवर्क लेटेंसी | periodic sync के साथ local in-मेमोरी कैश |
 | Hot कुंजियां (लोकप्रिय API कुंजियां) | कई Redis नोड में shard करें |
-| Rule evaluation overhead | नियम पहले से compile करें, configuration कैश करें |
+| Rule evaluation ओवरहेड | नियम पहले से compile करें, कॉन्फ़िगरेशन कैश करें |
 
 <Quiz question="एक रेट लिमिटर 60 सेकंड की fixed विंडो और 100 अनुरोधों की सीमा इस्तेमाल करता है। उपयोगकर्ता सेकंड 59 पर 100 अनुरोध और सेकंड 61 पर 100 और भेजता है। कितने अनुरोध निकल जाते हैं?" options="100|150|200|यह एल्गोरिदम पर निर्भर करता है" answer="2" explanation="Fixed विंडो counters में सभी 200 अनुरोध पास हो जाते हैं, क्योंकि 100 विंडो 1 (सेकंड 0-59) में और 100 विंडो 2 (सेकंड 60-119) में आते हैं। यही एज-burst समस्या है, जिसके कारण स्लाइडिंग विंडो या टोकन bucket एल्गोरिदम पसंद किए जाते हैं।" />
 
@@ -132,6 +132,6 @@ Atomic ऑपरेशन के बिना समवर्ती अनुर
 ---
 
 ## 📚 आगे पढ़ें
-- [रेट Limiting - सिस्टम Design Interview, Ch. 4](https://bytebytego.com/) - Alex Xu का चरण-दर-चरण रेट लिमिटर डिज़ाइन
+- [रेट Limiting - सिस्टम डिज़ाइन Interview, Ch. 4](https://bytebytego.com/) - Alex Xu का चरण-दर-चरण रेट लिमिटर डिज़ाइन
 - [Stripe रेट Limiting](https://stripe.com/blog/rate-limiters) - Stripe प्रोडक्शन में रेट लिमिटिंग कैसे संभालता है
 - [Kong रेट Limiting Plugin](https://docs.konghq.com/hub/kong-inc/rate-limiting/) - वास्तविक API गेटवे implementation

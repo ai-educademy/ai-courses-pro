@@ -1,6 +1,6 @@
 ---
 title: "वितरित कैश डिज़ाइन करें - Redis आर्किटेक्चर शुरू से"
-description: "कैश strategies, कंसिस्टेंट हैशिंग, eviction policies, कैश stampede prevention और Redis Cluster आर्किटेक्चर को कवर करने वाला वितरित कैशिंग सिस्टम डिज़ाइन करें।"
+description: "कैश strategies, कंसिस्टेंट हैशिंग, इविक्शन पॉलिसी, कैश स्टाम्पीड रोकथाम और Redis Cluster आर्किटेक्चर को कवर करने वाला वितरित कैशिंग सिस्टम डिज़ाइन करें।"
 order: 10
 difficulty: "advanced"
 duration: 23
@@ -10,74 +10,74 @@ published: true
 
 # वितरित कैश डिज़ाइन करें - Redis आर्किटेक्चर शुरू से
 
-कैशिंग सिस्टम performance सुधारने की सबसे प्रभावी तकनीक है। अच्छी तरह डिज़ाइन किया गया वितरित कैश डेटाबेस लोड 90%+ तक घटा सकता है और उत्तर times को सैकड़ों milliseconds से sub-millisecond तक ला सकता है।
+कैशिंग सिस्टम प्रदर्शन सुधारने की सबसे प्रभावी तकनीक है। अच्छी तरह डिज़ाइन किया गया वितरित कैश डेटाबेस लोड 90%+ तक घटा सकता है और उत्तर बार को सैकड़ों milliseconds से sub-millisecond तक ला सकता है।
 
 ## चरण 1 - आवश्यकताएं इकट्ठी करना
 
 ### फ़ंक्शनल आवश्यकताएं
-- Optional TTL (time-to-live) के साथ कुंजी-मान pairs स्टोर करें
+- Optional TTL (समय-to-live) के साथ कुंजी-मान pairs स्टोर करें
 - सामान्य ऑपरेशन का समर्थन करें: GET, SET, DELETE और bulk ऑपरेशन
-- Horizontal scaling के लिए डेटा को कई नोड में distribute करें
+- Horizontal स्केलिंग के लिए डेटा को कई नोड में distribute करें
 
 ### नॉन-फ़ंक्शनल आवश्यकताएं
-- **कम लेटेंसी** - कैश hits के लिए sub-millisecond पढ़ाई
-- **High throughput** - हर नोड पर 100K+ ऑपरेशन per सेकंड
-- **High availability** - कैश failures से सिस्टम बंद नहीं होना चाहिए
+- **कम लेटेंसी** - कैश हिट के लिए sub-millisecond पढ़ाई
+- **High थ्रूपुट** - हर नोड पर 100K+ ऑपरेशन per सेकंड
+- **High अवेलेबिलिटी** - कैश failures से सिस्टम बंद नहीं होना चाहिए
 - **Scalability** - downtime के बिना नोड जोड़ें
 
 ### कब कैश करें
-- **Read-heavy workloads** - जब पढ़ाई, writes से बहुत अधिक हों
+- **Read-heavy वर्कलोड** - जब पढ़ाई, लिखाई से बहुत अधिक हों
 - **Expensive computations** - ML मॉडल इन्फ़रेंस results, complex aggregations
-- **Frequently accessed डेटा** - उपयोगकर्ता sessions, product catalogues, configuration
+- **Frequently accessed डेटा** - उपयोगकर्ता sessions, उत्पाद catalogues, कॉन्फ़िगरेशन
 
 ## चरण 2 - कैशिंग Strategies
 
 ### कैश-Aside (Lazy Loading)
-सबसे आम pattern। Application पहले कैश जांचता है। मिस होने पर डेटाबेस से पढ़ता है, फिर कैश भरता है:
+सबसे आम पैटर्न। Application पहले कैश जांचता है। मिस होने पर डेटाबेस से पढ़ता है, फिर कैश भरता है:
 
 ```
 GET user:123 → Cache HIT → return cached data
 GET user:456 → Cache MISS → query DB → SET cache → return data
 ```
 
-**लाभ:** केवल वही डेटा कैश होता है जो वास्तव में requested है। **हानि:** कैश misses लेटेंसी जोड़ते हैं, डेटा stale हो सकता है।
+**लाभ:** केवल वही डेटा कैश होता है जो वास्तव में requested है। **हानि:** कैश मिस लेटेंसी जोड़ते हैं, डेटा पुराना हो सकता है।
 
 ### Read-Through
 कैश खुद मिस होने पर डेटाबेस पढ़ाई संभालता है। Application केवल कैश layer से बात करता है, जो डेटा स्रोत को abstract करती है।
 
 ### लिखाई-Through
-हर लिखाई synchronously कैश और डेटाबेस दोनों पर जाता है। कैश हमेशा कंसिस्टेंट रहता है, लेकिन लिखाई लेटेंसी बढ़ती है।
+हर लिखाई सिंक्रोनस रूप से कैश और डेटाबेस दोनों पर जाता है। कैश हमेशा कंसिस्टेंट रहता है, लेकिन लिखाई लेटेंसी बढ़ती है।
 
 ### लिखाई-Behind (लिखाई-Back)
-Writes तुरंत कैश पर जाते हैं। कैश asynchronously batches में डेटाबेस को flush करता है। लिखाई लेटेंसी कम होती है, लेकिन flush से पहले कैश नोड crash हो तो डेटा loss का जोखिम है।
+लिखाई तुरंत कैश पर जाते हैं। कैश असिंक्रोनस रूप से batches में डेटाबेस को फ़्लश करता है। लिखाई लेटेंसी कम होती है, लेकिन फ़्लश से पहले कैश नोड crash हो तो डेटा loss का जोखिम है।
 
-| Strategy | Consistency | Read लेटेंसी | लिखाई लेटेंसी | Use Case |
+| रणनीति | Consistency | Read लेटेंसी | लिखाई लेटेंसी | Use Case |
 |----------|-------------|-------------|---------------|----------|
-| कैश-Aside | Eventual | मिस penalty | N/A | General purpose |
-| Read-Through | Eventual | मिस penalty | N/A | Simplified पढ़ाई |
+| कैश-Aside | Eventual | मिस पेनल्टी | N/A | General purpose |
+| Read-Through | Eventual | मिस पेनल्टी | N/A | Simplified पढ़ाई |
 | लिखाई-Through | Strong | Fast | Slower | Consistency-critical |
-| लिखाई-Behind | Eventual | Fast | Fast | लिखाई-heavy workloads |
+| लिखाई-Behind | Eventual | Fast | Fast | लिखाई-heavy वर्कलोड |
 
-<Quiz question="एक e-commerce साइट को product prices कैश करने हैं, जो कम बदलते हैं लेकिन 5 मिनट के भीतर accurate होने चाहिए। कौन सी strategy सबसे उपयुक्त है?" options="1-hour flush interval के साथ लिखाई-Behind|5-minute TTL के साथ कैश-Aside|हर price अपडेट के लिए लिखाई-Through|कोई कैशिंग नहीं। हमेशा डेटाबेस से पढ़ें" answer="1" explanation="5-minute TTL के साथ कैश-Aside सुनिश्चित करता है कि stale डेटा स्वीकार्य विंडो से आगे न रहे। लिखाई-Through काम करेगा, लेकिन कम updates के लिए unnecessary लिखाई लेटेंसी जोड़ता है। कैश-Aside सरल है और 'पढ़ाई-प्रधान, occasionally updated' pattern के लिए बिल्कुल fit है।" />
+<Quiz question="एक e-commerce साइट को उत्पाद prices कैश करने हैं, जो कम बदलते हैं लेकिन 5 मिनट के भीतर सटीक होने चाहिए। कौन सी रणनीति सबसे उपयुक्त है?" options="1-hour फ़्लश interval के साथ लिखाई-Behind|5-minute TTL के साथ कैश-Aside|हर price अपडेट के लिए लिखाई-Through|कोई कैशिंग नहीं। हमेशा डेटाबेस से पढ़ें" answer="1" explanation="5-minute TTL के साथ कैश-Aside सुनिश्चित करता है कि पुराना डेटा स्वीकार्य विंडो से आगे न रहे। लिखाई-Through काम करेगा, लेकिन कम updates के लिए unnecessary लिखाई लेटेंसी जोड़ता है। कैश-Aside सरल है और 'पढ़ाई-प्रधान, occasionally updated' पैटर्न के लिए बिल्कुल fit है।" />
 
-## चरण 3 - Eviction Policies
+## चरण 3 - इविक्शन पॉलिसी
 
 कैश भर जाने पर कौन सी एंट्री हटाएं?
 
-- **LRU (Least Recently Used)** - उस एंट्री को evict करता है जिसे सबसे लंबे समय से एक्सेस नहीं किया गया। सबसे अच्छी general-purpose policy
-- **LFU (Least Frequently Used)** - सबसे कम बार एक्सेस की गई एंट्री हटाता है। Skewed एक्सेस patterns के लिए बेहतर
-- **TTL-based** - एक्सेस से स्वतंत्र रूप से एंट्री तय समय बाद एक्सपायर होती हैं। डेटा freshness के लिए जरूरी
+- **LRU (Least Recently Used)** - उस एंट्री को इविक्ट करता है जिसे सबसे लंबे समय से एक्सेस नहीं किया गया। सबसे अच्छी general-purpose policy
+- **LFU (Least Frequently Used)** - सबसे कम बार एक्सेस की गई एंट्री हटाता है। Skewed एक्सेस पैटर्न के लिए बेहतर
+- **TTL-based** - एक्सेस से स्वतंत्र रूप से एंट्री तय समय बाद एक्सपायर होती हैं। डेटा ताज़गी के लिए जरूरी
 - **Random** - आश्चर्यजनक रूप से प्रभावी और लागू करने में बहुत सरल
 
-<FunFact>Redis approximated LRU algorithm इस्तेमाल करता है, जो कुछ कुंजियां (default: 5) sample करता है और उनमें से least recently used को evict करता है। यह true LRU जितना लगभग accurate है, लेकिन एक्सेस order ट्रैक करने के लिए अतिरिक्त memory overhead शून्य है।</FunFact>
+<FunFact>Redis approximated LRU algorithm इस्तेमाल करता है, जो कुछ कुंजियां (default: 5) sample करता है और उनमें से least recently used को इविक्ट करता है। यह true LRU जितना लगभग सटीक है, लेकिन एक्सेस order ट्रैक करने के लिए अतिरिक्त मेमोरी ओवरहेड शून्य है।</FunFact>
 
-## चरण 4 - Distribution के लिए कंसिस्टेंट हैशिंग
+## चरण 4 - वितरण के लिए कंसिस्टेंट हैशिंग
 
 ### Simple हैशिंग की समस्या
 `hash(key) % N` नोड के साथ, नोड जोड़ने या हटाने पर लगभग सभी कुंजियां रीमैप हो जाती हैं, जिससे भारी कैश मिस storm होता है।
 
 ### Virtual नोड के साथ कंसिस्टेंट हैशिंग
-कंसिस्टेंट हैशिंग कुंजियां और नोड दोनों को रिंग पर map करती है। हर कुंजी रिंग पर clockwise अगला नोड पाती है:
+कंसिस्टेंट हैशिंग कुंजियां और नोड दोनों को रिंग पर map करती है। हर कुंजी रिंग पर क्लॉकवाइज़ अगला नोड पाती है:
 
 ```
 Hash Ring (0 to 2^32):
@@ -88,27 +88,27 @@ Hash Ring (0 to 2^32):
 Key "user:123" → hash → lands between B2 and A1 → assigned to Node A
 ```
 
-**Virtual नोड** uneven distribution समस्या हल करते हैं। हर physical नोड को रिंग पर कई positions मिलती हैं, जिससे कम physical नोड के साथ भी लोड balanced रहता है।
+**Virtual नोड** uneven वितरण समस्या हल करते हैं। हर भौतिक नोड को रिंग पर कई positions मिलती हैं, जिससे कम भौतिक नोड के साथ भी लोड balanced रहता है।
 
-जब नोड जोड़ा या हटाया जाता है, तो केवल रिंग पर उसके पास वाली कुंजियां रीमैप होती हैं। लगभग `K/N` कुंजियां (जहां K कुल कुंजियां और N नोड count है), सभी नहीं।
+जब नोड जोड़ा या हटाया जाता है, तो केवल रिंग पर उसके पास वाली कुंजियां रीमैप होती हैं। लगभग `K/N` कुंजियां (जहां K कुल कुंजियां और N नोड संख्या है), सभी नहीं।
 
-<Illustration src="/images/lessons/design-वितरित-कैश.svg" alt="कंसिस्टेंट हैशिंग रिंग जिसमें physical नोड virtual नोड से mapped हैं और कुंजियां nearest clockwise नोड को assigned हैं" caption="कंसिस्टेंट हैशिंग सुनिश्चित करता है कि नोड जोड़ने या हटाने पर केवल कुंजियां का छोटा हिस्सा रीमैप हो, जिससे कैश stampedes रुकते हैं" />
+<Illustration src="/images/lessons/डिज़ाइन-वितरित-कैश.svg" alt="कंसिस्टेंट हैशिंग रिंग जिसमें भौतिक नोड virtual नोड से mapped हैं और कुंजियां nearest क्लॉकवाइज़ नोड को assigned हैं" caption="कंसिस्टेंट हैशिंग सुनिश्चित करता है कि नोड जोड़ने या हटाने पर केवल कुंजियां का छोटा हिस्सा रीमैप हो, जिससे कैश stampedes रुकते हैं" />
 
-<Quiz question="कैश cluster में 4 नोड हैं। नोड 3 विफल हो जाता है। Simple modulo हैशिंग (कुंजी % 4 → कुंजी % 3) के साथ कितने प्रतिशत कुंजियां रीमैप होती हैं?" options="25% (सिर्फ नोड 3 की कुंजियां)|50%|75% - लगभग सभी कुंजियां रीमैप होती हैं|100%" answer="2" explanation="mod 4 से mod 3 में बदलने पर लगभग 75% कुंजियां अलग नोड पर रीमैप होती हैं। उदाहरण के लिए, जो कुंजी 7 पर हैश होती थी वह नोड 3 पर थी (7%4=3), लेकिन अब नोड 1 पर जाती है (7%3=1)। इससे कैश misses में भारी spike आता है। कंसिस्टेंट हैशिंग इसे केवल ~K/N कुंजियां रीमैप करके हल करता है।" />
+<Quiz question="कैश cluster में 4 नोड हैं। नोड 3 विफल हो जाता है। Simple modulo हैशिंग (कुंजी % 4 → कुंजी % 3) के साथ कितने प्रतिशत कुंजियां रीमैप होती हैं?" options="25% (सिर्फ नोड 3 की कुंजियां)|50%|75% - लगभग सभी कुंजियां रीमैप होती हैं|100%" answer="2" explanation="mod 4 से mod 3 में बदलने पर लगभग 75% कुंजियां अलग नोड पर रीमैप होती हैं। उदाहरण के लिए, जो कुंजी 7 पर हैश होती थी वह नोड 3 पर थी (7%4=3), लेकिन अब नोड 1 पर जाती है (7%3=1)। इससे कैश मिस में भारी spike आता है। कंसिस्टेंट हैशिंग इसे केवल ~K/N कुंजियां रीमैप करके हल करता है।" />
 
-## चरण 5 - कैश Stampede Prevention
+## चरण 5 - कैश स्टाम्पीड रोकथाम
 
-**कैश stampede** तब होता है जब कोई लोकप्रिय cached एंट्री एक्सपायर होती है और सैकड़ों समवर्ती अनुरोध एक साथ कैश मिस करके डेटाबेस पर पहुंचती हैं।
+**कैश स्टाम्पीड** तब होता है जब कोई लोकप्रिय cached एंट्री एक्सपायर होती है और सैकड़ों समवर्ती अनुरोध एक साथ कैश मिस करके डेटाबेस पर पहुंचती हैं।
 
 ### समाधान
 
-**Mutex/Locking:** कैश मिस होने पर वितरित lock लें। केवल एक अनुरोध डेटाबेस से fetch करती है। बाकी कैश फिर से भरने का इंतज़ार करती हैं।
+**Mutex/Locking:** कैश मिस होने पर वितरित lock लें। केवल एक अनुरोध डेटाबेस से फ़ेच करती है। बाकी कैश फिर से भरने का इंतज़ार करती हैं।
 
 **Probabilistic Early Expiry:** हर अनुरोध के पास TTL वास्तव में एक्सपायर होने से पहले कैश रीफ़्रेश करने का छोटा random chance होता है। इससे रीफ़्रेश लोड समय में फैलता है, expiry पर thundering herd नहीं बनता।
 
-**Background रीफ़्रेश:** Background process लोकप्रिय कैश एंट्री को एक्सपायर होने से पहले रीफ़्रेश करता है। Hot कुंजियां के लिए कैश कभी खाली नहीं होता।
+**Background रीफ़्रेश:** Background प्रोसेस लोकप्रिय कैश एंट्री को एक्सपायर होने से पहले रीफ़्रेश करता है। Hot कुंजियां के लिए कैश कभी खाली नहीं होता।
 
-<ThinkAboutIt>Flash sale पर विचार करें जहां product पेज को 100,000 अनुरोध per सेकंड मिलते हैं। Product details कैश एंट्री एक्सपायर हो जाती है। Stampede prevention के बिना सभी 100K अनुरोध डेटाबेस को एक साथ hit करती हैं। आप कौन सी prevention strategy चुनेंगे, और क्यों?</ThinkAboutIt>
+<ThinkAboutIt>Flash sale पर विचार करें जहां उत्पाद पेज को 100,000 अनुरोध per सेकंड मिलते हैं। उत्पाद details कैश एंट्री एक्सपायर हो जाती है। स्टाम्पीड रोकथाम के बिना सभी 100K अनुरोध डेटाबेस को एक साथ hit करती हैं। आप कौन सी रोकथाम रणनीति चुनेंगे, और क्यों?</ThinkAboutIt>
 
 ## चरण 6 - Redis Cluster आर्किटेक्चर
 
@@ -127,33 +127,33 @@ Slots 10923-16383: Master C ←→ Replica C'
 
 ### Monitoring कुंजी Metrics
 - **Hit ratio** - target 95%+; 80% से कम कैशिंग समस्या दिखाता है
-- **Memory usage** - evictions से बचने के लिए 80% से कम रहें
-- **Eviction रेट** - high evictions का मतलब कैश छोटा है
-- **लेटेंसी percentiles** - कैश hits के लिए p99 1ms से कम होना चाहिए
+- **मेमोरी usage** - evictions से बचने के लिए 80% से कम रहें
+- **इविक्शन रेट** - high evictions का मतलब कैश छोटा है
+- **लेटेंसी percentiles** - कैश हिट के लिए p99 1ms से कम होना चाहिए
 
-## चरण 7 - Real-World कैशिंग Patterns
+## चरण 7 - Real-World कैशिंग पैटर्न
 
-| Pattern | Implementation | TTL |
+| पैटर्न | Implementation | TTL |
 |---------|---------------|-----|
 | Session स्टोर | `SET session:{id} {data}` | 30 मिनट |
 | API उत्तर कैश | `SET api:/users/123 {json}` | 5 मिनट |
 | डेटाबेस query कैश | `SET query:{hash} {result}` | 1 minute |
-| रेट limiter counter | `INCR ratelimit:{user}:{window}` | विंडो duration |
+| रेट limiter काउंटर | `INCR ratelimit:{user}:{window}` | विंडो duration |
 | Feature flags | `HSET features {flag} {value}` | 10 सेकंड |
 
 ### कैश इनवैलिडेशन
-Computer science की सबसे कठिन समस्या (naming चीज़ें के साथ):
+Computer science की सबसे कठिन समस्या (नामकरण चीज़ें के साथ):
 - **TTL-based** - सरल, TTL अवधि तक staleness सहता है
 - **Event-driven** - डेटा बदलने पर इनवैलिडेशन इवेंट publish करें (Kafka या Redis Pub/Sub से)
-- **Version-based** - कैश कुंजी में version शामिल करें। Writes पर version बढ़ाकर पुरानी एंट्री प्रभावी रूप से invalidate करें
+- **Version-based** - कैश कुंजी में version शामिल करें। लिखाई पर version बढ़ाकर पुरानी एंट्री प्रभावी रूप से invalidate करें
 
-<Quiz question="कौन सा कैश इनवैलिडेशन तरीका सबसे मजबूत consistency guarantee देता है?" options="5-minute विंडो के साथ TTL-based expiry|डेटाबेस writes से triggered इवेंट-driven इनवैलिडेशन|Random eviction|हर 10 सेकंड background रीफ़्रेश" answer="1" explanation="Event-driven इनवैलिडेशन वास्तविक डेटा changes पर प्रतिक्रिया करता है, स्रोत डेटा अपडेट होते ही कैश को तुरंत invalidate करता है। TTL-based तरीकों में हमेशा staleness विंडो रहती है, जबकि background रीफ़्रेश में रीफ़्रेश cycles के बीच gaps होते हैं।" />
+<Quiz question="कौन सा कैश इनवैलिडेशन तरीका सबसे मजबूत consistency guarantee देता है?" options="5-minute विंडो के साथ TTL-based expiry|डेटाबेस लिखाई से triggered इवेंट-driven इनवैलिडेशन|Random इविक्शन|हर 10 सेकंड background रीफ़्रेश" answer="1" explanation="Event-driven इनवैलिडेशन वास्तविक डेटा changes पर प्रतिक्रिया करता है, स्रोत डेटा अपडेट होते ही कैश को तुरंत invalidate करता है। TTL-based तरीकों में हमेशा staleness विंडो रहती है, जबकि background रीफ़्रेश में रीफ़्रेश cycles के बीच gaps होते हैं।" />
 
-<ThinkAboutIt>Phil Karlton ने प्रसिद्ध रूप से कहा: 'There are only two hard चीज़ें in Computer Science - कैश इनवैलिडेशन and naming चीज़ें.' वितरित systems में कैश इनवैलिडेशन इतनी कठिन क्यों है? सोचें कि डेटाबेस लिखाई सफल हो जाए लेकिन कैश इनवैलिडेशन संदेश खो जाए तो क्या होता है।</ThinkAboutIt>
+<ThinkAboutIt>Phil Karlton ने प्रसिद्ध रूप से कहा: 'There are only two hard चीज़ें in Computer Science - कैश इनवैलिडेशन and नामकरण चीज़ें.' वितरित systems में कैश इनवैलिडेशन इतनी कठिन क्यों है? सोचें कि डेटाबेस लिखाई सफल हो जाए लेकिन कैश इनवैलिडेशन संदेश खो जाए तो क्या होता है।</ThinkAboutIt>
 
 ---
 
 ## 📚 आगे पढ़ें
 - [कंसिस्टेंट हैशिंग - ByteByteGo](https://bytebytego.com/courses/system-design-interview/design-consistent-hashing) - कंसिस्टेंट हैशिंग और virtual नोड की visual explanation
 - [Redis Cluster Specification](https://redis.io/docs/reference/cluster-spec/) - आधिकारिक Redis Cluster आर्किटेक्चर documentation
-- [कैशिंग Strategies - AWS](https://aws.amazon.com/caching/best-practices/) - cloud applications के लिए practical कैशिंग patterns
+- [कैशिंग Strategies - AWS](https://aws.amazon.com/caching/best-practices/) - cloud applications के लिए practical कैशिंग पैटर्न
