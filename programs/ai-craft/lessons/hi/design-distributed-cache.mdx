@@ -1,6 +1,6 @@
 ---
-title: "वितरितद कैश डिज़ाइन करें - Redis आर्किटेक्चर शुरू से"
-description: "एक वितरित कैशिंग सिस्टम डिज़ाइन करें जिसमें कैश रणनीतियाँ, कोनसिसटेनट हशिङ, एविकशन पोलिकिएस, कैश सटमपेदे परेवेनशन, और Redis कलुसटेर आर्किटेक्चर शामिल है।"
+title: "Distributed Cache डिज़ाइन करें - Redis Architecture शुरू से"
+description: "Cache strategies, consistent hashing, eviction policies, cache stampede prevention और Redis Cluster architecture को कवर करने वाला distributed caching system डिज़ाइन करें।"
 order: 10
 difficulty: "advanced"
 duration: 23
@@ -8,76 +8,76 @@ icon: "⚡"
 published: true
 ---
 
-# वितरितद कैश डिज़ाइन करें - Redis आर्किटेक्चर शुरू से
+# Distributed Cache डिज़ाइन करें - Redis Architecture शुरू से
 
-कैशिंग सिस्टम प्रदर्शन बेहतर करने की सबसे प्रभावी टेचनिक्वे है। एक अच्छी तरह डिज़ाइन किया गया वितरित कैश डेटाबेस लोड को 90%+ तक कम कर सकता है और प्रतिक्रिया टिमेस को सैकड़ों मिललिसेकोनदस से सुब-मिललिसेकोनद तक ला सकता है।
+Caching system performance सुधारने की सबसे प्रभावी तकनीक है। अच्छी तरह डिज़ाइन किया गया distributed cache database load 90%+ तक घटा सकता है और response times को सैकड़ों milliseconds से sub-millisecond तक ला सकता है।
 
-## चरण 1 - ज़रूरतें इकट्ठा करना
+## चरण 1 - आवश्यकताएं इकट्ठी करना
 
-### फ़ुनकशनल ज़रूरतें
-- केय-वलुए पैरस स्टोर करना ओपशनल TTL (टिमे-टो-लिवे) के साथ
-- कोममोन ऑपरेशन सपोर्ट करना: GET, SET, DELETE, और बुलक ऑपरेशन
-- होरिज़ोनटल स्केलिंग के लिए डेटा को कई नोड में वितरित करना
+### फ़ंक्शनल आवश्यकताएं
+- Optional TTL (time-to-live) के साथ key-value pairs store करें
+- सामान्य operations का समर्थन करें: GET, SET, DELETE और bulk operations
+- Horizontal scaling के लिए data को कई nodes में distribute करें
 
-### नोन-फ़ुनकशनल ज़रूरतें
-- **कम लेटेंसी** - कैश हिटस के लिए सुब-मिललिसेकोनद रीड
-- **उच्च थरोउघपुट** - प्रति नोड 100K+ ऑपरेशन प्रति सेकंड
-- **उच्च उपलब्धता** - कैश फ़ैलुरेस से सिस्टम दोवन नहीं होना चाहिए
-- **सकलबिलिटय** - बिना दोवनटिमे के नोड जोड़ें करना
+### नॉन-फ़ंक्शनल आवश्यकताएं
+- **कम लेटेंसी** - cache hits के लिए sub-millisecond reads
+- **High throughput** - हर node पर 100K+ operations per second
+- **High availability** - cache failures से system बंद नहीं होना चाहिए
+- **Scalability** - downtime के बिना nodes जोड़ें
 
-### कब कैश करें
-- **रेअद-हेअवय वोरकलोविज्ञापन** - जब रीड, राइट से बहुत ज़्यादा हों
-- **एक्सपेनसिवे गणनाओं** - ML मॉडल इन्फ़रेंस नतीजे, जटिल अगगरेगशनस
-- **बार-बार एक्सेस डेटा** - यूज़र सेसिओनस, उत्पाद कैटलॉग, कॉन्फ़िगरेशन
+### कब Cache करें
+- **Read-heavy workloads** - जब reads, writes से बहुत अधिक हों
+- **Expensive computations** - ML model inference results, complex aggregations
+- **Frequently accessed data** - user sessions, product catalogues, configuration
 
-## चरण 2 - कैशिंग रणनीतियाँ
+## चरण 2 - Caching Strategies
 
-### कचे-असिदे (लज़य लोअदिङ)
-सबसे आम पैटर्न। अपपलिकशन पहले कैश जाँच करता है; मिस होने पर डेटाबेस से रेअद करता है, फिर कैश पॉपुलटे करता है:
+### Cache-Aside (Lazy Loading)
+सबसे आम pattern। Application पहले cache जांचता है। Miss होने पर database से पढ़ता है, फिर cache भरता है:
 
 ```
 GET user:123 → Cache HIT → return cached data
 GET user:456 → Cache MISS → query DB → SET cache → return data
 ```
 
-**परोस:** सिर्फ़ वही कैश होता है जो वास्तव में रिक्वेस्ट किया जाता है। **कोनस:** कैश मिसेस पर लेटेंसी एजी है; डेटा सटले हो सकता है।
+**लाभ:** केवल वही data cache होता है जो वास्तव में requested है। **हानि:** cache misses latency जोड़ते हैं, data stale हो सकता है।
 
-### रेअद-थरोउघ
-कैश खुद मिस होने पर डेटाबेस रीड संभाल करता है। अपपलिकशन सिर्फ़ कैश परत से बात करती है, जो डेटा स्रोत को अबसटरकट करता है।
+### Read-Through
+Cache खुद miss होने पर database reads संभालता है। Application केवल cache layer से बात करता है, जो data source को abstract करती है।
 
-### वरिटे-थरोउघ
-हर राइट कैश और डेटाबेस दोनों में सयनचरोनोउसलय जाता है। कैश हमेशा कोनसिसटेनट रहता है लेकिन राइट लेटेंसी एजी है।
+### Write-Through
+हर write synchronously cache और database दोनों पर जाता है। Cache हमेशा consistent रहता है, लेकिन write latency बढ़ती है।
 
-### वरिटे-बेहिनद (वरिटे-बक)
-वरिटेस तुरंत कैश में जाते हैं; कैश असयनचरोनोउसलय बटचेस में डेटाबेस को फ़लुश करता है। वरिटे लेटेंसी कम होती है लेकिन अगर कैश नोड फ़लुश से पहले करश हो जाए तो डेटा लोस का जोखिम है।
+### Write-Behind (Write-Back)
+Writes तुरंत cache पर जाते हैं। Cache asynchronously batches में database को flush करता है। Write latency कम होती है, लेकिन flush से पहले cache node crash हो तो data loss का जोखिम है।
 
-| सटरटेगय | संगति | रेअद लेटेंसी | वरिटे लेटेंसी | उपयोग कसे |
+| Strategy | Consistency | Read Latency | Write Latency | Use Case |
 |----------|-------------|-------------|---------------|----------|
-| कचे-असिदे | एवेनटुअल | मिस पेनलटय | N/A | गेनेरल पुरपोसे |
-| रेअद-थरोउघ | एवेनटुअल | मिस पेनलटय | N/A | सिमपलिफ़िएद रीड |
-| वरिटे-थरोउघ | सटरोङ | तेज़ | सलोवेर | कोनसिसटेनकय-महत्वपूर्ण |
-| वरिटे-बेहिनद | एवेनटुअल | तेज़ | तेज़ | वरिटे-हेअवय वोरकलोविज्ञापन |
+| Cache-Aside | Eventual | Miss penalty | N/A | General purpose |
+| Read-Through | Eventual | Miss penalty | N/A | Simplified reads |
+| Write-Through | Strong | Fast | Slower | Consistency-critical |
+| Write-Behind | Eventual | Fast | Fast | Write-heavy workloads |
 
-<Quiz question="एक ए-कोममेरके सिटे को उत्पाद परिकेस कैश करने हैं जो कम बदलती हैं लेकिन 5 मिनट के अंदर सटीक होनी चाहिए। कौन सी रणनीति सबसे उपयुक्त है?" options="वरिटे-बेहिनद 1 घंटे के फ़लुश इंटरवल के साथ|कचे-असिदे 5-मिनुटे TTL के साथ|हर कीमत अपडेट के लिए वरिटे-थरोउघ|कोई कैशिंग नहीं - हमेशा डेटाबेस से रेअद करें" answer="1" explanation="कचे-असिदे 5-मिनुटे TTL के साथ यह सुनिश्चित करता है कि सटले डेटा स्वीकार्य विंडो से ज़्यादा नहीं रहता। वरिटे-थरोउघ काम करेगा लेकिन इनफ़रेक्वेनट अपडेट के लिए उननेकेसरय राइट लेटेंसी जोड़ें करता है। कचे-असिदे सिमपलेर है और 'रेअद-हेअवय, ओककसिओनललय उपदटेद' पैटर्न के लिए पेरफ़ेकट फ़िट है।" />
+<Quiz question="एक e-commerce site को product prices cache करने हैं, जो कम बदलते हैं लेकिन 5 minutes के भीतर accurate होने चाहिए। कौन सी strategy सबसे उपयुक्त है?" options="1-hour flush interval के साथ Write-Behind|5-minute TTL के साथ Cache-Aside|हर price update के लिए Write-Through|कोई caching नहीं। हमेशा database से पढ़ें" answer="1" explanation="5-minute TTL के साथ Cache-Aside सुनिश्चित करता है कि stale data स्वीकार्य window से आगे न रहे। Write-Through काम करेगा, लेकिन कम updates के लिए unnecessary write latency जोड़ता है। Cache-Aside सरल है और 'read-heavy, occasionally updated' pattern के लिए बिल्कुल fit है।" />
 
-## चरण 3 - एविकशन पोलिकिएस
+## चरण 3 - Eviction Policies
 
-जब कैश भर जाए, तो कौन सी एनटरिएस हटाएँ?
+Cache भर जाने पर कौन सी entries हटाएं?
 
-- **LRU (सबसे कम हाल में इस्तेमाल)** - सबसे लंबे समय से एक्सेस न की गई एनटरय को निकाल करता है। सबसे अच्छी गेनेरल-पुरपोसे पॉलिसी
-- **LFU (लेअसट बार-बार उसेद)** - सबसे कम बार एक्सेस की गई एनटरय को निकाल करता है। सकेवेद एक्सेस पैटर्न के लिए बेहतर
-- **टटल-बसेद** - एनटरिएस एक सेट समय बाद एक्सपिरे होती हैं चाहे एक्सेस हों या नहीं। डेटा ताज़गी के लिए ज़रूरी
-- **रनदोम** - हैरान करने वाला प्रभावी और लागू करने में बहुत सरल
+- **LRU (Least Recently Used)** - उस entry को evict करता है जिसे सबसे लंबे समय से access नहीं किया गया। सबसे अच्छी general-purpose policy
+- **LFU (Least Frequently Used)** - सबसे कम बार access की गई entry हटाता है। Skewed access patterns के लिए बेहतर
+- **TTL-based** - access से स्वतंत्र रूप से entries तय समय बाद expire होती हैं। Data freshness के लिए जरूरी
+- **Random** - आश्चर्यजनक रूप से प्रभावी और लागू करने में बहुत सरल
 
-<FunFact>Redis एक लगभग LRU एल्गोरिदम उपयोग करता है जो कुछ की सैंपल करता है (डिफ़ॉल्ट: 5) और उnameं से सबसे कम हाल में इस्तेमाल को निकाल करता है। यह true LRU जितना ही सटीक है लेकिन एक्सेस ऑर्डर रिकॉर्ड करने के लिए शून्य अतिरिक्त मेमोरी ओवरहेड लगती है।</FunFact>
+<FunFact>Redis approximated LRU algorithm इस्तेमाल करता है, जो कुछ keys (default: 5) sample करता है और उनमें से least recently used को evict करता है। यह true LRU जितना लगभग accurate है, लेकिन access order track करने के लिए अतिरिक्त memory overhead शून्य है।</FunFact>
 
-## चरण 4 - डिस्ट्रिब्यूशन के लिए कोनसिसटेनट हशिङ
+## चरण 4 - Distribution के लिए Consistent Hashing
 
-### सिमपले हशिङ की समस्या
-`hash(key) % N` नोड के साथ, कोई नोड जोड़ें या हटा करने पर लगभग सारी की रेमप हो जाती हैं, जिससे बहुत बड़ा कैश मिस सटोरम आता है।
+### Simple Hashing की समस्या
+`hash(key) % N` nodes के साथ, node जोड़ने या हटाने पर लगभग सभी keys remap हो जाती हैं, जिससे भारी cache miss storm होता है।
 
-### विरटुअल नोदेस के साथ कोनसिसटेनट हशिङ
-कोनसिसटेनट हशिङ की और नोड दोनों को एक रिङ पर मैप करता है। हर की रिङ पर अगले कलोकविसे नोड को असाइन होती है:
+### Virtual Nodes के साथ Consistent Hashing
+Consistent hashing keys और nodes दोनों को ring पर map करती है। हर key ring पर clockwise अगला node पाती है:
 
 ```
 Hash Ring (0 to 2^32):
@@ -88,36 +88,36 @@ Hash Ring (0 to 2^32):
 Key "user:123" → hash → lands between B2 and A1 → assigned to Node A
 ```
 
-**विरटुअल नोड** उनेवेन डिस्ट्रिब्यूशन समस्या हल करते हैं। हर फयसिकल नोड को रिङ पर कई पोसिशनस मिलती हैं, जिससे कम फयसिकल नोड होने पर भी संतुलित लोड सुनिश्चित होता है।
+**Virtual nodes** uneven distribution समस्या हल करते हैं। हर physical node को ring पर कई positions मिलती हैं, जिससे कम physical nodes के साथ भी load balanced रहता है।
 
-जब कोई नोड जोड़ें या हटा होता है, तो सिर्फ़ रिङ पर उसके अदजकेनट की रेमप होती हैं - लगभग `K/N` की (जहाँ K कुल की और N नोड गणना है), सारी नहीं।
+जब node जोड़ा या हटाया जाता है, तो केवल ring पर उसके पास वाली keys remap होती हैं। लगभग `K/N` keys (जहां K कुल keys और N node count है), सभी नहीं।
 
-<Illustration src="/images/lessons/design-distributed-cache.svg" alt="कोनसिसटेनट हशिङ रिङ जिसमें फयसिकल नोड विरटुअल नोड पर मपपेद हैं, और की नेअरेसट कलोकविसे नोड को असिगनेद हैं" caption="कोनसिसटेनट हशिङ सुनिश्चित करता है कि नोड जोड़ें या हटा करने पर सिर्फ़ की का एक छोटा फ़रकशन रेमप होता है, कैश सटमपेदेस परेवेनट होते हैं" />
+<Illustration src="/images/lessons/design-distributed-cache.svg" alt="Consistent hashing ring जिसमें physical nodes virtual nodes से mapped हैं और keys nearest clockwise node को assigned हैं" caption="Consistent hashing सुनिश्चित करता है कि node जोड़ने या हटाने पर केवल keys का छोटा हिस्सा remap हो, जिससे cache stampedes रुकते हैं" />
 
-<Quiz question="एक कैश क्लस्टर में 4 नोड हैं। Node 3 फ़ेल हो जाता है। सिमपले मोदुलो हशिङ (की % 4 → की % 3) के साथ, कितने पेरकेनट की रेमप होंगी?" options="25% (सिर्फ़ Node 3 की की)|50%|75% - लगभग सारी की रेमप होती हैं|100%" answer="2" explanation="मोद 4 से मोद 3 बदलने पर लगभग 75% की अलग नोड पर रेमप होती हैं। उदाहरण: जो की 7 पर हैश हुई वो नोड 3 पर थी (7%4=3) लेकिन अब नोड 1 पर जाएगी (7%3=1)। इससे कैश मिसेस में बहुत बड़ा स्पाइक आता है। कोनसिसटेनट हशिङ इसे हल करता है सिर्फ़ ~K/N की रेमप करके।" />
+<Quiz question="Cache cluster में 4 nodes हैं। Node 3 fail हो जाता है। Simple modulo hashing (key % 4 → key % 3) के साथ कितने प्रतिशत keys remap होती हैं?" options="25% (सिर्फ Node 3 की keys)|50%|75% - लगभग सभी keys remap होती हैं|100%" answer="2" explanation="mod 4 से mod 3 में बदलने पर लगभग 75% keys अलग nodes पर remap होती हैं। उदाहरण के लिए, जो key 7 पर hash होती थी वह node 3 पर थी (7%4=3), लेकिन अब node 1 पर जाती है (7%3=1)। इससे cache misses में भारी spike आता है। Consistent hashing इसे केवल ~K/N keys remap करके हल करता है।" />
 
-## चरण 5 - कैश सटमपेदे परेवेनशन
+## चरण 5 - Cache Stampede Prevention
 
-**कैश सटमपेदे** तब होता है जब कोई लोकप्रिय कचेद एनटरय एक्सपिरे होती है और सैकड़ों कोनकुररेनट रिक्वेस्ट एक साथ कैश मिस करती हैं और डेटाबेस को हिट करती हैं।
+**Cache stampede** तब होता है जब कोई लोकप्रिय cached entry expire होती है और सैकड़ों concurrent requests एक साथ cache miss करके database पर पहुंचती हैं।
 
 ### समाधान
 
-**मुटेक्स/लोकिङ:** कैश मिस होने पर एक वितरित लोक अकक्विरे करें। सिर्फ़ एक रिक्वेस्ट डेटाबेस से फ़ेटच करती है; बाकी कैश रेपॉपुलटे होने तक इंतज़ार करती हैं।
+**Mutex/Locking:** Cache miss होने पर distributed lock लें। केवल एक request database से fetch करती है। बाकी cache फिर से भरने का इंतज़ार करती हैं।
 
-**परोबबिलिसटिक एअरलय एक्सपिरय:** हर रिक्वेस्ट को TTL एक्सपिरे होने से पहले कैश रीफ़्रेश करने का एक समलल रनदोम चनके होता है। इससे रीफ़्रेश लोड समय में सपरेअद होता है बजाय एक्सपिरय पर थुनदेरिङ हेरद बनने के।
+**Probabilistic Early Expiry:** हर request के पास TTL वास्तव में expire होने से पहले cache refresh करने का छोटा random chance होता है। इससे refresh load समय में फैलता है, expiry पर thundering herd नहीं बनता।
 
-**पृष्ठभूमि रेफ़रेश:** एक पृष्ठभूमि प्रोसेस लोकप्रिय कैश एनटरिएस को एक्सपिरे होने से पहले रीफ़्रेश करता है। होट की के लिए कैश कभी एमपटय नहीं होता।
+**Background Refresh:** Background process लोकप्रिय cache entries को expire होने से पहले refresh करता है। Hot keys के लिए cache कभी खाली नहीं होता।
 
-<ThinkAboutIt>एक फ़लश सले सोचिए जहाँ एक उत्पाद पगे को 100,000 रिक्वेस्ट प्रति सेकंड मिल रही हैं। परोदुकट देटैलस कैश एनटरय एक्सपिरे हो जाती है। सटमपेदे परेवेनशन के बिना, सभी 100K रिक्वेस्ट एक साथ डेटाबेस हिट करेंगी। आप कौन सी परेवेनशन रणनीति चुनेंगे, और क्यों?</ThinkAboutIt>
+<ThinkAboutIt>Flash sale पर विचार करें जहां product page को 100,000 requests per second मिलते हैं। Product details cache entry expire हो जाती है। Stampede prevention के बिना सभी 100K requests database को एक साथ hit करती हैं। आप कौन सी prevention strategy चुनेंगे, और क्यों?</ThinkAboutIt>
 
-## चरण 6 - Redis कलुसटेर आर्किटेक्चर
+## चरण 6 - Redis Cluster Architecture
 
-Redis कलुसटेर सबसे विदेलय तैनात वितरित कैश है:
+Redis Cluster सबसे व्यापक रूप से deployed distributed cache है:
 
-- **16,384 हैश सलोटस** मास्टर नोड में वितरित होते हैं
-- हर की एक सलोट पर मैप होती है `CRC16(key) % 16384` से
-- **रेपलिकशन:** हर मास्टर के पास फ़ैलोवेर के लिए एक या ज़्यादा रेपलिकस होते हैं
-- **औटोमटिक फ़ैलोवेर:** अगर मास्टर फ़ेल होता है, तो उसका रेपलिक सेकंड में बढ़ावा हो जाता है
+- Master nodes में वितरित **16,384 hash slots**
+- हर key `CRC16(key) % 16384` से slot पर map होती है
+- **Replication:** हर master के पास failover के लिए एक या अधिक replicas होते हैं
+- **Automatic failover:** master fail होने पर उसका replica seconds में promote होता है
 
 ```
 Slots 0-5460:     Master A ←→ Replica A'
@@ -125,35 +125,35 @@ Slots 5461-10922: Master B ←→ Replica B'
 Slots 10923-16383: Master C ←→ Replica C'
 ```
 
-### मुख्य बात मेट्रिक्स मोनिटोर करना
-- **हिट अनुपात** - लक्षित 95%+; 80% से नीचे कैशिंग समस्या इनदिकटे करता है
-- **मेमोरय उसगे** - एविकशनस से बचने के लिए 80% से नीचे रखें
-- **एविकशन दर** - ज़्यादा एविकशनस मतलब कैश उनदेरसिज़ेद है
-- **लेटेंसी पेरकेनटिलेस** - कैश हिटस के लिए p99 1ms से कम होना चाहिए
+### Monitoring Key Metrics
+- **Hit ratio** - target 95%+; 80% से कम caching समस्या दिखाता है
+- **Memory usage** - evictions से बचने के लिए 80% से कम रहें
+- **Eviction rate** - high evictions का मतलब cache छोटा है
+- **Latency percentiles** - cache hits के लिए p99 1ms से कम होना चाहिए
 
-## चरण 7 - वास्तविक दुनिया कैशिंग पैटर्न
+## चरण 7 - Real-World Caching Patterns
 
-| पटटेरन | इमपलेमेनटशन | TTL |
+| Pattern | Implementation | TTL |
 |---------|---------------|-----|
-| सेशन स्टोर | `SET session:{id} {data}` | 30 मिनट |
-| API प्रतिक्रिया कैश | `SET api:/users/123 {json}` | 5 मिनट |
-| दटबसे क्वेरी कैश | `SET query:{hash} {result}` | 1 मिनुटे |
-| दर लिमिटेर कोउनटेर | `INCR ratelimit:{user}:{window}` | विंडो अवधि |
-| फ़ीचर फ़लगस | `HSET features {flag} {value}` | 10 सेकंड |
+| Session store | `SET session:{id} {data}` | 30 minutes |
+| API response cache | `SET api:/users/123 {json}` | 5 minutes |
+| Database query cache | `SET query:{hash} {result}` | 1 minute |
+| Rate limiter counter | `INCR ratelimit:{user}:{window}` | Window duration |
+| Feature flags | `HSET features {flag} {value}` | 10 seconds |
 
-### कैश इनवैलिडेशन
-कंप्यूटर विज्ञान की सबसे कठिन समस्या (नमिङ थिङस के साथ):
-- **टटल-बसेद** - सरल, TTL अवधि तक सटलेनेस टोलेरटे करता है
-- **एवेनट-दरिवेन** - डेटा बदलने पर इनवैलिडेशन इवेंट पुबलिश करें (Kafka या Redis पुब/सुब से)
-- **वर्शन-आधारित** - कैश की में वर्शन शामिल करें; राइट पर वर्शन इनकरेमेनट करें ताकि पुरानी एनटरिएस एफ़फ़ेकटिवेलय इनवलिदटे हों
+### Cache Invalidation
+Computer science की सबसे कठिन समस्या (naming things के साथ):
+- **TTL-based** - सरल, TTL अवधि तक staleness सहता है
+- **Event-driven** - data बदलने पर invalidation events publish करें (Kafka या Redis Pub/Sub से)
+- **Version-based** - cache key में version शामिल करें। Writes पर version बढ़ाकर पुरानी entries प्रभावी रूप से invalidate करें
 
-<Quiz question="कौन सा कैश इनवैलिडेशन तरीका सबसे मज़बूत संगति गारंटी देता है?" options="5-मिनुटे विंडो के साथ टटल-बसेद एक्सपिरय|दटबसे राइट से टरिगगेरेद एवेनट-दरिवेन इनवैलिडेशन|रनदोम एविकशन|हर 10 सेकंड में पृष्ठभूमि रीफ़्रेश" answer="1" explanation="एवेनट-दरिवेन इनवैलिडेशन वास्तविक डेटा चङेस पर react करता है, स्रोत डेटा अपडेट होने पर कैश तुरंत इनवलिदटे करता है। टटल-बसेद अपपरोअचेस में हमेशा सटलेनेस विंडो होती है, जबकि पृष्ठभूमि रीफ़्रेश में रीफ़्रेश कयकलेस के बीच गपस होते हैं।" />
+<Quiz question="कौन सा cache invalidation तरीका सबसे मजबूत consistency guarantee देता है?" options="5-minute window के साथ TTL-based expiry|Database writes से triggered event-driven invalidation|Random eviction|हर 10 seconds background refresh" answer="1" explanation="Event-driven invalidation वास्तविक data changes पर प्रतिक्रिया करता है, source data update होते ही cache को तुरंत invalidate करता है। TTL-based तरीकों में हमेशा staleness window रहती है, जबकि background refresh में refresh cycles के बीच gaps होते हैं।" />
 
-<ThinkAboutIt>फिल करलटोन ने कहा था: 'कंप्यूटर विज्ञान में सिर्फ़ दो कठिन चीज़ें हैं - कैश इनवैलिडेशन और नमिङ थिङस।' वितरितद सिस्टम में कैश इनवैलिडेशन इतना मुश्किल क्यों है? सोचिए कि क्या होगा जब डेटाबेस राइट सुककीद हो जाए लेकिन कैश इनवैलिडेशन संदेश लोसट हो जाए।</ThinkAboutIt>
+<ThinkAboutIt>Phil Karlton ने प्रसिद्ध रूप से कहा: 'There are only two hard things in Computer Science - cache invalidation and naming things.' Distributed systems में cache invalidation इतनी कठिन क्यों है? सोचें कि database write सफल हो जाए लेकिन cache invalidation message खो जाए तो क्या होता है।</ThinkAboutIt>
 
 ---
 
-## 📚 और पढ़ें
-- [कोनसिसटेनट हशिङ - बयटेबयटेगो](https://bytebytego.com/courses/system-design-interview/design-consistent-hashing) - कोनसिसटेनट हशिङ और विरटुअल नोड की विसुअल explanation
-- [Redis कलुसटेर सपेकिफ़िकशन](https://redis.io/docs/reference/cluster-spec/) - ओफ़फ़िकिअल Redis कलुसटेर आर्किटेक्चर दस्तावेज़ीकरण
-- [कैशिंग रणनीतियाँ - AWS](https://aws.amazon.com/caching/best-practices/) - क्लाउड अपपलिकशनस के लिए व्यावहारिक कैशिंग पैटर्न
+## 📚 आगे पढ़ें
+- [Consistent Hashing - ByteByteGo](https://bytebytego.com/courses/system-design-interview/design-consistent-hashing) - consistent hashing और virtual nodes की visual explanation
+- [Redis Cluster Specification](https://redis.io/docs/reference/cluster-spec/) - आधिकारिक Redis Cluster architecture documentation
+- [Caching Strategies - AWS](https://aws.amazon.com/caching/best-practices/) - cloud applications के लिए practical caching patterns

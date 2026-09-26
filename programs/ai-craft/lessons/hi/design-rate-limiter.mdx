@@ -78,7 +78,7 @@ Client → API Gateway (Rate Limiter Middleware) → Backend Services
 ## चरण 4 - डीप डाइव: वितरित रेट लिमिटिंग
 
 ### Redis + Lua Scripts
-वितरित सेटअप में कई सर्वरों को रेट लिमिटिंग स्टेट साझा करनी होती है। Redis अपनी atomic operations और sub-millisecond लेटेंसी के कारण मानक चुनाव है।
+वितरित व्यवस्था में कई सर्वरों को रेट लिमिटिंग स्टेट साझा करनी होती है। Redis अपनी atomic operations और sub-millisecond लेटेंसी के कारण मानक चुनाव है।
 
 Lua script atomicity सुनिश्चित करती है। check-and-decrement एक ही Redis operation में होता है, जिससे race conditions रुकती हैं:
 
