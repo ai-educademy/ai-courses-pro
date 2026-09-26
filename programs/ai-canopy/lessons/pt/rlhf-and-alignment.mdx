@@ -49,9 +49,10 @@ Com um modelo de recompensa em mãos, o modelo SFT é ainda mais otimizado usand
 
 A penalidade KL é crítica. Sem ele, o modelo aprenderia a explorar as peculiaridades do modelo de recompensa - gerando respostas com pontuação elevada, mas que seriam absurdas ou repetitivas. Ao restringir até que ponto a política pode divergir do modelo SFT, o PPO mantém a coerência dos resultados, ao mesmo tempo que melhora o alinhamento.
 
-Este processo de três estágios - SFT → Modelo de recompensa → PPO - é precisamente como a OpenAI transformou o GPT-3.5 em ChatGPT, conforme descrito em seu artigo **InstructGPT**.
+Este processo de três estágios - SFT → Modelo de recompensa → PPO - é a forma como a OpenAI transformou os primeiros modelos base da família GPT em assistentes úteis, conforme descrito em seu artigo **InstructGPT**.
 
-<FunFact>O artigo do InstructGPT revelou um resultado surpreendente: um modelo de parâmetro 1,3B alinhado com RLHF foi preferido pelos juízes humanos em vez do 175B GPT-3 não alinhado - um modelo 100× maior. O alinhamento pode ser mais importante do que a escala bruta.
+<FunFact>
+O artigo do InstructGPT revelou um resultado surpreendente: um modelo de parâmetro 1,3B alinhado com RLHF foi preferido pelos juízes humanos em vez do 175B GPT-3 não alinhado - um modelo 100× maior. O alinhamento pode ser mais importante do que a escala bruta.
 </FunFact>
 
 ## DPO: Eliminando o intermediário
@@ -103,7 +104,8 @@ A fronteira da pesquisa de alinhamento é encontrar técnicas que maximizem a ut
 
 <Quiz question="O que é a ”imposto de alinhamento” no contexto dos modelos treinados em RLHF?" options="O custo financeiro da contratação de rotuladores humanos para dados de preferência|A redução na utilidade e capacidade do modelo resultante do treinamento de segurança, tornando o modelo excessivamente cauteloso|O custo computacional de execução da otimização de PPO|O imposto que os governos impõem às empresas de IA para conformidade com a segurança" answer="1" explanation="A taxa de alinhamento refere-se à capacidade ou utilidade perdida quando o treinamento em segurança torna um modelo excessivamente cauteloso - recusando solicitações benignas, protegendo-se desnecessariamente ou produzindo respostas genéricas. Equilibrar a segurança com a ajuda genuína é um dos problemas mais difíceis do alinhamento." />
 
-<FunFact>Laboratórios de fronteira passam meses em trabalho de alinhamento (coleta de dados SFT, modelagem de recompensas, otimização de preferências e testes de segurança) para transformar modelos base em produtos seguros o suficiente para lançamento. A fase de alinhamento, embora seja uma fração da computação pré-treinamento, exige milhares de horas de rotulagem humana especializada e avaliação.</FunFact>
+<FunFact>
+Laboratórios de fronteira passam meses em trabalho de alinhamento (coleta de dados SFT, modelagem de recompensas, otimização de preferências e testes de segurança) para transformar modelos base em produtos seguros o suficiente para lançamento. A fase de alinhamento, embora seja uma fração da computação pré-treinamento, exige milhares de horas de rotulagem humana especializada e avaliação.
 </FunFact>
 
 <ThinkAboutIt>Os rotuladores humanos inevitavelmente trazem os seus próprios preconceitos, perspectivas culturais e inconsistências para os dados de preferência. Se o alinhamento é, em última análise, “aprender o que os humanos preferem”, quais preferências devem contar - e como lidamos com divergências fundamentais sobre valores entre culturas?

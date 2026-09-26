@@ -49,9 +49,10 @@ Avec un reward model en main, le modèle SFT est optimisé davantage par **Proxi
 
 La pénalité KL est cruciale. Sans elle, le modèle apprendrait à exploiter les failles du reward model - générant des réponses qui obtiennent un score élevé mais sont incohérentes ou répétitives. En contraignant la déviation de la politique par rapport au modèle SFT, PPO maintient la cohérence des sorties tout en améliorant l'alignement.
 
-Ce processus en trois étapes - SFT → Reward Model → PPO - est précisément la façon dont OpenAI a transformé GPT-3.5 en ChatGPT, comme décrit dans leur article **InstructGPT**.
+Ce processus en trois étapes - SFT → Reward Model → PPO - est la façon dont OpenAI a transformé les premiers modèles de base de la famille GPT en assistants utiles, comme décrit dans son article **InstructGPT**.
 
 <FunFact>
+
 L'article InstructGPT a révélé un résultat frappant : un modèle de 1,3 milliard de paramètres aligné par RLHF était préféré par les juges humains au GPT-3 non aligné de 175 milliards de paramètres - un modèle 100 fois plus grand. L'alignement peut compter davantage que la taille brute.
 </FunFact>
 
@@ -106,6 +107,7 @@ La frontière de la recherche en alignement est de trouver des techniques qui ma
 <Quiz question="Qu'est-ce que la « taxe de l'alignement » dans le contexte des modèles entraînés par RLHF ?" options="Le coût financier de l'embauche d'annotateurs humains pour les données de préférence|La réduction de l'utilité et des capacités du modèle résultant d'un entraînement à la sécurité rendant le modèle excessivement prudent|Le coût computationnel de l'optimisation PPO|La taxe que les gouvernements imposent aux entreprises d'IA pour la conformité en matière de sécurité" answer="1" explanation="La taxe de l'alignement désigne la perte de capacité ou d'utilité lorsque l'entraînement à la sécurité rend un modèle excessivement prudent - refusant des requêtes anodines, ajoutant des nuances inutiles ou produisant des réponses génériques. Équilibrer sécurité et utilité réelle est l'un des problèmes ouverts les plus difficiles de l'alignement." />
 
 <FunFact>
+
 Les laboratoires de pointe consacrent des mois au travail d'alignement (collecte de données SFT, modélisation de la récompense, optimisation des préférences et tests de sécurité) pour transformer des modèles de base en produits suffisamment sûrs pour être publiés. La phase d'alignement, bien que représentant une fraction du calcul de pré-entraînement, nécessite des milliers d'heures d'annotation humaine spécialisée et d'évaluation.
 </FunFact>
 

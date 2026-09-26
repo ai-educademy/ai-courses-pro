@@ -49,9 +49,10 @@ Mit einem Belohnungsmodell wird das SFT-Modell mithilfe von **Proximal Policy Op
 
 Die KL-Strafe ist entscheidend. Ohne sie würde das Modell lernen, die Besonderheiten des Belohnungsmodells auszunutzen und Antworten zu generieren, die zwar gut abschneiden, aber unsinnig oder sich wiederholend sind. Durch die Einschränkung, wie weit die Richtlinie vom SFT-Modell abweichen kann, sorgt PPO dafür, dass die Ergebnisse kohärent bleiben und gleichzeitig die Ausrichtung verbessert wird.
 
-Dieser dreistufige Prozess - SFT → Belohnungsmodell → PPO - ist genau die Art und Weise, wie OpenAI GPT-3.5 in ChatGPT umgewandelt hat, wie in ihrem **InstructGPT**-Papier beschrieben.
+Mit diesem dreistufigen Prozess - SFT → Belohnungsmodell → PPO - verwandelte OpenAI frühe Basismodelle der GPT-Familie in hilfreiche Assistenten, wie in ihrem **InstructGPT**-Paper beschrieben.
 
-<FunFact>Das InstructGPT-Papier enthüllte ein bemerkenswertes Ergebnis: Ein mit RLHF ausgerichtetes 1,3B-Parametermodell wurde von menschlichen Richtern dem nicht ausgerichteten 175B-GPT-3 - einem 100-mal größeren Modell - vorgezogen. Die Ausrichtung kann wichtiger sein als der bloße Maßstab.
+<FunFact>
+Das InstructGPT-Papier enthüllte ein bemerkenswertes Ergebnis: Ein mit RLHF ausgerichtetes 1,3B-Parametermodell wurde von menschlichen Richtern dem nicht ausgerichteten 175B-GPT-3 - einem 100-mal größeren Modell - vorgezogen. Die Ausrichtung kann wichtiger sein als der bloße Maßstab.
 </FunFact>
 
 ## DPO: Den Mittelsmann ausschalten
@@ -103,7 +104,8 @@ Die Grenze der Alignment-Forschung besteht darin, Techniken zu finden, die die N
 
 <Quiz question="Was ist die „Anpassungssteuer” im Zusammenhang mit RLHF-trainierten Modellen?" options="Die finanziellen Kosten für die Einstellung menschlicher Etikettierer für Präferenzdaten|Die Verringerung der Hilfsbereitschaft und Leistungsfähigkeit des Modells, die sich aus dem Sicherheitstraining ergibt, führt dazu, dass das Modell übermäßig vorsichtig ist|Der Rechenaufwand für die Durchführung der PPO-Optimierung|Die Steuer, die Regierungen KI-Unternehmen für die Einhaltung von Sicherheitsvorschriften auferlegen" answer="1" explanation="Die Ausrichtungssteuer bezieht sich auf den Fähigkeits- oder Hilfsbereitschaftsverlust, wenn das Sicherheitstraining ein Modell übermäßig vorsichtig macht - indem es harmlose Anfragen ablehnt, unnötige Absicherungen durchführt oder generische Antworten produziert. Sicherheit und echte Hilfsbereitschaft in Einklang zu bringen, ist eines der schwierigsten offenen Probleme bei der Ausrichtung." />
 
-<FunFact>Spitzen-Labore verbringen Monate mit Ausrichtungsarbeiten (SFT-Datenerfassung, Belohnungsmodellierung, Präferenzoptimierung und Sicherheitstests), um Basismodelle in Produkte zu verwandeln, die sicher genug für die Veröffentlichung sind. Die Ausrichtungsphase macht zwar nur einen Bruchteil des Rechenaufwands vor dem Training aus, erfordert aber Tausende von Stunden spezieller menschlicher Etikettierung und Evaluation.</FunFact>
+<FunFact>
+Spitzen-Labore verbringen Monate mit Ausrichtungsarbeiten (SFT-Datenerfassung, Belohnungsmodellierung, Präferenzoptimierung und Sicherheitstests), um Basismodelle in Produkte zu verwandeln, die sicher genug für die Veröffentlichung sind. Die Ausrichtungsphase macht zwar nur einen Bruchteil des Rechenaufwands vor dem Training aus, erfordert aber Tausende von Stunden spezieller menschlicher Etikettierung und Evaluation.
 </FunFact>
 
 <ThinkAboutIt>Menschliche Etikettierer bringen unweigerlich ihre eigenen Vorurteile, kulturellen Perspektiven und Inkonsistenzen in die Präferenzdaten ein. Wenn es beim Alignment letztendlich darum geht, „zu lernen, was Menschen bevorzugen“, wessen Vorlieben sollten dann zählen - und wie gehen wir mit grundlegenden Meinungsverschiedenheiten über Werte zwischen den Kulturen um?

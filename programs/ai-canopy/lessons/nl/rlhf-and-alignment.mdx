@@ -49,9 +49,10 @@ Met een reward model in de hand wordt het SFT-model verder geoptimaliseerd met *
 
 De KL-penalty is cruciaal. Zonder zou het model eigenaardigheden van het reward model leren exploiteren - antwoorden genereren die hoog scoren maar onzinnig of repetitief zijn. Door te beperken hoe ver het beleid kan afwijken van het SFT-model, houdt PPO de outputs coherent terwijl de alignment verbetert.
 
-Dit driefasenproces - SFT → Reward Model → PPO - is precies hoe OpenAI GPT-3.5 transformeerde in ChatGPT, zoals beschreven in hun **InstructGPT**-paper.
+Met dit driefasenproces - SFT → Reward Model → PPO - veranderde OpenAI vroege basismodellen uit de GPT-familie in behulpzame assistenten, zoals beschreven in hun **InstructGPT**-paper.
 
 <FunFact>
+
 Het InstructGPT-paper onthulde een opvallend resultaat: een model met 1,3 miljard parameters afgestemd met RLHF werd door menselijke beoordelaars verkozen boven het niet-afgestemde GPT-3 met 175 miljard parameters - een model dat 100× groter is. Alignment kan belangrijker zijn dan puur schaalgrootte.
 </FunFact>
 
@@ -106,6 +107,7 @@ De toonaangevend van alignment-onderzoek is het vinden van technieken die behulp
 <Quiz question="Wat is de 'alignment-belasting' in de context van RLHF-getrainde modellen?" options="De financiële kosten van het inhuren van menselijke beoordelaars voor voorkeursdata|De vermindering van modelbehulpzaamheid en -capaciteit die het gevolg is van veiligheidstraining die het model overdreven voorzichtig maakt|De rekenkosten van het draaien van PPO-optimalisatie|De belasting die overheden opleggen aan AI-bedrijven voor veiligheidsnaleving" answer="1" explanation="De alignment-belasting verwijst naar het verlies aan capaciteit of behulpzaamheid wanneer veiligheidstraining een model buitensporig voorzichtig maakt - onschuldige verzoeken weigeren, onnodig nuanceren, of generieke antwoorden produceren. Het balanceren van veiligheid met oprechte behulpzaamheid is een van de moeilijkste open problemen in alignment." />
 
 <FunFact>
+
 toonaangevende labs besteden maanden aan alignment-werk (SFT-dataverzameling, beloningsmodellering, voorkeuroptimalisatie en veiligheidstests) om basismodellen om te vormen tot producten die veilig genoeg zijn om uit te brengen. De alignment-fase kost, hoewel een fractie van de pre-training compute, duizenden uren gespecialiseerde menselijke labeling en evaluatie.
 </FunFact>
 
