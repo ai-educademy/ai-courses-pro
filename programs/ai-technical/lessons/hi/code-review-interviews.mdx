@@ -1,70 +1,70 @@
 ---
-title: "कोड समीक्षा साक्षात्कार"
-description: "कोड समीक्षा साक्षात्कार राउंड में एक्सेल - बग की पहचान करें, सुधार का सुझाव दें और अपने इंजीनियरिंग निर्णय का प्रदर्शन करें।"
+title: "Code Review इंटरव्यू"
+description: "Code review interview rounds में बेहतर प्रदर्शन करें: bugs पहचानें, improvements सुझाएँ, और अपना engineering judgement दिखाएँ।"
 order: 5
 difficulty: "intermediate"
 duration: 15
 icon: "👁️"
 published: true
-machineTranslated: true
 ---
-# कोड समीक्षा साक्षात्कार
 
-कोड समीक्षा साक्षात्कार नियुक्ति प्रक्रिया में सबसे कम महत्व वाले दौरों में से एक है - और सबसे अधिक खुलासा करने वाले दौरों में से एक है। कोडिंग साक्षात्कार में यह परीक्षण किया जाता है कि क्या आप कोड लिख सकते हैं, कोड समीक्षा साक्षात्कार परीक्षण करते हैं कि क्या आप इसे पढ़ सकते हैं, इसके बारे में तर्क कर सकते हैं और इसमें सुधार कर सकते हैं। वे बताते हैं कि आप गुणवत्ता के बारे में कैसे सोचते हैं, आप फीडबैक को कैसे प्राथमिकता देते हैं और आप अन्य इंजीनियरों के साथ कैसे संवाद करते हैं। कई उम्मीदवार लीटकोड पर महीनों तक तैयारी करते हैं लेकिन कोड समीक्षा दौर में पूरी तरह से बिना तैयारी के चले जाते हैं। वह व्यक्ति न बनें.
+# Code Review इंटरव्यू
 
-## कौन-सा कोड समीक्षा साक्षात्कार वास्तव में परीक्षण करता है
+Code review interviews hiring process के सबसे कम आँके गए rounds में से हैं, और सबसे ज़्यादा खुलासा भी करते हैं। Coding interviews जाँचते हैं कि आप code लिख सकते हैं या नहीं। Code review interviews जाँचते हैं कि आप code पढ़ सकते हैं, उसके बारे में reason कर सकते हैं, और उसे improve कर सकते हैं या नहीं। वे दिखाते हैं कि आप quality के बारे में कैसे सोचते हैं, feedback कैसे prioritise करते हैं, और दूसरे engineers से कैसे communicate करते हैं। कई candidates LeetCode पर महीनों तैयारी करते हैं लेकिन code review round में बिल्कुल unprepared पहुँचते हैं। आप वह व्यक्ति न बनें।
 
-आपके कोड समीक्षा कौशल का मूल्यांकन करने वाले साक्षात्कारकर्ता पाँच चीज़ों की तलाश कर रहे हैं:
+## Code Review Interviews असल में क्या जाँचते हैं
 
-1. **बग का पता लगाना** - क्या आप तार्किक त्रुटियों, किनारे के मामलों और दौड़ की स्थितियों का पता लगा सकते हैं?
-2. **डिज़ाइन सेंस** - क्या आप SOLID सिद्धांतों, ख़राब अमूर्तताओं, या कोड के उल्लंघन को पहचानते हैं जिन्हें बनाए रखना कठिन होगा?
-3. **सुरक्षा जागरूकता** - क्या आप इंजेक्शन की कमजोरियों, प्रमाणीकरण दोषों या डेटा एक्सपोज़र जोखिमों की पहचान कर सकते हैं?
-4. **संचार कौशल** - क्या आप मुद्दों को स्पष्ट और रचनात्मक ढंग से समझा सकते हैं?
-5. **प्राथमिकता** - क्या आप उस पर ध्यान केंद्रित करते हैं जो सबसे ज्यादा मायने रखता है, या क्या आप परिवर्तनशील नामों पर ध्यान केंद्रित करते हैं?
+Interviewers आपके code review skills में पाँच चीज़ें देखते हैं:
 
-<Callout>कोड समीक्षा साक्षात्कारों में सबसे आम गलती अपना सारा समय शैली के मुद्दों (नामकरण, स्वरूपण) पर खर्च करना है जबकि वास्तविक बग गायब हैं। यह देखने के लिए कि आप क्या प्राथमिकता देते हैं, साक्षात्कारकर्ता जानबूझकर शैली संबंधी मुद्दों के साथ-साथ महत्वपूर्ण बग भी लगाते हैं।</Callout>
+1. **Bug detection**: क्या आप logical errors, edge cases और race conditions पकड़ सकते हैं?
+2. **Design sense**: क्या आप SOLID principles के violations, कमजोर abstractions या maintain करने में कठिन code पहचानते हैं?
+3. **Security awareness**: क्या आप injection vulnerabilities, authentication flaws या data exposure risks पहचान सकते हैं?
+4. **Communication skill**: क्या आप issues साफ़ और constructive ढंग से समझा सकते हैं?
+5. **Prioritisation**: क्या आप असली बात पर focus करते हैं, या variable names पर bikeshed करते हैं?
 
-## व्यवस्थित समीक्षा दृष्टिकोण
+<Callout>Code review interviews में सबसे common गलती style issues (naming, formatting) पर पूरा समय खर्च करना है, जबकि actual bugs छूट जाते हैं। Interviewers जानबूझकर critical bugs को style issues के साथ रखते हैं ताकि देखें कि आप क्या prioritise करते हैं।</Callout>
 
-कोड को बेतरतीब ढंग से स्कैन न करें. एक संरचित पास-आधारित दृष्टिकोण का उपयोग करें:
+## Systematic Review Approach
 
-### पास 1: इरादे को समझें (2 मिनट)
+Code को random scan न करें। Structured pass-based approach इस्तेमाल करें:
 
-किसी भी चीज़ की आलोचना करने से पहले, समझें कि कोड क्या करने का प्रयास कर रहा है:
-- फ़ंक्शन/वर्ग के नाम और टिप्पणियाँ पढ़ें
-- इनपुट और आउटपुट को पहचानें
-- व्यावसायिक तर्क को समझें
+### Pass 1: Intent समझें (2 मिनट)
 
-### पास 2: शुद्धता (5 मिनट)
+Critique करने से पहले समझें कि code क्या करने की कोशिश कर रहा है:
+- Function/class names और comments पढ़ें
+- Inputs और outputs पहचानें
+- Business logic समझें
 
-यहीं पर आपको बग मिलते हैं। व्यवस्थित रूप से जांचें:
-- **एज केस**: खाली इनपुट, शून्य मान, एकल तत्व, अधिकतम मान
-- **ऑफ-बाय-वन त्रुटियाँ**: लूप सीमाएँ, सरणी अनुक्रमण
-- **तर्क संबंधी त्रुटियां**: गलत स्थितियां, गुम ब्रेक स्टेटमेंट, गलत ऑपरेटर
-- **समवर्ती मुद्दे**: साझा परिवर्तनीय स्थिति, दौड़ की स्थिति
-- **त्रुटि प्रबंधन**: न पकड़े गए अपवाद, गायब शून्य जाँचें
+### Pass 2: Correctness (5 मिनट)
 
-### पास 3: डिज़ाइन और रखरखाव (3 मिनट)
+यहीं आप bugs खोजते हैं। Systematically check करें:
+- **Edge cases**: empty inputs, null values, single elements, maximum values
+- **Off-by-one errors**: loop boundaries, array indexing
+- **Logic errors**: incorrect conditions, missing break statements, wrong operator
+- **Concurrency issues**: shared mutable state, race conditions
+- **Error handling**: uncaught exceptions, missing null checks
 
-संरचनात्मक मुद्दों की तलाश करें:
-- बहुत सारे कार्य करने वाले कार्य (एकल उत्तरदायित्व का उल्लंघन)
-- घटकों के बीच मजबूत युग्मन
-- जादुई संख्याएं और हार्डकोडेड मान
-- गुम अमूर्तता या अनावश्यक अमूर्तता
-- कोड दोहराव
+### Pass 3: Design और Maintainability (3 मिनट)
 
-### पास 4: प्रदर्शन और सुरक्षा (2 मिनट)
+Structural issues खोजें:
+- Functions बहुत ज़्यादा काम कर रहे हैं (Single Responsibility violation)
+- Components में tight coupling
+- Magic numbers और hardcoded values
+- Missing abstractions या unnecessary abstractions
+- Code duplication
 
-- लूप में अनावश्यक डेटाबेस क्वेरीज़ (एन+1 समस्या)
-- इनपुट सत्यापन या स्वच्छता का अभाव
-- लॉग या प्रतिक्रियाओं में संवेदनशील डेटा उजागर करना
-- अकुशल एल्गोरिदम जहां बेहतर विकल्प मौजूद हैं
+### Pass 4: Performance और Security (2 मिनट)
 
-## सामान्य बग पैटर्न का पता लगाएं
+- Loops में unnecessary database queries (N+1 problem)
+- Missing input validation या sanitisation
+- Logs या responses में exposed sensitive data
+- Inefficient algorithms जहाँ बेहतर alternatives मौजूद हों
 
-इन उच्च-आवृत्ति बगों को पकड़ने के लिए अपनी आँखों को प्रशिक्षित करें:
+## पकड़ने लायक Common Bug Patterns
 
-### शून्य संदर्भ त्रुटियाँ
+इन high-frequency bugs को पकड़ने के लिए अपनी नज़र train करें:
+
+### Null Reference Errors
 
 ```java
 // Bug: user could be null
@@ -81,7 +81,7 @@ public String getUserEmail(Long userId) {
 }
 ```
 
-### एक-एक करके त्रुटियाँ
+### Off-by-One Errors
 
 ```python
 # Bug: misses the last element
@@ -93,7 +93,7 @@ def find_max(numbers):
     return max_val
 ```
 
-### संसाधन लीक
+### Resource Leaks
 
 ```java
 // Bug: connection is never closed if an exception occurs
@@ -117,7 +117,7 @@ public List<User> getUsers() {
 }
 ```
 
-### एसक्यूएल इंजेक्शन
+### SQL Injection
 
 ```python
 # Bug: SQL injection vulnerability
@@ -131,9 +131,9 @@ def get_user(username):
     return db.execute(query, (username,))
 ```
 
-<FunFact>Google पर 100,000 से अधिक कोड समीक्षाओं के अध्ययन में पाया गया कि सभी समीक्षा टिप्पणियों में से लगभग 25% "शुद्धता" के बारे में हैं - वास्तविक बग या तर्क त्रुटियाँ। अन्य 25% "समझ" के बारे में हैं - जिससे कोड को समझना आसान हो जाता है। शैली और स्वरूपण का योगदान 10% से कम वास्तविक टिप्पणियों के लिए है।</FunFact>
+<FunFact>Google में 100,000 से अधिक code reviews के एक study ने पाया कि लगभग 25% review comments "correctness" पर होते हैं: actual bugs या logic त्रुटियाँ। और 25% "comprehension" पर होते हैं: code को समझने में आसान बनाना। Style और formatting substantive comments के 10% से कम थे।</FunFact>
 
-### समवर्ती बग
+### Concurrency Bugs
 
 ```java
 // Bug: race condition — check-then-act is not atomic
@@ -146,40 +146,40 @@ public void transferMoney(Account from, Account to, BigDecimal amount) {
 }
 ```
 
-<ThinkAboutIt>आप उपरोक्त समवर्ती बग को कैसे OK करेंगे? कम से कम तीन दृष्टिकोणों पर विचार करें: सिंक्रनाइज़ेशन, आशावादी लॉकिंग और डेटाबेस-स्तरीय लेनदेन। उच्च-थ्रूपुट प्रणाली में प्रत्येक का ट्रेड-ऑफ़ क्या है?</ThinkAboutIt>
+<ThinkAboutIt>ऊपर वाले concurrency bug को आप कैसे fix करेंगे? कम से कम तीन approaches सोचें: synchronisation, optimistic locking और database-level transactions. High-throughput system में हर approach के trade-offs क्या हैं?</ThinkAboutIt>
 
-## आपकी प्रतिक्रिया को प्राथमिकता देना
+## अपने Feedback को Prioritise करना
 
-समय-सीमित साक्षात्कार में, सभी प्रतिक्रियाएँ समान नहीं होती हैं। इस प्राथमिकता ढांचे का उपयोग करें:
+Time-limited interview में हर feedback बराबर नहीं होता। यह priority framework इस्तेमाल करें:
 
-| प्राथमिकता | श्रेणी | उदाहरण |
+| Priority | Category | Example |
 |---|---|---|
-| 🔴 **महत्वपूर्ण** | बग, सुरक्षा कमजोरियाँ, डेटा हानि | एसक्यूएल इंजेक्शन, दौड़ की स्थिति, शून्य डीरेफ़रेंस |
-| 🟠 **उच्च** | डिज़ाइन संबंधी समस्याएं, प्रदर्शन संबंधी समस्याएं | एन+1 क्वेरीज़, त्रुटि प्रबंधन गायब, टाइट कपलिंग |
-| 🟡 **मध्यम** | रख-रखाव, पठनीयता | जटिल सशर्तताएँ, गुम दस्तावेज, जादुई संख्याएँ |
-| 🟢 **कम** | शैली, मामूली सुधार | परिवर्तनीय नामकरण, आयात आदेश, छोटे रिफैक्टर |
+| 🔴 **Critical** | Bugs, security vulnerabilities, data loss | SQL injection, race conditions, null dereference |
+| 🟠 **High** | Design issues, performance problems | N+1 queries, missing error handling, tight coupling |
+| 🟡 **Medium** | Maintainability, readability | Complex conditionals, missing documentation, magic numbers |
+| 🟢 **Low** | Style, minor improvements | Variable naming, import ordering, minor refactors |
 
-इंटरव्यू में अपना 80% समय 🔴 और 🟠 आइटम पर खर्च करें। 🟡 आइटमों का संक्षेप में उल्लेख करें। केवल 🟢 आइटम को स्पर्श करें यदि आपके पास समय शेष है और आपको पहले से ही महत्वपूर्ण मुद्दे मिल गए हैं।
+इंटरव्यू में अपना 80% समय 🔴 और 🟠 items पर लगाएँ। 🟡 items briefly mention करें। 🟢 items को तभी छुएँ जब समय बचा हो और important issues मिल चुके हों।
 
-## संचार समीक्षा प्रतिक्रिया
+## Review Feedback Communicate करना
 
-आप फीडबैक कैसे देते हैं यह उतना ही मायने रखता है जितना फीडबैक स्वयं। साक्षात्कारकर्ता आपके सहयोग कौशल का मूल्यांकन कर रहे हैं।
+आप feedback कैसे देते हैं, यह feedback जितना ही महत्वपूर्ण है। Interviewers आपकी collaboration skills evaluate कर रहे होते हैं।
 
 **यह करें**:
-- "मैंने देखा है कि यह क्वेरी एक लूप के अंदर है, जो N+1 प्रदर्शन समस्याओं का कारण बन सकती है। हम इसे एक ही क्वेरी में बैच करना चाह सकते हैं।"
-- "ऐसा लगता है कि यदि उपयोगकर्ता नहीं मिला तो यह नुललपोइनटेरेक्सकेपशन फेंक सकता है। क्या हम यहां एक शून्य चेक जोड़ सकते हैं या वैकल्चुनता का उपयोग कर सकते हैं?"
-- "यहां रणनीति पैटर्न का अच्छा उपयोग है - यह नए भुगतान प्रकारों को जोड़ना आसान बनाता है।"
+- "मुझे दिख रहा है कि यह query loop के अंदर है, जिससे N+1 performance issues हो सकते हैं। शायद हमें इसे एक single query में batch करना चाहिए।"
+- "User न मिलने पर यह NullPointerException throw कर सकता है। क्या हम null check जोड़ें या यहाँ Optional इस्तेमाल करें?"
+- "Strategy pattern का यह उपयोग अच्छा है। इससे नए payment types जोड़ना straightforward हो जाता है।"
 
 **यह नहीं**:
-- "यह कोड गलत है।" (बहुत स्पष्ट, कोई स्पष्टीकरण नहीं)
-- "मैं इसे इस तरह कभी नहीं लिखूंगा।" (अहंकार से प्रेरित)
-- "इस वेरिएबल नाम को बदलें।" (कम प्राथमिकता वाली वस्तुओं पर बाइकशेडिंग)
+- "यह code गलत है।" (बहुत blunt, explanation नहीं)
+- "मैं इसे कभी ऐसे नहीं लिखता।" (ego-driven)
+- "इस variable name को बदलो।" (low-priority item पर bikeshedding)
 
-<Callout>हमेशा अपनी प्रतिक्रिया के पीछे *क्यों* को स्पष्ट करें, न कि केवल *क्या* को। "इसमें पैरामीटरयुक्त प्रश्नों का उपयोग करना चाहिए" OK है। "इसमें पैरामीटरयुक्त प्रश्नों का उपयोग करना चाहिए क्योंकि वर्तमान स्ट्रिंग संयोजन SQL इंजेक्शन हमलों के प्रति संवेदनशील है" बहुत बेहतर है।</Callout>
+<Callout>Feedback के पीछे *why* हमेशा समझाएँ, सिर्फ़ *what* नहीं। "यह parameterised queries इस्तेमाल करे" ठीक है। "यह parameterised queries इस्तेमाल करे क्योंकि current string concatenation SQL injection attacks के लिए vulnerable है" कहीं बेहतर है।</Callout>
 
-## उदाहरण कोड समीक्षा वॉकथ्रू
+## Example Code Review Walkthrough
 
-यहां एक फ़ंक्शन है जिसकी आपको साक्षात्कार में समीक्षा करने के लिए कहा जा सकता है:
+यह एक function है जिसे आपको interview में review करने को कहा जा सकता है:
 
 ```python
 def process_orders(orders):
@@ -198,21 +198,21 @@ def process_orders(orders):
     return results
 ```
 
-**एक मजबूत समीक्षा से पता चलेगा:**
+**एक strong review ये पहचानेगा:**
 
-1. 🔴 **एसक्यूएल इंजेक्शन** (पंक्तियाँ 4, 7): एसक्यूएल प्रश्नों में स्ट्रिंग इंटरपोलेशन। पैरामीटरयुक्त क्वेरीज़ का उपयोग करें.
-2. 🔴 **एन+1 क्वेरी समस्या** (पंक्तियाँ 4, 7): प्रति ऑर्डर दो डेटाबेस क्वेरीज़, प्रति आइटम एक। प्रत्येक 10 आइटम वाले 100 ऑर्डर के लिए, यह 1,100 प्रश्न हैं। एकल प्रश्नों में बैच.
-3. 🟠 **कोई त्रुटि प्रबंधन नहीं**: `price[0]` यदि उत्पाद नहीं मिला तो क्रैश हो जाएगा। `db.query` विफल हो सकता है.
-4. 🟠 **छूट का तर्क छिपा हुआ है**: मात्रा > 100 के लिए 10% की छूट नेस्टेड लूप्स में छिपा हुआ एक व्यावसायिक नियम है। इसे निकालें.
-5. 🟡 **जादुई संख्या**: `0.9` और `100` को स्थिरांक (`BULK_DISCOUNT_RATE`, `BULK_THRESHOLD`) नाम दिया जाना चाहिए।
-6. 🟡 **कार्य बहुत अधिक करता है**: उपयोगकर्ताओं को लाना, कुल की गणना करना, छूट लागू करना - एकल उत्तरदायित्व का उल्लंघन करता है।
+1. 🔴 **SQL Injection** (lines 4, 7): SQL queries में string interpolation. Parameterised queries इस्तेमाल करें।
+2. 🔴 **N+1 Query Problem** (lines 4, 7): हर order पर दो database queries, और हर item पर एक। 100 orders और 10 items each के लिए 1,100 queries. Single queries में batch करें।
+3. 🟠 **Error handling नहीं**: Product न मिलने पर `price[0]` crash करेगा। `db.query` fail हो सकता है।
+4. 🟠 **Discount logic hidden है**: quantity > 100 पर 10% discount nested loops में दबा business rule है। इसे extract करें।
+5. 🟡 **Magic number**: `0.9` और `100` named constants होने चाहिए (`BULK_DISCOUNT_RATE`, `BULK_THRESHOLD`)।
+6. 🟡 **Function बहुत ज़्यादा काम करता है**: users fetch करना, totals calculate करना, discounts apply करना। Single Responsibility violate होता है।
 
-<Quiz question="एक कोड समीक्षा साक्षात्कार के दौरान, आपको एक छोटी चर नामकरण समस्या और एक संभावित SQL इंजेक्शन भेद्यता मिलती है। आपके पास 2 मिनट बचे हैं. आपको क्या प्राथमिकता देनी चाहिए?" options="पहले वेरिएबल नामकरण को OK करें क्योंकि यह त्वरित है|पूरी तरह से SQL इंजेक्शन भेद्यता पर ध्यान दें|दोनों का समान रूप से उल्लेख करें - दिखाएँ कि आप संपूर्ण हैं|दोनों को छोड़ें और अधिक मुद्दों की तलाश करें" answer="1" explanation="SQL इंजेक्शन एक गंभीर सुरक्षा भेद्यता है जिससे डेटा उल्लंघन हो सकता है। स्टाइल संबंधी चिंताओं पर हमेशा सुरक्षा मुद्दों को प्राथमिकता दें। यदि इंजेक्शन के जोखिम को पूरी तरह से समझाने के बाद समय मिले तो ही नामकरण के मुद्दे का संक्षेप में उल्लेख करें।" />
+<Quiz question="Code review interview में आपको minor variable naming issue और potential SQL injection vulnerability मिलती है। आपके पास 2 मिनट बचे हैं। आपको किसे prioritise करना चाहिए?" options="Variable naming पहले fix करें क्योंकि यह जल्दी है|पूरी तरह SQL injection vulnerability पर focus करें|दोनों को बराबर mention करें: thoroughness दिखाएँ|दोनों छोड़कर और issues खोजें" answer="1" explanation="SQL injection critical security vulnerability है जिससे data breaches हो सकते हैं। हमेशा security issues को style concerns से ऊपर prioritise करें। Naming issue को briefly तभी mention करें जब injection risk अच्छी तरह explain करने के बाद समय बचे।" />
 
-## चाबी छीनना
+## मुख्य बातें
 
-- **एक संरचित दृष्टिकोण का उपयोग करें**: एकाधिक पास (इरादा → शुद्धता → डिज़ाइन → प्रदर्शन/सुरक्षा) यादृच्छिक स्कैनिंग की तुलना में अधिक समस्याएं पकड़ते हैं।
-- **बेरहमी से प्राथमिकता दें**: गंभीर बग और सुरक्षा मुद्दे पहले, शैली बाद में। साक्षात्कारकर्ता आपके निर्णय का परीक्षण करने के लिए दोनों का रोपण करते हैं।
-- **रचनात्मक ढंग से संवाद करें**: *क्यों* को समझाएं, विकल्प सुझाएं, और आपके द्वारा देखे गए अच्छे पैटर्न को स्वीकार करें।
-- **सामान्य बग पैटर्न को जानें**: शून्य संदर्भ, ऑफ-बाय-वन त्रुटियां, संसाधन लीक, एसक्यूएल इंजेक्शन, और दौड़ की स्थिति लगभग हर कोड समीक्षा साक्षात्कार में दिखाई देती है।
-- **कोड पढ़ने का अभ्यास करें**: GitHub पर ओपन-सोर्स पुल अनुरोधों को पढ़ने में समय व्यतीत करें। कोड पढ़ने का कौशल उसे लिखने से अलग है, और अधिकांश इंजीनियर इसका पर्याप्त अभ्यास नहीं करते हैं।
+- **Structured approach इस्तेमाल करें**: कई passes (intent → correctness → design → performance/security) random scanning से ज़्यादा issues पकड़ते हैं।
+- **निर्दयता से prioritise करें**: critical bugs और security issues पहले, style आख़िर में। Interviewers दोनों रखते हैं ताकि judgement test हो।
+- **Constructively communicate करें**: *why* explain करें, alternatives सुझाएँ, और अच्छे patterns को acknowledge करें।
+- **Common bug patterns जानें**: null references, off-by-one errors, resource leaks, SQL injection और race conditions लगभग हर code review interview में दिखते हैं।
+- **Code पढ़ने का अभ्यास करें**: GitHub पर open-source pull requests पढ़ें। Code पढ़ने का skill code लिखने से अलग है, और अधिकतर engineers इसका पर्याप्त अभ्यास नहीं करते।

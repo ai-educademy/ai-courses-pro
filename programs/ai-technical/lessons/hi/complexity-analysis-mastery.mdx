@@ -1,36 +1,36 @@
 ---
-title: "जटिलता विश्लेषण में निपुणता"
-description: "समय और स्थान की जटिलता का आत्मविश्वास से विश्लेषण करें - वह कौशल जो कोडिंग साक्षात्कारों में अच्छे समाधानों को इष्टतम समाधानों से अलग करता है।"
+title: "Complexity Analysis में महारत"
+description: "Time और space complexity को आत्मविश्वास से analyse करें: coding interviews में good solutions को optimal ones से अलग करने वाला कौशल।"
 order: 7
 difficulty: "intermediate"
 duration: 18
 icon: "⚡"
 published: true
-machineTranslated: true
 ---
-# जटिलता विश्लेषण में महारत
 
-"समय की जटिलता क्या है?" - चार शब्द जो कोडिंग साक्षात्कार में आपके द्वारा प्रस्तुत किए गए प्रत्येक समाधान का अनुसरण करते हैं। इसे OK से प्राप्त करें, और आप एक आत्मविश्वासी इंजीनियर की तरह लगेंगे। लड़खड़ाते हैं, और साक्षात्कारकर्ता सवाल करता है कि क्या आप वास्तव में अपना कोड समझते हैं। जटिलता विश्लेषण सिर्फ अकादमिक सिद्धांत नहीं है; यह वह लेंस है जिसके माध्यम से इंजीनियर मूल्यांकन करते हैं कि कोई समाधान बड़े पैमाने पर काम करेगा या नहीं। यह पाठ आपको आत्मविश्वास के साथ किसी भी समाधान का विश्लेषण करने में सक्षम बनाता है - सरल लूप से लेकर मुश्किल पुनरावर्ती एल्गोरिदम तक।
+# Complexity Analysis में महारत
 
-## बिग-ओ नोटेशन फंडामेंटल
+"Time complexity क्या है?" ये चार शब्द coding interview में आपके हर solution के बाद आते हैं। सही जवाब दें, तो आप confident engineer लगते हैं। अटकें, तो interviewer पूछता है कि क्या आप सच में अपना code समझते हैं। Complexity analysis सिर्फ academic theory नहीं है। यह वह lens है जिससे engineers evaluate करते हैं कि कोई solution scale पर काम करेगा या नहीं। यह पाठ आपको simple loops से tricky recursive algorithms तक, किसी भी solution को confidence से analyse करने के लिए तैयार करता है।
 
-बिग-ओ ऊपरी सीमा का वर्णन करता है कि इनपुट आकार बढ़ने के साथ एल्गोरिदम का रनटाइम या मेमोरी उपयोग कैसे एजा है। यह प्रमुख कारक पर ध्यान केंद्रित करने के लिए स्थिरांक और निचले क्रम के शब्दों को हटा देता है।
+## Big-O Notation Fundamentals
 
-| जटिलता | नाम | उदाहरण | 1M तत्व |
+Big-O बताता है कि input size बढ़ने पर algorithm का runtime या memory usage upper bound में कैसे बढ़ता है। यह constants और lower-order terms हटाकर dominant factor पर focus करता है।
+
+| Complexity | Name | Example | 1M Elements |
 |---|---|---|---|
-| O(1) | स्थिर | हैश मैप खोज | तुरंत |
-| O(लॉग n) | लोगरिथमिक | बाइनरी खोज | ~20 ऑपरेशन |
-| O(n) | लिनेअर | सरणी के माध्यम से एकल लूप | 1M ऑपरेशन |
-| O(n लॉग n) | रैखिक अंकन | मर्ज सॉर्ट, ढेर सॉर्ट | ~20M ऑपरेशन |
-| O(n²) | क्वदरटिक | नेस्टेड लूप्स (क्रूर बल) | 1 टरिललिओन ऑपरेशन |
-| ओ(2ⁿ) | घातीय | रेकुरसिवे उपसमूह | हेअट देअथ of उनिवेरसे |
-| O(n!) | फैक्टोरियल | सभी क्रम-विन्यास | गर्मी से मौत × गर्मी से मौत |
+| O(1) | Constant | Hash map lookup | Instant |
+| O(log n) | Logarithmic | Binary search | ~20 operations |
+| O(n) | Linear | Single loop through array | 1M operations |
+| O(n log n) | Linearithmic | Merge sort, heap sort | ~20M operations |
+| O(n²) | Quadratic | Nested loops (brute force) | 1 trillion operations |
+| O(2ⁿ) | Exponential | Recursive subsets | Heat death of universe |
+| O(n!) | Factorial | All permutations | Heat death × heat death |
 
-<Callout>एक व्यावहारिक नियम: आधुनिक कंप्यूटर प्रति सेकंड लगभग 10⁸ सरल ऑपरेशन संभालते हैं। यदि आपका एल्गोरिदम O(n²) और n = 10⁵ है, तो यह 10¹⁰ ऑपरेशन है - लगभग 100 सेकंड। बहुत धीमा। यह मानसिक गणित आपको तुरंत निर्णय लेने में मदद करता है कि आपका दृष्टिकोण सामान्य समय सीमा के भीतर पूरा होगा या नहीं।</Callout>
+<Callout>एक practical rule of thumb: modern computers लगभग 10⁸ simple operations प्रति second संभालते हैं। अगर आपका algorithm O(n²) है और n = 10⁵, तो यह 10¹⁰ operations है, लगभग 100 सेकंड। बहुत धीमा। यह mental math आपको जल्दी judge करने में मदद करता है कि आपका approach typical time limits में pass होगा या नहीं।</Callout>
 
-## सरल लूप्स का विश्लेषण
+## Simple Loops Analyse करना
 
-
+### Single Loop → O(n)
 
 ```python
 def find_max(nums):
@@ -42,7 +42,7 @@ def find_max(nums):
 # Total: O(1) + O(n) × O(1) = O(n)
 ```
 
-### नेस्टेड लूप्स → गुणा करें
+### Nested Loops → Multiply
 
 ```python
 def has_duplicate_pair(nums):
@@ -54,7 +54,7 @@ def has_duplicate_pair(nums):
 # Total: O(n) × O(n) = O(n²)
 ```
 
-### अनुक्रमिक ब्लॉक → जोड़ें
+### Sequential Blocks → Add
 
 ```python
 def process(nums):
@@ -70,7 +70,7 @@ def process(nums):
 # Total: O(n) + O(n²) = O(n²)  — drop the lower-order term
 ```
 
-### गैर-स्पष्ट पुनरावृत्तियों के साथ लूप
+### Non-Obvious Iterations वाले Loops
 
 ```python
 # This is O(n), not O(n²)!
@@ -87,13 +87,13 @@ def two_pointer_sum(nums, target):
     return False
 ```
 
-<ThinkAboutIt>एक लूप पर विचार करें जहां चर प्रत्येक पुनरावृत्ति को दोगुना करता है: `i = 1; while i < n: i *= 2`। यह लूप कितनी बार निष्पादित होता है? क्या's थे जटिलता? (संकेत: यदि मैं हर बार दोगुना हो जाता हूं, तो n तक पहुँचने में कितने दोगुना हो जाएंगे?)</ThinkAboutIt>
+<ThinkAboutIt>ऐसा loop सोचें जहाँ variable हर iteration में double होता है: `i = 1; while i < n: i *= 2`। यह loop कितनी बार execute होता है? Complexity क्या है? (Hint: अगर i हर बार double होता है, तो n तक पहुँचने में कितनी doublings लगती हैं?)</ThinkAboutIt>
 
+## Recursion Analyse करना
 
+Recursion में complexity analysis interesting हो जाती है। मुख्य tool है **recursion tree**।
 
-पुनरावर्तन वह जगह है जहां जटिलता विश्लेषण दिलचस्प हो जाता है। मुख्य उपकरण **रिकर्सन ट्री** है।
-
-### रैखिक पुनरावर्तन → O(n)
+### Linear Recursion → O(n)
 
 ```python
 def factorial(n):
@@ -106,7 +106,7 @@ def factorial(n):
 # Time: O(n), Space: O(n) — n stack frames
 ```
 
-### बाइनरी रिकर्सन → O(2ⁿ)
+### Binary Recursion → O(2ⁿ)
 
 ```python
 # Naive Fibonacci — the classic exponential example
@@ -117,16 +117,14 @@ def fib(n):
 
 # Recursion tree: each call spawns TWO calls
 #                fib(5)
-#              /        \
-#          fib(4)       fib(3)
-#         /     \       /    \
-#      fib(3)  fib(2) fib(2) fib(1)
+#              /        #          fib(4)       fib(3)
+#         /     \       /    #      fib(3)  fib(2) fib(2) fib(1)
 #      ...
 # Nodes at each level double → total nodes ≈ 2ⁿ
 # Time: O(2ⁿ), Space: O(n) — max depth of tree
 ```
 
-### स्मरणीय पुनरावृत्ति → O(n)
+### Memoised Recursion → O(n)
 
 ```python
 def fib_memo(n, memo={}):
@@ -141,29 +139,29 @@ def fib_memo(n, memo={}):
 # Time: O(n), Space: O(n)
 ```
 
-<FunFact>अनुभवहीन और स्मरणीय फाइबोनैचि के बीच का अंतर बड़े पैमाने पर चौंका देने वाला है। फ़ाइब (50) की गणना करने के लिए लगभग 2⁵⁰ 1 क्वाड्रिलियन ऑपरेशन की आवश्यकता होती है - एक आधुनिक कंप्यूटर पर लगभग 100 दिन। संस्मरणित संस्करण के लिए OK 50 ऑपरेशनों की आवश्यकता होती है - जो माइक्रोसेकंड में किए जाते हैं। यही कारण है कि जटिलता विश्लेषण मायने रखता है।</FunFact>
+<FunFact>Naive और memoised Fibonacci के बीच scale पर अंतर चौंकाने वाला है। fib(50) naively compute करने में लगभग 2⁵⁰ ≈ 1 quadrillion operations चाहिए, modern computer पर लगभग 100 दिन। Memoised version exactly 50 operations लेता है, microseconds में पूरा। इसी वजह से complexity analysis matter करता है।</FunFact>
 
-### मास्टर प्रमेय (सरलीकृत)
+### Master Theorem (सरल रूप)
 
-**T(n) = aT(n/b) + O(nᵈ)** फॉर्म की फूट डालो और जीतो पुनरावृत्ति के लिए:
+Form **T(n) = aT(n/b) + O(nᵈ)** वाली divide-and-conquer recurrences के लिए:
 
-| शर्त | जटिलता |
+| Condition | Complexity |
 |---|---|
-| d > लोग_b(a) | ओ(एनᵈ) |
-| डी = लॉग_बी(ए) | O(nᵈ लॉग n) |
-| डी < लॉग_बी(ए) | O(n^(लोग_b(a))) |
+| d > log_b(a) | O(nᵈ) |
+| d = log_b(a) | O(nᵈ log n) |
+| d < log_b(a) | O(n^(log_b(a))) |
 
-**व्यावहारिक उदाहरण**:
-- **मर्ज सॉर्ट**: टी(एन) = 2टी(एन/2) + ओ(एन) → ए=2, बी=2, डी=1 → डी = लॉग₂2 → **ओ(एन लॉग एन)**
-- **बाइनरी सर्च**: टी(एन) = टी(एन/2) + ओ(1) → ए=1, बी=2, डी=0 → डी = लॉग₂1 → **ओ(लॉग एन)**
-- **स्ट्रैसेन मैट्रिक्स मल्टी**: टी(एन) = 7टी(एन/2) + ओ(एन²) → ए=7, बी=2, डी=2 → डी < लॉग₂7 → **ओ(एन^2.81)**
+**Practical examples**:
+- **Merge Sort**: T(n) = 2T(n/2) + O(n) → a=2, b=2, d=1 → d = log₂2 → **O(n log n)**
+- **Binary Search**: T(n) = T(n/2) + O(1) → a=1, b=2, d=0 → d = log₂1 → **O(log n)**
+- **Strassen Matrix Mult**: T(n) = 7T(n/2) + O(n²) → a=7, b=2, d=2 → d < log₂7 → **O(n^2.81)**
 
-## अंतरिक्ष जटिलता
+## Space Complexity
 
-स्पेस जटिलता भी समय जटिलता जितनी ही महत्वपूर्ण है, लेकिन अक्सर अनदेखी रह जाती है। गिनें:
+Space complexity time complexity जितनी ही important है, लेकिन अक्सर overlook होती है। Count करें:
 
-1. **सहायक स्थान** - आपके द्वारा बनाई गई अतिरिक्त डेटा संरचनाएँ
-2. **स्टैक फ़्रेम** - प्रत्येक पुनरावर्ती कॉल एक फ़्रेम जोड़ता है
+1. **Auxiliary space**: extra data structures जो आप बनाते हैं
+2. **Stack frames**: हर recursive call एक frame जोड़ती है
 
 ```python
 # O(1) space — only a few variables
@@ -186,13 +184,13 @@ def reverse_recursive(nums, left, right):
     reverse_recursive(nums, left + 1, right - 1)
 ```
 
-<Callout>साक्षात्कार में, हमेशा समय और स्थान जटिलता दोनों बताएं। एक सामान्य अनुवर्ती है "क्या आप इसे O(1) स्पेस में कर सकते हैं?" इसका मतलब अक्सर पुनरावर्ती समाधान को पुनरावृत्त में परिवर्तित करना, या इन-प्लेस एल्गोरिदम ढूंढना होता है।</Callout>
+<Callout>Interviews में हमेशा time AND space complexity दोनों बताएं। Common follow-up होता है: "क्या आप इसे O(1) space में कर सकते हैं?" इसका मतलब अक्सर recursive solution को iterative बनाना, या in-place algorithm खोजना होता है।</Callout>
 
-## परिशोधित विश्लेषण मूल बातें
+## Amortised Analysis Basics
 
-कुछ ऑपरेशन कभी-कभी महंगे होते हैं लेकिन औसतन सस्ते होते हैं। परिशोधन विश्लेषण इसका कारण बनता है।
+कुछ operations कभी-कभी expensive होते हैं लेकिन average में सस्ते। Amortised analysis इसे account करता है।
 
-**क्लासिक उदाहरण: डायनामिक ऐरे (ArrayList)**
+**Classic example: Dynamic Array (ArrayList)**
 
 ```python
 # Appending to a dynamic array
@@ -202,14 +200,14 @@ def reverse_recursive(nums, left, right):
 # Amortised cost per operation: O(n) / n = O(1)
 ```
 
-अन्य परिशोधित O(1) उदाहरण:
-- हैश मानचित्र सम्मिलन (समय-समय पर रीट्राई करना)
-- स्प्ले ट्री ऑपरेशन
-- दो-स्टैक कतार कार्यान्वयन
+अन्य amortised O(1) examples:
+- Hash map insertions (occasional rehashing)
+- Splay tree operations
+- Two-stack queue implementation
 
-## सामान्य जटिलता जाल
+## Common Complexity Traps
 
-### ट्रैप 1: बिल्ट-इन ऑपरेशंस में छिपे हुए लूप
+### Trap 1: Built-in Operations में Hidden Loops
 
 ```python
 # Looks like O(n), but string concatenation in a loop is O(n²)
@@ -227,7 +225,7 @@ for item in big_list:
 # Fix: convert to set for O(1) lookup
 ```
 
-### ट्रैप 2: सॉर्टिंग हावी है
+### Trap 2: Sorting Dominates
 
 ```python
 def find_kth_largest(nums, k):
@@ -237,7 +235,7 @@ def find_kth_largest(nums, k):
 # Better: use a heap for O(n log k)
 ```
 
-### ट्रैप 3: रिकर्सन गहराई ≠ कुल कार्य
+### Trap 3: Recursion Depth ≠ Total Work
 
 ```python
 # Depth is O(log n), but total work is O(n)
@@ -251,31 +249,31 @@ def merge_sort(arr):
 # log n levels × O(n) work per level = O(n log n)
 ```
 
-<Quiz question="इस कोड की समय जटिलता क्या है? `for i in range(n): for j in range(i): print(i, j)`" options="पर)|ओ(एन लॉग एन)|ओ(एन²)|ओ(एन³)" answer="2" explanation="आंतरिक लूप कुल 0 + 1 + 2 + ... + (n-1) = n(n-1)/2 बार चलता है। यह अंकगणित श्रृंखला का योग है, जो O(n²) को सरल बनाता है। यह एक सामान्य जाल है क्योंकि आंतरिक लूप हमेशा n बार नहीं चलता है, लेकिन कुल कार्य अभी भी द्विघात है।" />
+<Quiz question="इस code की time complexity क्या है? `for i in range(n): for j in range(i): print(i, j)`" options="O(n)|O(n log n)|O(n²)|O(n³)" answer="2" explanation="Inner loop total 0 + 1 + 2 + ... + (n-1) = n(n-1)/2 times चलता है। यह arithmetic series sum है, जो O(n²) में simplify होता है। यह common trap है क्योंकि inner loop हमेशा n times नहीं चलता, लेकिन total work फिर भी quadratic है।" />
 
-## पाशविक बल से इष्टतम तक
+## Brute Force से Optimal तक
 
-साक्षात्कारों में, आप अक्सर एक क्रूर समाधान के साथ शुरुआत करेंगे और अनुकूलन करेंगे। यहां सामान्य अनुकूलन पथ है:
+Interviews में आप अक्सर brute-force solution से शुरू करके optimise करते हैं। Common optimisation path यह है:
 
-| वर्तमान | अनुकूलन तकनीक | में सुधार |
+| Current | Optimisation Technique | Improved To |
 |---|---|---|
-| O(n²) | खोज के लिए हैश मैप | O(n) |
-| ओ(एन²) | सॉर्टिंग + दो पॉइंटर्स | ओ(एन लॉग एन) |
-| ओ(2ⁿ) | संस्मरण / डीपी | O(n²) या O(n×m) |
-| ओ(एन लॉग एन) | बकेट सॉर्ट/गिनती सॉर्ट (सीमित सीमा) | ओ(एन) |
-| ओ(एन) स्पेस | जगह-जगह हेरफेर | ओ(1) स्थान |
+| O(n²) | Hash map for lookups | O(n) |
+| O(n²) | Sorting + two pointers | O(n log n) |
+| O(2ⁿ) | Memoisation / DP | O(n²) or O(n×m) |
+| O(n log n) | Bucket sort / counting sort (limited range) | O(n) |
+| O(n) space | In-place manipulation | O(1) space |
 
-**साक्षात्कार में बातचीत का प्रवाह**:
-1. "नेस्टेड लूप्स का उपयोग करके मेरा क्रूर बल दृष्टिकोण O(n²) है।"
-2. "मैं देख रहा हूँ कि हम बार-बार खोज कर रहे हैं - हैश मैप अंदरूनी खोज को O(1) तक कम कर सकता है।"
-3. "अनुकूलित समाधान O(n) समय और O(n) स्थान है।"
-4. "इसका नतीजा यह है कि हम अतिरिक्त मेमोरी का उपयोग कर रहे हैं, लेकिन समय में सुधार महत्वपूर्ण है।"
+**Interview में conversation flow**:
+1. "मेरा brute force approach nested loops से O(n²) है।"
+2. "मैं देख रहा हूँ कि हम repeated lookups कर रहे हैं। Hash map inner search को O(1) कर सकता है।"
+3. "Optimised solution O(n) time और O(n) space है।"
+4. "Trade-off यह है कि हम extra memory इस्तेमाल कर रहे हैं, लेकिन time improvement significant है।"
 
-## चाबी छीनना
+## मुख्य बातें
 
-- **पदानुक्रम को जानें**: O(1) < O(लॉग n) < O(n) < O(n लॉग n) < O(n²) < O(2ⁿ) < O(n!)। आप प्रत्येक साक्षात्कार में इसका संदर्भ देंगे।
-- **नेस्टेड लूप्स को गुणा करें, अनुक्रमिक ब्लॉक जोड़ें**: लूप विश्लेषण के लिए दो मूलभूत नियम।
-- **पुनरावर्ती वृक्ष बनाएँ**: वे पुनरावर्ती जटिलता को दृश्यमान बनाते हैं और सही ढंग से विश्लेषण करना बहुत आसान बनाते हैं।
-- **छिपी हुई लागतों पर नजर रखें**: स्ट्रिंग संयोजन, सूची सदस्यता परीक्षण, और लूप के अंदर सॉर्टिंग आम जाल हैं।
-- **समय और स्थान दोनों बताएं**: एक संपूर्ण जटिलता विश्लेषण हमेशा दोनों आयामों को कवर करता है।
-- **अनुकूलन से जुड़ें**: क्रूर-बल जटिलता को जानने से आपको पता चलता है कि सुधार करने की कितनी गुंजाइश है।
+- **Hierarchy जानें**: O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(2ⁿ) < O(n!)। हर interview में आप इसका reference देंगे।
+- **Nested loops multiply करें, sequential blocks add करें**: loop analysis के दो मूलभूत नियम।
+- **Recursion trees draw करें**: वे recursive complexity को visual और analyse करने में आसान बनाते हैं।
+- **Hidden costs देखें**: string concatenation, list membership testing और loops के अंदर sorting common traps हैं।
+- **Time और space दोनों बताएं**: complete complexity analysis दोनों dimensions cover करता है।
+- **Optimisation से जोड़ें**: brute-force complexity जानने से पता चलता है कि improve करने की कितनी जगह है।
