@@ -20,7 +20,7 @@ machineTranslated: true
 
 - क्या आप रचनात्मक ढंग से सोच सकते हैं कि डेटा में कौन-से संकेत मौजूद हैं?
 - क्या आप समझते हैं कि कच्चा डेटा मॉडल इनपुट में कैसे बदलता है?
-- क्या आप leakage, sparsity और scale जैसी समस्याओं का अनुमान लगा सकते हैं?
+- क्या आप लीकेज, विरलता और स्केल जैसी समस्याओं का अनुमान लगा सकते हैं?
 - क्या आप प्रोडक्शन बाधाओं (लेटेंसी, स्टोरेज, ताज़गी) के बारे में सोचते हैं?
 
 <Callout>
@@ -33,11 +33,11 @@ machineTranslated: true
 
 ### संख्यात्मक फ़ीचर
 
-कच्चे नंबर जिन्हें सीधे मॉडल में डाला जा सकता है, लेकिन अक्सर transformation से लाभ होता है:
+कच्चे नंबर जिन्हें सीधे मॉडल में डाला जा सकता है, लेकिन अक्सर ट्रांसफ़ॉर्मेशन से लाभ होता है:
 
-- **Standardisation**: mean 0 पर केंद्रित करना, unit variance तक scale करना (SVM, KNN जैसे distance-based models के लिए ज़रूरी)
-- **Log transformation**: right-skewed distributions को compress करना (आय, page views)
-- **Binning**: continuous values को discrete buckets में बदलना (age → age_group)
+- **Standardisation**: मीन 0 पर केंद्रित करना, यूनिट वैरिएंस तक स्केल करना (SVM, KNN जैसे दूरी-आधारित मॉडल के लिए ज़रूरी)
+- **Log ट्रांसफ़ॉर्मेशन**: राइट-स्क्यूड वितरण को कंप्रेस करना (आय, पेज व्यू)
+- **Binning**: लगातार मान को डिस्क्रीट बकेट में बदलना (age → age_group)
 
 ```python
 import numpy as np
@@ -57,23 +57,23 @@ df[['age_scaled', 'income_scaled']] = scaler.fit_transform(df[['age', 'income']]
 
 | तरीका | कब इस्तेमाल करें | लाभ | कमी |
 |---|---|---|---|
-| One-Hot Encoding | कम cardinality (< 20 categories) | सरल, ordinal assumption नहीं | sparse, high-dimensional |
-| Label Encoding | Ordinal categories (low/medium/high) | compact | non-ordinal में झूठा ordering दिखाता है |
-| Target Encoding | अधिक cardinality (city, postcode) | category-target संबंध पकड़ता है | data leakage का जोखिम |
-| Embeddings | बहुत अधिक cardinality, deep learning | dense representations सीखता है | neural network चाहिए |
+| One-Hot Encoding | कम कार्डिनैलिटी (< 20 श्रेणियां) | सरल, ऑर्डिनल अनुमान नहीं | विरल, हाई-डाइमेंशनल |
+| Label Encoding | Ordinal श्रेणियां (low/medium/high) | कॉम्पैक्ट | non-ordinal में झूठा ऑर्डरिंग दिखाता है |
+| Target Encoding | अधिक कार्डिनैलिटी (शहर, पोस्टकोड) | श्रेणी-target संबंध पकड़ता है | डेटा लीकेज का जोखिम |
+| Embeddings | बहुत अधिक कार्डिनैलिटी, डीप लर्निंग | घने प्रतिनिधित्व सीखता है | न्यूरल नेटवर्क चाहिए |
 
 <ThinkAboutIt>
-आप recommendation model बना रहे हैं और आपके फ़ीचर में से एक `product_id` है, जिसके 500,000 unique values हैं। One-hot encoding 500K sparse columns बनाएगा। आप कौन-सी encoding strategies पर विचार करेंगे, और उनके trade-offs क्या हैं?
+आप रिकमेंडेशन मॉडल बना रहे हैं और आपके फ़ीचर में से एक `product_id` है, जिसके 500,000 यूनिक मान हैं। One-hot एन्कोडिंग 500K विरल कॉलम बनाएगा। आप कौन-सी एन्कोडिंग रणनीतियां पर विचार करेंगे, और उनके ट्रेड-offs क्या हैं?
 </ThinkAboutIt>
 
 ### समय-आधारित फ़ीचर
 
 समय-आधारित डेटा में बहुत संकेत होते हैं, अगर आप उन्हें सही तरह निकालें:
 
-- **Cyclical encoding**: दिन का घंटा, सप्ताह का दिन (चक्रीय स्वभाव पकड़ने के लिए sin/cos इस्तेमाल करें)
-- **Lag features**: t-1, t-7, t-30 पर मान (time series के लिए अहम)
-- **Rolling statistics**: 7-day moving average, 30-day rolling std
-- **Time since event**: पिछली खरीद के बाद दिन, पिछले login के बाद घंटे
+- **Cyclical एन्कोडिंग**: दिन का घंटा, सप्ताह का दिन (चक्रीय स्वभाव पकड़ने के लिए sin/cos इस्तेमाल करें)
+- **Lag फ़ीचर**: t-1, t-7, t-30 पर मान (समय सीरीज़ के लिए अहम)
+- **Rolling स्टैटिस्टिक्स**: 7-day मूविंग औसत, 30-day रोलिंग std
+- **Time बाद से घटना**: पिछली खरीद के बाद दिन, पिछले लॉगिन के बाद घंटे
 
 ```python
 # Cyclical encoding for hour of day
@@ -90,23 +90,23 @@ df['sales_rolling_mean_7'] = df['sales'].rolling(window=7).mean()
 जब मॉडल को टेक्स्ट डेटा लेना हो:
 
 - **Bag of Words / TF-IDF**: सरल, समझने योग्य, पारंपरिक एमएल के साथ अच्छा काम करता है
-- **Word embeddings**: Word2Vec, GloVe, semantic meaning पकड़ने वाले dense representations
-- **Sentence embeddings**: BERT, Sentence-BERT, contextual representations
-- **हाथ से बनाए गए**: शब्दों की संख्या, औसत शब्द लंबाई, sentiment score, खास keywords की मौजूदगी
+- **Word एम्बेडिंग**: Word2Vec, GloVe, अर्थगत अर्थ पकड़ने वाले घने प्रतिनिधित्व
+- **Sentence एम्बेडिंग**: BERT, Sentence-BERT, कॉन्टेक्स्चुअल प्रतिनिधित्व
+- **हाथ से बनाए गए**: शब्दों की संख्या, औसत शब्द लंबाई, सेंटिमेंट स्कोर, खास कीवर्ड की मौजूदगी
 
 ### इंटरैक्शन फ़ीचर
 
 फ़ीचर के संयोजन, जो ऐसे संबंध पकड़ते हैं जिन्हें मॉडल अपने-आप न सीख पाए:
 
-- **Feature crosses**: `city × device_type` (शहरी mobile उपयोगकर्ता ग्रामीण desktop उपयोगकर्ताओं से अलग व्यवहार करते हैं)
-- **Ratios**: `clicks / impressions` = click-through rate
-- **Differences**: `current_price - avg_price` = relative pricing signal
+- **Feature क्रॉस**: `city × device_type` (शहरी मोबाइल उपयोगकर्ता ग्रामीण डेस्कटॉप उपयोगकर्ताओं से अलग व्यवहार करते हैं)
+- **Ratios**: `clicks / impressions` = क्लिक-through दर
+- **Differences**: `current_price - avg_price` = सापेक्ष प्राइसिंग संकेत
 
 <Quiz
-  question="Gradient-boosted tree model में 10,000 unique values वाले 'city' फ़ीचर के लिए कौन-सी encoding सबसे उपयुक्त है?"
+  सवाल="Gradient-boosted ट्री मॉडल में 10,000 यूनिक मान वाले 'शहर' फ़ीचर के लिए कौन-सी एन्कोडिंग सबसे उपयुक्त है?"
   options="One-Hot Encoding|Target Encoding|Binary Encoding|Label Encoding"
-  answer="1"
-  explanation="10,000 unique cities के साथ one-hot encoding अव्यावहारिक sparse matrix बनाती है। Target encoding हर शहर को target variable के mean से map करती है, जिससे city-target संबंध पकड़ने वाला एक dense feature बनता है। data leakage रोकने के लिए इसे सावधानीपूर्वक regularisation चाहिए (cross-validation folds के भीतर इस्तेमाल करें)।"
+  जवाब="1"
+  व्याख्या="10,000 यूनिक शहर के साथ one-hot एन्कोडिंग अव्यावहारिक विरल मैट्रिक्स बनाती है। Target एन्कोडिंग हर शहर को लक्ष्य बदलते के मीन से map करती है, जिससे शहर-target संबंध पकड़ने वाला एक घने फ़ीचर बनता है। डेटा लीकेज रोकने के लिए इसे सावधानीपूर्वक रेग्युलराइज़ेशन चाहिए (क्रॉस-validation फोल्ड के भीतर इस्तेमाल करें)।"
 />
 
 ---
@@ -116,14 +116,14 @@ df['sales_rolling_mean_7'] = df['sales'].rolling(window=7).mean()
 गायब डेटा प्रोडक्शन में हर जगह होता है। आपका तरीका आपके अनुभव स्तर का संकेत देता है:
 
 **सरल रणनीतियां:**
-- rows हटाना (सिर्फ़ जब गायब डेटा दुर्लभ और random हो)
-- mean/median (संख्यात्मक) या mode (श्रेणीगत) से भरना
-- sentinel value से भरना (-1 या "UNKNOWN")
+- रो हटाना (सिर्फ़ जब गायब डेटा दुर्लभ और यादृच्छिक हो)
+- मीन/median (संख्यात्मक) या मोड (श्रेणीगत) से भरना
+- सेंटिनल मान से भरना (-1 या "UNKNOWN")
 
 **बेहतर रणनीतियां:**
-- binary indicator feature बनाएं: `is_income_missing` (डेटा गायब होने का *तथ्य* जानकारीपूर्ण हो सकता है!)
-- model-based imputation इस्तेमाल करें (KNN imputer, iterative imputer)
-- tree-based models में कई implementations missing values को natively संभालती हैं
+- बाइनरी इंडिकेटर फ़ीचर बनाएं: `is_income_missing` (डेटा गायब होने का *तथ्य* जानकारीपूर्ण हो सकता है!)
+- मॉडल-आधारित इम्प्यूटेशन इस्तेमाल करें (KNN इम्प्यूटर, इटरेटिव इम्प्यूटर)
+- ट्री-आधारित मॉडल में कई कार्यान्वयन गायब मान को नेटिव रूप से संभालती हैं
 
 ```python
 # Indicator feature + median imputation
@@ -132,30 +132,30 @@ df['income'] = df['income'].fillna(df['income'].median())
 ```
 
 <FunFact>
-प्रसिद्ध Netflix Prize प्रतियोगिता में सबसे शक्तिशाली फ़ीचरों में से एक बस यह था कि *किसी उपयोगकर्ता ने फ़िल्म को रेट किया था या नहीं*, rating अपने-आप नहीं। missing ratings के पैटर्न ने उपयोगकर्ता पसंद को ratings से बेहतर उजागर किया।
+प्रसिद्ध Netflix Prize प्रतियोगिता में सबसे शक्तिशाली फ़ीचरों में से एक बस यह था कि *किसी उपयोगकर्ता ने फ़िल्म को रेट किया था या नहीं*, रेटिंग अपने-आप नहीं। गायब रेटिंग के पैटर्न ने उपयोगकर्ता पसंद को रेटिंग से बेहतर उजागर किया।
 </FunFact>
 
 ---
 
 ## 🔍 फ़ीचर चयन विधियां
 
-अधिक फ़ीचर हमेशा बेहतर नहीं होते। फ़ीचर चयन overfitting घटाता है, latency सुधारता है और मॉडल को समझने योग्य बनाता है।
+अधिक फ़ीचर हमेशा बेहतर नहीं होते। फ़ीचर चयन ओवरफ़िटिंग घटाता है, लेटेंसी सुधारता है और मॉडल को समझने योग्य बनाता है।
 
 ### Filter Methods
-लक्ष्य के साथ सांख्यिकीय correlation के आधार पर फ़ीचर रैंक करें। यह तेज़ है, लेकिन feature interactions को अनदेखा करता है:
-- Correlation coefficient (numerical targets)
-- Mutual information (किसी भी feature type के लिए)
-- Chi-squared test (categorical features)
+लक्ष्य के साथ सांख्यिकीय सहसंबंध के आधार पर फ़ीचर रैंक करें। यह तेज़ है, लेकिन फ़ीचर इंटरैक्शन को अनदेखा करता है:
+- Correlation कोएफ़िशिएंट (संख्यात्मक लक्ष्य)
+- Mutual जानकारी (किसी भी फ़ीचर प्रकार के लिए)
+- Chi-squared टेस्ट (श्रेणीगत फ़ीचर)
 
 ### Wrapper Methods
-अलग-अलग feature subsets के साथ मॉडल ट्रेन करें। यह सटीक है, लेकिन महंगा है:
-- Forward selection: खाली से शुरू करें, एक बार में सबसे अच्छा feature जोड़ें
-- Backward elimination: सभी features से शुरू करें, एक बार में सबसे कम उपयोगी feature हटाएं
+अलग-अलग फ़ीचर सबसेट के साथ मॉडल ट्रेन करें। यह सटीक है, लेकिन महंगा है:
+- Forward चयन: खाली से शुरू करें, एक बार में सबसे अच्छा फ़ीचर जोड़ें
+- Backward एलिमिनेशन: सभी फ़ीचर से शुरू करें, एक बार में सबसे कम उपयोगी फ़ीचर हटाएं
 
 ### Embedded Methods
 फ़ीचर चयन मॉडल ट्रेनिंग प्रक्रिया में ही जुड़ा होता है:
-- **L1 regularisation** (Lasso): गैर-ज़रूरी feature weights को बिल्कुल zero तक ले जाता है
-- **Tree-based importance**: gradient-boosted trees feature importance scores रिपोर्ट करते हैं
+- **L1 रेग्युलराइज़ेशन** (Lasso): गैर-ज़रूरी फ़ीचर वेट्स को बिल्कुल ज़ीरो तक ले जाता है
+- **Tree-based महत्व**: ग्रेडिएंट-boosted ट्री फ़ीचर महत्व स्कोर रिपोर्ट करते हैं
 
 ```python
 from sklearn.feature_selection import SelectKBest, mutual_info_classif
@@ -166,36 +166,36 @@ X_selected = selector.fit_transform(X, y)
 ```
 
 <Quiz
-  question="आप देखते हैं कि मॉडल में 'current_timestamp' फ़ीचर जोड़ने से test set performance बहुत बढ़ जाता है। सबसे संभावित व्याख्या क्या है?"
-  options="Timestamps सच में मॉडल को temporal patterns सीखने में मदद करते हैं|यह शायद data leakage है: timestamp train/test split से correlate करता है|मॉडल ने training data याद कर लिया है|आपका test set बहुत छोटा है"
-  answer="1"
-  explanation="कच्चा timestamp जो लगातार बढ़ता है, train/test split का proxy बन सकता है और यह जानकारी leak कर सकता है कि sample training set में है या test set में। यह data leakage का classic example है, जो test performance बढ़ाता है लेकिन production में fail होता है।"
+  सवाल="आप देखते हैं कि मॉडल में 'current_timestamp' फ़ीचर जोड़ने से टेस्ट set प्रदर्शन बहुत बढ़ जाता है। सबसे संभावित व्याख्या क्या है?"
+  options="Timestamps सच में मॉडल को टेम्पोरल पैटर्न सीखने में मदद करते हैं|यह शायद डेटा लीकेज है: टाइमस्टैम्प ट्रेन/test स्प्लिट से सहसंबंधित करता है|मॉडल ने ट्रेनिंग डेटा याद कर लिया है|आपका टेस्ट set बहुत छोटा है"
+  जवाब="1"
+  व्याख्या="कच्चा टाइमस्टैम्प जो लगातार बढ़ता है, ट्रेन/test स्प्लिट का प्रॉक्सी बन सकता है और यह जानकारी लीक कर सकता है कि सैंपल ट्रेनिंग set में है या टेस्ट set में। यह डेटा लीकेज का क्लासिक उदाहरण है, जो टेस्ट प्रदर्शन बढ़ाता है लेकिन प्रोडक्शन में फ़ेल होता है।"
 />
 
 ---
 
 ## 🏭 प्रोडक्शन में फ़ीचर इंजीनियरिंग
 
-इंटरव्यू-स्तर की फ़ीचर इंजीनियरिंग notebooks पर नहीं रुकती। प्रोडक्शन विचारों में शामिल हैं:
+इंटरव्यू-स्तर की फ़ीचर इंजीनियरिंग नोटबुक पर नहीं रुकती। प्रोडक्शन विचारों में शामिल हैं:
 
 ### फ़ीचर स्टोर
 
-फ़ीचर स्टोर features को manage, store और serve करने की centralised प्रणाली है। यह हल करता है:
-- **Consistency**: training और serving में वही feature definition
-- **Reusability**: टीमें features साझा करती हैं, उन्हें दोबारा implement नहीं करतीं
-- **Freshness**: scheduled pipelines features को अद्यतित रखती हैं
+फ़ीचर स्टोर फ़ीचर को मैनेज, स्टोर और सर्व करने की केंद्रीकृत प्रणाली है। यह हल करता है:
+- **Consistency**: ट्रेनिंग और सर्विंग में वही फ़ीचर परिभाषा
+- **Reusability**: टीमें फ़ीचर साझा करती हैं, उन्हें दोबारा इम्प्लीमेंट नहीं करतीं
+- **Freshness**: निर्धारित पाइपलाइन फ़ीचर को अद्यतित रखती हैं
 
-लोकप्रिय tools: **Feast**, **Tecton**, **Hopsworks**, **AWS SageMaker Feature Store**
+लोकप्रिय टूल: **Feast**, **Tecton**, **Hopsworks**, **AWS SageMaker Feature Store**
 
 ### Training-Serving Skew
 
-एमएल में सबसे खतरनाक प्रोडक्शन bug: training और serving के दौरान features अलग तरीके से compute होते हैं। आम कारण:
-- batch (training) और real-time (serving) के लिए अलग code paths
-- serving path में stale feature values
-- environments में अलग library versions
+एमएल में सबसे खतरनाक प्रोडक्शन bug: ट्रेनिंग और सर्विंग के दौरान फ़ीचर अलग तरीके से कम्प्यूट होते हैं। आम कारण:
+- बैच (ट्रेनिंग) और रीयल-टाइम (सर्विंग) के लिए अलग कोड मार्ग
+- सर्विंग पथ में पुरानी फ़ीचर मान
+- वातावरण में अलग लाइब्रेरी वर्ज़न
 
 <Callout>
-जब इंटरव्यूअर प्रोडक्शन में फ़ीचर इंजीनियरिंग पूछे, तो training-serving skew का ज़िक्र ज़रूर करें। यही वह मुद्दा है जिसे अधिकतर उम्मीदवार छोड़ देते हैं और अधिकतर production ML systems झेलते हैं।
+जब इंटरव्यूअर प्रोडक्शन में फ़ीचर इंजीनियरिंग पूछे, तो ट्रेनिंग-serving स्क्यू का ज़िक्र ज़रूर करें। यही वह मुद्दा है जिसे अधिकतर उम्मीदवार छोड़ देते हैं और अधिकतर प्रोडक्शन ML सिस्टम झेलते हैं।
 </Callout>
 
 ---
@@ -203,12 +203,12 @@ X_selected = selector.fit_transform(X, y)
 ## 🔑 मुख्य बातें
 
 - **फ़ीचर एल्गोरिदम से ज़्यादा असर डालते हैं**। मॉडल आर्किटेक्चर से ज़्यादा समय फ़ीचर इंजीनियरिंग में लगाएं
-- **Encoding को cardinality से मिलाएं**: कम cardinality के लिए one-hot, अधिक के लिए target encoding या embeddings
-- **गायब डेटा एक फ़ीचर है**, केवल समस्या नहीं। indicator variables बनाएं
+- **Encoding को कार्डिनैलिटी से मिलाएं**: कम कार्डिनैलिटी के लिए one-hot, अधिक के लिए लक्ष्य एन्कोडिंग या एम्बेडिंग
+- **गायब डेटा एक फ़ीचर है**, केवल समस्या नहीं। इंडिकेटर वेरिएबल बनाएं
 - **Leakage पर नज़र रखें**। अगर कोई फ़ीचर सच होने से ज़्यादा अच्छा लगे, तो शायद वही बात है
-- **प्रोडक्शन के बारे में सोचें**: feature stores, training-serving skew और latency constraints
-- **आम समस्याओं के लिए फ़ीचर सोचने का अभ्यास करें**: recommendations, fraud, ETA prediction, search
+- **प्रोडक्शन के बारे में सोचें**: फ़ीचर स्टोर, ट्रेनिंग-serving स्क्यू और लेटेंसी बाधाएं
+- **आम समस्याओं के लिए फ़ीचर सोचने का अभ्यास करें**: रिकमेंडेशन, फ़्रॉड, ETA भविष्यवाणी, सर्च
 
 <ThinkAboutIt>
-कोई उत्पाद चुनें जिसे आप रोज़ इस्तेमाल करते हैं (जैसे Spotify, Uber, Amazon)। यह अनुमान लगाने के लिए कि आप कल उस उत्पाद का उपयोग करेंगे या नहीं, आप कौन-से features बनाएंगे? user features, temporal features और interaction features के बारे में सोचें।
+कोई उत्पाद चुनें जिसे आप रोज़ इस्तेमाल करते हैं (जैसे Spotify, Uber, Amazon)। यह अनुमान लगाने के लिए कि आप कल उस उत्पाद का उपयोग करेंगे या नहीं, आप कौन-से फ़ीचर बनाएंगे? उपयोगकर्ता फ़ीचर, टेम्पोरल फ़ीचर और इंटरैक्शन फ़ीचर के बारे में सोचें।
 </ThinkAboutIt>

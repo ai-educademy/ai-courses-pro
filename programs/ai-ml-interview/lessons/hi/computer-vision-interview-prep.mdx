@@ -1,6 +1,6 @@
 ---
 title: "Computer Vision इंटरव्यू तैयारी"
-description: "CNNs से आधुनिक architectures तक, computer vision interview rounds की तैयारी करें, उस theory और practical knowledge के साथ जिसे interviewers जांचते हैं।"
+description: "CNNs से आधुनिक आर्किटेक्चर तक, कंप्यूटर विज़न इंटरव्यू राउंड की तैयारी करें, उस सिद्धांत और व्यावहारिक ज्ञान के साथ जिसे इंटरव्यूअर जांचते हैं।"
 order: 6
 difficulty: "advanced"
 duration: 20
@@ -10,15 +10,15 @@ machineTranslated: true
 ---
 # 👁️ Computer Vision इंटरव्यू तैयारी
 
-Computer vision interviews का अपना अलग रंग होता है: वे mathematical fundamentals (convolutions, spatial layers से backpropagation) को practical engineering के साथ मिलाते हैं (mobile device पर 4K image कैसे संभालेंगे?)। चाहे आप autonomous driving team के लिए interview दे रहे हों या retail analytics startup के लिए, यह पाठ उन concepts को कवर करता है जिन्हें interviewers सबसे ज़्यादा जांचते हैं, और वह practical knowledge भी जो candidates को अलग दिखाती है।
+Computer विज़न इंटरव्यू का अपना अलग रंग होता है: वे गणितीय मूल बातें (कन्वॉल्यूशन, स्पैशियल लेयर से बैकप्रोपेगेशन) को व्यावहारिक इंजीनियरिंग के साथ मिलाते हैं (मोबाइल डिवाइस पर 4K इमेज कैसे संभालेंगे?)। चाहे आप स्वायत्त ड्राइविंग टीम के लिए इंटरव्यू दे रहे हों या रिटेल एनालिटिक्स स्टार्ट-अप के लिए, यह पाठ उन कॉन्सेप्ट को कवर करता है जिन्हें इंटरव्यूअर सबसे ज़्यादा जांचते हैं, और वह व्यावहारिक ज्ञान भी जो उम्मीदवार को अलग दिखाती है।
 
 ---
 
-## 🧱 CV fundamentals: interviewers आपसे क्या जानने की अपेक्षा करते हैं
+## 🧱 CV मूल बातें: इंटरव्यूअर आपसे क्या जानने की अपेक्षा करते हैं
 
 ### Convolutions
 
-Convolutional layer input image पर छोटा filter (kernel) slide करता है, element-wise multiplications करता है और उन्हें sum करके feature map बनाता है। Computer vision में यही मूल operation है।
+Convolutional लेयर इनपुट इमेज पर छोटा फ़िल्टर (कर्नेल) स्लाइड करता है, एलिमेंट-wise गुणन करता है और उन्हें sum करके फ़ीचर map बनाता है। Computer विज़न में यही मूल ऑपरेशन है।
 
 ```
 Input (5×5)      Kernel (3×3)      Output (3×3)
@@ -31,43 +31,43 @@ Input (5×5)      Kernel (3×3)      Output (3×3)
 └─────────────┘
 ```
 
-**मुख्य parameters**:
-- **Kernel size**: आम तौर पर 3×3 या 5×5। एक बड़े kernel की जगह छोटे kernels की गहरी stack को प्राथमिकता दी जाती है
-- **Stride**: sliding window का step size (stride 2 spatial dimensions को आधा कर देता है)
-- **Padding**: spatial size बचाए रखने के लिए border के चारों ओर zeros जोड़ना ('same' padding)
-- **Channels**: RGB image पर 3×3 kernel असल में 3×3×3 होता है
+**मुख्य पैरामीटर**:
+- **Kernel आकार**: आम तौर पर 3×3 या 5×5। एक बड़े कर्नेल की जगह छोटे कर्नेल की गहरी स्टैक को प्राथमिकता दी जाती है
+- **Stride**: स्लाइडिंग विंडो का कदम आकार (स्ट्राइड 2 स्पैशियल आयाम को आधा कर देता है)
+- **Padding**: स्पैशियल आकार बचाए रखने के लिए किनारा के चारों ओर शून्य जोड़ना ('समान' पैडिंग)
+- **Channels**: RGB इमेज पर 3×3 कर्नेल असल में 3×3×3 होता है
 
-**Output size formula**:
+**Output आकार सूत्र**:
 
 $$O = \frac{W - K + 2P}{S} + 1$$
 
-जहां W = input width, K = kernel size, P = padding, S = stride।
+जहां W = इनपुट चौड़ाई, K = कर्नेल आकार, P = पैडिंग, S = स्ट्राइड।
 
 ### Pooling
 
-Pooling महत्वपूर्ण जानकारी बचाते हुए spatial dimensions घटाता है:
-- **Max pooling**: हर window में maximum value लेता है (सबसे आम)
-- **Average pooling**: mean लेता है (कुछ architectures में final layer से पहले इस्तेमाल)
-- **Global average pooling**: हर feature map को एक single value में घटाता है (modern networks में fully connected layers की जगह)
+Pooling महत्वपूर्ण जानकारी बचाते हुए स्पैशियल आयाम घटाता है:
+- **Max पूलिंग**: हर विंडो में अधिकतम मान लेता है (सबसे आम)
+- **Average पूलिंग**: मीन लेता है (कुछ आर्किटेक्चर में अंतिम लेयर से पहले इस्तेमाल)
+- **Global औसत पूलिंग**: हर फ़ीचर map को एक एकल मान में घटाता है (आधुनिक नेटवर्क में पूरी तरह कनेक्टेड लेयर की जगह)
 
 ### Feature Maps और Receptive Fields
 
-- **Feature maps**: हर convolutional layer का output। शुरुआती layers edges और textures पकड़ती हैं, गहरी layers complex patterns (faces, objects) पकड़ती हैं
-- **Receptive field**: input image का वह region जो किसी विशेष output neuron को प्रभावित करता है। network में गहराई बढ़ने पर यह बढ़ता है
+- **Feature मैप**: हर कन्वॉल्यूशनल लेयर का आउटपुट। शुरुआती लेयर किनारे और टेक्सचर पकड़ती हैं, गहरी लेयर जटिल पैटर्न (चेहरे, ऑब्जेक्ट) पकड़ती हैं
+- **Receptive क्षेत्र**: इनपुट इमेज का वह क्षेत्र जो किसी विशेष आउटपुट न्यूरॉन को प्रभावित करता है। नेटवर्क में गहराई बढ़ने पर यह बढ़ता है
 
 <ThinkAboutIt>
-Modern architectures single 7×7 convolution की जगह कई stacked 3×3 convolutions क्यों इस्तेमाल करते हैं? Parameters की संख्या, non-linearities और receptive field size के बारे में सोचें।
+Modern आर्किटेक्चर एकल 7×7 कन्वॉल्यूशन की जगह कई स्टैक किए हुए 3×3 कन्वॉल्यूशन क्यों इस्तेमाल करते हैं? Parameters की संख्या, non-linearities और रिसेप्टिव क्षेत्र आकार के बारे में सोचें।
 </ThinkAboutIt>
 
 ---
 
-## 🏛️ मुख्य architectures जिन्हें आपको जानना चाहिए
+## 🏛️ मुख्य आर्किटेक्चर जिन्हें आपको जानना चाहिए
 
 ### ResNet (Residual Networks)
 
-वह architecture जिसने "degradation problem" हल की, यानी deeper networks का shallower networks से खराब perform करना।
+वह आर्किटेक्चर जिसने "डिग्रेडेशन समस्या" हल की, यानी गहरे नेटवर्क का उथले नेटवर्क से खराब परफ़ॉर्म करना।
 
-**मुख्य innovation**: skip connections (residual connections), जो gradients को network में सीधे flow करने देते हैं:
+**मुख्य नवाचार**: स्किप कनेक्शन (रेज़िडुअल कनेक्शन), जो ग्रेडिएंट को नेटवर्क में सीधे प्रवाह करने देते हैं:
 
 ```python
 # Residual block (simplified)
@@ -79,36 +79,36 @@ def residual_block(x):
     return relu(out)
 ```
 
-**यह क्यों मायने रखता है**: skip connections बहुत deep networks (100+ layers) train करना संभव बनाते हैं। यह idea लगभग हर modern architecture में दिखता है।
+**यह क्यों मायने रखता है**: स्किप कनेक्शन बहुत डीप नेटवर्क (100+ लेयर) ट्रेन करना संभव बनाते हैं। यह विचार लगभग हर आधुनिक आर्किटेक्चर में दिखता है।
 
 ### YOLO (You Only Look Once)
 
-Real-time object detection के लिए go-to architecture।
+रीयल-टाइम ऑब्जेक्ट डिटेक्शन के लिए मुख्य आर्किटेक्चर।
 
-**मुख्य innovation**: detection को single regression problem की तरह देखता है। image को grid में बांटता है और bounding boxes तथा class probabilities साथ-साथ predict करता है।
+**मुख्य नवाचार**: डिटेक्शन को एकल रिग्रेशन समस्या की तरह देखता है। इमेज को ग्रिड में बांटता है और बाउंडिंग बॉक्स तथा क्लास संभावनाएं साथ-साथ अनुमान करता है।
 
 | Version | Key Feature | Speed |
 |---|---|---|
-| YOLOv3 | Multi-scale detection | ~30 FPS |
-| YOLOv5 | PyTorch-native, easy to use | ~45 FPS |
-| YOLOv8 | Anchor-free, state-of-the-art | ~80 FPS |
+| YOLOv3 | मल्टी-स्केल डिटेक्शन | ~30 FPS |
+| YOLOv5 | PyTorch-native, आसान to use | ~45 FPS |
+| YOLOv8 | एंकर-फ़्री, अत्याधुनिक | ~80 FPS |
 
 ### Vision Transformers (ViT)
 
-Images को patches में बांटकर transformer architecture लागू करता है:
+Images को पैच में बांटकर ट्रांसफ़ॉर्मर आर्किटेक्चर लागू करता है:
 
 ```
 Image (224×224) → Split into 16×16 patches → 196 patch tokens
 → Linear projection → Add position embeddings → Transformer encoder → Classification
 ```
 
-**मुख्य interview point**: ViT को अच्छी training के लिए CNNs से अधिक data चाहिए (inductive bias कम है), लेकिन अधिक data और compute मिलने पर बेहतर scale करता है।
+**मुख्य इंटरव्यू बिंदु**: ViT को अच्छी ट्रेनिंग के लिए CNNs से अधिक डेटा चाहिए (इंडक्टिव पूर्वाग्रह कम है), लेकिन अधिक डेटा और कम्प्यूट मिलने पर बेहतर स्केल करता है।
 
 <Quiz
-  question="ResNet में residual (skip) connections कौन-सी समस्या हल करते हैं?"
-  options="Deep networks में overfitting|Vanishing/exploding gradients जो बहुत deep networks की training रोकते हैं|Slow inference time|High memory usage"
-  answer="1"
-  explanation="Skip connections के बिना, gradients कई layers से backpropagate होते हुए बहुत छोटे हो जाते हैं, जिससे deep networks train करना बहुत कठिन हो जाता है। Residual connections gradients के लिए direct path देते हैं, जिससे सैकड़ों layers वाले networks को प्रभावी ढंग से train करना संभव होता है।"
+  सवाल="ResNet में रेज़िडुअल (स्किप) कनेक्शन कौन-सी समस्या हल करते हैं?"
+  options="Deep नेटवर्क में ओवरफ़िटिंग|Vanishing/exploding ग्रेडिएंट जो बहुत डीप नेटवर्क की ट्रेनिंग रोकते हैं|Slow इन्फ़रेंस समय|High मेमोरी उपयोग"
+  जवाब="1"
+  व्याख्या="Skip कनेक्शन के बिना, ग्रेडिएंट कई लेयर से बैकप्रोपेगेट होते हुए बहुत छोटे हो जाते हैं, जिससे डीप नेटवर्क ट्रेन करना बहुत कठिन हो जाता है। Residual कनेक्शन ग्रेडिएंट के लिए सीधा पथ देते हैं, जिससे सैकड़ों लेयर वाले नेटवर्क को प्रभावी ढंग से ट्रेन करना संभव होता है।"
 />
 
 ---
@@ -117,24 +117,24 @@ Image (224×224) → Split into 16×16 patches → 196 patch tokens
 
 ### Object Detection बनाम Segmentation
 
-Interviewers आपसे इन tasks में अंतर पूछना पसंद करते हैं:
+Interviewers आपसे इन कार्य में अंतर पूछना पसंद करते हैं:
 
 | Task | Output | Example |
 |---|---|---|
-| **Classification** | Image के लिए single label | "This is a cat" |
-| **Object detection** | Bounding boxes + labels | "Cat at (x1,y1,x2,y2), dog at (x3,y3,x4,y4)" |
-| **Semantic segmentation** | Per-pixel class label | हर pixel को cat, dog या background label करना |
-| **Instance segmentation** | Per-pixel label + instance ID | pixel level पर cat_1 को cat_2 से अलग करना |
+| **Classification** | Image के लिए एकल लेबल | "This is a cat" |
+| **Object डिटेक्शन** | Bounding बॉक्स + लेबल | "Cat at (x1,y1,x2,y2), dog at (x3,y3,x4,y4)" |
+| **Semantic सेगमेंटेशन** | Per-pixel क्लास लेबल | हर पिक्सेल को cat, dog या बैकग्राउंड लेबल करना |
+| **Instance सेगमेंटेशन** | Per-pixel लेबल + इंस्टेंस ID | पिक्सेल स्तर पर cat_1 को cat_2 से अलग करना |
 
 ### Transfer Learning
 
-सबसे practical CV techniques में से एक, और बार-बार पूछा जाने वाला interview topic:
+सबसे व्यावहारिक CV तकनीकें में से एक, और बार-बार पूछा जाने वाला इंटरव्यू विषय:
 
-1. **Pre-trained model लें** (जैसे ImageNet पर trained ResNet-50)
-2. **Final classification head बदलें** और अपनी task-specific layers लगाएं
+1. **प्री-ट्रेंड मॉडल लें** (जैसे ImageNet पर ट्रेंड ResNet-50)
+2. **Final क्लासिफ़िकेशन हेड बदलें** और अपनी कार्य-specific लेयर लगाएं
 3. **Fine-tune करें**:
-   - **Feature extraction**: सभी pre-trained layers freeze करें, केवल नया head train करें (तेज़, छोटे datasets के साथ काम करता है)
-   - **Full fine-tuning**: सभी layers unfreeze करें, छोटे learning rate से end-to-end train करें (बेहतर results, अधिक data चाहिए)
+   - **Feature एक्सट्रैक्शन**: सभी प्री-ट्रेंड लेयर फ़्रीज़ करें, केवल नया हेड ट्रेन करें (तेज़, छोटे डेटासेट के साथ काम करता है)
+   - **Full फ़ाइन-ट्यूनिंग**: सभी लेयर अनफ़्रीज़ करें, छोटे लर्निंग दर से एंड-टू-एंड ट्रेन करें (बेहतर नतीजे, अधिक डेटा चाहिए)
 
 ```python
 import torchvision.models as models
@@ -152,20 +152,20 @@ model.fc = nn.Linear(model.fc.in_features, 10)
 ```
 
 <Callout>
-Interviews में transfer learning पर बात करते समय हमेशा बताएं कि *यह कब fail हो सकता है*: जब आपका target domain pre-trained domain से बहुत अलग हो (जैसे medical X-rays बनाम ImageNet natural images)। ऐसे मामलों में domain-specific pre-training चाहिए हो सकती है।
+Interviews में ट्रांसफ़र लर्निंग पर बात करते समय हमेशा बताएं कि *यह कब फ़ेल हो सकता है*: जब आपका लक्ष्य डोमेन प्री-ट्रेंड डोमेन से बहुत अलग हो (जैसे मेडिकल X-rays बनाम ImageNet प्राकृतिक इमेज)। ऐसे मामलों में डोमेन-विशिष्ट प्री-training चाहिए हो सकती है।
 </Callout>
 
 ### Data Augmentation
 
-मज़बूत models train करने के लिए critical, खासकर सीमित data के साथ:
+मज़बूत मॉडल ट्रेन करने के लिए महत्वपूर्ण, खासकर सीमित डेटा के साथ:
 
-- **Geometric**: rotation, flipping, cropping, scaling
-- **Colour**: brightness, contrast, saturation, hue jitter
-- **Advanced**: CutOut (random patches mask करना), MixUp (दो images blend करना), CutMix (patches को दूसरी image के patches से बदलना)
-- **Test-time augmentation (TTA)**: inference पर augment करना और बेहतर accuracy के लिए predictions average करना
+- **Geometric**: रोटेशन, फ़्लिपिंग, क्रॉपिंग, स्केलिंग
+- **Colour**: ब्राइटनेस, कॉन्ट्रास्ट, सैचुरेशन, hue जिटर
+- **Advanced**: CutOut (यादृच्छिक पैच मास्क करना), MixUp (दो इमेज ब्लेंड करना), CutMix (पैच को दूसरी इमेज के पैच से बदलना)
+- **Test-time ऑगमेंटेशन (TTA)**: इन्फ़रेंस पर ऑगमेंट करना और बेहतर सटीकता के लिए भविष्यवाणियां औसत करना
 
 <FunFact>
-ImageNet dataset, वह benchmark जिसने deep learning revolution को गति दी, 21,841 categories में 14 million से अधिक hand-labelled images रखता है। वार्षिक ImageNet challenge (2010-2017) ने error rates को 28% से 2.3% तक ला दिया, जो लगभग 5% human performance से बेहतर था।
+ImageNet डेटासेट, वह बेंचमार्क जिसने डीप लर्निंग क्रांति को गति दी, 21,841 श्रेणियां में 14 मिलियन से अधिक हाथ-labelled इमेज रखता है। वार्षिक ImageNet चैलेंज (2010-2017) ने त्रुटि दरें को 28% से 2.3% तक ला दिया, जो लगभग 5% मानव प्रदर्शन से बेहतर था।
 </FunFact>
 
 ---
@@ -174,72 +174,72 @@ ImageNet dataset, वह benchmark जिसने deep learning revolution क�
 
 ### Image Preprocessing
 
-Production CV systems को robust preprocessing चाहिए:
+Production CV सिस्टम को मज़बूत प्रीप्रोसेसिंग चाहिए:
 
-- **Resizing**: models fixed input sizes की अपेक्षा करते हैं, लेकिन naïve resizing aspect ratios बिगाड़ती है। padding या centre-cropping इस्तेमाल करें।
-- **Normalisation**: ImageNet mean घटाएं और std से divide करें (pre-trained models इस्तेमाल करते समय): `mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]`
-- **Variable resolutions संभालना**: similar sizes की images batch करें, या adaptive pooling layers इस्तेमाल करें
+- **Resizing**: मॉडल फिक्स्ड इनपुट आकार की अपेक्षा करते हैं, लेकिन भोली रीसाइज़िंग आस्पेक्ट अनुपात बिगाड़ती है। पैडिंग या सेंटर-cropping इस्तेमाल करें।
+- **Normalisation**: ImageNet मीन घटाएं और std से भाग दें करें (प्री-ट्रेंड मॉडल इस्तेमाल करते समय): `mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]`
+- **Variable रिज़ॉल्यूशन संभालना**: समान आकार की इमेज बैच करें, या एडेप्टिव पूलिंग लेयर इस्तेमाल करें
 
 ### Deployment: Edge बनाम Cloud
 
 | Factor | Edge (Mobile/IoT) | Cloud |
 |---|---|---|
-| Latency | बहुत कम (network round-trip नहीं) | अधिक (network पर निर्भर) |
-| Model size | सीमित (MobileNet, EfficientNet-Lite) | असिमित |
-| Privacy | Data device पर रहता है | Data server को भेजा जाता है |
-| Cost | Server costs नहीं, लेकिन hardware fixed | प्रति inference भुगतान |
-| Updates | कठिन (app update चाहिए) | आसान (server-side model बदलें) |
+| Latency | बहुत कम (नेटवर्क राउंड-trip नहीं) | अधिक (नेटवर्क पर निर्भर) |
+| Model आकार | सीमित (MobileNet, EfficientNet-Lite) | असिमित |
+| Privacy | Data डिवाइस पर रहता है | Data सर्वर को भेजा जाता है |
+| Cost | Server लागतें नहीं, लेकिन हार्डवेयर फिक्स्ड | प्रति इन्फ़रेंस भुगतान |
+| Updates | कठिन (app अपडेट चाहिए) | आसान (सर्वर-side मॉडल बदलें) |
 
-**Edge deployment के लिए model compression techniques**:
-- **Quantisation**: weights को FP32 से INT8 तक घटाना (4× छोटा, faster inference)
-- **Pruning**: low-magnitude weights हटाना (वास्तविक speedup के लिए structured pruning)
-- **Knowledge distillation**: बड़े "teacher" model की नकल करने के लिए छोटा "student" model train करना
+**Edge डिप्लॉयमेंट के लिए मॉडल कंप्रेशन तकनीकें**:
+- **Quantisation**: वेट्स को FP32 से INT8 तक घटाना (4× छोटा, तेज़ इन्फ़रेंस)
+- **Pruning**: low-magnitude वेट्स हटाना (वास्तविक तेज़ी के लिए संरचित प्रूनिंग)
+- **Knowledge डिस्टिलेशन**: बड़े "टीचर" मॉडल की नकल करने के लिए छोटा "स्टूडेंट" मॉडल ट्रेन करना
 
 <Quiz
-  question="आपको mobile phone पर 30 FPS पर चलने वाला object detection model deploy करना है। कौन-सा approach सबसे उपयुक्त है?"
-  options="Use a full ResNet-152 backbone with FP32 precision|Use MobileNet backbone with INT8 quantisation|Use Vision Transformer with full attention|Use an ensemble of three detection models"
-  answer="1"
-  explanation="MobileNet खास तौर पर mobile और edge devices के लिए design किया गया है, जो computation घटाने के लिए depthwise separable convolutions इस्तेमाल करता है। INT8 quantisation model size को और घटाता है और inference तेज़ करता है, जिससे mobile hardware पर real-time detection संभव होता है।"
+  सवाल="आपको मोबाइल फ़ोन पर 30 FPS पर चलने वाला ऑब्जेक्ट डिटेक्शन मॉडल डिप्लॉय करना है। कौन-सा तरीका सबसे उपयुक्त है?"
+  options="Use a पूर्ण ResNet-152 बैकबोन के साथ FP32 प्रेसिजन|Use MobileNet बैकबोन के साथ INT8 क्वांटाइज़ेशन|Use Vision Transformer के साथ पूर्ण अटेंशन|Use an एन्सेम्बल of तीन डिटेक्शन मॉडल"
+  जवाब="1"
+  व्याख्या="MobileNet खास तौर पर मोबाइल और एज डिवाइस के लिए डिज़ाइन किया गया है, जो गणना घटाने के लिए डेप्थवाइज़ सेपरेबल कन्वॉल्यूशन इस्तेमाल करता है। INT8 क्वांटाइज़ेशन मॉडल आकार को और घटाता है और इन्फ़रेंस तेज़ करता है, जिससे मोबाइल हार्डवेयर पर रीयल-टाइम डिटेक्शन संभव होता है।"
 />
 
 ---
 
-## 🌊 हालिया trends जिन्हें जानना उपयोगी है
+## 🌊 हालिया ट्रेंड जिन्हें जानना उपयोगी है
 
 ### Multimodal Models
 
-ऐसे models जो images और text दोनों process करते हैं:
-- **CLIP** (Contrastive Language-Image Pre-training): image और text embeddings को shared space में align करता है। zero-shot image classification संभव करता है, यानी text में category describe करें और matching images खोजें।
-- **SAM** (Segment Anything Model): segmentation के लिए foundation model, जो point, box या text prompt मिलने पर किसी भी object को segment कर सकता है।
+ऐसे मॉडल जो इमेज और टेक्स्ट दोनों प्रक्रिया करते हैं:
+- **CLIP** (Contrastive Language-Image Pre-training): इमेज और टेक्स्ट एम्बेडिंग को साझा स्पेस में मेल करता है। ज़ीरो-शॉट इमेज क्लासिफ़िकेशन संभव करता है, यानी टेक्स्ट में श्रेणी बताएं करें और मिलाकर इमेज खोजें।
+- **SAM** (Segment Anything Model): सेगमेंटेशन के लिए फ़ाउंडेशन मॉडल, जो बिंदु, box या टेक्स्ट प्रॉम्प्ट मिलने पर किसी भी ऑब्जेक्ट को सेगमेंट कर सकता है।
 
 ### Diffusion Models
 
-DALL-E, Stable Diffusion और Midjourney के पीछे की architecture:
-- **Forward process**: image में धीरे-धीरे noise जोड़ना, जब तक वह pure noise न बन जाए
-- **Reverse process**: denoise करना सीखना। noisy input मिलने पर noise predict और remove करना
-- **Art से आगे applications**: image super-resolution, inpainting, medical image synthesis
+DALL-E, Stable Diffusion और Midjourney के पीछे की आर्किटेक्चर:
+- **Forward प्रक्रिया**: इमेज में धीरे-धीरे नॉइज़ जोड़ना, जब तक वह शुद्ध नॉइज़ न बन जाए
+- **Reverse प्रक्रिया**: डीनॉइज़ करना सीखना। नॉइज़ी इनपुट मिलने पर नॉइज़ अनुमान और हटाएं करना
+- **Art से आगे एप्लिकेशन**: इमेज सुपर-resolution, इनपेंटिंग, मेडिकल इमेज सिंथेसिस
 
 ### CV में Self-Supervised Learning
 
-Labelled data की ज़रूरत घटाना:
-- **Contrastive learning** (SimCLR, MoCo): same image के augmented views को पास लाकर और different images को दूर धकेलकर representations सीखना
-- **Masked image modelling** (MAE): random patches mask करके model को उन्हें reconstruct करने के लिए train करना (BERT तरीका, images पर लागू)
+Labelled डेटा की ज़रूरत घटाना:
+- **Contrastive लर्निंग** (SimCLR, MoCo): समान इमेज के ऑगमेंटेड व्यू को पास लाकर और अलग इमेज को दूर धकेलकर प्रतिनिधित्व सीखना
+- **Masked इमेज मॉडलिंग** (MAE): यादृच्छिक पैच मास्क करके मॉडल को उन्हें रीकंस्ट्रक्ट करने के लिए ट्रेन करना (BERT तरीका, इमेज पर लागू)
 
 <ThinkAboutIt>
-CLIP training में कभी न देखी गई categories में images classify कर सकता है, सिर्फ़ images को text descriptions से match करके। इसका उन traditional CV pipelines पर क्या असर है जिन्हें हर नई category के लिए labelled training data चाहिए होता है?
+CLIP ट्रेनिंग में कभी न देखी गई श्रेणियां में इमेज क्लासिफ़ाई कर सकता है, सिर्फ़ इमेज को टेक्स्ट विवरण से मैच करके। इसका उन पारंपरिक CV पाइपलाइन पर क्या असर है जिन्हें हर नई श्रेणी के लिए लेबल किए गए ट्रेनिंग डेटा चाहिए होता है?
 </ThinkAboutIt>
 
 ---
 
 ## 🔑 मुख्य बातें
 
-- **Fundamentals में महारत हासिल करें**: convolutions, pooling, feature maps और receptive fields हर CV interview में आते हैं
-- **मुख्य architectures जानें**: ResNet (skip connections), YOLO (real-time detection), ViT (vision के लिए transformers)
-- **Task hierarchy समझें**: classification → detection → segmentation → instance segmentation
-- **Transfer learning आपका default approach है**। अधिकतर practical scenarios में pre-trained models fine-tune करना scratch से train करने से बेहतर है
-- **Deployment constraints पर सोचें**: edge बनाम cloud, model compression और latency budgets
-- **Current रहें**: multimodal models (CLIP), foundation models (SAM) और diffusion models field को बदल रहे हैं
+- **Fundamentals में महारत हासिल करें**: कन्वॉल्यूशन, पूलिंग, फ़ीचर मैप और रिसेप्टिव फ़ील्ड हर CV इंटरव्यू में आते हैं
+- **मुख्य आर्किटेक्चर जानें**: ResNet (स्किप कनेक्शन), YOLO (रीयल-टाइम डिटेक्शन), ViT (विज़न के लिए ट्रांसफ़ॉर्मर)
+- **Task क्रम समझें**: क्लासिफ़िकेशन → डिटेक्शन → सेगमेंटेशन → इंस्टेंस सेगमेंटेशन
+- **Transfer लर्निंग आपका डिफ़ॉल्ट तरीका है**। अधिकतर व्यावहारिक परिदृश्य में प्री-ट्रेंड मॉडल फ़ाइन-tune करना स्क्रैच से ट्रेन करने से बेहतर है
+- **Deployment बाधाएं पर सोचें**: एज बनाम क्लाउड, मॉडल कंप्रेशन और लेटेंसी बजट
+- **Current रहें**: मल्टीमॉडल मॉडल (CLIP), फ़ाउंडेशन मॉडल (SAM) और डिफ़्यूज़न मॉडल क्षेत्र को बदल रहे हैं
 
 <Callout>
-CV interviews breadth और depth दोनों जांचते हैं। एक architecture पर गहराई से जाने के लिए तैयार रहें (output size formula derive करें, skip connections को mathematically explain करें) और field में व्यापक रूप से भी बात करें (detection approaches compare करें, ViT बनाम CNN कब इस्तेमाल करें)। दोनों modes तैयार करें।
+CV इंटरव्यू विस्तार और गहराई दोनों जांचते हैं। एक आर्किटेक्चर पर गहराई से जाने के लिए तैयार रहें (आउटपुट आकार सूत्र निकालें करें, स्किप कनेक्शन को गणितीय रूप से समझाएं करें) और क्षेत्र में व्यापक रूप से भी बात करें (डिटेक्शन तरीके तुलना करें करें, ViT बनाम CNN कब इस्तेमाल करें)। दोनों मोड तैयार करें।
 </Callout>

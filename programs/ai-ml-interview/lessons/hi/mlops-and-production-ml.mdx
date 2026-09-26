@@ -10,13 +10,13 @@ machineTranslated: true
 ---
 # ⚙️ MLOps और प्रोडक्शन एमएल
 
-एक आंकड़ा आपके इंटरव्यू की तैयारी को दिशा देना चाहिए: **87% एमएल मॉडल कभी प्रोडक्शन तक नहीं पहुंचते।** Jupyter notebook और भरोसेमंद, scalable एमएल सेवा के बीच बहुत बड़ा अंतर है, और कंपनियों को ऐसे इंजीनियरों की सख्त ज़रूरत है जो यह अंतर पाट सकें। MLOps इंटरव्यू सवाल जांचते हैं कि क्या आप मॉडल को "मेरी मशीन पर चलता है" से "शनिवार सुबह 3 बजे भी लाखों उपयोगकर्ताओं के लिए भरोसेमंद चलता है" तक ले जा सकते हैं।
+एक आंकड़ा आपके इंटरव्यू की तैयारी को दिशा देना चाहिए: **87% एमएल मॉडल कभी प्रोडक्शन तक नहीं पहुंचते।** Jupyter नोटबुक और भरोसेमंद, स्केलेबल एमएल सेवा के बीच बहुत बड़ा अंतर है, और कंपनियों को ऐसे इंजीनियरों की सख्त ज़रूरत है जो यह अंतर पाट सकें। MLOps इंटरव्यू सवाल जांचते हैं कि क्या आप मॉडल को "मेरी मशीन पर चलता है" से "शनिवार सुबह 3 बजे भी लाखों उपयोगकर्ताओं के लिए भरोसेमंद चलता है" तक ले जा सकते हैं।
 
 ---
 
 ## 🧭 MLOps सच में क्या कवर करता है
 
-MLOps वे practices हैं जो DevOps अनुशासन को मशीन लर्निंग में लाते हैं। यह पूरे एमएल lifecycle में फैला होता है:
+MLOps वे प्रैक्टिस हैं जो DevOps अनुशासन को मशीन लर्निंग में लाते हैं। यह पूरे एमएल लाइफ़सायकल में फैला होता है:
 
 ```
 Data → Feature Engineering → Training → Evaluation → Deployment → Monitoring → Retraining
@@ -25,83 +25,83 @@ Data → Feature Engineering → Training → Evaluation → Deployment → Moni
 ```
 
 मुख्य स्तंभों में शामिल हैं:
-- **एमएल के लिए CI/CD**: केवल code नहीं, data, features और models की automated testing
-- **Experiment tracking**: hyperparameters, metrics और artefacts का व्यवस्थित रिकॉर्ड
-- **Model versioning**: कौन-सा model version किस traffic को serve कर रहा है, यह track करना
-- **Model serving**: predictions को उपयोगकर्ताओं तक भरोसेमंद और तेज़ पहुंचाना
-- **Monitoring**: production में models कब degrade होते हैं, यह पहचानना
+- **एमएल के लिए CI/CD**: केवल कोड नहीं, डेटा, फ़ीचर और मॉडल की ऑटोमेटेड टेस्टिंग
+- **Experiment ट्रैकिंग**: हाइपरपैरामीटर, मेट्रिक्स और आर्टिफ़ैक्ट का व्यवस्थित रिकॉर्ड
+- **Model वर्ज़निंग**: कौन-सा मॉडल वर्ज़न किस ट्रैफ़िक को सर्व कर रहा है, यह ट्रैक करना
+- **Model सर्विंग**: भविष्यवाणियां को उपयोगकर्ताओं तक भरोसेमंद और तेज़ पहुंचाना
+- **Monitoring**: प्रोडक्शन में मॉडल कब डिग्रेड होते हैं, यह पहचानना
 
 <Callout>
-MLOps और पारंपरिक DevOps में सबसे बड़ा अंतर: software में code changes चीज़ें तोड़ते हैं। एमएल में *data* changes चीज़ें तोड़ते हैं, अक्सर चुपचाप, बिना किसी error logs के।
+MLOps और पारंपरिक DevOps में सबसे बड़ा अंतर: सॉफ़्टवेयर में कोड बदलाव चीज़ें तोड़ते हैं। एमएल में *डेटा* बदलाव चीज़ें तोड़ते हैं, अक्सर चुपचाप, बिना किसी त्रुटि लॉग के।
 </Callout>
 
 ---
 
 ## 🚀 मॉडल सर्विंग पैटर्न
 
-आप predictions कैसे serve करते हैं, यह आपकी latency requirements, scale और predictions कितनी बार बदलनी चाहिए, इस पर निर्भर करता है।
+आप भविष्यवाणियां कैसे सर्व करते हैं, यह आपकी लेटेंसी आवश्यकताएं, स्केल और भविष्यवाणियां कितनी बार बदलनी चाहिए, इस पर निर्भर करता है।
 
 ### Batch Inference
 
-Schedule पर predictions पहले से compute करें (hourly, daily) और lookup के लिए store करें।
+Schedule पर भविष्यवाणियां पहले से कम्प्यूट करें (घंटेवार, दैनिक) और लुक-अप के लिए स्टोर करें।
 
-**सबसे अच्छा किसके लिए**: email recommendations, daily risk scores, weekly reports
+**सबसे अच्छा किसके लिए**: ईमेल रिकमेंडेशन, दैनिक जोखिम स्कोर, साप्ताहिक रिपोर्ट
 
 ```
 Schedule → Load data → Run model → Write predictions to DB → Serve from DB
 ```
 
-**लाभ**: simple infrastructure, बड़े models इस्तेमाल हो सकते हैं, cost-effective
-**कमी**: predictions stale हो सकती हैं, real-time context पर प्रतिक्रिया नहीं दे सकता
+**लाभ**: सरल इन्फ़्रास्ट्रक्चर, बड़े मॉडल इस्तेमाल हो सकते हैं, किफ़ायती
+**कमी**: भविष्यवाणियां पुरानी हो सकती हैं, रीयल-टाइम संदर्भ पर प्रतिक्रिया नहीं दे सकता
 
-### Real-Time Inference (Model-as-a-Service)
+### रीयल-टाइम Inference (Model-as-a-Service)
 
-मॉडल API के पीछे चलता है। हर request prediction trigger करता है।
+मॉडल API के पीछे चलता है। हर अनुरोध भविष्यवाणी ट्रिगर करता है।
 
-**सबसे अच्छा किसके लिए**: search ranking, fraud detection, chatbots
+**सबसे अच्छा किसके लिए**: सर्च रैंकिंग, फ़्रॉड डिटेक्शन, चैटबॉट
 
 ```
 User request → API Gateway → Feature lookup → Model inference → Response
 ```
 
-**लाभ**: fresh predictions, real-time context इस्तेमाल हो सकता है
-**कमी**: latency-sensitive, model size और serving infrastructure optimise करने पड़ते हैं
+**लाभ**: ताज़ा भविष्यवाणियां, रीयल-टाइम संदर्भ इस्तेमाल हो सकता है
+**कमी**: लेटेंसी-sensitive, मॉडल आकार और सर्विंग इन्फ़्रास्ट्रक्चर ऑप्टिमाइज़ करने पड़ते हैं
 
 ### Embedded Model
 
-मॉडल सीधे application या device में bundle होता है।
+मॉडल सीधे एप्लिकेशन या डिवाइस में बंडल होता है।
 
-**सबसे अच्छा किसके लिए**: mobile apps, IoT devices, edge computing
+**सबसे अच्छा किसके लिए**: मोबाइल ऐप, IoT डिवाइस, एज गणना
 
-**लाभ**: network latency नहीं, offline काम करता है
-**कमी**: update करना कठिन, device resources से सीमित
+**लाभ**: नेटवर्क लेटेंसी नहीं, ऑफ़लाइन काम करता है
+**कमी**: अपडेट करना कठिन, डिवाइस रिसोर्स से सीमित
 
 <Quiz
-  question="Food delivery app को हर order के लिए delivery time estimate करना है। कौन-सा serving pattern सबसे उपयुक्त है?"
-  options="Batch inference computed nightly|Real-time inference at order time|Embedded model on the customer's phone|Pre-computed lookup table"
-  answer="1"
-  explanation="Delivery time real-time factors पर निर्भर करता है: वर्तमान restaurant load, driver availability, traffic conditions और weather। ये minute-to-minute बदलते हैं, इसलिए batch predictions stale हो जाएंगी। Real-time inference model को हर order के लिए latest context इस्तेमाल करने देता है।"
+  सवाल="Food डिलीवरी app को हर order के लिए डिलीवरी समय अनुमान करना है। कौन-सा सर्विंग पैटर्न सबसे उपयुक्त है?"
+  options="Batch इन्फ़रेंस गणना किए गए हर रात|रीयल-टाइम इन्फ़रेंस at order समय|Embedded मॉडल on the ग्राहक's फ़ोन|Pre-computed लुक-अप टेबल"
+  जवाब="1"
+  व्याख्या="Delivery समय रीयल-टाइम कारक पर निर्भर करता है: वर्तमान रेस्तरां लोड, ड्राइवर उपलब्धता, ट्रैफ़िक स्थितियां और मौसम। ये मिनट-to-minute बदलते हैं, इसलिए बैच भविष्यवाणियां पुरानी हो जाएंगी। रीयल-टाइम इन्फ़रेंस मॉडल को हर order के लिए नवीनतम संदर्भ इस्तेमाल करने देता है।"
 />
 
 ---
 
 ## 📊 Experiment Tracking
 
-Tracking के बिना एमएल experiments चलाना lab notebook के बिना science करने जैसा है। आपको रिकॉर्ड करना चाहिए:
+Tracking के बिना एमएल एक्सपेरिमेंट चलाना lab नोटबुक के बिना विज्ञान करने जैसा है। आपको रिकॉर्ड करना चाहिए:
 
-- **Hyperparameters**: learning rate, batch size, architecture choices
-- **Metrics**: training loss, हर epoch पर validation metrics
-- **Artefacts**: model checkpoints, feature importance plots, confusion matrices
-- **Environment**: library versions, इस्तेमाल hardware, random seeds
+- **Hyperparameters**: लर्निंग दर, बैच आकार, आर्किटेक्चर चयन
+- **Metrics**: ट्रेनिंग लॉस, हर इपॉक पर वैलिडेशन मेट्रिक्स
+- **Artefacts**: मॉडल चेकपॉइंट, फ़ीचर महत्व प्लॉट, कन्फ़्यूज़न मैट्रिक्स
+- **Environment**: लाइब्रेरी वर्ज़न, इस्तेमाल हार्डवेयर, यादृच्छिक सीड
 
-### लोकप्रिय tools
+### लोकप्रिय टूल
 
 | Tool | Strengths | Deployment |
 |---|---|---|
-| **MLflow** | Open-source, model registry, wide adoption | Self-hosted or managed |
-| **Weights & Biases (W&B)** | Beautiful UI, collaboration features, sweeps | Cloud-hosted |
-| **Neptune.ai** | Lightweight, good for teams | Cloud-hosted |
-| **TensorBoard** | Free, tightly integrated with TensorFlow | Local or embedded |
+| **MLflow** | ओपन-सोर्स, मॉडल रजिस्ट्री, व्यापक स्वीकार्यता | सेल्फ़-होस्टेड or मैनेज्ड |
+| **Weights & Biases (W&B)** | Beautiful UI, सहयोग फ़ीचर, स्वीप | क्लाउड-होस्टेड |
+| **Neptune.ai** | Lightweight, अच्छा for टीमें | क्लाउड-होस्टेड |
+| **TensorBoard** | Free, TensorFlow के साथ गहराई से इंटीग्रेटेड | Local or एम्बेडेड |
 
 ```python
 import mlflow
@@ -121,32 +121,32 @@ with mlflow.start_run():
 ```
 
 <ThinkAboutIt>
-आपकी टीम छह महीने से कोई tracking system लगाए बिना experiments चला रही है। कोई stakeholder पूछता है, "पिछले महीने model performance क्यों गिरा?" आप कैसे जवाब देंगे, और ऐसी स्थिति दोबारा न हो इसके लिए क्या लगाएंगे?
+आपकी टीम छह महीने से कोई ट्रैकिंग सिस्टम लगाए बिना एक्सपेरिमेंट चला रही है। कोई हितधारक पूछता है, "पिछले महीने मॉडल प्रदर्शन क्यों गिरा?" आप कैसे जवाब देंगे, और ऐसी स्थिति दोबारा न हो इसके लिए क्या लगाएंगे?
 </ThinkAboutIt>
 
 ---
 
 ## 🔍 प्रोडक्शन में एमएल मॉनिटरिंग
 
-पारंपरिक software monitoring errors और latency track करती है। एमएल monitoring एक अहम परत जोड़ती है: **क्या मॉडल अभी भी अच्छी predictions कर रहा है?**
+पारंपरिक सॉफ़्टवेयर मॉनिटरिंग त्रुटियां और लेटेंसी ट्रैक करती है। एमएल मॉनिटरिंग एक अहम परत जोड़ती है: **क्या मॉडल अभी भी अच्छी भविष्यवाणियां कर रहा है?**
 
 ### Drift के प्रकार
 
-**Data drift** (covariate shift): input features का distribution बदलता है। उदाहरण: pre-pandemic data पर trained e-commerce model को home office equipment searches में उछाल दिखता है।
+**Data ड्रिफ़्ट** (कोवेरिएट शिफ़्ट): इनपुट फ़ीचर का वितरण बदलता है। उदाहरण: प्री-pandemic डेटा पर ट्रेंड e-commerce मॉडल को होम ऑफ़िस उपकरण खोजों में उछाल दिखता है।
 
-**Concept drift**: features और target का संबंध बदलता है। उदाहरण: recession के दौरान credit scoring model में "employment status" feature का अर्थ बदल जाता है।
+**Concept ड्रिफ़्ट**: फ़ीचर और लक्ष्य का संबंध बदलता है। उदाहरण: मंदी के दौरान क्रेडिट स्कोरिंग मॉडल में "रोज़गार स्थिति" फ़ीचर का अर्थ बदल जाता है।
 
-**Prediction drift**: model outputs का distribution बदलता है, भले inputs समान दिखें।
+**Prediction ड्रिफ़्ट**: मॉडल आउटपुट का वितरण बदलता है, भले इनपुट समान दिखें।
 
-### क्या monitor करें
+### क्या मॉनिटर करें
 
 | Signal | कैसे पहचानें | Action |
 |---|---|---|
-| Input feature distributions | Statistical tests (KS test, PSI) | Data pipeline जांचें |
-| Prediction distribution | समय के साथ mean, variance, percentiles track करें | Baseline period से compare करें |
-| Model performance (जब labels उपलब्ध हों) | ground truth के विरुद्ध accuracy, F1, आदि track करें | threshold से नीचे हो तो retraining trigger करें |
-| Latency | P50, P95, P99 response times | Infrastructure scale करें या model optimise करें |
-| Data quality | Null rates, schema violations, volume anomalies | Data engineering team को alert करें |
+| Input फ़ीचर वितरण | Statistical टेस्ट (KS टेस्ट, PSI) | Data पाइपलाइन जांचें |
+| Prediction वितरण | समय के साथ मीन, वैरिएंस, परसेंटाइल ट्रैक करें | Baseline अवधि से तुलना करें करें |
+| Model प्रदर्शन (जब लेबल उपलब्ध हों) | ग्राउंड सत्य के विरुद्ध सटीकता, F1, आदि ट्रैक करें | सीमा से नीचे हो तो रीट्रेनिंग ट्रिगर करें |
+| Latency | P50, P95, P99 जवाब समय | Infrastructure स्केल करें या मॉडल ऑप्टिमाइज़ करें |
+| Data गुणवत्ता | Null दरें, स्कीमा उल्लंघन, वॉल्यूम विसंगतियां | Data इंजीनियरिंग टीम को अलर्ट करें |
 
 ```python
 from scipy.stats import ks_2samp
@@ -158,14 +158,14 @@ def detect_drift(reference_data, current_data, threshold=0.05):
 ```
 
 <FunFact>
-जब Zillow के "Zestimate" home-pricing model ने 2021 के असामान्य housing market में concept drift झेला, तो कंपनी ने अपने ही model की predictions पर आधारित home purchases में $500 million से अधिक गंवाए, और अंततः अपना home-flipping business बंद कर दिया।
+जब Zillow के "Zestimate" होम-pricing मॉडल ने 2021 के असामान्य हाउसिंग बाज़ार में कॉन्सेप्ट ड्रिफ़्ट झेला, तो कंपनी ने अपने ही मॉडल की भविष्यवाणियां पर आधारित होम खरीद में $500 मिलियन से अधिक गंवाए, और अंततः अपना होम-flipping व्यवसाय बंद कर दिया।
 </FunFact>
 
 ---
 
 ## 🔄 मशीन लर्निंग के लिए CI/CD
 
-एमएल CI/CD code testing से आगे जाता है। आपको data, features और models भी validate करने होते हैं।
+एमएल CI/CD कोड टेस्टिंग से आगे जाता है। आपको डेटा, फ़ीचर और मॉडल भी वैलिडेट करने होते हैं।
 
 ### एमएल Testing Pyramid
 
@@ -181,15 +181,15 @@ def detect_drift(reference_data, current_data, threshold=0.05):
            └────────────────────┘
 ```
 
-**Data validation**: schema, null rates, value ranges, row counts जांचें
-**Feature tests**: verify करें कि feature transformations expected outputs देती हैं
-**Model tests**: deployment से पहले सुनिश्चित करें कि trained model minimum quality thresholds से ऊपर है
+**Data वैलिडेशन**: स्कीमा, नल दरें, मान सीमाएं, row गिनती जांचें
+**Feature टेस्ट**: वेरिफ़ाई करें कि फ़ीचर ट्रांसफ़ॉर्मेशन अपेक्षित आउटपुट देती हैं
+**Model टेस्ट**: डिप्लॉयमेंट से पहले सुनिश्चित करें कि ट्रेंड मॉडल न्यूनतम गुणवत्ता सीमाएं से ऊपर है
 
 <Quiz
-  question="आपके recommendation model का click-through rate दो हफ्तों में 15% गिर गया है, लेकिन code में कोई बदलाव नहीं हुआ। सबसे संभावित कारण क्या है?"
-  options="Model code में bug आया है|Data drift: input data distribution बदल गया है|Model के hyperparameters retune करने की ज़रूरत है|A/B test framework में bug है"
-  answer="1"
-  explanation="जब code नहीं बदला लेकिन performance गिरती है, तो सबसे संभावित कारण data drift है: model को मिलने वाला real-world data उस data से बदल गया है जिस पर वह trained था। यह seasonal changes, new user segments या upstream data pipelines में बदलाव से हो सकता है।"
+  सवाल="आपके रिकमेंडेशन मॉडल का क्लिक-through दर दो हफ्तों में 15% गिर गया है, लेकिन कोड में कोई बदलाव नहीं हुआ। सबसे संभावित कारण क्या है?"
+  options="Model कोड में bug आया है|Data ड्रिफ़्ट: इनपुट डेटा वितरण बदल गया है|Model के हाइपरपैरामीटर रीट्यून करने की ज़रूरत है|A/B टेस्ट ढांचा में bug है"
+  जवाब="1"
+  व्याख्या="जब कोड नहीं बदला लेकिन प्रदर्शन गिरती है, तो सबसे संभावित कारण डेटा ड्रिफ़्ट है: मॉडल को मिलने वाला रीयल-world डेटा उस डेटा से बदल गया है जिस पर वह ट्रेंड था। यह मौसमी बदलाव, new उपयोगकर्ता सेगमेंट या अपस्ट्रीम डेटा पाइपलाइन में बदलाव से हो सकता है।"
 />
 
 ---
@@ -200,16 +200,16 @@ def detect_drift(reference_data, current_data, threshold=0.05):
 
 ### GPU प्रबंधन
 
-- **Training**: cost savings के लिए spot/preemptible instances इस्तेमाल करें (checkpointing के साथ!)
-- **Serving**: GPU requirements घटाने के लिए model distillation या quantisation पर विचार करें
-- **Autoscaling**: GPU instances को peak capacity नहीं, traffic patterns के आधार पर scale करें
+- **Training**: लागत बचत के लिए स्पॉट/preemptible इंस्टेंस इस्तेमाल करें (चेकपॉइंटिंग के साथ!)
+- **Serving**: GPU आवश्यकताएं घटाने के लिए मॉडल डिस्टिलेशन या क्वांटाइज़ेशन पर विचार करें
+- **Autoscaling**: GPU इंस्टेंस को चरम क्षमता नहीं, ट्रैफ़िक पैटर्न के आधार पर स्केल करें
 
-### लागत optimisation रणनीतियां
+### लागत ऑप्टिमाइज़ेशन रणनीतियां
 
-- **Model compression**: pruning, quantisation, knowledge distillation
-- **Caching**: repeated inputs के लिए predictions cache करें
-- **Tiered serving**: अधिकांश requests के लिए सस्ता model, expensive model केवल confidence कम होने पर
-- **Right-sizing**: जब fine-tuned 7B model quality का 95% पा लेता है, तो 175B parameter model serve न करें
+- **Model कंप्रेशन**: प्रूनिंग, क्वांटाइज़ेशन, ज्ञान डिस्टिलेशन
+- **Caching**: दोहराए इनपुट के लिए भविष्यवाणियां कैश करें
+- **Tiered सर्विंग**: अधिकांश अनुरोध के लिए सस्ता मॉडल, महंगा मॉडल केवल विश्वास कम होने पर
+- **Right-sizing**: जब फ़ाइन-tuned 7B मॉडल गुणवत्ता का 95% पा लेता है, तो 175B पैरामीटर मॉडल सर्व न करें
 
 ```
 Cost per prediction ≈ (GPU cost per hour) / (predictions per hour)
@@ -226,23 +226,23 @@ Example:
 
 इन सवालों पर चर्चा के लिए तैयार रहें:
 
-1. "नया model production में कैसे deploy करेंगे, पूरा flow बताएं"। training से canary deployment और full rollout तक पूरी pipeline बताएं
-2. "Production में degrade हो रहे model को कैसे संभालेंगे?" monitoring, root cause analysis, rollback, retraining
-3. "Model retraining और model updating में क्या अंतर है?" नए data पर full retraining बनाम incremental/online learning
-4. "एमएल experiments में reproducibility कैसे सुनिश्चित करते हैं?" code, data और config के लिए version control; fixed seeds; containerisation
-5. "अपना ideal एमएल platform बताएं"। feature store, experiment tracker, model registry, serving infrastructure, monitoring dashboard
+1. "नया मॉडल प्रोडक्शन में कैसे डिप्लॉय करेंगे, पूरा प्रवाह बताएं"। ट्रेनिंग से कैनरी डिप्लॉयमेंट और पूर्ण रोलआउट तक पूरी पाइपलाइन बताएं
+2. "Production में डिग्रेड हो रहे मॉडल को कैसे संभालेंगे?" मॉनिटरिंग, रूट कारण विश्लेषण, रोलबैक, रीट्रेनिंग
+3. "Model रीट्रेनिंग और मॉडल अपडेटिंग में क्या अंतर है?" नए डेटा पर पूर्ण रीट्रेनिंग बनाम इन्क्रिमेंटल/online लर्निंग
+4. "एमएल एक्सपेरिमेंट में रीप्रोड्यूसिबिलिटी कैसे सुनिश्चित करते हैं?" कोड, डेटा और कॉन्फ़िग के लिए वर्ज़न नियंत्रण; फिक्स्ड सीड; कंटेनरीकरण
+5. "अपना आदर्श एमएल प्लेटफ़ॉर्म बताएं"। फ़ीचर स्टोर, एक्सपेरिमेंट ट्रैकर, मॉडल रजिस्ट्री, सर्विंग इन्फ़्रास्ट्रक्चर, मॉनिटरिंग डैशबोर्ड
 
 <Callout>
-MLOps इंटरव्यू सवालों के जवाब में technical decisions को business impact से हमेशा जोड़ें। "हम canary deployments इसलिए इस्तेमाल करते हैं क्योंकि खराब model rollback करने में lost revenue में X लागत आती है" सिर्फ़ technical setup बताने से अधिक प्रभावी है।
+MLOps इंटरव्यू सवालों के जवाब में तकनीकी निर्णय को व्यवसाय असर से हमेशा जोड़ें। "हम कैनरी डिप्लॉयमेंट इसलिए इस्तेमाल करते हैं क्योंकि खराब मॉडल रोलबैक करने में गंवाए राजस्व में X लागत आती है" सिर्फ़ तकनीकी सेट-अप बताने से अधिक प्रभावी है।
 </Callout>
 
 ---
 
 ## 🔑 मुख्य बातें
 
-- **MLOps model development और production के बीच का अंतर पाटता है**। यह आज सबसे अधिक मांग वाला एमएल कौशल है
-- **Serving patterns समझदारी से चुनें**: cost के लिए batch, freshness के लिए real-time, edge के लिए embedded
-- **Latency से आगे monitor करें**: data drift, concept drift और model degradation silent killers हैं
-- **हर experiment track करें**: parameters, metrics, artefacts और environment
-- **एमएल pipeline test करें**, सिर्फ़ code नहीं: data validation, feature tests और model quality gates
-- **लागत सोचें**: model compression, caching और tiered serving infrastructure bills घटाते हैं
+- **MLOps मॉडल डेवलपमेंट और प्रोडक्शन के बीच का अंतर पाटता है**। यह आज सबसे अधिक मांग वाला एमएल कौशल है
+- **Serving पैटर्न समझदारी से चुनें**: लागत के लिए बैच, ताज़गी के लिए रीयल-टाइम, एज के लिए एम्बेडेड
+- **Latency से आगे मॉनिटर करें**: डेटा ड्रिफ़्ट, कॉन्सेप्ट ड्रिफ़्ट और मॉडल डिग्रेडेशन चुप घातक हैं
+- **हर एक्सपेरिमेंट ट्रैक करें**: पैरामीटर, मेट्रिक्स, आर्टिफ़ैक्ट और वातावरण
+- **एमएल पाइपलाइन टेस्ट करें**, सिर्फ़ कोड नहीं: डेटा वैलिडेशन, फ़ीचर टेस्ट और मॉडल गुणवत्ता गेट
+- **लागत सोचें**: मॉडल कंप्रेशन, कैशिंग और टियरड सर्विंग इन्फ़्रास्ट्रक्चर बिल घटाते हैं
