@@ -1,6 +1,6 @@
 ---
 title: "Ontwerp een Web Crawler - Hoe Google het internet indexeert"
-description: "Ontwerp een gedistribueerde web crawler met URL frontier management, politeness policies, content deduplication met SimHash en distributed crawling met consistent hashing."
+description: "Ontwerp een gedistribueerde web crawler met URL toonaangevend management, politeness policies, content deduplication met SimHash en distributed crawling met consistent hashing."
 order: 9
 difficulty: "advanced"
 duration: 22
@@ -42,7 +42,7 @@ Seed URLs → URL Frontier (priority queue)
                                  URL Frontier (loop)
 ```
 
-<Illustration src="/images/lessons/design-web-crawler.svg" alt="Web crawler-architectuur die de crawl-loop toont van URL frontier via fetcher, parser, URL-extractie, deduplicatie en terug naar de frontier" caption="De crawler werkt als een continue loop: haal een pagina op, extraheer nieuwe URLs, deduplicate en voeg toe aan de wachtrij voor toekomstige crawls" />
+<Illustration src="/images/lessons/design-web-crawler.svg" alt="Web crawler-architectuur die de crawl-loop toont van URL toonaangevend via fetcher, parser, URL-extractie, deduplicatie en terug naar de toonaangevend" caption="De crawler werkt als een continue loop: haal een pagina op, extraheer nieuwe URLs, deduplicate en voeg toe aan de wachtrij voor toekomstige crawls" />
 
 ## Stap 3 - De crawl-loop
 
@@ -50,8 +50,8 @@ Seed URLs → URL Frontier (priority queue)
 - **BFS (Breadth-First)** - de voorkeur voor web crawling. Ontdekt snel een breed scala aan domeinen en voorkomt dat je vast komt te zitten diep in één site
 - **DFS (Depth-First)** - risico om oneindig diep te gaan in dynamisch gegenereerde pagina's voordat andere domeinen ontdekt worden
 
-### URL Frontier-ontwerp
-De frontier is geen simpele wachtrij - het is een geavanceerd prioriteitssysteem met twee subcomponenten:
+### URL toonaangevend-ontwerp
+De toonaangevend is geen simpele wachtrij - het is een geavanceerd prioriteitssysteem met twee subcomponenten:
 
 1. **Priority Queue (Front)** - rangschikt URLs op belangrijkheid. Factoren zijn onder andere PageRank, updatefrequentie en domeinautoriteit
 2. **Politeness Queue (Back)** - zorgt ervoor dat elk domein een eigen FIFO-wachtrij heeft. Een scheduler kiest uit verschillende domeinwachtrijen om te voorkomen dat één server overbelast wordt
@@ -119,7 +119,7 @@ Hamming distance = 1 → likely duplicate, skip storing
 Eén machine kan geen miljard pagina's per maand crawlen. Verdeel het werk:
 
 - **Consistent hashing** op domeinnamen wijst elk domein toe aan een specifiek crawler-node. Dit garandeert politeness - slechts één node crawlt een bepaald domein
-- De **URL frontier** wordt over nodes gepartitioneerd op basis van de hash ring
+- De **URL toonaangevend** wordt over nodes gepartitioneerd op basis van de hash ring
 - **Coördinatie** via een lichtgewicht service die node-toewijzingen beheert en herbalanceert wanneer nodes toetreden of vertrekken
 
 ### DNS Resolution Caching
@@ -145,7 +145,7 @@ Kwaadaardige of slecht gebouwde sites kunnen oneindige URL-ruimtes creëren:
 | DNS-resolutielatentie | Lokale DNS-cache, batch pre-resolution |
 | Langzame/niet-reagerende servers | Timeouts (30s), async I/O, overslaan na retries |
 | Opslag voor gecrawlde content | Pagina's comprimeren, alleen gewijzigde content opslaan |
-| URL frontier-geheugen | Disk-backed priority queue (RocksDB) |
+| URL toonaangevend-geheugen | Disk-backed priority queue (RocksDB) |
 | Dubbele content | SimHash fingerprinting, canonical URL-detectie |
 
 <ThinkAboutIt>Zoekmachines moeten een balans vinden tussen crawlversheid (pagina's vaak opnieuw crawlen) en ontdekking (nieuwe pagina's vinden). Als je crawler een vast budget heeft van 1 miljoen pagina's per dag, hoe zou je dat budget verdelen tussen het opnieuw crawlen van bestaande pagina's en het ontdekken van nieuwe?</ThinkAboutIt>

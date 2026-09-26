@@ -64,7 +64,7 @@ La función de pérdida de DPO define implícitamente un modelo de recompensa de
 L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
 ```
 
-Donde `y_w` es la respuesta preferida, `y_l` es la rechazada y `π_ref` es el modelo de referencia (SFT). DPO es más simple, más estable y más económico de entrenar: sin modelo de recompensa, sin bucle RL, sin PPO sensible a hiperparámetros. Muchos modelos open-weight ahora usan DPO o variantes relacionadas de preference-optimisation.
+Donde `y_w` es la respuesta preferida, `y_l` es la rechazada y `π_ref` es el modelo de referencia (SFT). DPO es más simple, más estable y más económico de entrenar: sin modelo de recompensa, sin bucle RL, sin PPO sensible a hiperparámetros. Muchos modelos de pesos abiertos ahora usan DPO o variantes relacionadas de preference-optimisation.
 
 <ThinkAboutIt>DPO elimina el modelo de recompensa pero también pierde la capacidad de calificar nuevas respuestas arbitrarias en el momento de la inferencia. ¿En qué escenarios podría ser más valioso tener un modelo de recompensa explícito (el proceso RLHF completo) que la simplicidad de DPO?
 </ThinkAboutIt>
@@ -103,7 +103,7 @@ La frontera de la investigación de la alineación es encontrar técnicas que ma
 
 <Quiz question="¿Qué es el 'impuesto de alineación' en el contexto de los modelos entrenados por RLHF?" options="El costo financiero de contratar etiquetadores humanos para datos de preferencias|La reducción en la utilidad y capacidad del modelo que resulta de la capacitación en seguridad hace que el modelo sea demasiado cauteloso.|El costo computacional de ejecutar la optimización de PPO|El impuesto que los gobiernos imponen a las empresas de IA por el cumplimiento de la seguridad" answer="1" explanation="El impuesto de alineación se refiere a la capacidad o utilidad que se pierde cuando la capacitación en seguridad hace que un modelo sea excesivamente cauteloso: rechazando solicitudes benignas, cubriendo innecesariamente o produciendo respuestas genéricas. Equilibrar la seguridad con la ayuda genuina es uno de los problemas abiertos más difíciles de la alineación." />
 
-<FunFact>Los laboratorios frontier pasan meses en trabajo de alineación (recopilación de datos SFT, modelado de recompensas, preference optimisation y pruebas de seguridad) para convertir modelos base en productos lo bastante seguros para lanzarse. La fase de alineación, aunque es una fracción del cálculo previo al entrenamiento, requiere miles de horas de etiquetado y evaluación humana especializada.</FunFact>
+<FunFact>Los laboratorios de frontera pasan meses en trabajo de alineación (recopilación de datos SFT, modelado de recompensas, optimización de preferencias y pruebas de seguridad) para convertir modelos base en productos lo bastante seguros para lanzarse. La fase de alineación, aunque es una fracción del cálculo previo al entrenamiento, requiere miles de horas de etiquetado y evaluación humana especializada.</FunFact>
 </FunFact>
 
 <ThinkAboutIt>Los etiquetadores humanos inevitablemente aportan sus propios prejuicios, perspectivas culturales e inconsistencias a los datos de preferencias. Si la alineación es, en última instancia, "aprender lo que los humanos prefieren", ¿qué preferencias deberían contar y cómo manejamos los desacuerdos fundamentales sobre los valores entre culturas?

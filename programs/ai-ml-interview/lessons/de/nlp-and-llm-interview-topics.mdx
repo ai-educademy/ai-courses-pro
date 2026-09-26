@@ -1,6 +1,6 @@
 ---
 title: "NLP- und LLM-Interviewthemen"
-description: "Bereiten Sie sich auf das heißeste Interviewthema im Bereich KI vor – Verarbeitung natürlicher Sprache und große Sprachmodelle, von Transformatoren bis hin zu Prompt Engineering."
+description: "Bereiten Sie sich auf das heißeste Interviewthema im Bereich KI vor - Verarbeitung natürlicher Sprache und große Sprachmodelle, von Transformatoren bis hin zu Prompt Engineering."
 order: 5
 difficulty: "advanced"
 duration: 22
@@ -24,7 +24,7 @@ Durch die Tokenisierung wird Rohtext in diskrete Einheiten umgewandelt, die das 
 
 - **Wortebene**: einfach, kann aber nicht mit Wörtern umgehen, die außerhalb des Wortschatzes liegen („Unfreundlichkeit“ → unbekannt)
 - **Zeichenebene**: Behandelt jedes Wort, aber die Sequenzen sind sehr lang
-- **Subword (BPE, WordPiece, SentencePiece)**: der moderne Standard – zerlegt seltene Wörter in bedeutungsvolle Teile
+- **Subword (BPE, WordPiece, SentencePiece)**: der moderne Standard - zerlegt seltene Wörter in bedeutungsvolle Teile
 
 ```
 "unfriendliness" → ["un", "friend", "li", "ness"]  (BPE)
@@ -38,8 +38,8 @@ Durch die Tokenisierung wird Rohtext in diskrete Einheiten umgewandelt, die das 
 
 Einbettungen ordnen diskrete Token dichten kontinuierlichen Vektoren zu, wobei semantische Beziehungen erhalten bleiben:
 
-- **Word2Vec / GloVe**: statische Einbettungen – jedes Wort erhält unabhängig vom Kontext einen Vektor („Bank“ hat die gleiche Einbettung, unabhängig davon, ob es sich um ein Flussufer oder ein Finanzinstitut handelt)
-- **Kontextuelle Einbettungen (BERT, GPT)**: Die Einbettung jedes Tokens hängt vom umgebenden Kontext ab – „Bank“ erhält unterschiedliche Darstellungen in verschiedenen Sätzen
+- **Word2Vec / GloVe**: statische Einbettungen - jedes Wort erhält unabhängig vom Kontext einen Vektor („Bank“ hat die gleiche Einbettung, unabhängig davon, ob es sich um ein Flussufer oder ein Finanzinstitut handelt)
+- **Kontextuelle Einbettungen (BERT, GPT)**: Die Einbettung jedes Tokens hängt vom umgebenden Kontext ab - „Bank“ erhält unterschiedliche Darstellungen in verschiedenen Sätzen
 
 ### Der Aufmerksamkeitsmechanismus
 
@@ -68,7 +68,7 @@ Der Transformator besteht aus:
   question="Warum verwenden Transformatoren Multi-Head-Aufmerksamkeit anstelle eines einzelnen Aufmerksamkeitsmechanismus?"
   options="Es ist rechnerisch günstiger als eine einzelne Aufmerksamkeit|Mehrere Leiter können sich gleichzeitig um verschiedene Arten von Beziehungen kümmern|Es verhindert eine Überanpassung|Es reduziert die Sequenzlänge"
   answer="1"
-  explanation="Die Aufmerksamkeit mehrerer Köpfe ermöglicht es dem Modell, Informationen aus verschiedenen Darstellungsunterräumen an verschiedenen Positionen gemeinsam zu berücksichtigen. Ein Kopf könnte syntaktische Beziehungen, ein anderer semantische Ähnlichkeit, ein anderer Positionsnähe erfassen – alles parallel."
+  explanation="Die Aufmerksamkeit mehrerer Köpfe ermöglicht es dem Modell, Informationen aus verschiedenen Darstellungsunterräumen an verschiedenen Positionen gemeinsam zu berücksichtigen. Ein Kopf könnte syntaktische Beziehungen, ein anderer semantische Ähnlichkeit, ein anderer Positionsnähe erfassen - alles parallel."
 />
 
 ---
@@ -115,7 +115,7 @@ Die Technik hinter der Hilfsbereitschaft von ChatGPT:
 
 ### Kontextfenster und Herausforderungen mit langem Kontext
 
-- **Kontextfenster**: die maximale Anzahl an Token, die ein Modell gleichzeitig verarbeiten kann. Aktuelle frontier Systeme reichen von Hunderttausenden bis zu etwa einer Million Token.
+- **Kontextfenster**: die maximale Anzahl an Token, die ein Modell gleichzeitig verarbeiten kann. Aktuelle Spitzensysteme reichen von Hunderttausenden bis zu etwa einer Million Token.
 - **Mittendrin verloren**: Modelle tendieren dazu, Informationen in langen Kontexten weniger Aufmerksamkeit zu schenken
 - **Strategien**: Lange Dokumente zusammenfassen, wichtige Informationen am Anfang/Ende platzieren, hierarchisches Abrufen verwenden
 
@@ -136,7 +136,7 @@ Modelle generieren plausible, aber sachlich falsche Texte. Minderungsstrategien:
 
 Dies ist eine beliebte Interviewfrage: „Welches Modell würden Sie angesichts dieses Anwendungsfalls wählen?“
 
-**Verwenden Sie ein großes frontier Modell (GPT-6 Astra, Claude Opus 5.5), wenn:**
+**Verwenden Sie ein großes Spitzenmodell (GPT-6 Astra, Claude Opus 5.5), wenn:**
 - Die Aufgabe erfordert allgemeine Überlegungen oder die Befolgung komplexer Anweisungen
 - Sie haben keine gekennzeichneten Trainingsdaten
 - Die Prototyping-Geschwindigkeit ist wichtiger als die Inferenzkosten
@@ -154,7 +154,7 @@ Dies ist eine beliebte Interviewfrage: „Welches Modell würden Sie angesichts 
 
 <Quiz
   question="Ein Gesundheitsunternehmen muss Patientennachrichten in 15 Kategorien einteilen. Sie haben 50.000 beschriftete Exemplare. Welcher Ansatz ist für die Produktion am kostengünstigsten?"
-  options="Ein Frontier-LLM mit Wenig-Schuss-Eingabeaufforderung|Feinabgestimmtes BERT-Modell|RAG mit einer Vektordatenbank|Nullschussklassifizierung mit Llama 70B"
+  options="Ein Spitzen-LLM mit Wenig-Schuss-Eingabeaufforderung|Feinabgestimmtes BERT-Modell|RAG mit einer Vektordatenbank|Nullschussklassifizierung mit Llama 70B"
   answer="1"
   explanation="Mit 50.000 beschrifteten Beispielen und einer klar definierten Klassifizierungsaufgabe ist ein fein abgestimmtes BERT-Modell schnell, kostengünstig in der Bereitstellung und äußerst genau. Die Verwendung eines großen LLM für eine Klassifizierungsaufgabe mit zahlreichen Trainingsdaten ist unnötig teuer und langsamer."
 />
@@ -197,7 +197,7 @@ NLP-Interviews beinhalten zunehmend ethische Fragen:
   question="Was ist das Hauptrisiko bei der Verwendung eines auf Online-Texten geschulten LLM für ein Einstellungsempfehlungssystem?"
   options="Das Modell ist für den Produktionseinsatz zu langsam|Das Modell kann historische Verzerrungen in Trainingsdaten aufrechterhalten|Das Modell wird zufällige Vorhersagen treffen|Das Modell benötigt zu viel Speicherplatz"
   answer="1"
-  explanation="An Internettexten geschulte LLMs berücksichtigen in ihren Trainingsdaten gesellschaftliche Vorurteile – Geschlecht, Rasse, sozioökonomische Aspekte. Bei der Einstellung von Mitarbeitern können diese Vorurteile zu diskriminierenden Empfehlungen führen, die historische Ungleichheiten aufrechterhalten."
+  explanation="An Internettexten geschulte LLMs berücksichtigen in ihren Trainingsdaten gesellschaftliche Vorurteile - Geschlecht, Rasse, sozioökonomische Aspekte. Bei der Einstellung von Mitarbeitern können diese Vorurteile zu diskriminierenden Empfehlungen führen, die historische Ungleichheiten aufrechterhalten."
 />
 
 ---
@@ -206,9 +206,9 @@ NLP-Interviews beinhalten zunehmend ethische Fragen:
 
 - **Kennen Sie Ihre Grundlagen**: Tokenisierung, Einbettungen, Aufmerksamkeit und Transformatorarchitektur sind nicht verhandelbar
 - **Verstehen Sie das Feinabstimmungsspektrum**: von der Null-Schuss-Eingabeaufforderung bis zur vollständigen Feinabstimmung und wann jeweils angemessen
-- **RAG ist das praktischste LLM-Muster** – verstehen Sie Chunking, Retrieval und Reranking
+- **RAG ist das praktischste LLM-Muster** - verstehen Sie Chunking, Retrieval und Reranking
 - **Bei der Modellauswahl geht es um Kompromisse**: Leistungsfähigkeit vs. Kosten vs. Latenz vs. Datenschutz
-- **Die Bewertung generativer Modelle ist ein offenes Problem** – kennen mehrere Ansätze
+- **Die Bewertung generativer Modelle ist ein offenes Problem** - kennen mehrere Ansätze
 - **Ethik ist nicht optional**: Voreingenommenheit, Halluzination und Privatsphäre gehören mittlerweile zu den Standardthemen in Vorstellungsgesprächen
 
 <Callout>Der NLP-Bereich entwickelt sich unglaublich schnell. Prüfen Sie vor Ihrem Vorstellungsgespräch, welche Modelle und Techniken in den letzten drei Monaten veröffentlicht wurden. Die Fähigkeit, aktuelle Entwicklungen zu diskutieren (und gleichzeitig die Grundlagen zu verstehen), signalisiert, dass Sie sich aktiv in diesem Bereich engagieren.

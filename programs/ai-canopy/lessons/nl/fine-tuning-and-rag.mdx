@@ -1,5 +1,5 @@
 ---
-title: "Fine-Tuning en RAG - Hoe Bedrijven AI Aanpassen aan Hun Data"
+title: "Fijnafstemming en RAG - Hoe Bedrijven AI Aanpassen aan Hun Data"
 description: "Leer wanneer en hoe je modellen fine-tunet of retrieval-augmented generation inzet om domeinspecifieke AI-toepassingen te bouwen."
 order: 4
 difficulty: "advanced"
@@ -8,27 +8,27 @@ icon: "🔧"
 published: true
 ---
 
-# Fine-Tuning en RAG - Hoe Bedrijven AI Aanpassen aan Hun Data
+# Fijnafstemming en RAG - Hoe Bedrijven AI Aanpassen aan Hun Data
 
-Een generiek LLM weet veel over de wereld, maar niets over de interne documenten, bedrijfseigen data of domeinspecifieke terminologie van jouw organisatie. In deze les behandelen we de twee belangrijkste benaderingen om die kloof te overbruggen: **fine-tuning** en **retrieval-augmented generation (RAG)**.
+Een generiek LLM weet veel over de wereld, maar niets over de interne documenten, bedrijfseigen data of domeinspecifieke terminologie van jouw organisatie. In deze les behandelen we de twee belangrijkste benaderingen om die kloof te overbruggen: **fijnafstemming** en **retrieval-augmented generation (RAG)**.
 
 ## Waarom Generieke Modellen Niet Genoeg Zijn
 
-Stel je voor dat je een frontier model vraagt om klantvragen te beantwoorden over het specifieke retourbeleid van je bedrijf, interne productcodes of medische behandelprotocollen. Dat kan het niet, die informatie zit niet in zijn trainingsdata.
+Stel je voor dat je een toonaangevend model vraagt om klantvragen te beantwoorden over het specifieke retourbeleid van je bedrijf, interne productcodes of medische behandelprotocollen. Dat kan het niet, die informatie zit niet in zijn trainingsdata.
 
 Bedrijven hebben AI nodig die de **algemene intelligentie** van een groot model combineert met **specifieke kennis** van hun domein. Er zijn twee paden om dat te bereiken, en de juiste keuze maakt een enorm verschil.
 
 <Callout>
-Een veelvoorkomend misverstand is dat je simpelweg "je data kunt uploaden" naar een LLM. In werkelijkheid vereist het aanpassen van een model ofwel het hertrainen van de gewichten (fine-tuning) ofwel het bouwen van een retrieval-pipeline (RAG) - beide zijn technische inspanningen die zorgvuldige planning vereisen.
+Een veelvoorkomend misverstand is dat je simpelweg "je data kunt uploaden" naar een LLM. In werkelijkheid vereist het aanpassen van een model ofwel het hertrainen van de gewichten (fijnafstemming) ofwel het bouwen van een retrieval-pipeline (RAG) - beide zijn technische inspanningen die zorgvuldige planning vereisen.
 </Callout>
 
-<Illustration src="/images/lessons/fine-tuning-and-rag.svg" alt="Diagram dat fine-tuning en RAG-benaderingen voor het aanpassen van LLM's vergelijkt" caption="Fine-tuning wijzigt de gewichten van het model; RAG levert externe kennis aan op het moment van de query." />
+<Illustration src="/images/lessons/fine-tuning-and-rag.svg" alt="Diagram dat fijnafstemming en RAG-benaderingen voor het aanpassen van LLM's vergelijkt" caption="Fijnafstemming wijzigt de gewichten van het model; RAG levert externe kennis aan op het moment van de query." />
 
-## Fine-Tuning: Het Model Nieuwe Vaardigheden Aanleren
+## Fijnafstemming: Het Model Nieuwe Vaardigheden Aanleren
 
-Fine-tuning neemt een voorgetraind model en traint het verder op je eigen dataset. De gewichten van het model worden bijgewerkt om de taal, stijl en kennis van jouw domein te weerspiegelen.
+Fijnafstemming neemt een voorgetraind model en traint het verder op je eigen dataset. De gewichten van het model worden bijgewerkt om de taal, stijl en kennis van jouw domein te weerspiegelen.
 
-**Wanneer fine-tunen:**
+**Wanneer fijn afstemmen:**
 - Je wilt dat het model consequent een specifieke toon of schrijfstijl hanteert.
 - Jouw domein heeft gespecialiseerde terminologie die het basismodel slecht beheerst.
 - Je wilt snellere inferentie (kennis is "ingebakken" in plaats van opgehaald).
@@ -40,21 +40,21 @@ Fine-tuning neemt een voorgetraind model en traint het verder op je eigen datase
 4. Evalueer op niet eerder geziene testdata.
 
 <FunFact>
-Bloomberg bouwde BloombergGPT door te fine-tunen op 363 miljard tokens aan financiële data. Het resulterende model presteerde significant beter dan generieke modellen op financiële NLP-taken zoals sentimentanalyse van kwartaalcijferpresentaties en named entity recognition in SEC-filings.
+Bloomberg bouwde BloombergGPT door te fijn afstemmen op 363 miljard tokens aan financiële data. Het resulterende model presteerde significant beter dan generieke modellen op financiële NLP-taken zoals sentimentanalyse van kwartaalcijferpresentaties en named entity recognition in SEC-filings.
 </FunFact>
 
 ## LoRA en QLoRA: Efficiënt Fine-Tunen
 
-Traditioneel fine-tunen werkt **alle** modelparameters bij, wat enorm veel GPU-geheugen vereist. Een model met 70 miljard parameters heeft honderden gigabytes nodig alleen al voor gradient-opslag.
+Traditioneel fijn afstemmen werkt **alle** modelparameters bij, wat enorm veel GPU-geheugen vereist. Een model met 70 miljard parameters heeft honderden gigabytes nodig alleen al voor gradient-opslag.
 
 **LoRA (Low-Rank Adaptation)** lost dit elegant op:
 - In plaats van alle gewichten bij te werken, bevriest LoRA het oorspronkelijke model en voegt kleine **trainbare adaptermatrices** toe aan elke laag.
-- Deze adapters voegen doorgaans slechts 0,1–1% extra parameters toe.
+- Deze adapters voegen doorgaans slechts 0,1-1% extra parameters toe.
 - Het resultaat is vrijwel identieke prestatie tegen een fractie van de kosten.
 
-**QLoRA** gaat nog verder door het bevroren model te kwantiseren naar 4-bit precisie, waardoor de geheugenvereisten dramatisch dalen. Je kunt een model met 70 miljard parameters fine-tunen op één enkele consumenten-GPU met 48GB VRAM.
+**QLoRA** gaat nog verder door het bevroren model te kwantiseren naar 4-bit precisie, waardoor de geheugenvereisten dramatisch dalen. Je kunt een model met 70 miljard parameters fijn afstemmen op één enkele consumenten-GPU met 48GB VRAM.
 
-<Quiz question="Wat is het voornaamste voordeel van LoRA ten opzichte van traditioneel fine-tunen?" options="LoRA produceert nauwkeurigere modellen dan volledig fine-tunen|LoRA traint alleen kleine adaptermatrices, wat veel minder GPU-geheugen en rekenkracht vereist|LoRA elimineert de noodzaak voor trainingsdata|LoRA werkt alleen met kleine modellen onder 1 miljard parameters" answer="1" explanation="LoRA bevriest de oorspronkelijke modelgewichten en traint in plaats daarvan kleine low-rank adaptermatrices. Dit vermindert het geheugengebruik en de trainingstijd drastisch terwijl het prestaties levert die vergelijkbaar zijn met volledig fine-tunen." />
+<Quiz question="Wat is het voornaamste voordeel van LoRA ten opzichte van traditioneel fijn afstemmen?" options="LoRA produceert nauwkeurigere modellen dan volledig fijn afstemmen|LoRA traint alleen kleine adaptermatrices, wat veel minder GPU-geheugen en rekenkracht vereist|LoRA elimineert de noodzaak voor trainingsdata|LoRA werkt alleen met kleine modellen onder 1 miljard parameters" answer="1" explanation="LoRA bevriest de oorspronkelijke modelgewichten en traint in plaats daarvan kleine low-rank adaptermatrices. Dit vermindert het geheugengebruik en de trainingstijd drastisch terwijl het prestaties levert die vergelijkbaar zijn met volledig fijn afstemmen." />
 
 ## RAG: Retrieval-Augmented Generation
 
@@ -69,7 +69,7 @@ RAG volgt een totaal andere aanpak. In plaats van het model te wijzigen, **geef 
 **Wanneer RAG gebruiken:**
 - Je kennisbasis verandert frequent (nieuwe documenten, bijgewerkt beleid).
 - Je hebt bronvermeldingen en traceerbaarheid nodig.
-- Je wilt de kosten en complexiteit van fine-tuning vermijden.
+- Je wilt de kosten en complexiteit van fijnafstemming vermijden.
 - Feitelijke nauwkeurigheid is cruciaal en hallucinaties moeten worden geminimaliseerd.
 
 <ThinkAboutIt>
@@ -94,7 +94,7 @@ De keuze voor een vectordatabase hangt af van je schaal, bestaande infrastructuu
 
 ## Wanneer Fine-Tunen vs Wanneer RAG Gebruiken
 
-| Overweging | Fine-Tuning | RAG |
+| Overweging | Fijnafstemming | RAG |
 |------------|-------------|-----|
 | **Data-actualiteit** | Statisch (hertrainen om bij te werken) | Dynamisch (documenten op elk moment bijwerken) |
 | **Kosten** | Hogere initiële investering (training) | Lagere initiële investering, doorlopende ophaalkost |
@@ -118,12 +118,12 @@ De Britse National Health Service heeft RAG-systemen getest die LLM's verbinden 
 
 Een robuust RAG-systeem vereist meer dan alleen een vectordatabase en een LLM. Belangrijke overwegingen zijn:
 
-- **Chunkingstrategie** - Hoe je documenten opsplitst maakt enorm veel uit. Te groot en irrelevante content verzwakt het signaal; te klein en je verliest context. Overlappende chunks met 10–20% overlap werken vaak goed.
+- **Chunkingstrategie** - Hoe je documenten opsplitst maakt enorm veel uit. Te groot en irrelevante content verzwakt het signaal; te klein en je verliest context. Overlappende chunks met 10-20% overlap werken vaak goed.
 - **Re-ranking** - Na de initiële vectorretrieval kan een cross-encoder re-ranker resultaten herordenen op relevantie, wat de antwoordkwaliteit significant verbetert.
 - **Evaluatie** - Meet retrieval precision (heb je de juiste chunks gevonden?) en generation faithfulness (weerspiegelt het antwoord de chunks?) apart.
 - **Hybride zoeken** - Het combineren van vectorsimilariteit met traditioneel keyword search (BM25) vangt gevallen op waar semantisch zoeken alleen exacte termen of acroniemen mist.
 
-<Quiz question="De kennisbasis van een bedrijf wordt dagelijks bijgewerkt met nieuwe productinformatie. Welke aanpak is het meest geschikt?" options="Het model dagelijks fine-tunen op de nieuwe data|RAG gebruiken zodat het model altijd de nieuwste documenten ophaalt|Het model elke week opnieuw trainen vanaf nul|Een kleiner model gebruiken dat geen externe data nodig heeft" answer="1" explanation="RAG is ideaal voor frequent veranderende data omdat je alleen de documentindex hoeft bij te werken - geen hertraining van het model nodig. Fine-tuning zou onpraktisch zijn voor dagelijkse updates vanwege de kosten en tijd." />
+<Quiz question="De kennisbasis van een bedrijf wordt dagelijks bijgewerkt met nieuwe productinformatie. Welke aanpak is het meest geschikt?" options="Het model dagelijks fijn afstemmen op de nieuwe data|RAG gebruiken zodat het model altijd de nieuwste documenten ophaalt|Het model elke week opnieuw trainen vanaf nul|Een kleiner model gebruiken dat geen externe data nodig heeft" answer="1" explanation="RAG is ideaal voor frequent veranderende data omdat je alleen de documentindex hoeft bij te werken - geen hertraining van het model nodig. Fijnafstemming zou onpraktisch zijn voor dagelijkse updates vanwege de kosten en tijd." />
 
 <ThinkAboutIt>
 Als een RAG-systeem de verkeerde documenten ophaalt door een slecht embedding-model, zal het LLM met vertrouwen een antwoord genereren op basis van irrelevante context. Hoe zou je waarborgen kunnen ontwerpen om deze faalwijze te detecteren en te voorkomen?

@@ -46,9 +46,9 @@ En lugar de pasar información de forma secuencial, la autoatención calcula **q
 
 Para cada palabra (o ficha), el Transformador crea tres vectores:
 
-- **Consulta (Q)**: *"¿Qué estoy buscando?"* — la pregunta que plantea esta palabra
-- **Clave (K)**: *"¿Qué contengo?"* — el anuncio que cada palabra transmite sobre sí misma
-- **Valor (V)**: *"¿Qué información proporciono?"* — el contenido real que se recuperará
+- **Consulta (Q)**: *"¿Qué estoy buscando?"* - la pregunta que plantea esta palabra
+- **Clave (K)**: *"¿Qué contengo?"* - el anuncio que cada palabra transmite sobre sí misma
+- **Valor (V)**: *"¿Qué información proporciono?"* - el contenido real que se recuperará
 
 La puntuación de atención entre dos palabras se calcula tomando el producto escalar de la consulta de una palabra con la clave de otra palabra. Una puntuación alta significa "estas dos palabras son muy relevantes entre sí".
 
@@ -186,15 +186,15 @@ Esto llevó a una progresión:
 - GPT-1 (2018): 117M parámetros
 - GPT-2 (2019): 1,5 mil millones de parámetros
 - GPT-3 (2020): 175B parámetros
-- Modelos frontier actuales: a menudo mixture-of-experts o arquitecturas no divulgadas con cientos de miles de millones a billones de parámetros efectivos
+- Modelos de frontera actuales: a menudo mixture-of-experts o arquitecturas no divulgadas con cientos de miles de millones a billones de parámetros efectivos
 
-Cada salto trajo mejoras cualitativas en capacidad. Las tareas que GPT-2 no podía hacer en absoluto (razonamiento complejo, generación de código) se hicieron posibles a escala GPT-3 y siguieron mejorando en modelos frontier posteriores.
+Cada salto trajo mejoras cualitativas en capacidad. Las tareas que GPT-2 no podía hacer en absoluto (razonamiento complejo, generación de código) se hicieron posibles a escala GPT-3 y siguieron mejorando en modelos de frontera posteriores.
 
 ## ⚡ Entrenamiento vs Inferencia
 
 Dos perfiles computacionales muy diferentes:
 
-**Entrenamiento**: extremadamente caro. Procesar billones de tokens, calcular gradientes y actualizar enormes conjuntos de parámetros en miles de GPU durante semanas o meses. Entrenar modelos frontier actuales puede costar cientos de millones cuando se incluyen computación, datos, energía e ingeniería.
+**Entrenamiento**: extremadamente caro. Procesar billones de tokens, calcular gradientes y actualizar enormes conjuntos de parámetros en miles de GPU durante semanas o meses. Entrenar modelos de frontera actuales puede costar cientos de millones cuando se incluyen computación, datos, energía e ingeniería.
 
 **Inferencia**: mucho más barato. Un único paso directo a través de la red para generar cada token. Todavía requiere hardware importante (GPU potentes o chips de IA especializados), pero manejable a escala.
 
@@ -210,5 +210,5 @@ Esta asimetría ha dado forma a la industria: unas pocas organizaciones con buen
 - **Codificación posicional** agrega información de orden al mecanismo de atención inherentemente independiente de la posición
 - **BERT** (solo codificador) está previamente entrenado para comprender texto bidireccionalmente; Lo mejor para tareas de clasificación y búsqueda.
 - **GPT** (solo decodificador) está previamente entrenado para generar texto de izquierda a derecha; Lo mejor para la generación y la conversación.
-- **La escala importa enormemente**: los Transformers más grandes entrenados con más datos desbloquean nuevas capacidades de forma consistente, como demuestra la progresión de GPT-1 a GPT-3 y sistemas frontier posteriores
+- **La escala importa enormemente**: los Transformers más grandes entrenados con más datos desbloquean nuevas capacidades de forma consistente, como demuestra la progresión de GPT-1 a GPT-3 y sistemas de frontera posteriores
 - La formación es extremadamente cara; La inferencia es mucho más barata: esta asimetría determina cómo se implementan los modelos básicos.

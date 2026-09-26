@@ -1,6 +1,6 @@
 ---
 title: "Code-Review-Interviews"
-description: "Excel bei Interviewrunden zur Codeüberprüfung – identifizieren Sie Fehler, schlagen Sie Verbesserungen vor und stellen Sie Ihr technisches Urteilsvermögen unter Beweis."
+description: "Excel bei Interviewrunden zur Codeüberprüfung - identifizieren Sie Fehler, schlagen Sie Verbesserungen vor und stellen Sie Ihr technisches Urteilsvermögen unter Beweis."
 order: 5
 difficulty: "intermediate"
 duration: 15
@@ -10,17 +10,17 @@ machineTranslated: true
 ---
 # Code-Review-Interviews
 
-Vorstellungsgespräche zur Codeüberprüfung sind eine der am meisten unterschätzten Runden im Einstellungsprozess – und eine der aufschlussreichsten. Während Coding-Interviews testen, ob Sie Code schreiben können, testen Code-Review-Interviews, ob Sie ihn lesen, darüber nachdenken und ihn verbessern können. Sie zeigen, wie Sie über Qualität denken, wie Sie Feedback priorisieren und wie Sie mit anderen Ingenieuren kommunizieren. Viele Kandidaten bereiten sich monatelang auf LeetCode vor, gehen aber völlig unvorbereitet in eine Code-Review-Runde. Sei nicht diese Person.
+Vorstellungsgespräche zur Codeüberprüfung sind eine der am meisten unterschätzten Runden im Einstellungsprozess - und eine der aufschlussreichsten. Während Programmieren-Interviews testen, ob Sie Code schreiben können, testen Code-Review-Interviews, ob Sie ihn lesen, darüber nachdenken und ihn verbessern können. Sie zeigen, wie Sie über Qualität denken, wie Sie Feedback priorisieren und wie Sie mit anderen Ingenieuren kommunizieren. Viele Kandidaten bereiten sich monatelang auf LeetCode vor, gehen aber völlig unvorbereitet in eine Code-Review-Runde. Sei nicht diese Person.
 
 ## Welche Code-Review-Interviews tatsächlich testen
 
 Interviewer, die Ihre Code-Review-Fähigkeiten bewerten, achten auf fünf Dinge:
 
-1. **Fehlererkennung** – Können Sie logische Fehler, Grenzfälle und Race Conditions erkennen?
-2. **Designsinn** – Erkennen Sie Verstöße gegen SOLID-Prinzipien, schlechte Abstraktionen oder Code, der schwer zu pflegen ist?
-3. **Sicherheitsbewusstsein** – Können Sie Sicherheitslücken bei der Injektion, Authentifizierungsfehler oder Datengefährdungsrisiken erkennen?
-4. **Kommunikationsfähigkeit** – Können Sie Probleme klar und konstruktiv erklären?
-5. **Priorisierung** – Konzentrieren Sie sich auf das Wesentliche oder verzichten Sie auf Variablennamen?
+1. **Fehlererkennung** - Können Sie logische Fehler, Grenzfälle und Race Conditions erkennen?
+2. **Designsinn** - Erkennen Sie Verstöße gegen SOLID-Prinzipien, schlechte Abstraktionen oder Code, der schwer zu pflegen ist?
+3. **Sicherheitsbewusstsein** - Können Sie Sicherheitslücken bei der Injektion, Authentifizierungsfehler oder Datengefährdungsrisiken erkennen?
+4. **Kommunikationsfähigkeit** - Können Sie Probleme klar und konstruktiv erklären?
+5. **Priorisierung** - Konzentrieren Sie sich auf das Wesentliche oder verzichten Sie auf Variablennamen?
 
 <Callout>Der häufigste Fehler bei Code-Review-Interviews besteht darin, dass man seine ganze Zeit mit Stilfragen (Benennung, Formatierung) verbringt und dabei tatsächliche Fehler übersieht. Interviewer platzieren neben Stilproblemen bewusst auch kritische Fehler, um zu sehen, was Sie priorisieren.</Callout>
 
@@ -57,7 +57,7 @@ Suchen Sie nach strukturellen Problemen:
 
 - Unnötige Datenbankabfragen in Schleifen (N+1-Problem)
 - Fehlende Eingabevalidierung oder -bereinigung
-– Offengelegte sensible Daten in Protokollen oder Antworten
+- Offengelegte sensible Daten in Protokollen oder Antworten
 - Ineffiziente Algorithmen, wo es bessere Alternativen gibt
 
 ## Häufige Fehlermuster, die es zu erkennen gilt
@@ -131,12 +131,12 @@ def get_user(username):
     return db.execute(query, (username,))
 ```
 
-<FunFact>Eine Studie mit über 100.000 Codeüberprüfungen bei Google ergab, dass sich etwa 25 % aller Überprüfungskommentare auf „Korrektheit“ beziehen – tatsächliche Fehler oder logische Fehler. Bei weiteren 25 % geht es um „Verständnis“ – darum, Code leichter verständlich zu machen. Stil und Formatierung machten weniger als 10 % der inhaltlichen Kommentare aus.</FunFact>
+<FunFact>Eine Studie mit über 100.000 Codeüberprüfungen bei Google ergab, dass sich etwa 25 % aller Überprüfungskommentare auf „Korrektheit“ beziehen - tatsächliche Fehler oder logische Fehler. Bei weiteren 25 % geht es um „Verständnis“ - darum, Code leichter verständlich zu machen. Stil und Formatierung machten weniger als 10 % der inhaltlichen Kommentare aus.</FunFact>
 
 ### Parallelitätsfehler
 
 ```java
-// Bug: race condition — check-then-act is not atomic
+// Bug: race condition - check-then-act is not atomic
 public void transferMoney(Account from, Account to, BigDecimal amount) {
     if (from.getBalance().compareTo(amount) >= 0) {
         // Another thread could modify balance here
@@ -167,8 +167,8 @@ Wie Sie Feedback geben, ist genauso wichtig wie das Feedback selbst. Interviewer
 
 **Mach das**:
 - „Mir ist aufgefallen, dass sich diese Abfrage in einer Schleife befindet, was zu N+1-Leistungsproblemen führen kann. Möglicherweise möchten wir dies in einer einzigen Abfrage zusammenfassen.“
-– „Es sieht so aus, als würde es eine NullPointerException auslösen, wenn der Benutzer nicht gefunden wird. Könnten wir hier eine Nullprüfung hinzufügen oder Optional verwenden?“
-- „Gute Verwendung des Strategiemusters hier – es macht das Hinzufügen neuer Zahlungsarten unkompliziert.“
+- „Es sieht so aus, als würde es eine NullPointerException auslösen, wenn der Benutzer nicht gefunden wird. Könnten wir hier eine Nullprüfung hinzufügen oder Optional verwenden?“
+- „Gute Verwendung des Strategiemusters hier - es macht das Hinzufügen neuer Zahlungsarten unkompliziert.“
 
 **Nicht das**:
 - „Dieser Code ist falsch.“ (zu direkt, keine Erklärung)
@@ -205,9 +205,9 @@ def process_orders(orders):
 3. 🟠 **Keine Fehlerbehandlung**: `price[0]` stürzt ab, wenn das Produkt nicht gefunden wird. `db.query` könnte scheitern.
 4. 🟠 **Rabattlogik ist ausgeblendet**: Der 10 %-Rabatt für Mengen > 100 ist eine in verschachtelten Schleifen vergrabene Geschäftsregel. Extrahieren Sie es.
 5. 🟡 **Magische Zahl**: `0.9` und `100` sollten benannte Konstanten sein (`BULK_DISCOUNT_RATE`, `BULK_THRESHOLD`).
-6. 🟡 **Funktion macht zu viel**: Benutzer abrufen, Gesamtbeträge berechnen, Rabatte anwenden – verstößt gegen die Einzelverantwortung.
+6. 🟡 **Funktion macht zu viel**: Benutzer abrufen, Gesamtbeträge berechnen, Rabatte anwenden - verstößt gegen die Einzelverantwortung.
 
-<Quiz question="Während eines Code-Review-Interviews stellen Sie ein geringfügiges Problem bei der Benennung von Variablen und eine potenzielle SQL-Injection-Sicherheitslücke fest. Sie haben noch 2 Minuten Zeit. Was sollten Sie priorisieren?" options="Korrigieren Sie zuerst die Variablenbenennung, da es schnell geht|Konzentrieren Sie sich ausschließlich auf die SQL-Injection-Sicherheitslücke|Erwähnen Sie beide gleichermaßen – zeigen Sie, dass Sie gründlich sind|Überspringen Sie beide und suchen Sie nach weiteren Problemen" answer="1" explanation="SQL-Injection ist eine kritische Sicherheitslücke, die zu Datenschutzverletzungen führen kann. Geben Sie Sicherheitsfragen stets Vorrang vor Stilbedenken. Erwähnen Sie das Namensproblem nur kurz, wenn die Zeit es erlaubt, nachdem Sie das Injektionsrisiko ausführlich erläutert haben." />
+<Quiz question="Während eines Code-Review-Interviews stellen Sie ein geringfügiges Problem bei der Benennung von Variablen und eine potenzielle SQL-Injection-Sicherheitslücke fest. Sie haben noch 2 Minuten Zeit. Was sollten Sie priorisieren?" options="Korrigieren Sie zuerst die Variablenbenennung, da es schnell geht|Konzentrieren Sie sich ausschließlich auf die SQL-Injection-Sicherheitslücke|Erwähnen Sie beide gleichermaßen - zeigen Sie, dass Sie gründlich sind|Überspringen Sie beide und suchen Sie nach weiteren Problemen" answer="1" explanation="SQL-Injection ist eine kritische Sicherheitslücke, die zu Datenschutzverletzungen führen kann. Geben Sie Sicherheitsfragen stets Vorrang vor Stilbedenken. Erwähnen Sie das Namensproblem nur kurz, wenn die Zeit es erlaubt, nachdem Sie das Injektionsrisiko ausführlich erläutert haben." />
 
 ## Wichtige Erkenntnisse
 

@@ -1,5 +1,5 @@
 ---
-title: "O ecossistema de IA de código aberto – ferramentas, modelos e comunidades"
+title: "O ecossistema de IA de código aberto - ferramentas, modelos e comunidades"
 description: "Navegue pelo cenário de IA de código aberto, desde as principais plataformas e modelos até a execução de inferências localmente e a construção de uma pilha completa de IA."
 order: 2
 difficulty: "advanced"
@@ -14,17 +14,17 @@ A IA de código aberto mudou fundamentalmente o jogo. O que antes exigia milhõe
 
 ## Por que a IA de código aberto é importante
 
-Código aberto não é apenas software livre – é uma filosofia que molda a forma como a IA se desenvolve.
+Código aberto não é apenas software livre - é uma filosofia que molda a forma como a IA se desenvolve.
 
-**Democratização** – Os modelos de última geração não estão mais bloqueados por APIs corporativas. Um investigador em Nairobi tem o mesmo acesso que um engenheiro em São Francisco.
+**Democratização** - Os modelos de última geração não estão mais bloqueados por APIs corporativas. Um investigador em Nairobi tem o mesmo acesso que um engenheiro em São Francisco.
 
-**Velocidade de inovação** – Comunidades abertas iteram mais rápido do que qualquer empresa isolada. Técnicas como ajuste fino de LoRA, quantização e estímulo de cadeia de pensamento surgiram de pesquisas abertas e foram adotadas pela indústria em poucas semanas.
+**Velocidade de inovação** - Comunidades abertas iteram mais rápido do que qualquer empresa isolada. Técnicas como ajuste fino de LoRA, quantização e estímulo de cadeia de pensamento surgiram de pesquisas abertas e foram adotadas pela indústria em poucas semanas.
 
-**Transparência** – Ao inspecionar pesos de modelos, dados de treinamento e código, você pode auditar tendências, verificar declarações de segurança e compreender modos de falha. APIs de caixa preta não oferecem nada disso.
+**Transparência** - Ao inspecionar pesos de modelos, dados de treinamento e código, você pode auditar tendências, verificar declarações de segurança e compreender modos de falha. APIs de caixa preta não oferecem nada disso.
 
-**Soberania de dados** – Executar modelos localmente significa que dados confidenciais nunca saem da sua infraestrutura. Para aplicações de saúde, jurídicas e financeiras, esse costuma ser um requisito difícil.
+**Soberania de dados** - Executar modelos localmente significa que dados confidenciais nunca saem da sua infraestrutura. Para aplicações de saúde, jurídicas e financeiras, esse costuma ser um requisito difícil.
 
-<FunFact>A família Llama da Meta ajudou a provar que a IA open-weight pode alcançar rapidamente adoção em massa por desenvolvedores. A adoção open-weight está acelerando, não desacelerando.</FunFact>
+<FunFact>A família Llama da Meta ajudou a provar que a IA de pesos abertos pode alcançar rapidamente adoção em massa por desenvolvedores. A adoção de pesos abertos está acelerando, não desacelerando.</FunFact>
 </FunFact>
 
 ## Principais plataformas
@@ -35,11 +35,11 @@ O ecossistema de IA de código aberto gira em torno de algumas plataformas crít
 
 **Ollama** - Execute LLMs localmente com um único comando. Lida com download, quantização e veiculação de modelos por trás de uma API limpa. Perfeito para desenvolvimento e implantações sensíveis à privacidade.
 
-**LangChain** – Uma estrutura para construir aplicativos com tecnologia LLM. Fornece abstrações para cadeias, agentes, recuperação e memória. Melhor para fluxos de trabalho complexos que envolvem várias chamadas de modelo.
+**LangChain** - Uma estrutura para construir aplicativos com tecnologia LLM. Fornece abstrações para cadeias, agentes, recuperação e memória. Melhor para fluxos de trabalho complexos que envolvem várias chamadas de modelo.
 
 **LlamaIndex** - Especializado em conectar LLMs aos seus dados. Excelente para construir sistemas RAG (Retrieval-Augmented Generation) com bases de conhecimento customizadas.
 
-<Quiz question="Qual plataforma é melhor descrita como ‘o GitHub da IA’ para hospedar modelos e conjuntos de dados?" options="Ollama|LangChain|Abraçando o rosto|LhamaIndex" answer="2" explanation="Hugging Face hospeda centenas de milhares de modelos e conjuntos de dados com um fluxo de trabalho colaborativo baseado em Git – ganhando sua reputação como o centro central de IA de código aberto." />
+<Quiz question="Qual plataforma é melhor descrita como ‘o GitHub da IA’ para hospedar modelos e conjuntos de dados?" options="Ollama|LangChain|Hugging Face|LlamaIndex" answer="2" explanation="Hugging Face hospeda centenas de milhares de modelos e conjuntos de dados com um fluxo de trabalho colaborativo baseado em Git - ganhando sua reputação como o centro central de IA de código aberto." />
 
 ## Modelos abertos que vale a pena conhecer
 
@@ -47,7 +47,7 @@ O cenário do modelo aberto evolui mensalmente, mas essas famílias definem o es
 
 | Família modelo | Criador | Pontos fortes | Melhor para |
 |---|---|---|---|
-| **Lhama 3** | Meta | Forte desempenho geral, grande comunidade | Base de ajuste fino de uso geral |
+| **Llama 3** | Meta | Forte desempenho geral, grande comunidade | Base de ajuste fino de uso geral |
 | **Mistral / Mixtral** | IA Mistral | Excelente eficiência, arquitetura MoE | Utilização de produção sensível aos custos |
 | **Fi** | Microsoft | Surpreendentemente capaz para o tamanho | Dispositivos de borda, móveis |
 | **Gema** | Google | Raciocínio forte e bem documentado | Pesquisa, tarefas estruturadas |
@@ -66,9 +66,9 @@ ollama pull llama3.1:8b
 ollama run llama3.1:8b "Explain transformer attention in one paragraph"
 ```
 
-**llama.cpp** – Mecanismo de inferência C++ otimizado para hardware de consumidor. Suporta modelos quantizados GGUF e funciona em CPU, Apple Silicon e GPUs CUDA.
+**llama.cpp** - Mecanismo de inferência C++ otimizado para hardware de consumidor. Suporta modelos quantizados GGUF e funciona em CPU, Apple Silicon e GPUs CUDA.
 
-**vLLM** – Mecanismo de serviço de alto rendimento para implantações de produção. Implementa PagedAttention para uso eficiente de memória e oferece suporte a lotes contínuos.
+**vLLM** - Mecanismo de serviço de alto rendimento para implantações de produção. Implementa PagedAttention para uso eficiente de memória e oferece suporte a lotes contínuos.
 
 **Diretrizes de hardware:**
 - **Modelos 8B** - Mínimo de 8 GB de RAM, funciona na maioria dos laptops modernos
@@ -77,7 +77,7 @@ ollama run llama3.1:8b "Explain transformer attention in one paragraph"
 
 <Quiz question="Qual é a RAM mínima recomendada para executar localmente um modelo de 8 bilhões de parâmetros?" options="2GB|4GB|8GB|32 GB" answer="2" explanation="Modelos de 8 bilhões de parâmetros, quando quantizados com precisão de 4 bits, requerem aproximadamente 4 a 6 GB de memória, tornando 8 GB de RAM o mínimo prático para uma operação confortável." />
 
-<Illustration src="/images/lessons/open-source-ai.svg" alt="Pilha de IA de código aberto mostrando modelos, estruturas e ferramentas de implantação" caption="A pilha de IA de código aberto – dos modelos à implantação" />
+<Illustration src="/images/lessons/open-source-ai.svg" alt="Pilha de IA de código aberto mostrando modelos, estruturas e ferramentas de implantação" caption="A pilha de IA de código aberto - dos modelos à implantação" />
 
 ## Construindo uma pilha completa de IA
 

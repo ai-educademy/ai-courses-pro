@@ -31,7 +31,7 @@ Isso funciona, mas tem dois problemas principais:
 **1. Desaparecimento de gradientes em longas sequências**
 No momento em que o modelo processa a palavra 10, as informações da palavra 1 foram “diluídas” por nove atualizações de estado ocultas. O modelo se esforça para conectar “isso” (palavra 8) a “gato” (palavra 2) quando a frase é longa.
 
-**2. Lento — sem paralelização**
+**2. Lento - sem paralelização**
 Como cada palavra depende do estado oculto anterior, você deve processar as palavras uma de cada vez. Você não pode paralelizar uma sequência. O treinamento em documentos longos é dolorosamente lento.
 
 O Transformer resolve ambos os problemas com um único mecanismo elegante: **atenção**.
@@ -40,15 +40,15 @@ O Transformer resolve ambos os problemas com um único mecanismo elegante: **ate
 
 A inovação central do Transformer é a **autoatenção**: a capacidade de cada palavra em uma sequência atender diretamente a todas as outras palavras simultaneamente, independentemente da distância entre elas.
 
-Em vez de passar informações sequencialmente, a autoatenção calcula **quão relevante é cada palavra em relação a todas as outras palavras na sequência** — tudo de uma vez.
+Em vez de passar informações sequencialmente, a autoatenção calcula **quão relevante é cada palavra em relação a todas as outras palavras na sequência** - tudo de uma vez.
 
-### Consulta, chave e valor — em inglês simples
+### Consulta, chave e valor - em inglês simples
 
 Para cada palavra (ou token), o Transformer cria três vetores:
 
-- **Consulta (Q)**: *"O que estou procurando?"* — a pergunta que esta palavra está fazendo
-- **Chave (K)**: *"O que eu contenho?"* — o anúncio que cada palavra transmite sobre si mesma
-- **Valor (V)**: *"Quais informações devo fornecer?"* — o conteúdo real a ser recuperado
+- **Consulta (Q)**: *"O que estou procurando?"* - a pergunta que esta palavra está fazendo
+- **Chave (K)**: *"O que eu contenho?"* - o anúncio que cada palavra transmite sobre si mesma
+- **Valor (V)**: *"Quais informações devo fornecer?"* - o conteúdo real a ser recuperado
 
 A pontuação de atenção entre duas palavras é calculada considerando o produto escalar da consulta de uma palavra pela chave de outra palavra. Uma pontuação alta significa “essas duas palavras são altamente relevantes uma para a outra”.
 
@@ -169,7 +169,7 @@ Nem todos os modelos baseados em Transformer usam a estrutura completa do codifi
 - Usa apenas a pilha **decodificador**  
 - Treinado com **previsão do próximo token**: dados todos os tokens anteriores, preveja o próximo
 - Excelente em **gerar** texto: conversação, escrita, código
-- Mascaramento causal: cada token só pode atender aos tokens anteriores (não aos futuros — isso seria trapaça)
+- Mascaramento causal: cada token só pode atender aos tokens anteriores (não aos futuros - isso seria trapaça)
 
 ```
 BERT training:   "The [MASK] sat on the mat"  → predict "cat"
@@ -180,35 +180,35 @@ GPT training:    "The cat sat on the"          → predict "mat"
 
 ## 📈 Por que a escala é importante
 
-A arquitetura do Transformer revelou-se extremamente bem dimensionada. Modelos maiores com mais parâmetros, treinados em mais dados, com mais computação, produzem consistentemente melhor desempenho — um fenômeno descrito por **leis de escalabilidade** (Kaplan et al., 2020).
+A arquitetura do Transformer revelou-se extremamente bem dimensionada. Modelos maiores com mais parâmetros, treinados em mais dados, com mais computação, produzem consistentemente melhor desempenho - um fenômeno descrito por **leis de escalabilidade** (Kaplan et al., 2020).
 
 Isso levou a uma progressão:
 - GPT-1 (2018): parâmetros de 117 milhões
 - GPT-2 (2019): parâmetros 1,5B
 - GPT-3 (2020): parâmetros 175B
-- Modelos frontier atuais: muitas vezes mixture-of-experts ou arquiteturas não divulgadas com centenas de bilhões a trilhões de parâmetros efetivos
+- Modelos de fronteira atuais: muitas vezes mixture-of-experts ou arquiteturas não divulgadas com centenas de bilhões a trilhões de parâmetros efetivos
 
-Cada salto trouxe melhorias qualitativas em capacidade. Tarefas que o GPT-2 não conseguia fazer de forma alguma (raciocínio complexo, geração de código) tornaram-se possíveis na escala GPT-3 e continuaram melhorando em modelos frontier posteriores.
+Cada salto trouxe melhorias qualitativas em capacidade. Tarefas que o GPT-2 não conseguia fazer de forma alguma (raciocínio complexo, geração de código) tornaram-se possíveis na escala GPT-3 e continuaram melhorando em modelos de fronteira posteriores.
 
 ## ⚡ Treinamento vs Inferência
 
 Dois perfis computacionais muito diferentes:
 
-**Treinamento**: extremamente caro. Processar trilhões de tokens, calcular gradientes e atualizar enormes conjuntos de parâmetros em milhares de GPUs por semanas ou meses. O treinamento de modelos frontier atuais pode custar centenas de milhões quando computação, dados, energia e engenharia são incluídos.
+**Treinamento**: extremamente caro. Processar trilhões de tokens, calcular gradientes e atualizar enormes conjuntos de parâmetros em milhares de GPUs por semanas ou meses. O treinamento de modelos de fronteira atuais pode custar centenas de milhões quando computação, dados, energia e engenharia são incluídos.
 
 **Inferência**: muito mais barato. Uma única passagem direta pela rede para gerar cada token. Ainda requer hardware significativo (GPUs poderosas ou chips de IA especializados), mas gerenciável em escala.
 
 Esta assimetria moldou a indústria: algumas organizações com bons recursos treinam modelos básicos; todos os outros os acessam por meio de APIs.
 
-<Quiz question="Que problema com RNNs o mecanismo de atenção do Transformer resolveu?" options="RNNs não conseguiam processar texto – eles só funcionavam em imagens|RNNs lutavam com dependências de longo alcance e não conseguiam paralelizar o comprimento da sequência|RNNs exigiam muitos dados rotulados para treinar|RNNs só podiam processar texto em inglês" answer="1" explanation="Os RNNs processavam tokens sequencialmente, causando gradientes de desaparecimento que dificultavam a conexão de palavras distantes (dependências de longo alcance). Eles também não podiam ser paralelizados ao longo da sequência, tornando o treinamento lento. A autoatenção resolve ambos: cada token atende diretamente a todos os outros, e todos os cálculos de atenção podem ser executados em paralelo." />
+<Quiz question="Que problema com RNNs o mecanismo de atenção do Transformer resolveu?" options="RNNs não conseguiam processar texto - eles só funcionavam em imagens|RNNs lutavam com dependências de longo alcance e não conseguiam paralelizar o comprimento da sequência|RNNs exigiam muitos dados rotulados para treinar|RNNs só podiam processar texto em inglês" answer="1" explanation="Os RNNs processavam tokens sequencialmente, causando gradientes de desaparecimento que dificultavam a conexão de palavras distantes (dependências de longo alcance). Eles também não podiam ser paralelizados ao longo da sequência, tornando o treinamento lento. A autoatenção resolve ambos: cada token atende diretamente a todos os outros, e todos os cálculos de atenção podem ser executados em paralelo." />
 
 ## Principais conclusões
 
-- **RNNs** processaram sequências passo a passo, lutando com dependências de longo alcance e incapazes de paralelizar — os transformadores as substituíram
+- **RNNs** processaram sequências passo a passo, lutando com dependências de longo alcance e incapazes de paralelizar - os transformadores as substituíram
 - **Autoatenção** permite que cada token atenda diretamente a todos os outros tokens por meio de vetores Consulta, Chave e Valor - resolvendo os dois problemas de uma só vez
 - **Atenção multicabeças** executa vários cálculos de atenção em paralelo, permitindo que o modelo aprenda diferentes tipos de relacionamentos simultaneamente
 - **Codificação posicional** adiciona informações de pedido ao mecanismo de atenção inerentemente independente de posição
 - **BERT** (somente codificador) é pré-treinado para entender texto bidirecionalmente; melhor para tarefas de classificação e pesquisa
 - **GPT** (somente decodificador) é pré-treinado para gerar texto da esquerda para a direita; melhor para geração e conversa
-- **A escala importa enormemente**: Transformers maiores treinados em mais dados desbloqueiam consistentemente novas capacidades, como demonstrado pela progressão de GPT-1 a GPT-3 e sistemas frontier posteriores
+- **A escala importa enormemente**: Transformers maiores treinados em mais dados desbloqueiam consistentemente novas capacidades, como demonstrado pela progressão de GPT-1 a GPT-3 e sistemas de fronteira posteriores
 - O treinamento é extremamente caro; a inferência é muito mais barata - essa assimetria molda como os modelos básicos são implantados

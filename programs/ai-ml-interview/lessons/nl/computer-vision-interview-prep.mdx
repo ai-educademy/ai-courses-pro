@@ -10,7 +10,7 @@ machineTranslated: true
 ---
 # 👁️Voorbereiding computervisie-interview
 
-Computervisie-interviews hebben een unieke smaak: ze combineren wiskundige grondbeginselen (convoluties, terugpropagatie door ruimtelijke lagen) met praktische techniek (hoe ga je om met een 4K-beeld op een mobiel apparaat?). Of je nu solliciteert voor een autonoom rijteam of een startup voor retailanalyses, deze les behandelt de concepten die interviewers het meest testen – en de praktische kennis waarmee kandidaten zich onderscheiden.
+Computervisie-interviews hebben een unieke smaak: ze combineren wiskundige grondbeginselen (convoluties, terugpropagatie door ruimtelijke lagen) met praktische techniek (hoe ga je om met een 4K-beeld op een mobiel apparaat?). Of je nu solliciteert voor een autonoom rijteam of een startup voor retailanalyses, deze les behandelt de concepten die interviewers het meest testen - en de praktische kennis waarmee kandidaten zich onderscheiden.
 
 ---
 
@@ -32,7 +32,7 @@ Input (5×5)      Kernel (3×3)      Output (3×3)
 ```
 
 **Belangrijkste parameters**:
-- **Kernelgrootte**: doorgaans 3×3 of 5×5 — kleinere dieper gestapelde kernels hebben de voorkeur boven één grote kernel
+- **Kernelgrootte**: doorgaans 3×3 of 5×5 - kleinere dieper gestapelde kernels hebben de voorkeur boven één grote kernel
 - **Stride**: stapgrootte van het schuifraam (stap 2 helften ruimtelijke afmetingen)
 - **Opvulling**: voeg nullen toe rond de rand om de ruimtelijke grootte te behouden ('dezelfde' opvulling)
 - **Kanalen**: een 3×3-kernel op een RGB-afbeelding is feitelijk 3×3×3
@@ -53,7 +53,7 @@ Pooling verkleint de ruimtelijke dimensies terwijl belangrijke informatie behoud
 ### Functiekaarten en receptieve velden
 
 - **Feature maps**: de uitvoer van elke convolutionele laag: vroege lagen detecteren randen en texturen, diepere lagen detecteren complexe patronen (gezichten, objecten)
-- **Ontvangstveld**: het gebied van het invoerbeeld dat een bepaald uitvoerneuron beïnvloedt — groeit dieper in het netwerk
+- **Ontvangstveld**: het gebied van het invoerbeeld dat een bepaald uitvoerneuron beïnvloedt - groeit dieper in het netwerk
 
 <ThinkAboutIt>Waarom gebruiken moderne architecturen meerdere gestapelde 3×3-convoluties in plaats van een enkele 7×7-convolutie? Denk na over het aantal parameters, niet-lineariteiten en receptieve veldgrootte.
 </ThinkAboutIt>
@@ -90,7 +90,7 @@ De go-to-architectuur voor realtime objectdetectie.
 |---|---|---|
 | YOLOv3 | Detectie op meerdere schaal | ~30 FPS |
 | YOLOv5 | PyTorch-native, gemakkelijk te gebruiken | ~45 FPS |
-| YOLOv8 | Ankervrij, state-of-the-art | ~80 FPS |
+| YOLOv8 | Ankervrij, geavanceerde | ~80 FPS |
 
 ### Visietransformers (ViT)
 
@@ -127,7 +127,7 @@ Interviewers vragen u graag om deze taken te onderscheiden:
 
 ### Leer leren overdragen
 
-Een van de meest praktische CV-technieken – en een veel voorkomend interviewonderwerp:
+Een van de meest praktische CV-technieken - en een veel voorkomend interviewonderwerp:
 
 1. **Neem een vooraf getraind model** (bijvoorbeeld ResNet-50 getraind op ImageNet)
 2. **Vervang de uiteindelijke classificatiekop** door uw taakspecifieke lagen
@@ -162,7 +162,7 @@ Cruciaal voor het trainen van robuuste modellen, vooral met beperkte gegevens:
 - **Geavanceerd**: CutOut (willekeurige patches maskeren), MixUp (twee afbeeldingen combineren), CutMix (patches vervangen door patches van een andere afbeelding)
 - **Testtijdaugmentatie (TTA)**: verhoog de gevolgtrekking en gemiddelde voorspellingen voor een betere nauwkeurigheid
 
-<FunFact>De ImageNet-dataset – de benchmark die de aanzet gaf tot de deep learning-revolutie – bevat meer dan 14 miljoen met de hand gelabelde afbeeldingen in 21.841 categorieën. De jaarlijkse ImageNet-uitdaging (2010-2017) zorgde ervoor dat het foutenpercentage steeg van 28% naar 2,3%, waarmee de menselijke prestaties van ongeveer 5% werden overtroffen.
+<FunFact>De ImageNet-dataset - de benchmark die de aanzet gaf tot de deep learning-revolutie - bevat meer dan 14 miljoen met de hand gelabelde afbeeldingen in 21.841 categorieën. De jaarlijkse ImageNet-uitdaging (2010-2017) zorgde ervoor dat het foutenpercentage steeg van 28% naar 2,3%, waarmee de menselijke prestaties van ongeveer 5% werden overtroffen.
 </FunFact>
 
 ---
@@ -229,10 +229,10 @@ De behoefte aan gelabelde gegevens verminderen:
 
 ## 🔑Belangrijkste afhaalrestaurants
 
-- **Beheers de basisprincipes**: convoluties, pooling, functiekaarten en receptieve velden – deze komen in elk CV-interview aan bod
+- **Beheers de basisprincipes**: convoluties, pooling, functiekaarten en receptieve velden - deze komen in elk CV-interview aan bod
 - **Ken de belangrijkste architecturen**: ResNet (verbindingen overslaan), YOLO (real-time detectie), ViT (transformatoren voor visie)
 - **Begrijp de taakhiërarchie**: classificatie → detectie → segmentatie → instantiesegmentatie
-- **Transferleren is uw standaardaanpak** — het verfijnen van vooraf getrainde modellen is in de meeste praktische scenario's beter dan helemaal opnieuw trainen
+- **Transferleren is uw standaardaanpak** - het verfijnen van vooraf getrainde modellen is in de meeste praktische scenario's beter dan helemaal opnieuw trainen
 - **Denk na over implementatiebeperkingen**: edge versus cloud, modelcompressie en latentiebudgetten
 - **Blijf actueel**: multimodale modellen (CLIP), funderingsmodellen (SAM) en diffusiemodellen geven het veld opnieuw vorm
 

@@ -16,7 +16,7 @@ Eine besondere Art von Stress entsteht durch das Debuggen von Code, während jem
 
 Wenn Ihnen in einem Vorstellungsgespräch fehlerhafter Code ausgehändigt wird, widerstehen Sie dem Drang, sofort mit der Suche nach dem Fehler zu beginnen. Befolgen Sie stattdessen diesen fünfstufigen Rahmen:
 
-### R – Reproduzieren
+### R - Reproduzieren
 
 Bestätigen Sie, dass der Fehler vorliegt, und verstehen Sie seine Symptome.
 
@@ -38,11 +38,11 @@ def second_largest(nums):
 
 # Step 1: Reproduce with test cases
 print(second_largest([3, 1, 4, 1, 5]))  # Expected: 4, Got: 4 ✓
-print(second_largest([5, 5, 5]))         # Expected: 5, Got: -inf ✗ — BUG!
-print(second_largest([1]))               # Expected: None?, Got: -inf — Edge case
+print(second_largest([5, 5, 5]))         # Expected: 5, Got: -inf ✗ - BUG!
+print(second_largest([1]))               # Expected: None?, Got: -inf - Edge case
 ```
 
-### I – Isolieren
+### I - Isolieren
 
 Grenzen Sie ein, wo der Käfer lebt. Nutzen Sie das Prinzip „Teile und herrsche“:
 
@@ -50,14 +50,14 @@ Grenzen Sie ein, wo der Käfer lebt. Nutzen Sie das Prinzip „Teile und herrsch
 - Welche bestimmte Zeile oder welcher Block führt zu dem falschen Ergebnis?
 - Können Sie es auf einen minimal fehlerhaften Testfall eingrenzen?
 
-### I – Identifizieren
+### I - Identifizieren
 
-Bestimmen Sie nach der Isolierung die Grundursache – nicht nur das Symptom:
+Bestimmen Sie nach der Isolierung die Grundursache - nicht nur das Symptom:
 
 - **Symptom**: Gibt `-inf` für `[5, 5, 5]` zurück
 - **Grundursache**: Die Bedingung `elif num > second` behandelt keine Duplikate. Wenn alle Elemente gleich sind, ist `num > first` nur einmal wahr und `num > second` ist für die verbleibenden gleichen Elemente niemals wahr.
 
-### F – Fix
+### F - Fix
 
 Wenden Sie den minimalen Fix an, der die Grundursache behebt, ohne neue Fehler einzuführen:
 
@@ -75,11 +75,11 @@ def second_largest(nums):
     return second if second != float('-inf') else first  # All same → return that value
 ```
 
-<ThinkAboutIt>Warten Sie – sollte `second_largest([5, 5, 5])` 5 oder Keine zurückgeben? Das ist zweideutig und in einem echten Vorstellungsgespräch sollten Sie dem Interviewer genau diese Art von Frage stellen. Die Klärung von Anforderungen gehört zum Debugging.</ThinkAboutIt>
+<ThinkAboutIt>Warten Sie - sollte `second_largest([5, 5, 5])` 5 oder Keine zurückgeben? Das ist zweideutig und in einem echten Vorstellungsgespräch sollten Sie dem Interviewer genau diese Art von Frage stellen. Die Klärung von Anforderungen gehört zum Debugging.</ThinkAboutIt>
 
-### V – Überprüfen
+### V - Überprüfen
 
-Bestätigen Sie, dass die Fehlerbehebung in allen Fällen funktioniert – dem ursprünglichen Fehlerfall, Randfällen und zuvor bestandenen Fällen:
+Bestätigen Sie, dass die Fehlerbehebung in allen Fällen funktioniert - dem ursprünglichen Fehlerfall, Randfällen und zuvor bestandenen Fällen:
 
 ```python
 assert second_largest([3, 1, 4, 1, 5]) == 4    # Normal case
@@ -93,14 +93,14 @@ assert second_largest([-1, -2, -3]) == -2        # Negative numbers
 
 ## Gängige Formate für Debugging-Interviews
 
-### Format 1: „Hier ist fehlerhafter Code – beheben“
+### Format 1: „Hier ist fehlerhafter Code - beheben“
 
 Sie erhalten eine Funktion mit 1-3 Fehlern. RIIFV anwenden:
 - Lesen Sie den Code und verstehen Sie die Absicht
 - Führen Sie mentale Testfälle durch, um Fehler zu finden
 - Beheben Sie jeden Fehler und erläutern Sie Ihre Argumentation
 
-### Format 2: „Dieses System ist kaputt – diagnostizieren Sie es“
+### Format 2: „Dieses System ist kaputt - diagnostizieren Sie es“
 
 Ihnen wird ein Szenario angezeigt: „Benutzer berichten, dass auf der Checkout-Seite manchmal der falsche Preis angezeigt wird.“ Sie müssen:
 - Stellen Sie klärende Fragen („Manchmal? Ist es zufällig oder folgt es einem Muster?“)
@@ -134,7 +134,7 @@ Der größte Unterschied zwischen dem Debuggen allein und dem Debuggen in einem 
 
 ## Strategischer Einsatz von Print-Statements
 
-In einem Coding-Interview sind print-Anweisungen Ihr Debugger. Nutzen Sie sie strategisch:
+In einem Programmieren-Interview sind print-Anweisungen Ihr Debugger. Nutzen Sie sie strategisch:
 
 ```python
 def merge_sorted_lists(list1, list2):
@@ -178,11 +178,11 @@ Bei Vorstellungsgesprächen auf höherer Ebene werden Sie möglicherweise zum De
 
 ### Systematischer Ansatz
 
-1. **Überprüfen Sie die Metrik-Dashboards** – handelt es sich um einen Anstieg oder eine allmähliche Verschlechterung?
-2. **Den Umfang eingrenzen** – welcher Dienst, Endpunkt oder welche Region ist betroffen?
-3. **Überprüfen Sie die letzten Bereitstellungen** – „Was hat sich geändert?“ ist die Frage mit dem höchsten Signal
-4. **Follow the Trace** – Verwenden Sie Korrelations-IDs, um eine fehlgeschlagene Anfrage dienstübergreifend zu verfolgen
-5. **Abhängigkeiten prüfen** – ist ein Downstream-Dienst (Datenbank, Cache, Drittanbieter-API) die Ursache?
+1. **Überprüfen Sie die Metrik-Dashboards** - handelt es sich um einen Anstieg oder eine allmähliche Verschlechterung?
+2. **Den Umfang eingrenzen** - welcher Dienst, Endpunkt oder welche Region ist betroffen?
+3. **Überprüfen Sie die letzten Bereitstellungen** - „Was hat sich geändert?“ ist die Frage mit dem höchsten Signal
+4. **Follow the Trace** - Verwenden Sie Korrelations-IDs, um eine fehlgeschlagene Anfrage dienstübergreifend zu verfolgen
+5. **Abhängigkeiten prüfen** - ist ein Downstream-Dienst (Datenbank, Cache, Drittanbieter-API) die Ursache?
 
 ```
 User reports slow checkout
@@ -198,7 +198,7 @@ User reports slow checkout
 
 ## Zeitmanagement während Debugging-Runden
 
-Eine typische Debugging-Runde dauert 30–45 Minuten. Planen Sie Ihre Zeit ein:
+Eine typische Debugging-Runde dauert 30-45 Minuten. Planen Sie Ihre Zeit ein:
 
 | Phase | Zeit | Aktivität |
 |---|---|---|
@@ -208,16 +208,16 @@ Eine typische Debugging-Runde dauert 30–45 Minuten. Planen Sie Ihre Zeit ein:
 | **Reparieren** | 5 Minuten | Wenden Sie die minimale, korrekte Korrektur | an
 | **Überprüfen** | 5 Minuten | Testen Sie den Fix in allen Fällen, einschließlich Randfällen |
 
-<Callout>Wenn Sie nach 15 Minuten den Fehler noch nicht gefunden haben, treten Sie einen Schritt zurück und ändern Sie Ihren Ansatz. Lesen Sie die Problemstellung noch einmal – möglicherweise haben Sie das erwartete Verhalten falsch verstanden. Probieren Sie einen völlig anderen Testfall aus. Manchmal liegt der Fehler in Ihren Annahmen und nicht im Code.</Callout>
+<Callout>Wenn Sie nach 15 Minuten den Fehler noch nicht gefunden haben, treten Sie einen Schritt zurück und ändern Sie Ihren Ansatz. Lesen Sie die Problemstellung noch einmal - möglicherweise haben Sie das erwartete Verhalten falsch verstanden. Probieren Sie einen völlig anderen Testfall aus. Manchmal liegt der Fehler in Ihren Annahmen und nicht im Code.</Callout>
 
 ## Was tun, wenn Sie nicht weiterkommen?
 
-1. **Lesen Sie die Problemstellung noch einmal** – möglicherweise haben Sie eine falsche Annahme getroffen
-2. **Versuchen Sie es mit einem minimalen Testfall** – reduzieren Sie die Eingabe auf den kleinsten Fall, der immer noch fehlschlägt
-3. **Zeile für Zeile nachzeichnen** – verfolgen Sie bei Bedarf mit Stift und Papier jede Variable
-4. **Überprüfen Sie die Grenzen** – erste Iteration, letzte Iteration, leere Eingabe
-5. **Erklären Sie dem Interviewer das Problem** – „Rubber Duck Debugging“ funktioniert auch bei einem menschlichen Publikum
-6. **Bitten Sie um einen Hinweis** – das ist viel besser, als 10 Minuten lang schweigend zu sitzen
+1. **Lesen Sie die Problemstellung noch einmal** - möglicherweise haben Sie eine falsche Annahme getroffen
+2. **Versuchen Sie es mit einem minimalen Testfall** - reduzieren Sie die Eingabe auf den kleinsten Fall, der immer noch fehlschlägt
+3. **Zeile für Zeile nachzeichnen** - verfolgen Sie bei Bedarf mit Stift und Papier jede Variable
+4. **Überprüfen Sie die Grenzen** - erste Iteration, letzte Iteration, leere Eingabe
+5. **Erklären Sie dem Interviewer das Problem** - „Rubber Duck Debugging“ funktioniert auch bei einem menschlichen Publikum
+6. **Bitten Sie um einen Hinweis** - das ist viel besser, als 10 Minuten lang schweigend zu sitzen
 
 ## Wichtige Erkenntnisse
 
@@ -225,4 +225,4 @@ Eine typische Debugging-Runde dauert 30–45 Minuten. Planen Sie Ihre Zeit ein:
 - **Kontinuierlich laut denken**: Erzählen Sie Ihre Beobachtungen, Hypothesen und Überlegungen. Schweigen ist Ihr Feind in einem Debugging-Interview.
 - **Randfälle priorisieren**: Die meisten Interviewfehler verbergen sich in leeren Eingaben, Duplikaten, negativen Zahlen oder Randbedingungen.
 - **Druckauszüge sind Ihr Freund**: Setzen Sie sie an Entscheidungspunkten strategisch ein und bereinigen Sie sie, bevor Sie sie fertigstellen.
-- **Wissen Sie, wann Sie drehen müssen**: Wenn Ihr Ansatz nach 10–15 Minuten nicht funktioniert, treten Sie einen Schritt zurück und versuchen Sie es mit einem völlig anderen Winkel.
+- **Wissen Sie, wann Sie drehen müssen**: Wenn Ihr Ansatz nach 10-15 Minuten nicht funktioniert, treten Sie einen Schritt zurück und versuchen Sie es mit einem völlig anderen Winkel.

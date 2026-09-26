@@ -24,7 +24,7 @@ Estos modelos se entrenan con cientos de miles de millones de palabras extraída
 
 **Tokens, no palabras:** Los LLM no procesan palabras completas; funcionan con **tokens**, que son unidades de subpalabras. La palabra "comprender" podría dividirse en "bajo" + "estar de pie" + "ing". Una palabra típica en inglés tiene un promedio de aproximadamente 1,3 tokens. Este esquema de tokenización permite a los modelos manejar palabras raras, jerga técnica e incluso varios idiomas sin un vocabulario increíblemente extenso.
 
-<FunFact>Entrenar un modelo de lenguaje frontier puede costar cientos de millones cuando se incluyen computación, datos, energía e ingeniería. Eso es aproximadamente el presupuesto de una gran película, excepto que el "actor" puede hablar todos los lenguajes de programación.</FunFact>
+<FunFact>Entrenar un modelo de lenguaje de frontera puede costar cientos de millones cuando se incluyen computación, datos, energía e ingeniería. Eso es aproximadamente el presupuesto de una gran película, excepto que el "actor" puede hablar todos los lenguajes de programación.</FunFact>
 </FunFact>
 
 ## La arquitectura transformadora
@@ -90,7 +90,7 @@ A medida que los modelos crecen, desarrollan habilidades que no fueron entrenada
 
 Estas propiedades emergentes son uno de los aspectos más fascinantes del escalamiento: habilidades que aparecen casi "gratis" una vez que un modelo cruza ciertos umbrales de tamaño.
 
-<FunFact>Los primeros modelos frontier mostraron el patrón con claridad: podían aprobar exámenes profesionales difíciles y aun así tropezar con tareas simples de aritmética o conteo cuando el prompt exponía sus debilidades.</FunFact>
+<FunFact>Los primeros modelos de frontera mostraron el patrón con claridad: podían aprobar exámenes profesionales difíciles y aun así tropezar con tareas simples de aritmética o conteo cuando el prompt exponía sus debilidades.</FunFact>
 </FunFact>
 
 ## Limitaciones que debes entender
@@ -98,8 +98,8 @@ Estas propiedades emergentes son uno de los aspectos más fascinantes del escala
 Los LLM son poderosos pero están lejos de ser perfectos:
 
 - **Alucinaciones** - Los modelos generan texto que suena confiado pero que en realidad es incorrecto. No "conocen" los hechos; predicen secuencias de tokens probables.
-- **Límites de la ventana de contexto** - Cada modelo tiene un tamaño de entrada máximo, desde cientos de miles hasta más de un millón de tokens en los sistemas frontier actuales. La información más allá de esta ventana es simplemente invisible.
-- **Costo y latencia** - Ejecutar inferencia en modelos grandes requiere costosos clústeres de GPU. Una consulta frontier de primer nivel cuesta significativamente más que una consulta a un modelo pequeño o mediano.
+- **Límites de la ventana de contexto** - Cada modelo tiene un tamaño de entrada máximo, desde cientos de miles hasta más de un millón de tokens en los sistemas de frontera actuales. La información más allá de esta ventana es simplemente invisible.
+- **Costo y latencia** - Ejecutar inferencia en modelos grandes requiere costosos clústeres de GPU. Una consulta de frontera de primer nivel cuesta significativamente más que una consulta a un modelo pequeño o mediano.
 - **Falta de verdadera comprensión** - Los LLM manipulan patrones estadísticos en el texto. Si esto constituye "comprensión" es un debate filosófico profundo.
 - **Límites de datos de entrenamiento**: los modelos no conocen los eventos después de que se recopilaron sus datos de entrenamiento, a menos que se complementen con sistemas de recuperación.
 
@@ -110,7 +110,7 @@ Los LLM son poderosos pero están lejos de ser perfectos:
 
 ## El debate sobre la escala
 
-Durante años, la creencia dominante fue que **cuanto más grande, siempre mejor**: más parámetros, más datos y más computación mejorarían constantemente el rendimiento. Esta "ley de escala" se mantuvo notablemente bien durante la generación GPT-2, GPT-3 y GPT-4 y sistemas frontier posteriores.
+Durante años, la creencia dominante fue que **cuanto más grande, siempre mejor**: más parámetros, más datos y más computación mejorarían constantemente el rendimiento. Esta "ley de escala" se mantuvo notablemente bien durante la generación GPT-2, GPT-3 y GPT-4 y sistemas de frontera posteriores.
 
 Sin embargo, investigaciones recientes sugieren que es posible que nos estemos acercando a rendimientos decrecientes sólo en escala bruta. La atención se está desplazando hacia:
 - **Mejor calidad de datos** que cantidad (conjuntos de datos seleccionados y deduplicados).

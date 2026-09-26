@@ -1,6 +1,6 @@
 ---
 title: "RLHF et alignement - Comment ChatGPT apprend les valeurs humaines"
-description: "Comprenez comment les modèles de langage bruts sont transformés en assistants utiles et inoffensifs grâce au fine-tuning supervisé, à la modélisation de la récompense et à l'apprentissage par renforcement à partir de feedback humain."
+description: "Comprenez comment les modèles de langage bruts sont transformés en assistants utiles et inoffensifs grâce au réglage fin supervisé, à la modélisation de la récompense et à l'apprentissage par renforcement à partir de feedback humain."
 order: 8
 difficulty: "advanced"
 duration: 18
@@ -20,7 +20,7 @@ L'écart entre « capable » et « utile » constitue le problème de l'aligneme
 
 <Illustration src="/images/lessons/rlhf-and-alignment.svg" alt="Pipeline en trois étapes : le SFT entraîne sur des démonstrations, le reward model apprend les préférences, PPO optimise la politique contre le reward model" caption="Le pipeline RLHF transforme un modèle de base en assistant aligné en trois étapes : SFT, modélisation de la récompense et optimisation par RL." />
 
-## Étape 1 : Fine-tuning supervisé (SFT)
+## Étape 1 : réglage fin supervisé (SFT)
 
 La première étape est simple : collecter des milliers d'**exemples de démonstration** de haute qualité - des conversations idéales entre un utilisateur et un assistant - puis fine-tuner le modèle de base dessus. Cela enseigne au modèle le *format* de l'utilité : répondre directement aux questions, suivre les instructions, admettre l'incertitude et refuser les requêtes nuisibles.
 
@@ -65,7 +65,7 @@ La fonction de perte DPO définit implicitement un reward model au sein du modè
 L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
 ```
 
-Où `y_w` est la réponse préférée, `y_l` la rejetée, et `π_ref` le modèle de référence (SFT). DPO est plus simple, plus stable et moins coûteux à entraîner - pas de reward model, pas de boucle de RL, pas de PPO sensible aux hyperparamètres. De nombreux modèles open-weight utilisent désormais DPO ou des variantes de preference-optimisation associées.
+Où `y_w` est la réponse préférée, `y_l` la rejetée, et `π_ref` le modèle de référence (SFT). DPO est plus simple, plus stable et moins coûteux à entraîner - pas de reward model, pas de boucle de RL, pas de PPO sensible aux hyperparamètres. De nombreux modèles à poids ouverts utilisent désormais DPO ou des variantes de preference-optimisation associées.
 
 <ThinkAboutIt>
 DPO élimine le reward model mais perd aussi la capacité de noter des réponses arbitraires au moment de l'inférence. Dans quels scénarios avoir un reward model explicite (le pipeline RLHF complet) serait-il plus précieux que la simplicité de DPO ?
@@ -81,7 +81,7 @@ Anthropic a introduit le **Constitutional AI (CAI)** pour réduire la dépendanc
 
 Le CAI passe massivement à l'échelle la collecte de préférences - l'IA peut générer et évaluer des millions de comparaisons pour une fraction du coût de l'annotation humaine. Cela rend aussi les critères d'alignement **explicites et auditables**, encodés dans la constitution plutôt qu'implicitement appris des biais des annotateurs.
 
-<Quiz question="Quelle est l'innovation centrale du Constitutional AI par rapport au RLHF standard ?" options="Il utilise un modèle de base beaucoup plus grand|Il remplace les annotateurs de préférences humains par le modèle IA lui-même, guidé par des principes écrits explicites|Il élimine tout besoin de fine-tuning|Il n'entraîne que sur des données synthétiques" answer="1" explanation="Le Constitutional AI utilise le modèle lui-même pour générer des jugements de préférence, guidé par un ensemble de principes explicitement écrits (la constitution). Cela passe massivement à l'échelle la collecte de données de préférence tout en rendant les critères d'alignement transparents et modifiables." />
+<Quiz question="Quelle est l'innovation centrale du Constitutional AI par rapport au RLHF standard ?" options="Il utilise un modèle de base beaucoup plus grand|Il remplace les annotateurs de préférences humains par le modèle IA lui-même, guidé par des principes écrits explicites|Il élimine tout besoin de réglage fin|Il n'entraîne que sur des données synthétiques" answer="1" explanation="Le Constitutional AI utilise le modèle lui-même pour générer des jugements de préférence, guidé par un ensemble de principes explicitement écrits (la constitution). Cela passe massivement à l'échelle la collecte de données de préférence tout en rendant les critères d'alignement transparents et modifiables." />
 
 ## Red teaming
 
@@ -106,7 +106,7 @@ La frontière de la recherche en alignement est de trouver des techniques qui ma
 <Quiz question="Qu'est-ce que la « taxe de l'alignement » dans le contexte des modèles entraînés par RLHF ?" options="Le coût financier de l'embauche d'annotateurs humains pour les données de préférence|La réduction de l'utilité et des capacités du modèle résultant d'un entraînement à la sécurité rendant le modèle excessivement prudent|Le coût computationnel de l'optimisation PPO|La taxe que les gouvernements imposent aux entreprises d'IA pour la conformité en matière de sécurité" answer="1" explanation="La taxe de l'alignement désigne la perte de capacité ou d'utilité lorsque l'entraînement à la sécurité rend un modèle excessivement prudent - refusant des requêtes anodines, ajoutant des nuances inutiles ou produisant des réponses génériques. Équilibrer sécurité et utilité réelle est l'un des problèmes ouverts les plus difficiles de l'alignement." />
 
 <FunFact>
-Les laboratoires frontier consacrent des mois au travail d'alignement (collecte de données SFT, modélisation de la récompense, preference optimisation et tests de sécurité) pour transformer des modèles de base en produits suffisamment sûrs pour être publiés. La phase d'alignement, bien que représentant une fraction du calcul de pré-entraînement, nécessite des milliers d'heures d'annotation humaine spécialisée et d'évaluation.
+Les laboratoires de pointe consacrent des mois au travail d'alignement (collecte de données SFT, modélisation de la récompense, optimisation des préférences et tests de sécurité) pour transformer des modèles de base en produits suffisamment sûrs pour être publiés. La phase d'alignement, bien que représentant une fraction du calcul de pré-entraînement, nécessite des milliers d'heures d'annotation humaine spécialisée et d'évaluation.
 </FunFact>
 
 <ThinkAboutIt>

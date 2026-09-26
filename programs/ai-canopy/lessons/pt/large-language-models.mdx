@@ -1,5 +1,5 @@
 ---
-title: "Grandes modelos de linguagem – os motores por trás da IA ​​moderna"
+title: "Grandes modelos de linguagem - os motores por trás da IA ​​moderna"
 description: "Explore como funcionam os LLMs, desde a arquitetura do transformador até recursos emergentes e limitações do mundo real."
 order: 1
 difficulty: "advanced"
@@ -8,7 +8,7 @@ icon: "🤖"
 published: true
 machineTranslated: true
 ---
-# Grandes modelos de linguagem – os motores por trás da IA ​​moderna
+# Grandes modelos de linguagem - os motores por trás da IA ​​moderna
 
 Grandes modelos de linguagem mudaram fundamentalmente o que as máquinas podem fazer com texto, código e raciocínio. Nesta lição, abriremos a cortina sobre como eles funcionam, por que são tão poderosos e onde ainda ficam aquém.
 
@@ -24,12 +24,12 @@ Esses modelos são treinados em centenas de bilhões de palavras extraídas de l
 
 **Tokens, não palavras:** LLMs não processam palavras inteiras - eles funcionam com **tokens**, que são unidades de subpalavras. A palavra “compreensão” pode ser dividida em “sob” + “suporte” + “ing”. Uma palavra típica em inglês tem em média cerca de 1,3 tokens. Este esquema de tokenização permite que os modelos lidem com palavras raras, jargões técnicos e até mesmo vários idiomas sem um vocabulário impossivelmente grande.
 
-<FunFact>Treinar um modelo de linguagem frontier pode custar centenas de milhões quando computação, dados, energia e engenharia são incluídos. Esse é aproximadamente o orçamento de um grande filme, exceto que o “ator” pode falar todas as linguagens de programação.</FunFact>
+<FunFact>Treinar um modelo de linguagem de fronteira pode custar centenas de milhões quando computação, dados, energia e engenharia são incluídos. Esse é aproximadamente o orçamento de um grande filme, exceto que o “ator” pode falar todas as linguagens de programação.</FunFact>
 </FunFact>
 
 ## A Arquitetura do Transformador
 
-Todo LLM moderno é baseado no **transformador**, apresentado no artigo de 2017 *Atenção é tudo que você precisa*. A principal inovação é a **autoatenção** – um mecanismo que permite ao modelo avaliar a importância de cada palavra em relação a todas as outras palavras na entrada.
+Todo LLM moderno é baseado no **transformador**, apresentado no artigo de 2017 *Atenção é tudo que você precisa*. A principal inovação é a **autoatenção** - um mecanismo que permite ao modelo avaliar a importância de cada palavra em relação a todas as outras palavras na entrada.
 
 **Como funciona a autoatenção (simplificado):**
 1. Cada token é convertido em três vetores: **Query**, **Key** e **Value**.
@@ -60,7 +60,7 @@ Isso é repetido em vários **cabeçalhos de atenção** em paralelo, permitindo
 | **Llama 4** | Meta | Pesos abertos, multimodalidade nativa, contexto longo |
 | **Mistral Large** | Mistral AI | Alternativa europeia eficiente |
 
-O campo se move extraordinariamente rápido – no momento em que você estiver lendo isto, já poderão existir modelos mais novos.
+O campo se move extraordinariamente rápido - no momento em que você estiver lendo isto, já poderão existir modelos mais novos.
 
 Uma distinção crucial neste cenário é entre modelos de **código fechado** (GPT, Claude, Gemini), onde apenas a API está disponível, e modelos de **peso aberto** (Llama, Mistral), onde os pesos do modelo são divulgados publicamente. Os modelos de peso aberto permitem que as organizações executem inferência em sua própria infraestrutura, ajustem para domínios específicos e inspecionem o comportamento do modelo, vantagens muito importantes para setores sensíveis à privacidade.
 
@@ -71,7 +71,7 @@ Uma distinção crucial neste cenário é entre modelos de **código fechado** (
 
 LLMs são construídos em etapas:
 
-1. **Pré-treinamento** – O modelo lê grandes quantidades de texto e aprende a prever o próximo token. Este estágio é extremamente caro e produz um modelo básico que pode completar o texto, mas não é particularmente útil.
+1. **Pré-treinamento** - O modelo lê grandes quantidades de texto e aprende a prever o próximo token. Este estágio é extremamente caro e produz um modelo básico que pode completar o texto, mas não é particularmente útil.
 
 2. **Ajuste fino supervisionado (SFT)** - Exemplos de respostas ideais escritas por humanos ensinam o modelo a seguir instruções e responder perguntas adequadamente.
 
@@ -88,9 +88,9 @@ LLMs são construídos em etapas:
 - **Fluência multilíngue** - Traduzir e gerar texto em idiomas com relativamente poucos dados de treinamento.
 - **Aprendizagem no contexto** - Adaptação do comportamento com base nos exemplos fornecidos no prompt, sem nenhuma atualização de peso.
 
-Essas propriedades emergentes são um dos aspectos mais fascinantes do dimensionamento – habilidades que aparecem quase “de graça” quando um modelo ultrapassa certos limites de tamanho.
+Essas propriedades emergentes são um dos aspectos mais fascinantes do dimensionamento - habilidades que aparecem quase “de graça” quando um modelo ultrapassa certos limites de tamanho.
 
-<FunFact>Os primeiros modelos frontier mostraram o padrão claramente: conseguiam passar em exames profissionais difíceis, mas ainda tropeçavam em tarefas simples de aritmética ou contagem quando o prompt expunha suas fraquezas.</FunFact>
+<FunFact>Os primeiros modelos de fronteira mostraram o padrão claramente: conseguiam passar em exames profissionais difíceis, mas ainda tropeçavam em tarefas simples de aritmética ou contagem quando o prompt expunha suas fraquezas.</FunFact>
 </FunFact>
 
 ## Limitações que você deve compreender
@@ -98,28 +98,28 @@ Essas propriedades emergentes são um dos aspectos mais fascinantes do dimension
 LLMs são poderosos, mas estão longe de ser perfeitos:
 
 - **Alucinações** - Os modelos geram textos que parecem confiantes e que são factualmente errados. Eles não “conhecem” os fatos; eles prevêem sequências de tokens prováveis.
-- **Limites da janela de contexto** - Cada modelo tem um tamanho máximo de entrada, de centenas de milhares a mais de um milhão de tokens nos sistemas frontier atuais. As informações além desta janela são simplesmente invisíveis.
-- **Custo e latência** - Executar inferência em modelos grandes requer clusters de GPU caros. Uma consulta frontier de primeira linha custa significativamente mais do que uma consulta a um modelo pequeno ou médio.
+- **Limites da janela de contexto** - Cada modelo tem um tamanho máximo de entrada, de centenas de milhares a mais de um milhão de tokens nos sistemas de fronteira atuais. As informações além desta janela são simplesmente invisíveis.
+- **Custo e latência** - Executar inferência em modelos grandes requer clusters de GPU caros. Uma consulta de fronteira de primeira linha custa significativamente mais do que uma consulta a um modelo pequeno ou médio.
 - **Falta de compreensão verdadeira** - LLMs manipulam padrões estatísticos em texto. Se isto constitui “compreensão” é um debate filosófico profundo.
 - **Cortes de dados de treinamento** - Os modelos não sabem sobre os eventos depois que seus dados de treinamento foram coletados, a menos que sejam aumentados com sistemas de recuperação.
 
 <Callout>Sempre verifique os fatos críticos dos resultados do LLM em relação a fontes confiáveis. Trate os LLMs como um assistente de pesquisa brilhante, mas não confiável - extraordinariamente útil, mas nunca a palavra final sobre questões de fato.
 </Callout>
 
-<Quiz question="Por que os LLMs às vezes produzem alucinações?" options="Porque eles acessam bancos de dados não confiáveis|Porque eles prevêem sequências de tokens estatisticamente prováveis, em vez de recuperar fatos verificados|Porque seus dados de treinamento são deliberadamente imprecisos|Porque as alucinações são um recurso projetado para a criatividade" answer="1" explanation="LLMs geram texto prevendo os próximos tokens mais prováveis. Eles não têm nenhum mecanismo para verificar a exatidão dos fatos – eles modelam padrões de linguagem, não a verdade." />
+<Quiz question="Por que os LLMs às vezes produzem alucinações?" options="Porque eles acessam bancos de dados não confiáveis|Porque eles prevêem sequências de tokens estatisticamente prováveis, em vez de recuperar fatos verificados|Porque seus dados de treinamento são deliberadamente imprecisos|Porque as alucinações são um recurso projetado para a criatividade" answer="1" explanation="LLMs geram texto prevendo os próximos tokens mais prováveis. Eles não têm nenhum mecanismo para verificar a exatidão dos fatos - eles modelam padrões de linguagem, não a verdade." />
 
 ## O debate sobre escala
 
-Durante anos, a crença dominante foi que **maior é sempre melhor** - mais parâmetros, mais dados e mais computação melhorariam constantemente o desempenho. Esta “lei de escala” funcionou notavelmente bem na geração GPT-2, GPT-3 e GPT-4 e em sistemas frontier posteriores.
+Durante anos, a crença dominante foi que **maior é sempre melhor** - mais parâmetros, mais dados e mais computação melhorariam constantemente o desempenho. Esta “lei de escala” funcionou notavelmente bem na geração GPT-2, GPT-3 e GPT-4 e em sistemas de fronteira posteriores.
 
 No entanto, pesquisas recentes sugerem que podemos estar nos aproximando de retornos decrescentes apenas em escala bruta. O foco está mudando para:
 - **Melhor qualidade de dados** em relação à quantidade (conjuntos de dados selecionados e desduplicados).
 - **Cálculo em tempo de inferência** - permitindo que os modelos "pensem mais" em problemas difíceis, em vez de tornar o modelo em si maior.
-- **Arquiteturas especializadas** – modelos mistos de especialistas que ativam apenas uma fração dos parâmetros por consulta, melhorando a eficiência sem sacrificar a capacidade.
+- **Arquiteturas especializadas** - modelos mistos de especialistas que ativam apenas uma fração dos parâmetros por consulta, melhorando a eficiência sem sacrificar a capacidade.
 
 ## Concluindo
 
-Grandes modelos de linguagem representam uma verdadeira mudança de paradigma na computação. Compreender sua arquitetura, pipeline de treinamento e limitações não é opcional para quem trabalha seriamente com IA – é um conhecimento fundamental que será útil à medida que o campo continua a evoluir.
+Grandes modelos de linguagem representam uma verdadeira mudança de paradigma na computação. Compreender sua arquitetura, pipeline de treinamento e limitações não é opcional para quem trabalha seriamente com IA - é um conhecimento fundamental que será útil à medida que o campo continua a evoluir.
 
 <Quiz question="Qual estágio do treinamento LLM é o mais caro computacionalmente?" options="Ajuste fino supervisionado|RLHF|Pré-treinamento em grandes corpora de texto|Engenharia imediata" answer="2" explanation="O pré-treinamento envolve o processamento de centenas de bilhões de tokens em milhares de GPUs durante semanas ou meses. O ajuste fino e o RLHF são estágios comparativamente leves." />
 

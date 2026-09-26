@@ -38,7 +38,7 @@ Tokenisatie zet ruwe tekst om in discrete eenheden die het model kan verwerken. 
 
 Inbedding wijst discrete tokens toe aan dichte continue vectoren waarbij semantische relaties behouden blijven:
 
-- **Word2Vec / GloVe**: statische inbedding — elk woord krijgt één vector, ongeacht de context ("bank" heeft dezelfde inbedding, of het nu een rivieroever of een financiële instelling betekent)
+- **Word2Vec / GloVe**: statische inbedding - elk woord krijgt één vector, ongeacht de context ("bank" heeft dezelfde inbedding, of het nu een rivieroever of een financiële instelling betekent)
 - **Contextuele inbedding (BERT, GPT)**: de inbedding van elk token hangt af van de omringende context - "bank" krijgt verschillende representaties in verschillende zinnen
 
 ### Het aandachtsmechanisme
@@ -68,7 +68,7 @@ De transformator bestaat uit:
   question="Waarom gebruiken transformatoren aandacht met meerdere hoofden in plaats van een enkel aandachtsmechanisme?"
   options="Het is computationeel goedkoper dan enkele aandacht|Meerdere hoofden kunnen tegelijkertijd verschillende soorten relaties onderhouden|Het voorkomt overfitting|Het vermindert de lengte van de reeks"
   answer="1"
-  explanation="Multi-head aandacht stelt het model in staat om gezamenlijk aandacht te besteden aan informatie uit verschillende representatie-subruimten op verschillende posities. Eén hoofd kan syntactische relaties vastleggen, een ander semantische gelijkenis, een ander positionele nabijheid – allemaal parallel."
+  explanation="Multi-head aandacht stelt het model in staat om gezamenlijk aandacht te besteden aan informatie uit verschillende representatie-subruimten op verschillende posities. Eén hoofd kan syntactische relaties vastleggen, een ander semantische gelijkenis, een ander positionele nabijheid - allemaal parallel."
 />
 
 ---
@@ -115,7 +115,7 @@ De techniek achter de behulpzaamheid van ChatGPT:
 
 ### Contextvensters en uitdagingen met lange context
 
-- **Contextvenster**: het maximale aantal tokens dat een model tegelijk kan verwerken. Huidige frontier systemen lopen uiteen van honderdduizenden tot ongeveer een miljoen tokens.
+- **Contextvenster**: het maximale aantal tokens dat een model tegelijk kan verwerken. Huidige toonaangevende systemen lopen uiteen van honderdduizenden tot ongeveer een miljoen tokens.
 - **Lost in the middle**: modellen besteden doorgaans minder aandacht aan informatie in het midden van lange contexten
 - **Strategieën**: vat lange documenten samen, plaats cruciale informatie aan het begin/einde, gebruik hiërarchisch ophalen
 
@@ -136,7 +136,7 @@ Modellen genereren plausibele maar feitelijk onjuiste tekst. Mitigatiestrategie�
 
 Dit is een favoriete interviewvraag: "Welk model zou je, gegeven deze gebruikssituatie, kiezen?"
 
-**Gebruik een groot frontier model (GPT-6 Astra, Claude Opus 5.5) wanneer:**
+**Gebruik een groot toonaangevend model (GPT-6 Astra, Claude Opus 5.5) wanneer:**
 - De taak vereist algemene redenering of het volgen van complexe instructies
 - Je hebt geen gelabelde trainingsgegevens
 - De snelheid van het prototypen is belangrijker dan de inferentiekosten
@@ -154,7 +154,7 @@ Dit is een favoriete interviewvraag: "Welk model zou je, gegeven deze gebruikssi
 
 <Quiz
   question="Een gezondheidszorgbedrijf moet patiëntberichten in vijftien categorieën indelen. Ze hebben 50.000 gelabelde voorbeelden. Welke aanpak is het meest kosteneffectief voor de productie?"
-  options="Een frontier LLM met few-shot prompting|Verfijnd BERT-model|RAG met een vectordatabase|Zero-shot-classificatie met Llama 70B"
+  options="Een toonaangevend LLM met few-shot prompting|Verfijnd BERT-model|RAG met een vectordatabase|Zero-shot-classificatie met Llama 70B"
   answer="1"
   explanation="Met 50.000 gelabelde voorbeelden en een goed gedefinieerde classificatietaak zal een verfijnd BERT-model snel, goedkoop in gebruik en zeer nauwkeurig zijn. Het gebruik van een grote LLM voor een classificatietaak met veel trainingsgegevens is onnodig duur en langzamer."
 />
@@ -197,7 +197,7 @@ NLP-interviews bevatten steeds vaker ethische vragen:
   question="Wat is het voornaamste risico van het gebruik van een LLM die is getraind in internetteksten voor een systeem voor aanwervingsaanbevelingen?"
   options="Het model zal te langzaam zijn voor productiegebruik|Het model kan historische vooroordelen in trainingsgegevens bestendigen|Het model zal willekeurige voorspellingen doen|Het model vereist te veel opslagruimte"
   answer="1"
-  explanation="LLM's die zijn getraind in internetteksten absorberen maatschappelijke vooroordelen – geslacht, ras, sociaal-economisch – die aanwezig zijn in hun trainingsgegevens. Wanneer deze vooroordelen worden gebruikt voor personeelswerving, kunnen ze leiden tot discriminerende aanbevelingen die historische ongelijkheden in stand houden."
+  explanation="LLM's die zijn getraind in internetteksten absorberen maatschappelijke vooroordelen - geslacht, ras, sociaal-economisch - die aanwezig zijn in hun trainingsgegevens. Wanneer deze vooroordelen worden gebruikt voor personeelswerving, kunnen ze leiden tot discriminerende aanbevelingen die historische ongelijkheden in stand houden."
 />
 
 ---
@@ -206,9 +206,9 @@ NLP-interviews bevatten steeds vaker ethische vragen:
 
 - **Ken uw basisprincipes**: tokenisatie, inbedding, aandacht en transformatorarchitectuur zijn niet onderhandelbaar
 - **Begrijp het spectrum van fijnafstemming**: van zero-shot-prompts tot volledige fijnafstemming, en wanneer elk geschikt is
-- **RAG is het meest praktische LLM-patroon** — begrijp chunking, ophalen en herrangschikken
+- **RAG is het meest praktische LLM-patroon** - begrijp chunking, ophalen en herrangschikken
 - **Modelselectie gaat over afwegingen**: mogelijkheden versus kosten versus latentie versus privacy
-- **Evaluatie van generatieve modellen is een open probleem** — ken meerdere benaderingen
+- **Evaluatie van generatieve modellen is een open probleem** - ken meerdere benaderingen
 - **Ethiek is niet optioneel**: vooroordelen, hallucinaties en privacy zijn nu standaard interviewonderwerpen
 
 <Callout>Het NLP-veld ontwikkelt zich ongelooflijk snel. Controleer vóór je sollicitatiegesprek welke modellen en technieken de afgelopen drie maanden zijn vrijgegeven. Als u recente ontwikkelingen kunt bespreken (terwijl u de grondbeginselen begrijpt), geeft dit aan dat u actief betrokken bent bij het vakgebied.

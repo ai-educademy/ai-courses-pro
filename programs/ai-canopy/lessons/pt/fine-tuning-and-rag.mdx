@@ -1,5 +1,5 @@
 ---
-title: "Ajuste fino e RAG – Como as empresas personalizam a IA para seus dados"
+title: "Ajuste fino e RAG - Como as empresas personalizam a IA para seus dados"
 description: "Aprenda quando e como ajustar modelos ou usar geração de recuperação aumentada para criar aplicativos de IA específicos de domínio."
 order: 4
 difficulty: "advanced"
@@ -8,13 +8,13 @@ icon: "🔧"
 published: true
 machineTranslated: true
 ---
-# Ajuste fino e RAG – Como as empresas personalizam a IA para seus dados
+# Ajuste fino e RAG - Como as empresas personalizam a IA para seus dados
 
 Um LLM de uso geral sabe muito sobre o mundo, mas nada sobre os documentos internos da sua empresa, dados proprietários ou terminologia específica do domínio. Esta lição aborda as duas abordagens principais para preencher essa lacuna: **ajuste fino** e **geração aumentada por recuperação (RAG)**.
 
 ## Por que os modelos genéricos não são suficientes
 
-Imagine pedir a um modelo frontier para responder às dúvidas dos clientes sobre a política de devolução específica da sua empresa, códigos internos de produtos ou protocolos de tratamento médico. Ele não consegue, essa informação não está nos dados de treinamento.
+Imagine pedir a um modelo de fronteira para responder às dúvidas dos clientes sobre a política de devolução específica da sua empresa, códigos internos de produtos ou protocolos de tratamento médico. Ele não consegue, essa informação não está nos dados de treinamento.
 
 As empresas precisam de IA que combine a **inteligência geral** de um grande modelo com o **conhecimento específico** de seu domínio. Existem dois caminhos para chegar lá, e escolher o caminho certo é extremamente importante.
 
@@ -47,7 +47,7 @@ O ajuste fino tradicional atualiza **todos** os parâmetros do modelo, exigindo 
 
 **LoRA (adaptação de baixa classificação)** resolve isso com elegância:
 - Em vez de atualizar todos os pesos, LoRA congela o modelo original e adiciona pequenas **matrizes adaptadoras treináveis** a cada camada.
-- Esses adaptadores normalmente adicionam apenas 0,1–1% de parâmetros extras.
+- Esses adaptadores normalmente adicionam apenas 0,1-1% de parâmetros extras.
 - O resultado é um desempenho quase idêntico por uma fração do custo.
 
 **QLoRA** vai além ao quantizar o modelo congelado com precisão de 4 bits, reduzindo drasticamente os requisitos de memória. Você pode ajustar um modelo de parâmetros de 70B em uma única GPU de consumidor com 48 GB de VRAM.

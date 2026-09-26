@@ -1,5 +1,5 @@
 ---
-title: "RLHF und Ausrichtung – Wie ChatGPT menschliche Werte lernt"
+title: "RLHF und Ausrichtung - Wie ChatGPT menschliche Werte lernt"
 description: "Verstehen Sie, wie rohe Sprachmodelle durch überwachte Feinabstimmung, Belohnungsmodellierung und verstärkendes Lernen aus menschlichem Feedback in hilfreiche, harmlose Assistenten umgewandelt werden."
 order: 8
 difficulty: "advanced"
@@ -8,27 +8,27 @@ icon: "🎯"
 published: true
 machineTranslated: true
 ---
-# RLHF und Ausrichtung – Wie ChatGPT menschliche Werte lernt
+# RLHF und Ausrichtung - Wie ChatGPT menschliche Werte lernt
 
-Ein vorab trainiertes Sprachmodell ist eine leistungsstarke, aber unkontrollierte Engine. Es kann Gedichte schreiben, Code generieren und über Physik nachdenken – aber es kann auch toxische Inhalte produzieren, selbstbewusst Fakten fabrizieren und Benutzeranweisungen ignorieren. **Ausrichtung** ist der Prozess, diese rohe Fähigkeit dahingehend zu steuern, wirklich hilfreich, ehrlich und harmlos zu sein.
+Ein vorab trainiertes Sprachmodell ist eine leistungsstarke, aber unkontrollierte Engine. Es kann Gedichte schreiben, Code generieren und über Physik nachdenken - aber es kann auch toxische Inhalte produzieren, selbstbewusst Fakten fabrizieren und Benutzeranweisungen ignorieren. **Ausrichtung** ist der Prozess, diese rohe Fähigkeit dahingehend zu steuern, wirklich hilfreich, ehrlich und harmlos zu sein.
 
 ## Das Ausrichtungsproblem
 
-Das Vortraining optimiert ein einzelnes Ziel: **Vorhersage des nächsten Tokens**. Dadurch erhält das Modell umfassendes Wissen, aber kein Verständnis dafür, was ein Mensch tatsächlich *will*. Wenn Sie einem Basismodell eine Frage stellen, vervollständigt es möglicherweise den Text, als würde es einen Forumsbeitrag, eine Anzeige oder eine Verschwörungstheorie schreiben – denn alle diese Muster sind in seinen Trainingsdaten vorhanden.
+Das Vortraining optimiert ein einzelnes Ziel: **Vorhersage des nächsten Tokens**. Dadurch erhält das Modell umfassendes Wissen, aber kein Verständnis dafür, was ein Mensch tatsächlich *will*. Wenn Sie einem Basismodell eine Frage stellen, vervollständigt es möglicherweise den Text, als würde es einen Forumsbeitrag, eine Anzeige oder eine Verschwörungstheorie schreiben - denn alle diese Muster sind in seinen Trainingsdaten vorhanden.
 
-Die Kluft zwischen „fähig“ und „nützlich“ ist das Ausrichtungsproblem. Ein Model, das medizinische Ratschläge schreiben kann, aber nicht weiß, wann es ablehnen soll, ist potenziell gefährlich. Um diese Lücke zu schließen, muss das Modell der menschlichen Präferenzen gelehrt werden – nicht nur, was als nächstes kommen könnte, sondern auch, was als nächstes kommen sollte.
+Die Kluft zwischen „fähig“ und „nützlich“ ist das Ausrichtungsproblem. Ein Model, das medizinische Ratschläge schreiben kann, aber nicht weiß, wann es ablehnen soll, ist potenziell gefährlich. Um diese Lücke zu schließen, muss das Modell der menschlichen Präferenzen gelehrt werden - nicht nur, was als nächstes kommen könnte, sondern auch, was als nächstes kommen sollte.
 
 <Illustration src="/images/lessons/rlhf-and-alignment.svg" alt="Dreistufige Pipeline: SFT trainiert anhand von Demonstrationen, Belohnungsmodell lernt Präferenzen, PPO optimiert Richtlinien anhand des Belohnungsmodells" caption="Die RLHF-Pipeline wandelt ein Basismodell in drei Phasen in einen abgestimmten Assistenten um: SFT, Belohnungsmodellierung und RL-Optimierung." />
 
 ## Stufe 1: Überwachte Feinabstimmung (SFT)
 
-Der erste Schritt ist unkompliziert: Sammeln Sie Tausende hochwertiger **Demonstrationsbeispiele** – ideale Gespräche zwischen einem Benutzer und einem Assistenten – und optimieren Sie das Basismodell darauf. Dadurch lernt das Modell, hilfreich zu sein: Fragen direkt beantworten, Anweisungen befolgen, Unsicherheit zugeben und schädliche Anfragen ablehnen.
+Der erste Schritt ist unkompliziert: Sammeln Sie Tausende hochwertiger **Demonstrationsbeispiele** - ideale Gespräche zwischen einem Benutzer und einem Assistenten - und optimieren Sie das Basismodell darauf. Dadurch lernt das Modell, hilfreich zu sein: Fragen direkt beantworten, Anweisungen befolgen, Unsicherheit zugeben und schädliche Anfragen ablehnen.
 
 SFT allein ergibt ein deutlich besseres Modell, weist jedoch Einschränkungen auf. Menschliche Demonstratoren können nur eine begrenzte Anzahl von Beispielen schreiben, und das Modell lernt, die *durchschnittliche* Qualität dieser Demonstrationen nachzuahmen, anstatt stets die bestmögliche Antwort zu produzieren.
 
 ## Stufe 2: Belohnungsmodellschulung
 
-Anstatt ideale Antworten zu schreiben, erhalten menschliche Etikettierer **Paare von Modellausgaben** und werden gebeten, die bessere zu bewerten. Dies ist kognitiv einfacher – Vergleichen ist einfacher als Erstellen – und ermöglicht das Sammeln weitaus mehr Präferenzdaten.
+Anstatt ideale Antworten zu schreiben, erhalten menschliche Etikettierer **Paare von Modellausgaben** und werden gebeten, die bessere zu bewerten. Dies ist kognitiv einfacher - Vergleichen ist einfacher als Erstellen - und ermöglicht das Sammeln weitaus mehr Präferenzdaten.
 
 Diese Rangpaare trainieren ein **Belohnungsmodell (RM)**: ein separates neuronales Netzwerk, das eine Aufforderung und eine Antwort als Eingabe verwendet und einen Skalarwert ausgibt, der die menschliche Präferenz darstellt. Der RM lernt Muster wie:
 
@@ -49,9 +49,9 @@ Mit einem Belohnungsmodell wird das SFT-Modell mithilfe von **Proximal Policy Op
 
 Die KL-Strafe ist entscheidend. Ohne sie würde das Modell lernen, die Besonderheiten des Belohnungsmodells auszunutzen und Antworten zu generieren, die zwar gut abschneiden, aber unsinnig oder sich wiederholend sind. Durch die Einschränkung, wie weit die Richtlinie vom SFT-Modell abweichen kann, sorgt PPO dafür, dass die Ergebnisse kohärent bleiben und gleichzeitig die Ausrichtung verbessert wird.
 
-Dieser dreistufige Prozess – SFT → Belohnungsmodell → PPO – ist genau die Art und Weise, wie OpenAI GPT-3.5 in ChatGPT umgewandelt hat, wie in ihrem **InstructGPT**-Papier beschrieben.
+Dieser dreistufige Prozess - SFT → Belohnungsmodell → PPO - ist genau die Art und Weise, wie OpenAI GPT-3.5 in ChatGPT umgewandelt hat, wie in ihrem **InstructGPT**-Papier beschrieben.
 
-<FunFact>Das InstructGPT-Papier enthüllte ein bemerkenswertes Ergebnis: Ein mit RLHF ausgerichtetes 1,3B-Parametermodell wurde von menschlichen Richtern dem nicht ausgerichteten 175B-GPT-3 – einem 100-mal größeren Modell – vorgezogen. Die Ausrichtung kann wichtiger sein als der bloße Maßstab.
+<FunFact>Das InstructGPT-Papier enthüllte ein bemerkenswertes Ergebnis: Ein mit RLHF ausgerichtetes 1,3B-Parametermodell wurde von menschlichen Richtern dem nicht ausgerichteten 175B-GPT-3 - einem 100-mal größeren Modell - vorgezogen. Die Ausrichtung kann wichtiger sein als der bloße Maßstab.
 </FunFact>
 
 ## DPO: Den Mittelsmann ausschalten
@@ -64,7 +64,7 @@ Die DPO-Verlustfunktion definiert implizit ein Belohnungsmodell innerhalb des Sp
 L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
 ```
 
-Dabei ist `y_w` die bevorzugte Antwort, `y_l` die abgelehnte und `π_ref` das Referenzmodell (SFT). DPO ist einfacher, stabiler und kostengünstiger zu trainieren - kein Belohnungsmodell, keine RL-Schleife, kein hyperparameterempfindliches PPO. Viele Open-Weight-Modelle verwenden inzwischen DPO oder verwandte preference-optimisation Varianten.
+Dabei ist `y_w` die bevorzugte Antwort, `y_l` die abgelehnte und `π_ref` das Referenzmodell (SFT). DPO ist einfacher, stabiler und kostengünstiger zu trainieren - kein Belohnungsmodell, keine RL-Schleife, kein hyperparameterempfindliches PPO. Viele Modelle mit offenen Gewichten verwenden inzwischen DPO oder verwandte Varianten der Präferenzoptimierung.
 
 <ThinkAboutIt>DPO eliminiert das Belohnungsmodell, verliert aber auch die Fähigkeit, zum Zeitpunkt der Inferenz willkürliche neue Antworten zu erzielen. In welchen Szenarien könnte ein explizites Belohnungsmodell (die vollständige RLHF-Pipeline) wertvoller sein als die Einfachheit von DPO?
 </ThinkAboutIt>
@@ -73,11 +73,11 @@ Dabei ist `y_w` die bevorzugte Antwort, `y_l` die abgelehnte und `π_ref` das Re
 
 Anthropic führte **Constitutional AI (CAI)** ein, um die Abhängigkeit von menschlichen Etikettierern zu verringern. Der Ansatz:
 
-1. Definieren Sie eine Reihe von Grundsätzen (eine „Verfassung“) – z. B. *„Wählen Sie die Antwort, die am hilfreichsten ist und gleichzeitig ehrlich und harmlos ist“*
+1. Definieren Sie eine Reihe von Grundsätzen (eine „Verfassung“) - z. B. *„Wählen Sie die Antwort, die am hilfreichsten ist und gleichzeitig ehrlich und harmlos ist“*
 2. Erzeugen Sie Antwortpaare und verwenden Sie das **Modell selbst**, um zu beurteilen, welche Antwort der Verfassung besser entspricht
-3. Verwenden Sie diese von der KI generierten Präferenzen, um das Belohnungsmodell zu trainieren (RLAIF – RL von AI Feedback).
+3. Verwenden Sie diese von der KI generierten Präferenzen, um das Belohnungsmodell zu trainieren (RLAIF - RL von AI Feedback).
 
-CAI skaliert die Präferenzerfassung drastisch – die KI kann Millionen von Vergleichen zu einem Bruchteil der Kosten einer menschlichen Kennzeichnung generieren und auswerten. Außerdem werden die Ausrichtungskriterien dadurch **explizit und überprüfbar**, da sie in der Verfassung kodiert sind und nicht implizit aus den Vorurteilen der Labelgeber gelernt werden.
+CAI skaliert die Präferenzerfassung drastisch - die KI kann Millionen von Vergleichen zu einem Bruchteil der Kosten einer menschlichen Kennzeichnung generieren und auswerten. Außerdem werden die Ausrichtungskriterien dadurch **explizit und überprüfbar**, da sie in der Verfassung kodiert sind und nicht implizit aus den Vorurteilen der Labelgeber gelernt werden.
 
 <Quiz question="Was ist die Kerninnovation der Constitutional AI im Vergleich zum Standard-RLHF?" options="Es verwendet ein viel größeres Basismodell|Es ersetzt menschliche Präferenzkennzeichner durch das KI-Modell selbst, das sich an expliziten schriftlichen Prinzipien orientiert|Dadurch entfällt jegliche Feinabstimmung|Es trainiert nur mit synthetischen Daten" answer="1" explanation="Constitutional AI nutzt das Modell selbst, um Präferenzurteile zu generieren, die sich an einer Reihe explizit geschriebener Prinzipien (der Verfassung) orientieren. Dies skaliert die Sammlung von Präferenzdaten enorm und macht gleichzeitig die Ausrichtungskriterien transparent und veränderbar." />
 
@@ -94,25 +94,25 @@ Große Labore führen heute vor der Veröffentlichung von Modellen umfangreiches
 
 ## Die Anpassungssteuer
 
-Die Ausrichtung ist mit Kosten verbunden. Von RLHF geschulte Modelle werden manchmal **übervorsichtig** – sie lehnen harmlose Anfragen ab, fügen unnötige Vorbehalte hinzu oder geben langweilige Antworten, um jedes wahrgenommene Risiko zu vermeiden. Diese „Ausrichtungssteuer“ ist eine echte technische Herausforderung:
+Die Ausrichtung ist mit Kosten verbunden. Von RLHF geschulte Modelle werden manchmal **übervorsichtig** - sie lehnen harmlose Anfragen ab, fügen unnötige Vorbehalte hinzu oder geben langweilige Antworten, um jedes wahrgenommene Risiko zu vermeiden. Diese „Ausrichtungssteuer“ ist eine echte technische Herausforderung:
 
 - Zu geringe Ausrichtung → schädliche Ausgänge
 - Zu viel Ausrichtung → nicht hilfreiche, nervige Ablehnungen
 
-Die Grenze der Alignment-Forschung besteht darin, Techniken zu finden, die die Nützlichkeit maximieren und gleichzeitig echte Sicherheitsgrenzen wahren – und nicht nur den Mustervergleich bei oberflächlich „sicheren“ Antworten.
+Die Grenze der Alignment-Forschung besteht darin, Techniken zu finden, die die Nützlichkeit maximieren und gleichzeitig echte Sicherheitsgrenzen wahren - und nicht nur den Mustervergleich bei oberflächlich „sicheren“ Antworten.
 
-<Quiz question="Was ist die „Anpassungssteuer” im Zusammenhang mit RLHF-trainierten Modellen?" options="Die finanziellen Kosten für die Einstellung menschlicher Etikettierer für Präferenzdaten|Die Verringerung der Hilfsbereitschaft und Leistungsfähigkeit des Modells, die sich aus dem Sicherheitstraining ergibt, führt dazu, dass das Modell übermäßig vorsichtig ist|Der Rechenaufwand für die Durchführung der PPO-Optimierung|Die Steuer, die Regierungen KI-Unternehmen für die Einhaltung von Sicherheitsvorschriften auferlegen" answer="1" explanation="Die Ausrichtungssteuer bezieht sich auf den Fähigkeits- oder Hilfsbereitschaftsverlust, wenn das Sicherheitstraining ein Modell übermäßig vorsichtig macht – indem es harmlose Anfragen ablehnt, unnötige Absicherungen durchführt oder generische Antworten produziert. Sicherheit und echte Hilfsbereitschaft in Einklang zu bringen, ist eines der schwierigsten offenen Probleme bei der Ausrichtung." />
+<Quiz question="Was ist die „Anpassungssteuer” im Zusammenhang mit RLHF-trainierten Modellen?" options="Die finanziellen Kosten für die Einstellung menschlicher Etikettierer für Präferenzdaten|Die Verringerung der Hilfsbereitschaft und Leistungsfähigkeit des Modells, die sich aus dem Sicherheitstraining ergibt, führt dazu, dass das Modell übermäßig vorsichtig ist|Der Rechenaufwand für die Durchführung der PPO-Optimierung|Die Steuer, die Regierungen KI-Unternehmen für die Einhaltung von Sicherheitsvorschriften auferlegen" answer="1" explanation="Die Ausrichtungssteuer bezieht sich auf den Fähigkeits- oder Hilfsbereitschaftsverlust, wenn das Sicherheitstraining ein Modell übermäßig vorsichtig macht - indem es harmlose Anfragen ablehnt, unnötige Absicherungen durchführt oder generische Antworten produziert. Sicherheit und echte Hilfsbereitschaft in Einklang zu bringen, ist eines der schwierigsten offenen Probleme bei der Ausrichtung." />
 
-<FunFact>Frontier-Labore verbringen Monate mit Ausrichtungsarbeiten (SFT-Datenerfassung, Belohnungsmodellierung, preference optimisation und Sicherheitstests), um Basismodelle in Produkte zu verwandeln, die sicher genug für die Veröffentlichung sind. Die Ausrichtungsphase macht zwar nur einen Bruchteil des Pre-Training-Rechenaufwands aus, erfordert aber Tausende von Stunden spezieller menschlicher Etikettierung und Evaluation.</FunFact>
+<FunFact>Spitzen-Labore verbringen Monate mit Ausrichtungsarbeiten (SFT-Datenerfassung, Belohnungsmodellierung, Präferenzoptimierung und Sicherheitstests), um Basismodelle in Produkte zu verwandeln, die sicher genug für die Veröffentlichung sind. Die Ausrichtungsphase macht zwar nur einen Bruchteil des Rechenaufwands vor dem Training aus, erfordert aber Tausende von Stunden spezieller menschlicher Etikettierung und Evaluation.</FunFact>
 </FunFact>
 
-<ThinkAboutIt>Menschliche Etikettierer bringen unweigerlich ihre eigenen Vorurteile, kulturellen Perspektiven und Inkonsistenzen in die Präferenzdaten ein. Wenn es beim Alignment letztendlich darum geht, „zu lernen, was Menschen bevorzugen“, wessen Vorlieben sollten dann zählen – und wie gehen wir mit grundlegenden Meinungsverschiedenheiten über Werte zwischen den Kulturen um?
+<ThinkAboutIt>Menschliche Etikettierer bringen unweigerlich ihre eigenen Vorurteile, kulturellen Perspektiven und Inkonsistenzen in die Präferenzdaten ein. Wenn es beim Alignment letztendlich darum geht, „zu lernen, was Menschen bevorzugen“, wessen Vorlieben sollten dann zählen - und wie gehen wir mit grundlegenden Meinungsverschiedenheiten über Werte zwischen den Kulturen um?
 </ThinkAboutIt>
 
 ---
 
 ## 📚 Weiterführende Literatur
 
-- [Sprachmodelle trainieren, um Anweisungen mit menschlichem Feedback zu befolgen (InstructGPT)](https://arxiv.org/abs/2203.02155) – OpenAIs grundlegendes RLHF-Papier
-– [Direct Preference Optimization (Rafailov et al., 2023)](https://arxiv.org/abs/2305.18290) – Das DPO-Papier, das das Ausrichtungstraining vereinfachte
+- [Sprachmodelle trainieren, um Anweisungen mit menschlichem Feedback zu befolgen (InstructGPT)](https://arxiv.org/abs/2203.02155) - OpenAIs grundlegendes RLHF-Papier
+- [Direct Preference Optimization (Rafailov et al., 2023)](https://arxiv.org/abs/2305.18290) - Das DPO-Papier, das das Ausrichtungstraining vereinfachte
 - [Verfassungsmäßige KI: Harmlosigkeit durch KI-Feedback (Anthropic)](https://arxiv.org/abs/2212.08073) - Anthropics Ansatz zur skalierbaren Ausrichtung mithilfe der KI-Selbstüberwachung

@@ -1,5 +1,5 @@
 ---
-title: "Infraestrutura de IA – GPUs, TPUs e a batalha na nuvem"
+title: "Infraestrutura de IA - GPUs, TPUs e a batalha na nuvem"
 description: "Entenda o hardware e a infraestrutura de nuvem que alimentam a IA moderna: arquiteturas de GPU, comparações de plataformas de nuvem, silício personalizado e otimização de inferência."
 order: 9
 difficulty: "advanced"
@@ -10,21 +10,21 @@ machineTranslated: true
 ---
 # Infraestrutura de IA
 
-Por trás de cada avanço da IA está uma enorme história de infraestrutura. Treinar um modelo frontier pode custar centenas de milhões quando computação, dados, energia e engenharia são incluídos. Compreender o hardware, as plataformas de nuvem e as técnicas de otimização que impulsionam a IA moderna é essencial para qualquer pessoa que construa em escala.
+Por trás de cada avanço da IA está uma enorme história de infraestrutura. Treinar um modelo de fronteira pode custar centenas de milhões quando computação, dados, energia e engenharia são incluídos. Compreender o hardware, as plataformas de nuvem e as técnicas de otimização que impulsionam a IA moderna é essencial para qualquer pessoa que construa em escala.
 
 ## Por que as GPUs superam as CPUs em IA
 
-As CPUs são otimizadas para tarefas sequenciais – alguns núcleos poderosos que lidam com lógica complexa. As GPUs são otimizadas para paralelismo – milhares de núcleos simples executando a mesma operação em dados diferentes simultaneamente.
+As CPUs são otimizadas para tarefas sequenciais - alguns núcleos poderosos que lidam com lógica complexa. As GPUs são otimizadas para paralelismo - milhares de núcleos simples executando a mesma operação em dados diferentes simultaneamente.
 
 O treinamento de redes neurais é fundamentalmente a multiplicação de matrizes em escala. Uma única etapa de treinamento para um modelo grande envolve a multiplicação de matrizes com bilhões de elementos. Uma CPU os processa sequencialmente. Uma GPU processa milhares de elementos em paralelo.
 
 Uma GPU NVIDIA H100 oferece aproximadamente **4.000 TFLOPS** de computação FP8. Uma CPU de servidor de última geração gerencia talvez 2 TFLOPS. Para as cargas de trabalho embaraçosamente paralelas de aprendizagem profunda, as GPUs vencem por três ordens de magnitude.
 
-<Illustration src="/images/lessons/ai-infrastructure.svg" alt="Diagrama de comparação mostrando CPU com poucos núcleos poderosos versus GPU com milhares de núcleos paralelos para operações de matriz" caption="As GPUs processam milhares de operações de matriz simultaneamente – a vantagem fundamental para cargas de trabalho de IA." />
+<Illustration src="/images/lessons/ai-infrastructure.svg" alt="Diagrama de comparação mostrando CPU com poucos núcleos poderosos versus GPU com milhares de núcleos paralelos para operações de matriz" caption="As GPUs processam milhares de operações de matriz simultaneamente - a vantagem fundamental para cargas de trabalho de IA." />
 
 ## Domínio da NVIDIA
 
-A NVIDIA controla cerca de 80-90% do mercado de aceleradores de IA. Seu fosso não é apenas hardware – é o **ecossistema CUDA**. Quase todas as estruturas de ML (PyTorch, TensorFlow, JAX) são construídas em CUDA. Mudar para um concorrente significa reescrever kernels de baixo nível e aceitar possíveis incompatibilidades.
+A NVIDIA controla cerca de 80-90% do mercado de aceleradores de IA. Seu fosso não é apenas hardware - é o **ecossistema CUDA**. Quase todas as estruturas de ML (PyTorch, TensorFlow, JAX) são construídas em CUDA. Mudar para um concorrente significa reescrever kernels de baixo nível e aceitar possíveis incompatibilidades.
 
 ### A linha de GPU
 
@@ -37,14 +37,14 @@ A NVIDIA controla cerca de 80-90% do mercado de aceleradores de IA. Seu fosso n�
 
 O salto de H100 para B200 representa um aumento de desempenho de 2,3x - mas o verdadeiro gargalo geralmente é a **largura de banda da memória**, e não a computação bruta. Os 141 GB de memória HBM3e do H200 visam especificamente a inferência LLM, onde o cache KV domina o uso da memória.
 
-<FunFact>Uma única GPU NVIDIA B200 custa aproximadamente US$ 30.000 a US$ 40.000. Um servidor DGX B200 com oito dessas GPUs custa mais de US$ 300.000. A Meta supostamente encomendou 350.000 GPUs H100 para treinamento do Llama – um investimento em hardware superior a US$ 10 bilhões.</FunFact>
+<FunFact>Uma única GPU NVIDIA B200 custa aproximadamente US$ 30.000 a US$ 40.000. Um servidor DGX B200 com oito dessas GPUs custa mais de US$ 300.000. A Meta supostamente encomendou 350.000 GPUs H100 para treinamento do Llama - um investimento em hardware superior a US$ 10 bilhões.</FunFact>
 
 ##TPU do Google
 
 As unidades de processamento de tensores do Google são ASICs personalizados projetados especificamente para operações de matriz. Ao contrário das GPUs, que lidam com gráficos e computação, as TPUs são desenvolvidas especificamente para redes neurais.
 
 - **TPU v5p**: o chip de treinamento mais recente do Google, disponível em conjuntos de até 8.960 chips conectados por meio de interconexão de alta velocidade
-- **TPU v5e** – Custo otimizado para cargas de trabalho de inferência
+- **TPU v5e** - Custo otimizado para cargas de trabalho de inferência
 - Vantagem principal: forte integração com JAX e o compilador XLA
 - Limitação principal: disponível apenas por meio do Google Cloud - sem opção local
 
@@ -62,7 +62,7 @@ Microsoft, Meta e Oracle adotaram o MI300X para cargas de trabalho de inferênci
 
 O acelerador **Gaudi 3** da Intel também está entrando no mix, oferecendo desempenho de treinamento competitivo com foco nas relações preço/desempenho empresariais. O mercado de aceleradores de IA está finalmente se tornando um ecossistema de vários fornecedores.
 
-<Quiz question="Por que o fosso competitivo da NVIDIA não se resume apenas ao desempenho do hardware?" options="Eles fabricam seus próprios chips|O ecossistema de software CUDA cria enormes custos de mudança|Eles são a única empresa que fabrica GPUs|Suas GPUs são a opção mais barata" answer="1" explanation="O domínio da NVIDIA repousa no ecossistema CUDA – quase todas as estruturas e bibliotecas de ML são construídas em CUDA, tornando o custo de mudança para concorrentes extremamente alto, mesmo quando o hardware alternativo é competitivo." />
+<Quiz question="Por que o fosso competitivo da NVIDIA não se resume apenas ao desempenho do hardware?" options="Eles fabricam seus próprios chips|O ecossistema de software CUDA cria enormes custos de mudança|Eles são a única empresa que fabrica GPUs|Suas GPUs são a opção mais barata" answer="1" explanation="O domínio da NVIDIA repousa no ecossistema CUDA - quase todas as estruturas e bibliotecas de ML são construídas em CUDA, tornando o custo de mudança para concorrentes extremamente alto, mesmo quando o hardware alternativo é competitivo." />
 
 ## Comparação de provedores de nuvem
 
@@ -95,7 +95,7 @@ Várias startups estão desafiando totalmente o paradigma da GPU:
 
 - **Groq** - A arquitetura LPU (Unidade de Processamento de Linguagem) oferece inferência determinística e de latência ultrabaixa. Não é necessário lote.
 - **Cerebras** - Chip em escala de wafer (do tamanho de um prato) elimina gargalos de largura de banda de memória para treinamento.
-- **SambaNova** – Arquitetura de fluxo de dados reconfigurável otimizada para IA corporativa.
+- **SambaNova** - Arquitetura de fluxo de dados reconfigurável otimizada para IA corporativa.
 - **Graphcore** (adquirido pela SoftBank) - Arquitetura IPU com enorme SRAM no chip para cargas de trabalho estruturadas em gráfico.
 
 Estes não são substitutos da NVIDIA hoje. Mas representam uma inovação arquitetónica genuína que poderá remodelar o mercado à medida que as cargas de trabalho de IA se diversificarem para além dos transformadores.
@@ -118,7 +118,7 @@ O treinamento ganha as manchetes, mas a inferência é para onde vai o dinheiro.
 
 O custo da infraestrutura vai muito além do aluguel de GPU. Uma imagem completa inclui:
 
-- **Cálculo** – horas de GPU para treinamento e inferência (normalmente 60-70% do custo total)
+- **Cálculo** - horas de GPU para treinamento e inferência (normalmente 60-70% do custo total)
 - **Armazenamento** - Dados de treinamento, pontos de verificação, artefatos de modelo e registros
 - **Rede** - Transferência de dados entre GPUs, regiões e para usuários finais
 - **Engenharia** - Engenheiros de ML, engenheiros de plataforma e equipe de DevOps para operar a pilha

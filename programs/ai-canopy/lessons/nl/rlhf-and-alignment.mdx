@@ -1,6 +1,6 @@
 ---
 title: "RLHF en Alignment - Hoe ChatGPT Menselijke Waarden Leert"
-description: "Begrijp hoe ruwe taalmodellen worden omgevormd tot behulpzame, ongevaarlijke assistenten via supervised fine-tuning, reward modelling en reinforcement learning from human feedback."
+description: "Begrijp hoe ruwe taalmodellen worden omgevormd tot behulpzame, ongevaarlijke assistenten via begeleide fijnafstemming, beloningsmodellering en reinforcement learning from human feedback."
 order: 8
 difficulty: "advanced"
 duration: 18
@@ -18,9 +18,9 @@ Pre-training optimaliseert één enkel doel: **voorspel het volgende token**. Di
 
 De kloof tussen "capabel" en "nuttig" is het alignment-probleem. Een model dat medisch advies kan schrijven maar niet weet wanneer het moet weigeren, is potentieel gevaarlijk. Het dichten van deze kloof vereist dat het model **menselijke voorkeuren** leert - niet alleen wat er *zou kunnen* volgen, maar wat er *zou moeten* volgen.
 
-<Illustration src="/images/lessons/rlhf-and-alignment.svg" alt="Driefasenpipeline: SFT traint op demonstraties, het reward model leert voorkeuren, PPO optimaliseert het beleid tegen het reward model" caption="De RLHF-pipeline transformeert een basismodel in een afgestemde assistent via drie fasen: SFT, reward modelling en RL-optimalisatie." />
+<Illustration src="/images/lessons/rlhf-and-alignment.svg" alt="Driefasenpipeline: SFT traint op demonstraties, het reward model leert voorkeuren, PPO optimaliseert het beleid tegen het reward model" caption="De RLHF-pipeline transformeert een basismodel in een afgestemde assistent via drie fasen: SFT, beloningsmodellering en RL-optimalisatie." />
 
-## Fase 1: Supervised Fine-Tuning (SFT)
+## Fase 1: Supervised Fijnafstemming (SFT)
 
 De eerste stap is eenvoudig: verzamel duizenden hoogwaardige **demonstratievoorbeelden** - ideale gesprekken tussen een gebruiker en een assistent - en fine-tune het basismodel erop. Dit leert het model het *format* van behulpzaam zijn: vragen direct beantwoorden, instructies opvolgen, onzekerheid erkennen en schadelijke verzoeken weigeren.
 
@@ -65,7 +65,7 @@ De DPO-lossfunctie definieert impliciet een reward model binnen het taalmodel ze
 L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
 ```
 
-Waarbij `y_w` het geprefereerde antwoord is, `y_l` het afgewezen antwoord, en `π_ref` het referentiemodel (SFT). DPO is eenvoudiger, stabieler en goedkoper om te trainen - geen reward model, geen RL-lus, geen hyperparametergevoelige PPO. Veel open-weight modellen gebruiken nu DPO of verwante preference-optimisation varianten.
+Waarbij `y_w` het geprefereerde antwoord is, `y_l` het afgewezen antwoord, en `π_ref` het referentiemodel (SFT). DPO is eenvoudiger, stabieler en goedkoper om te trainen - geen reward model, geen RL-lus, geen hyperparametergevoelige PPO. Veel modellen met open gewichten gebruiken nu DPO of verwante preference-optimisation varianten.
 
 <ThinkAboutIt>
 DPO elimineert het reward model maar verliest daarmee ook de mogelijkheid om willekeurige nieuwe antwoorden te scoren tijdens inferentie. In welke scenario's zou een expliciet reward model (de volledige RLHF-pipeline) waardevoller zijn dan de eenvoud van DPO?
@@ -81,7 +81,7 @@ Anthropic introduceerde **Constitutional AI (CAI)** om de afhankelijkheid van me
 
 CAI schaalt het verzamelen van voorkeuren enorm - de AI kan miljoenen vergelijkingen genereren en evalueren tegen een fractie van de kosten van menselijke labeling. Het maakt de alignment-criteria ook **expliciet en controleerbaar**, vastgelegd in de grondwet in plaats van impliciet geleerd uit de vooroordelen van beoordelaars.
 
-<Quiz question="Wat is de kerninnovatie van Constitutional AI vergeleken met standaard RLHF?" options="Het gebruikt een veel groter basismodel|Het vervangt menselijke voorkeursbeoordelaars door het AI-model zelf, geleid door expliciet geschreven principes|Het elimineert de noodzaak voor enige fine-tuning|Het traint uitsluitend op synthetische data" answer="1" explanation="Constitutional AI gebruikt het model zelf om voorkeursoordelen te genereren, geleid door een set expliciet geschreven principes (de grondwet). Dit schaalt het verzamelen van voorkeursdata enorm terwijl de alignment-criteria transparant en aanpasbaar worden." />
+<Quiz question="Wat is de kerninnovatie van Constitutional AI vergeleken met standaard RLHF?" options="Het gebruikt een veel groter basismodel|Het vervangt menselijke voorkeursbeoordelaars door het AI-model zelf, geleid door expliciet geschreven principes|Het elimineert de noodzaak voor enige fijnafstemming|Het traint uitsluitend op synthetische data" answer="1" explanation="Constitutional AI gebruikt het model zelf om voorkeursoordelen te genereren, geleid door een set expliciet geschreven principes (de grondwet). Dit schaalt het verzamelen van voorkeursdata enorm terwijl de alignment-criteria transparant en aanpasbaar worden." />
 
 ## Red Teaming
 
@@ -101,12 +101,12 @@ Alignment heeft een prijs. RLHF-getrainde modellen worden soms **overdreven voor
 - Te weinig alignment → schadelijke outputs
 - Te veel alignment → nutteloze, irritante weigeringen
 
-De frontier van alignment-onderzoek is het vinden van technieken die behulpzaamheid maximaliseren terwijl echte veiligheidsgrenzen gehandhaafd blijven - niet alleen patroonherkenning op oppervlakkig "veilige" antwoorden.
+De toonaangevend van alignment-onderzoek is het vinden van technieken die behulpzaamheid maximaliseren terwijl echte veiligheidsgrenzen gehandhaafd blijven - niet alleen patroonherkenning op oppervlakkig "veilige" antwoorden.
 
 <Quiz question="Wat is de 'alignment-belasting' in de context van RLHF-getrainde modellen?" options="De financiële kosten van het inhuren van menselijke beoordelaars voor voorkeursdata|De vermindering van modelbehulpzaamheid en -capaciteit die het gevolg is van veiligheidstraining die het model overdreven voorzichtig maakt|De rekenkosten van het draaien van PPO-optimalisatie|De belasting die overheden opleggen aan AI-bedrijven voor veiligheidsnaleving" answer="1" explanation="De alignment-belasting verwijst naar het verlies aan capaciteit of behulpzaamheid wanneer veiligheidstraining een model buitensporig voorzichtig maakt - onschuldige verzoeken weigeren, onnodig nuanceren, of generieke antwoorden produceren. Het balanceren van veiligheid met oprechte behulpzaamheid is een van de moeilijkste open problemen in alignment." />
 
 <FunFact>
-Frontier labs besteden maanden aan alignment-werk (SFT-dataverzameling, reward modelling, preference optimisation en safety testing) om basismodellen om te vormen tot producten die veilig genoeg zijn om uit te brengen. De alignment-fase kost, hoewel een fractie van de pre-training compute, duizenden uren gespecialiseerde menselijke labeling en evaluatie.
+toonaangevende labs besteden maanden aan alignment-werk (SFT-dataverzameling, beloningsmodellering, voorkeuroptimalisatie en veiligheidstests) om basismodellen om te vormen tot producten die veilig genoeg zijn om uit te brengen. De alignment-fase kost, hoewel een fractie van de pre-training compute, duizenden uren gespecialiseerde menselijke labeling en evaluatie.
 </FunFact>
 
 <ThinkAboutIt>

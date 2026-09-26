@@ -30,7 +30,7 @@ Dit zijn de fundamentele promptstrategieën:
 
 **Zero-shot** - Je geeft het model een taak zonder voorbeelden. Werkt goed voor eenvoudige verzoeken waarbij de trainingsdata van het model het onderwerp grondig dekt.
 
-**Few-shot** - Je geeft 2–5 voorbeelden van het gewenste input-outputpatroon vóór je eigenlijke vraag. Dit verbetert de consistentie voor opmaak, classificatie en stijl aanzienlijk.
+**Few-shot** - Je geeft 2-5 voorbeelden van het gewenste input-outputpatroon vóór je eigenlijke vraag. Dit verbetert de consistentie voor opmaak, classificatie en stijl aanzienlijk.
 
 **Chain-of-thought (CoT)** - Je instrueert het model om stap voor stap te redeneren voordat het een eindantwoord geeft. Het toevoegen van "Laten we dit stap voor stap doordenken" kan de nauwkeurigheid op redeneertaken significant verbeteren.
 
@@ -67,7 +67,7 @@ Draai dezelfde prompt meerdere keren met temperature > 0 en neem het meerderheid
 ### Tree of Thought (ToT)
 In plaats van één enkele redeneerketen verkent het model meerdere redeneerpaden tegelijkertijd, evalueert elk pad, en selecteert de meest veelbelovende tak. Beschouw het als het model een mentaal whiteboard geven in plaats van een enkel notitieboekje.
 
-### ReAct (Reasoning + Acting)
+### ReAct (redeneren + handelen)
 Het model wisselt af tussen **denken** (redeneren over de volgende stap) en **handelen** (tools aanroepen, zoeken of berekenen). Dit patroon drijft de meeste moderne AI-agents aan.
 
 ```text
@@ -97,7 +97,7 @@ Verdediging tegen injectie vereist:
 - **Gelaagde architectuur** - Vertrouw nooit op één enkele promptgrens; gebruik aparte modellen voor validatie.
 - **Principe van minimale rechten** - Geef het model geen toegang tot tools of data die het niet nodig heeft.
 
-<Quiz question="Wat is prompt injection?" options="Een techniek om de promptkwaliteit te verbeteren|Een methode om modellen te fine-tunen met eigen data|Een aanval waarbij gebruikersinvoer de systeemprompt of het beoogde gedrag overschrijft|Een manier om lange prompts tot kortere te comprimeren" answer="2" explanation="Prompt injection is een beveiligingskwetsbaarheid waarbij zorgvuldig opgestelde gebruikersinvoer het model manipuleert om zijn instructies te negeren, systeemprompts te onthullen of schadelijke output te produceren." />
+<Quiz question="Wat is prompt injection?" options="Een techniek om de promptkwaliteit te verbeteren|Een methode om modellen te fijn afstemmen met eigen data|Een aanval waarbij gebruikersinvoer de systeemprompt of het beoogde gedrag overschrijft|Een manier om lange prompts tot kortere te comprimeren" answer="2" explanation="Prompt injection is een beveiligingskwetsbaarheid waarbij zorgvuldig opgestelde gebruikersinvoer het model manipuleert om zijn instructies te negeren, systeemprompts te onthullen of schadelijke output te produceren." />
 
 ## Herbruikbare Prompttemplates Bouwen
 
