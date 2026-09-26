@@ -49,10 +49,10 @@ machineTranslated: true
 **الرد (الاستدلال + الفعل)** هو النمط الأساسي وراء معظم الوكلاء المعاصرين. يتناوب النموذج بين آثار الاستدلال الصريح والإجراءات الملموسة:
 
 ```text
-Question: What is the population density of the UK in 2024?
+Question: What is the latest UK population density?
 
 Thought: I need the UK's current population and total area.
-Action: search("UK population 2024")
+Action: search("latest UK population density ONS")
 Observation: The UK population is approximately 68.3 million.
 
 Thought: Now I need the area of the UK.
@@ -63,7 +63,7 @@ Thought: Population density = population ÷ area = 68,300,000 ÷ 242,495
 Action: calculate(68300000 / 242495)
 Observation: 281.65
 
-Answer: The UK's population density in 2024 is approximately 282 people per square kilometre.
+Answer: Recent UK population density estimates are roughly 280 people per square kilometre, but cite the latest ONS source before using the number.
 ```
 
 من خلال جعل المنطق **صريحًا**، يسمح ReAct للنموذج بتحليل المشكلات المعقدة إلى خطوات يمكن التحكم فيها والتصحيح الذاتي على طول الطريق.

@@ -64,7 +64,7 @@ Die DPO-Verlustfunktion definiert implizit ein Belohnungsmodell innerhalb des Sp
 L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
 ```
 
-Dabei ist `y_w` die bevorzugte Antwort, `y_l` die abgelehnte und `π_ref` das Referenzmodell (SFT). DPO ist einfacher, stabiler und kostengünstiger zu trainieren – kein Belohnungsmodell, keine RL-Schleife, kein hyperparameterempfindliches PPO. Metas LLaMA 2 und viele Open-Source-Modelle verwenden jetzt DPO oder seine Varianten.
+Dabei ist `y_w` die bevorzugte Antwort, `y_l` die abgelehnte und `π_ref` das Referenzmodell (SFT). DPO ist einfacher, stabiler und kostengünstiger zu trainieren - kein Belohnungsmodell, keine RL-Schleife, kein hyperparameterempfindliches PPO. Viele Open-Weight-Modelle verwenden inzwischen DPO oder verwandte preference-optimisation Varianten.
 
 <ThinkAboutIt>DPO eliminiert das Belohnungsmodell, verliert aber auch die Fähigkeit, zum Zeitpunkt der Inferenz willkürliche neue Antworten zu erzielen. In welchen Szenarien könnte ein explizites Belohnungsmodell (die vollständige RLHF-Pipeline) wertvoller sein als die Einfachheit von DPO?
 </ThinkAboutIt>
@@ -103,7 +103,7 @@ Die Grenze der Alignment-Forschung besteht darin, Techniken zu finden, die die N
 
 <Quiz question="Was ist die „Anpassungssteuer” im Zusammenhang mit RLHF-trainierten Modellen?" options="Die finanziellen Kosten für die Einstellung menschlicher Etikettierer für Präferenzdaten|Die Verringerung der Hilfsbereitschaft und Leistungsfähigkeit des Modells, die sich aus dem Sicherheitstraining ergibt, führt dazu, dass das Modell übermäßig vorsichtig ist|Der Rechenaufwand für die Durchführung der PPO-Optimierung|Die Steuer, die Regierungen KI-Unternehmen für die Einhaltung von Sicherheitsvorschriften auferlegen" answer="1" explanation="Die Ausrichtungssteuer bezieht sich auf den Fähigkeits- oder Hilfsbereitschaftsverlust, wenn das Sicherheitstraining ein Modell übermäßig vorsichtig macht – indem es harmlose Anfragen ablehnt, unnötige Absicherungen durchführt oder generische Antworten produziert. Sicherheit und echte Hilfsbereitschaft in Einklang zu bringen, ist eines der schwierigsten offenen Probleme bei der Ausrichtung." />
 
-<FunFact>OpenAI verbrachte etwa sechs Monate mit Ausrichtungsarbeiten (SFT-Datenerfassung, Belohnungsmodellierung und RLHF-Training), um das Basismodell von GPT-4 in die für die Öffentlichkeit veröffentlichte Version umzuwandeln. Die Ausrichtungsphase machte zwar einen Bruchteil des Rechenaufwands vor dem Training aus, erforderte jedoch Tausende von Stunden spezieller menschlicher Etikettierung.
+<FunFact>Frontier-Labore verbringen Monate mit Ausrichtungsarbeiten (SFT-Datenerfassung, Belohnungsmodellierung, preference optimisation und Sicherheitstests), um Basismodelle in Produkte zu verwandeln, die sicher genug für die Veröffentlichung sind. Die Ausrichtungsphase macht zwar nur einen Bruchteil des Pre-Training-Rechenaufwands aus, erfordert aber Tausende von Stunden spezieller menschlicher Etikettierung und Evaluation.</FunFact>
 </FunFact>
 
 <ThinkAboutIt>Menschliche Etikettierer bringen unweigerlich ihre eigenen Vorurteile, kulturellen Perspektiven und Inkonsistenzen in die Präferenzdaten ein. Wenn es beim Alignment letztendlich darum geht, „zu lernen, was Menschen bevorzugen“, wessen Vorlieben sollten dann zählen – und wie gehen wir mit grundlegenden Meinungsverschiedenheiten über Werte zwischen den Kulturen um?
@@ -115,4 +115,4 @@ Die Grenze der Alignment-Forschung besteht darin, Techniken zu finden, die die N
 
 - [Sprachmodelle trainieren, um Anweisungen mit menschlichem Feedback zu befolgen (InstructGPT)](https://arxiv.org/abs/2203.02155) – OpenAIs grundlegendes RLHF-Papier
 – [Direct Preference Optimization (Rafailov et al., 2023)](https://arxiv.org/abs/2305.18290) – Das DPO-Papier, das das Ausrichtungstraining vereinfachte
-- [Verfassungsmäßige KI: Harmlosigkeit durch KI-Feedback (Anthropic)](https://arxiv.org/abs/2212.08073) – Anthropics Ansatz zur skalierbaren Ausrichtung mithilfe der KI-Selbstüberwachung
+- [Verfassungsmäßige KI: Harmlosigkeit durch KI-Feedback (Anthropic)](https://arxiv.org/abs/2212.08073) - Anthropics Ansatz zur skalierbaren Ausrichtung mithilfe der KI-Selbstüberwachung

@@ -1,6 +1,6 @@
 ---
 title: "Transformers uitgelegd: de architectuur achter ChatGPT"
-description: "Begrijp de Transformer-architectuur die ChatGPT, GPT-4, BERT en Gemini aanstuurt – het aandachtsmechanisme stap voor stap uitgelegd."
+description: "Begrijp de Transformer-architectuur die ChatGPT, Claude, Gemini, BERT en moderne GPT-modellen aandrijft - het attention-mechanisme stap voor stap uitgelegd."
 order: 12
 difficulty: "intermediate"
 duration: 35
@@ -10,7 +10,7 @@ machineTranslated: true
 ---
 # Transformers uitgelegd: de architectuur achter ChatGPT
 
-In 2017 publiceerde een team van Google een artikel met de titel *"Attention Is All You Need"*. Het introduceerde de **Transformer**-architectuur en veranderde AI voor altijd. Elk belangrijk taalmodel waar je van hebt gehoord – ChatGPT, GPT-4, BERT, Gemini, Claude, LLaMA – is gebouwd op Transformers.
+In 2017 publiceerde een team bij Google een paper met de titel *"Attention Is All You Need"*. Het introduceerde de **Transformer**-architectuur en veranderde AI voorgoed. Elk belangrijk taalmodel waar je van hebt gehoord - ChatGPT, Claude, Gemini, BERT, Llama en moderne GPT-modellen - is gebouwd op Transformers.
 
 Om te begrijpen waarom Transformers belangrijk zijn, moet je eerst begrijpen wat ze hebben vervangen.
 
@@ -109,7 +109,7 @@ class MultiHeadAttention(nn.Module):
 
 Elk aandachtshoofd kan zich specialiseren in een ander type relatie. Eén hoofd zou syntactische afhankelijkheden kunnen volgen (overeenkomst tussen onderwerp en werkwoord), een ander zou zich kunnen concentreren op coreferentie (voornaamwoorden en hun antecedenten), en een ander zou semantische gelijkenis kunnen vastleggen.
 
-<FunFact>Het gerucht gaat dat GPT-4 96 aandachtskoppen gebruikt. Iedereen kan zelfstandig leren verschillende taalkundige relaties in het hele contextvenster tegelijkertijd te volgen.</FunFact>
+<FunFact>Grote GPT-family modellen gebruiken veel attention heads. Elke head kan zelfstandig leren om verschillende taalkundige relaties tegelijk over het hele contextvenster te volgen.</FunFact>
 
 ## 📍 Positionele codering
 
@@ -186,15 +186,15 @@ Dit leidde tot een progressie:
 - GPT-1 (2018): 117 miljoen parameters
 - GPT-2 (2019): 1,5B-parameters
 - GPT-3 (2020): 175B-parameters
-- GPT-4 (2023): geschatte meer dan 1 biljoen parameters
+- Huidige frontier modellen: vaak mixture-of-experts of niet-openbaar gemaakte architecturen met honderden miljarden tot biljoenen effectieve parameters
 
-Elke sprong bracht kwalitatieve verbeteringen in capaciteiten met zich mee. Taken die GPT-2 helemaal niet kon uitvoeren (complex redeneren, code genereren) werden mogelijk op GPT-3-schaal en uitstekend op GPT-4-schaal.
+Elke sprong bracht kwalitatieve verbeteringen in capaciteit. Taken die GPT-2 helemaal niet kon (complex redeneren, codegeneratie) werden mogelijk op GPT-3-schaal en verbeterden verder in latere frontier modellen.
 
 ## ⚡ Training versus gevolgtrekking
 
 Twee zeer verschillende computationele profielen:
 
-**Opleiding**: extreem duur. Het verwerken van miljarden tokens, het berekenen van gradiënten en het bijwerken van honderden miljarden parameters over duizenden GPU's gedurende weken of maanden. De training van GPT-4 kostte naar schatting meer dan $ 100 miljoen.
+**Training**: extreem duur. Biljoenen tokens verwerken, gradients berekenen en enorme parametersets over duizenden GPUs weken of maanden bijwerken. Het trainen van huidige frontier modellen kan honderden miljoenen kosten wanneer compute, data, energie en engineering worden meegerekend.
 
 **Gevolgtrekking**: veel goedkoper. Eén enkele voorwaartse doorgang door het netwerk om elk token te genereren. Vereist nog steeds aanzienlijke hardware (krachtige GPU's of gespecialiseerde AI-chips), maar kan op schaal worden beheerd.
 
@@ -210,5 +210,5 @@ Deze asymmetrie heeft de sector gevormd: een paar goed uitgeruste organisaties t
 - **Positionele codering** voegt orderinformatie toe aan het inherent positie-agnostische aandachtsmechanisme
 - **BERT** (alleen encoder) is vooraf getraind om tekst bidirectioneel te begrijpen; het beste voor classificatie- en zoektaken
 - **GPT** (alleen decoder) is vooraf getraind om tekst van links naar rechts te genereren; het beste voor generatie en conversatie
-- **Schaal is enorm belangrijk**: grotere Transformers die zijn getraind op meer data ontsluiten consequent nieuwe mogelijkheden, zoals blijkt uit de voortgang van GPT-1 → GPT-4
-- Opleiding is extreem duur; gevolgtrekking is veel goedkoper – deze asymmetrie bepaalt hoe funderingsmodellen worden ingezet
+- **Schaal doet er enorm toe**: grotere Transformers getraind op meer data ontgrendelen consequent nieuwe mogelijkheden, zoals blijkt uit de progressie van GPT-1 via GPT-3 en latere frontier systemen
+- Opleiding is extreem duur; gevolgtrekking is veel goedkoper - deze asymmetrie bepaalt hoe funderingsmodellen worden ingezet

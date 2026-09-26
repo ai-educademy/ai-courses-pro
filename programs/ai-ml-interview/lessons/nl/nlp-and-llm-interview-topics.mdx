@@ -61,7 +61,7 @@ De transformator bestaat uit:
 | Architectuur | Voorbeelden | Beste voor |
 |---|---|---|
 | Alleen encoder | BERT, RoBERTa | Classificatie, NER, inbedding |
-| Alleen decoder | GPT-4, LLaMA, Mistral | Tekst genereren, chatten, redeneren |
+| Alleen decoder | GPT, Llama, Mistral | Tekst genereren, chatten, redeneren |
 | Encoder-decoder | T5, BART | Vertaling, samenvatting |
 
 <Quiz
@@ -115,7 +115,7 @@ De techniek achter de behulpzaamheid van ChatGPT:
 
 ### Contextvensters en uitdagingen met lange context
 
-- **Contextvenster**: het maximale aantal tokens dat een model tegelijk kan verwerken (bijvoorbeeld GPT-4 Turbo: 128K, Claude: 200K)
+- **Contextvenster**: het maximale aantal tokens dat een model tegelijk kan verwerken. Huidige frontier systemen lopen uiteen van honderdduizenden tot ongeveer een miljoen tokens.
 - **Lost in the middle**: modellen besteden doorgaans minder aandacht aan informatie in het midden van lange contexten
 - **Strategieën**: vat lange documenten samen, plaats cruciale informatie aan het begin/einde, gebruik hiërarchisch ophalen
 
@@ -136,12 +136,12 @@ Modellen genereren plausibele maar feitelijk onjuiste tekst. Mitigatiestrategie�
 
 Dit is een favoriete interviewvraag: "Welk model zou je, gegeven deze gebruikssituatie, kiezen?"
 
-**Gebruik een large frontier-model (GPT-4, Claude) wanneer:**
+**Gebruik een groot frontier model (GPT-6 Astra, Claude Opus 5.5) wanneer:**
 - De taak vereist algemene redenering of het volgen van complexe instructies
 - Je hebt geen gelabelde trainingsgegevens
 - De snelheid van het prototypen is belangrijker dan de inferentiekosten
 
-**Gebruik een verfijnd kleiner model (Mistral 7B, LLaMA 3) wanneer:**
+**Gebruik een verfijnd kleiner model (Mistral, Llama) wanneer:**
 - U beschikt over domeinspecifieke gegevens en heeft consistente, gespecialiseerde output nodig
 - Inferentiekosten zijn belangrijk (op schaal weergeven)
 - De latentievereisten zijn streng
@@ -154,7 +154,7 @@ Dit is een favoriete interviewvraag: "Welk model zou je, gegeven deze gebruikssi
 
 <Quiz
   question="Een gezondheidszorgbedrijf moet patiëntberichten in vijftien categorieën indelen. Ze hebben 50.000 gelabelde voorbeelden. Welke aanpak is het meest kosteneffectief voor de productie?"
-  options="GPT-4 met aanwijzingen voor een paar schoten|Verfijnd BERT-model|RAG met een vectordatabase|Zero-shot-classificatie met LLaMA 70B"
+  options="Een frontier LLM met few-shot prompting|Verfijnd BERT-model|RAG met een vectordatabase|Zero-shot-classificatie met Llama 70B"
   answer="1"
   explanation="Met 50.000 gelabelde voorbeelden en een goed gedefinieerde classificatietaak zal een verfijnd BERT-model snel, goedkoop in gebruik en zeer nauwkeurig zijn. Het gebruik van een grote LLM voor een classificatietaak met veel trainingsgegevens is onnodig duur en langzamer."
 />

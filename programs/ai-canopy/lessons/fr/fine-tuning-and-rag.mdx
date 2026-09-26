@@ -14,7 +14,7 @@ Un LLM généraliste connaît beaucoup de choses sur le monde, mais rien sur les
 
 ## Pourquoi les modèles génériques ne suffisent pas
 
-Imaginez que vous demandiez à GPT-4 de répondre aux requêtes clients concernant la politique de retour spécifique de votre entreprise, vos codes produits internes ou vos protocoles de traitement médical. Il en est incapable - ces informations ne figurent pas dans ses données d'entraînement.
+Imaginez que vous demandiez à un modèle frontier de répondre aux requêtes clients concernant la politique de retour spécifique de votre entreprise, vos codes produits internes ou vos protocoles de traitement médical. Il en est incapable, ces informations ne figurent pas dans ses données d'entraînement.
 
 Les entreprises ont besoin d'une IA qui combine l'**intelligence générale** d'un grand modèle avec une **connaissance spécifique** de leur domaine. Deux voies s'offrent à elles, et le bon choix est déterminant.
 
@@ -35,7 +35,7 @@ Le fine-tuning prend un modèle pré-entraîné et poursuit son entraînement su
 
 **Le processus :**
 1. Préparer un jeu de données d'exemples de haute qualité dans votre domaine (typiquement des centaines à des milliers de paires entrée-sortie).
-2. Choisir un modèle de base (ex. Llama 3, Mistral).
+2. Choisir un modèle de base (ex. Llama 4, Mistral).
 3. Entraîner pendant quelques époques avec un faible taux d'apprentissage pour éviter l'oubli catastrophique.
 4. Évaluer sur des données de test non vues.
 

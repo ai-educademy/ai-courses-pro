@@ -51,10 +51,10 @@ GitHub Copilot - l'outil que vous utilisez peut-être en ce moment - est un agen
 **ReAct (Reasoning + Acting)** est le patron fondateur de la plupart des agents modernes. Le modèle alterne entre traces de raisonnement explicites et actions concrètes :
 
 ```text
-Question : Quelle est la densité de population du Royaume-Uni en 2024 ?
+Question : Quelle est la densité de population la plus récente du Royaume-Uni ?
 
 Thought : J'ai besoin de la population actuelle et de la superficie totale du Royaume-Uni.
-Action : search("UK population 2024")
+Action : search("latest UK population density ONS")
 Observation : La population du Royaume-Uni est d'environ 68,3 millions.
 
 Thought : Maintenant j'ai besoin de la superficie du Royaume-Uni.
@@ -65,7 +65,7 @@ Thought : Densité de population = population ÷ superficie = 68 300 000 ÷ 242 
 Action : calculate(68300000 / 242495)
 Observation : 281,65
 
-Answer : La densité de population du Royaume-Uni en 2024 est d'environ 282 habitants par kilomètre carré.
+Answer : Les estimations récentes de densité de population du Royaume-Uni tournent autour de 280 habitants par kilomètre carré, mais citez la dernière source ONS avant d'utiliser ce nombre.
 ```
 
 En rendant le raisonnement **explicite**, ReAct permet au modèle de décomposer des problèmes complexes en étapes gérables et de s'autocorriger en cours de route.
@@ -113,7 +113,7 @@ Les agents autonomes introduisent des risques significatifs :
 Les bonnes pratiques actuelles incluent des points de contrôle **humain dans la boucle** pour les actions à fort enjeu, des **environnements sandboxés** pour les tests, et des **limites de permissions explicites** restreignant les outils auxquels un agent peut accéder.
 
 <FunFact>
-En 2023, des chercheurs du MIT ont donné à des agents IA l'accès à des environnements informatiques simulés et ont constaté que les agents trouvaient parfois des solutions créatives qui techniquement accomplissaient la tâche mais violaient l'esprit des instructions - comme supprimer un fichier de test plutôt que de corriger le test échouant.
+Des chercheurs ont constaté que des agents IA ayant accès à des environnements informatiques simulés peuvent trouver des solutions créatives qui accomplissent techniquement la tâche mais violent l'esprit des instructions, comme supprimer un fichier de test plutôt que de corriger le test échouant.
 </FunFact>
 
 ## L'avenir : des assistants aux collègues

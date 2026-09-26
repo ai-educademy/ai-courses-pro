@@ -64,7 +64,7 @@ A função de perda do DPO define implicitamente um modelo de recompensa dentro 
 L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
 ```
 
-Onde `y_w` é a resposta preferida, `y_l` é a rejeitada e `π_ref` é o modelo de referência (SFT). O DPO é mais simples, mais estável e mais barato de treinar – sem modelo de recompensa, sem loop RL, sem PPO sensível a hiperparâmetros. O LLaMA 2 da Meta e muitos modelos de código aberto agora usam DPO ou suas variantes.
+Onde `y_w` é a resposta preferida, `y_l` é a rejeitada e `π_ref` é o modelo de referência (SFT). O DPO é mais simples, mais estável e mais barato de treinar - sem modelo de recompensa, sem loop RL, sem PPO sensível a hiperparâmetros. Muitos modelos open-weight agora usam DPO ou variantes relacionadas de preference-optimisation.
 
 <ThinkAboutIt>O DPO elimina o modelo de recompensa, mas também perde a capacidade de pontuar novas respostas arbitrárias no momento da inferência. Em quais cenários ter um modelo de recompensa explícito (o pipeline RLHF completo) pode ser mais valioso do que a simplicidade do DPO?
 </ThinkAboutIt>
@@ -103,7 +103,7 @@ A fronteira da pesquisa de alinhamento é encontrar técnicas que maximizem a ut
 
 <Quiz question="O que é a ”imposto de alinhamento” no contexto dos modelos treinados em RLHF?" options="O custo financeiro da contratação de rotuladores humanos para dados de preferência|A redução na utilidade e capacidade do modelo resultante do treinamento de segurança, tornando o modelo excessivamente cauteloso|O custo computacional de execução da otimização de PPO|O imposto que os governos impõem às empresas de IA para conformidade com a segurança" answer="1" explanation="A taxa de alinhamento refere-se à capacidade ou utilidade perdida quando o treinamento em segurança torna um modelo excessivamente cauteloso – recusando solicitações benignas, protegendo-se desnecessariamente ou produzindo respostas genéricas. Equilibrar a segurança com a ajuda genuína é um dos problemas mais difíceis do alinhamento." />
 
-<FunFact>A OpenAI passou cerca de seis meses no trabalho de alinhamento (coleta de dados SFT, modelagem de recompensas e treinamento RLHF) para transformar o modelo básico do GPT-4 na versão lançada ao público. A fase de alinhamento, embora fosse uma fração da computação pré-treinamento, exigiu milhares de horas de rotulagem humana especializada.
+<FunFact>Laboratórios frontier passam meses em trabalho de alinhamento (coleta de dados SFT, modelagem de recompensas, preference optimisation e testes de segurança) para transformar modelos base em produtos seguros o suficiente para lançamento. A fase de alinhamento, embora seja uma fração da computação pré-treinamento, exige milhares de horas de rotulagem humana especializada e avaliação.</FunFact>
 </FunFact>
 
 <ThinkAboutIt>Os rotuladores humanos inevitavelmente trazem os seus próprios preconceitos, perspectivas culturais e inconsistências para os dados de preferência. Se o alinhamento é, em última análise, “aprender o que os humanos preferem”, quais preferências devem contar – e como lidamos com divergências fundamentais sobre valores entre culturas?

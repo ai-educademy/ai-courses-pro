@@ -36,11 +36,11 @@ CLIP est devenu une brique fondamentale. Il alimente le guidage textuel dans Sta
 
 <FunFact>CLIP peut classer des images dans des catégories qu'il n'a jamais vues pendant l'entraînement - simplement en recevant les noms des catégories en anglais courant.</FunFact>
 
-## GPT-4V et GPT-4o - La vision rencontre la conversation
+## Modèles GPT modernes - La vision rencontre la conversation
 
-Le **GPT-4V** (Vision) d'OpenAI a étendu le modèle de langage GPT-4 pour accepter des images en plus du texte. Vous pouvez téléverser une photographie et poser des questions à son sujet, demander des explications de diagrammes, ou faire lire et interpréter des notes manuscrites par le modèle.
+Le GPT-4V d'OpenAI a montré comment les modèles de langage de la famille GPT pouvaient accepter des images en plus du texte. Aujourd'hui, les modèles GPT frontier poursuivent ce schéma : vous pouvez téléverser une photographie et poser des questions à son sujet, demander des explications de diagrammes, ou faire lire et interpréter des notes manuscrites par le modèle.
 
-**GPT-4o** (« omni ») est allé plus loin, en traitant nativement le texte, les images et l'audio dans un seul modèle. Plutôt que d'acheminer différentes modalités à travers des systèmes séparés, GPT-4o a été entraîné de bout en bout sur les trois - permettant des interactions plus rapides et plus naturelles.
+Les modèles de style omni sont allés plus loin, en traitant nativement le texte, les images et l'audio dans un seul modèle. Plutôt que d'acheminer différentes modalités à travers des systèmes séparés, ils sont entraînés end-to-end sur les trois, permettant des interactions plus rapides et plus naturelles.
 
 C'est important car un modèle unifié peut capturer des relations intermodales subtiles : le ton de la voix de quelqu'un correspondant à son expression faciale, ou la disposition visuelle d'un graphique renforçant les données décrites dans le texte environnant. Cela réduit aussi la latence - un seul passage dans un modèle unique est plus rapide que d'acheminer les données à travers plusieurs systèmes spécialisés.
 
@@ -93,13 +93,13 @@ La vidéo ajoute une dimension temporelle : les modèles multimodaux doivent sui
 - Répondre à des questions sur des événements couvrant plusieurs minutes de séquences.
 - Détecter des anomalies dans des séquences de surveillance ou de fabrication.
 
-Le Gemini 1.5 Pro de Google a démontré la capacité de raisonner sur des vidéos d'une heure - un bond significatif par rapport aux modèles qui ne pouvaient traiter qu'une poignée d'images. Cela ouvre la porte à des applications comme l'analyse sportive automatisée, la surveillance sécuritaire et la modération de contenu à grande échelle.
+La famille Gemini de Google a démontré la capacité de raisonner sur de longues vidéos - un bond significatif par rapport aux modèles qui ne pouvaient traiter qu'une poignée d'images. Cela ouvre la porte à des applications comme l'analyse sportive automatisée, la surveillance sécuritaire et la modération de contenu à grande échelle.
 
 ## Pourquoi le multimodal est l'avenir
 
 Le monde réel est intrinsèquement multimodal. Un médecin examine des radiographies (vision), lit les notes du patient (texte) et écoute les symptômes (audio). Un conducteur observe la route (vision), entend les klaxons (audio) et lit les panneaux (texte). Les systèmes d'IA qui n'opèrent que dans une seule modalité sont fondamentalement limités.
 
-La tendance est indéniable : les systèmes d'IA les plus performants construits aujourd'hui - GPT-4o, Gemini, Claude - sont tous multimodaux. Les modèles unimodaux deviendront de plus en plus des outils spécialisés au sein de pipelines multimodaux plus larges.
+La tendance est indéniable : les systèmes d'IA les plus performants construits aujourd'hui, dans les familles GPT, Gemini, Claude et Llama, sont tous multimodaux. Les modèles unimodaux deviendront de plus en plus des outils spécialisés au sein de pipelines multimodaux plus larges.
 
 <Quiz question="Pourquoi la multimodalité native (entraînement sur toutes les modalités dès le départ) est-elle considérée comme avantageuse par rapport à l'ajout de modalités sur un modèle textuel ?" options="Elle nécessite moins de données d'entraînement|Elle permet une compréhension intermodale plus étroite et une inférence plus rapide|Elle élimine le besoin de GPU|Elle rend les modèles plus petits" answer="1" explanation="L'entraînement multimodal natif permet au modèle d'apprendre dès le départ des relations profondes entre les modalités, plutôt que de s'appuyer sur des systèmes séparés connectés après coup." />
 
@@ -111,4 +111,4 @@ La tendance est indéniable : les systèmes d'IA les plus performants construits
 
 - [Apprentissage de modèles visuels transférables à partir de la supervision en langage naturel (article CLIP)](https://arxiv.org/abs/2103.00020) - L'article original de CLIP par OpenAI
 - [Rapport technique Gemini - Google DeepMind](https://arxiv.org/abs/2312.11805) - Architecture et capacités de la famille de modèles nativement multimodaux de Google
-- [Fiche système GPT-4o - OpenAI](https://openai.com/index/gpt-4o-system-card/) - Analyse de sécurité et des capacités du modèle omni
+- [Fiche système GPT-4o - OpenAI](https://openai.com/index/gpt-4o-system-card/) - Analyse historique de sécurité et des capacités d'un premier modèle omni

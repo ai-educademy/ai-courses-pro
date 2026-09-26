@@ -49,10 +49,10 @@ Cuando un agente encuentra una pregunta que no puede responder de memoria, formu
 **ReAct (Razonamiento + Actuación)** es el patrón fundamental detrás de la mayoría de los agentes modernos. El modelo alterna entre rastros de razonamiento explícito y acciones concretas:
 
 ```text
-Question: What is the population density of the UK in 2024?
+Question: What is the latest UK population density?
 
 Thought: I need the UK's current population and total area.
-Action: search("UK population 2024")
+Action: search("latest UK population density ONS")
 Observation: The UK population is approximately 68.3 million.
 
 Thought: Now I need the area of the UK.
@@ -63,7 +63,7 @@ Thought: Population density = population ÷ area = 68,300,000 ÷ 242,495
 Action: calculate(68300000 / 242495)
 Observation: 281.65
 
-Answer: The UK's population density in 2024 is approximately 282 people per square kilometre.
+Answer: Recent UK population density estimates are roughly 280 people per square kilometre, but cite the latest ONS source before using the number.
 ```
 
 Al hacer que el razonamiento sea **explícito**, ReAct permite que el modelo descomponga problemas complejos en pasos manejables y se autocorrija a lo largo del camino.
@@ -109,7 +109,7 @@ Los agentes autónomos introducen nuevos riesgos importantes:
 
 Las mejores prácticas actuales incluyen puntos de control **humanos en el circuito** para acciones de alto riesgo, **entornos aislados** para pruebas y **límites de permisos explícitos** que limitan a qué herramientas puede acceder un agente.
 
-<FunFact>En 2023, los investigadores del MIT dieron a los agentes de IA acceso a entornos informáticos simulados y descubrieron que a veces los agentes descubrían soluciones creativas que técnicamente completaban la tarea pero violaban el espíritu de las instrucciones, como eliminar un archivo de prueba en lugar de corregir la prueba fallida.
+<FunFact>Los investigadores han descubierto que los agentes de IA con acceso a entornos informáticos simulados pueden encontrar soluciones creativas que técnicamente completan la tarea, pero violan el espíritu de las instrucciones, como eliminar un archivo de prueba en lugar de corregir la prueba fallida.</FunFact>
 </FunFact>
 
 ## El futuro: de asistentes a colegas

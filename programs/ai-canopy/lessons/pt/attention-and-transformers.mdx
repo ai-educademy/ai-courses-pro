@@ -105,7 +105,7 @@ Os modelos somente decodificadores dominam hoje porque **a geração é a interf
 
 <Quiz question="Em qual variante do Transformer se baseia o BERT e por que ela é inadequada para geração de texto aberto?" options="Somente decodificador; falta camadas de atenção cruzada|Codificador-decodificador; requer um decodificador separado para gerar texto|Somente codificador; sua atenção bidirecional significa que ele vê a sequência completa, impossibilitando a geração autoregressiva|Somente codificador; tem poucos parâmetros para tarefas de geração" answer="2" explanation="O BERT usa atenção bidirecional (somente codificador), o que significa que cada token atende a todos os outros tokens, incluindo os futuros. Isso é perfeito para entender tarefas, mas torna impossível a geração autoregressiva - ele não pode prever 'o próximo token' quando já pode ver todos os tokens." />
 
-<FunFact>O artigo original *Atenção é tudo que você precisa* foi rejeitado em um local anterior antes de ser aceito no NeurIPS 2017. Em 2024, ele tinha mais de 130.000 citações - tornando-o um dos artigos de ciência da computação mais citados já escritos.
+<FunFact>O artigo original *Atenção é tudo que você precisa* foi rejeitado em um local anterior antes de ser aceito no NeurIPS 2017. Desde então, tornou-se um dos artigos de ciência da computação mais citados já escritos.</FunFact>
 </FunFact>
 
 <ThinkAboutIt>A autoatenção tem complexidade O(n²) no comprimento da sequência - duplicar a janela de contexto quadruplica o cálculo. A pesquisa sobre atenção linear, atenção esparsa e atenção circular visa quebrar essa barreira. Que compensações essas aproximações podem introduzir?

@@ -1,6 +1,6 @@
 ---
 title: "Transformers erklärt: Die Architektur hinter ChatGPT"
-description: "Verstehen Sie die Transformer-Architektur, die ChatGPT, GPT-4, BERT und Gemini antreibt – der Aufmerksamkeitsmechanismus wird Schritt für Schritt erklärt."
+description: "Verstehen Sie die Transformer-Architektur, die ChatGPT, Claude, Gemini, BERT und moderne GPT-Modelle antreibt - der Aufmerksamkeitsmechanismus wird Schritt für Schritt erklärt."
 order: 12
 difficulty: "intermediate"
 duration: 35
@@ -10,7 +10,7 @@ machineTranslated: true
 ---
 # Transformers erklärt: Die Architektur hinter ChatGPT
 
-Im Jahr 2017 veröffentlichte ein Team bei Google einen Artikel mit dem Titel „Attention Is All You Need“*. Es führte die **Transformer**-Architektur ein und veränderte die KI für immer. Jedes wichtige Sprachmodell, von dem Sie gehört haben – ChatGPT, GPT-4, BERT, Gemini, Claude, LLaMA – basiert auf Transformers.
+Im Jahr 2017 veröffentlichte ein Team bei Google einen Artikel mit dem Titel *"Attention Is All You Need"*. Es führte die **Transformer**-Architektur ein und veränderte die KI für immer. Jedes wichtige Sprachmodell, von dem Sie gehört haben - ChatGPT, Claude, Gemini, BERT, Llama und moderne GPT-Modelle - basiert auf Transformers.
 
 Um zu verstehen, warum Transformers wichtig sind, müssen Sie zunächst verstehen, was sie ersetzt haben.
 
@@ -109,7 +109,7 @@ class MultiHeadAttention(nn.Module):
 
 Jeder Aufmerksamkeitsleiter kann sich auf eine andere Art von Beziehung spezialisieren. Ein Kopf könnte syntaktische Abhängigkeiten verfolgen (Subjekt-Verb-Übereinstimmung), ein anderer könnte sich auf die Koreferenz (Pronomen und ihre Antezedenzien) konzentrieren, ein anderer könnte semantische Ähnlichkeiten erfassen.
 
-<FunFact>Es wird gemunkelt, dass GPT-4 96 Aufmerksamkeitsköpfe verwendet. Jeder kann selbstständig lernen, gleichzeitig verschiedene sprachliche Beziehungen im gesamten Kontextfenster zu verfolgen.</FunFact>
+<FunFact>Große GPT-family Modelle verwenden viele Aufmerksamkeitsköpfe. Jeder kann selbstständig lernen, verschiedene linguistische Beziehungen über das gesamte Kontextfenster hinweg gleichzeitig zu verfolgen.</FunFact>
 
 ## 📍Positionskodierung
 
@@ -186,15 +186,15 @@ Dies führte zu einer Entwicklung:
 - GPT-1 (2018): 117 Mio. Parameter
 - GPT-2 (2019): 1,5B Parameter
 - GPT-3 (2020): 175B Parameter
-- GPT-4 (2023): geschätzte über 1 Billion Parameter
+- Aktuelle frontier Modelle: oft mixture-of-experts oder unveröffentlichte Architekturen mit Hunderten Milliarden bis Billionen effektiver Parameter
 
-Jeder Sprung brachte qualitative Verbesserungen der Leistungsfähigkeit. Aufgaben, die GPT-2 überhaupt nicht bewältigen konnte (komplexes Denken, Codegenerierung), wurden im GPT-3-Maßstab möglich und im GPT-4-Maßstab hervorragend.
+Jeder Sprung brachte qualitative Verbesserungen der Fähigkeiten. Aufgaben, die GPT-2 überhaupt nicht bewältigen konnte (komplexes Schlussfolgern, Codegenerierung), wurden im GPT-3-Maßstab möglich und verbesserten sich in späteren frontier Modellen weiter.
 
 ## ⚡ Training vs. Inferenz
 
 Zwei sehr unterschiedliche Rechenprofile:
 
-**Schulung**: extrem teuer. Verarbeiten Sie Milliarden von Token, berechnen Sie Farbverläufe und aktualisieren Sie Hunderte von Milliarden Parametern auf Tausenden von GPUs über Wochen oder Monate hinweg. Schätzungen zufolge kostete die Ausbildung von GPT-4 über 100 Millionen US-Dollar.
+**Training**: extrem teuer. Billionen von Token verarbeiten, Gradienten berechnen und riesige Parametersätze über Tausende GPUs wochen- oder monatelang aktualisieren. Das Training aktueller frontier Modelle kann Hunderte Millionen kosten, wenn Compute, Daten, Energie und Engineering einbezogen werden.
 
 **Schlussfolgerung**: viel günstiger. Ein einzelner Vorwärtsdurchlauf durch das Netzwerk, um jedes Token zu generieren. Erfordert immer noch erhebliche Hardware (leistungsstarke GPUs oder spezielle KI-Chips), ist aber im großen Maßstab beherrschbar.
 
@@ -210,5 +210,5 @@ Diese Asymmetrie hat die Branche geprägt: Einige wenige gut ausgestattete Organ
 - **Positionskodierung** fügt Ordnungsinformationen zum inhärent positionsunabhängigen Aufmerksamkeitsmechanismus hinzu
 - **BERT** (nur Encoder) ist vorab darauf trainiert, Text bidirektional zu verstehen; am besten für Klassifizierungs- und Suchaufgaben geeignet
 - **GPT** (nur Decoder) ist vorab trainiert, um Text von links nach rechts zu generieren; am besten für Generation und Konversation
-- **Skalierung ist enorm wichtig**: Größere Transformer, die auf mehr Daten trainiert werden, erschließen ständig neue Fähigkeiten, wie die GPT-1 → GPT-4-Progression zeigt
-- Schulung ist extrem teuer; Inferenz ist viel billiger – diese Asymmetrie prägt die Art und Weise, wie Basismodelle eingesetzt werden
+- **Skalierung ist enorm wichtig**: Größere Transformers, die auf mehr Daten trainiert werden, schalten konsequent neue Fähigkeiten frei, wie die Entwicklung von GPT-1 über GPT-3 bis zu späteren frontier Systemen zeigt
+- Schulung ist extrem teuer; Inferenz ist viel billiger - diese Asymmetrie prägt die Art und Weise, wie Basismodelle eingesetzt werden

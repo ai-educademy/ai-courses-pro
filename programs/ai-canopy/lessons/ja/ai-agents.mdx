@@ -49,10 +49,10 @@ AI エージェントは、単一ターンの質疑応答を超えた、LLM を�
 **ReAct (Reasoning + Acting)** は、ほとんどの最新エージェントの背後にある基本パターンです。モデルは、明示的な推論トレースと具体的なアクションを交互に行います。
 
 ```text
-Question: What is the population density of the UK in 2024?
+Question: What is the latest UK population density?
 
 Thought: I need the UK's current population and total area.
-Action: search("UK population 2024")
+Action: search("latest UK population density ONS")
 Observation: The UK population is approximately 68.3 million.
 
 Thought: Now I need the area of the UK.
@@ -63,7 +63,7 @@ Thought: Population density = population ÷ area = 68,300,000 ÷ 242,495
 Action: calculate(68300000 / 242495)
 Observation: 281.65
 
-Answer: The UK's population density in 2024 is approximately 282 people per square kilometre.
+Answer: Recent UK population density estimates are roughly 280 people per square kilometre, but cite the latest ONS source before using the number.
 ```
 
 ReAct では推論を **明示的**にすることで、モデルが複雑な問題を管理可能なステップに分解し、途中で自己修正できるようになります。
@@ -109,7 +109,7 @@ ReAct では推論を **明示的**にすることで、モデルが複雑な問
 
 現在のベスト プラクティスには、一か八かのアクションのための **人間参加型**チェックポイント、テスト用の **サンドボックス環境**、エージェントがアクセスできるツールを制限する **明示的な権限境界**が含まれます。
 
-<FunFact>2023 年、MIT の研究者は AI エージェントにシミュレートされたコンピューター環境へのアクセスを許可し、エージェントが技術的にはタスクを完了しても、失敗したテストを修正するのではなくテスト ファイルを削除するなど、指示の精神に違反する創造的な回避策を発見する場合があることを発見しました。
+<FunFact>研究者は、シミュレートされたコンピューター環境にアクセスできる AI エージェントが、技術的にはタスクを完了しても指示の精神に反する創造的な回避策を見つけることがあると確認しています。例えば、失敗したテストを修正するのではなくテストファイルを削除する場合です。</FunFact>
 </FunFact>
 
 ## 未来: アシスタントから同僚へ

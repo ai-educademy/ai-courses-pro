@@ -1,6 +1,6 @@
 ---
 title: "Transformers explicados: la arquitectura detrás de ChatGPT"
-description: "Comprenda la arquitectura Transformer que impulsa ChatGPT, GPT-4, BERT y Gemini: el mecanismo de atención explicado paso a paso."
+description: "Comprenda la arquitectura Transformer que impulsa ChatGPT, Claude, Gemini, BERT y los modelos GPT modernos - el mecanismo de atención explicado paso a paso."
 order: 12
 difficulty: "intermediate"
 duration: 35
@@ -10,7 +10,7 @@ machineTranslated: true
 ---
 # Transformers explicados: la arquitectura detrás de ChatGPT
 
-En 2017, un equipo de Google publicó un artículo titulado *"La atención es todo lo que necesitas"*. Introdujo la arquitectura **Transformer** y cambió la IA para siempre. Todos los modelos de lenguaje importantes de los que ha oído hablar (ChatGPT, GPT-4, BERT, Gemini, Claude, LLaMA) se basan en Transformers.
+En 2017, un equipo de Google publicó un artículo titulado *"Attention Is All You Need"*. Introdujo la arquitectura **Transformer** y cambió la IA para siempre. Todos los principales modelos de lenguaje de los que ha oído hablar - ChatGPT, Claude, Gemini, BERT, Llama y los modelos GPT modernos - se basan en Transformers.
 
 Para comprender por qué son importantes los transformadores, primero debe comprender qué reemplazaron.
 
@@ -109,7 +109,7 @@ class MultiHeadAttention(nn.Module):
 
 Cada jefe de atención puede especializarse en un tipo diferente de relación. Una cabeza podría rastrear las dependencias sintácticas (concordancia sujeto-verbo), otra podría centrarse en la correferencia (pronombres y sus antecedentes), otra podría capturar la similitud semántica.
 
-<FunFact>Se rumorea que GPT-4 utiliza 96 cabezas de atención. Cada uno puede aprender de forma independiente a rastrear diferentes relaciones lingüísticas en toda la ventana de contexto simultáneamente.</FunFact>
+<FunFact>Los grandes modelos GPT-family usan muchas cabezas de atención. Cada una puede aprender de forma independiente a rastrear diferentes relaciones lingüísticas en toda la ventana de contexto simultáneamente.</FunFact>
 
 ## 📍 Codificación posicional
 
@@ -186,15 +186,15 @@ Esto llevó a una progresión:
 - GPT-1 (2018): 117M parámetros
 - GPT-2 (2019): 1,5 mil millones de parámetros
 - GPT-3 (2020): 175B parámetros
-- GPT-4 (2023): más de 1 billón de parámetros estimados
+- Modelos frontier actuales: a menudo mixture-of-experts o arquitecturas no divulgadas con cientos de miles de millones a billones de parámetros efectivos
 
-Cada salto trajo mejoras cualitativas en la capacidad. Las tareas que GPT-2 no podía realizar en absoluto (razonamiento complejo, generación de código) se volvieron posibles en la escala GPT-3 y excelentes en la escala GPT-4.
+Cada salto trajo mejoras cualitativas en capacidad. Las tareas que GPT-2 no podía hacer en absoluto (razonamiento complejo, generación de código) se hicieron posibles a escala GPT-3 y siguieron mejorando en modelos frontier posteriores.
 
 ## ⚡ Entrenamiento vs Inferencia
 
 Dos perfiles computacionales muy diferentes:
 
-**Formación**: extremadamente cara. Procesar miles de millones de tokens, calcular gradientes y actualizar cientos de miles de millones de parámetros en miles de GPU durante semanas o meses. Se estimó que el entrenamiento de GPT-4 costó más de 100 millones de dólares.
+**Entrenamiento**: extremadamente caro. Procesar billones de tokens, calcular gradientes y actualizar enormes conjuntos de parámetros en miles de GPU durante semanas o meses. Entrenar modelos frontier actuales puede costar cientos de millones cuando se incluyen computación, datos, energía e ingeniería.
 
 **Inferencia**: mucho más barato. Un único paso directo a través de la red para generar cada token. Todavía requiere hardware importante (GPU potentes o chips de IA especializados), pero manejable a escala.
 
@@ -210,5 +210,5 @@ Esta asimetría ha dado forma a la industria: unas pocas organizaciones con buen
 - **Codificación posicional** agrega información de orden al mecanismo de atención inherentemente independiente de la posición
 - **BERT** (solo codificador) está previamente entrenado para comprender texto bidireccionalmente; Lo mejor para tareas de clasificación y búsqueda.
 - **GPT** (solo decodificador) está previamente entrenado para generar texto de izquierda a derecha; Lo mejor para la generación y la conversación.
-- **La escala importa enormemente**: los transformadores más grandes entrenados con más datos desbloquean constantemente nuevas capacidades, como lo demuestra la progresión GPT-1 → GPT-4.
+- **La escala importa enormemente**: los Transformers más grandes entrenados con más datos desbloquean nuevas capacidades de forma consistente, como demuestra la progresión de GPT-1 a GPT-3 y sistemas frontier posteriores
 - La formación es extremadamente cara; La inferencia es mucho más barata: esta asimetría determina cómo se implementan los modelos básicos.

@@ -16,15 +16,15 @@ Grandes modelos de linguagem mudaram fundamentalmente o que as máquinas podem f
 
 Um **modelo de linguagem grande** é uma rede neural treinada em enormes quantidades de texto para prever o próximo token em uma sequência. "Grande" refere-se ao número de **parâmetros** - pesos que podem ser aprendidos que codificam padrões de dados de treinamento.
 
-- Estima-se que **GPT-4** tenha mais de 1 trilhão de parâmetros.
-- **Llama 3** vem em tamanhos de 8 bilhões a 405 bilhões de parâmetros.
+- **GPT-6 Astra** representa a fronteira atual da OpenAI, com os detalhes internos do modelo não publicados.
+- **Llama 4 Scout e Maverick** usam designs mixture-of-experts com 17 bilhões de parâmetros ativos e contagens totais de parâmetros muito maiores.
 - **Mistral 7B** mostra que modelos menores podem perfurar bem acima do seu peso.
 
 Esses modelos são treinados em centenas de bilhões de palavras extraídas de livros, sites, repositórios de códigos e artigos acadêmicos. A enorme escala de dados e parâmetros é o que dá aos LLMs sua notável versatilidade.
 
 **Tokens, não palavras:** LLMs não processam palavras inteiras - eles funcionam com **tokens**, que são unidades de subpalavras. A palavra “compreensão” pode ser dividida em “sob” + “suporte” + “ing”. Uma palavra típica em inglês tem em média cerca de 1,3 tokens. Este esquema de tokenização permite que os modelos lidem com palavras raras, jargões técnicos e até mesmo vários idiomas sem um vocabulário impossivelmente grande.
 
-<FunFact>Estima-se que o treinamento do GPT-4 tenha custado mais de US$ 100 milhões apenas em computação. Esse é aproximadamente o orçamento de um filme de Hollywood de médio porte - exceto que o “ator” pode falar todas as linguagens de programação.
+<FunFact>Treinar um modelo de linguagem frontier pode custar centenas de milhões quando computação, dados, energia e engenharia são incluídos. Esse é aproximadamente o orçamento de um grande filme, exceto que o “ator” pode falar todas as linguagens de programação.</FunFact>
 </FunFact>
 
 ## A Arquitetura do Transformador
@@ -54,7 +54,7 @@ Isso é repetido em vários **cabeçalhos de atenção** em paralelo, permitindo
 
 | Modelo | Criador | Recurso notável |
 |-------|---------|-----------------|
-| **GPT-4o** | OpenAI | Multimodal (texto, imagem, áudio) |
+| **GPT-6 Astra** | OpenAI | Raciocínio frontier, codificação, pesquisa e entrada multimodal |
 | **Cláudio 4** | Antrópico | Pensamento ampliado, focado na segurança |
 | **Gêmeos 2,5** | Google DeepMind | Multimodalidade nativa, contexto longo |
 | **Lhama 3** | Meta | Peso aberto, voltado para a comunidade |
@@ -62,7 +62,7 @@ Isso é repetido em vários **cabeçalhos de atenção** em paralelo, permitindo
 
 O campo se move extraordinariamente rápido – no momento em que você estiver lendo isto, já poderão existir modelos mais novos.
 
-Uma distinção crucial neste cenário é entre modelos de **código fechado** (GPT-4o, Claude, Gemini), onde apenas a API está disponível, e modelos de **peso aberto** (Llama, Mistral), onde os pesos do modelo são divulgados publicamente. Os modelos de peso aberto permitem que as organizações executem inferências em sua própria infraestrutura, ajustem domínios específicos e inspecionem o comportamento do modelo – vantagens que são muito importantes para setores sensíveis à privacidade.
+Uma distinção crucial neste cenário é entre modelos de **código fechado** (GPT, Claude, Gemini), onde apenas a API está disponível, e modelos de **peso aberto** (Llama, Mistral), onde os pesos do modelo são divulgados publicamente. Os modelos de peso aberto permitem que as organizações executem inferência em sua própria infraestrutura, ajustem para domínios específicos e inspecionem o comportamento do modelo, vantagens muito importantes para setores sensíveis à privacidade.
 
 <Callout>Nem todos os modelos “abertos” são verdadeiramente de código aberto. Alguns liberam pesos, mas restringem o uso comercial ou não compartilham dados e código de treinamento. Sempre verifique a licença antes de implantar um modelo aberto em produção.
 </Callout>
@@ -90,7 +90,7 @@ LLMs são construídos em etapas:
 
 Essas propriedades emergentes são um dos aspectos mais fascinantes do dimensionamento – habilidades que aparecem quase “de graça” quando um modelo ultrapassa certos limites de tamanho.
 
-<FunFact>GPT-4 passou no Uniform Bar Exam no percentil 90 - melhor do que a maioria dos graduados em direito humano. No entanto, ainda pode ter dificuldades com a aritmética básica se os números forem suficientemente incomuns.
+<FunFact>Os primeiros modelos frontier mostraram o padrão claramente: conseguiam passar em exames profissionais difíceis, mas ainda tropeçavam em tarefas simples de aritmética ou contagem quando o prompt expunha suas fraquezas.</FunFact>
 </FunFact>
 
 ## Limitações que você deve compreender
@@ -98,8 +98,8 @@ Essas propriedades emergentes são um dos aspectos mais fascinantes do dimension
 LLMs são poderosos, mas estão longe de ser perfeitos:
 
 - **Alucinações** - Os modelos geram textos que parecem confiantes e que são factualmente errados. Eles não “conhecem” os fatos; eles prevêem sequências de tokens prováveis.
-- **Limites da janela de contexto** - Cada modelo tem um tamanho máximo de entrada (por exemplo, 128 mil tokens para GPT-4o). As informações além desta janela são simplesmente invisíveis.
-- **Custo e latência** - A execução de inferência em modelos grandes requer clusters de GPU caros. Uma única consulta GPT-4 custa significativamente mais do que uma consulta GPT-3.5.
+- **Limites da janela de contexto** - Cada modelo tem um tamanho máximo de entrada, de centenas de milhares a mais de um milhão de tokens nos sistemas frontier atuais. As informações além desta janela são simplesmente invisíveis.
+- **Custo e latência** - Executar inferência em modelos grandes requer clusters de GPU caros. Uma consulta frontier de primeira linha custa significativamente mais do que uma consulta a um modelo pequeno ou médio.
 - **Falta de compreensão verdadeira** - LLMs manipulam padrões estatísticos em texto. Se isto constitui “compreensão” é um debate filosófico profundo.
 - **Cortes de dados de treinamento** - Os modelos não sabem sobre os eventos depois que seus dados de treinamento foram coletados, a menos que sejam aumentados com sistemas de recuperação.
 
@@ -110,7 +110,7 @@ LLMs são poderosos, mas estão longe de ser perfeitos:
 
 ## O debate sobre escala
 
-Durante anos, a crença dominante foi que **maior é sempre melhor** - mais parâmetros, mais dados e mais computação melhorariam constantemente o desempenho. Esta “lei de escala” funcionou notavelmente bem em GPT-2, GPT-3 e GPT-4.
+Durante anos, a crença dominante foi que **maior é sempre melhor** - mais parâmetros, mais dados e mais computação melhorariam constantemente o desempenho. Esta “lei de escala” funcionou notavelmente bem na geração GPT-2, GPT-3 e GPT-4 e em sistemas frontier posteriores.
 
 No entanto, pesquisas recentes sugerem que podemos estar nos aproximando de retornos decrescentes apenas em escala bruta. O foco está mudando para:
 - **Melhor qualidade de dados** em relação à quantidade (conjuntos de dados selecionados e desduplicados).

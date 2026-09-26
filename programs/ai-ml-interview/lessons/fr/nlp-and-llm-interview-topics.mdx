@@ -61,7 +61,7 @@ Le transformateur est composé de :
 | Architecture | Exemples | Idéal pour |
 |---|---|---|
 | Encodeur uniquement | BERT, RoBERTa | Classification, NER, intégrations |
-| Décodeur uniquement | GPT-4, LLaMA, Mistral | Génération de texte, chat, raisonnement |
+**Utilisez un grand modèle frontier (GPT-6 Astra, Claude Opus 5.5) lorsque :**
 | Encodeur-Décodeur | T5, BART | Traduction, résumé |
 
 <Quiz
@@ -115,7 +115,7 @@ La technique derrière l'utilité de ChatGPT :
 
 ### Fenêtres de contexte et défis de contexte long
 
-- **Fenêtre contextuelle** : le nombre maximum de jetons qu'un modèle peut traiter à la fois (par exemple, GPT-4 Turbo : 128 Ko, Claude : 200 Ko)
+- **Fenêtre contextuelle** : le nombre maximum de jetons qu'un modèle peut traiter à la fois. Les systèmes frontier actuels vont de centaines de milliers à environ un million de tokens.
 - **Perdu au milieu** : les modèles ont tendance à accorder moins d'attention aux informations au milieu de contextes longs
 - **Stratégies** : résumer des documents longs, placer les informations critiques au début/à la fin, utiliser la récupération hiérarchique
 
@@ -136,12 +136,12 @@ Les modèles génèrent un texte plausible mais factuellement incorrect. Straté
 
 C'est l'une des questions d'entretien préférées : « Compte tenu de ce cas d'utilisation, quel modèle choisiriez-vous ? »
 
-**Utilisez un modèle de grande frontière (GPT-4, Claude) lorsque :**
+**Utilisez un grand modèle frontier (GPT-6 Astra, Claude Opus 5.5) lorsque :**
 - La tâche nécessite un raisonnement général ou le suivi d'instructions complexes
 - Vous n'avez aucune donnée d'entraînement étiquetée
 - La vitesse de prototypage compte plus que le coût d'inférence
 
-**Utilisez un modèle plus petit et optimisé (Mistral 7B, LLaMA 3) lorsque :**
+**Utilisez un modèle plus petit et optimisé (Mistral, Llama) lorsque :**
 - Vous disposez de données spécifiques à un domaine et avez besoin de sorties cohérentes et spécialisées
 - Le coût d'inférence est important (servir à grande échelle)
 - Les exigences de latence sont strictes
@@ -154,7 +154,7 @@ C'est l'une des questions d'entretien préférées : « Compte tenu de ce cas 
 
 <Quiz
   question="Une entreprise de soins de santé doit classer les messages destinés aux patients en 15 catégories. Ils ont 50 000 exemples étiquetés. Quelle approche est la plus rentable pour la production ?"
-  options="GPT-4 avec invite à quelques tirs|Modèle BERT affiné|RAG avec une base de données vectorielles|Classement zéro tir avec LLaMA 70B"
+  options="Un LLM frontier avec invite à quelques tirs|Modèle BERT affiné|RAG avec une base de données vectorielles|Classement zéro tir avec Llama 70B"
   answer="1"
   explanation="Avec 50 000 exemples étiquetés et une tâche de classification bien définie, un modèle BERT affiné sera rapide, peu coûteux à mettre en œuvre et très précis. L'utilisation d'un LLM volumineux pour une tâche de classification avec des données de formation abondantes est inutilement coûteuse et plus lente."
 />

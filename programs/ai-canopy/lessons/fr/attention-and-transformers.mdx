@@ -108,7 +108,7 @@ Les modèles decoder-only dominent aujourd'hui car **la génération est l'inter
 <Quiz question="Sur quelle variante du Transformer BERT est-il basé, et pourquoi est-il inadapté à la génération de texte libre ?" options="Decoder-only ; il manque de couches de cross-attention|Encoder-decoder ; il nécessite un decoder séparé pour générer du texte|Encoder-only ; son attention bidirectionnelle signifie qu'il voit toute la séquence, rendant la génération auto-régressive impossible|Encoder-only ; il a trop peu de paramètres pour les tâches de génération" answer="2" explanation="BERT utilise une attention bidirectionnelle (encoder-only), ce qui signifie que chaque token assiste à tous les autres, y compris les futurs. C'est parfait pour les tâches de compréhension mais rend la génération auto-régressive impossible - il ne peut pas prédire « le prochain token » quand il voit déjà tous les tokens." />
 
 <FunFact>
-L'article original *Attention Is All You Need* a été rejeté d'une première conférence avant d'être accepté à NeurIPS 2017. En 2024, il cumule plus de 130 000 citations - en faisant l'un des articles d'informatique les plus cités de l'histoire.
+L'article original *Attention Is All You Need* a été rejeté d'une première conférence avant d'être accepté à NeurIPS 2017. Il est depuis devenu l'un des articles d'informatique les plus cités de l'histoire.
 </FunFact>
 
 <ThinkAboutIt>

@@ -65,7 +65,7 @@ La fonction de perte DPO définit implicitement un reward model au sein du modè
 L_DPO = -log σ(β · (log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)))
 ```
 
-Où `y_w` est la réponse préférée, `y_l` la rejetée, et `π_ref` le modèle de référence (SFT). DPO est plus simple, plus stable et moins coûteux à entraîner - pas de reward model, pas de boucle de RL, pas de PPO sensible aux hyperparamètres. LLaMA 2 de Meta et de nombreux modèles open source utilisent désormais DPO ou ses variantes.
+Où `y_w` est la réponse préférée, `y_l` la rejetée, et `π_ref` le modèle de référence (SFT). DPO est plus simple, plus stable et moins coûteux à entraîner - pas de reward model, pas de boucle de RL, pas de PPO sensible aux hyperparamètres. De nombreux modèles open-weight utilisent désormais DPO ou des variantes de preference-optimisation associées.
 
 <ThinkAboutIt>
 DPO élimine le reward model mais perd aussi la capacité de noter des réponses arbitraires au moment de l'inférence. Dans quels scénarios avoir un reward model explicite (le pipeline RLHF complet) serait-il plus précieux que la simplicité de DPO ?
@@ -106,7 +106,7 @@ La frontière de la recherche en alignement est de trouver des techniques qui ma
 <Quiz question="Qu'est-ce que la « taxe de l'alignement » dans le contexte des modèles entraînés par RLHF ?" options="Le coût financier de l'embauche d'annotateurs humains pour les données de préférence|La réduction de l'utilité et des capacités du modèle résultant d'un entraînement à la sécurité rendant le modèle excessivement prudent|Le coût computationnel de l'optimisation PPO|La taxe que les gouvernements imposent aux entreprises d'IA pour la conformité en matière de sécurité" answer="1" explanation="La taxe de l'alignement désigne la perte de capacité ou d'utilité lorsque l'entraînement à la sécurité rend un modèle excessivement prudent - refusant des requêtes anodines, ajoutant des nuances inutiles ou produisant des réponses génériques. Équilibrer sécurité et utilité réelle est l'un des problèmes ouverts les plus difficiles de l'alignement." />
 
 <FunFact>
-OpenAI a consacré environ six mois au travail d'alignement (collecte de données SFT, modélisation de la récompense et entraînement RLHF) pour transformer le modèle de base de GPT-4 en la version publiée. La phase d'alignement, bien que représentant une fraction du calcul de pré-entraînement, a nécessité des milliers d'heures d'annotation humaine spécialisée.
+Les laboratoires frontier consacrent des mois au travail d'alignement (collecte de données SFT, modélisation de la récompense, preference optimisation et tests de sécurité) pour transformer des modèles de base en produits suffisamment sûrs pour être publiés. La phase d'alignement, bien que représentant une fraction du calcul de pré-entraînement, nécessite des milliers d'heures d'annotation humaine spécialisée et d'évaluation.
 </FunFact>
 
 <ThinkAboutIt>

@@ -34,7 +34,7 @@ Im Jahr 2022 stellte DeepMinds **Chinchilla-Artikel** Kaplans Schlussfolgerungen
 |-------|-----------|----------------|-------|
 | GPT-3 | 175B | 300B | 1,7:1 |
 | Chinchilla | 70B | 1,4T | 20:1 |
-| LLaMA 2 70B | 70B | 2T | 28:1 |
+| Llama 4 Scout | 17B active / 109B total | ~40T multimodal | MoE |
 
 Chinchilla (70B-Parameter) **übertraf** den viel größeren Gopher (280B), indem es mit viermal mehr Daten trainierte. Die Lektion war tiefgreifend: Die meisten großen Modelle waren massiv **überparametrisiert und untertrainiert**.
 
@@ -48,7 +48,7 @@ Die Leistungsfähigkeit eines Modells hängt vom Zusammenspiel von Architektur, 
 - **Architekturentscheidungen** – Aufmerksamkeitsmuster, Aktivierungsfunktionen (SwiGLU vs. ReLU), Normalisierungsplatzierung (Pränorm vs. Postnorm) – alle verschieben die Skalierungskurven.
 - **Tokenisierung** wirkt sich auf das effektive Datenvolumen aus. Ein besserer Tokenisierer komprimiert mehr Informationen pro Token und verändert so das Verhältnis von Parameter zu Token.
 
-<FunFact>Es wird geschätzt, dass das Training von GPT-4 allein für die Rechenleistung über 100 Millionen US-Dollar gekostet hat. Der Stromverbrauch während eines einzelnen Grenzmodell-Trainingslaufs kann den Jahresverbrauch einer Kleinstadt übersteigen – was ernsthafte Fragen zur ökologischen Nachhaltigkeit der Skalierung aufwirft.
+<FunFact>Das Training eines frontier Modells kann Hunderte Millionen kosten, wenn Rechenleistung, Daten, Energie und Engineering einbezogen werden. Der Stromverbrauch während eines einzelnen frontier Modell-Trainingslaufs kann den Jahresverbrauch einer Kleinstadt übersteigen, was ernsthafte Fragen zur ökologischen Nachhaltigkeit der Skalierung aufwirft.</FunFact>
 </FunFact>
 
 ## Verteilte Trainingsstrategien
@@ -111,4 +111,4 @@ Auch die **Debatte über sinkende Renditen** nimmt zu. Jede Größenordnung bei 
 
 – [Skalierungsgesetze für neuronale Sprachmodelle (Kaplan et al., 2020)](https://arxiv.org/abs/2001.08361) – Das Originalpapier zu Skalierungsgesetzen von OpenAI
 – [Training rechenoptimaler großer Sprachmodelle (Hoffmann et al., 2022)](https://arxiv.org/abs/2203.15556) – Das Chinchilla-Papier, das die Art und Weise, wie Modelle dimensioniert und trainiert werden, neu gestaltet hat
-– [ZeRO: Memory Optimizations Toward Training Trillion Parameter Models](https://arxiv.org/abs/1910.02054) – Microsofts DeepSpeed ZeRO-Papier zur verteilten Trainingseffizienz
+- [ZeRO: Memory Optimizations Toward Training Trillion Parameter Models](https://arxiv.org/abs/1910.02054) - Microsofts DeepSpeed ZeRO-Papier zur verteilten Trainingseffizienz

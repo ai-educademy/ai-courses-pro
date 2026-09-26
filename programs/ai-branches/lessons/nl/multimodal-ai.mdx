@@ -36,11 +36,11 @@ CLIP werd een fundamentele bouwsteen. Het drijft de tekststuring in Stable Diffu
 
 <FunFact>CLIP kan afbeeldingen classificeren in categorieën die het tijdens de training nooit heeft gezien - simpelweg door de categorienamen in gewoon Engels te krijgen.</FunFact>
 
-## GPT-4V en GPT-4o - Visie ontmoet conversatie
+## Moderne GPT-modellen - Visie ontmoet conversatie
 
-OpenAI's **GPT-4V** (Vision) breidde het GPT-4-taalmodel uit om naast tekst ook afbeeldingen te accepteren. Je kunt een foto uploaden en er vragen over stellen, uitleg van diagrammen vragen, of het model handgeschreven notities laten lezen en interpreteren.
+OpenAI's GPT-4V liet zien hoe GPT-familie taalmodellen naast tekst ook afbeeldingen konden accepteren. Vandaag zetten frontier GPT-modellen dat patroon voort: je kunt een foto uploaden en er vragen over stellen, uitleg van diagrammen vragen, of het model handgeschreven notities laten lezen en interpreteren.
 
-**GPT-4o** ("omni") ging verder en verwerkte tekst, afbeeldingen en audio native in één enkel model. In plaats van verschillende modaliteiten via afzonderlijke systemen te routeren, werd GPT-4o end-to-end getraind op alle drie - wat snellere, meer natuurlijke interacties mogelijk maakte.
+Omni-achtige modellen gingen verder en verwerken tekst, afbeeldingen en audio native in één model. In plaats van verschillende modaliteiten via afzonderlijke systemen te routeren, worden ze end-to-end op alle drie getraind, wat snellere en natuurlijkere interacties mogelijk maakt.
 
 Dit is belangrijk omdat een uniform model subtiele kruismodale relaties kan vastleggen: de toon van iemands stem die past bij de gezichtsuitdrukking, of de visuele layout van een grafiek die de data in de omringende tekst versterkt. Het vermindert ook de latentie - een enkele forward pass door één model is sneller dan data door meerdere gespecialiseerde systemen routeren.
 
@@ -93,13 +93,13 @@ Video voegt een tijdsdimensie toe: multimodale modellen moeten objecten, acties 
 - Vragen beantwoorden over gebeurtenissen die minuten aan beeldmateriaal beslaan.
 - Anomalieën detecteren in bewakings- of productiebeelden.
 
-Google's Gemini 1.5 Pro demonstreerde het vermogen om te redeneren over video's van een uur lang - een aanzienlijke sprong ten opzichte van modellen die slechts een handvol frames konden verwerken. Dit opent deuren naar toepassingen zoals geautomatiseerde sportanalyse, beveiligingsmonitoring en contentmoderatie op grote schaal.
+Google's Gemini-familie demonstreerde het vermogen om te redeneren over lange video's - een aanzienlijke sprong ten opzichte van modellen die slechts een handvol frames konden verwerken. Dit opent deuren naar toepassingen zoals geautomatiseerde sportanalyse, beveiligingsmonitoring en contentmoderatie op grote schaal.
 
 ## Waarom multimodaal de toekomst is
 
 De echte wereld is inherent multimodaal. Een arts bekijkt röntgenfoto's (visie), leest patiëntnotities (tekst) en luistert naar symptomen (audio). Een bestuurder kijkt naar de weg (visie), hoort claxons (audio) en leest borden (tekst). AI-systemen die slechts in één modaliteit werken zijn fundamenteel beperkt.
 
-De trend is onmiskenbaar: de meest capabele AI-systemen die vandaag worden gebouwd - GPT-4o, Gemini, Claude - zijn allemaal multimodaal. Unimodale modellen zullen steeds meer specialistische gereedschappen worden binnen grotere multimodale pipelines.
+De trend is onmiskenbaar: de meest capabele AI-systemen die vandaag worden gebouwd, binnen de GPT-, Gemini-, Claude- en Llama-families, zijn allemaal multimodaal. Unimodale modellen zullen steeds meer specialistische gereedschappen worden binnen grotere multimodale pipelines.
 
 <Quiz question="Waarom wordt native multimodaliteit (training op alle modaliteiten vanaf het begin) als voordelig beschouwd ten opzichte van het toevoegen van modaliteiten aan een tekstmodel?" options="Het vereist minder trainingsdata|Het maakt hechtere kruismodale begrip en snellere inferentie mogelijk|Het elimineert de behoefte aan GPU's|Het maakt modellen kleiner" answer="1" explanation="Native multimodale training stelt het model in staat om vanaf het begin diepe relaties tussen modaliteiten te leren, in plaats van te vertrouwen op afzonderlijke systemen die achteraf worden verbonden." />
 
@@ -111,4 +111,4 @@ De trend is onmiskenbaar: de meest capabele AI-systemen die vandaag worden gebou
 
 - [Overdraagbare visuele modellen leren van natuurlijke-taalsupervisie (CLIP-paper)](https://arxiv.org/abs/2103.00020) - Het originele CLIP-paper van OpenAI
 - [Gemini Technisch Rapport - Google DeepMind](https://arxiv.org/abs/2312.11805) - Architectuur en mogelijkheden van Google's native multimodale modelfamilie
-- [GPT-4o Systeemkaart - OpenAI](https://openai.com/index/gpt-4o-system-card/) - Veiligheids- en capaciteitsanalyse van het omnimodel
+- [GPT-4o Systeemkaart - OpenAI](https://openai.com/index/gpt-4o-system-card/) - Historische veiligheids- en capaciteitsanalyse van een vroeg omni-model
