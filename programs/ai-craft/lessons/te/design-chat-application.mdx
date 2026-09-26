@@ -1,6 +1,6 @@
 ---
-title: "Chat Application డిజైన్ చేయండి - Real-Time Communication at Scale"
-description: "Millions of concurrent users కు real-time delivery అందించే WhatsApp లాంటి chat system డిజైన్ చేయండి."
+title: "చాట్ అప్లికేషన్ డిజైన్ చేయండి - నిజమైన-సమయం కమ్యూనికేషన్ at స్కేల్"
+description: "మిలియన్లు of సమకాలిక వినియోగదారులు కు రియల్ టైమ్ డెలివరీ అందించే WhatsApp లాంటి చాట్ సిస్టమ్ డిజైన్ చేయండి."
 order: 3
 difficulty: "advanced"
 duration: 25
@@ -8,36 +8,36 @@ icon: "💬"
 published: true
 ---
 
-## Interview Prompt
+## ఇంటర్వ్యూ ప్రాంప్ట్
 
-*"WhatsApp లేదా Slack లాంటి chat application డిజైన్ చేయండి - one-to-one messaging, group chats, మరియు online presence indicators support చేయాలి."*
+*"WhatsApp లేదా Slack లాంటి చాట్ అప్లికేషన్ డిజైన్ చేయండి - ఒకటి-కు-ఒకటి messaging, గుంపు chats, మరియు ఆన్‌లైన్ ఉనికి indicators మద్దతు చేయాలి."*
 
-System design interviews లో ఇది చాలా popular question ఎందుకంటే ఒకే problem లో real-time communication, connection management, storage at scale, మరియు distributed system trade-offs - అన్నీ test చేస్తుంది.
+సిస్టమ్ డిజైన్ ఇంటర్వ్యూలు లో ఇది చాలా ప్రజాదరణ పొందిన ప్రశ్న ఎందుకంటే ఒకే సమస్య లో రియల్ టైమ్ కమ్యూనికేషన్, కనెక్షన్ నిర్వహణ, నిల్వ at స్కేల్, మరియు విస్తరిత సిస్టమ్ ట్రేడ్‌ఆఫ్‌లు - అన్నీ పరీక్ష చేస్తుంది.
 
-## Step 1: Requirements Gathering
+## దశ 1: అవసరాలు Gathering
 
-**Functional requirements:**
-- Delivery మరియు read receipts తో one-to-one messaging
-- Group chat (500 members వరకు)
-- Online/offline presence indicators
-- Message history మరియు search
-- Offline users కు push notifications
+**Functional అవసరాలు:**
+- డెలివరీ మరియు చదవడం receipts తో ఒకటి-కు-ఒకటి messaging
+- గుంపు చాట్ (500 members వరకు)
+- ఆన్‌లైన్/offline ఉనికి indicators
+- సందేశం చరిత్ర మరియు సెర్చ్
+- Offline వినియోగదారులు కు పుష్ నోటిఫికేషన్‌లు
 
-**Non-functional requirements:**
-- Low latency: messages 200ms లోపు deliver అవ్వాలి
-- High availability: 99.99% uptime
-- ఒక conversation లో message ordering guaranteed
-- 50 million concurrent connections support
+**Non-functional అవసరాలు:**
+- Low లేటెన్సీ: సందేశాలు 200ms లోపు deliver అవ్వాలి
+- అధిక అందుబాటు: 99.99% uptime
+- ఒక conversation లో సందేశం ordering guaranteed
+- 50 మిలియన్ సమకాలిక కనెక్షన్‌లు మద్దతు
 
 <Callout>
-Non-functional requirements ను ఎల్లప్పుడూ specific numbers తో quantify చేయండి. "Fast delivery" vague - "sub-200ms delivery" అంటే మీకు domain అర్థమైందని చూపిస్తుంది.
+Non-functional అవసరాలు ను ఎల్లప్పుడూ స్పష్టంగా సంఖ్యలు తో quantify చేయండి. "వేగంగా డెలివరీ" vague - "ఉప-200ms డెలివరీ" అంటే మీకు డొమైన్ అర్థమైందని చూపిస్తుంది.
 </Callout>
 
-## Step 2: API Design
+## దశ 2: API డిజైన్
 
-REST-only systems కు భిన్నంగా, chat కు **bidirectional communication** అవసరం. మనకు రెండు protocols కావాలి:
+REST-only సిస్టమ్‌లు కు భిన్నంగా, చాట్ కు **bidirectional కమ్యూనికేషన్** అవసరం. మనకు రెండు protocols కావాలి:
 
-**REST API** (non-real-time operations కోసం):
+**REST API** (non-రియల్ టైమ్ ఆపరేషన్లు కోసం):
 ```
 POST /api/users/login
 GET  /api/conversations
@@ -45,7 +45,7 @@ GET  /api/conversations/:id/messages?before=timestamp&limit=50
 POST /api/groups
 ```
 
-**WebSocket** (real-time messaging కోసం):
+**WebSocket** (రియల్ టైమ్ messaging కోసం):
 ```
 CONNECT  ws://chat.example.com/ws?token=jwt
 SEND     { type: "message", to: "user_456", content: "Hello!" }
@@ -53,36 +53,36 @@ RECEIVE  { type: "message", from: "user_123", content: "Hello!", ts: 1706000000 
 SEND     { type: "ack", messageId: "msg_789", status: "read" }
 ```
 
-## Step 3: WebSocket Connection Management
+## దశ 3: WebSocket కనెక్షన్ నిర్వహణ
 
-ప్రతి connected user ఒక persistent WebSocket connection maintain చేస్తారు. 50 million concurrent users వద్ద ఇది పెద్ద engineering challenge.
+ప్రతి కలిసిన వినియోగదారు ఒక persistent WebSocket కనెక్షన్ నిర్వహించండి చేస్తారు. 50 మిలియన్ సమకాలిక వినియోగదారులు వద్ద ఇది పెద్ద ఇంజినీరింగ్ సవాలు.
 
-**Connection servers** (gateway servers అని కూడా అంటారు) WebSocket connections hold చేస్తాయి. ప్రతి server సుమారు 50,000-100,000 concurrent connections handle చేయగలదు, అంటే మనకు 500-1,000 connection servers కావాలి.
+**కనెక్షన్ సర్వర్‌లు** (గేట్‌వే సర్వర్‌లు అని కూడా అంటారు) WebSocket కనెక్షన్‌లు hold చేస్తాయి. ప్రతి సర్వర్ సుమారు 50,000-100,000 సమకాలిక కనెక్షన్‌లు నిర్వహించు చేయగలదు, అంటే మనకు 500-1,000 కనెక్షన్ సర్వర్‌లు కావాలి.
 
-ఒక **connection registry** (Redis cluster) ప్రతి user ని వారి connection server కు map చేస్తుంది:
+ఒక **కనెక్షన్ రిజిస్ట్రీ** (Redis క్లస్టర్) ప్రతి వినియోగదారు ని వారి కనెక్షన్ సర్వర్ కు మ్యాప్ చేస్తుంది:
 ```
 user_123 → ws-server-042
 user_456 → ws-server-187
 ```
 
-User A, user B కి message పంపినప్పుడు flow ఇలా ఉంటుంది:
-1. Message, A యొక్క connection server కి WebSocket ద్వారా వస్తుంది
-2. Server, Redis లో B యొక్క connection server ను look up చేస్తుంది
-3. Message internal messaging ద్వారా B యొక్క connection server కు route అవుతుంది
-4. B యొక్క server, B యొక్క WebSocket లో message push చేస్తుంది
+వినియోగదారు A, వినియోగదారు B కి సందేశం పంపినప్పుడు ప్రవాహం ఇలా ఉంటుంది:
+1. సందేశం, A యొక్క కనెక్షన్ సర్వర్ కి WebSocket ద్వారా వస్తుంది
+2. సర్వర్, Redis లో B యొక్క కనెక్షన్ సర్వర్ ను look up చేస్తుంది
+3. సందేశం అంతర్గత messaging ద్వారా B యొక్క కనెక్షన్ సర్వర్ కు మార్గం అవుతుంది
+4. B యొక్క సర్వర్, B యొక్క WebSocket లో సందేశం పుష్ చేస్తుంది
 
-<Illustration src="/images/lessons/design-chat-application.svg" alt="WebSocket connection servers, message routing, మరియు storage layers చూపించే chat architecture" caption="Messages connection servers ద్వారా flow అవుతాయి, Redis ఏ user ఎక్కడ connected అనేది track చేస్తుంది." />
+<Illustration src="/images/lessons/design-chat-application.svg" alt="WebSocket కనెక్షన్ సర్వర్‌లు, సందేశం రూటింగ్, మరియు నిల్వ పొరలు చూపించే చాట్ ఆర్కిటెక్చర్" title="సందేశాలు కనెక్షన్ సర్వర్‌లు ద్వారా ప్రవాహం అవుతాయి, Redis ఏ వినియోగదారు ఎక్కడ కలిసిన అనేది ట్రాక్ చేస్తుంది." />
 
-## Step 4: Message Storage
+## దశ 4: సందేశం నిల్వ
 
-Chat applications చాలా పెద్ద volumes లో data generate చేస్తాయి. WhatsApp రోజుకు 100 billion కంటే ఎక్కువ messages process చేస్తుంది.
+చాట్ అప్లికేషన్‌లు చాలా పెద్ద volumes లో డేటా సృష్టించు చేస్తాయి. WhatsApp రోజుకు 100 బిలియన్ కంటే ఎక్కువ సందేశాలు ప్రక్రియ చేస్తుంది.
 
-**Storage strategy:**
-- **Recent messages** - fast datastore (Cassandra లేదా HBase) లో, conversation ID తో partitioned
-- **Message index** - Elasticsearch ద్వారా search enable చేస్తుంది
-- **Media files** - object storage (S3) లో CDN delivery తో
+**నిల్వ వ్యూహం:**
+- **ఇటీవలి సందేశాలు** - వేగంగా datastore (Cassandra లేదా HBase) లో, conversation ID తో partitioned
+- **సందేశం ఇండెక్స్** - Elasticsearch ద్వారా సెర్చ్ enable చేస్తుంది
+- **మీడియా files** - object నిల్వ (S3) లో CDN డెలివరీ తో
 
-**Schema design (Cassandra):**
+**స్కీమా డిజైన్ (Cassandra):**
 ```
 Table: messages
   partition_key: conversation_id
@@ -90,81 +90,81 @@ Table: messages
   columns: sender_id, content, type, status
 ```
 
-ఈ design వల్ల ఒక conversation లోని అన్ని messages ఒకే partition లో co-located అవుతాయి, "పాత messages load చేయి" queries చాలా efficient అవుతాయి - ఒకే partition లో sequential read.
+ఈ డిజైన్ వల్ల ఒక conversation లోని అన్ని సందేశాలు ఒకే పార్టిషన్ లో co-located అవుతాయి, "పాత సందేశాలు లోడ్ చేయి" క్వెరీలు చాలా efficient అవుతాయి - ఒకే పార్టిషన్ లో sequential చదవడం.
 
-<Quiz question="Chat message storage కోసం PostgreSQL లాంటి relational database కంటే Cassandra ఎందుకు మంచి choice?" options="Cassandra complex queries కోసం SQL joins support చేస్తుంది|Cassandra strong ACID transactions provide చేస్తుంది|Cassandra massive write throughput handle చేస్తుంది మరియు design ప్రకారం horizontally scale అవుతుంది|Cassandra automatically అన్ని data at rest encrypt చేస్తుంది" answer="2" explanation="Chat systems write-heavy (రోజుకు billions messages). Cassandra యొక్క distributed architecture massive write throughput handle చేస్తుంది మరియు nodes add చేసి horizontally scale అవుతుంది, PostgreSQL single primary మీద ఈ write volume తో struggle చేస్తుంది." />
+<Quiz question="చాట్ సందేశం నిల్వ కోసం PostgreSQL లాంటి relational డేటాబేస్ కంటే Cassandra ఎందుకు మంచి ఎంపిక?" options="Cassandra క్లిష్టమైన క్వెరీలు కోసం SQL joins మద్దతు చేస్తుంది|Cassandra బలమైన ACID transactions provide చేస్తుంది|Cassandra massive రాయండి థ్రూపుట్ నిర్వహించు చేస్తుంది మరియు డిజైన్ ప్రకారం horizontally స్కేల్ అవుతుంది|Cassandra automatically అన్ని డేటా at rest encrypt చేస్తుంది" answer="2" explanation="చాట్ సిస్టమ్‌లు రాయండి-భారీ (రోజుకు billions సందేశాలు). Cassandra యొక్క విస్తరిత ఆర్కిటెక్చర్ massive రాయండి థ్రూపుట్ నిర్వహించు చేస్తుంది మరియు నోడ్‌లు జోడించు చేసి horizontally స్కేల్ అవుతుంది, PostgreSQL ఒకే primary మీద ఈ రాయండి volume తో struggle చేస్తుంది." />
 
-## Step 5: Presence System
+## దశ 5: ఉనికి సిస్టమ్
 
-ఎవరు online లో ఉన్నారో చూపించడం simple గా అనిపిస్తుంది కానీ scale వద్ద surprisingly tricky. మీ contact list లోని ప్రతి user కోసం ప్రతి కొన్ని seconds కు database poll చేయడం సాధ్యం కాదు.
+ఎవరు ఆన్‌లైన్ లో ఉన్నారో చూపించడం సులభమైన గా అనిపిస్తుంది కానీ స్కేల్ వద్ద surprisingly tricky. మీ సంప్రదిస్తుంది జాబితా లోని ప్రతి వినియోగదారు కోసం ప్రతి కొన్ని సెకన్లు కు డేటాబేస్ poll చేయడం సాధ్యం కాదు.
 
-**Heartbeat approach:**
-1. Connected clients ప్రతి 30 seconds కు WebSocket ద్వారా heartbeat పంపుతాయి
-2. Server ఒక Redis key ను 60 seconds TTL తో update చేస్తుంది: `presence:user_123 → online (TTL 60s)`
-3. Heartbeat రాకపోతే key expire అవుతుంది మరియు user offline గా కనిపిస్తారు
+**Heartbeat విధానం:**
+1. కలిసిన clients ప్రతి 30 సెకన్లు కు WebSocket ద్వారా heartbeat పంపుతాయి
+2. సర్వర్ ఒక Redis కీ ను 60 సెకన్లు TTL తో నవీకరించు చేస్తుంది: `presence:user_123 → online (TTL 60s)`
+3. Heartbeat రాకపోతే కీ గడువు ముగియాలి అవుతుంది మరియు వినియోగదారు offline గా కనిపిస్తారు
 
-**Status updates కోసం fan-out:**
-ఒక user online వచ్చినప్పుడు, వారి status online ఉన్న అన్ని contacts కు push అవ్వాలి. 500 contacts ఉన్న user కోసం, ఏ contacts online లో ఉన్నారో check చేసి వారికి మాత్రమే presence updates పంపాలి - **lazy fan-out** offline users కు broadcast చేయడం నివారిస్తుంది.
+**స్థితి నవీకరణలు కోసం fan-out:**
+ఒక వినియోగదారు ఆన్‌లైన్ వచ్చినప్పుడు, వారి స్థితి ఆన్‌లైన్ ఉన్న అన్ని contacts కు పుష్ అవ్వాలి. 500 contacts ఉన్న వినియోగదారు కోసం, ఏ contacts ఆన్‌లైన్ లో ఉన్నారో తనిఖీ చేసి వారికి మాత్రమే ఉనికి నవీకరణలు పంపాలి - **lazy fan-out** offline వినియోగదారులు కు broadcast చేయడం నివారిస్తుంది.
 
 <FunFact>
-WhatsApp యొక్క "last seen" feature ప్రపంచవ్యాప్తంగా unexpected social drama కలిగించింది. కొన్ని దేశాల్లో relationship disputes పెరిగాయి ఎందుకంటే partners ఒకరినొకరి exact last-active timestamps చూడగలిగారు. WhatsApp చివరకు ఈ information దాచడానికి privacy controls add చేసింది.
+WhatsApp యొక్క "last seen" ఫీచర్ ప్రపంచవ్యాప్తంగా unexpected సోషల్ drama కలిగించింది. కొన్ని దేశాల్లో relationship disputes పెరిగాయి ఎందుకంటే partners ఒకరినొకరి ఖచ్చితమైన last-active timestamps చూడగలిగారు. WhatsApp చివరకు ఈ సమాచారం దాచడానికి గోప్యత controls జోడించు చేసింది.
 </FunFact>
 
-## Step 6: Push Notifications
+## దశ 6: పుష్ నోటిఫికేషన్‌లు
 
-User offline అయినప్పుడు (active WebSocket లేదు), messages push notifications ద్వారా చేరాలి.
+వినియోగదారు offline అయినప్పుడు (active WebSocket లేదు), సందేశాలు పుష్ నోటిఫికేషన్‌లు ద్వారా చేరాలి.
 
-Message flow మారుతుంది:
-1. Connection registry user B offline అని చూపిస్తుంది
-2. Message database లో "undelivered" status తో store అవుతుంది
-3. Notification service APNs (iOS) లేదా FCM (Android) ద్వారా push పంపుతుంది
-4. User B reconnect అయినప్పుడు, undelivered messages fetch చేసి WebSocket ద్వారా పంపబడతాయి
-5. Receipt confirm చేయడానికి delivery receipts తిరిగి పంపబడతాయి
-
-<ThinkAboutIt>
-500 members ఉన్న group chats లో fan-out challenge ఉంటుంది. 400 members offline ఉన్న group కు message పంపితే, 400 push notifications పంపాలి. Peak hours లో notification services ను overwhelm చేయకుండా వీటిని ఎలా batch మరియు rate-limit చేస్తారు?
-</ThinkAboutIt>
-
-## Step 7: E2E Encryption Basics
-
-Interview discussions లో E2E encryption గురించి mention చేయడం security awareness చూపిస్తుంది:
-
-- ప్రతి user తమ device మీద **public/private key pair** generate చేస్తారు
-- Messages sender device నుండి బయటకు వెళ్ళే ముందు recipient యొక్క public key తో encrypt అవుతాయి
-- Server కు ciphertext మాత్రమే కనిపిస్తుంది - message content చదవలేదు
-- Group chats ఒక **shared group key** వాడతాయి, members join లేదా leave అయినప్పుడు rotate అవుతుంది
-
-అంటే server యొక్క message storage లో encrypted blobs మాత్రమే ఉంటాయి, data compliance దృష్ట్యా ఇది actually simpler.
-
-## Step 8: Millions కు Scale చేయడం
-
-**Key scaling strategies:**
-- **Connection servers** horizontally scale అవుతాయి - users పెరిగేకొద్దీ servers add చేయండి
-- **Message routing** inter-server communication కోసం Kafka లేదా Redis Pub/Sub వాడుతుంది
-- **Database sharding** conversation ID ద్వారా storage load distribute చేస్తుంది
-- **Geographic distribution** - latency తగ్గించడానికి multiple regions లో connection servers deploy చేయండి
-- **Message queue buffering** - peak usage hours లో spikes absorb చేస్తుంది
-
-<Quiz question="London లో ఉన్న user Tokyo లో ఉన్న user కు message పంపుతారు. Delivery latency minimize చేయడానికి అత్యంత effective మార్గం ఏది?" options="అన్ని messages ఒకే centralised database లో store చేయడం|రెండు regions లో connection servers deploy చేసి inter-region message routing వాడటం|అన్ని WebSocket connections ను London servers ద్వారా force చేయడం|అన్ని messages ను CDN edge వద్ద cache చేయడం" answer="1" explanation="Multiple regions లో connection servers deploy చేయడం వల్ల ప్రతి user nearby server కు connect అవుతారు. Messages optimised inter-region links ద్వారా route అవుతాయి, ప్రతి user అనుభవించే latency minimize అవుతుంది." />
-
-<Quiz question="పెద్ద sporting event సమయంలో message volume 10 రెట్లు పెరుగుతుంది. ఏ component bottleneck అయ్యే risk ఎక్కువ?" options="Static assets serve చేసే CDN|WebSocket connection servers (ఇప్పటికే established connections)|Message storage write path (database writes)|User authentication service" answer="2" explanation="Message volume spikes storage write path ను ఎక్కువగా hit చేస్తాయి. Connections ఇప్పటికే established, CDN static content handle చేస్తుంది, auth login సమయంలో మాత్రమే run అవుతుంది. Database sudden write surge absorb చేయాలి." />
-
-## Interview Tips
-
-1. **WebSocket decision తో start చేయండి** - ఈ scale వద్ద HTTP polling ఎందుకు work కాదో explain చేయండి
-2. **Connection capacity quantify చేయండి** - server limits అర్థమయ్యాయని చూపించండి (~50-100K connections per server)
-3. **Offline delivery address చేయండి** - చాలా candidates users ఎల్లప్పుడూ connected ఉండరని మరచిపోతారు
-4. **Message ordering mention చేయండి** - timestamp-based ordering with conflict resolution
+సందేశం ప్రవాహం మారుతుంది:
+1. కనెక్షన్ రిజిస్ట్రీ వినియోగదారు B offline అని చూపిస్తుంది
+2. సందేశం డేటాబేస్ లో "undelivered" స్థితి తో నిల్వ అవుతుంది
+3. నోటిఫికేషన్ సేవ APNs (iOS) లేదా FCM (Android) ద్వారా పుష్ పంపుతుంది
+4. వినియోగదారు B reconnect అయినప్పుడు, undelivered సందేశాలు fetch చేసి WebSocket ద్వారా పంపబడతాయి
+5. Receipt confirm చేయడానికి డెలివరీ receipts తిరిగి పంపబడతాయి
 
 <ThinkAboutIt>
-Slack మరియు WhatsApp message history కోసం చాలా భిన్నమైన approaches తీసుకుంటాయి. WhatsApp messages ను device మీద store చేస్తుంది మరియు new devices కు full history sync చేయదు. Slack అంతా server-side store చేసి full search అందిస్తుంది. ప్రతి approach యొక్క privacy, cost, మరియు user experience trade-offs ఏమిటి?
+500 members ఉన్న గుంపు chats లో fan-out సవాలు ఉంటుంది. 400 members offline ఉన్న గుంపు కు సందేశం పంపితే, 400 పుష్ నోటిఫికేషన్‌లు పంపాలి. పీక్ గంటలు లో నోటిఫికేషన్ సేవలు ను overwhelm చేయకుండా వీటిని ఎలా బ్యాచ్ మరియు రేట్-పరిమితి చేస్తారు?
 </ThinkAboutIt>
 
-## Key Takeaways
+## దశ 7: E2E Encryption Basics
 
-- Chat systems కు real-time bidirectional communication కోసం WebSockets అవసరం
-- Scale వద్ద connection management కు users-to-servers mapping registry అవసరం
-- Cassandra యొక్క write throughput మరియు partition-based queries chat message storage కు సరిపోతాయి
-- Presence systems Redis లో TTL-based expiry తో heartbeats వాడతాయి
-- Push notifications offline message delivery handle చేస్తాయి
-- Geographic distribution మరియు horizontal scaling global latency requirements address చేస్తాయి
+ఇంటర్వ్యూ చర్చలు లో E2E encryption గురించి mention చేయడం భద్రత awareness చూపిస్తుంది:
+
+- ప్రతి వినియోగదారు తమ device మీద **పబ్లిక్/ప్రైవేట్ కీ pair** సృష్టించు చేస్తారు
+- సందేశాలు sender device నుండి బయటకు వెళ్ళే ముందు recipient యొక్క పబ్లిక్ కీ తో encrypt అవుతాయి
+- సర్వర్ కు ciphertext మాత్రమే కనిపిస్తుంది - సందేశం కంటెంట్ చదవలేదు
+- గుంపు chats ఒక **పంచుకున్న గుంపు కీ** వాడతాయి, members join లేదా leave అయినప్పుడు rotate అవుతుంది
+
+అంటే సర్వర్ యొక్క సందేశం నిల్వ లో encrypted blobs మాత్రమే ఉంటాయి, డేటా అనుసరణ దృష్ట్యా ఇది నిజంగా simpler.
+
+## దశ 8: మిలియన్లు కు స్కేల్ చేయడం
+
+**కీ స్కేలింగ్ వ్యూహాలు:**
+- **కనెక్షన్ సర్వర్‌లు** horizontally స్కేల్ అవుతాయి - వినియోగదారులు పెరిగేకొద్దీ సర్వర్‌లు జోడించు చేయండి
+- **సందేశం రూటింగ్** inter-సర్వర్ కమ్యూనికేషన్ కోసం Kafka లేదా Redis Pub/ఉప వాడుతుంది
+- **డేటాబేస్ షార్డింగ్** conversation ID ద్వారా నిల్వ లోడ్ విస్తరించండి చేస్తుంది
+- **Geographic వితరణ** - లేటెన్సీ తగ్గించడానికి అనేక regions లో కనెక్షన్ సర్వర్‌లు డిప్లాయ్ చేయండి చేయండి
+- **సందేశం క్యూ buffering** - పీక్ వినియోగం గంటలు లో spikes absorb చేస్తుంది
+
+<Quiz question="London లో ఉన్న వినియోగదారు Tokyo లో ఉన్న వినియోగదారు కు సందేశం పంపుతారు. డెలివరీ లేటెన్సీ minimize చేయడానికి అత్యంత ప్రభావవంతమైన మార్గం ఏది?" options="అన్ని సందేశాలు ఒకే centralised డేటాబేస్ లో నిల్వ చేయడం|రెండు regions లో కనెక్షన్ సర్వర్‌లు డిప్లాయ్ చేయండి చేసి inter-region సందేశం రూటింగ్ వాడటం|అన్ని WebSocket కనెక్షన్‌లు ను London సర్వర్‌లు ద్వారా force చేయడం|అన్ని సందేశాలు ను CDN ముందంజ వద్ద క్యాష్ చేయడం" answer="1" explanation="అనేక regions లో కనెక్షన్ సర్వర్‌లు డిప్లాయ్ చేయండి చేయడం వల్ల ప్రతి వినియోగదారు nearby సర్వర్ కు connect అవుతారు. సందేశాలు optimised inter-region లింకులు ద్వారా మార్గం అవుతాయి, ప్రతి వినియోగదారు అనుభవించే లేటెన్సీ minimize అవుతుంది." />
+
+<Quiz question="పెద్ద sporting ఈవెంట్ సమయంలో సందేశం volume 10 రెట్లు పెరుగుతుంది. ఏ భాగం bottleneck అయ్యే రిస్క్ ఎక్కువ?" options="Static assets సర్వ్ చేయండి చేసే CDN|WebSocket కనెక్షన్ సర్వర్‌లు (ఇప్పటికే established కనెక్షన్‌లు)|సందేశం నిల్వ రాయండి మార్గం (డేటాబేస్ రైట్‌లు)|వినియోగదారు ప్రామాణీకరణ సేవ" answer="2" explanation="సందేశం volume spikes నిల్వ రాయండి మార్గం ను ఎక్కువగా హిట్ చేస్తాయి చేస్తాయి. కనెక్షన్‌లు ఇప్పటికే established, CDN static కంటెంట్ నిర్వహించు చేస్తుంది, ఆథ్ login సమయంలో మాత్రమే నడపండి అవుతుంది. డేటాబేస్ sudden రాయండి సర్జ్ absorb చేయాలి." />
+
+## ఇంటర్వ్యూ Tips
+
+1. **WebSocket నిర్ణయం తో ప్రారంభించండి చేయండి** - ఈ స్కేల్ వద్ద HTTP polling ఎందుకు పని కాదో explain చేయండి
+2. **కనెక్షన్ capacity quantify చేయండి** - సర్వర్ పరిమితులు అర్థమయ్యాయని చూపించండి (~50-100K కనెక్షన్‌లు ప్రతి సర్వర్)
+3. **Offline డెలివరీ address చేయండి** - చాలా అభ్యర్థులు వినియోగదారులు ఎల్లప్పుడూ కలిసిన ఉండరని మరచిపోతారు
+4. **సందేశం ordering mention చేయండి** - timestamp-ఆధారిత ordering తో ఘర్షణ resolution
+
+<ThinkAboutIt>
+Slack మరియు WhatsApp సందేశం చరిత్ర కోసం చాలా భిన్నమైన విధానాలు తీసుకుంటాయి. WhatsApp సందేశాలు ను device మీద నిల్వ చేస్తుంది మరియు కొత్త devices కు పూర్తి చరిత్ర sync చేయదు. Slack అంతా సర్వర్-side నిల్వ చేసి పూర్తి సెర్చ్ అందిస్తుంది. ప్రతి విధానం యొక్క గోప్యత, ఖర్చు, మరియు వినియోగదారు అనుభవం ట్రేడ్‌ఆఫ్‌లు ఏమిటి?
+</ThinkAboutIt>
+
+## కీ Takeaways
+
+- చాట్ సిస్టమ్‌లు కు రియల్ టైమ్ bidirectional కమ్యూనికేషన్ కోసం WebSockets అవసరం
+- స్కేల్ వద్ద కనెక్షన్ నిర్వహణ కు వినియోగదారులు-కు-సర్వర్‌లు మ్యాపింగ్ రిజిస్ట్రీ అవసరం
+- Cassandra యొక్క రాయండి థ్రూపుట్ మరియు పార్టిషన్-ఆధారిత క్వెరీలు చాట్ సందేశం నిల్వ కు సరిపోతాయి
+- ఉనికి సిస్టమ్‌లు Redis లో TTL-ఆధారిత expiry తో heartbeats వాడతాయి
+- పుష్ నోటిఫికేషన్‌లు offline సందేశం డెలివరీ నిర్వహించు చేస్తాయి
+- Geographic వితరణ మరియు horizontal స్కేలింగ్ ప్రపంచ లేటెన్సీ అవసరాలు address చేస్తాయి
