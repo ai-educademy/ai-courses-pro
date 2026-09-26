@@ -1,6 +1,6 @@
 ---
 title: "वेब क्रॉलर डिज़ाइन करें - Google इंटरनेट को कैसे इंडेक्स करता है"
-description: "URL frontier management, politeness policies, SimHash से content deduplication और consistent hashing के साथ distributed crawling को कवर करने वाला distributed web crawler डिज़ाइन करें।"
+description: "URL फ़्रंटियर management, शिष्टाचार policies, SimHash से सामग्री डीडुप्लिकेशन और कंसिस्टेंट हैशिंग के साथ वितरित crawling को कवर करने वाला वितरित web क्रॉलर डिज़ाइन करें।"
 order: 9
 difficulty: "advanced"
 duration: 22
@@ -10,20 +10,20 @@ published: true
 
 # वेब क्रॉलर डिज़ाइन करें - Google इंटरनेट को कैसे इंडेक्स करता है
 
-वेब क्रॉलर वेब पेज डाउनलोड और इंडेक्स करने के लिए व्यवस्थित रूप से इंटरनेट ब्राउज़ करता है। यह हर search engine की बुनियाद है, और इसे डिज़ाइन करना आपको distributed systems, graph traversal और वास्तविक वेब की अव्यवस्था संभालना सिखाता है।
+वेब क्रॉलर वेब पेज डाउनलोड और इंडेक्स करने के लिए व्यवस्थित रूप से इंटरनेट ब्राउज़ करता है। यह हर search engine की बुनियाद है, और इसे डिज़ाइन करना आपको वितरित systems, graph traversal और वास्तविक वेब की अव्यवस्था संभालना सिखाता है।
 
 ## चरण 1 - आवश्यकताएं इकट्ठी करना
 
 ### फ़ंक्शनल आवश्यकताएं
-- Seed URLs के सेट से शुरू करके web pages crawl करें
-- नए pages खोजने के लिए hyperlinks निकालें और follow करें
-- Indexing और processing के लिए downloaded content store करें
-- robots.txt और crawl politeness rules का सम्मान करें
+- Seed URL के सेट से शुरू करके web पेज क्रॉल करें
+- नए पेज खोजने के लिए hyperlinks निकालें और follow करें
+- Indexing और प्रोसेसिंग के लिए downloaded सामग्री स्टोर करें
+- robots.txt और क्रॉल शिष्टाचार rules का सम्मान करें
 
 ### नॉन-फ़ंक्शनल आवश्यकताएं
-- **Scale** - हर महीने 1 billion pages crawl करें
-- **Politeness** - किसी एक web server को कभी overwhelm न करें
-- **Freshness** - महत्वपूर्ण pages को नियमित रूप से re-crawl करें
+- **Scale** - हर महीने 1 billion पेज क्रॉल करें
+- **शिष्टाचार** - किसी एक web server को कभी overwhelm न करें
+- **Freshness** - महत्वपूर्ण पेज को नियमित रूप से re-क्रॉल करें
 - **Robustness** - malformed HTML, infinite loops और spider traps संभालें
 
 ## चरण 2 - उच्च-स्तरीय आर्किटेक्चर
@@ -42,19 +42,19 @@ Seed URLs → URL Frontier (priority queue)
                                  URL Frontier (loop)
 ```
 
-<Illustration src="/images/lessons/design-web-crawler.svg" alt="URL frontier से fetcher, parser, URL extraction, deduplication और वापस frontier तक crawl loop दिखाने वाला web crawler architecture" caption="Crawler लगातार loop की तरह काम करता है: page fetch करें, नए URLs निकालें, deduplicate करें और future crawling के लिए enqueue करें" />
+<Illustration src="/images/lessons/design-web-क्रॉलर.svg" alt="URL फ़्रंटियर से fetcher, parser, URL extraction, डीडुप्लिकेशन और वापस फ़्रंटियर तक क्रॉल loop दिखाने वाला web क्रॉलर आर्किटेक्चर" caption="क्रॉलर लगातार loop की तरह काम करता है: पेज fetch करें, नए URL निकालें, deduplicate करें और future crawling के लिए enqueue करें" />
 
-## चरण 3 - Crawl Loop
+## चरण 3 - क्रॉल Loop
 
 ### BFS बनाम DFS Crawling
-- **BFS (Breadth-First)** - web crawling के लिए पसंदीदा। यह domains का विस्तृत सेट जल्दी खोजता है और किसी एक site में बहुत गहराई तक फंसने से बचता है
-- **DFS (Depth-First)** - दूसरे domains खोजने से पहले dynamically generated pages में अनंत गहराई तक जाने का जोखिम रखता है
+- **BFS (Breadth-First)** - web crawling के लिए पसंदीदा। यह domains का विस्तृत सेट जल्दी खोजता है और किसी एक साइट में बहुत गहराई तक फंसने से बचता है
+- **DFS (Depth-First)** - दूसरे domains खोजने से पहले dynamically generated पेज में अनंत गहराई तक जाने का जोखिम रखता है
 
-### URL Frontier Design
-Frontier कोई simple queue नहीं है। यह दो sub-components वाला sophisticated priority system है:
+### URL फ़्रंटियर Design
+फ़्रंटियर कोई simple क्यू नहीं है। यह दो sub-components वाला sophisticated प्राथमिकता सिस्टम है:
 
-1. **Priority Queue (Front)** - URLs को importance से rank करती है। कारकों में PageRank, update frequency और domain authority शामिल हैं
-2. **Politeness Queue (Back)** - सुनिश्चित करती है कि हर domain की अपनी FIFO queue हो। Scheduler अलग-अलग domain queues से चुनता है ताकि किसी एक server पर अत्यधिक load न पड़े
+1. **प्राथमिकता क्यू (Front)** - URL को importance से rank करती है। कारकों में PageRank, अपडेट frequency और डोमेन authority शामिल हैं
+2. **शिष्टाचार क्यू (Back)** - सुनिश्चित करती है कि हर डोमेन की अपनी FIFO क्यू हो। Scheduler अलग-अलग डोमेन क्यू से चुनता है ताकि किसी एक server पर अत्यधिक लोड न पड़े
 
 ```
 Front (Priority):       Back (Politeness):
@@ -67,12 +67,12 @@ Front (Priority):       Back (Politeness):
                         └───────────────────────┘
 ```
 
-<Quiz question="General-purpose crawling के लिए web crawler DFS की जगह BFS क्यों इस्तेमाल करता है?" options="BFS कम memory इस्तेमाल करता है|BFS अधिक unique domains जल्दी खोजता है और किसी एक website में गहराई तक फंसने से बचता है|BFS DFS से तेज़ है|DFS URLs के साथ काम नहीं करता" answer="1" explanation="BFS level by level explore करता है, यानी यह कई अलग-अलग domains में pages जल्दी खोजता है। DFS किसी एक site में links को बहुत गहराई तक follow कर सकता है, संभावित रूप से लाखों dynamically generated pages तक, और तब तक दूसरे domain पर नहीं जाएगा।" />
+<Quiz question="General-purpose crawling के लिए web क्रॉलर DFS की जगह BFS क्यों इस्तेमाल करता है?" options="BFS कम memory इस्तेमाल करता है|BFS अधिक unique domains जल्दी खोजता है और किसी एक website में गहराई तक फंसने से बचता है|BFS DFS से तेज़ है|DFS URL के साथ काम नहीं करता" answer="1" explanation="BFS स्तर by स्तर explore करता है, यानी यह कई अलग-अलग domains में पेज जल्दी खोजता है। DFS किसी एक साइट में links को बहुत गहराई तक follow कर सकता है, संभावित रूप से लाखों dynamically generated पेज तक, और तब तक दूसरे डोमेन पर नहीं जाएगा।" />
 
-## चरण 4 - Politeness और Robots.txt
+## चरण 4 - शिष्टाचार और Robots.txt
 
 ### Robots.txt का सम्मान
-किसी भी domain को crawl करने से पहले उसकी `robots.txt` file fetch और cache करें:
+किसी भी डोमेन को क्रॉल करने से पहले उसकी `robots.txt` file fetch और कैश करें:
 
 ```
 # Example robots.txt
@@ -82,28 +82,28 @@ Disallow: /private/
 Crawl-delay: 2
 ```
 
-Robots.txt को हर domain के लिए TTL (24 hours) के साथ cache करें। हमेशा `Disallow` rules और `Crawl-delay` directives का सम्मान करें।
+Robots.txt को हर डोमेन के लिए TTL (24 hours) के साथ कैश करें। हमेशा `Disallow` rules और `Crawl-delay` directives का सम्मान करें।
 
-### Crawl Rate Limiting
-स्पष्ट `Crawl-delay` न होने पर भी politeness बनाए रखें:
-- हर domain पर अधिकतम 1 request per second (configurable)
-- हर domain की अलग download queues इस्तेमाल करें
-- Response times track करें। Server धीमा हो तो automatically back off करें
+### क्रॉल रेट Limiting
+स्पष्ट `Crawl-delay` न होने पर भी शिष्टाचार बनाए रखें:
+- हर डोमेन पर अधिकतम 1 अनुरोध per सेकंड (configurable)
+- हर डोमेन की अलग download क्यू इस्तेमाल करें
+- उत्तर times ट्रैक करें। Server धीमा हो तो automatically back off करें
 
-<FunFact>Google का web crawler (Googlebot) सैकड़ों अरब pages crawl करता है। Polite रहने के लिए यह server response times monitor करता है और अगर कोई site धीमी response देने लगे तो अपनी crawl rate घटा देता है। इससे website crawler के विरुद्ध प्रभावी रूप से "push back" कर सकती है।</FunFact>
+<FunFact>Google का web क्रॉलर (Googlebot) सैकड़ों अरब पेज क्रॉल करता है। Polite रहने के लिए यह server उत्तर times monitor करता है और अगर कोई साइट धीमी उत्तर देने लगे तो अपनी क्रॉल रेट घटा देता है। इससे website क्रॉलर के विरुद्ध प्रभावी रूप से "पुश back" कर सकती है।</FunFact>
 
-## चरण 5 - Deduplication
+## चरण 5 - डीडुप्लिकेशन
 
-### URL Deduplication (Bloom Filter)
-अरबों URLs के साथ यह जांचना कि कोई URL पहले देखा गया है या नहीं, एक कुशल data structure मांगता है। Bloom filter छोटे memory footprint के साथ O(1) lookups देता है:
+### URL डीडुप्लिकेशन (Bloom Filter)
+अरबों URL के साथ यह जांचना कि कोई URL पहले देखा गया है या नहीं, एक कुशल डेटा structure मांगता है। Bloom filter छोटे memory footprint के साथ O(1) lookups देता है:
 
-- **Space:** 1% false positive rate पर 1 billion URLs के लिए ~1 GB
-- **Trade-off:** कभी-कभी किसी page को दोबारा crawl कर सकता है (false positive), लेकिन नया URL कभी नहीं चूकता (no false negatives)
+- **Space:** 1% फ़ॉल्स पॉज़िटिव रेट पर 1 billion URL के लिए ~1 GB
+- **Trade-off:** कभी-कभी किसी पेज को दोबारा क्रॉल कर सकता है (फ़ॉल्स पॉज़िटिव), लेकिन नया URL कभी नहीं चूकता (no फ़ॉल्स निगेटिव)
 
-जांचने से पहले URLs normalize करें: fragments (#) हटाएं, query parameters sort करें, hostname lowercase करें और relative paths resolve करें।
+जांचने से पहले URL नॉर्मलाइज़ करें: fragments (#) हटाएं, query parameters sort करें, hostname lowercase करें और relative paths resolve करें।
 
-### Content Deduplication (SimHash)
-अलग URLs identical content serve कर सकते हैं (mirrors, copied articles)। SimHash page content का fingerprint बनाता है। समान fingerprints (छोटी Hamming distance) वाले pages संभवतः duplicates होते हैं:
+### सामग्री डीडुप्लिकेशन (SimHash)
+अलग URL identical सामग्री serve कर सकते हैं (mirrors, copied articles)। SimHash पेज सामग्री का fingerprint बनाता है। समान fingerprints (छोटी Hamming distance) वाले पेज संभवतः duplicates होते हैं:
 
 ```
 Page A content → SimHash → 10110010...
@@ -111,48 +111,48 @@ Page B content → SimHash → 10110011...
 Hamming distance = 1 → likely duplicate, skip storing
 ```
 
-<Quiz question="Bloom filter बताता है कि URL पहले देखा गया है। आप क्या निष्कर्ष निकाल सकते हैं?" options="URL निश्चित रूप से crawl किया गया है|URL संभवतः crawl किया गया है, लेकिन छोटा chance है कि यह false positive हो|URL crawl नहीं किया गया है|Bloom filter फिर से बनाना होगा" answer="1" explanation="Bloom filters की false positive rate छोटी होती है। वे unseen URL के लिए 'yes, seen' कह सकते हैं, लेकिन जो URL वास्तव में added था उसके लिए कभी 'no' नहीं कहते। इसका मतलब है कभी-कभार page दोबारा crawl हो सकता है, जो अधिकांश crawlers के लिए स्वीकार्य है।" />
+<Quiz question="Bloom filter बताता है कि URL पहले देखा गया है। आप क्या निष्कर्ष निकाल सकते हैं?" options="URL निश्चित रूप से क्रॉल किया गया है|URL संभवतः क्रॉल किया गया है, लेकिन छोटा chance है कि यह फ़ॉल्स पॉज़िटिव हो|URL क्रॉल नहीं किया गया है|Bloom filter फिर से बनाना होगा" answer="1" explanation="Bloom filters की फ़ॉल्स पॉज़िटिव रेट छोटी होती है। वे unseen URL के लिए 'yes, seen' कह सकते हैं, लेकिन जो URL वास्तव में added था उसके लिए कभी 'no' नहीं कहते। इसका मतलब है कभी-कभार पेज दोबारा क्रॉल हो सकता है, जो अधिकांश crawlers के लिए स्वीकार्य है।" />
 
-## चरण 6 - Distributed Crawling
+## चरण 6 - वितरित Crawling
 
 ### क्षैतिज रूप से स्केल करना
-एक अकेली machine हर महीने billion pages crawl नहीं कर सकती। काम को बांटें:
+एक अकेली machine हर महीने billion पेज क्रॉल नहीं कर सकती। काम को बांटें:
 
-- Domain names पर **consistent hashing** हर domain को खास crawler node पर assign करती है। इससे politeness सुनिश्चित होती है, क्योंकि कोई दिया हुआ domain केवल एक node crawl करता है
-- **URL frontier** hash ring के आधार पर nodes में partitioned होता है
-- **Coordination** हल्की सेवा से होती है, जो node assignments manage करती है और nodes join या leave होने पर rebalance करती है
+- डोमेन names पर **कंसिस्टेंट हैशिंग** हर डोमेन को खास क्रॉलर नोड पर assign करती है। इससे शिष्टाचार सुनिश्चित होती है, क्योंकि कोई दिया हुआ डोमेन केवल एक नोड क्रॉल करता है
+- **URL फ़्रंटियर** हैश रिंग के आधार पर नोड में partitioned होता है
+- **Coordination** हल्की सेवा से होती है, जो नोड assignments manage करती है और नोड join या leave होने पर rebalance करती है
 
-### DNS Resolution Caching
-DNS lookups हर request में 10-100ms जोड़ते हैं। Scale पर यह बड़ी बाधा है:
-- हर crawler node पर local DNS cache रखें
-- Queued URLs के लिए batch DNS pre-resolution करें
+### DNS Resolution कैशिंग
+DNS lookups हर अनुरोध में 10-100ms जोड़ते हैं। Scale पर यह बड़ी बाधा है:
+- हर क्रॉलर नोड पर local DNS कैश रखें
+- Queued URL के लिए बैच DNS pre-resolution करें
 - Public DNS servers को overwhelm करने से बचने के लिए dedicated DNS resolver इस्तेमाल करें
 
 ### Spider Trap Detection
 दुर्भावनापूर्ण या खराब बनी sites अनंत URL spaces बना सकती हैं:
 - `/page/1/page/1/page/1/...` - दोहराए जाने वाले path patterns
-- हर future date के लिए URLs बनाने वाले calendar pages
-- Identical content के लिए unique URLs बनाने वाले session IDs
+- हर future date के लिए URL बनाने वाले calendar पेज
+- Identical सामग्री के लिए unique URL बनाने वाले session IDs
 
-**बचाव:** maximum URL length, हर domain पर maximum crawl depth, repetitive URL structures के लिए pattern detection और domain-level page count limits।
+**बचाव:** maximum URL length, हर डोमेन पर maximum क्रॉल depth, repetitive URL structures के लिए pattern detection और डोमेन-स्तर पेज count limits।
 
-<ThinkAboutIt>अगर आपको search index fresh रखना हो, तो आप पहले किन pages को re-crawl करने का निर्णय कैसे लेंगे? एक news site जो hourly update होती है बनाम Wikipedia article जो monthly बदलता है, इस पर विचार करें। Re-crawl scheduling को prioritise करने के लिए आप कौन से signals इस्तेमाल करेंगे?</ThinkAboutIt>
+<ThinkAboutIt>अगर आपको search index fresh रखना हो, तो आप पहले किन पेज को re-क्रॉल करने का निर्णय कैसे लेंगे? एक news साइट जो hourly अपडेट होती है बनाम Wikipedia article जो monthly बदलता है, इस पर विचार करें। Re-क्रॉल scheduling को prioritise करने के लिए आप कौन से signals इस्तेमाल करेंगे?</ThinkAboutIt>
 
 ## चरण 7 - बाधाएं और ऑप्टिमाइज़ेशन
 
 | बाधा | समाधान |
 |-----------|----------|
-| DNS resolution latency | Local DNS cache, batch pre-resolution |
-| Slow/unresponsive servers | Timeouts (30s), async I/O, retries के बाद skip करें |
-| Crawled content के लिए storage | Pages compress करें, केवल changed content store करें |
-| URL frontier memory | Disk-backed priority queue (RocksDB) |
-| Duplicate content | SimHash fingerprinting, canonical URL detection |
+| DNS resolution लेटेंसी | Local DNS कैश, बैच pre-resolution |
+| Slow/unresponsive servers | Timeouts (30s), async I/O, रीट्राई के बाद skip करें |
+| Crawled सामग्री के लिए स्टोरेज | पेज compress करें, केवल changed सामग्री स्टोर करें |
+| URL फ़्रंटियर memory | Disk-backed प्राथमिकता क्यू (RocksDB) |
+| Duplicate सामग्री | SimHash fingerprinting, canonical URL detection |
 
-<ThinkAboutIt>Search engines को crawl freshness (pages को बार-बार re-crawl करना) और discovery (नए pages खोजना) में संतुलन बनाना पड़ता है। अगर आपके crawler का fixed budget 1 million pages per day है, तो आप इस budget को existing pages re-crawl करने और नए pages discover करने के बीच कैसे बांटेंगे?</ThinkAboutIt>
+<ThinkAboutIt>Search engines को क्रॉल freshness (पेज को बार-बार re-क्रॉल करना) और discovery (नए पेज खोजना) में संतुलन बनाना पड़ता है। अगर आपके क्रॉलर का fixed budget 1 million पेज per day है, तो आप इस budget को existing पेज re-क्रॉल करने और नए पेज discover करने के बीच कैसे बांटेंगे?</ThinkAboutIt>
 
 ---
 
 ## 📚 आगे पढ़ें
-- [Web Crawler - System Design Interview Vol. 1, Ch. 9](https://bytebytego.com/) - Alex Xu का विस्तृत web crawler design walkthrough
-- [Mercator: A Scalable Web Crawler](https://courses.cs.washington.edu/courses/cse454/15wi/papers/mercator.pdf) - scalable crawler architecture पर foundational paper
+- [Web क्रॉलर - सिस्टम Design Interview Vol. 1, Ch. 9](https://bytebytego.com/) - Alex Xu का विस्तृत web क्रॉलर design walkthrough
+- [Mercator: A Scalable Web क्रॉलर](https://courses.cs.washington.edu/courses/cse454/15wi/papers/mercator.pdf) - scalable क्रॉलर आर्किटेक्चर पर foundational paper
 - [Bloom Filters by Example](https://llimllib.github.io/bloomfilter-tutorial/) - Bloom filters कैसे काम करते हैं, इस पर interactive tutorial
