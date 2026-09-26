@@ -1,6 +1,6 @@
 ---
-title: "MLOps మరియు డిప్లాయ్‌మెంట్ - మోడల్‌ను Notebook నుండి ప్రొడక్షన్ కు తీసుకెళ్ళడం"
-description: "పూర్తి MLOps జీవనచక్రం నేర్చుకోండి: మోడల్ registries, ML కోసం CI/CD, containerisation, సర్వింగ్ మౌలిక సదుపాయాలు, డ్రిఫ్ట్ పర్యవేక్షణ, మరియు పెద్ద ఎత్తున ఖర్చు ఆప్టిమైజేషన్."
+title: "MLOps మరియు డిప్లాయ్‌మెంట్ - మోడల్‌ను notebook నుండి production కు తీసుకెళ్లడం"
+description: "పూర్తి MLOps జీవనచక్రం నేర్చుకోండి: model registries, ML కోసం CI/CD, containerisation, serving infrastructure, drift monitoring, పెద్ద స్థాయి ఖర్చు optimisation."
 order: 6
 difficulty: "advanced"
 duration: 18
@@ -10,17 +10,17 @@ published: true
 
 # MLOps మరియు డిప్లాయ్‌మెంట్
 
-94% ఖచ్చితత్వం ఉన్న Jupyter notebook ఒక ప్రోడక్ట్ కాదు. మీరు laptop మూసేసిన క్షణం, ఆ మోడల్ ఎవరికీ పనికిరాదు. MLOps అనేది ప్రయోగాలు మరియు ప్రొడక్షన్ మధ్య గల అంతరాన్ని తగ్గించే discipline - మరియు ఇక్కడే చాలా AI బృందాలు అత్యంత కష్టపడతాయి.
+94% ఖచ్చితత్వం ఉన్న Jupyter notebook ఒక product కాదు. మీరు laptop మూసేసిన క్షణం నుంచి ఆ మోడల్ ఎవరికీ ఉపయోగపడదు. MLOps అనేది ప్రయోగాలు మరియు production మధ్య గల అంతరాన్ని తగ్గించే discipline. చాలా AI బృందాలు ఇక్కడే అత్యంత కష్టపడతాయి.
 
 ## Notebooks ఎందుకు ప్రొడక్షన్ కాదు
 
-Notebooks చెడ్డ ఇంజినీరింగ్ అలవాట్లను ప్రోత్సహిస్తాయి: సెల్‌లు క్రమం తప్పి execute అవడం వల్ల hidden స్థితి, hardcoded ఫైల్ మార్గాలు, dependency నిర్వహణ లేకపోవడం, మరియు reproducibility సున్నా. Notebook లో శిక్షణ ఇవ్వండి చేసిన మోడల్ కొత్త డేటా వచ్చినప్పుడు స్వయంచాలకంగా retrain కాదు, విఫలమైనప్పుడు rollback కాదు, మరియు degradation కోసం monitor చేయబడదు.
+Notebooks చెడ్డ ఇంజినీరింగ్ అలవాట్లను ప్రోత్సహిస్తాయి: సెల్‌లు క్రమం తప్పి execute కావడం వల్ల దాగిన స్థితి, hardcoded file paths, dependency నిర్వహణ లేకపోవడం, reproducibility లేకపోవడం. Notebook లో శిక్షణ ఇచ్చిన మోడల్ కొత్త డేటా వచ్చినప్పుడు స్వయంచాలకంగా retrain కాదు, విఫలమైనప్పుడు rollback కాదు, degradation కోసం monitor చేయబడదు.
 
 ప్రొడక్షన్ ML కి **versioned కోడ్, versioned డేటా, versioned మోడళ్లు, మరియు ఆటోమేటెడ్ పైప్‌లైన్‌లు** అవసరం. మిగతావన్నీ కేవలం డెమో మాత్రమే.
 
 ## MLOps జీవనచక్రం
 
-MLOps జీవనచక్రం ఒక continuous లూప్, linear పైప్‌లైన్ కాదు. ప్రతి stage మిగతా వాటికి ఫీడ్‌బ్యాక్ ఇస్తుంది, మరియు మీ organisation యొక్క maturity ఈ మార్పులు ఎంత ఆటోమేటెడ్ గా ఉంటాయో నిర్ణయిస్తుంది.
+MLOps జీవనచక్రం continuous loop, linear pipeline కాదు. ప్రతి stage మిగతా వాటికి feedback ఇస్తుంది. మీ organisation యొక్క maturity, ఈ మార్పులు ఎంత automated గా ఉంటాయో నిర్ణయిస్తుంది.
 
 Google మూడు MLOps maturity స్థాయులు నిర్వచిస్తుంది:
 - **స్థాయి 0** - Manual, స్క్రిప్ట్-driven ప్రక్రియ. డేటా scientists మోడళ్లు ను ఇంజినీర్లు కు handoff చేస్తారు.
