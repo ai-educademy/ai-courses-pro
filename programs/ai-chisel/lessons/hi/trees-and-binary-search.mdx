@@ -1,6 +1,6 @@
 ---
-title: "Trees और Binary Search - AI तेज़ फ़ैसले कैसे लेता है"
-description: "Tree structures को explore करें जो databases से लेकर machine learning तक decision-making को power करती हैं।"
+title: "टरीस और बिनरय सर्च - AI तेज़ फ़ैसले कैसे लेता है"
+description: "टरी सटरुकटुरेस को एक्सपलोरे करें जो दटबसेस से लेकर मशीन लर्निंग तक देकिसिओन-मकिङ को पोवेर करती हैं।"
 order: 2
 difficulty: "intermediate"
 duration: 18
@@ -8,17 +8,17 @@ icon: "🌲"
 published: true
 ---
 
-## AI में Trees हर जगह हैं
+## AI में टरीस हर जगह हैं
 
-जब भी कोई spam filter किसी email को classify करता है या कोई database मिलीसेकंड में आपका order retrieve करता है, तो पीछे एक tree data structure काम कर रही होती है। Trees **hierarchical decisions** को model करते हैं - हर node search space को छोटा करता है जब तक आप answer तक नहीं पहुँच जाते।
+जब भी कोई स्पैम फ़िल्टर किसी एमैल को कलसिफ़य करता है या कोई डेटाबेस मिलीसेकंड में आपका order लाता करता है, तो पीछे एक ट्री डेटा संरचना काम कर रही होती है। टरीस **हिएररचिकल फ़ैसले** को मॉडल करते हैं - हर नोड सर्च स्पेस को छोटा करता है जब तक आप answer तक नहीं पहुँच जाते।
 
-<Illustration src="/images/lessons/trees-and-binary-search.svg" alt="एक binary search tree जिसमें nodes पर values लिखी हैं, left-smaller और right-larger property दिखाते हुए" caption="BST में हर left child अपने parent से छोटा और हर right child बड़ा होता है।" />
+<Illustration src="/images/lessons/trees-and-binary-search.svg" alt="एक बाइनरी सर्च ट्री जिसमें नोड पर वलुएस लिखी हैं, लेफ़ट-समललेर और रिघट-लरगेर परोपेरटय दिखाते हुए" caption="BST में हर लेफ़ट चिलद अपने परेनट से छोटा और हर रिघट चिलद बड़ा होता है।" />
 
-## Binary Search Trees (BSTs)
+## बिनरय सर्च टरीस (बसटस)
 
-BST elements को इस तरह store करता है कि किसी भी node के लिए, उसके **left** subtree की सभी values छोटी होती हैं और **right** subtree की सभी values बड़ी होती हैं।
+BST एलिमेंट को इस तरह सटोरे करता है कि किसी भी नोड के लिए, उसके **लेफ़ट** सुबटरी की सभी वलुएस छोटी होती हैं और **रिघट** सुबटरी की सभी वलुएस बड़ी होती हैं।
 
-### Search
+### सर्च
 
 ```
 function search(node, target):
@@ -28,9 +28,9 @@ function search(node, target):
     return search(node.right, target)
 ```
 
-हर comparison लगभग आधे बचे हुए nodes को eliminate कर देता है - balanced tree पर O(log n)।
+हर कोमपरिसोन लगभग आधे बचे हुए नोड को एलिमिनटे कर देता है - संतुलित ट्री पर O(लॉग n)।
 
-### Insertion
+### इनसेरशन
 
 ```
 function insert(node, value):
@@ -42,37 +42,37 @@ function insert(node, value):
     return node
 ```
 
-### Deletion
+### देलेशन
 
-Deletion सबसे tricky operation है। तीन cases बनते हैं:
+देलेशन सबसे पेचीदा ऑपरेशन है। तीन मामले बनते हैं:
 
-1. **Leaf node** - बस हटा दो।
-2. **एक child** - node को उसके child से replace कर दो।
-3. **दो children** - node की value को उसके in-order successor (right subtree की सबसे छोटी value) से swap करो, फिर उस successor को delete करो।
+1. **लेअफ़ नोड** - बस हटा दो।
+2. **एक चिलद** - नोड को उसके चिलद से रेपलके कर दो।
+3. **दो चिलदरेन** - नोड की वैल्यू को उसके इन-ओरदेर सुककेसोर (रिघट सुबटरी की सबसे छोटी वैल्यू) से सवप करो, फिर उस सुककेसोर को डिलीट करो।
 
-<Quiz question="BST में किसी node का in-order successor क्या होता है?" options="Node का parent|Left subtree का सबसे बड़ा node|Right subtree का सबसे छोटा node|Tree का root" answer="2" explanation="In-order successor right subtree की सबसे छोटी value होती है - एक बार right जाओ, फिर जितना हो सके left जाते रहो।" />
+<Quiz question="BST में किसी नोड का इन-ओरदेर सुककेसोर क्या होता है?" options="Node का परेनट|लेफ़ट सुबटरी का सबसे बड़ा नोड|रिघट सुबटरी का सबसे छोटा नोड|टरी का रूट" answer="2" explanation="इन-ओरदेर सुककेसोर रिघट सुबटरी की सबसे छोटी वैल्यू होती है - एक बार रिघट जाओ, फिर जितना हो सके लेफ़ट जाते रहो।" />
 
-## Balanced vs Unbalanced
+## बलनकेद vs उनबलनकेद
 
-अगर आप sorted data को एक plain BST में insert करो, तो वो एक linked list बन जाता है - हर operation O(n)। **Self-balancing** trees इसे fix करते हैं:
+अगर आप सॉर्टेड डेटा को एक पलैन BST में इन्सर्ट करो, तो वो एक लिंक्ड लिस्ट बन जाता है - हर ऑपरेशन O(n)। **सेलफ़-बलनकिङ** ट्री इसे फ़िक्स करते हैं:
 
-| Tree | Balance Rule | Typical Use |
+| टरी | बलनके रुले | टयपिकल उपयोग |
 |------|-------------|-------------|
-| AVL | Subtrees के बीच height difference ≤ 1 | In-memory lookups |
-| Red-Black | Colour-based rotation rules | Language standard libraries (जैसे Java TreeMap) |
-| B-Tree | हर node में multiple keys, सभी leaves एक ही depth पर | Databases और file systems |
+| AVL | सुबटरीस के बीच ऊँचाई दिफ़फ़ेरेनके ≤ 1 | इन-मेमोरय लूकुपस |
+| रेद-बलक | कोलोउर-बसेद रोटशन रुलेस | भाषा सटनदरद लिबररिएस (जैसे जव टरीमप) |
+| ब-टरी | हर नोड में कई की, सभी लेअवेस एक ही गहराई पर | दटबसेस और फ़ाइल सिस्टम |
 
-<FunFact>PostgreSQL और MySQL दोनों अपने default index structure के लिए B-tree variants use करते हैं। Branching factor 100 वाला B-tree सिर्फ पाँच levels में एक billion rows को index कर सकता है।</FunFact>
+<FunFact>PostgreSQL और मयसकल दोनों अपने देफ़ौलट इंडेक्स संरचना के लिए ब-टरी वरिअनटस उपयोग करते हैं। बरनचिङ फ़कटोर 100 वाला ब-टरी सिर्फ पाँच लेवेलस में एक बिललिओन रोवस को इंडेक्स कर सकता है।</FunFact>
 
-## Tree Traversals
+## टरी टरवेरसलस
 
-Traversals हर node को exactly एक बार visit करते हैं। तीन classic orders में फ़र्क सिर्फ इतना है कि current node को उसके children के relative **कब** process किया जाता है।
+टरवेरसलस हर नोड को ठीक एक बार विसिट करते हैं। तीन क्लासिक ओरदेरस में फ़र्क सिर्फ इतना है कि वर्तमान नोड को उसके चिलदरेन के रेलटिवे **कब** प्रोसेस किया जाता है।
 
-| Traversal | Order | Use Case |
+| टरवेरसल | ओरदेर | उपयोग कसे |
 |-----------|-------|----------|
-| **In-order** | Left → Node → Right | BST से sorted output निकालना |
-| **Pre-order** | Node → Left → Right | Tree को serialise / clone करना |
-| **Post-order** | Left → Right → Node | Tree को safely delete करना; expression trees evaluate करना |
+| **इन-ओरदेर** | लेफ़ट → Node → रिघट | BST से सॉर्टेड आउटपुट निकालना |
+| **परे-ओरदेर** | Node → लेफ़ट → रिघट | टरी को सेरिअलिसे / क्लोन करना |
+| **पोसट-ओरदेर** | लेफ़ट → रिघट → Node | टरी को सफ़ेलय डिलीट करना; एक्सपरेसिओन ट्री एवलुअटे करना |
 
 ```
 function inOrder(node):
@@ -82,19 +82,19 @@ function inOrder(node):
     inOrder(node.right)
 ```
 
-<ThinkAboutIt>एक compiler आपके code को Abstract Syntax Tree (AST) में parse करता है। Expression `(3 + 5) * 2` को tree में store करने पर evaluate करने के लिए कौन सा traversal order use करोगे? क्यों?</ThinkAboutIt>
+<ThinkAboutIt>एक कोमपिलेर आपके कोड को अबसटरकट सयनटक्स टरी (AST) में PRsे करता है। एक्सपरेसिओन `(3 + 5) * 2` को ट्री में सटोरे करने पर एवलुअटे करने के लिए कौन सा टरवेरसल order उपयोग करोगे? क्यों?</ThinkAboutIt>
 
-## Heaps और Priority Queues
+## हेअपस और परिओरिटय क्वेउएस
 
-**Heap** एक complete binary tree है जहाँ हर parent अपने children से बड़ा (max-heap) या छोटा (min-heap) होता है। यह support करता है:
+**हेअप** एक पूरा बाइनरी ट्री है जहाँ हर परेनट अपने चिलदरेन से बड़ा (मक्स-हेअप) या छोटा (मिन-हेअप) होता है। यह सपोर्ट करता है:
 
-- **Insert** - end में add करो, bubble up करो। O(log n)।
-- **Extract min/max** - root हटाओ, last element को root पर लाओ, sift down करो। O(log n)।
+- **इनसेरट** - एनद में जोड़ें करो, बुबबले up करो। O(लॉग n)।
+- **एक्सटरकट मिन/मक्स** - रूट हटाओ, लसट एलिमेंट को रूट पर लाओ, सिफ़ट दोवन करो। O(लॉग n)।
 
-Priority queues जो heaps पर बनी हैं, ये चीज़ें power करती हैं:
-- **Dijkstra's algorithm** (अगला lesson!) - हमेशा nearest unvisited node को expand करो।
-- **Task scheduling** - OS schedulers highest-priority process को pick करते हैं।
-- **Beam search in NLP** - top-k सबसे promising sentence completions रखो।
+परिओरिटय क्यू जो हेअपस पर बनी हैं, ये चीज़ें पोवेर करती हैं:
+- **दिजकसटर's अलगोरिथम** (अगला पाठ!) - हमेशा नेअरेसट उनविसिटेद नोड को एक्सपनद करो।
+- **काम सचेदुलिङ** - OS सचेदुलेरस हिघेसट-परिओरिटय प्रोसेस को पिक करते हैं।
+- **बेअम सर्च in NLP** - टोप-क सबसे परोमिसिङ सेनटेनके कोमपलेशनस रखो।
 
 ```
 function siftUp(heap, index):
@@ -106,24 +106,24 @@ function siftUp(heap, index):
         else: break
 ```
 
-<Quiz question="Min-heap में minimum element find करने की time complexity क्या है?" options="O(n)|O(log n)|O(1)|O(n log n)" answer="2" explanation="Minimum हमेशा min-heap के root पर होता है, तो उसे access करना O(1) है - कोई traversal नहीं चाहिए।" />
+<Quiz question="मिन-हेअप में मिनिमुम एलिमेंट फ़ाइंड करने की समय जटिलता क्या है?" options="O(n)|O(लॉग n)|O(1)|O(n लॉग n)" answer="2" explanation="मिनिमुम हमेशा मिन-हेअप के रूट पर होता है, तो उसे एक्सेस करना O(1) है - कोई टरवेरसल नहीं चाहिए।" />
 
-## Real AI Applications
+## वास्तविक AI अपपलिकशनस
 
-- **Decision trees** machine learning में हर node पर data को उस feature से split करते हैं जो classes को सबसे अच्छे से separate करता है - tree structure का direct application।
-- **Syntax trees** NLP में grammatical structure represent करते हैं, जो sentiment analysis और machine translation जैसे tasks enable करते हैं।
-- **Monte Carlo Tree Search (MCTS)** AlphaGo जैसी game-playing AI को power करता है, possible moves को game states के tree के रूप में explore करता है।
-- **Huffman trees** frequent symbols को shorter codes assign करके data compress करते हैं - model weight compression में use होते हैं।
+- **देकिसिओन ट्री** मशीन लर्निंग में हर नोड पर डेटा को उस फ़ीचर से सपलिट करते हैं जो कलसेस को सबसे अच्छे से सेपरटे करता है - ट्री संरचना का दिरेकट अपपलिकशन।
+- **सयनटक्स ट्री** NLP में गरममटिकल संरचना रेपरेसेनट करते हैं, जो सेनटिमेनट विश्लेषण और मचिने टरनसलशन जैसे टसकस एनबले करते हैं।
+- **मोनटे करलो टरी सर्च (MCTS)** अलफगो जैसी गमे-पलयिङ AI को पोवेर करता है, पोसिबले मोवेस को गमे सटटेस के ट्री के रूप में एक्सपलोरे करता है।
+- **हुफ़फ़मन ट्री** फ़रेक्वेनट सयमबोलस को शोरटेर कोदेस असाइन करके डेटा कोमपरेस करते हैं - मॉडल वज़न कोमपरेसिओन में उपयोग होते हैं।
 
-<FunFact>scikit-learn decision tree classifier एक ऐसा tree बनाता है जहाँ हर internal node एक feature threshold test करता है। Depth 20 वाला trained model दस लाख से ज़्यादा distinct decision paths represent कर सकता है।</FunFact>
+<FunFact>scikit-learn निर्णय ट्री कलसिफ़िएर एक ऐसा ट्री बनाता है जहाँ हर इनटेरनल नोड एक फ़ीचर थरेशोलद टेस्ट करता है। देपथ 20 वाला टरैनेद मॉडल दस लाख से ज़्यादा दिसटिनकट निर्णय रास्ते रेपरेसेनट कर सकता है।</FunFact>
 
-<ThinkAboutIt>अगर आप एक autocomplete system बना रहे हो, तो BST, heap, या कोई और tree structure (जैसे trie) - कौन सा use करोगे? सोचो कि कौन से operations fast होने चाहिए।</ThinkAboutIt>
+<ThinkAboutIt>अगर आप एक औटोकोमपलेटे सयसटेम बना रहे हो, तो BST, हीप, या कोई और ट्री संरचना (जैसे ट्राइ) - कौन सा उपयोग करोगे? सोचो कि कौन से ऑपरेशन तेज़ होने चाहिए।</ThinkAboutIt>
 
 ## मुख्य बातें
 
-1. BSTs O(log n) search, insert, और delete देते हैं - लेकिन तभी जब balanced हों।
-2. Traversal order तय करता है कि tree से कौन सी information निकलेगी।
-3. Heaps extreme value तक O(1) access और O(log n) insertion देते हैं - priority-based AI algorithms के लिए ideal।
-4. Trees ML, databases, compilers, और game AI में decision-making की नींव हैं।
+1. बसटस O(लॉग n) सर्च, इन्सर्ट, और डिलीट देते हैं - लेकिन तभी जब संतुलित हों।
+2. टरवेरसल order तय करता है कि ट्री से कौन सी जानकारी निकलेगी।
+3. हेअपस एक्सटरेमे वैल्यू तक O(1) एक्सेस और O(लॉग n) इन्सर्शन देते हैं - परिओरिटय-बसेद AI अलगोरिथमस के लिए इदेअल।
+4. टरीस ML, दटबसेस, कोमपिलेरस, और गमे AI में देकिसिओन-मकिङ की नींव हैं।
 
-<Quiz question="Already-sorted data को plain (unbalanced) BST में insert करने से performance problems क्यों होती हैं?" options="Duplicate nodes बन जाते हैं|Tree एक linked list बन जाता है जिसमें O(n) operations होते हैं|Hash collisions होते हैं|Root node overflow हो जाता है" answer="1" explanation="हर नई value हमेशा पिछली से बड़ी (या छोटी) होती है, तो हर insertion एक ही side में जाता है, balanced tree की जगह एक linear chain बनती है।" />
+<Quiz question="अलरेअदय-सोरटेद डेटा को पलैन (उनबलनकेद) BST में इन्सर्ट करने से प्रदर्शन समस्याएँ क्यों होती हैं?" options="दुपलिकटे नोड बन जाते हैं|टरी एक लिंक्ड लिस्ट बन जाता है जिसमें O(n) ऑपरेशन होते हैं|हश कोललिसिओनस होते हैं|रूट नोड ओवेरफ़लोव हो जाता है" answer="1" explanation="हर नई वैल्यू हमेशा पिछली से बड़ी (या छोटी) होती है, तो हर इन्सर्शन एक ही सिदे में जाता है, संतुलित ट्री की जगह एक लिनेअर चैन बनती है।" />

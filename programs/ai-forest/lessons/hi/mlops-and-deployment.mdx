@@ -1,6 +1,6 @@
 ---
-title: "MLOps और Deployment - मॉडल को Notebook से Production तक ले जाना"
-description: "पूरा MLOps lifecycle सीखें: model registries, ML के लिए CI/CD, containerisation, serving infrastructure, drift monitoring, और बड़े पैमाने पर cost optimisation।"
+title: "MLOps और देपलोयमेनट - मॉडल को नोटेबूक से परोदुकशन तक ले जाना"
+description: "पूरा MLOps लिफ़ेकयकले सीखें: मॉडल रेगिसटरिएस, ML के लिए CI/CD, कोनटैनेरिसशन, सर्विंग इन्फ़्रास्ट्रक्चर, दरिफ़ट निगरानी, और बड़े पैमाने पर लागत ऑप्टिमाइज़ेशन।"
 order: 6
 difficulty: "advanced"
 duration: 18
@@ -8,124 +8,124 @@ icon: "⚙️"
 published: true
 ---
 
-# MLOps और Deployment
+# MLOps और देपलोयमेनट
 
-94% accuracy वाली Jupyter notebook कोई product नहीं है। जैसे ही आप laptop बंद करते हैं, वो model किसी के काम नहीं आता। MLOps वो discipline है जो experimentation और production के बीच की खाई को पाटता है - और यही वो जगह है जहाँ ज़्यादातर AI teams सबसे ज़्यादा struggle करती हैं।
+94% अककुरकय वाली Jupyter नोटेबूक कोई उत्पाद नहीं है। जैसे ही आप लपटोप बंद करते हैं, वो मॉडल किसी के काम नहीं आता। MLOps वो दिसकिपलिने है जो प्रयोग और प्रोडक्शन के बीच की खाई को पाटता है - और यही वो जगह है जहाँ ज़्यादातर AI टीमों सबसे ज़्यादा सटरुगगले करती हैं।
 
-## Notebooks Production क्यों नहीं हैं
+## नोटेबूकस परोदुकशन क्यों नहीं हैं
 
-Notebooks बुरी engineering habits को बढ़ावा देती हैं: cells के गलत क्रम में चलने से hidden state, hardcoded file paths, कोई dependency management नहीं, और reproducibility बिल्कुल ज़ीरो। Notebook में train किया गया model नया data आने पर अपने-आप retrain नहीं हो सकता, टूटने पर rollback नहीं हो सकता, और degradation के लिए monitor नहीं किया जा सकता।
+नोटेबूकस बुरी इंजीनियरिंग आदतें को बढ़ावा देती हैं: केललस के गलत क्रम में चलने से हिददेन सटटे, हरदकोदेद फ़ाइल रास्ते, कोई देपेनदेनकय प्रबंधन नहीं, और रेपरोदुकिबिलिटय बिल्कुल ज़ीरो। नोटेबूक में ट्रेन किया गया मॉडल नया डेटा आने पर अपने-आप रेटरैन नहीं हो सकता, टूटने पर रोललबक नहीं हो सकता, और गिरावट के लिए मोनिटोर नहीं किया जा सकता।
 
-Production ML के लिए **versioned code, versioned data, versioned models, और automated pipelines** ज़रूरी हैं। बाकी सब सिर्फ demo है।
+परोदुकशन ML के लिए **वेरसिओनेद कोड, वेरसिओनेद डेटा, वेरसिओनेद मॉडल, और औटोमटेद पाइपलाइन** ज़रूरी हैं। बाकी सब सिर्फ डेमो है।
 
-## MLOps Lifecycle
+## MLOps लिफ़ेकयकले
 
-MLOps lifecycle एक continuous loop है, कोई linear pipeline नहीं। हर stage दूसरे stages को feedback देता है, और आपकी organisation की maturity तय करती है कि ये transitions कितने automated हैं।
+MLOps लिफ़ेकयकले एक कोनटिनुओउस लूप है, कोई लिनेअर पाइपलाइन नहीं। हर चरण दूसरे सटगेस को फ़ीडबैक देता है, और आपकी ओरगनिसशन की मटुरिटय तय करती है कि ये बदलाव कितने औटोमटेद हैं।
 
-Google तीन MLOps maturity levels define करता है:
-- **Level 0** - Manual, script-driven process। Data scientists models को engineers को handoff करते हैं।
-- **Level 1** - Automated training pipelines। नए data पर retraining अपने-आप trigger होती है।
-- **Level 2** - ML के लिए पूरा CI/CD। Code, data, और model changes सब automated pipelines से गुज़रते हैं।
+Google तीन MLOps मटुरिटय लेवेलस परिभाषित करता है:
+- **लेवेल 0** - मनुअल, सकरिपट-दरिवेन प्रोसेस। डेटा सकिएनटिसटस मॉडल को इंजीनियर को हनदोफ़फ़ करते हैं।
+- **लेवेल 1** - औटोमटेद ट्रेनिंग पाइपलाइन। नए डेटा पर रेटरैनिङ अपने-आप ट्रिगर होती है।
+- **लेवेल 2** - ML के लिए पूरा CI/CD। कोड, डेटा, और मॉडल चङेस सब औटोमटेद पाइपलाइन से गुज़रते हैं।
 
-Loop के stages:
+लूप के सटगेस:
 
-1. **Data ingestion और validation** - Incoming data को collect, clean, और schemas के against validate करें
-2. **Feature engineering** - Raw data को feature store के ज़रिए model-ready features में transform करें
-3. **Training** - Tracked hyperparameters के साथ reproducible training jobs चलाएँ
-4. **Evaluation** - Held-out test sets पर candidate models की baselines से तुलना करें
-5. **Registry** - Approved models को metadata, lineage, और approval status के साथ store करें
-6. **Deployment** - Model को canary या blue-green rollout के साथ API के पीछे serve करें
-7. **Monitoring** - Prediction quality, latency, throughput, और data drift को track करें
-8. **Retraining** - Performance गिरने पर नई training runs trigger करें
+1. **डेटा इङेसशन और वलिदशन** - इनकोमिङ डेटा को कोललेकट, साफ़, और सचेमस के अगैनसट वलिदटे करें
+2. **फ़ीचर इंजीनियरिंग** - रव डेटा को फ़ीचर स्टोर के ज़रिए मोदेल-रेअदय फ़ीचर में टरनसफ़ोरम करें
+3. **ट्रेनिंग** - टरकेद हयपेरपरमेटेरस के साथ रेपरोदुकिबले ट्रेनिंग जॉब चलाएँ
+4. **मूल्यांकन** - हेलद-ओउट टेस्ट सेटस पर उम्मीदवार मॉडल की बसेलिनेस से तुलना करें
+5. **रेगिसटरय** - अपपरोवेद मॉडल को मेटदट, लिनेअगे, और अपपरोवल सटटुस के साथ सटोरे करें
+6. **देपलोयमेनट** - मॉडल को कनरय या बलुए-गरीन रोललोउट के साथ API के पीछे सर्व करें
+7. **मोनिटोरिङ** - परेदिकशन गुणवत्ता, लेटेंसी, थरोउघपुट, और डेटा दरिफ़ट को रिकॉर्ड करें
+8. **रेटरैनिङ** - पेरफ़ोरमनके गिरने पर नई ट्रेनिंग रुनस ट्रिगर करें
 
-<Illustration src="/images/lessons/mlops-and-deployment.svg" alt="MLOps lifecycle diagram जो data से deployment से monitoring तक का continuous loop दिखाता है" caption="MLOps lifecycle एक loop है - monitoring retraining में वापस feed करती है।" />
+<Illustration src="/images/lessons/mlops-and-deployment.svg" alt="MLOps लिफ़ेकयकले दिअगरम जो डेटा से तैनाती से निगरानी तक का कोनटिनुओउस लूप दिखाता है" caption="MLOps लिफ़ेकयकले एक लूप है - निगरानी रेटरैनिङ में वापस फ़ीड करती है।" />
 
-## Model Registries
+## मॉडल रेगिसटरिएस
 
-Model registry आपके trained models का version control system है। **MLflow**, **Weights & Biases**, और **Neptune** जैसे tools आपको model artefacts को उनकी training metrics, hyperparameters, dataset versions, और promotion status (staging → production → archived) के साथ store करने देते हैं।
+मॉडल रेगिसटरय आपके टरैनेद मॉडल का वर्शन कोनटरोल सयसटेम है। **मलफ़लोव**, **वेट्स & बिअसेस**, और **नेपटुने** जैसे टूल्स आपको मॉडल अरटेफ़कटस को उनकी ट्रेनिंग मेट्रिक्स, हयपेरपरमेटेरस, दटसेट वेरसिओनस, और परोमोशन सटटुस (सटगिङ → प्रोडक्शन → अरचिवेद) के साथ सटोरे करने देते हैं।
 
-Registry ज़रूरी सवालों के जवाब देती है: *अभी production में कौन-सा model है? इसे किस data पर train किया गया था? किसने approve किया? Evaluation metrics क्या थीं?*
+रेगिसटरय ज़रूरी सवालों के जवाब देती है: *अभी प्रोडक्शन में कौन-सा मॉडल है? इसे किस डेटा पर ट्रेन किया गया था? किसने अपपरोवे किया? मूल्यांकन मेट्रिक्स क्या थीं?*
 
-<Quiz question="Model registry का मुख्य उद्देश्य क्या है?" options="Training data store करना|Trained models को metadata के साथ version और track करना|Hyperparameter tuning चलाना|End users को models serve करना" answer="1" explanation="Model registry trained models को उनके metadata - metrics, parameters, lineage, और promotion status - के साथ version करती है, जिससे reproducibility और governance संभव होता है।" />
+<Quiz question="मॉडल रेगिसटरय का मुख्य उद्देश्य क्या है?" options="ट्रेनिंग डेटा सटोरे करना|टरैनेद मॉडल को मेटदट के साथ वर्शन और रिकॉर्ड करना|हयपेरपरमेटेर टुनिङ चलाना|एनद यूज़र को मॉडल सर्व करना" answer="1" explanation="मॉडल रेगिसटरय टरैनेद मॉडल को उनके मेटदट - मेट्रिक्स, पैरामीटर, लिनेअगे, और परोमोशन सटटुस - के साथ वर्शन करती है, जिससे रेपरोदुकिबिलिटय और गोवेरननके संभव होता है।" />
 
-## Machine Learning के लिए CI/CD
+## मशीन लर्निंग के लिए CI/CD
 
-Traditional CI/CD code test करता है। ML CI/CD को तीन चीज़ें test करनी होती हैं: **code, data, और models**।
+पारंपरिक CI/CD कोड टेस्ट करता है। ML CI/CD को तीन चीज़ें टेस्ट करनी होती हैं: **कोड, डेटा, और मॉडल**।
 
-- **Code tests** - Feature engineering logic, data transformations, और API contracts के लिए unit tests
-- **Data tests** - Schema validation, distribution checks (क्या नया data expected ranges में है?), और completeness checks (कोई missing columns तो नहीं)
-- **Model tests** - Validation sets पर performance thresholds, latency benchmarks, bias metrics, और current production model से तुलना
+- **कोड टेस्ट** - फ़ीचर इंजीनियरिंग तर्क, डेटा टरनसफ़ोरमशनस, और API कोनटरकटस के लिए उनिट टेस्ट
+- **डेटा टेस्ट** - सचेम वलिदशन, दिसटरिबुशन चेकस (क्या नया डेटा एक्सपेकटेद रङेस में है?), और कोमपलेटेनेस चेकस (कोई मिसिङ कोलुमनस तो नहीं)
+- **मॉडल टेस्ट** - वलिदशन सेटस पर प्रदर्शन थरेशोलदस, लेटेंसी बेनचमरकस, पूर्वाग्रह मेट्रिक्स, और वर्तमान प्रोडक्शन मॉडल से तुलना
 
-अगर कोई pull request feature pipeline बदलता है, तो उसे अपने-आप retraining और evaluation trigger करनी चाहिए। अगर नया model baseline से ख़राब perform करता है, तो PR block हो जाता है।
+अगर कोई खींचें रिक्वेस्ट फ़ीचर पाइपलाइन बदलता है, तो उसे अपने-आप रेटरैनिङ और मूल्यांकन ट्रिगर करनी चाहिए। अगर नया मॉडल बसेलिने से ख़राब पेरफ़ोरम करता है, तो PR ब्लॉक हो जाता है।
 
-## ML के लिए Containerisation
+## ML के लिए कोनटैनेरिसशन
 
-Production ML के लिए Docker ज़रूरी है। आपका training environment और serving environment एक जैसा होना चाहिए - "मेरी machine पर तो चल रहा था" वाली problem तब और बढ़ जाती है जब GPU drivers, CUDA versions, और Python dependencies सबको match करना हो।
+परोदुकशन ML के लिए Docker ज़रूरी है। आपका ट्रेनिंग एनविरोनमेनट और सर्विंग एनविरोनमेनट एक जैसा होना चाहिए - "मेरी मचिने पर तो चल रहा था" वाली समस्या तब और बढ़ जाती है जब GPU ड्राइवर, CUDA वेरसिओनस, और Python देपेनदेनकिएस सबको मेल करना हो।
 
-एक typical ML Dockerfile की layers: base CUDA image → Python dependencies → model artefacts → serving framework। Multi-stage builds final image को lean रखते हैं।
+एक आम ML दोकेरफ़ाइल की परतें: बेस CUDA इमगे → Python देपेनदेनकिएस → मॉडल अरटेफ़कटस → सर्विंग ढाँचा। मुलटि-सटगे बुइलदस अंतिम इमगे को लेअन रखते हैं।
 
-ML containerisation के लिए ज़रूरी practices:
-- **हर dependency pin करें** - `requirements.txt` में exact versions use करें, ranges नहीं
-- **Digest-based base images use करें** - `nvidia/cuda@sha256:...` न कि `:latest`
-- **Training और serving images अलग रखें** - Training images को compilers और dev tools चाहिए; serving images को सिर्फ runtime
-- **Vulnerabilities के लिए scan करें** - ML images deep dependency trees से CVEs inherit करती हैं
+ML कोनटैनेरिसशन के लिए ज़रूरी अभ्यास:
+- **हर देपेनदेनकय पिन करें** - `requirements.txt` में एक्सकट वेरसिओनस इस्तेमाल करें, रङेस नहीं
+- **दिगेसट-बसेद बेस इमगेस इस्तेमाल करें** - `nvidia/cuda@sha256:...` न कि `:latest`
+- **ट्रेनिंग और सर्विंग इमगेस अलग रखें** - ट्रेनिंग इमगेस को कोमपिलेरस और देव टूल्स चाहिए; सर्विंग इमगेस को सिर्फ रनटाइम
+- **कमज़ोरियाँ के लिए सकन करें** - ML इमगेस गहरी देपेनदेनकय ट्री से कवेस इनहेरिट करती हैं
 
-<FunFact>अकेली NVIDIA CUDA base image 3 GB से ज़्यादा होती है। Production teams अक्सर cold-start times और container registry costs कम करने के लिए Docker images optimise करने में दिन लगा देती हैं।</FunFact>
+<FunFact>अकेली NVIDIA CUDA बेस इमगे 3 GB से ज़्यादा होती है। परोदुकशन टीमों अक्सर कोल्ड-स्टार्ट टिमेस और कोनटैनेर रेगिसटरय कोसटस कम करने के लिए Docker इमगेस ऑप्टिमाइज़ करने में दिन लगा देती हैं।</FunFact>
 
-## Serving Infrastructure
+## सेरविङ इन्फ़्रास्ट्रक्चर
 
-Model कैसे serve करना है, ये आपकी latency और throughput requirements पर निर्भर करता है:
+मॉडल कैसे सर्व करना है, ये आपकी लेटेंसी और थरोउघपुट ज़रूरतें पर निर्भर करता है:
 
-| Tool | सबसे अच्छा किसके लिए | मुख्य Feature |
+| टूल | सबसे अच्छा किसके लिए | मुख्य फ़ीचर |
 |------|----------------------|--------------|
-| **TorchServe** | PyTorch models | Built-in batching, model versioning |
-| **Triton Inference Server** | Multi-framework, GPU | Dynamic batching, concurrent model execution |
-| **vLLM** | Large language models | PagedAttention, continuous batching |
-| **TensorFlow Serving** | TF/Keras models | gRPC + REST, automatic model reload |
-| **BentoML** | कोई भी framework | Pythonic API, built-in containerisation |
+| **टोरचसेरवे** | PyTorch मॉडल | बुइलट-इन बटचिङ, मॉडल वेरसिओनिङ |
+| **Triton इन्फ़रेंस सेरवेर** | मुलटि-फ़रमेवोरक, GPU | दयनमिक बटचिङ, कोनकुररेनट मॉडल एक्सेकुशन |
+| **vLLM** | लरगे भाषा मॉडल | पगेदटटेनशन, कोनटिनुओउस बटचिङ |
+| **TensorFlow सेरविङ** | TF/Keras मॉडल | gRPC + REST, औटोमटिक मॉडल रेलोअद |
+| **बेनटोमल** | कोई भी ढाँचा | पयथोनिक API, बुइलट-इन कोनटैनेरिसशन |
 
-LLM serving के लिए खास तौर पर **vLLM** industry standard बन चुका है क्योंकि इसका PagedAttention mechanism naive serving की तुलना में GPU memory waste को 90% तक कम कर देता है।
+LLM सर्विंग के लिए खास तौर पर **vLLM** इंडस्ट्री सटनदरद बन चुका है क्योंकि इसका पगेदटटेनशन मेचनिसम नैवे सर्विंग की तुलना में GPU मेमोरी वसटे को 90% तक कम कर देता है।
 
-<Quiz question="Large language models के लिए vLLM preferred serving solution क्यों बन गया है?" options="ये सिर्फ PyTorch models support करता है|इसका PagedAttention mechanism GPU memory waste को नाटकीय रूप से कम करता है|ये इकलौता open-source option है|इसे GPU hardware की ज़रूरत नहीं है" answer="1" explanation="vLLM का PagedAttention, operating systems की virtual memory से ideas लेकर KV cache memory को efficiently manage करता है, जिससे memory waste 90% तक कम होता है।" />
+<Quiz question="लरगे भाषा मॉडल के लिए vLLM परेफ़ेररेद सर्विंग सोलुशन क्यों बन गया है?" options="ये सिर्फ PyTorch मॉडल सपोर्ट करता है|इसका पगेदटटेनशन मेचनिसम GPU मेमोरी वसटे को नाटकीय रूप से कम करता है|ये इकलौता ओपन-सोर्स ओपशन है|इसे GPU हरदवरे की ज़रूरत नहीं है" answer="1" explanation="vLLM का पगेदटटेनशन, ओपेरटिङ सिस्टम की विरटुअल मेमोरी से विचार लेकर KV कैश मेमोरी को एफ़फ़िकिएनटलय मनगे करता है, जिससे मेमोरी वसटे 90% तक कम होता है।" />
 
-## Model Drift की Monitoring
+## मॉडल दरिफ़ट की मोनिटोरिङ
 
-Deployment के समय accurate model समय के साथ degrade होगा। **Data drift** तब होता है जब input distribution बदलती है (जैसे, pandemic के बाद customer behaviour बदलना)। **Concept drift** तब होता है जब inputs और outputs के बीच का relationship बदलता है (जैसे, fraud patterns का evolve होना)।
+देपलोयमेनट के समय सटीक मॉडल समय के साथ गिरावट होगा। **डेटा दरिफ़ट** तब होता है जब इनपुट दिसटरिबुशन बदलती है (जैसे, पनदेमिक के बाद कुसटोमेर व्यवहार बदलना)। **कोनकेपट दरिफ़ट** तब होता है जब इनपुटस और आउटपुट के बीच का रेलशनशिप बदलता है (जैसे, धोखाधड़ी पैटर्न का एवोलवे होना)।
 
-इन signals को monitor करें:
-- **Prediction distribution** - क्या outputs shift हो रहे हैं? सामान्य से ज़्यादा high-confidence predictions तो नहीं?
-- **Feature distributions** - Current data की training data से तुलना करने वाले statistical tests (KS test, PSI)
-- **Ground truth feedback** - जब labels आएँ, तो live accuracy/F1 compute करें और baseline से compare करें
-- **Latency और error rates** - Infrastructure health अप्रत्यक्ष रूप से model quality को प्रभावित करती है
+इन सिग्नल को मोनिटोर करें:
+- **परेदिकशन दिसटरिबुशन** - क्या आउटपुट शिफ़ट हो रहे हैं? सामान्य से ज़्यादा हिघ-कोनफ़िदेनके भविष्यवाणियाँ तो नहीं?
+- **फ़ीचर दिसटरिबुशनस** - वर्तमान डेटा की ट्रेनिंग डेटा से तुलना करने वाले सांख्यिकीय टेस्ट (KS टेस्ट, PSI)
+- **गरोउनद टरुथ फ़ीडबैक** - जब लबेलस आएँ, तो लाइव अककुरकय/F1 गणना करें और बसेलिने से कोमपरे करें
+- **लेटेंसी और एररोर दरें** - इन्फ़्रास्ट्रक्चर स्वास्थ्य अप्रत्यक्ष रूप से मॉडल गुणवत्ता को प्रभावित करती है
 
-<ThinkAboutIt>आपका e-commerce recommendation model pandemic से पहले train हुआ था। Pandemic के बाद shopping patterns पूरी तरह बदल गए हैं। आप इस drift को automatically कैसे detect करेंगे, और आपकी retraining strategy क्या होगी?</ThinkAboutIt>
+<ThinkAboutIt>आपका ए-कोममेरके अनुशंसा मॉडल पनदेमिक से पहले ट्रेन हुआ था। पनदेमिक के बाद शोपपिङ पैटर्न पूरी तरह बदल गए हैं। आप इस दरिफ़ट को औटोमटिकललय कैसे देटेकट करेंगे, और आपकी रेटरैनिङ रणनीति क्या होगी?</ThinkAboutIt>
 
-## Feature Stores
+## फ़ीचर सटोरेस
 
-Feature store, feature definitions और values की एक centralised repository है, जो training और serving दोनों में shared होती है। **Feast**, **Tecton**, और **Hopsworks** जैसे tools **training-serving skew** की critical problem solve करते हैं - जब training और inference के दौरान features अलग-अलग तरीके से compute होते हैं।
+फ़ीचर सटोरे, फ़ीचर परिभाषाएँ और वलुएस की एक केनटरलिसेद रेपोसिटोरय है, जो ट्रेनिंग और सर्विंग दोनों में शरेद होती है। **Feast**, **Tecton**, और **होपसवोरकस** जैसे टूल्स **टरैनिङ-सेरविङ सकेव** की करिटिकल समस्या हल करते हैं - जब ट्रेनिंग और इन्फ़रेंस के दौरान फ़ीचर अलग-अलग तरीके से कम्प्यूट होते हैं।
 
-Feature stores provide करते हैं: offline store (training के लिए batch features), online store (serving के लिए low-latency features), और registry (feature definitions, ownership, lineage)।
+फ़ीचर सटोरेस परोविदे करते हैं: ऑफ़लाइन सटोरे (ट्रेनिंग के लिए बैच फ़ीचर), ऑनलाइन सटोरे (सर्विंग के लिए कम-लेटेंसी फ़ीचर), और रेगिसटरय (फ़ीचर परिभाषाएँ, ओवनेरशिप, लिनेअगे)।
 
-## Batch vs Real-Time Inference
+## बैच vs रीयल-टाइम इन्फ़रेंस
 
-हर prediction को real time में होने की ज़रूरत नहीं है। Cost का फ़र्क बहुत बड़ा है:
+हर परेदिकशन को वास्तविक समय में होने की ज़रूरत नहीं है। लागत का फ़र्क बहुत बड़ा है:
 
-- **Batch inference** - एक schedule पर predictions चलाएँ (hourly, daily)। सस्ता, spot instances use करता है। Recommendations, risk scoring, report generation के लिए ideal।
-- **Real-time inference** - API के ज़रिए sub-second predictions। महँगा, always-on GPU instances चाहिए। Chatbots, fraud detection, autonomous systems के लिए ज़रूरी।
-- **Near-real-time (streaming)** - Kafka या Pub/Sub के ज़रिए events को आते ही process करें। Personalisation और anomaly detection जैसे use cases के लिए latency और cost का balance।
+- **बैच इन्फ़रेंस** - एक शेड्यूल पर भविष्यवाणियाँ चलाएँ (होउरलय, दैनिक)। सस्ता, सपोट इनसटनकेस उपयोग करता है। अनुशंसाएँ, जोखिम सकोरिङ, रिपोर्ट जनरेशन के लिए इदेअल।
+- **रेअल-टिमे इन्फ़रेंस** - API के ज़रिए सुब-सेकोनद भविष्यवाणियाँ। महँगा, अलवयस-ओन GPU इनसटनकेस चाहिए। चटबोटस, धोखाधड़ी पहचान, स्वायत्त सिस्टम के लिए ज़रूरी।
+- **नेअर-रेअल-टिमे (स्ट्रीमिंग)** - Kafka या पुब/सुब के ज़रिए इवेंट को आते ही प्रोसेस करें। पेरसोनलिसशन और अनोमलय पहचान जैसे उपयोग मामले के लिए लेटेंसी और लागत का संतुलन।
 
-एक common pattern है कि 95% predictable cases के लिए batch predictions pre-compute कर लें, और सिर्फ बाकी 5% को real-time endpoint पर route करें।
+एक आम पैटर्न है कि 95% पूर्वानुमेय मामले के लिए बैच भविष्यवाणियाँ परे-कोमपुटे कर लें, और सिर्फ बाकी 5% को रीयल-टाइम एनदपोइनट पर रूट करें।
 
-Cost optimisation tip: **Inference endpoints को autoscale करें** request queue depth के आधार पर, CPU utilisation पर नहीं। ML workloads bursty होते हैं - queue depth पर scaling over-provisioning और traffic spikes में request timeouts दोनों से बचाता है।
+लागत ऑप्टिमाइज़ेशन टिप: **इन्फ़रेंस एनदपोइनटस को औटोसकले करें** रिक्वेस्ट क्यू गहराई के आधार पर, CPU उटिलिसशन पर नहीं। ML वोरकलोअदस बुरसटय होते हैं - क्यू गहराई पर स्केलिंग ओवेर-परोविसिओनिङ और ट्रैफ़िक सपिकेस में रिक्वेस्ट टिमेओउटस दोनों से बचाता है।
 
-<Quiz question="Real-time inference की जगह batch inference कब बेहतर है?" options="जब predictions 100ms से कम में चाहिए|जब predictions को schedule पर pre-compute किया जा सके और latency critical न हो|जब model GPU serving के लिए बहुत छोटा हो|जब concurrent users handle करने हों" answer="1" explanation="Batch inference ideal है जब predictions को पहले से schedule किया जा सके - ये काफ़ी सस्ता है क्योंकि spot instances use कर सकते हैं और always-on GPU infrastructure की ज़रूरत नहीं।" />
+<Quiz question="रेअल-टिमे इन्फ़रेंस की जगह बैच इन्फ़रेंस कब बेहतर है?" options="जब भविष्यवाणियाँ 100ms से कम में चाहिए|जब भविष्यवाणियाँ को शेड्यूल पर परे-कोमपुटे किया जा सके और लेटेंसी करिटिकल न हो|जब मॉडल GPU सर्विंग के लिए बहुत छोटा हो|जब कोनकुररेनट यूज़र संभाल करने हों" answer="1" explanation="बैच इन्फ़रेंस इदेअल है जब भविष्यवाणियाँ को पहले से शेड्यूल किया जा सके - ये काफ़ी सस्ता है क्योंकि सपोट इनसटनकेस उपयोग कर सकते हैं और अलवयस-ओन GPU इन्फ़्रास्ट्रक्चर की ज़रूरत नहीं।" />
 
-<ThinkAboutIt>आप एक बड़े retailer के लिए ML platform design कर रहे हैं। कौन-से components (feature store, model registry, serving layer, monitoring) आप पहले खुद build करेंगे, और कौन-से managed services के रूप में adopt करेंगे? इस फ़ैसले को कौन-से factors drive करते हैं?</ThinkAboutIt>
+<ThinkAboutIt>आप एक बड़े रेटैलेर के लिए ML प्लैटफ़ॉर्म डिज़ाइन कर रहे हैं। कौन-से कोमपोनेनटस (फ़ीचर स्टोर, मॉडल रेगिसटरय, सर्विंग परत, निगरानी) आप पहले खुद बनाएँगे, और कौन-से मनगेद सेरविकेस के रूप में अदोपट करेंगे? इस फ़ैसले को कौन-से फ़कटोरस दरिवे करते हैं?</ThinkAboutIt>
 
 ---
 
 ## 📚 आगे पढ़ें
 
-- [Designing Machine Learning Systems by Chip Huyen](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/) - Production ML systems design पर सबसे authoritative किताब
-- [MLOps Maturity Model by Google](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning) - Level 0 से level 2 तक MLOps maturity assess करने का Google का framework
-- [vLLM: Easy, Fast, and Cheap LLM Serving](https://docs.vllm.ai/) - Leading open-source LLM serving engine की official documentation
+- [देसिगनिङ मशीन लर्निंग सिस्टम by Chip Huyen](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/) - परोदुकशन ML सिस्टम डिज़ाइन पर सबसे औथोरिटटिवे किताब
+- [MLOps मटुरिटय मॉडल by Google](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning) - लेवेल 0 से स्तर 2 तक MLOps मटुरिटय असेस करने का Google का ढाँचा
+- [vLLM: एअसय, तेज़, and चेअप LLM सेरविङ](https://docs.vllm.ai/) - लेअदिङ ओपन-सोर्स LLM सर्विंग एङिने की ओफ़फ़िकिअल दस्तावेज़ीकरण

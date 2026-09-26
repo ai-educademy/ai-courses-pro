@@ -1,6 +1,6 @@
 ---
-title: "Union-Find - Connected Components और Network Detection"
-description: "Union-Find (disjoint set) data structure सीखें - path compression और union by rank के साथ। Connectivity, MST, और graph component problems को efficiently solve करें।"
+title: "उनिओन-फ़िनद - जुड़े हुए घटक और नेटवर्क देटेकशन"
+description: "उनिओन-फ़िनद (डिसजॉइंट सेट) डेटा संरचना सीखें - रास्ता कोमपरेसिओन और यूनियन by रनक के साथ। कोननेकटिविटय, MST, और ग्राफ़ कोमपोनेनट समस्याएँ को एफ़फ़िकिएनटलय हल करें।"
 order: 7
 difficulty: "advanced"
 duration: 17
@@ -8,15 +8,15 @@ icon: "🔗"
 published: true
 ---
 
-## Connectivity की समस्या
+## कोननेकटिविटय की समस्या
 
-मान लीजिए आपके पास nodes का एक network है, और बार-बार दो तरह की queries आ रही हैं: *node A को node B से connect करो* और *क्या A और B connected हैं?* अगर हर query के लिए BFS/DFS चलाएँ तो पूरा graph traverse करना पड़ेगा - लाखों operations के लिए ये बहुत slow है।
+मान लीजिए आपके पास नोड का एक नेटवर्क है, और बार-बार दो तरह की क्वेरिएस आ रही हैं: *नोड A को नोड B से कोननेकट करो* और *क्या A और B कोननेकटेद हैं?* अगर हर क्वेरी के लिए BFS/DFS चलाएँ तो पूरा ग्राफ़ ट्रैवर्स करना पड़ेगा - लाखों ऑपरेशन के लिए ये बहुत धीमे है।
 
-**Union-Find** दोनों queries को लगभग constant time में handle करता है।
+**उनिओन-फ़िनद** दोनों क्वेरिएस को लगभग कोनसटनट समय में संभाल करता है।
 
-## Naive Approach - Quick Find
+## नैवे तरीका - क्विक फ़िनद
 
-हर node के लिए एक component ID store करो। Connectivity check करने के लिए IDs compare करो - O(1)। लेकिन दो components merge करने के लिए एक पूरे group की हर ID update करनी पड़ेगी - O(n) per union।
+हर नोड के लिए एक कोमपोनेनट ID सटोरे करो। कोननेकटिविटय जाँच करने के लिए इदस कोमपरे करो - O(1)। लेकिन दो कोमपोनेनटस मर्ज करने के लिए एक पूरे गरोउप की हर ID अपडेट करनी पड़ेगी - O(n) प्रति यूनियन।
 
 ```
 IDs:  [0, 0, 0, 3, 3]
@@ -26,9 +26,9 @@ union(0, 3) → update all 3s to 0 → O(n)
 
 हमें कुछ बेहतर चाहिए।
 
-## Union-Find Data Structure
+## उनिओन-फ़िनद डेटा सटरुकटुरे
 
-हर node एक **parent** की तरफ point करता है। हर tree का root उस component का representative होता है। दो nodes तभी connected हैं जब उनका root same हो।
+हर नोड एक **परेनट** की तरफ बिंदु करता है। हर ट्री का रूट उस कोमपोनेनट का रेपरेसेनटटिवे होता है। दो नोड तभी कोननेकटेद हैं जब उनका रूट समान हो।
 
 ```python
 class UnionFind:
@@ -37,9 +37,9 @@ class UnionFind:
         self.rank = [0] * n
 ```
 
-## Find with Path Compression
+## फ़िनद के साथ रास्ता कोमपरेसिओन
 
-Deep tree में parent pointers follow करना slow हो सकता है। **Path compression** tree को flat कर देता है - हर visited node को directly root से जोड़ देता है।
+दीप ट्री में परेनट पॉइंटर फ़ॉलो करना धीमे हो सकता है। **रास्ता कोमपरेसिओन** ट्री को फ़लट कर देता है - हर विज़िटेड नोड को दिरेकटलय रूट से जोड़ देता है।
 
 ```python
 def find(self, x):
@@ -48,7 +48,7 @@ def find(self, x):
     return self.parent[x]
 ```
 
-Node 4 को find करने से पहले और बाद में:
+Node 4 को फ़ाइंड करने से पहले और बाद में:
 
 ```
 Before:  0←1←2←3←4     After:  0←1
@@ -57,9 +57,9 @@ Before:  0←1←2←3←4     After:  0←1
                                 0←4
 ```
 
-## Union by Rank
+## उनिओन by रनक
 
-हमेशा छोटे tree को बड़े tree के नीचे attach करो। इससे tree की height logarithmic रहती है और degenerate chains नहीं बनतीं।
+हमेशा छोटे ट्री को बड़े ट्री के नीचे अटटच करो। इससे ट्री की ऊँचाई लोगरिथमिक रहती है और देगेनेरटे चैनस नहीं बनतीं।
 
 ```python
 def union(self, x, y):
@@ -75,75 +75,75 @@ def union(self, x, y):
 ```
 
 <Quiz
-  question="Path compression और union by rank दोनों के साथ, हर operation का amortised time क्या होता है?"
-  options="O(log n)|O(n)|O(α(n)) - लगभग O(1)|O(√n)"
+  question="रास्ता कोमपरेसिओन और यूनियन by रनक दोनों के साथ, हर ऑपरेशन का अमोरटिसेद समय क्या होता है?"
+  options="O(लॉग n)|O(n)|O(α(n)) - लगभग O(1)|O(√n)"
   answer="2"
-  explanation="Inverse Ackermann function α(n) इतना धीरे बढ़ता है कि किसी भी practical input के लिए ये 4 से ज़्यादा नहीं होता, जिससे operations effectively O(1) हो जाते हैं।"
+  explanation="इनवेरसे अकेरमनन फ़ुनकशन α(n) इतना धीरे बढ़ता है कि किसी भी व्यावहारिक इनपुट के लिए ये 4 से ज़्यादा नहीं होता, जिससे ऑपरेशन एफ़फ़ेकटिवेलय O(1) हो जाते हैं।"
 />
 
-<Illustration src="/images/lessons/union-find-and-disjoint-sets.svg" alt="Path compression से पहले और बाद में Union-Find trees" caption="Path compression deep chains को flat कर देता है, जिससे future lookups fast रहती हैं।" />
+<Illustration src="/images/lessons/union-find-and-disjoint-sets.svg" alt="रास्ता कोमपरेसिओन से पहले और बाद में उनिओन-फ़िनद ट्री" caption="रास्ता कोमपरेसिओन गहरी चैनस को फ़लट कर देता है, जिससे फ़ुटुरे लूकुपस तेज़ रहती हैं।" />
 
-## Kruskal's MST Algorithm
+## करुसकल's MST अलगोरिथम
 
-Union-Find **Kruskal's algorithm** को power करता है - Minimum Spanning Trees के लिए:
+उनिओन-फ़िनद **करुसकल's अलगोरिथम** को पोवेर करता है - मिनिमुम सपननिङ टरीस के लिए:
 
-1. सभी edges को weight के हिसाब से sort करो
-2. हर edge (u, v) के लिए, अगर `find(u) ≠ find(v)` है, तो उसे add करो और `union(u, v)` करो
-3. जब n − 1 edges हो जाएँ तो रुक जाओ
+1. सभी एदगेस को वज़न के हिसाब से सॉर्ट करो
+2. हर बढ़त (u, v) के लिए, अगर `find(u) ≠ find(v)` है, तो उसे जोड़ें करो और `union(u, v)` करो
+3. जब n − 1 एदगेस हो जाएँ तो रुक जाओ
 
-Union-Find cycles prevent करता है - अगर दोनों endpoints का root same है तो edge reject हो जाती है। Total time: **O(E log E)** - sorting dominate करती है।
+उनिओन-फ़िनद कयकलेस परेवेनट करता है - अगर दोनों एनदपोइनटस का रूट समान है तो बढ़त रेजेकट हो जाती है। कुल समय: **O(E लॉग E)** - सॉर्टिंग दोमिनटे करती है।
 
-<ThinkAboutIt>Kruskal's algorithm cycles detect करने के लिए Union-Find use करता है। DFS से cycle detect कैसे करोगे, और यहाँ Union-Find ज़्यादा natural क्यों है?</ThinkAboutIt>
+<ThinkAboutIt>करुसकल's अलगोरिथम कयकलेस देटेकट करने के लिए उनिओन-फ़िनद उपयोग करता है। DFS से साइकिल देटेकट कैसे करोगे, और यहाँ उनिओन-फ़िनद ज़्यादा नटुरल क्यों है?</ThinkAboutIt>
 
-## Classic Problems
+## कलसिक परोबलेमस
 
-### Number of Connected Components
+### नुमबेर of जुड़े हुए घटक
 
-Union-Find को n nodes से initialise करो। हर edge को `union` से process करो। अंत में distinct roots count करो।
+उनिओन-फ़िनद को n नोड से इनिटिअलिसे करो। हर बढ़त को `union` से प्रोसेस करो। अंत में दिसटिनकट रूटस गणना करो।
 
-### Accounts Merge (LeetCode 721)
+### अकाउंट मर्ज (LeetCode 721)
 
-हर account में emails हैं। अगर दो accounts में कोई common email है, तो वो same person के हैं। Shared emails के basis पर accounts को union करो, फिर group और sort करो।
+हर अककोउनट में एमैलस हैं। अगर दो अकाउंट में कोई आम एमैल है, तो वो समान पेरसोन के हैं। शरेद एमैलस के आधार पर अकाउंट को यूनियन करो, फिर गरोउप और सॉर्ट करो।
 
-### Redundant Connection (LeetCode 684)
+### रेदुनदनट कोननेकशन (LeetCode 684)
 
-एक tree दिया है जिसमें एक extra edge है - redundant edge ढूँढो। Edges को order में process करो - जिस पहली edge पर `union` `False` return करे (already connected), वही answer है।
+एक ट्री दिया है जिसमें एक एक्सटर बढ़त है - रेदुनदनट बढ़त ढूँढो। एदगेस को order में प्रोसेस करो - जिस पहली बढ़त पर `union` `False` लौटाएँ करे (अलरेअदय कोननेकटेद), वही answer है।
 
-<FunFact>Union-Find दोनों optimisations के साथ O(α(n)) में चलता है - इसका proof Tarjan ने 1975 में publish किया था और इसे computer science में सबसे elegant amortised analyses में से एक माना जाता है।</FunFact>
+<FunFact>उनिओन-फ़िनद दोनों ओपटिमिसशनस के साथ O(α(n)) में चलता है - इसका प्रमाण टरजन ने 1975 में पुबलिश किया था और इसे कंप्यूटर विज्ञान में सबसे एलेगनट अमोरटिसेद अनलयसेस में से एक माना जाता है।</FunFact>
 
-## Union-Find vs BFS/DFS - कब क्या चुनें
+## उनिओन-फ़िनद vs BFS/DFS - कब क्या चुनें
 
-| Scenario | सबसे अच्छा choice |
+| सकेनरिओ | सबसे अच्छा चोइके |
 |----------|-------------------|
-| बार-बार connectivity queries | Union-Find |
-| Single traversal / shortest path | BFS/DFS |
-| Incremental edge additions | Union-Find |
-| Edge removals (dynamic graph) | BFS/DFS (या offline UF) |
-| Kruskal's MST | Union-Find |
-| Topological sort / directed graph में cycle | DFS |
+| बार-बार कोननेकटिविटय क्वेरिएस | उनिओन-फ़िनद |
+| सिङले टरवेरसल / सबसे छोटा रास्ता | BFS/DFS |
+| इनकरेमेनटल बढ़त अददिशनस | उनिओन-फ़िनद |
+| एदगे रेमोवलस (डायनेमिक ग्राफ़) | BFS/DFS (या ऑफ़लाइन UF) |
+| करुसकल's MST | उनिओन-फ़िनद |
+| टोपोलोगिकल सॉर्ट / दिरेकटेद ग्राफ़ में साइकिल | DFS |
 
-Union-Find तब shine करता है जब आप edges *incrementally* process कर रहे हों और fast connectivity checks चाहिए। अगर सिर्फ एक बार traverse करना है या path information चाहिए, तो BFS/DFS use करें।
+उनिओन-फ़िनद तब शिने करता है जब आप एदगेस *इनकरेमेनटललय* प्रोसेस कर रहे हों और तेज़ कोननेकटिविटय चेकस चाहिए। अगर सिर्फ एक बार ट्रैवर्स करना है या रास्ता जानकारी चाहिए, तो BFS/DFS इस्तेमाल करें।
 
 <Quiz
-  question="आपको एक-एक करके edges मिल रही हैं और पहली edge detect करनी है जो cycle बनाती है। सबसे अच्छा approach कौन सा है?"
-  options="हर edge के बाद BFS from scratch|हर edge के बाद DFS from scratch|Union-Find - cycle edge पर union False return करता है|Topological sort"
+  question="आपको एक-एक करके एदगेस मिल रही हैं और पहली बढ़त देटेकट करनी है जो साइकिल बनाती है। सबसे अच्छा तरीका कौन सा है?"
+  options="हर बढ़त के बाद BFS from शुरुआत|हर बढ़त के बाद DFS from शुरुआत|उनिओन-फ़िनद - साइकिल बढ़त पर यूनियन फ़लसे लौटाएँ करता है|टोपोलोगिकल सॉर्ट"
   answer="2"
-  explanation="Union-Find हर edge पर near O(1) में incrementally cycle detect करता है, जबकि BFS/DFS को हर बार पूरा graph re-traverse करना पड़ेगा।"
+  explanation="उनिओन-फ़िनद हर बढ़त पर नेअर O(1) में इनकरेमेनटललय साइकिल देटेकट करता है, जबकि BFS/DFS को हर बार पूरा ग्राफ़ रे-टरवेरसे करना पड़ेगा।"
 />
 
 <Quiz
-  question="Union-Find में union by rank क्या prevent करता है?"
-  options="Duplicate edges|Disconnected components|Degenerate linear chains (tall trees)|Negative edge weights"
+  question="उनिओन-फ़िनद में यूनियन by रनक क्या परेवेनट करता है?"
+  options="दुपलिकटे एदगेस|दिसकोननेकटेद कोमपोनेनटस|देगेनेरटे लिनेअर चैनस (टलल ट्री)|नेगटिवे बढ़त वेट्स"
   answer="2"
-  explanation="Union by rank trees को balanced रखता है - हमेशा छोटे tree को बड़े के नीचे attach करके, जिससे O(n) find operations नहीं होतीं।"
+  explanation="उनिओन by रनक ट्री को संतुलित रखता है - हमेशा छोटे ट्री को बड़े के नीचे अटटच करके, जिससे O(n) फ़ाइंड ऑपरेशन नहीं होतीं।"
 />
 
-<ThinkAboutIt>कुछ problems में unions को *undo* करना पड़ता है (dynamic connectivity with deletions)। Standard Union-Find इसके लिए काफी क्यों नहीं है, और इसमें क्या modifications exist करते हैं?</ThinkAboutIt>
+<ThinkAboutIt>कुछ समस्याएँ में उनिओनस को *उनदो* करना पड़ता है (डायनेमिक कोननेकटिविटय के साथ देलेशनस)। सटनदरद उनिओन-फ़िनद इसके लिए काफी क्यों नहीं है, और इसमें क्या मोदिफ़िकशनस मौजूद करते हैं?</ThinkAboutIt>
 
 ---
 
 ## 📚 और पढ़ें
 
-- [Disjoint-Set Data Structure - Wikipedia](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) - Union-Find की theory, proofs, और history
-- [Union-Find - Princeton Algorithms](https://algs4.cs.princeton.edu/15uf/) - Sedgewick का authoritative treatment, Java examples के साथ
-- [Redundant Connection - LeetCode 684](https://leetcode.com/problems/redundant-connection/) - Union-Find से cycle detection का एक clean application
+- [दिसजोइनट-सेट डेटा सटरुकटुरे - विकिपेदिअ](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) - उनिओन-फ़िनद की सिद्धांत, परूफ़स, और इतिहास
+- [उनिओन-फ़िनद - परिनकेटोन अलगोरिथमस](https://algs4.cs.princeton.edu/15uf/) - सेदगेविक का औथोरिटटिवे टरेअटमेनट, जव एक्समपलेस के साथ
+- [रेदुनदनट कोननेकशन - LeetCode 684](https://leetcode.com/problems/redundant-connection/) - उनिओन-फ़िनद से साइकिल पहचान का एक साफ़ अपपलिकशन

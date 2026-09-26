@@ -1,6 +1,6 @@
 ---
-title: "Dynamic Programming - AI जटिल समस्याओं को तोड़कर कैसे हल करता है"
-description: "Memoisation, tabulation, और classic DP patterns को समझें जो AI और computer science में हर जगह इस्तेमाल होते हैं।"
+title: "दयनमिक परोगरममिङ - AI जटिल समस्याओं को तोड़कर कैसे हल करता है"
+description: "मेमोइसशन, टबुलशन, और क्लासिक DP पैटर्न को समझें जो AI और कंप्यूटर विज्ञान में हर जगह इस्तेमाल होते हैं।"
 order: 4
 difficulty: "intermediate"
 duration: 20
@@ -10,18 +10,18 @@ published: true
 
 ## बड़ा आइडिया
 
-कुछ problems देखने में बहुत complex लगते हैं, लेकिन जब ध्यान से देखो तो पता चलता है कि वो **छोटी-छोटी repeating sub-problems** से बने हैं। Dynamic programming (DP) हर sub-problem को **एक बार** solve करता है, result store करता है, और उसे दोबारा use करता है - थोड़ी memory खर्च करके बहुत बड़ी speed-up हासिल करता है।
+कुछ समस्याएँ देखने में बहुत कोमपलेक्स लगते हैं, लेकिन जब ध्यान से देखो तो पता चलता है कि वो **छोटी-छोटी रेपेअटिङ सुब-परोबलेमस** से बने हैं। दयनमिक प्रोग्रामिंग (DP) हर सुब-परोबलेम को **एक बार** हल करता है, रेसुलट सटोरे करता है, और उसे दोबारा उपयोग करता है - थोड़ी मेमोरी खर्च करके बहुत बड़ी सपीद-उप हासिल करता है।
 
-दो conditions बताती हैं कि DP लगा सकते हैं:
+दो कोनदिशनस बताती हैं कि DP लगा सकते हैं:
 
-1. **Overlapping sub-problems** - एक ही calculations बार-बार repeat होती हैं।
-2. **Optimal substructure** - पूरी problem का best solution उसके parts के best solutions से बनाया जा सकता है।
+1. **ओवेरलपपिङ सुब-परोबलेमस** - एक ही कलकुलशनस बार-बार रेपेअट होती हैं।
+2. **ओपटिमल सुबसटरुकटुरे** - पूरी समस्या का श्रेष्ठ सोलुशन उसके परटस के श्रेष्ठ सोलुशनस से बनाया जा सकता है।
 
-<Illustration src="/images/lessons/dynamic-programming.svg" alt="Fibonacci के लिए एक recursion tree जिसमें repeated sub-problems highlight हैं, साथ में एक भरी हुई DP table" caption="बिना DP के, Fibonacci एक ही values को exponentially recalculate करता है। DP के साथ, हर value सिर्फ एक बार compute होती है।" />
+<Illustration src="/images/lessons/dynamic-programming.svg" alt="फ़िबोनककि के लिए एक रिकर्शन ट्री जिसमें रेपेअटेद सुब-परोबलेमस हिघलिघट हैं, साथ में एक भरी हुई DP टेबल" caption="बिना DP के, फ़िबोनककि एक ही वलुएस को एक्सपोनेनटिअललय रेकलकुलटे करता है। DP के साथ, हर वैल्यू सिर्फ एक बार कम्प्यूट होती है।" />
 
-## Fibonacci: सबसे Classic Example
+## फ़िबोनककि: सबसे कलसिक एक्समपले
 
-### Naïve Recursion - O(2ⁿ)
+### Naïve रेकुरसिओन - O(2ⁿ)
 
 ```
 function fib(n):
@@ -29,11 +29,11 @@ function fib(n):
     return fib(n - 1) + fib(n - 2)
 ```
 
-`fib(5)` call करने पर **15** function calls होती हैं, जिनमें काफी redundant हैं। `fib(40)` पर seconds लगते हैं; `fib(100)` पर तो universe से भी ज़्यादा time लगेगा।
+`fib(5)` कॉल करने पर **15** फ़ुनकशन कललस होती हैं, जिनमें काफी रेदुनदनट हैं। `fib(40)` पर सेकंड लगते हैं; `fib(100)` पर तो उनिवेरसे से भी ज़्यादा समय लगेगा।
 
-### Memoisation (Top-Down) - O(n)
+### मेमोइसशन (top-down) - O(n)
 
-Results को एक cache में store करो। अगर कोई sub-problem पहले solve हो चुकी है, तो cached answer return करो।
+रेसुलटस को एक कैश में सटोरे करो। अगर कोई सुब-परोबलेम पहले हल हो चुकी है, तो कचेद answer लौटाएँ करो।
 
 ```
 memo = {}
@@ -44,9 +44,9 @@ function fib(n):
     return memo[n]
 ```
 
-### Tabulation (Bottom-Up) - O(n)
+### टबुलशन (बोटटोम-उप) - O(n)
 
-Base cases से शुरू करके iteratively answer बनाओ।
+बसे मामले से शुरू करके इटेरटिवेलय answer बनाओ।
 
 ```
 function fib(n):
@@ -56,13 +56,13 @@ function fib(n):
     return table[n]
 ```
 
-<Quiz question="Memoisation और tabulation में क्या फ़र्क है?" options="Memoisation stack use करता है; tabulation queue use करता है|Memoisation top-down recursion से काम करता है; tabulation bottom-up iteration से|Memoisation हमेशा faster होता है|दोनों एक ही technique के अलग-अलग नाम हैं" answer="1" explanation="Memoisation original problem से शुरू होकर नीचे recurse करता है और रास्ते में cache करता जाता है। Tabulation सबसे छोटी sub-problems से शुरू होकर ऊपर की ओर iteratively बनाता है।" />
+<Quiz question="मेमोइसशन और टबुलशन में क्या फ़र्क है?" options="मेमोइसशन स्टैक उपयोग करता है; टबुलशन क्यू उपयोग करता है|मेमोइसशन top-down रिकर्शन से काम करता है; टबुलशन बोटटोम-उप इटेरशन से|मेमोइसशन हमेशा तेज़ होता है|दोनों एक ही टेचनिक्वे के अलग-अलग नाम हैं" answer="1" explanation="मेमोइसशन ओरिगिनल समस्या से शुरू होकर नीचे रेकुरसे करता है और रास्ते में कैश करता जाता है। टबुलशन सबसे छोटी सुब-परोबलेमस से शुरू होकर ऊपर की ओर इटेरटिवेलय बनाता है।" />
 
-## Classic DP Problems
+## कलसिक DP परोबलेमस
 
-### Climbing Stairs
+### कलिमबिङ सटैरस
 
-आप एक बार में 1 या 2 सीढ़ियाँ चढ़ सकते हैं। Step _n_ तक पहुँचने के कितने अलग-अलग तरीके हैं?
+आप एक बार में 1 या 2 सीढ़ियाँ चढ़ सकते हैं। चरण _n_ तक पहुँचने के कितने अलग-अलग तरीके हैं?
 
 ```
 function climbStairs(n):
@@ -73,11 +73,11 @@ function climbStairs(n):
     return b
 ```
 
-यह असल में Fibonacci ही है - step _n_ का answer, step _n−1_ और _n−2_ तक पहुँचने के तरीकों का sum है।
+यह असल में फ़िबोनककि ही है - चरण _n_ का answer, चरण _n−1_ और _n−2_ तक पहुँचने के तरीकों का सुम है।
 
-### Coin Change
+### कोइन चङे
 
-दिए गए coin denominations से target amount बनाने के लिए **सबसे कम coins** ढूँढो।
+दिए गए कोइन देनोमिनशनस से लक्षित अमोउनट बनाने के लिए **सबसे कम कोइनस** ढूँढो।
 
 ```
 function coinChange(coins, amount):
@@ -90,9 +90,9 @@ function coinChange(coins, amount):
     return dp[amount] if dp[amount] != INF else -1
 ```
 
-### Longest Common Subsequence (LCS)
+### लोङेसट कोममोन सुबसेक्वेनके (LCS)
 
-दो strings में common characters की सबसे लंबी sequence ढूँढो (ज़रूरी नहीं कि contiguous हो)।
+दो सटरिङस में आम चरकटेरस की सबसे लंबी सेक्वेनके ढूँढो (ज़रूरी नहीं कि कोनटिगुओउस हो)।
 
 ```
 function lcs(s1, s2):
@@ -107,40 +107,40 @@ function lcs(s1, s2):
     return dp[m][n]
 ```
 
-<FunFact>`diff` tool जो file versions के बीच changes दिखाता है, वो LCS पर based है। जब भी आप `git diff` चलाते हैं, Git इसका एक variant use करता है।</FunFact>
+<FunFact>`diff` टूल जो फ़ाइल वेरसिओनस के बीच चङेस दिखाता है, वो LCS पर आधारित है। जब भी आप `git diff` चलाते हैं, गिट इसका एक वैरिएंट उपयोग करता है।</FunFact>
 
-<ThinkAboutIt>Coin change minimum coins की संख्या पूछता है। अगर आपको amount बनाने के कुल अलग-अलग तरीकों की गिनती करनी हो तो? Recurrence relation कैसे बदलेगा?</ThinkAboutIt>
+<ThinkAboutIt>कोइन चङे मिनिमुम कोइनस की संख्या पूछता है। अगर आपको अमोउनट बनाने के कुल अलग-अलग तरीकों की गिनती करनी हो तो? रेकुररेनके रेलशन कैसे बदलेगा?</ThinkAboutIt>
 
-## AI में Real Applications
+## AI में वास्तविक अपपलिकशनस
 
-| Problem | AI Domain | DP Technique |
+| समस्या | AI डोमेन | DP टेचनिक्वे |
 |---------|-----------|-------------|
-| **Edit distance** (Levenshtein) | Spell checkers, fuzzy search | Characters compare करने वाली 2D table |
-| **Viterbi algorithm** | Speech recognition, POS tagging | Hidden Markov model में best path |
-| **Sequence alignment** | Bioinformatics (DNA matching) | Gap penalties वाला LCS variant |
-| **CTC decoding** | Handwriting / speech-to-text | Repeated characters को optimally merge करना |
-| **Beam search pruning** | Machine translation | Top-k partial translations रखना |
+| **एदिट दिसटनके** (लेवेनशटेइन) | सपेलल चेकेरस, फ़ुज़ज़य सर्च | चरकटेरस कोमपरे करने वाली 2D टेबल |
+| **विटेरबि अलगोरिथम** | सपीच रेकोगनिशन, POS टगगिङ | हिददेन मरकोव मॉडल में श्रेष्ठ रास्ता |
+| **सेक्वेनके अलिगनमेनट** | बिओइनफ़ोरमटिकस (DNA मटचिङ) | गप पेनलटिएस वाला LCS वैरिएंट |
+| **CTC देकोदिङ** | हनदवरिटिङ / सपीच-टो-टेक्सट | रेपेअटेद चरकटेरस को ओपटिमललय मर्ज करना |
+| **बेअम सर्च परुनिङ** | मचिने टरनसलशन | टोप-क परटिअल टरनसलशनस रखना |
 
-<Quiz question="एक spell checker corrections suggest करने के लिए सबसे likely कौन सा DP-based algorithm use करता है?" options="Longest common subsequence|Edit distance (Levenshtein)|Coin change|Climbing stairs" answer="1" explanation="Edit distance एक word को दूसरे में बदलने के लिए minimum insertions, deletions, और substitutions count करता है - सीधे measure करता है कि एक misspelling dictionary word से कितनी 'करीब' है।" />
+<Quiz question="एक सपेलल चेकेर कोररेकशनस सुगगेसट करने के लिए सबसे लिकेलय कौन सा दप-बसेद अलगोरिथम उपयोग करता है?" options="लोङेसट आम सुबसेक्वेनके|एदिट दिसटनके (लेवेनशटेइन)|कोइन चङे|कलिमबिङ सटैरस" answer="1" explanation="एदिट दिसटनके एक वोरद को दूसरे में बदलने के लिए मिनिमुम इनसेरशनस, देलेशनस, और सुबसटिटुशनस गणना करता है - सीधे मेअसुरे करता है कि एक मिसपेललिङ दिकशनरय वोरद से कितनी 'करीब' है।" />
 
-## Top-Down vs Bottom-Up
+## top-down vs बोटटोम-उप
 
-| पहलू | Top-Down (Memoisation) | Bottom-Up (Tabulation) |
+| पहलू | top-down (मेमोइसशन) | बोटटोम-उप (टबुलशन) |
 |-------|----------------------|----------------------|
-| Style | Recursive + cache | Iterative + table |
-| कौन सी sub-problems solve होती हैं | सिर्फ़ जो ज़रूरी हैं | _n_ तक सभी sub-problems |
-| Stack overflow का risk | हाँ, deep recursion में | नहीं |
-| Space optimisation की आसानी | मुश्किल | आसान (अक्सर बस last row रखनी होती है) |
+| सटयले | रेकुरसिवे + कैश | इटेरटिवे + टेबल |
+| कौन सी सुब-परोबलेमस हल होती हैं | सिर्फ़ जो ज़रूरी हैं | _n_ तक सभी सुब-परोबलेमस |
+| सटक ओवेरफ़लोव का जोखिम | हाँ, गहरी रिकर्शन में | नहीं |
+| सपके ऑप्टिमाइज़ेशन की आसानी | मुश्किल | आसान (अक्सर बस लसट रोव रखनी होती है) |
 
-**अंगूठे का नियम:** पहले memoisation से recurrence समझो, फिर space optimise करने या stack limits से बचने के लिए tabulation में convert करो।
+**अंगूठे का नियम:** पहले मेमोइसशन से रेकुररेनके समझो, फिर स्पेस ऑप्टिमाइज़ करने या स्टैक सीमाएँ से बचने के लिए टबुलशन में कोनवेरट करो।
 
-<ThinkAboutIt>Coin change table का size O(amount) है। LCS table का size O(m × n) है। क्या आप एक बार में सिर्फ़ दो rows रखकर LCS space को O(min(m, n)) तक कम कर सकते हैं? ऐसा करने पर कौन सी information खो जाएगी?</ThinkAboutIt>
+<ThinkAboutIt>कोइन चङे टेबल का आकार O(अमोउनट) है। LCS टेबल का आकार O(m × n) है। क्या आप एक बार में सिर्फ़ दो रोवस रखकर LCS स्पेस को O(मिन(m, n)) तक कम कर सकते हैं? ऐसा करने पर कौन सी जानकारी खो जाएगी?</ThinkAboutIt>
 
 ## मुख्य बातें
 
-1. DP exponential brute-force को polynomial time में बदलता है **repeated work को cache करके**।
-2. DP लगाने से पहले overlapping sub-problems और optimal substructure identify करो।
-3. Memoisation intuitive है; tabulation efficient है - दोनों सीखो।
-4. Edit distance, Viterbi, और sequence alignment दिखाते हैं कि DP modern AI के दिल में है।
+1. DP एक्सपोनेनटिअल बरुटे-फ़ोरके को पोलयनोमिअल समय में बदलता है **रेपेअटेद काम को कैश करके**।
+2. DP लगाने से पहले ओवेरलपपिङ सुब-परोबलेमस और ओपटिमल सुबसटरुकटुरे इदेनटिफ़य करो।
+3. मेमोइसशन इनटुइटिवे है; टबुलशन कुशल है - दोनों सीखो।
+4. एदिट दिसटनके, विटेरबि, और सेक्वेनके अलिगनमेनट दिखाते हैं कि DP आधुनिक AI के दिल में है।
 
-<Quiz question="एक problem में overlapping sub-problems हैं लेकिन optimal substructure नहीं है। क्या आप optimal solution पाने के लिए DP लगा सकते हैं?" options="हाँ - अगर sub-problems overlap करती हैं तो DP हमेशा काम करता है|नहीं - DP से optimality guarantee करने के लिए दोनों conditions ज़रूरी हैं|सिर्फ़ tabulation से|सिर्फ़ graph problems के लिए" answer="1" explanation="DP के लिए overlapping sub-problems (efficiency के लिए) और optimal substructure (correctness के लिए) दोनों ज़रूरी हैं। Optimal substructure के बिना, सिर्फ़ caching से global optimum की guarantee नहीं मिलती।" />
+<Quiz question="एक समस्या में ओवेरलपपिङ सुब-परोबलेमस हैं लेकिन ओपटिमल सुबसटरुकटुरे नहीं है। क्या आप ओपटिमल सोलुशन पाने के लिए DP लगा सकते हैं?" options="हाँ - अगर सुब-परोबलेमस ओवेरलप करती हैं तो DP हमेशा काम करता है|नहीं - DP से ओपटिमलिटय गुअरनटी करने के लिए दोनों कोनदिशनस ज़रूरी हैं|सिर्फ़ टबुलशन से|सिर्फ़ ग्राफ़ समस्याएँ के लिए" answer="1" explanation="DP के लिए ओवेरलपपिङ सुब-परोबलेमस (एफ़फ़िकिएनकय के लिए) और ओपटिमल सुबसटरुकटुरे (कोररेकटनेस के लिए) दोनों ज़रूरी हैं। ओपटिमल सुबसटरुकटुरे के बिना, सिर्फ़ कचिङ से गलोबल ओपटिमुम की गुअरनटी नहीं मिलती।" />

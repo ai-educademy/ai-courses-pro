@@ -1,6 +1,6 @@
 ---
-title: "Kaggle Competition Guide - Kaggle पर कैसे compete करें (और सीखें)"
-description: "पहली submission से grandmaster techniques तक: EDA workflows, feature engineering tricks, ensemble methods, और top 1% में consistently place करने की strategies।"
+title: "Kaggle प्रतियोगिता गुइदे - Kaggle पर कैसे कोमपेटे करें (और सीखें)"
+description: "पहली सुबमिसिओन से गरनदमसटेर तकनीकें तक: EDA वोरk़लोवस, फ़ीचर इंजीनियरिंग टरिकस, एनसेमबले मेथोदस, और शीर्ष 1% में कोनसिसटेनटलय रखें करने की रणनीतियाँ।"
 order: 7
 difficulty: "advanced"
 duration: 20
@@ -8,30 +8,30 @@ icon: "🏆"
 published: true
 ---
 
-# Kaggle Competition Guide - Kaggle पर कैसे Compete करें (और सीखें)
+# Kaggle प्रतियोगिता गुइदे - Kaggle पर कैसे कोमपेटे करें (और सीखें)
 
-Kaggle सिर्फ एक competition platform नहीं - यह दुनिया की सबसे बड़ी applied ML classroom है। 15 million से ज़्यादा data scientists इसे skills sharpen करने, portfolio बनाने, और jobs पाने के लिए use करते हैं। यह lesson आपको सिखाएगा कि effectively compete कैसे करें और हर competition से maximum learning कैसे निकालें।
+Kaggle सिर्फ एक प्रतियोगिता प्लैटफ़ॉर्म नहीं - यह दुनिया की सबसे बड़ी अपपलिएद ML कलसरूम है। 15 मिलियन से ज़्यादा डेटा सकिएनटिसटस इसे कौशल शरपेन करने, पोर्टफ़ोलियो बनाने, और जॉब पाने के लिए उपयोग करते हैं। यह पाठ आपको सिखाएगा कि एफ़फ़ेकटिवेलय कोमपेटे कैसे करें और हर प्रतियोगिता से मक्सिमुम लेअरनिङ कैसे निकालें।
 
-## 🎯 Kaggle आपके Career के लिए क्यों मायने रखता है
+## 🎯 Kaggle आपके करियर के लिए क्यों मायने रखता है
 
-Kaggle experience एक ऐसा signal देता है जो CVs नहीं दे सकते: **आप messy, real-world data पर काम करने वाले models ship कर सकते हैं**। Google, Meta, और top startups के hiring managers Kaggle leaderboards से actively recruit करते हैं। जीतने के बिना भी, well-documented notebooks वाला एक strong profile practical competence दिखाता है।
+Kaggle अनुभव एक ऐसा सिग्नल देता है जो कवस नहीं दे सकते: **आप मेसय, रेअल-वोरलद डेटा पर काम करने वाले मॉडल भेज कर सकते हैं**। Google, Meta, और शीर्ष सटरटुपस के भर्ती मैनेजर Kaggle लेअदेरबोअरदस से सक्रिय रूप से रेकरुइट करते हैं। जीतने के बिना भी, वेलल-दोकुमेनटेद नोटेबूकस वाला एक मज़बूत प्रोफ़ाइल व्यावहारिक कोमपेटेनके दिखाता है।
 
-<Illustration src="/images/lessons/kaggle-competition-guide.svg" alt="Kaggle competition workflow - data exploration से final submission तक" caption="Typical Kaggle workflow - EDA, feature engineering, और validation के बीच iterate करते रहें जब तक convergence न हो।" />
+<Illustration src="/images/lessons/kaggle-competition-guide.svg" alt="Kaggle प्रतियोगिता वोरk़लोव - डेटा एक्सपलोरशन से अंतिम सुबमिसिओन तक" caption="टयपिकल Kaggle वोरk़लोव - EDA, फ़ीचर इंजीनियरिंग, और वलिदशन के बीच इटेरटे करते रहें जब तक कोनवेरगेनके न हो।" />
 
-## 📊 Competition Types और जीतने की Strategies
+## 📊 प्रतियोगिता टयपेस और जीतने की रणनीतियाँ
 
-| Type | उदाहरण | Typical Winning Approach |
+| टयपे | उदाहरण | टयपिकल विननिङ तरीका |
 |------|---------|------------------------|
-| **Tabular** | House prices, fraud detection | Gradient boosting (XGBoost/LightGBM) + heavy feature engineering |
-| **Computer Vision** | Image classification, segmentation | Pre-trained CNNs (EfficientNet, ConvNeXt) + augmentation |
-| **NLP** | Sentiment, question answering | Fine-tuned transformers (DeBERTa, RoBERTa) |
-| **Simulation** | Game AI, optimisation | Reinforcement learning + domain heuristics |
+| **टबुलर** | होउसे परिकेस, धोखाधड़ी पहचान | गरदिएनट बूसटिङ (क्सगबूसट/लिघटगबम) + भारी फ़ीचर इंजीनियरिंग |
+| **कंप्यूटर विसिओन** | इमगे कलसिफ़िकशन, सेगमेनटशन | परे-टरैनेद कननस (एफ़फ़िकिएनटनेट, कोनवनेक्सट) + औगमेनटशन |
+| **NLP** | सेनटिमेनट, question अनसवेरिङ | फ़िने-टुनेद transformers (देबेरट, रोबेरट) |
+| **सिमुलशन** | गमे AI, ऑप्टिमाइज़ेशन | रेइनफ़ोरकेमेनट लेअरनिङ + डोमेन हेउरिसटिकस |
 
-<FunFact>Kaggle competition winners में सबसे लोकप्रिय algorithm LightGBM है - यह 60% से ज़्यादा top-placing tabular solutions में दिखता है, अक्सर CatBoost या XGBoost के साथ ensembles में।</FunFact>
+<FunFact>Kaggle प्रतियोगिता विननेरस में सबसे लोकप्रिय अलगोरिथम लिघटगबम है - यह 60% से ज़्यादा टोप-पलकिङ टबुलर सोलुशनस में दिखता है, अक्सर कटबूसट या क्सगबूसट के साथ एनसेमबलेस में।</FunFact>
 
 ## 🔍 EDA - आपके पहले 48 घंटे
 
-Data समझे बिना कभी modelling शुरू न करें। एक disciplined EDA workflow:
+डेटा समझे बिना कभी मॉडलिंग शुरू न करें। एक दिसकिपलिनेद EDA वोरk़लोव:
 
 ```python
 import pandas as pd
@@ -54,15 +54,15 @@ print(correlations.head(10))  # Strongest negative correlations
 print(correlations.tail(10))  # Strongest positive correlations
 ```
 
-**Leakage check करें** - ऐसे features जो prediction time पर exist नहीं करेंगे। यह beginners की नंबर एक गलती है। अगर कोई feature target के साथ suspicious तरीके से correlate करता है, तो खुशी मनाने से पहले investigate करें।
+**लेअकगे जाँच करें** - ऐसे फ़ीचर जो परेदिकशन समय पर मौजूद नहीं करेंगे। यह बेगिननेरस की नंबर एक गलती है। अगर कोई फ़ीचर लक्षित के साथ सुसपिकिओउस तरीके से कोररेलटे करता है, तो खुशी मनाने से पहले जाँच करें।
 
-<Quiz question="EDA के दौरान आपको एक feature मिलता है जिसका target के साथ 0.98 correlation है। आपकी पहली reaction क्या होनी चाहिए?" options="खुशी मनाएँ - यह feature model dominate करेगा|Data leakage की जाँच करें - यह correlation संदिग्ध रूप से high है|इसे हटा दें - high correlation मतलब overfitting|इसे सिर्फ ensemble में use करें, baseline में नहीं" answer="1" explanation="0.98 correlation लगभग निश्चित रूप से data leakage है। यह feature शायद future की जानकारी रखता है या target से derive किया गया है। इसे use करने पर validation scores बढ़ेंगे लेकिन private leaderboard पर गिर जाएँगे।" />
+<Quiz question="EDA के दौरान आपको एक फ़ीचर मिलता है जिसका लक्षित के साथ 0.98 कोररेलशन है। आपकी पहली रेअकशन क्या होनी चाहिए?" options="खुशी मनाएँ - यह फ़ीचर मॉडल दोमिनटे करेगा|डेटा लेअकगे की जाँच करें - यह कोररेलशन संदिग्ध रूप से हिघ है|इसे हटा दें - हिघ कोररेलशन मतलब ओवेरफ़िटटिङ|इसे सिर्फ एनसेमबले में इस्तेमाल करें, बसेलिने में नहीं" answer="1" explanation="0.98 कोररेलशन लगभग निश्चित रूप से डेटा लेअकगे है। यह फ़ीचर शायद फ़ुटुरे की जानकारी रखता है या लक्षित से देरिवे किया गया है। इसे उपयोग करने पर वलिदशन सकोरेस बढ़ेंगे लेकिन परिवटे लेअदेरबोअरद पर गिर जाएँगे।" />
 
-## 🛠️ Feature Engineering जो जिताती है
+## 🛠️ फ़ीचर इंजीनियरिंग जो जिताती है
 
-Top competitors अपना 70% समय features पर लगाते हैं, model tuning पर नहीं। आज़माई हुई techniques:
+शीर्ष कोमपेटिटोरस अपना 70% समय फ़ीचर पर लगाते हैं, मॉडल टुनिङ पर नहीं। आज़माई हुई तकनीकें:
 
-**Aggregation features** - अलग-अलग granularities पर group statistics:
+**अगगरेगशन फ़ीचर** - अलग-अलग गरनुलरिटिएस पर गरोउप सांख्यिकी:
 ```python
 for col in ["category", "store_id", "day_of_week"]:
     stats = df.groupby(col)["sales"].agg(["mean", "std", "median"])
@@ -70,17 +70,17 @@ for col in ["category", "store_id", "day_of_week"]:
     df = df.merge(stats, on=col, how="left")
 ```
 
-**Target encoding** - categories को smoothed target means से replace करें (leakage रोकने के लिए fold-based encoding use करें)।
+**लक्षित एनकोदिङ** - कटेगोरिएस को समूtheद लक्षित मेअनस से रेपलके करें (लेअकगे रोकने के लिए फ़ोलद-बसेद एनकोदिङ इस्तेमाल करें)।
 
-**Lag features** - time series के लिए, पिछले values सोने जैसे हैं:
+**लग फ़ीचर** - समय सेरिएस के लिए, पिछले वलुएस सोने जैसे हैं:
 ```python
 for lag in [1, 7, 14, 28]:
     df[f"sales_lag_{lag}"] = df.groupby("store_id")["sales"].shift(lag)
 ```
 
-## ✅ Cross-Validation - अपने Local Score पर भरोसा करें
+## ✅ करोस-वलिदशन - अपने स्थानीय स्कोर पर भरोसा करें
 
-आपका local CV score public leaderboard से ज़्यादा मायने रखता है। एक robust validation strategy:
+आपका स्थानीय CV स्कोर पुबलिक लेअदेरबोअरद से ज़्यादा मायने रखता है। एक रोबुसट वलिदशन रणनीति:
 
 ```python
 from sklearn.model_selection import StratifiedKFold
@@ -100,17 +100,17 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
 print(f"OOF AUC: {roc_auc_score(y, oof_predictions):.5f}")
 ```
 
-**Golden rule**: अगर local CV और public LB disagree करें, तो CV पर भरोसा करें। Public leaderboard test data का सिर्फ एक हिस्सा use करता है - इस पर overfit होना एक जाल है।
+**गोलदेन रुले**: अगर स्थानीय CV और पुबलिक LB दिसगरी करें, तो CV पर भरोसा करें। पुबलिक लेअदेरबोअरद टेस्ट डेटा का सिर्फ एक हिस्सा उपयोग करता है - इस पर ओवेरफ़िट होना एक जाल है।
 
-<ThinkAboutIt>आप public leaderboard पर 15वें हैं लेकिन local CV बता रहा है कि model overfit है। Final submission के लिए best LB score submit करेंगे या best CV score? क्यों?</ThinkAboutIt>
+<ThinkAboutIt>आप पुबलिक लेअदेरबोअरद पर 15वें हैं लेकिन स्थानीय CV बता रहा है कि मॉडल ओवेरफ़िट है। फ़िनल सुबमिसिओन के लिए श्रेष्ठ LB स्कोर सुबमिट करेंगे या श्रेष्ठ CV स्कोर? क्यों?</ThinkAboutIt>
 
-## 🎭 Ensemble Methods - आखिरी Push
+## 🎭 एनसेमबले मेथोदस - आखिरी पुश
 
-लगभग हर winning solution ensembles use करती है। तीन key techniques:
+लगभग हर विननिङ सोलुशन एनसेमबलेस उपयोग करती है। तीन की तकनीकें:
 
-**Bagging** - same model को अलग-अलग data subsets पर train करें, predictions average करें। Variance कम करता है।
+**बगगिङ** - समान मॉडल को अलग-अलग डेटा सुबसेटस पर ट्रेन करें, भविष्यवाणियाँ औसत करें। वरिअनके कम करता है।
 
-**Stacking** - diverse base models के out-of-fold predictions पर एक meta-model train करें:
+**सटकिङ** - दिवेरसे बेस मॉडल के ओउट-ओफ़-फ़ोलद भविष्यवाणियाँ पर एक मेट-मोदेल ट्रेन करें:
 ```python
 # Level 1: diverse base models OOF predictions बनाते हैं
 base_preds = np.column_stack([lgbm_oof, xgb_oof, catboost_oof, nn_oof])
@@ -121,48 +121,48 @@ meta = LogisticRegression()
 meta.fit(base_preds, y_train)
 ```
 
-**Blending** - model predictions का weighted average। Stacking से simple लेकिन effective:
+**बलेनदिङ** - मॉडल भविष्यवाणियाँ का भारित औसत। सटकिङ से सरल लेकिन प्रभावी:
 ```python
 final = 0.4 * lgbm_pred + 0.35 * xgb_pred + 0.25 * catboost_pred
 ```
 
-<Quiz question="Kaggle competitions में ensemble methods लगभग हमेशा single models से बेहतर क्यों perform करते हैं?" options="वे ज़्यादा training data use करते हैं|वे deeper models use करके bias कम करते हैं|वे diverse models combine करके variance कम करते हैं जो अलग-अलग errors करते हैं|वे train करने में तेज़ होते हैं" answer="2" explanation="Ensembles इसलिए काम करते हैं क्योंकि diverse models uncorrelated errors करते हैं। Average करने पर individual गलतियाँ cancel हो जाती हैं और सही signals एक-दूसरे को reinforce करते हैं - बिना bias बढ़ाए overall variance कम होता है।" />
+<Quiz question="Kaggle प्रतियोगिताएँ में एनसेमबले मेथोदस लगभग हमेशा एकल मॉडल से बेहतर क्यों पेरफ़ोरम करते हैं?" options="वे ज़्यादा ट्रेनिंग डेटा उपयोग करते हैं|वे दीपेर मॉडल उपयोग करके पूर्वाग्रह कम करते हैं|वे दिवेरसे मॉडल जोड़ते करके वरिअनके कम करते हैं जो अलग-अलग एररोरस करते हैं|वे ट्रेन करने में तेज़ होते हैं" answer="2" explanation="एनसेमबलेस इसलिए काम करते हैं क्योंकि दिवेरसे मॉडल उनकोररेलटेद एररोरस करते हैं। अवेरगे करने पर इनदिविदुअल गलतियाँ कनकेल हो जाती हैं और सही सिग्नल एक-दूसरे को रेइनफ़ोरके करते हैं - बिना पूर्वाग्रह बढ़ाए कुल वरिअनके कम होता है।" />
 
-## 📓 बेहतरीन Kaggle Notebooks लिखना
+## 📓 बेहतरीन Kaggle नोटेबूकस लिखना
 
-Public notebooks आपकी reputation बनाते हैं। Medal-worthy notebook में होना चाहिए:
+पुबलिक नोटेबूकस आपकी रेपुटशन बनाते हैं। मेदल-वोरथय नोटेबूक में होना चाहिए:
 
-1. **साफ कहानी** - अपनी reasoning explain करें, सिर्फ code नहीं
-2. **Reproducibility** - random seeds set करें, library versions document करें
-3. **Visualisations** - insights दिखाने वाले plots, सजावट नहीं
-4. **ईमानदार results** - जो काम नहीं किया उसे भी share करें
+1. **साफ कहानी** - अपनी तर्क एक्सपलैन करें, सिर्फ कोड नहीं
+2. **रेपरोदुकिबिलिटय** - रनदोम सीदस सेट करें, लिबररय वेरसिओनस दोकुमेनट करें
+3. **विसुअलिसशनस** - इनसिघटस दिखाने वाले पलोटस, सजावट नहीं
+4. **ईमानदार नतीजे** - जो काम नहीं किया उसे भी साझा करें
 
-<Quiz question="Kaggle Contributor से Expert rank तक पहुँचने का सबसे effective तरीका क्या है?" options="एक featured competition में solo gold medal जीतना|Multiple competitions और notebooks में consistently bronze और silver medals कमाना|Result की परवाह किए बिना ज़्यादा से ज़्यादा competitions में submit करना|Top-scoring public notebooks fork करना" answer="1" explanation="Competitions में consistent performance medals accumulate करती है। आपको competition medals और notebook/discussion medals दोनों चाहिए। एक lucky result से ज़्यादा contribution की breadth मायने रखती है।" />
+<Quiz question="Kaggle कोनटरिबुटोर से एक्सपेरट रनक तक पहुँचने का सबसे प्रभावी तरीका क्या है?" options="एक फ़ेअटुरेद प्रतियोगिता में सोलो गोलद मेदल जीतना|मुलटिपले प्रतियोगिताएँ और नोटेबूकस में कोनसिसटेनटलय बरोनज़े और सिलवेर मेदलस कमाना|नतीजा की परवाह किए बिना ज़्यादा से ज़्यादा प्रतियोगिताएँ में सुबमिट करना|टोप-सकोरिङ पुबलिक नोटेबूकस फ़ोरक करना" answer="1" explanation="कोमपेटिशनस में कोनसिसटेनट प्रदर्शन मेदलस अककुमुलटे करती है। आपको प्रतियोगिता मेदलस और नोटेबूक/दिसकुसिओन मेदलस दोनों चाहिए। एक लुकय रेसुलट से ज़्यादा योगदान की चौड़ाई मायने रखती है।" />
 
-## 📈 Kaggle Ranks और Progression
+## 📈 Kaggle रनकस और परोगरेसिओन
 
-| Rank | ज़रूरत | Typical Timeline |
+| रनक | ज़रूरत | टयपिकल टिमेलिने |
 |------|--------|-----------------|
-| **Novice** | Account बनाएँ | पहला दिन |
-| **Contributor** | Profile पूरा करें, notebook चलाएँ | पहला हफ्ता |
-| **Expert** | 2 bronze medals (competitions) | 3–6 महीने |
-| **Master** | 1 gold + 2 silver medals | 1–2 साल |
-| **Grandmaster** | 5 gold medals (1 solo) | 3–5+ साल |
+| **नोविके** | अककोउनट बनाएँ | पहला दिन |
+| **कोनटरिबुटोर** | परोफ़ाइल पूरा करें, नोटेबूक चलाएँ | पहला हफ्ता |
+| **एक्सपेरट** | 2 बरोनज़े मेदलस (प्रतियोगिताएँ) | 3-6 महीने |
+| **मास्टर** | 1 गोलद + 2 सिलवेर मेदलस | 1-2 साल |
+| **गरनदमसटेर** | 5 गोलद मेदलस (1 सोलो) | 3-5+ साल |
 
-<ThinkAboutIt>Rankings के अलावा, ML roles के लिए apply करते समय अपने Kaggle profile को portfolio piece के रूप में कैसे use करेंगे? Hiring manager आपकी competition history में क्या देखेगा?</ThinkAboutIt>
+<ThinkAboutIt>रनकिङस के अलावा, ML भूमिकाएँ के लिए अपपलय करते समय अपने Kaggle प्रोफ़ाइल को पोर्टफ़ोलियो पिएके के रूप में कैसे इस्तेमाल करेंगे? हिरिङ मैनेजर आपकी प्रतियोगिता इतिहास में क्या देखेगा?</ThinkAboutIt>
 
 ## 🎯 मुख्य बातें
 
-- पहले EDA, फिर modelling - हमेशा data leakage check करें
-- Feature engineering, hyperparameter tuning से ज़्यादा lift देती है
-- Public leaderboard पर नहीं, अपने local CV पर भरोसा करें
-- Final push के लिए diverse models ensemble करें
-- अपना काम public notebooks में document करें - यही आपका portfolio है
+- पहले EDA, फिर मॉडलिंग - हमेशा डेटा लेअकगे जाँच करें
+- फ़ीचर इंजीनियरिंग, हयपेरपरमेटेर टुनिङ से ज़्यादा लिफ़ट देती है
+- पुबलिक लेअदेरबोअरद पर नहीं, अपने स्थानीय CV पर भरोसा करें
+- फ़िनल पुश के लिए दिवेरसे मॉडल एनसेमबले करें
+- अपना काम पुबलिक नोटेबूकस में दोकुमेनट करें - यही आपका पोर्टफ़ोलियो है
 
 ---
 
 ## 📚 आगे पढ़ें
 
-- [Kaggle Book by Konrad Banachewicz & Luca Massaron](https://www.kaggle.com/discussions/general/320744) - Grandmasters की strategies को actionable advice में distill किया गया
-- [How to Win a Data Science Competition (Coursera)](https://www.coursera.org/learn/competitive-data-science) - NRU HSE का top-down Kaggle strategy course
-- [Papers With Code - Benchmarks](https://paperswithcode.com/sota) - सभी ML tasks के state-of-the-art results
+- [Kaggle बूक by कोनरद बनचेविकज़ & लुक मसरोन](https://www.kaggle.com/discussions/general/320744) - गरनदमसटेरस की रणनीतियाँ को लागू करने योग्य अदविके में दिसटिलल किया गया
+- [कैसे to विन a डेटा विज्ञान प्रतियोगिता (Coursera)](https://www.coursera.org/learn/competitive-data-science) - NRU HSE का top-down Kaggle रणनीति कोर्स
+- [पपेरस के साथ कोड - बेनचमरकस](https://paperswithcode.com/sota) - सभी ML टसकस के सटटे-ओफ़-the-अरट नतीजे

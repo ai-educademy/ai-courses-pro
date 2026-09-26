@@ -1,6 +1,6 @@
 ---
-title: "Video Streaming Platform Design करें - YouTube/Netflix Architecture"
-description: "एक scalable video streaming platform design करें जिसमें upload pipelines, adaptive bitrate transcoding, CDN distribution, और live streaming architecture शामिल है।"
+title: "विदेओ स्ट्रीमिंग प्लैटफ़ॉर्म डिज़ाइन करें - YouTube/Netflix आर्किटेक्चर"
+description: "एक सकलबले विदेओ स्ट्रीमिंग प्लैटफ़ॉर्म डिज़ाइन करें जिसमें उपलोअद पाइपलाइन, अदपटिवे बिटरटे टरनसकोदिङ, CDN दिसटरिबुशन, और लाइव स्ट्रीमिंग आर्किटेक्चर शामिल है।"
 order: 8
 difficulty: "advanced"
 duration: 25
@@ -8,25 +8,25 @@ icon: "🎬"
 published: true
 ---
 
-# Video Streaming Platform Design करें - YouTube/Netflix Architecture
+# विदेओ स्ट्रीमिंग प्लैटफ़ॉर्म डिज़ाइन करें - YouTube/Netflix आर्किटेक्चर
 
-Video streaming पूरे global internet traffic का 65% से ज़्यादा हिस्सा है। इस system को design करने में file processing pipelines, CDN architecture, और adaptive streaming जैसे concepts आते हैं - जो सिर्फ video तक सीमित नहीं हैं।
+विदेओ स्ट्रीमिंग पूरे गलोबल इनटेरनेट ट्रैफ़िक का 65% से ज़्यादा हिस्सा है। इस सयसटेम को डिज़ाइन करने में फ़ाइल प्रोसेसिंग पाइपलाइन, CDN आर्किटेक्चर, और अदपटिवे स्ट्रीमिंग जैसे कोनकेपटस आते हैं - जो सिर्फ विदेओ तक सीमित नहीं हैं।
 
-## Step 1 - Requirements इकट्ठा करना
+## चरण 1 - ज़रूरतें इकट्ठा करना
 
-### Functional Requirements
-- Videos upload करना (प्रति file 1 GB तक)
-- Network conditions के हिसाब से adaptive quality में videos stream करना
-- Title, description, और tags से videos search करना
-- View counts और engagement metrics track करना
+### फ़ुनकशनल ज़रूरतें
+- विदेओस उपलोअद करना (प्रति फ़ाइल 1 GB तक)
+- नेटवर्क कोनदिशनस के हिसाब से अदपटिवे गुणवत्ता में विदेओस सटरेअम करना
+- शीर्षक, description, और टगस से विदेओस सर्च करना
+- विएव कोउनटस और एङगेमेनट मेट्रिक्स रिकॉर्ड करना
 
-### Non-Functional Requirements
-- **Availability** - streaming के लिए 99.99% uptime
-- **Low latency** - video playback 2 seconds के अंदर शुरू हो
-- **Global reach** - सभी continents के users को efficiently serve करना
-- **Cost-efficient** - storage और bandwidth optimise करना (दो सबसे बड़े costs)
+### नोन-फ़ुनकशनल ज़रूरतें
+- **अवैलबिलिटय** - स्ट्रीमिंग के लिए 99.99% उपटिमे
+- **कम लेटेंसी** - विदेओ पलयबक 2 सेकंड के अंदर शुरू हो
+- **गलोबल रेअच** - सभी कोनटिनेनटस के यूज़र को एफ़फ़िकिएनटलय सर्व करना
+- **कोसट-एफ़फ़िकिएनट** - स्टोरेज और बैंडविड्थ ऑप्टिमाइज़ करना (दो सबसे बड़े कोसटस)
 
-## Step 2 - High-Level Architecture
+## चरण 2 - हिघ-लेवेल आर्किटेक्चर
 
 ```
 Upload Flow:
@@ -43,38 +43,38 @@ Streaming Flow:
 Client → CDN Edge → (cache miss) → CDN Origin → Object Storage
 ```
 
-<Illustration src="/images/lessons/design-video-streaming.svg" alt="Video streaming architecture जिसमें upload pipeline, transcoding, object storage, CDN distribution, और clients को streaming flow दिखाया गया है" caption="Upload और streaming flows पूरी तरह अलग हैं - uploads async और write-heavy होते हैं जबकि streaming read-heavy और latency-sensitive होती है" />
+<Illustration src="/images/lessons/design-video-streaming.svg" alt="विदेओ स्ट्रीमिंग आर्किटेक्चर जिसमें उपलोअद पाइपलाइन, टरनसकोदिङ, ओबजेकट स्टोरेज, CDN दिसटरिबुशन, और कलिएनटस को स्ट्रीमिंग फ़लोव दिखाया गया है" caption="उपलोअद और स्ट्रीमिंग फ़लोवस पूरी तरह अलग हैं - उपलोअदस असयनक और वरिटे-हेअवय होते हैं जबकि स्ट्रीमिंग रेअद-हेअवय और लटेनकय-सेनसिटिवे होती है" />
 
-## Step 3 - Video Upload Pipeline
+## चरण 3 - विदेओ उपलोअद पाइपलाइन
 
-### Step-by-Step Processing
-1. **Upload** - client raw video को object storage (जैसे S3) में pre-signed URLs के ज़रिए upload करता है, बड़ी files के लिए resumable uploads के साथ
-2. **Transcoding** - source video को multiple resolutions (1080p, 720p, 480p, 360p) और codecs (H.264, VP9, AV1) में convert करना
-3. **Adaptive Bitrate Packaging** - हर quality level को छोटे segments (2-10 seconds) में split करना HLS/DASH streaming के लिए
-4. **Thumbnail Generation** - preview thumbnails के लिए regular intervals पर frames extract करना
-5. **Metadata Update** - सारी processing पूरी होने पर database में video को "ready" mark करना
+### सटेप-बय-सटेप परोकेसिङ
+1. **उपलोअद** - क्लाइंट रव विदेओ को ओबजेकट स्टोरेज (जैसे S3) में परे-सिगनेद उरलस के ज़रिए उपलोअद करता है, बड़ी फ़ाइलस के लिए रेसुमबले उपलोअदस के साथ
+2. **टरनसकोदिङ** - सोउरके विदेओ को कई रेसोलुशनस (1080p, 720p, 480p, 360p) और कोदेकस (H.264, VP9, AV1) में कोनवेरट करना
+3. **अदपटिवे बिटरटे पकगिङ** - हर गुणवत्ता स्तर को छोटे सेगमेनटस (2-10 सेकंड) में सपलिट करना HLS/DASH स्ट्रीमिंग के लिए
+4. **थुमबनैल गेनेरशन** - परेविएव थुमबनैलस के लिए रेगुलर इनटेरवलस पर फ़रमेस एक्सटरकट करना
+5. **मेटदट उपदटे** - सारी प्रोसेसिंग पूरी होने पर डेटाबेस में विदेओ को "रेअदय" मरक करना
 
-### Transcoding at Scale
-एक 10-minute 4K video को एक machine पर transcode करने में 30+ minutes लग सकते हैं। हज़ारों concurrent uploads handle करने के लिए:
-- Videos को chunks में split करें और DAG-based workflow (जैसे AWS Step Functions) से parallel में transcode करें
-- Spot/preemptible instances use करके compute costs 60-80% तक कम करें
+### टरनसकोदिङ बड़े पैमाने पर
+एक 10-मिनुटे 4K विदेओ को एक मचिने पर टरनसकोदे करने में 30+ मिनट लग सकते हैं। हज़ारों कोनकुररेनट उपलोअदस संभाल करने के लिए:
+- विदेओस को चुनकस में सपलिट करें और दग-बसेद वोरk़लोव (जैसे AWS चरण फ़ुनकशनस) से परललेल में टरनसकोदे करें
+- सपोट/परीमपटिबले इनसटनकेस उपयोग करके कम्प्यूट कोसटस 60-80% तक कम करें
 
-<Quiz question="Video transcoding upload के दौरान नहीं बल्कि asynchronously क्यों की जाती है?" options="User का upload time कम करने के लिए|Transcoding CPU-intensive होती है और upload service को block कर देगी, जिससे availability खराब होगी|Storage space बचाने के लिए|क्योंकि browsers raw video formats नहीं चला सकते" answer="1" explanation="एक video को multiple quality levels में transcode करना बहुत CPU-intensive है (minutes से लेकर hours)। इसे synchronously करने से upload service block हो जाएगी, user experience खराब होगा, और upload service को बहुत ज़्यादा compute resources चाहिए होंगे।" />
+<Quiz question="विदेओ टरनसकोदिङ उपलोअद के दौरान नहीं बल्कि असयनचरोनोउसलय क्यों की जाती है?" options="यूज़र का उपलोअद समय कम करने के लिए|टरनसकोदिङ कपु-गहन होती है और उपलोअद सर्विस को ब्लॉक कर देगी, जिससे उपलब्धता खराब होगी|सटोरगे स्पेस बचाने के लिए|क्योंकि बरोवसेरस रव विदेओ फ़ॉर्मैट नहीं चला सकते" answer="1" explanation="एक विदेओ को कई गुणवत्ता लेवेलस में टरनसकोदे करना बहुत कपु-गहन है (मिनट से लेकर घंटे)। इसे सयनचरोनोउसलय करने से उपलोअद सर्विस ब्लॉक हो जाएगी, यूज़र अनुभव खराब होगा, और उपलोअद सर्विस को बहुत ज़्यादा कम्प्यूट रेसोउरकेस चाहिए होंगे।" />
 
-## Step 4 - Streaming Protocols और CDN
+## चरण 4 - स्ट्रीमिंग परोटोकोलस और CDN
 
-### Adaptive Bitrate Streaming
-Player viewer की network speed के हिसाब से automatically quality switch करता है:
+### अदपटिवे बिटरटे स्ट्रीमिंग
+पलयेर विएवेर की नेटवर्क सपीद के हिसाब से औटोमटिकललय गुणवत्ता सविटच करता है:
 
-| Protocol | इस्तेमाल करने वाले | Segment Format | Manifest |
+| परोटोकोल | इस्तेमाल करने वाले | सेगमेनट फ़ोरमट | मनिफ़ेसट |
 |----------|-------------------|----------------|----------|
-| HLS | Apple, ज़्यादातर browsers | .ts या .fmp4 | .m3u8 playlist |
-| DASH | YouTube, Netflix | .mp4 segments | .mpd manifest |
+| HLS | अपपले, ज़्यादातर बरोवसेरस | .ts या .फ़मप4 | .m3u8 प्लेलिस्ट |
+| DASH | YouTube, Netflix | .mp4 सेगमेनटस | .मपद मनिफ़ेसट |
 
-Client एक manifest file download करता है जिसमें सभी available quality levels listed होते हैं, फिर एक-एक segment request करता है, और bandwidth बदलने पर seamlessly quality switch करता है।
+कलिएनट एक मनिफ़ेसट फ़ाइल दोवनलोअद करता है जिसमें सभी अवैलबले गुणवत्ता लेवेलस लिसटेद होते हैं, फिर एक-एक सेगमेनट रिक्वेस्ट करता है, और बैंडविड्थ बदलने पर सेअमलेसलय गुणवत्ता सविटच करता है।
 
-### CDN Architecture
-Streaming performance के लिए CDN सबसे critical component है:
+### CDN आर्किटेक्चर
+स्ट्रीमिंग प्रदर्शन के लिए CDN सबसे करिटिकल कोमपोनेनट है:
 
 ```
 User in London → London Edge PoP (cache hit: 95%)
@@ -84,54 +84,54 @@ User in London → London Edge PoP (cache hit: 95%)
               Origin Storage (S3)
 ```
 
-**Key insight:** popular videos users के सबसे नज़दीकी edge locations पर cache होते हैं। Long-tail content सिर्फ regional nodes पर cache हो सकता है, और rare content के लिए origin fetch होता है।
+**मुख्य बात इनसिघट:** लोकप्रिय विदेओस यूज़र के सबसे नज़दीकी बढ़त लोकेशन पर कैश होते हैं। लोङ-टैल कंटेंट सिर्फ रेगिओनल नोड पर कैश हो सकता है, और ररे कंटेंट के लिए ओरिगिन फ़ेटच होता है।
 
-<FunFact>Netflix हर हफ़्ते 700 million+ hours video serve करता है। उनका Open Connect CDN ISP data centres के अंदर custom hardware appliances रखता है, जो popular content को last mile पर cache करके internet backbone traffic को 90% से ज़्यादा कम कर देता है।</FunFact>
+<FunFact>Netflix हर हफ़्ते 700 मिलियन+ घंटे विदेओ सर्व करता है। उनका ओपेन कोननेकट CDN ISP डेटा केनटरेस के अंदर कुसटोम हरदवरे अपपलिअनकेस रखता है, जो लोकप्रिय कंटेंट को लसट मिले पर कैश करके इनटेरनेट बकबोने ट्रैफ़िक को 90% से ज़्यादा कम कर देता है।</FunFact>
 
-## Step 5 - Supporting Services
+## चरण 5 - सुपपोरटिङ सेरविकेस
 
-### Video Metadata Service
-Title, description, tags, upload date, view counts, और processing status store करता है। Structured queries और search indexing के लिए relational database (PostgreSQL) use करें।
+### विदेओ मेटदट सर्विस
+शीर्षक, description, टगस, उपलोअद दटे, विएव कोउनटस, और प्रोसेसिंग सटटुस सटोरे करता है। सटरुकटुरेद क्वेरिएस और सर्च इनदेक्सिङ के लिए रेलशनल डेटाबेस (PostgreSQL) इस्तेमाल करें।
 
-### View Counting at Scale
-Naive approach (हर view पर increment) से write hotspot बनता है। बेहतर तरीका:
-- View events को एक stream (Kafka) में batch करें
-- Counts को periodically aggregate करें (हर 30 seconds)
-- Real-time display के लिए approximate counting और analytics के लिए exact counts use करें
+### विएव कोउनटिङ बड़े पैमाने पर
+नैवे तरीका (हर विएव पर इनकरेमेनट) से राइट होटसपोट बनता है। बेहतर तरीका:
+- विएव इवेंट को एक सटरेअम (Kafka) में बैच करें
+- कोउनटस को पेरिओदिकललय अगगरेगटे करें (हर 30 सेकंड)
+- रेअल-टिमे दिसपलय के लिए अपपरोक्सिमटे कोउनटिङ और एनालिटिक्स के लिए एक्सकट कोउनटस इस्तेमाल करें
 
-<Quiz question="एक video viral हो जाता है और प्रति minute 1 million views आते हैं। हर view पर database counter increment करने में सबसे बड़ी problem क्या है?" options="Database की storage खत्म हो जाती है|एक single row पर write contention bottleneck बनाती है और performance खराब करती है|Counter overflow हो जाता है|Read queries slow हो जाती हैं" answer="1" explanation="एक single row पर millions concurrent writes से database में extreme lock contention होता है। इसीलिए view counts को typically in-memory या stream में buffer किया जाता है, फिर periodically batch-aggregate करके database में डाला जाता है।" />
+<Quiz question="एक विदेओ वायरल हो जाता है और प्रति मिनुटे 1 मिलियन व्यू आते हैं। हर विएव पर डेटाबेस कोउनटेर इनकरेमेनट करने में सबसे बड़ी समस्या क्या है?" options="दटबसे की स्टोरेज खत्म हो जाती है|एक एकल रोव पर राइट कोनटेनशन बोटटलेनेक बनाती है और प्रदर्शन खराब करती है|कोउनटेर ओवेरफ़लोव हो जाता है|रेअद क्वेरिएस धीमे हो जाती हैं" answer="1" explanation="एक एकल रोव पर मिलियन कोनकुररेनट राइट से डेटाबेस में एक्सटरेमे लोक कोनटेनशन होता है। इसीलिए विएव कोउनटस को आमतौर पर इन-मेमोरय या सटरेअम में बुफ़फ़ेर किया जाता है, फिर पेरिओदिकललय बटच-अगगरेगटे करके डेटाबेस में डाला जाता है।" />
 
-### Live Streaming Architecture
-Live streaming on-demand से कई तरह से अलग है:
-- **No pre-transcoding** - video को real-time में transcode करना होता है
-- **Ultra-low latency** - viewers 5-second से कम delay expect करते हैं
-- **Ingestion protocol** - streamers RTMP से push करते हैं; viewers HLS/DASH low-latency extensions से receive करते हैं
+### लाइव स्ट्रीमिंग आर्किटेक्चर
+लाइव स्ट्रीमिंग ओन-देमनद से कई तरह से अलग है:
+- **No परे-टरनसकोदिङ** - विदेओ को रीयल-टाइम में टरनसकोदे करना होता है
+- **उलटर-लोव लेटेंसी** - विएवेरस 5-सेकोनद से कम देलय उम्मीद करते हैं
+- **इङेसशन परोटोकोल** - सटरेअमेरस RTMP से पुश करते हैं; विएवेरस HLS/DASH कम-लेटेंसी एक्सटेनसिओनस से रेकेइवे करते हैं
 
-## Step 6 - Cost Breakdown और Optimisations
+## चरण 6 - लागत बरेअकदोवन और ओपटिमिसशनस
 
-Video platforms चलाना **बहुत महंगा** होता है। तीन सबसे बड़े costs:
+विदेओ पलटफ़ोरमस चलाना **बहुत महंगा** होता है। तीन सबसे बड़े कोसटस:
 
-| Cost Centre | अनुमान (10M daily users) | Optimisation |
+| लागत केनटरे | अनुमान (10M दैनिक यूज़र) | ओपटिमिसशन |
 |------------|--------------------------|--------------|
-| Storage | ~$200K/month | Tiered storage (hot/warm/cold), failed uploads delete करें |
-| CDN Bandwidth | ~$500K/month | Edge caching, modern codecs (AV1) से compress करें |
-| Transcoding Compute | ~$100K/month | Spot instances, कम देखे जाने वाले quality levels skip करें |
+| सटोरगे | ~$200K/महीने | टिएरेद स्टोरेज (होट/वरम/कोल्ड), फ़ैलेद उपलोअदस डिलीट करें |
+| CDN बनदविदथ | ~$500K/महीने | एदगे कचिङ, आधुनिक कोदेकस (AV1) से कोमपरेस करें |
+| टरनसकोदिङ कम्प्यूट | ~$100K/महीने | सपोट इनसटनकेस, कम देखे जाने वाले गुणवत्ता लेवेलस सकिप करें |
 
-<ThinkAboutIt>Netflix content delivery पर सालाना billions खर्च करता है। अगर आप उनका system scratch से design कर रहे होते, तो अपना खुद का CDN बनाते (जैसे Netflix Open Connect) या commercial CDN (जैसे CloudFront) use करते? किस scale पर अपना CDN बनाना cost-effective हो जाता है?</ThinkAboutIt>
+<ThinkAboutIt>Netflix कंटेंट डिलीवरी पर सालाना बिललिओनस खर्च करता है। अगर आप उनका सयसटेम शुरुआत से डिज़ाइन कर रहे होते, तो अपना खुद का CDN बनाते (जैसे Netflix ओपेन कोननेकट) या कोममेरकिअल CDN (जैसे Cloudफ़रोनट) उपयोग करते? किस स्केल पर अपना CDN बनाना कोसट-एफ़फ़ेकटिवे हो जाता है?</ThinkAboutIt>
 
-### Content Protection (DRM)
-Premium content को Digital Rights Management चाहिए:
-- **Widevine** (Google) - Chrome, Android
-- **FairPlay** (Apple) - Safari, iOS
-- **PlayReady** (Microsoft) - Edge, Windows
+### कंटेंट परोटेकशन (DRM)
+परेमिउम कंटेंट को दिगिटल रिघटस मनगेमेनट चाहिए:
+- **विदेविने** (Google) - चरोमे, अनदरोइद
+- **फ़ैरपलय** (अपपले) - सफ़रि, इओस
+- **पलयरेअदय** (Microsoft) - एदगे, विनदोवस
 
-हर DRM system को अलग encryption और licence server integration चाहिए, जो काफ़ी complexity बढ़ा देता है।
+हर DRM सयसटेम को अलग एनकरयपशन और लिकेनके सर्वर इनटेगरशन चाहिए, जो काफ़ी जटिलता बढ़ा देता है।
 
-<ThinkAboutIt>YouTube पर 800 million+ videos हैं। अगर हर video को 5 quality levels में transcode किया जाए और हर level औसतन 500 MB हो, तो कुल कितनी storage चाहिए? आप cost-effective storage strategy कैसे design करेंगे?</ThinkAboutIt>
+<ThinkAboutIt>YouTube पर 800 मिलियन+ विदेओस हैं। अगर हर विदेओ को 5 गुणवत्ता लेवेलस में टरनसकोदे किया जाए और हर स्तर औसतन 500 MB हो, तो कुल कितनी स्टोरेज चाहिए? आप कोसट-एफ़फ़ेकटिवे स्टोरेज रणनीति कैसे डिज़ाइन करेंगे?</ThinkAboutIt>
 
 ---
 
 ## 📚 और पढ़ें
-- [YouTube System Design - System Design Interview Vol. 2, Ch. 14](https://bytebytego.com/) - Alex Xu की video platform architecture पर deep dive
-- [Netflix Tech Blog: Content Delivery](https://netflixtechblog.com/) - Netflix ने Open Connect कैसे बनाया और global traffic कैसे serve करता है
-- [HLS vs DASH Streaming](https://www.cloudflare.com/learning/video/what-is-http-live-streaming/) - adaptive bitrate protocols को समझें
+- [YouTube सयसटेम डिज़ाइन - सयसटेम डिज़ाइन इंटरव्यू वोल. 2, Ch. 14](https://bytebytego.com/) - अलेक्स Xu की विदेओ प्लैटफ़ॉर्म आर्किटेक्चर पर गहरी दिवे
+- [Netflix टेच बलोग: कंटेंट देलिवेरय](https://netflixtechblog.com/) - Netflix ने ओपेन कोननेकट कैसे बनाया और गलोबल ट्रैफ़िक कैसे सर्व करता है
+- [HLS vs DASH स्ट्रीमिंग](https://www.cloudflare.com/learning/video/what-is-http-live-streaming/) - अदपटिवे बिटरटे परोटोकोलस को समझें

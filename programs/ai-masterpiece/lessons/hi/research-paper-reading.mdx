@@ -1,6 +1,6 @@
 ---
-title: "Research Papers पढ़ना - AI Papers कैसे समझें और Implement करें"
-description: "AI research papers पढ़ने, समझने, और implement करने का practical framework - maths notation decode करने से लेकर algorithms को working code में बदलने तक।"
+title: "शोध पपेरस पढ़ना - AI पपेरस कैसे समझें और लागू करें"
+description: "AI शोध पपेरस पढ़ने, समझने, और लागू करने का व्यावहारिक ढाँचा - मथस नोटशन देकोदे करने से लेकर अलगोरिथमस को काम कर रहे कोड में बदलने तक।"
 order: 8
 difficulty: "advanced"
 duration: 20
@@ -8,88 +8,88 @@ icon: "📄"
 published: true
 ---
 
-# Research Papers पढ़ना - AI Papers कैसे समझें और Implement करें
+# शोध पपेरस पढ़ना - AI पपेरस कैसे समझें और लागू करें
 
-"मैं AI use करता हूँ" और "मैं AI build करता हूँ" के बीच का gap research papers पढ़ने से भरता है। हर breakthrough - transformers, diffusion models, RLHF - एक paper से शुरू हुआ। Papers पढ़ने वाले engineers trends follow नहीं करते; वे उन्हें **पहले से भाँप लेते हैं**।
+"मैं AI उपयोग करता हूँ" और "मैं AI बनाना करता हूँ" के बीच का गप शोध पपेरस पढ़ने से भरता है। हर बरेअकथरोउघ - transformers, दिफ़फ़ुसिओन मॉडल, RLHF - एक पेपर से शुरू हुआ। पपेरस पढ़ने वाले इंजीनियर टरेनदस फ़ॉलो नहीं करते; वे उन्हें **पहले से भाँप लेते हैं**।
 
-## 🤔 Papers क्यों पढ़ें?
+## 🤔 पपेरस क्यों पढ़ें?
 
-- **Updated रहें** - blog posts papers से महीनों पीछे होते हैं
-- **Fundamentals समझें** - tutorials simplify करते हैं; papers *क्यों* explain करते हैं
-- **बेहतर debug करें** - model fail हो तो paper edge cases reveal करता है
-- **Career leverage** - paper-literate engineers दुर्लभ और valued हैं
+- **उपदटेद रहें** - ब्लॉग पोसटस पपेरस से महीनों पीछे होते हैं
+- **बुनियादी बातें समझें** - ट्यूटोरियल सिमपलिफ़य करते हैं; पपेरस *क्यों* एक्सपलैन करते हैं
+- **बेहतर देबुग करें** - मॉडल फ़ेल हो तो पेपर बढ़त मामले उजागर करता है
+- **करियर लाभ** - पपेर-लिटेरटे इंजीनियर दुर्लभ और वलुएद हैं
 
-<Illustration src="/images/lessons/research-paper-reading.svg" alt="Three-pass paper reading approach - skim, understand, और critique stages" caption="Three-pass method एक dense 12-page paper को structured understanding में बदलता है।" />
+<Illustration src="/images/lessons/research-paper-reading.svg" alt="थरी-पस पेपर रेअदिङ तरीका - सकिम, उनदेरसटनद, और करिटिक्वे सटगेस" caption="थरी-पस विधि एक देनसे 12-पगे पेपर को संरचित समझ में बदलता है।" />
 
-## 📐 ML Paper की Anatomy
+## 📐 ML पपेर की अनटोमय
 
-हर ML paper एक predictable structure follow करता है। Blueprint जानने से reading तेज़ होती है:
+हर ML पेपर एक पूर्वानुमेय संरचना फ़ॉलो करता है। बलुएपरिनट जानने से रेअदिङ तेज़ होती है:
 
-| Section | उद्देश्य | कितना समय दें |
+| सेकशन | उद्देश्य | कितना समय दें |
 |---------|----------|--------------|
-| **Abstract** | पूरे contribution का 200-word summary | 2 मिनट |
-| **Introduction** | Problem motivation, existing solutions क्यों fail हैं | 5 मिनट |
-| **Related Work** | पहले क्या हुआ, यह paper कैसे अलग है | पहले pass में skim |
-| **Method** | Core contribution - architecture, algorithm, maths | आपके समय का 60% |
-| **Experiments** | Proof कि काम करता है - datasets, baselines, ablations | आपके समय का 20% |
-| **Conclusion** | Summary और future directions | 2 मिनट |
+| **अबसटरकट** | पूरे योगदान का 200-वोरद सुममरय | 2 मिनट |
+| **इनटरोदुकशन** | समस्या मोटिवशन, मौजूदा सोलुशनस क्यों फ़ेल हैं | 5 मिनट |
+| **रेलटेद काम** | पहले क्या हुआ, यह पेपर कैसे अलग है | पहले पस में सकिम |
+| **मेथोद** | कोरे योगदान - आर्किटेक्चर, अलगोरिथम, मथस | आपके समय का 60% |
+| **एक्सपेरिमेनटस** | परूफ़ कि काम करता है - डेटासेट, बसेलिनेस, अबलशनस | आपके समय का 20% |
+| **कोनकलुसिओन** | सुममरय और फ़ुटुरे दिरेकशनस | 2 मिनट |
 
-<FunFact>Original "Attention Is All You Need" paper (2017) को 130,000 से ज़्यादा बार cite किया गया है, जो इसे अब तक के सबसे influential computer science papers में से एक बनाता है। इसके title ने बाद के papers में अनगिनत parodies inspire कीं।</FunFact>
+<FunFact>ओरिगिनल "अटटेनशन Is अलल योउ नीद" पेपर (2017) को 130,000 से ज़्यादा बार किटे किया गया है, जो इसे अब तक के सबसे इनफ़लुएनटिअल कंप्यूटर विज्ञान पपेरस में से एक बनाता है। इसके title ने बाद के पपेरस में अनगिनत परोदिएस इनसपिरे कीं।</FunFact>
 
-## 📖 Three-Pass Approach
+## 📖 थरी-पस तरीका
 
-### Pass 1: Skim (15 मिनट)
+### पस 1: सकिम (15 मिनट)
 
-**Abstract**, **introduction**, **section headings**, **figures**, और **conclusion** पढ़ें। इस pass के बाद आप ये जवाब दे पाएँ:
+**अबसटरकट**, **इनटरोदुकशन**, **सेक्शन हेअदिङस**, **फ़िगुरेस**, और **कोनकलुसिओन** पढ़ें। इस पस के बाद आप ये जवाब दे पाएँ:
 
-- यह paper कौन सा problem solve करता है?
-- Key idea एक वाक्य में क्या है?
-- क्या यह paper मेरे काम से relevant है?
+- यह पेपर कौन सा समस्या हल करता है?
+- मुख्य बात इदेअ एक वाक्य में क्या है?
+- क्या यह पेपर मेरे काम से प्रासंगिक है?
 
-अगर तीसरे सवाल का जवाब 'नहीं' है, तो यहीं रुकें। हर paper deep read की deserve नहीं करता।
+अगर तीसरे सवाल का जवाब 'नहीं' है, तो यहीं रुकें। हर पेपर गहरी रेअद की देसेरवे नहीं करता।
 
-### Pass 2: Understand (1–2 घंटे)
+### पस 2: उनदेरसटनद (1-2 घंटे)
 
-पूरा paper पढ़ें, पहली बार dense proofs skip करें। Focus करें:
+पूरा पेपर पढ़ें, पहली बार देनसे परूफ़स सकिप करें। ध्यान करें:
 
-- **Figures और tables** - authors अपने best ideas visuals में distil करते हैं
-- **Method section** - input से output तक data flow trace करें
-- **Ablation studies** - ये reveal करती हैं कि कौन से components actually मायने रखते हैं
+- **फ़िगुरेस और टेबल** - औथोरस अपने श्रेष्ठ विचार विसुअलस में दिसटिल करते हैं
+- **मेथोद सेक्शन** - इनपुट से आउटपुट तक डेटा फ़लोव टरके करें
+- **अबलशन सटुदिएस** - ये उजागर करती हैं कि कौन से कोमपोनेनटस वास्तव में मायने रखते हैं
 
-जो sections समझ न आएँ उन्हें mark करें। आगे बढ़ें और experiments पढ़ने के बाद वापस आएँ - results अक्सर method clarify करते हैं।
+जो सेकशनस समझ न आएँ उन्हें मरक करें। आगे बढ़ें और प्रयोग पढ़ने के बाद वापस आएँ - नतीजे अक्सर विधि कलरिफ़य करते हैं।
 
-### Pass 3: Critique (1–2 घंटे)
+### पस 3: करिटिक्वे (1-2 घंटे)
 
-अब reviewer की तरह पढ़ें:
+अब रेविएवेर की तरह पढ़ें:
 
-- यह paper कौन सी assumptions बनाता है? क्या वे reasonable हैं?
-- Experiments में क्या missing है? कौन से baselines नहीं हैं?
-- यह approach कैसे fail होगा? Limitations क्या हैं?
-- क्या मैं दी गई जानकारी से results reproduce कर सकता हूँ?
+- यह पेपर कौन सी असुमपशनस बनाता है? क्या वे उचित हैं?
+- एक्सपेरिमेनटस में क्या मिसिङ है? कौन से बसेलिनेस नहीं हैं?
+- यह तरीका कैसे फ़ेल होगा? लिमिटशनस क्या हैं?
+- क्या मैं दी गई जानकारी से नतीजे रेबनाने कर सकता हूँ?
 
-<Quiz question="Paper पढ़ते समय Pass 2 में एक mathematical derivation समझ नहीं आती। सबसे अच्छा अगला कदम क्या है?" options="रुकें और हर equation समझने में घंटे लगाएँ|इसे पूरी तरह skip करें और कभी वापस न आएँ|Mark करें, experiments section तक continue करें, फिर ज़्यादा context के साथ वापस आएँ|Paper explain करने वाला blog post search करें" answer="2" explanation="Experiments section अक्सर intuition देता है कि maths क्या describe करता है। पहले results पढ़ने से context मिलता है जो derivation को दूसरी बार बहुत ज़्यादा approachable बना देता है।" />
+<Quiz question="पपेर पढ़ते समय पस 2 में एक मtheमटिकल देरिवशन समझ नहीं आती। सबसे अच्छा अगला कदम क्या है?" options="रुकें और हर एक्वशन समझने में घंटे लगाएँ|इसे पूरी तरह सकिप करें और कभी वापस न आएँ|मरक करें, प्रयोग सेक्शन तक कोनटिनुए करें, फिर ज़्यादा संदर्भ के साथ वापस आएँ|पपेर एक्सपलैन करने वाला ब्लॉग पोस्ट सर्च करें" answer="2" explanation="एक्सपेरिमेनटस सेक्शन अक्सर इनटुइशन देता है कि मथस क्या देसकरिबे करता है। पहले नतीजे पढ़ने से संदर्भ मिलता है जो देरिवशन को दूसरी बार बहुत ज़्यादा अपपरोअचबले बना देता है।" />
 
-## 📚 ज़रूरी Papers जो हर AI Engineer को पढ़ने चाहिए
+## 📚 ज़रूरी पपेरस जो हर AI इंजीनियर को पढ़ने चाहिए
 
-ये papers modern AI की foundation हैं - इन्हें पढ़ना non-negotiable है:
+ये पपेरस आधुनिक AI की फ़ोउनदशन हैं - इन्हें पढ़ना नोन-नेगोटिअबले है:
 
-**Architectures:**
-- *Attention Is All You Need* (Vaswani et al., 2017) - transformer
-- *Deep Residual Learning for Image Recognition* (He et al., 2015) - ResNet और skip connections
+**अरचिटेकटुरेस:**
+- *अटटेनशन Is अलल योउ नीद* (वसवनि et al., 2017) - transformer
+- *दीप रेसिदुअल लेअरनिङ के लिए इमगे रेकोगनिशन* (He et al., 2015) - ResNet और सकिप कनेक्शन
 
-**Language Models:**
-- *BERT: Pre-training of Deep Bidirectional Transformers* (Devlin et al., 2018) - bidirectional pre-training
-- *Language Models are Few-Shot Learners* (Brown et al., 2020) - GPT-3 और in-context learning
+**भाषा मॉडल:**
+- *BERT: परे-टरैनिङ of दीप बिदिरेकशनल Transformers* (देवलिन et al., 2018) - बिदिरेकशनल परे-टरैनिङ
+- *भाषा मॉडल अरे फ़ेव-शोट लेअरनेरस* (बरोवन et al., 2020) - GPT-3 और इन-कोनटेक्सट लेअरनिङ
 
-**Training Techniques:**
-- *Adam: A Method for Stochastic Optimisation* (Kingma & Ba, 2014) - default optimiser
-- *Dropout: A Simple Way to Prevent Neural Networks from Overfitting* (Srivastava et al., 2014)
+**ट्रेनिंग तकनीकें:**
+- *अदम: A मेथोद के लिए सटोचसटिक ओपटिमिसशन* (किङम & Ba, 2014) - देफ़ौलट ओपटिमिसेर
+- *दरोपोउट: A सिमपले वय to परेवेनट नेउरल नेटवोरकस from ओवेरफ़िटटिङ* (सरिवसटव et al., 2014)
 
-<ThinkAboutIt>अगर ऊपर की list से सिर्फ तीन papers पढ़ सकते, तो कौन से तीन चुनेंगे जो modern AI की सबसे broad understanding दें? उन तीन को क्यों?</ThinkAboutIt>
+<ThinkAboutIt>अगर ऊपर की लिस्ट से सिर्फ तीन पपेरस पढ़ सकते, तो कौन से तीन चुनेंगे जो आधुनिक AI की सबसे बरोअद समझ दें? उन तीन को क्यों?</ThinkAboutIt>
 
-## 🔢 Maths Notation पढ़ना
+## 🔢 मथस नोटशन पढ़ना
 
-Mathematical notation एक भाषा है। ML papers के लिए आपकी phrasebook:
+मtheमटिकल नोटशन एक भाषा है। ML पपेरस के लिए आपकी फरसेबूक:
 
 ```
 θ (theta)      - model parameters (weights)
@@ -102,11 +102,11 @@ argmax          - वो input जो function को maximise करे
 softmax(z_i)   - e^(z_i) / Σ e^(z_j) - logits को probabilities में बदलता है
 ```
 
-**Pro tip**: complex equation दिखे तो actual numbers substitute करें। अगर paper कहता है `L = -Σ y_i log(ŷ_i)`, तो `y = [1, 0]` और `ŷ = [0.9, 0.1]` put करें और हाथ से calculate करें। Abstract चीज़ तुरंत concrete बन जाती है।
+**Pro टिप**: कोमपलेक्स एक्वशन दिखे तो अकटुअल नंबर सुबसटिटुटे करें। अगर पेपर कहता है `L = -Σ y_i log(ŷ_i)`, तो `y = [1, 0]` और `ŷ = [0.9, 0.1]` पुट करें और हाथ से कलकुलटे करें। अबसटरकट चीज़ तुरंत कोनकरेटे बन जाती है।
 
-## 💻 Paper से Code तक
+## 💻 पपेर से कोड तक
 
-Understanding की ultimate test: implement करें। एक practical workflow:
+उनदेरसटनदिङ की उलटिमटे टेस्ट: लागू करें। एक व्यावहारिक वोरk़लोव:
 
 ```python
 # Step 1: Core mechanism को isolation में implement करें
@@ -135,38 +135,38 @@ class SelfAttention(nn.Module):
         return (attn @ v).transpose(1, 2).contiguous().view(B, T, C)
 ```
 
-**Paper से verify करें**: हर step पर tensor shapes check करें। अगर paper कहता है output `(batch, seq_len, d_model)` है, तो assert करें।
+**पपेर से वेरिफ़य करें**: हर चरण पर टेनसोर शपेस जाँच करें। अगर पेपर कहता है आउटपुट `(batch, seq_len, d_model)` है, तो असेरट करें।
 
-<Quiz question="Paper implementation सही है, इसे verify करने का सबसे अच्छा तरीका क्या है?" options="Check करें कि compile बिना errors हो|Identical inputs पर reference implementation से output tensors compare करें|Convergence तक train करें और final accuracy check करें|Code को visually पढ़ लें" answer="1" explanation="Trusted reference implementation (जैसे authors का official code या Hugging Face) से identical inputs पर numerical comparison उन subtle bugs पकड़ता है जो compilation और visual review miss कर देते हैं।" />
+<Quiz question="पपेर इमपलेमेनटशन सही है, इसे वेरिफ़य करने का सबसे अच्छा तरीका क्या है?" options="जाँच करें कि कोमपिले बिना एररोरस हो|इदेनटिकल इनपुटस पर रेफ़ेरेनके इमपलेमेनटशन से आउटपुट टेनसोरस कोमपरे करें|कोनवेरगेनके तक ट्रेन करें और अंतिम अककुरकय जाँच करें|कोड को विसुअललय पढ़ लें" answer="1" explanation="टरुसटेद रेफ़ेरेनके इमपलेमेनटशन (जैसे औथोरस का ओफ़फ़िकिअल कोड या Hugging Face) से इदेनटिकल इनपुटस पर नुमेरिकल कोमपरिसोन उन सुबटले बुगस पकड़ता है जो कोमपिलशन और विसुअल समीक्षा मिस कर देते हैं।" />
 
-## 🔍 Papers कहाँ खोजें
+## 🔍 पपेरस कहाँ खोजें
 
-| Source | किसके लिए Best |
+| सोउरके | किसके लिए श्रेष्ठ |
 |--------|---------------|
-| **arXiv** (arxiv.org) | Latest preprints, सबसे तेज़ access |
-| **Semantic Scholar** | Citation graphs, related work खोजना |
-| **Papers With Code** | Implementations और benchmarks से linked papers |
-| **Connected Papers** | Paper relationships का visual exploration |
-| **Twitter/X** | नए papers की real-time चर्चा |
+| **arXiv** (arxiv.ओरग) | नवीनतम परेपरिनटस, सबसे तेज़ एक्सेस |
+| **सेमनटिक सचोलर** | किटशन ग्राफ़, संबंधित काम खोजना |
+| **पपेरस के साथ कोड** | इमपलेमेनटशनस और बेनचमरकस से लिंक्ड पपेरस |
+| **कोननेकटेद पपेरस** | पपेर रेलशनशिपस का विसुअल एक्सपलोरशन |
+| **Twitter/X** | नए पपेरस की रीयल-टाइम चर्चा |
 
-<FunFact>arXiv को सभी fields में हर दिन 2,000 से ज़्यादा नई submissions मिलती हैं। सिर्फ cs.LG (Machine Learning) और cs.CL (Computation and Language) categories में ही रोज़ सैकड़ों papers आते हैं।</FunFact>
+<FunFact>arXiv को सभी क्षेत्रों में हर दिन 2,000 से ज़्यादा नई सुबमिसिओनस मिलती हैं। सिर्फ cs.LG (मशीन लर्निंग) और cs.CL (कोमपुटशन and भाषा) कटेगोरिएस में ही रोज़ सैकड़ों पपेरस आते हैं।</FunFact>
 
-<Quiz question="किसी paper के method की existing code implementation खोजने के लिए कौन सा resource सबसे useful है?" options="arXiv|Google Scholar|Papers With Code|Wikipedia" answer="2" explanation="Papers With Code research papers को सीधे उनकी GitHub implementations और benchmark results से link करता है, जिससे paper पढ़ने से code चलाने तक का रास्ता सबसे तेज़ बनता है।" />
+<Quiz question="किसी पेपर के विधि की मौजूदा कोड इमपलेमेनटशन खोजने के लिए कौन सा रेसोउरके सबसे उपयोगी है?" options="arXiv|Google सचोलर|पपेरस के साथ कोड|विकिपेदिअ" answer="2" explanation="पपेरस के साथ कोड शोध पपेरस को सीधे उनकी GitHub इमपलेमेनटशनस और बेनचमरक नतीजे से लिनक करता है, जिससे पेपर पढ़ने से कोड चलाने तक का रास्ता सबसे तेज़ बनता है।" />
 
-<ThinkAboutIt>Paper reading की आदत बनाएँ: हर हफ्ते एक paper, तीन वाक्यों में summary (problem, method, result)। 12 हफ्तों बाद आपने ज़्यादा papers पढ़ लिए होंगे जितने ज़्यादातर working ML engineers साल भर में पढ़ते हैं।</ThinkAboutIt>
+<ThinkAboutIt>पपेर रेअदिङ की आदत बनाएँ: हर हफ्ते एक पेपर, तीन वाक्यों में सुममरय (समस्या, विधि, रेसुलट)। 12 हफ्तों बाद आपने ज़्यादा पपेरस पढ़ लिए होंगे जितने ज़्यादातर काम कर रहे ML इंजीनियर साल भर में पढ़ते हैं।</ThinkAboutIt>
 
 ## 🎯 मुख्य बातें
 
-- Three-pass method use करें: skim, understand, critique
-- अपने reading time का 60% method section पर लगाएँ
-- Intuition बनाने के लिए equations में real numbers substitute करें
-- सच में समझने के लिए core mechanism implement करें
-- हर हफ्ते एक paper - compound होकर expertise बनती है
+- थरी-पस विधि इस्तेमाल करें: सकिम, उनदेरसटनद, करिटिक्वे
+- अपने रेअदिङ समय का 60% विधि सेक्शन पर लगाएँ
+- इनटुइशन बनाने के लिए एक्वशनस में वास्तविक नंबर सुबसटिटुटे करें
+- सच में समझने के लिए कोरे मेचनिसम लागू करें
+- हर हफ्ते एक पेपर - कोमपोउनद होकर विशेषज्ञता बनती है
 
 ---
 
 ## 📚 आगे पढ़ें
 
-- [How to Read a Paper by S. Keshav](http://ccr.sigcomm.org/online/files/p83-keshavA.pdf) - Original three-pass method paper, academia में widely cited
-- [Papers With Code](https://paperswithcode.com/) - Linked implementations और leaderboards के साथ papers browse करें
-- [The Illustrated Transformer by Jay Alammar](https://jalammar.github.io/illustrated-transformer/) - Transformer architecture का visual walkthrough
+- [कैसे to रेअद a पपेर by S. केशव](http://ccr.sigcomm.org/online/files/p83-keshavA.pdf) - ओरिगिनल थरी-पस विधि पेपर, अकदेमिअ में विदेलय किटेद
+- [पपेरस के साथ कोड](https://paperswithcode.com/) - लिनकेद इमपलेमेनटशनस और लेअदेरबोअरदस के साथ पपेरस बरोवसे करें
+- [the इललुसटरटेद ट्रांसफ़ॉर्मर by Jay Alammar](https://jalammar.github.io/illustrated-transformer/) - ट्रांसफ़ॉर्मर आर्किटेक्चर का विसुअल वलकथरोउघ

@@ -1,6 +1,6 @@
 ---
-title: "Hash Tables Deep Dive - तेज़ AI Lookups की असली ताकत"
-description: "Hashing, collision handling, और उन probabilistic structures को समझिए जो AI systems को तेज़ बनाते हैं।"
+title: "हश टबलेस दीप दिवे - तेज़ AI लूकुपस की असली ताकत"
+description: "हशिङ, कोललिसिओन हनदलिङ, और उन परोबबिलिसटिक सटरुकटुरेस को समझिए जो AI सिस्टम को तेज़ बनाते हैं।"
 order: 5
 difficulty: "intermediate"
 duration: 15
@@ -8,26 +8,26 @@ icon: "🗄️"
 published: true
 ---
 
-## Hashing क्यों ज़रूरी है
+## हशिङ क्यों ज़रूरी है
 
-जब एक recommendation engine को ये चेक करना हो कि आपने कोई फ़िल्म पहले देखी है या नहीं - लाखों फ़िल्मों के catalogue में - तो वो एक-एक करके list scan नहीं कर सकता। एक **hash table** ये सवाल O(1) average time में answer कर देता है।
+जब एक अनुशंसा इंजन को ये चेक करना हो कि आपने कोई फ़िल्म पहले देखी है या नहीं - लाखों फ़िल्मों के कैटलॉग में - तो वो एक-एक करके लिस्ट सकन नहीं कर सकता। एक **हैश टेबल** ये सवाल O(1) औसत समय में answer कर देता है।
 
-Hash tables production software में सबसे ज़्यादा इस्तेमाल होने वाला data structure है, और AI systems इन्हें feature lookups, caching, और deduplication के लिए काफ़ी use करते हैं।
+हश टेबल प्रोडक्शन सॉफ़्टवेयर में सबसे ज़्यादा इस्तेमाल होने वाला डेटा संरचना है, और AI सिस्टम इन्हें फ़ीचर लूकुपस, कचिङ, और देदुपलिकशन के लिए काफ़ी उपयोग करते हैं।
 
-<Illustration src="/images/lessons/hash-tables-deep-dive.svg" alt="A hash function mapping keys to bucket indices in an array, with one bucket showing a chain of colliding entries" caption="एक hash function keys को array indices में convert करता है; collisions को chaining या probing से handle किया जाता है।" />
+<Illustration src="/images/lessons/hash-tables-deep-dive.svg" alt="A हैश फ़ुनकशन मपपिङ की to बुकेट इंडेक्स in an ऐरे, के साथ ओने बुकेट शोविङ a चैन of कोललिदिङ एनटरिएस" caption="एक हैश फ़ुनकशन की को ऐरे इंडेक्स में कोनवेरट करता है; कोललिसिओनस को चैनिङ या परोबिङ से संभाल किया जाता है।" />
 
-## Hashing कैसे काम करता है
+## हशिङ कैसे काम करता है
 
-एक **hash function** कोई input लेता है (string, number, या object) और एक integer return करता है - यही **hash code** है। इस code को modulo के ज़रिए **bucket index** में map किया जाता है:
+एक **हैश फ़ुनकशन** कोई इनपुट लेता है (सटरिङ, नुमबेर, या ओबजेकट) और एक इनटेगेर लौटाएँ करता है - यही **हैश कोड** है। इस कोड को मोदुलो के ज़रिए **बुकेट इंडेक्स** में मैप किया जाता है:
 
 ```
 index = hashFunction(key) % numberOfBuckets
 ```
 
-एक अच्छे hash function की खासियत:
-- **Deterministic** - एक ही input हमेशा same output देगा।
-- **Uniform** - keys को buckets में बराबर distribute करे।
-- **Fast** - key size के हिसाब से O(1) में compute हो।
+एक अच्छे हैश फ़ुनकशन की खासियत:
+- **देटेरमिनिसटिक** - एक ही इनपुट हमेशा समान आउटपुट देगा।
+- **उनिफ़ोरम** - की को बुकेटस में बराबर दिसटरिबुटे करे।
+- **तेज़** - की आकार के हिसाब से O(1) में कम्प्यूट हो।
 
 ### उदाहरण
 
@@ -39,17 +39,17 @@ function simpleHash(key, size):
     return total % size
 ```
 
-ये जानबूझकर simple रखा गया है - production में MurmurHash3 या xxHash जैसे hash functions bit-mixing use करते हैं जो बहुत बेहतर distribution देते हैं।
+ये जानबूझकर सरल रखा गया है - प्रोडक्शन में मुरमुरहश3 या क्सक्सहश जैसे हैश फ़ुनकशनस बिट-मिक्सिङ उपयोग करते हैं जो बहुत बेहतर दिसटरिबुशन देते हैं।
 
-<Quiz question="अगर एक hash function कई अलग-अलग keys को एक ही bucket index पर map कर दे तो क्या होगा?" options="Hash table अपने आप resize हो जाएगी|एक collision होगा जिसे resolve करना पड़ेगा|Duplicate keys चुपचाप drop हो जाएँगी|Programme crash हो जाएगा" answer="1" explanation="जब दो keys एक ही bucket में आ जाती हैं, तो collision होता है। Hash table को इसे resolve करना होता है - आमतौर पर chaining या open addressing से।" />
+<Quiz question="अगर एक हैश फ़ुनकशन कई अलग-अलग की को एक ही बुकेट इंडेक्स पर मैप कर दे तो क्या होगा?" options="हश टेबल अपने आप रेसिज़े हो जाएगी|एक कोललिसिओन होगा जिसे रेसोलवे करना पड़ेगा|दुपलिकटे की चुपचाप दरोप हो जाएँगी|प्रोग्राम करश हो जाएगा" answer="1" explanation="जब दो की एक ही बुकेट में आ जाती हैं, तो कोललिसिओन होता है। हश टेबल को इसे रेसोलवे करना होता है - आमतौर पर चैनिङ या ओपेन हलिङ से।" />
 
-## Collision Handling
+## कोललिसिओन हनदलिङ
 
-Collisions अटल हैं (pigeonhole principle)। दो मुख्य strategies:
+कोललिसिओनस अटल हैं (पिगेओनहोले परिनकिपले)। दो मुख्य रणनीतियाँ:
 
-### Chaining
+### चैनिङ
 
-हर bucket में एक linked list (या छोटा array) होता है। Collide करने वाली keys को list में append कर दिया जाता है।
+हर बुकेट में एक लिंक्ड लिस्ट (या छोटा ऐरे) होता है। कोललिदे करने वाली की को लिस्ट में अपपेनद कर दिया जाता है।
 
 ```
 function insert(table, key, value):
@@ -61,58 +61,58 @@ function insert(table, key, value):
     table[idx].append((key, value))
 ```
 
-**फ़ायदे:** Simple है, moderate load पर अच्छा काम करता है।
-**नुकसान:** Pointer chasing की वजह से cache-unfriendly है।
+**फ़ायदे:** सिमपले है, मध्यम लोड पर अच्छा काम करता है।
+**नुकसान:** पोइनटेर चसिङ की वजह से कचे-उनफ़रिएनदलय है।
 
-### Open Addressing
+### ओपेन हलिङ
 
-सभी entries सीधे array में ही रहती हैं। Collision होने पर, अगली खाली slot **probe** की जाती है।
+सभी एनटरिएस सीधे ऐरे में ही रहती हैं। कोललिसिओन होने पर, अगली खाली सलोट **जाँच** की जाती है।
 
-- **Linear probing:** index+1, index+2, … चेक करो।
-- **Quadratic probing:** index+1², index+2², … चेक करो।
-- **Double hashing:** Step size तय करने के लिए दूसरा hash function use करो।
+- **लिनेअर परोबिङ:** इंडेक्स+1, इंडेक्स+2, … चेक करो।
+- **क्वदरटिक परोबिङ:** इंडेक्स+1², इंडेक्स+2², … चेक करो।
+- **दोउबले हशिङ:** चरण आकार तय करने के लिए दूसरा हैश फ़ुनकशन उपयोग करो।
 
-**फ़ायदे:** बेहतर cache performance, कोई extra pointers नहीं।
-**नुकसान:** Clustering से performance गिर सकती है; deletion मुश्किल होती है (tombstones चाहिए)।
+**फ़ायदे:** बेहतर कैश प्रदर्शन, कोई एक्सटर पॉइंटर नहीं।
+**नुकसान:** कलुसटेरिङ से प्रदर्शन गिर सकती है; देलेशन मुश्किल होती है (टोमबसटोनेस चाहिए)।
 
-<FunFact>Python dictionaries open addressing use करती हैं एक custom probing sequence के साथ। CPython की dict implementation इतनी optimised है कि modern hardware पर 5 करोड़ से ज़्यादा lookups per second handle कर सकती है।</FunFact>
+<FunFact>Python दिकशनरिएस ओपेन हलिङ उपयोग करती हैं एक कुसटोम परोबिङ सेक्वेनके के साथ। कपयथोन की दिकट इमपलेमेनटशन इतनी ओपटिमिसेद है कि आधुनिक हरदवरे पर 5 करोड़ से ज़्यादा लूकुपस प्रति सेकंड संभाल कर सकती है।</FunFact>
 
-## Load Factor और Rehashing
+## लोअद फ़कटोर और रेहशिङ
 
-**Load factor** α = entries की संख्या / buckets की संख्या। जैसे-जैसे α बढ़ता है, collisions बढ़ती हैं और performance गिरती है।
+**लोअद फ़कटोर** α = एनटरिएस की संख्या / बुकेटस की संख्या। जैसे-जैसे α बढ़ता है, कोललिसिओनस बढ़ती हैं और प्रदर्शन गिरती है।
 
-| Load Factor | Expected Lookups (chaining) |
+| लोअद फ़कटोर | एक्सपेकटेद लूकुपस (चैनिङ) |
 |------------|----------------------------|
 | 0.5 | ~1.25 |
 | 0.75 | ~1.375 |
 | 1.0 | ~1.5 |
 | 2.0 | ~2.0 |
 
-ज़्यादातर implementations α एक threshold (आमतौर पर 0.75) से ज़्यादा होने पर **rehash** करते हैं: एक बड़ा array allocate करो, हर key का index दोबारा compute करो, और reinsert करो।
+ज़्यादातर इमपलेमेनटशनस α एक थरेशोलद (आमतौर पर 0.75) से ज़्यादा होने पर **रेहश** करते हैं: एक बड़ा ऐरे अललोकटे करो, हर की का इंडेक्स दोबारा कम्प्यूट करो, और रेइनसेरट करो।
 
-Rehashing O(n) है लेकिन बहुत कम होती है, इसलिए insertion की **amortised** cost O(1) ही रहती है।
+रेहशिङ O(n) है लेकिन बहुत कम होती है, इसलिए इन्सर्शन की **अमोरटिसेद** लागत O(1) ही रहती है।
 
-<ThinkAboutIt>Rehashing table size double करता है और हर element को दोबारा insert करता है। अगर आपका AI system एक live request stream handle कर रहा है, तो ये pause एक latency spike पैदा कर सकता है। आप rehashing cost को एक बार में करने की बजाय कई insertions में कैसे बाँट सकते हैं?</ThinkAboutIt>
+<ThinkAboutIt>रेहशिङ टेबल आकार दोउबले करता है और हर एलिमेंट को दोबारा इन्सर्ट करता है। अगर आपका AI सयसटेम एक लाइव रिक्वेस्ट सटरेअम संभाल कर रहा है, तो ये पौसे एक लेटेंसी स्पाइक पैदा कर सकता है। आप रेहशिङ लागत को एक बार में करने की बजाय कई इनसेरशनस में कैसे बाँट सकते हैं?</ThinkAboutIt>
 
-## AI में असली Applications
+## AI में असली अपपलिकशनस
 
-| Use Case | Hash Tables कैसे मदद करते हैं |
+| उपयोग कसे | हश टबलेस कैसे मदद करते हैं |
 |----------|-------------------------------|
-| **Embedding tables** | Token IDs को O(1) में dense vector representations से map करें |
-| **Feature hashing** | High-cardinality categorical features को fixed-size vector में hash करें ("hashing trick") |
-| **Deduplication** | Content fingerprints hash करके duplicate documents या images detect करें |
-| **Caching layers** | Input hash से keyed precomputed model predictions store करें |
-| **Count-min sketch** | Multiple hash functions से streaming data में approximate frequency counts निकालें |
+| **एमबेददिङ टेबल** | टोकेन इदस को O(1) में देनसे वेकटोर रेपरेसेनटशनस से मैप करें |
+| **फ़ीचर हशिङ** | हिघ-करदिनलिटय कटेगोरिकल फ़ीचर को फ़िक्सेद-सिज़े वेकटोर में हैश करें ("हशिङ टरिक") |
+| **देदुपलिकशन** | कंटेंट फ़िङेरपरिनटस हैश करके दुपलिकटे दोकुमेनटस या इमगेस देटेकट करें |
+| **कचिङ परतें** | इनपुट हैश से केयेद परेकोमपुटेद मॉडल भविष्यवाणियाँ सटोरे करें |
+| **कोउनट-मिन सकेटच** | मुलटिपले हैश फ़ुनकशनस से स्ट्रीमिंग डेटा में अपपरोक्सिमटे फ़रेक्वेनकय कोउनटस निकालें |
 
-<Quiz question="Machine learning में 'hashing trick' में आप जानबूझकर collisions क्यों allow करते हैं?" options="Collisions model accuracy बढ़ाते हैं|ये fixed vocabulary की ज़रूरत खत्म कर देता है, memory बचाता है|Hash collisions को avoid करना वैसे भी impossible है|ये hash function को speed up करता है" answer="1" explanation="Feature hashing जानबूझकर unbounded features को fixed-size array में map करता है, कुछ collision noise accept करके constant memory footprint पाता है - कोई vocabulary dictionary नहीं चाहिए।" />
+<Quiz question="मचिने लेअरनिङ में 'हशिङ टरिक' में आप जानबूझकर कोललिसिओनस क्यों अललोव करते हैं?" options="कोललिसिओनस मॉडल अककुरकय बढ़ाते हैं|ये फ़िक्सेद वोकबुलरय की ज़रूरत खत्म कर देता है, मेमोरी बचाता है|हश कोललिसिओनस को अवोइद करना वैसे भी इमपोसिबले है|ये हैश फ़ुनकशन को सपीद up करता है" answer="1" explanation="फ़ीचर हशिङ जानबूझकर उनबोउनदेद फ़ीचर को फ़िक्सेद-सिज़े ऐरे में मैप करता है, कुछ कोललिसिओन नोइसे अककेपट करके कोनसटनट मेमोरी फ़ूटपरिनट पाता है - कोई वोकबुलरय दिकशनरय नहीं चाहिए।" />
 
-## Bloom Filters: Probabilistic Membership
+## बलूम फ़िलटेरस: परोबबिलिसटिक मेमबेरशिप
 
-एक **Bloom filter** ये बताता है कि "क्या ये element set में है?" इसके दो जवाब:
-- **पक्का नहीं** - element निश्चित रूप से नहीं है।
-- **शायद हाँ** - element शायद है (छोटा false-positive rate)।
+एक **बलूम फ़िल्टर** ये बताता है कि "क्या ये एलिमेंट सेट में है?" इसके दो जवाब:
+- **पक्का नहीं** - एलिमेंट निश्चित रूप से नहीं है।
+- **शायद हाँ** - एलिमेंट शायद है (छोटा फ़लसे-पोसिटिवे दर)।
 
-ये _k_ hash functions और एक bit array use करता है। Insert करने पर _k_ bits set होते हैं; lookup पर चेक होता है कि सभी _k_ bits set हैं या नहीं।
+ये _k_ हैश फ़ुनकशनस और एक बिट ऐरे उपयोग करता है। इनसेरट करने पर _k_ बिटस सेट होते हैं; लुकअप पर चेक होता है कि सभी _k_ बिटस सेट हैं या नहीं।
 
 ```
 function bloomInsert(filter, item):
@@ -127,26 +127,26 @@ function bloomContains(filter, item):
     return true   // probably present
 ```
 
-**AI में use:** ये check करना कि कोई URL पहले crawl हो चुका है, spam filtering, और caching layers में redundant database queries से बचना।
+**AI में उपयोग:** ये जाँच करना कि कोई URL पहले करवल हो चुका है, स्पैम फ़िल्टरिंग, और कचिङ परतें में रेदुनदनट डेटाबेस क्वेरिएस से बचना।
 
-<FunFact>Google Chrome एक Bloom filter use करता है जिसमें लाखों known malicious URLs हैं। कोई भी page load करने से पहले, आपका browser filter check करता है - अगर वो "शायद हाँ" कहे, तो Chrome confirm करने के लिए full list fetch करता है।</FunFact>
+<FunFact>Google चरोमे एक बलूम फ़िल्टर उपयोग करता है जिसमें लाखों ज्ञात दुर्भावनापूर्ण उरलस हैं। कोई भी पगे लोड करने से पहले, आपका बरोवसेर फ़िल्टर जाँच करता है - अगर वो "शायद हाँ" कहे, तो चरोमे कोनफ़िरम करने के लिए फ़ुलल लिस्ट फ़ेटच करता है।</FunFact>
 
-## Sets vs Maps: कब क्या Use करें
+## सेटस vs मपस: कब क्या इस्तेमाल करें
 
-| Structure | क्या Store करता है | कब Use करें |
+| सटरुकटुरे | क्या सटोरे करता है | कब इस्तेमाल करें |
 |-----------|-------------------|-------------|
-| **Set** | सिर्फ़ Keys | Membership checks चाहिए - "क्या मैंने ये पहले देखा है?" |
-| **Map** | Key–value pairs | हर key के साथ data associate करना है - "इस key की value क्या है?" |
+| **सेट** | सिर्फ़ केयस | मेमबेरशिप चेकस चाहिए - "क्या मैंने ये पहले देखा है?" |
+| **मैप** | केय-वलुए पैरस | हर की के साथ डेटा असोकिअटे करना है - "इस की की वैल्यू क्या है?" |
 
-दोनों hash tables पर बने हैं और O(1) average operations देते हैं। **Set** चुनिए deduplication, visited tracking, और uniqueness constraints के लिए। **Map** चुनिए lookups, caches, और configuration stores के लिए।
+दोनों हैश टेबल पर बने हैं और O(1) औसत ऑपरेशन देते हैं। **सेट** चुनिए देदुपलिकशन, विज़िटेड टरकिङ, और उनिक्वेनेस कोनसटरैनटस के लिए। **मैप** चुनिए लूकुपस, कचेस, और कॉन्फ़िगरेशन सटोरेस के लिए।
 
-<ThinkAboutIt>एक AI content moderation system को incoming messages को 1 करोड़ banned phrases की blocklist से check करना है। क्या आप hash set use करेंगे, Bloom filter, या दोनों? Memory, speed, और accuracy में क्या trade-offs हैं?</ThinkAboutIt>
+<ThinkAboutIt>एक AI कंटेंट मोदेरशन सयसटेम को इनकोमिङ संदेश को 1 करोड़ बननेद फरसेस की बलोकलिसट से जाँच करना है। क्या आप हैश सेट इस्तेमाल करेंगे, बलूम फ़िल्टर, या दोनों? मेमोरय, सपीद, और अककुरकय में क्या टरदे-ओफ़फ़स हैं?</ThinkAboutIt>
 
 ## मुख्य बातें
 
-1. Hash tables O(1) average-case lookups देते हैं - caching, indexing, और feature engineering की रीढ़।
-2. Collisions को chaining या open addressing से manage किया जाता है; load factor बताता है कब rehash करना है।
-3. Bloom filters थोड़ा false-positive rate accept करके membership queries में बहुत ज़्यादा memory बचाते हैं।
-4. Hashing internals समझने से आप हर AI workload के लिए सही tool - set, map, या probabilistic filter - चुन सकते हैं।
+1. हश टेबल O(1) अवेरगे-कसे लूकुपस देते हैं - कचिङ, इनदेक्सिङ, और फ़ीचर इंजीनियरिंग की रीढ़।
+2. कोललिसिओनस को चैनिङ या ओपेन हलिङ से मनगे किया जाता है; लोड फ़कटोर बताता है कब रेहश करना है।
+3. बलूम फ़िल्टर थोड़ा फ़लसे-पोसिटिवे दर अककेपट करके मेमबेरशिप क्वेरिएस में बहुत ज़्यादा मेमोरी बचाते हैं।
+4. हशिङ इनटेरनलस समझने से आप हर AI वोरकलोअद के लिए सही टूल - सेट, मैप, या परोबबिलिसटिक फ़िल्टर - चुन सकते हैं।
 
-<Quiz question="एक Bloom filter बताता है कि element set में नहीं है। आप क्या conclude कर सकते हैं?" options="Element निश्चित रूप से set में नहीं है|Element अभी भी set में हो सकता है|Filter को rebuild करना होगा|कुछ नहीं - Bloom filters भरोसेमंद नहीं हैं" answer="0" explanation="Bloom filters कभी false negatives नहीं देते। अगर _k_ bit positions में से कोई भी 0 है, तो element कभी insert नहीं किया गया - guaranteed।" />
+<Quiz question="एक बलूम फ़िल्टर बताता है कि एलिमेंट सेट में नहीं है। आप क्या कोनकलुदे कर सकते हैं?" options="एलेमेनट निश्चित रूप से सेट में नहीं है|एलेमेनट अभी भी सेट में हो सकता है|फ़िल्टर को रेबुइलद करना होगा|कुछ नहीं - बलूम फ़िल्टर भरोसेमंद नहीं हैं" answer="0" explanation="बलूम फ़िल्टर कभी false नेगटिवेस नहीं देते। अगर _k_ बिट पोसिशनस में से कोई भी 0 है, तो एलिमेंट कभी इन्सर्ट नहीं किया गया - गुअरनटीद।" />

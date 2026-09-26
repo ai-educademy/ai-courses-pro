@@ -1,6 +1,6 @@
 ---
-title: "Graph Algorithms - AI कैसे Networks को Navigate करता है"
-description: "Maps, social networks और web crawlers को power करने वाले traversal और shortest-path algorithms सीखें।"
+title: "गरफ अलगोरिथमस - AI कैसे नेटवोरकस को नविगटे करता है"
+description: "मपस, सोकिअल नेटवोरकस और वेब करवलेरस को पोवेर करने वाले टरवेरसल और शोरटेसट-पथ अलगोरिथमस सीखें।"
 order: 3
 difficulty: "intermediate"
 duration: 20
@@ -8,22 +8,22 @@ icon: "🗺️"
 published: true
 ---
 
-## Graphs दुनिया के Connections को Model करते हैं
+## गरफस दुनिया के कोननेकशनस को मॉडल करते हैं
 
-दोस्ती, road networks, hyperlinks, neural pathways - जब भी entities आपस में relationships से जुड़ी होती हैं, तो आपके पास एक **graph** होता है। Formally, एक graph G = (V, E) vertices (nodes) और edges (connections) से मिलकर बनता है।
+दोस्ती, रोअद नेटवोरकस, हयपेरलिनकस, न्यूरल पथवयस - जब भी एनटिटिएस आपस में रेलशनशिपस से जुड़ी होती हैं, तो आपके पास एक **ग्राफ़** होता है। फ़ोरमललय, एक ग्राफ़ G = (V, E) वर्टेक्स (नोड) और एदगेस (कनेक्शन) से मिलकर बनता है।
 
-Graphs **directed** (one-way streets) या **undirected** (two-way) हो सकते हैं, और edges पर **weights** (distances, costs, latencies) हो सकते हैं।
+गरफस **दिरेकटेद** (ओने-वय सटरीटस) या **उनदिरेकटेद** (टवो-वय) हो सकते हैं, और एदगेस पर **वेट्स** (दिसटनकेस, कोसटस, लटेनकिएस) हो सकते हैं।
 
-<Illustration src="/images/lessons/graph-algorithms.svg" alt="A directed weighted graph with six nodes and labelled edges, showing a shortest path highlighted" caption="Graphs entities के बीच relationships को capture करते हैं; edge weights traversal की cost को दर्शाते हैं।" />
+<Illustration src="/images/lessons/graph-algorithms.svg" alt="A दिरेकटेद भारित ग्राफ़ के साथ सिक्स नोड and लेबल किए गए एदगेस, शोविङ a सबसे छोटा रास्ता हिघलिघटेद" caption="गरफस एनटिटिएस के बीच रेलशनशिपस को कपटुरे करते हैं; बढ़त वेट्स टरवेरसल की लागत को दर्शाते हैं।" />
 
-## Graphs को Represent कैसे करें
+## गरफस को रेपरेसेनट कैसे करें
 
-दो common representations:
+दो आम रेपरेसेनटशनस:
 
-| Representation | Space | Edge lookup | किसके लिए बेस्ट |
+| रेपरेसेनटशन | सपके | एदगे लुकअप | किसके लिए बेस्ट |
 |---------------|-------|-------------|-----------------|
-| **Adjacency list** | O(V + E) | O(degree) | Sparse graphs (ज़्यादातर real-world networks) |
-| **Adjacency matrix** | O(V²) | O(1) | Dense graphs, quick edge existence checks |
+| **अदजकेनकय लिस्ट** | O(V + E) | O(देगरी) | सPRsे ग्राफ़ (ज़्यादातर रेअल-वोरलद नेटवोरकस) |
+| **अदजकेनकय मैट्रिक्स** | O(V²) | O(1) | देनसे ग्राफ़, क्विक बढ़त एक्सिसटेनके चेकस |
 
 ```
 // Adjacency list example
@@ -35,9 +35,9 @@ graph = {
 }
 ```
 
-## Breadth-First Search (BFS)
+## बरेअदथ-फ़िरसट सर्च (BFS)
 
-BFS **level by level** explore करता है - पहले सारे neighbours को visit करता है, फिर deeper जाता है। यह एक **queue** use करता है।
+BFS **स्तर by स्तर** एक्सपलोरे करता है - पहले सारे नेइघबोउरस को विसिट करता है, फिर दीपेर जाता है। यह एक **क्यू** उपयोग करता है।
 
 ```
 function bfs(graph, start):
@@ -52,19 +52,19 @@ function bfs(graph, start):
                 queue.enqueue(neighbour)
 ```
 
-**Key property:** BFS unweighted graphs में **shortest path** find करता है क्योंकि यह nodes को source से distance के order में process करता है।
+**मुख्य बात परोपेरटय:** BFS उनवेइघटेद ग्राफ़ में **सबसे छोटा रास्ता** फ़ाइंड करता है क्योंकि यह नोड को सोउरके से दिसटनके के order में प्रोसेस करता है।
 
-### BFS के AI Use Cases
+### BFS के AI उपयोग कसेस
 
-- **Social network friend suggestions** - 2–3 connections के अंदर लोगों को find करना।
-- **Web crawlers** - एक seed URL से layer by layer pages को index करना।
-- **Puzzle solvers** - minimum number of moves find करना (जैसे Rubik's cube states)।
+- **सामाजिक नेटवर्क फ़रिएनद सुझाव** - 2-3 कनेक्शन के अंदर लोगों को फ़ाइंड करना।
+- **वेब करवलेरस** - एक सीद URL से परत by परत पेज को इंडेक्स करना।
+- **पुज़ज़ले सोलवेरस** - मिनिमुम नुमबेर of मोवेस फ़ाइंड करना (जैसे रुबिक's कुबे सटटेस)।
 
-<Quiz question="BFS unweighted graph में shortest path की guarantee क्यों देता है?" options="यह हमेशा सबसे हल्का edge pick करता है|यह source से बढ़ती distance के order में nodes explore करता है|यह backtracking के लिए stack use करता है|यह traversal से पहले सारे edges sort करता है" answer="1" explanation="BFS distance d पर सारे nodes को process करता है इससे पहले कि distance d+1 का कोई node process हो, इसलिए जब यह किसी node तक पहली बार पहुँचता है, वो shortest path होता है।" />
+<Quiz question="BFS उनवेइघटेद ग्राफ़ में सबसे छोटा रास्ता की गुअरनटी क्यों देता है?" options="यह हमेशा सबसे हल्का बढ़त पिक करता है|यह सोउरके से बढ़ती दिसटनके के order में नोड एक्सपलोरे करता है|यह बैकट्रैकिंग के लिए स्टैक उपयोग करता है|यह टरवेरसल से पहले सारे एदगेस सॉर्ट करता है" answer="1" explanation="BFS दिसटनके d पर सारे नोड को प्रोसेस करता है इससे पहले कि दिसटनके d+1 का कोई नोड प्रोसेस हो, इसलिए जब यह किसी नोड तक पहली बार पहुँचता है, वो सबसे छोटा रास्ता होता है।" />
 
-## Depth-First Search (DFS)
+## देपथ-फ़िरसट सर्च (DFS)
 
-DFS **जितना deep हो सके** जाता है, फिर backtrack करता है। यह एक **stack** (या recursion) use करता है।
+DFS **जितना गहरी हो सके** जाता है, फिर बकटरक करता है। यह एक **स्टैक** (या रिकर्शन) उपयोग करता है।
 
 ```
 function dfs(graph, node, visited):
@@ -75,20 +75,20 @@ function dfs(graph, node, visited):
             dfs(graph, neighbour, visited)
 ```
 
-### DFS के Applications
+### DFS के अपपलिकशनस
 
-- **Topological sort** - tasks को ऐसे order करना कि हर dependency पहले आए (build systems, course prerequisites)।
-- **Cycle detection** - अगर DFS किसी ऐसे node पर दोबारा पहुँचे जो अभी call stack पर है, तो cycle है।
-- **Maze solving** - alternatives try करने से पहले एक path को पूरा explore करना।
-- **Connected components** - हर unvisited node से DFS run करके अलग-अलग clusters identify करना।
+- **टोपोलोगिकल सॉर्ट** - टसकस को ऐसे order करना कि हर देपेनदेनकय पहले आए (बनाना सिस्टम, कोर्स परेरेक्विसिटेस)।
+- **कयकले पहचान** - अगर DFS किसी ऐसे नोड पर दोबारा पहुँचे जो अभी कॉल स्टैक पर है, तो साइकिल है।
+- **मज़े सोलविङ** - अलटेरनटिवेस टरय करने से पहले एक रास्ता को पूरा एक्सपलोरे करना।
+- **कोननेकटेद कोमपोनेनटस** - हर उनविसिटेद नोड से DFS रुन करके अलग-अलग कलुसटेरस इदेनटिफ़य करना।
 
-<ThinkAboutIt>एक package manager को dependencies को सही order में install करना है। क्या उसे BFS use करना चाहिए या DFS-based topological sort? अगर dependency graph में cycle हो तो क्या होगा?</ThinkAboutIt>
+<ThinkAboutIt>एक पकगे मैनेजर को देपेनदेनकिएस को सही order में इनसटलल करना है। क्या उसे BFS उपयोग करना चाहिए या दफ़स-बसेद टोपोलोगिकल सॉर्ट? अगर देपेनदेनकय ग्राफ़ में साइकिल हो तो क्या होगा?</ThinkAboutIt>
 
-## Dijkstra's Algorithm - Weights के साथ Shortest Path
+## दिजकसटर's अलगोरिथम - वेट्स के साथ शोरटेसट रास्ता
 
-जब edges की अलग-अलग costs हों, तो BFS काफी नहीं है। Dijkstra's algorithm एक source से बाकी सभी nodes तक shortest weighted path find करता है।
+जब एदगेस की अलग-अलग कोसटस हों, तो BFS काफी नहीं है। दिजकसटर's अलगोरिथम एक सोउरके से बाकी सभी नोड तक सबसे छोटा भारित रास्ता फ़ाइंड करता है।
 
-**Core idea:** हमेशा **सबसे सस्ते unvisited node** को min-heap (priority queue) से expand करो।
+**कोरे इदेअ:** हमेशा **सबसे सस्ते उनविसिटेद नोड** को मिन-हेअप (प्राथमिकता क्यू) से एक्सपनद करो।
 
 ```
 function dijkstra(graph, source):
@@ -105,39 +105,39 @@ function dijkstra(graph, source):
     return dist
 ```
 
-**Time complexity:** Binary heap के साथ O((V + E) log V)।
+**समय जटिलता:** बिनरय हीप के साथ O((V + E) लॉग V)।
 
-<FunFact>Google Maps पूरे road network पर plain Dijkstra नहीं चलाता। यह contraction hierarchies और A* search use करता है - लेकिन दोनों Dijkstra की foundational insight पर बने हैं: shortest known distance से greedy expansion।</FunFact>
+<FunFact>Google मपस पूरे रोअद नेटवर्क पर पलैन दिजकसटर नहीं चलाता। यह कोनटरकशन हिएररचिएस और A* सर्च उपयोग करता है - लेकिन दोनों दिजकसटर की फ़ोउनदशनल इनसिघट पर बने हैं: सबसे छोटा ज्ञात दिसटनके से ग्रीडी एक्सपनसिओन।</FunFact>
 
-### Dijkstra के AI Use Cases
+### दिजकसटर के AI उपयोग कसेस
 
-- **Route planning** - navigation apps सबसे तेज़ route find करने के लिए।
-- **Network routing** - internet packets lowest-latency path choose करने के लिए।
-- **Knowledge graphs** - concepts के बीच shortest semantic connection find करने के लिए।
+- **रास्ता योजना** - नविगशन ऐप सबसे तेज़ रूट फ़ाइंड करने के लिए।
+- **नेटवर्क रूटिंग** - इनटेरनेट पकेटस लोवेसट-लटेनकय रास्ता चुनें करने के लिए।
+- **ज्ञान ग्राफ़** - कोनकेपटस के बीच सबसे छोटा सेमनटिक कोननेकशन फ़ाइंड करने के लिए।
 
-<Quiz question="Dijkstra's algorithm को next node efficiently select करने के लिए कौन सा data structure चाहिए?" options="Stack|Queue|Min-heap (priority queue)|Hash table" answer="2" explanation="Min-heap Dijkstra को सबसे छोटी tentative distance वाला unvisited node O(log V) time में extract करने देता है।" />
+<Quiz question="दिजकसटर's अलगोरिथम को नेक्सट नोड एफ़फ़िकिएनटलय चुनें करने के लिए कौन सा डेटा संरचना चाहिए?" options="सटक|क्वेउए|मिन-हेअप (प्राथमिकता क्यू)|हश टेबल" answer="2" explanation="मिन-हेअप दिजकसटर को सबसे छोटी टेनटटिवे दिसटनके वाला उनविसिटेद नोड O(लॉग V) समय में एक्सटरकट करने देता है।" />
 
-## Cycle Detection और Connected Components
+## कयकले देटेकशन और जुड़े हुए घटक
 
-### Cycle Detection
+### कयकले देटेकशन
 
-एक **directed graph** में, nodes को तीन states में track करें: unvisited, in-progress (current DFS path पर), और completed। अगर in-progress node दोबारा मिले, तो cycle है।
+एक **दिरेकटेद ग्राफ़** में, नोड को तीन सटटेस में रिकॉर्ड करें: उनविसिटेद, इन-परोगरेस (वर्तमान DFS रास्ता पर), और कोमपलेटेद। अगर इन-परोगरेस नोड दोबारा मिले, तो साइकिल है।
 
-एक **undirected graph** में, अगर DFS किसी ऐसे visited node तक पहुँचे जो immediate parent नहीं है, तो cycle है।
+एक **उनदिरेकटेद ग्राफ़** में, अगर DFS किसी ऐसे विज़िटेड नोड तक पहुँचे जो इममेदिअटे परेनट नहीं है, तो साइकिल है।
 
-### Connected Components
+### जुड़े हुए घटक
 
-हर unvisited node से BFS या DFS run करो। हर run एक connected component discover करता है। Social networks में, components isolated communities को reveal करते हैं।
+हर उनविसिटेद नोड से BFS या DFS रुन करो। हर रुन एक कोननेकटेद कोमपोनेनट खोजना करता है। सामाजिक नेटवोरकस में, कोमपोनेनटस इसोलटेद कोममुनिटिएस को उजागर करते हैं।
 
-<ThinkAboutIt>एक AI fraud detection system transactions को graph के रूप में model करता है जहाँ accounts nodes हैं और transfers edges हैं। Connected components money-laundering rings identify करने में कैसे मदद कर सकते हैं?</ThinkAboutIt>
+<ThinkAboutIt>एक AI धोखाधड़ी पहचान सयसटेम टरनसकशनस को ग्राफ़ के रूप में मॉडल करता है जहाँ अकाउंट नोड हैं और टरनसफ़ेरस एदगेस हैं। कोननेकटेद कोमपोनेनटस मोनेय-लौनदेरिङ रिङस इदेनटिफ़य करने में कैसे मदद कर सकते हैं?</ThinkAboutIt>
 
 ## मुख्य बातें
 
-1. **BFS** level by level explore करता है - unweighted graphs में shortest paths और neighbour-based discovery के लिए ideal।
-2. **DFS** deep dive करता है - topological sorting, cycle detection, और component analysis की backbone।
-3. **Dijkstra** BFS को priority queue से weighted graphs तक extend करता है - modern route planning की foundation।
-4. Graph algorithms maps, social networks, package managers, और knowledge graphs के पीछे का engine हैं।
+1. **BFS** स्तर by स्तर एक्सपलोरे करता है - उनवेइघटेद ग्राफ़ में सबसे छोटा रास्ते और नेइघबोउर-बसेद दिसकोवेरय के लिए इदेअल।
+2. **DFS** गहरी दिवे करता है - टोपोलोगिकल सॉर्टिंग, साइकिल पहचान, और कोमपोनेनट विश्लेषण की बकबोने।
+3. **दिजकसटर** BFS को प्राथमिकता क्यू से भारित ग्राफ़ तक एक्सटेनद करता है - आधुनिक रूट योजना की फ़ोउनदशन।
+4. गरफ अलगोरिथमस मपस, सोकिअल नेटवोरकस, पकगे मैनेजर, और ज्ञान ग्राफ़ के पीछे का एङिने हैं।
 
-<FunFact>World Wide Web में 50 billion से ज़्यादा indexed pages हैं। Search engine crawlers pages discover और re-index करने के लिए BFS की variations use करते हैं, page importance (PageRank) के हिसाब से prioritise करते हुए।</FunFact>
+<FunFact>वोरलद विदे वेब में 50 बिललिओन से ज़्यादा इनदेक्सेद पेज हैं। सर्च एङिने करवलेरस पेज खोजना और रे-इनदेक्स करने के लिए BFS की वरिअशनस उपयोग करते हैं, पगे इमपोरटनके (पगेरनक) के हिसाब से परिओरिटिसे करते हुए।</FunFact>
 
-<Quiz question="एक directed task-dependency graph में circular dependency detect करने के लिए कौन सा algorithm use करेंगे?" options="Dijkstra's algorithm|BFS shortest path|DFS with in-progress tracking|Binary search" answer="2" explanation="DFS three-state tracking (unvisited, in-progress, completed) से back edges detect करता है - अगर in-progress node दोबारा मिले तो cycle है।" />
+<Quiz question="एक दिरेकटेद टसक-देपेनदेनकय ग्राफ़ में किरकुलर देपेनदेनकय देटेकट करने के लिए कौन सा अलगोरिथम इस्तेमाल करेंगे?" options="दिजकसटर's अलगोरिथम|BFS सबसे छोटा रास्ता|DFS के साथ इन-परोगरेस टरकिङ|बिनरय सर्च" answer="2" explanation="DFS थरी-सटटे टरकिङ (उनविसिटेद, इन-परोगरेस, कोमपलेटेद) से बक एदगेस देटेकट करता है - अगर इन-परोगरेस नोड दोबारा मिले तो साइकिल है।" />

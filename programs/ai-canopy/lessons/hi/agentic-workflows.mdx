@@ -1,6 +1,6 @@
 ---
-title: "Agentic Workflows - Multi-Agent AI Systems बनाना"
-description: "जानिए कैसे AI agents tool use, memory, planning strategies और multi-agent architectures का उपयोग करके observe, reason और act करते हैं।"
+title: "अगेनटिक वोरk़लोवस - मुलटि-अगेनट AI सिस्टम बनाना"
+description: "जानिए कैसे AI एजेंट टूल उपयोग, मेमोरी, योजना रणनीतियाँ और मल्टी-एजेंट आर्किटेक्चर का उपयोग करके ओबसेरवे, रेअसोन और अकट करते हैं।"
 order: 9
 difficulty: "advanced"
 duration: 20
@@ -8,131 +8,131 @@ icon: "🤖"
 published: true
 ---
 
-# Agentic Workflows - Multi-Agent AI Systems बनाना
+# अगेनटिक वोरk़लोवस - मुलटि-अगेनट AI सिस्टम बनाना
 
-एक language model सवालों के जवाब देता है। एक **agent** goals पूरे करता है। फ़र्क है loop का: agents अपने environment को observe करते हैं, सोचते हैं कि आगे क्या करना है, tools की मदद से action लेते हैं, और task पूरा होने तक यही cycle दोहराते हैं। इस lesson में हम modern agentic AI systems की architecture, patterns और failure modes को समझेंगे।
+एक भाषा मॉडल सवालों के जवाब देता है। एक **एजेंट** लक्ष्य पूरे करता है। फ़र्क है लूप का: एजेंट अपने एनविरोनमेनट को ओबसेरवे करते हैं, सोचते हैं कि आगे क्या करना है, टूल्स की मदद से कार्रवाई लेते हैं, और काम पूरा होने तक यही साइकिल दोहराते हैं। इस पाठ में हम आधुनिक अगेनटिक AI सिस्टम की आर्किटेक्चर, पैटर्न और फ़ैलुरे मोदेस को समझेंगे।
 
-## AI Agent क्या बनाता है?
+## AI अगेनट क्या बनाता है?
 
-एक AI agent तीन capabilities का continuous loop है:
+एक AI एजेंट तीन कपबिलिटिएस का कोनटिनुओउस लूप है:
 
-1. **Observe** - मौजूदा state को समझना: user instructions, tool outputs, environment data, पिछले actions
-2. **Reason** - अगला कदम तय करना: goal को तोड़ना, steps plan करना, options evaluate करना
-3. **Act** - Action execute करना: tool call करना, code लिखना, API request भेजना, result return करना
+1. **ओबसेरवे** - मौजूदा सटटे को समझना: यूज़र निर्देश, टूल आउटपुट, एनविरोनमेनट डेटा, पिछले कार्रवाइयाँ
+2. **रेअसोन** - अगला कदम तय करना: गोअल को तोड़ना, सटेपस योजना करना, options एवलुअटे करना
+3. **अकट** - कार्रवाई चलना करना: टूल कॉल करना, कोड लिखना, API रिक्वेस्ट भेजना, रेसुलट लौटाएँ करना
 
-Simple prompting से मुख्य अंतर यह है कि agent के पास **कई steps पर autonomy** होती है। Agent सिर्फ respond नहीं करता - वह iterate करता है। वह web search कर सकता है, results पढ़ सकता है, decide कर सकता है कि और information चाहिए, refined query से दोबारा search कर सकता है, findings synthesise कर सकता है, और फिर answer दे सकता है।
+सिमपले प्रॉम्प्टिङ से मुख्य अंतर यह है कि एजेंट के पास **कई सटेपस पर औटोनोमय** होती है। अगेनट सिर्फ प्रतिक्रिया नहीं करता - वह इटेरटे करता है। वह वेब सर्च कर सकता है, नतीजे पढ़ सकता है, देकिदे कर सकता है कि और जानकारी चाहिए, रेफ़िनेद क्वेरी से दोबारा सर्च कर सकता है, फ़िनदिङस सयनtheसिसे कर सकता है, और फिर answer दे सकता है।
 
-<Illustration src="/images/lessons/agentic-workflows.svg" alt="Observe-reason-act loop का circular diagram जो tools, memory और environment से connections दिखाता है" caption="Agentic loop: environment को observe करो, अगले step के बारे में reason करो, tools से act करो, और goal achieve होने तक repeat करो।" />
+<Illustration src="/images/lessons/agentic-workflows.svg" alt="ओबसेरवे-रेअसोन-अकट लूप का किरकुलर दिअगरम जो टूल्स, मेमोरी और एनविरोनमेनट से कनेक्शन दिखाता है" caption="अगेनटिक लूप: एनविरोनमेनट को ओबसेरवे करो, अगले चरण के बारे में रेअसोन करो, टूल्स से अकट करो, और गोअल अचिएवे होने तक रेपेअट करो।" />
 
-## Tool Use और Function Calling
+## टूल उपयोग और फ़ुनकशन कललिङ
 
-Tools के बिना, agent सिर्फ text generate कर सकता है। **Tool use** agents को दुनिया से interact करने की ताकत देता है:
+टूल्स के बिना, एजेंट सिर्फ टेक्स्ट जनरेट कर सकता है। **टूल उपयोग** एजेंट को दुनिया से बातचीत करने की ताकत देता है:
 
-- **Function calling** - LLM structured JSON output करता है जिसमें बताया जाता है कि कौन सा function call करना है और किन arguments के साथ। Runtime function execute करता है और results context में वापस feed करता है।
-- **API integration** - Agents databases query कर सकते हैं, REST endpoints call कर सकते हैं, emails भेज सकते हैं, या files manipulate कर सकते हैं।
-- **Code execution** - कुछ agents sandboxed environment में code लिखकर run करते हैं और output से अगले steps decide करते हैं।
+- **फ़ुनकशन कललिङ** - LLM संरचित JSON आउटपुट करता है जिसमें बताया जाता है कि कौन सा फ़ुनकशन कॉल करना है और किन अरगुमेनटस के साथ। रुनटिमे फ़ुनकशन चलना करता है और नतीजे संदर्भ में वापस फ़ीड करता है।
+- **API इनटेगरशन** - अगेनटस दटबसेस क्वेरी कर सकते हैं, REST एनदपोइनटस कॉल कर सकते हैं, एमैलस भेज सकते हैं, या फ़ाइलस प्रभावित कर सकते हैं।
+- **कोड एक्सेकुशन** - कुछ एजेंट सनदबोक्सेद एनविरोनमेनट में कोड लिखकर रुन करते हैं और आउटपुट से अगले सटेपस देकिदे करते हैं।
 
-Modern frameworks tools को typed function signatures के रूप में expose करते हैं। Model task के अनुसार सही tool चुनना सीख जाता है - maths के लिए calculator, current events के लिए search engine, या data analysis के लिए code interpreter।
+मोदेरन ढाँचे टूल्स को टयपेद फ़ुनकशन सिगनटुरेस के रूप में एक्सपोसे करते हैं। मॉडल काम के अनुसार सही टूल चुनना सीख जाता है - मथस के लिए कलकुलटोर, वर्तमान इवेंट के लिए सर्च एङिने, या डेटा विश्लेषण के लिए कोड इनटेरपरेटेर।
 
-<Quiz question="Function calling का LLM से tool 'imagine' करवाने पर क्या मुख्य फ़ायदा है?" options="Function calling कम compute use करता है|Function calling actual real-world results produce करता है - code या API calls execute करके, न कि plausible लेकिन fabricated answers generate करके|Function calling को language model की ज़रूरत नहीं|Function calling हमेशा सही results देता है" answer="1" explanation="जब LLM search result 'imagine' करता है, तो वह plausible लेकिन गलत information hallucinate कर सकता है। Function calling actually search execute करता है और real data return करता है, जिससे agent की reasoning factual results पर based होती है।" />
+<Quiz question="फ़ुनकशन कललिङ का LLM से टूल 'इमगिने' करवाने पर क्या मुख्य फ़ायदा है?" options="फ़ुनकशन कललिङ कम कम्प्यूट उपयोग करता है|फ़ुनकशन कललिङ अकटुअल रेअल-वोरलद नतीजे बनाने करता है - कोड या API कललस चलना करके, न कि पलौसिबले लेकिन फ़बरिकटेद अनसवेरस जनरेट करके|फ़ुनकशन कललिङ को भाषा मॉडल की ज़रूरत नहीं|फ़ुनकशन कललिङ हमेशा सही नतीजे देता है" answer="1" explanation="जब LLM सर्च रेसुलट 'इमगिने' करता है, तो वह पलौसिबले लेकिन गलत जानकारी हललुकिनटे कर सकता है। फ़ुनकशन कललिङ वास्तव में सर्च चलना करता है और वास्तविक डेटा लौटाएँ करता है, जिससे एजेंट की तर्क फ़कटुअल नतीजे पर आधारित होती है।" />
 
-## Memory: Short-Term और Long-Term
+## मेमोरय: शोरट-टेरम और लोङ-टेरम
 
-Complex tasks के लिए जो single context window से बड़े हों, agents को memory चाहिए:
+कोमपलेक्स टसकस के लिए जो एकल संदर्भ विंडो से बड़े हों, एजेंट को मेमोरी चाहिए:
 
-**Short-term memory** conversation context है - recent observations, actions और results की sliding window। यह model की context length से limited है।
+**शोरट-टेरम मेमोरी** कोनवेरसशन संदर्भ है - हालिया ओबसेरवशनस, कार्रवाइयाँ और नतीजे की स्लाइडिंग विंडो। यह मॉडल की संदर्भ लेङथ से लिमिटेद है।
 
-**Long-term memory** external storage use करती है, आमतौर पर **vector databases**, जो sessions के बीच information persist और retrieve करती है:
-- Important observations को embed करके vector store में रखो
-- हर step पर relevant past experiences के लिए store query करो
-- इससे agents को कई interactions से accumulated knowledge मिलती है
+**लोङ-टेरम मेमोरी** एक्सटेरनल स्टोरेज उपयोग करती है, आमतौर पर **वेकटोर दटबसेस**, जो सेसिओनस के बीच जानकारी पेरसिसट और लाता करती है:
+- इमपोरटनट ओबसेरवशनस को एमबेद करके वेकटोर सटोरे में रखो
+- हर चरण पर प्रासंगिक पिछले एक्सपेरिएनकेस के लिए सटोरे क्वेरी करो
+- इससे एजेंट को कई इंटरैक्शन से अककुमुलटेद ज्ञान मिलती है
 
-Short-term context और long-term retrieval का combination हमारी working memory और episodic memory जैसा है।
+शोरट-टेरम संदर्भ और दीर्घकालिक प्राप्ति का संयोजन हमारी काम कर रहे मेमोरी और एपिसोदिक मेमोरी जैसा है।
 
-## Planning Strategies
+## पलननिङ रणनीतियाँ
 
-Agent **आगे क्या करेगा** - यह उसकी effectiveness तय करता है:
+अगेनट **आगे क्या करेगा** - यह उसकी एफ़फ़ेकटिवेनेस तय करता है:
 
-**Chain-of-Thought (CoT)** - Model action लेने से पहले step by step reason करता है। Simple लेकिन straightforward problems के लिए effective।
+**चैन-ओफ़-थोउघट (कोट)** - मॉडल कार्रवाई लेने से पहले चरण by चरण रेअसोन करता है। सिमपले लेकिन सटरैघटफ़ोरवरद समस्याएँ के लिए प्रभावी।
 
-**ReAct (Reason + Act)** - Explicit reasoning traces और tool actions को structured format में interleave करता है: `Thought → Action → Observation → Thought → ...` इससे agent का decision process transparent और debuggable बनता है।
+**ReAct (रेअसोन + अकट)** - एक्सपलिकिट तर्क टरकेस और टूल कार्रवाइयाँ को संरचित फ़ोरमट में इनटेरलेअवे करता है: `Thought → Action → Observation → Thought → ...` इससे एजेंट का निर्णय प्रोसेस टरनसपरेनट और देबुगगबले बनता है।
 
-**Tree-of-Thought (ToT)** - Agent एक साथ कई reasoning paths explore करता है, हर branch evaluate करता है, और सबसे promising एक चुनता है। जहाँ पहला approach गलत हो सकता है वहाँ useful है।
+**tree-of-thought (टोट)** - अगेनट एक साथ कई तर्क रास्ते एक्सपलोरे करता है, हर बरनच एवलुअटे करता है, और सबसे परोमिसिङ एक चुनता है। जहाँ पहला तरीका गलत हो सकता है वहाँ उपयोगी है।
 
-**Plan-then-Execute** - Agent पहले complete plan बनाता है, फिर हर step execute करता है। इससे high-level strategy और low-level execution अलग रहती है।
+**पलन-theन-एक्सेकुटे** - अगेनट पहले पूरा योजना बनाता है, फिर हर चरण चलना करता है। इससे हिघ-लेवेल रणनीति और लोव-लेवेल एक्सेकुशन अलग रहती है।
 
 <FunFact>
-AutoGPT, पहले autonomous agent experiments में से एक, April 2023 में viral हुआ और कुछ समय के लिए GitHub पर सबसे तेज़ी से बढ़ने वाला repository बन गया। लोकप्रियता के बावजूद, यह अक्सर infinite loops में फँस जाता था - जो impressive demos और reliable production agents के बीच के बड़े gap को दर्शाता था।
+औटोगपट, पहले स्वायत्त एजेंट प्रयोग में से एक, अपरिल 2023 में वायरल हुआ और कुछ समय के लिए GitHub पर सबसे तेज़ी से बढ़ने वाला रेपोसिटोरय बन गया। लोकप्रियता के बावजूद, यह अक्सर इनफ़िनिटे लूपस में फँस जाता था - जो इमपरेसिवे डेमो और रेलिअबले प्रोडक्शन एजेंट के बीच के बड़े गप को दर्शाता था।
 </FunFact>
 
-## Multi-Agent Architectures
+## मुलटि-अगेनट अरचिटेकटुरेस
 
-Complex tasks में अक्सर कई specialised agents मिलकर बेहतर काम करते हैं:
+कोमपलेक्स टसकस में अक्सर कई सपेकिअलिसेद एजेंट मिलकर बेहतर काम करते हैं:
 
-**Supervisor pattern** - एक central "manager" agent task decompose करता है और specialised worker agents (researcher, coder, reviewer) को subtasks delegate करता है। Supervisor outputs synthesise करता है और coordination manage करता है।
+**सुपेरविसोर पैटर्न** - एक केनटरल "मैनेजर" एजेंट काम देकोमपोसे करता है और सपेकिअलिसेद वोरकेर एजेंट (रेसेअरचेर, कोदेर, रेविएवेर) को सुबटसकस देलेगटे करता है। सुपेरविसोर आउटपुट सयनtheसिसे करता है और कूरदिनशन मनगे करता है।
 
-**Peer-to-peer** - Agents बिना central coordinator के directly एक-दूसरे से communicate करते हैं। हर agent की defined role होती है और वह results chain या network में अगले agent को pass करता है।
+**पीर-टो-पीर** - अगेनटस बिना केनटरल कूरदिनटोर के दिरेकटलय एक-दूसरे से कोममुनिकटे करते हैं। हर एजेंट की देफ़िनेद भूमिका होती है और वह नतीजे चैन या नेटवर्क में अगले एजेंट को पस करता है।
 
-**Hierarchical** - कई layers of supervision: top-level planner mid-level coordinators को delegate करता है, जो specialist workers manage करते हैं।
+**हिएररचिकल** - कई परतें of सुपेरविसिओन: टोप-लेवेल पलननेर मिद-लेवेल कूरदिनटोरस को देलेगटे करता है, जो सपेकिअलिसट वोरकेरस मनगे करते हैं।
 
 <ThinkAboutIt>
-Multi-agent systems coordination overhead, communication costs और agents के cross-purposes पर काम करने का risk लाते हैं। किन परिस्थितियों में specialisation के फ़ायदे orchestration की complexity से ज़्यादा होते हैं? कब एक single, ज़्यादा capable agent बेहतर choice है?
+मुलटि-अगेनट सिस्टम कूरदिनशन ओवेरहेअद, संचार कोसटस और एजेंट के करोस-पुरपोसेस पर काम करने का जोखिम लाते हैं। किन परिस्थितियों में विशेषज्ञता के फ़ायदे ओरचेसटरशन की जटिलता से ज़्यादा होते हैं? कब एक एकल, ज़्यादा कपबले एजेंट बेहतर चोइके है?
 </ThinkAboutIt>
 
-## Modern Agent Frameworks
+## मोदेरन अगेनट फ़रमेवोरकस
 
-Ecosystem तेज़ी से mature हुआ है:
+एकोसयसटेम तेज़ी से मटुरे हुआ है:
 
-- **LangGraph** - Agents को stateful graphs के रूप में बनाता है जिनमें explicit control flow, cycles और persistence होती है।
-- **CrewAI** - Role-based multi-agent collaboration पर focus करता है जिसमें defined tasks, tools और delegation patterns हैं।
-- **AutoGen (Microsoft)** - Conversational multi-agent workflows enable करता है जहाँ agents problems solve करने के लिए आपस में chat करते हैं।
-- **OpenAI Agents SDK** - Built-in function calling, agent handoffs और guardrails के साथ first-party framework।
+- **लङगरफ** - अगेनटस को सटटेफ़ुल ग्राफ़ के रूप में बनाता है जिनमें एक्सपलिकिट कोनटरोल फ़लोव, कयकलेस और पेरसिसटेनके होती है।
+- **करेवै** - रोले-बसेद मल्टी-एजेंट कोललबोरशन पर ध्यान करता है जिसमें देफ़िनेद टसकस, टूल्स और देलेगशन पैटर्न हैं।
+- **औटोगेन (Microsoft)** - कोनवेरसशनल मल्टी-एजेंट वोरk़लोवस एनबले करता है जहाँ एजेंट समस्याएँ हल करने के लिए आपस में चट करते हैं।
+- **OpenAI अगेनटस SDK** - बुइलट-इन फ़ुनकशन कललिङ, एजेंट हनदोफ़फ़स और गुअरदरैलस के साथ फ़िरसट-परटय ढाँचा।
 
-## Agentic Coding
+## अगेनटिक कोदिङ
 
-शायद सबसे transformative application: AI agents जो autonomously code लिखते हैं, test करते हैं और debug करते हैं:
+शायद सबसे टरनसफ़ोरमटिवे अपपलिकशन: AI एजेंट जो औटोनोमोउसलय कोड लिखते हैं, टेस्ट करते हैं और देबुग करते हैं:
 
-- **GitHub Copilot** - In-editor agent mode जो changes plan करता है, multiple files edit करता है और terminal commands run करता है।
-- **Cursor** - Agent के around बना IDE जो पूरे codebases को समझता है और multi-file edits करता है।
-- **Devin (Cognition)** - Autonomous software engineering agent जो issue से pull request तक full development tasks handle कर सकता है।
+- **GitHub Copilot** - इन-एदिटोर एजेंट मोदे जो चङेस योजना करता है, कई फ़ाइलस एदिट करता है और टेरमिनल कोममनदस रुन करता है।
+- **कुरसोर** - अगेनट के अरोउनद बना IDE जो पूरे कोडबेस को समझता है और मुलटि-फ़ाइल एदिटस करता है।
+- **देविन (कोगनिशन)** - औटोनोमोउस सॉफ़्टवेयर इंजीनियरिंग एजेंट जो इसुए से खींचें रिक्वेस्ट तक फ़ुलल देवेलोपमेनट टसकस संभाल कर सकता है।
 
-ये tools **autocomplete से autonomy** की तरफ shift दर्शाते हैं - agent सिर्फ अगली line suggest नहीं करता, वह goal समझता है और files, terminals और browsers में उसकी तरफ काम करता है।
+ये टूल्स **औटोकोमपलेटे से औटोनोमय** की तरफ शिफ़ट दर्शाते हैं - एजेंट सिर्फ अगली लिने सुगगेसट नहीं करता, वह गोअल समझता है और फ़ाइलस, टेरमिनलस और बरोवसेरस में उसकी तरफ काम करता है।
 
-## जब Agents Fail होते हैं
+## जब अगेनटस फ़ैल होते हैं
 
-Reliable agents बनाने के लिए failure modes समझना ज़रूरी है:
+रेलिअबले एजेंट बनाने के लिए फ़ैलुरे मोदेस समझना ज़रूरी है:
 
-- **Hallucination loops** - Agent tool result fabricate करता है, उससे reason करता है, और हर iteration में fiction में गहरा उतरता जाता है।
-- **Infinite recursion** - Agent बिना approach बदले failing action को बार-बार retry करता है, tokens और compute बर्बाद करता है।
-- **Goal drift** - कई steps के बाद agent original objective भूल जाता है और tangential subtasks में उलझ जाता है।
-- **Reward hacking** - Agent ऐसे shortcuts ढूँढता है जो success criteria satisfy करते हैं बिना problem actually solve किए।
+- **हललुकिनशन लूपस** - अगेनट टूल रेसुलट फ़बरिकटे करता है, उससे रेअसोन करता है, और हर इटेरशन में फ़िकशन में गहरा उतरता जाता है।
+- **इनफ़िनिटे रिकर्शन** - अगेनट बिना तरीका बदले फ़ेल होती कार्रवाई को बार-बार फिर कोशिश करता है, टोकन और कम्प्यूट बर्बाद करता है।
+- **गोअल दरिफ़ट** - कई सटेपस के बाद एजेंट ओरिगिनल उद्देश्य भूल जाता है और टङेनटिअल सुबटसकस में उलझ जाता है।
+- **रेवरद हकिङ** - अगेनट ऐसे शोरटकुटस ढूँढता है जो सुककेस करिटेरिअ सटिसफ़य करते हैं बिना समस्या वास्तव में हल किए।
 
-<Quiz question="एक agent को codebase में bug ढूँढने का task दिया गया। वह file search करता है, नहीं मिलती, फिर same query से दोबारा search करता है, बार-बार। यह कौन सा failure mode है?" options="Hallucination loop|Goal drift|Infinite recursion - बिना approach बदले failing action retry करना|Reward hacking" answer="2" explanation="यह infinite recursion है: agent एक loop में फँसा है, बिना approach modify किए same failing action retry कर रहा है। एक अच्छे design वाला agent repeated failures detect करके alternative strategy try करेगा।" />
+<Quiz question="एक एजेंट को कोदेबसे में बुग ढूँढने का काम दिया गया। वह फ़ाइल सर्च करता है, नहीं मिलती, फिर समान क्वेरी से दोबारा सर्च करता है, बार-बार। यह कौन सा फ़ैलुरे मोदे है?" options="हललुकिनशन लूप|गोअल दरिफ़ट|इनफ़िनिटे रिकर्शन - बिना तरीका बदले फ़ेल होती कार्रवाई फिर कोशिश करना|रेवरद हकिङ" answer="2" explanation="यह इनफ़िनिटे रिकर्शन है: एजेंट एक लूप में फँसा है, बिना तरीका मोदिफ़य किए समान फ़ेल होती कार्रवाई फिर कोशिश कर रहा है। एक अच्छे डिज़ाइन वाला एजेंट रेपेअटेद फ़ैलुरेस देटेकट करके अलटेरनटिवे रणनीति टरय करेगा।" />
 
-## Production Agent Patterns
+## परोदुकशन अगेनट पटटेरनस
 
-Production में reliably काम करने वाले agents बनाने के लिए defensive engineering चाहिए:
+परोदुकशन में रेलिअबलय काम करने वाले एजेंट बनाने के लिए देफ़ेनसिवे इंजीनियरिंग चाहिए:
 
-- **Guardrails** - Input/output validation, content filtering और boundary checks जो agents को dangerous actions लेने से रोकते हैं।
-- **Human-in-the-loop** - High-stakes actions (emails भेजना, databases modify करना, code deploy करना) के लिए execution से पहले human approval ज़रूरी।
-- **Structured outputs** - Agents को free-form text की जगह machine-parseable responses (JSON schemas) produce करने पर force करना।
-- **Observability** - हर thought, action और tool call log करो। Comprehensive traces के बिना 20-step agent run debug करना लगभग impossible है।
-- **Circuit breakers** - Maximum step counts, token budgets और time limits set करो। अगर agent इन bounds से बाहर जाए, तो रुको और human को escalate करो।
+- **गुअरदरैलस** - इनपुट/ओउटपुट वलिदशन, कंटेंट फ़िल्टरिंग और बोउनदरय चेकस जो एजेंट को दङेरोउस कार्रवाइयाँ लेने से रोकते हैं।
+- **हुमन-इन-the-लूप** - हिघ-सटकेस कार्रवाइयाँ (एमैलस भेजना, दटबसेस मोदिफ़य करना, कोड तैनात करना) के लिए एक्सेकुशन से पहले मानव अपपरोवल ज़रूरी।
+- **सटरुकटुरेद आउटपुट** - अगेनटस को फ़री-फ़ोरम टेक्स्ट की जगह मचिने-PRsेअबले रेसपोनसेस (JSON सचेमस) बनाने करने पर फ़ोर्स करना।
+- **ओबसेरवबिलिटय** - हर थोउघट, कार्रवाई और टूल कॉल लॉग करो। व्यापक टरकेस के बिना 20-सटेप एजेंट रुन देबुग करना लगभग इमपोसिबले है।
+- **सर्किट ब्रेकर** - अधिकतम चरण कोउनटस, टोकन बजट और समय सीमाएँ सेट करो। अगर एजेंट इन बोउनदस से बाहर जाए, तो रुको और मानव को एसकलटे करो।
 
-<Quiz question="Production agents में high-stakes actions के लिए human-in-the-loop approval इतना critical क्यों है?" options="क्योंकि AI agents हमेशा गलत होते हैं|क्योंकि इससे compute costs कम होती है|क्योंकि agents hallucinate कर सकते हैं, intent गलत समझ सकते हैं, या irreversible actions ले सकते हैं - human oversight real-world consequences वाले decisions के लिए safety net है|क्योंकि regulations हर case में इसकी ज़रूरत बताते हैं" answer="2" explanation="Agents goals गलत interpret कर सकते हैं, information hallucinate कर सकते हैं, या ऐसे actions ले सकते हैं जो reverse करना मुश्किल है। High-stakes operations के लिए human approval एक critical safety net है जो real-world impact से पहले errors पकड़ता है।" />
+<Quiz question="परोदुकशन एजेंट में हिघ-सटकेस कार्रवाइयाँ के लिए हुमन-इन-the-लूप अपपरोवल इतना करिटिकल क्यों है?" options="क्योंकि AI एजेंट हमेशा गलत होते हैं|क्योंकि इससे कम्प्यूट कोसटस कम होती है|क्योंकि एजेंट हललुकिनटे कर सकते हैं, इनटेनट गलत समझ सकते हैं, या इररेवेरसिबले कार्रवाइयाँ ले सकते हैं - मानव ओवेरसिघट रेअल-वोरलद कोनसेक्वेनकेस वाले फ़ैसले के लिए सुरक्षा नेट है|क्योंकि रेगुलशनस हर मामला में इसकी ज़रूरत बताते हैं" answer="2" explanation="अगेनटस लक्ष्य गलत इनटेरपरेट कर सकते हैं, जानकारी हललुकिनटे कर सकते हैं, या ऐसे कार्रवाइयाँ ले सकते हैं जो रेवेरसे करना मुश्किल है। हिघ-सटकेस ऑपरेशन के लिए मानव अपपरोवल एक करिटिकल सुरक्षा नेट है जो रेअल-वोरलद इमपकट से पहले एररोरस पकड़ता है।" />
 
 <FunFact>
-Browser agents - AI systems जो websites पर click, type और screen read करके navigate करते हैं - सबसे कठिन agentic applications में से हैं। WebArena जैसे benchmarks दिखाते हैं कि best agents भी realistic web tasks में सिर्फ 15-30% सफल होते हैं, जबकि humans लगभग perfect perform करते हैं।
+बरोवसेर एजेंट - AI सिस्टम जो वेबसिटेस पर कलिक, type और सकरीन रेअद करके नविगटे करते हैं - सबसे कठिन अगेनटिक अपपलिकशनस में से हैं। वेबरेन जैसे बेनचमरकस दिखाते हैं कि श्रेष्ठ एजेंट भी वास्तविक वेब टसकस में सिर्फ 15-30% सफल होते हैं, जबकि हुमनस लगभग पेरफ़ेकट पेरफ़ोरम करते हैं।
 </FunFact>
 
 <ThinkAboutIt>
-जैसे-जैसे agentic coding tools ज़्यादा capable बनते जाएँगे, software engineer की भूमिका code लिखने से बदलकर AI-generated code review करने, direct करने और verify करने की हो जाएगी। इस दुनिया में कौन सी नई skills ज़रूरी बनेंगी - और कौन सी traditional skills कम critical हो जाएँगी?
+जैसे-जैसे अगेनटिक कोदिङ टूल्स ज़्यादा कपबले बनते जाएँगे, सॉफ़्टवेयर इंजीनियर की भूमिका कोड लिखने से बदलकर ऐ-गेनेरटेद कोड समीक्षा करने, दिरेकट करने और वेरिफ़य करने की हो जाएगी। इस दुनिया में कौन सी नई कौशल ज़रूरी बनेंगी - और कौन सी पारंपरिक कौशल कम करिटिकल हो जाएँगी?
 </ThinkAboutIt>
 
 ---
 
 ## �� आगे पढ़ें
 
-- [ReAct: Synergizing Reasoning and Acting in Language Models (Yao et al., 2023)](https://arxiv.org/abs/2210.03629) - ReAct agent pattern पर foundational paper
-- [The Landscape of Emerging AI Agent Architectures (LangChain)](https://blog.langchain.dev/what-is-an-agent/) - Modern agent design patterns का comprehensive overview
-- [Andrew Ng - Agentic Design Patterns](https://www.deeplearning.ai/the-batch/how-agents-can-improve-llm-performance/) - चार key agentic patterns: reflection, tool use, planning, और multi-agent collaboration
+- [ReAct: सयनेरगिज़िङ रेअसोनिङ and अकटिङ in भाषा मॉडल (यओ et al., 2023)](https://arxiv.org/abs/2210.03629) - ReAct एजेंट पैटर्न पर फ़ोउनदशनल पेपर
+- [the परिदृश्य of एमेरगिङ AI अगेनट अरचिटेकटुरेस (LangChain)](https://blog.langchain.dev/what-is-an-agent/) - मोदेरन एजेंट डिज़ाइन पैटर्न का कोमपरेहेनसिवे ओवेरविएव
+- [Andrew Ng - अगेनटिक डिज़ाइन पटटेरनस](https://www.deeplearning.ai/the-batch/how-agents-can-improve-llm-performance/) - चार की अगेनटिक पैटर्न: रेफ़लेकशन, टूल उपयोग, योजना, और मल्टी-एजेंट कोललबोरशन
