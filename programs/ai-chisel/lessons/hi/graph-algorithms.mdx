@@ -8,17 +8,17 @@ icon: "🗺️"
 published: true
 ---
 
-## गरफस दुनिया के कोननेकशनस को मॉडल करते हैं
+## Graphs जुड़ी हुई दुनिया को मॉडल करते हैं
 
-दोस्ती, रोअद नेटवोरकस, हयपेरलिनकस, न्यूरल पथवयस - जब भी एनटिटिएस आपस में रेलशनशिपस से जुड़ी होती हैं, तो आपके पास एक **ग्राफ़** होता है। फ़ोरमललय, एक ग्राफ़ G = (V, E) वर्टेक्स (नोड) और एदगेस (कनेक्शन) से मिलकर बनता है।
+दोस्ती, road networks, hyperlinks, neural pathways - जब भी entities आपसी relationships से जुड़ी होती हैं, तो आपके पास एक **graph** होता है। औपचारिक रूप से, graph G = (V, E) vertices (nodes) और edges (connections) से मिलकर बनता है।
 
-गरफस **दिरेकटेद** (ओने-वय सटरीटस) या **उनदिरेकटेद** (टवो-वय) हो सकते हैं, और एदगेस पर **वेट्स** (दूरी, लागत, लटेनकिएस) हो सकते हैं।
+Graphs **directed** (one-way streets) या **undirected** (two-way) हो सकते हैं, और edges पर **weights** (दूरी, लागत, latencies) हो सकते हैं।
 
-<Illustration src="/images/lessons/graph-algorithms.svg" alt="A दिरेकटेद भारित ग्राफ़ के साथ सिक्स नोड और लेबल किए गए एदगेस, शोविङ a सबसे छोटा रास्ता उच्चलिघटेद" caption="गरफस एनटिटिएस के बीच रेलशनशिपस को कैप्चर करते हैं; एज वेट्स ट्रैवर्सल की लागत को दर्शाते हैं।" />
+<Illustration src="/images/lessons/graph-algorithms.svg" alt="छह nodes और labelled edges वाला directed weighted graph, जिसमें shortest path highlight किया गया है" caption="Graphs entities के बीच relationships capture करते हैं; edge weights traversal की लागत बताते हैं।" />
 
-## गरफस को रेपरेसेनट कैसे करें
+## Graphs को represent कैसे करें
 
-दो आम रेपरेसेनटशनस:
+दो आम representations:
 
 | निरूपण | जगह | एज खोज | सबसे उपयुक्त |
 |---------------|-------|-------------|-----------------|
@@ -64,7 +64,7 @@ function bfs(graph, start):
 
 ## देपथ-फ़िरसट सर्च (DFS)
 
-DFS **जितना गहरी हो सके** जाता है, फिर बकटरक करता है। यह एक **स्टैक** (या रिकर्शन) उपयोग करता है।
+DFS **जितना गहरा हो सके** जाता है, फिर backtrack करता है। यह एक **stack** (या recursion) इस्तेमाल करता है।
 
 ```
 function dfs(graph, node, visited):
@@ -75,7 +75,7 @@ function dfs(graph, node, visited):
             dfs(graph, neighbour, visited)
 ```
 
-### DFS के अपपलिकशनस
+### DFS के ऐप्लिकेशन
 
 - **टोपोलोगिकल सॉर्ट** - कार्यों को ऐसे क्रमबद्ध करना कि हर डिपेंडेंसी पहले आए (बिल्ड सिस्टम, कोर्स पूर्वापेक्षाएँ)।
 - **कयकले पहचान** - अगर DFS किसी ऐसे नोड पर दोबारा पहुँचे जो अभी कॉल स्टैक पर है, तो साइकिल है।
@@ -84,11 +84,11 @@ function dfs(graph, node, visited):
 
 <ThinkAboutIt>एक पैकेज मैनेजर को डिपेंडेंसी को सही क्रम में इंस्टॉल करना है। क्या उसे BFS उपयोग करना चाहिए या DFS-आधारित टोपोलोगिकल सॉर्ट? अगर डिपेंडेंसी ग्राफ़ में साइकिल हो तो क्या होगा?</ThinkAboutIt>
 
-## दिजकसटर's एल्गोरिदम - वेट्स के साथ शोरटेसट रास्ता
+## Dijkstra's Algorithm - weights के साथ shortest path
 
-जब एदगेस की अलग-अलग लागत हों, तो BFS काफी नहीं है। दिजकसटर's एल्गोरिदम एक स्रोत से बाकी सभी नोड तक सबसे छोटा भारित रास्ता फ़ाइंड करता है।
+जब edges की अलग-अलग लागत हों, तो BFS काफी नहीं है। Dijkstra's algorithm एक source से बाकी सभी nodes तक सबसे छोटा weighted path ढूँढता है।
 
-**कोरे विचार:** हमेशा **सबसे सस्ते उनविसिटेद नोड** को मिन-हेअप (प्राथमिकता क्यू) से एक्सपनद करो।
+**मुख्य विचार:** हमेशा **सबसे सस्ते unvisited node** को min-heap (priority queue) से expand करो।
 
 ```
 function dijkstra(graph, source):
@@ -107,15 +107,15 @@ function dijkstra(graph, source):
 
 **समय जटिलता:** बिनरय हीप के साथ O((V + E) लॉग V)।
 
-<FunFact>Google मपस पूरे रोअद नेटवर्क पर पलैन दिजकसटर नहीं चलाता। यह कोनटरकशन हिएररचिएस और A* सर्च उपयोग करता है - लेकिन दोनों दिजकसटर की बुनियादी इनसिघट पर बने हैं: सबसे छोटा ज्ञात दूरी से ग्रीडी एक्सपनसिओन।</FunFact>
+<FunFact>Google Maps पूरे road network पर plain Dijkstra नहीं चलाता। यह contraction hierarchies और A* search इस्तेमाल करता है - लेकिन दोनों Dijkstra की बुनियादी insight पर बने हैं: सबसे कम ज्ञात दूरी से greedy expansion।</FunFact>
 
-### दिजकसटर के AI उपयोग कसेस
+### Dijkstra के AI use cases
 
 - **रास्ता योजना** - नविगशन ऐप सबसे तेज़ रूट फ़ाइंड करने के लिए।
 - **नेटवर्क रूटिंग** - इनटेरनेट पकेटस लोवेसट-लटेनकय रास्ता चुनें करने के लिए।
 - **ज्ञान ग्राफ़** - कोनकेपटस के बीच सबसे छोटा सेमनटिक कोननेकशन फ़ाइंड करने के लिए।
 
-<Quiz question="दिजकसटर's एल्गोरिदम को नेक्सट नोड कुशलता से चुनें करने के लिए कौन सा डेटा संरचना चाहिए?" options="सटक|क्यू|मिन-हेअप (प्राथमिकता क्यू)|हश टेबल" answer="2" explanation="मिन-हेअप दिजकसटर को सबसे छोटी टेनटटिवे दूरी वाला उनविसिटेद नोड O(लॉग V) समय में एक्सटरकट करने देता है।" />
+<Quiz question="Dijkstra's algorithm को अगला node कुशलता से चुनने के लिए कौन सी data structure चाहिए?" options="Stack|Queue|Min-heap (priority queue)|Hash table" answer="2" explanation="Min-heap Dijkstra को सबसे छोटी tentative दूरी वाला unvisited node O(log V) समय में extract करने देता है।" />
 
 ## कयकले देटेकशन और जुड़े हुए घटक
 
@@ -129,15 +129,15 @@ function dijkstra(graph, source):
 
 हर उनविसिटेद नोड से BFS या DFS रुन करो। हर रुन एक कोननेकटेद कोमपोनेनट खोजना करता है। सामाजिक नेटवोरकस में, कोमपोनेनटस इसोलटेद कोममुनिटिएस को उजागर करते हैं।
 
-<ThinkAboutIt>एक AI धोखाधड़ी पहचान सिस्टम ट्रांज़ैक्शनस को ग्राफ़ के रूप में मॉडल करता है जहाँ अकाउंट नोड हैं और ट्रांसफ़रस एदगेस हैं। कोननेकटेद कोमपोनेनटस मोनेय-लौनदेरिङ घेरों इदेनटिफ़य करने में कैसे मदद कर सकते हैं?</ThinkAboutIt>
+<ThinkAboutIt>एक AI fraud detection system transactions को graph के रूप में model करता है जहाँ accounts nodes हैं और transfers edges हैं। Connected components money-laundering rings पहचानने में कैसे मदद कर सकते हैं?</ThinkAboutIt>
 
 ## मुख्य बातें
 
 1. **BFS** स्तर by स्तर एक्सप्लोर करता है - बिना वज़न वाले ग्राफ़ में सबसे छोटा रास्ते और नेइघबोउर-बसेद दिसकोवेरय के लिए विचारल।
 2. **DFS** गहरी दिवे करता है - टोपोलोगिकल सॉर्टिंग, साइकिल पहचान, और कोमपोनेनट विश्लेषण की बकबोने।
-3. **दिजकसटर** BFS को प्राथमिकता क्यू से भारित ग्राफ़ तक एक्सटेनद करता है - आधुनिक रूट योजना की फ़ोउनदशन।
+3. **Dijkstra** priority queue की मदद से BFS को weighted graphs तक extend करता है - modern route planning की foundation।
 4. गरफ एल्गोरिदमस मपस, सोकिअल नेटवोरकस, पैकेज मैनेजर, और ज्ञान ग्राफ़ के पीछे का एङिने हैं।
 
 <FunFact>वोरलद विदे वेब में 50 बिललिओन से ज़्यादा इनदेक्सेद पेज हैं। सर्च एङिने करवलेरस पेज खोजना और रे-इनदेक्स करने के लिए BFS की वरिअशनस उपयोग करते हैं, पगे इमपोरटनके (पगेरनक) के हिसाब से परिओरिटिसे करते हुए।</FunFact>
 
-<Quiz question="एक दिरेकटेद टसक-डिपेंडेंसी ग्राफ़ में किरकुलर डिपेंडेंसी देटेकट करने के लिए कौन सा एल्गोरिदम इस्तेमाल करेंगे?" options="दिजकसटर's एल्गोरिदम|BFS सबसे छोटा रास्ता|DFS के साथ इन-परोगरेस टरकिङ|बिनरय सर्च" answer="2" explanation="DFS थरी-सटटे टरकिङ (उनविसिटेद, इन-परोगरेस, कोमपलेटेद) से बक एदगेस देटेकट करता है - अगर इन-परोगरेस नोड दोबारा मिले तो साइकिल है।" />
+<Quiz question="directed task-dependency graph में circular dependency detect करने के लिए कौन सा algorithm इस्तेमाल करेंगे?" options="Dijkstra's algorithm|BFS shortest path|DFS with in-progress tracking|Binary search" answer="2" explanation="DFS three-state tracking (unvisited, in-progress, completed) से back edges detect करता है - अगर in-progress node दोबारा मिले तो cycle है।" />
