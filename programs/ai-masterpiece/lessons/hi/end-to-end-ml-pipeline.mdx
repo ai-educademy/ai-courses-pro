@@ -1,6 +1,6 @@
 ---
-title: "एनद-टो-एनद ML पाइपलाइन - रव डेटा से तैनात मॉडल तक"
-description: "पूरा ML लाइफ़साइकल मास्टर करें: डेटा संग्रह, फ़ीचर इंजीनियरिंग, मॉडल ट्रेनिंग, तैनाती, और निगरानी - सब पुनरुत्पाद्य पाइपलाइन कोड के रूप में।"
+title: "End-to-End ML Pipeline - कच्चे डेटा से डिप्लॉय किए गए मॉडल तक"
+description: "पूरा ML जीवनचक्र सीखें: data collection, feature engineering, model training, deployment और monitoring, सब कुछ reproducible pipeline code के रूप में orchestrate किया गया।"
 order: 6
 difficulty: "advanced"
 duration: 22
@@ -8,28 +8,28 @@ icon: "🔄"
 published: true
 ---
 
-# एनद-टो-एनद ML पाइपलाइन - रव डेटा से तैनात मॉडल तक
+# End-to-End ML Pipeline - कच्चे डेटा से डिप्लॉय किए गए मॉडल तक
 
-ज़्यादातर ट्यूटोरियल `model.fit()` पर रुक जाते हैं। प्रोडक्शन में, ये बमुश्किल 20% काम है। ये पाठ **पूरे ML लाइफ़साइकल** को कोवेर करता है - वही पाइपलाइन जो Spotify के अनुशंसा इंजन, Stripe के धोखाधड़ी पहचान, और Google की सर्च रैंकिंग को पोवेर करता है।
+अधिकतर ट्यूटोरियल `model.fit()` पर रुक जाते हैं। प्रोडक्शन में यह काम का मुश्किल से 20% है। यह पाठ आपको **पूरे ML जीवनचक्र** से ले जाता है, वही pipeline जो Spotify के recommendation engines, Stripe के fraud detection और Google की search ranking को चलाती है।
 
-## 🗺️ ML लाइफ़साइकल एक नज़र में
+## 🗺️ ML जीवनचक्र एक नज़र में
 
-<Illustration src="/images/lessons/end-to-end-ml-pipeline.svg" alt="डेटा इंजेशन से निगरानी तक ML पाइपलाइन चरणों का आरेख" caption="प्रोडक्शन ML पाइपलाइन के आठ चरणों - हर एक संभावित फ़ैलुरे बिंदु है।" />
+<Illustration src="/images/lessons/end-to-end-ml-pipeline.svg" alt="डेटा ingestion से monitoring तक ML pipeline चरणों का आरेख" caption="Production ML pipeline के आठ चरण, हर चरण संभावित failure point है।" />
 
-हर प्रोडक्शन ML सिस्टम इन चरणों से गुज़रता है:
+हर production ML system इन चरणों से गुजरता है:
 
-1. **डेटा संग्रह** - APIs, डेटाबेस, घटना स्टारेअमस, वेब स्क्रैपिंग
-2. **डेटा सफ़ाई** - नल वैल्यू संभालना, डीडुप्लिकेशन, टाइप कोअर्शन
-3. **फ़ीचर इंजीनियरिंग** - रव सिग्नल को मोदेल-रेअदय फ़ीचर में बदलना
-4. **मॉडल चयन** - अपनी समस्या से मेल करने वाले आर्किटेक्चर चुनना
-5. **ट्रेनिंग** - GPU/CPU ऑर्केस्ट्रेशन, हाइपरपैरामीटर ट्यूनिंग
-6. **मूल्यांकन** - ऑफ़लाइन मेट्रिक्स, A/B परीक्षण, निष्पक्षता ऑडिट
-7. **डिप्लॉयमेंट** - सर्विंग इन्फ़्रास्ट्रक्चर, लेटेंसी बजट
-8. **मोनिटोरिङ** - दरिफ़ट पहचान, अलेरटिङ, रेटरैनिङ ट्रिगर
+1. **Data Collection** - APIs, databases, event streams, web scraping
+2. **Data Cleaning** - nulls संभालना, deduplication, type coercion
+3. **Feature Engineering** - कच्चे signals को model-ready features में बदलना
+4. **Model Selection** - समस्या से मेल खाने वाली architectures चुनना
+5. **Training** - GPU/CPU orchestration, hyperparameter tuning
+6. **Evaluation** - offline metrics, A/B testing, fairness audits
+7. **Deployment** - serving infrastructure, latency budgets
+8. **Monitoring** - drift detection, alerting, retraining trigger
 
-## 📦 डेटा संग्रह और वेरसिओनिङ
+## 📦 Data Collection और Versioning
 
-कच्चे डेटा आपकी आधार है। इसे स्रोत कोड की तरह मानें - **सब कुछ वर्शन करें**।
+कच्चा डेटा आपकी नींव है। उसे source code की तरह मानें: **हर चीज़ version करें**।
 
 ```bash
 # Initialise DVC in your repo
@@ -43,13 +43,13 @@ git commit -m "Track raw transaction dataset v1"
 dvc push
 ```
 
-**DVC** (डेटा वेरसिओन कोनटरोल) आपको किसी भी हिसटोरिकल दटसेट को `git checkout` करने देता है। गिट टगस के साथ मिलाकर, आप किसी भी बिंदु in समय से कोई भी एक्सपेरिमेनट रेबनाने कर सकते हैं।
+**DVC** (Data Version Control) आपको किसी भी ऐतिहासिक dataset पर `git checkout` करने देता है। Git tags के साथ मिलकर आप किसी भी समय बिंदु से कोई भी experiment दोबारा बना सकते हैं।
 
-<FunFact>Netflix अपनी डेटा पाइपलाइन के ज़रिए रोज़ाना 1.5 टरिललिओन से ज़्यादा इवेंट प्रोसेस करता है - हर सेकंड लगभग 17 मिलियन इवेंट जो उनके अनुशंसा मॉडल को फ़ीड करते हैं।</FunFact>
+<FunFact>Netflix अपनी data pipelines के माध्यम से प्रतिदिन 1.5 trillion से अधिक events process करता है, यानी लगभग 17 million events हर सेकंड उसके recommendation models तक पहुँचते हैं।</FunFact>
 
-## 🛠️ फ़ीचर इंजीनियरिंग - जहाँ प्रतियोगिताएँ जीती जाती हैं
+## 🛠️ Feature Engineering - जहां प्रतियोगिताएं जीती जाती हैं
 
-फ़ीचर एल्गोरिदम से ज़्यादा मटटेर करते हैं। शानदार फ़ीचर वाला गरदिएनट-बूसटेद ट्री ख़राब फ़ीचर वाले गहरी न्यूरल नेटवर्क को हरा देता है।
+Features, algorithms से ज़्यादा मायने रखते हैं। शानदार features वाला gradient-boosted tree, कमजोर features वाले deep neural network को हरा देता है।
 
 ```python
 import pandas as pd
@@ -69,11 +69,11 @@ df = df.merge(user_stats, on="user_id")
 df["amount_vs_avg"] = df["amount"] / df["user_avg_amount"]
 ```
 
-<Quiz question="टैबुलर ML समस्याएँ में कौन सी फ़ीचर इंजीनियरिंग तकनीक आमतौर पर सबसे ज़्यादा पूर्वानुमानात्मक शक्ति देती है?" options="श्रेणीगत चर को one-hot एन्कोडिंग करना|मौजूदा कॉलम के बीच इंटरैक्शन और अनुपात फ़ीचर बनाना|सभी फ़ीचर को शून्य माध्य पर नॉर्मलाइज़ करना|PCA आयाम कमी लागू करें करना" answer="1" explanation="इंटरैक्शन और अनुपात फ़ीचर चर के बीच ऐसे संबंध कैप्चर करते हैं जो लीनियर मॉडल ख़ुद नहीं सीख सकते। शीर्ष Kaggle समाधान इन्हें लगातार सबसे ज़्यादा असरदार रूपांतरणों बताते हैं।" />
+<Quiz question="Tabular ML समस्याओं में कौन-सी feature engineering तकनीक सामान्यतः सबसे अधिक predictive power देती है?" options="Categorical variables की one-hot encoding|मौजूदा columns के बीच interaction और ratio features बनाना|सभी features को zero mean पर normalise करना|PCA dimensionality reduction लागू करना" answer="1" explanation="Interaction और ratio features variables के बीच वे संबंध पकड़ते हैं जिन्हें linear models अपने आप नहीं सीख सकते। शीर्ष Kaggle solutions इन्हें लगातार highest-impact transformations बताते हैं।" />
 
-## 🧪 MLflow के साथ एक्सपेरिमेनट टरकिङ
+## 🧪 MLflow के साथ Experiment Tracking
 
-कभी रिकॉर्ड मत खोइए कि आपने क्या टरय किया। MLflow पैरामीटर, मेट्रिक्स, और आर्टिफ़ैक्ट अपने-आप लॉग करता है।
+जो आपने आज़माया उसे कभी खोने न दें। MLflow parameters, metrics और artefacts को अपने आप log करता है।
 
 ```python
 import mlflow
@@ -94,26 +94,26 @@ with mlflow.start_run(run_name="gbm-baseline"):
     mlflow.sklearn.log_model(model, "model")
 ```
 
-MLflow UI में रन कोमपरे करें, फिर श्रेष्ठ मॉडल को **मॉडल रजिस्ट्री** में बढ़ावा करें स्टेजिंग → प्रोडक्शन लाइफ़साइकल टगस के साथ।
+MLflow UI में runs की तुलना करें, फिर सबसे अच्छे model को staging → production lifecycle tags के साथ **Model Registry** में promote करें।
 
-## 🚀 पाइपलाइन as कोड - ऑर्केस्ट्रेशन
+## 🚀 Pipeline as Code - Orchestration
 
-मनुअल चरण टूटते हैं। अपनी पाइपलाइन को ऑर्केस्ट्रेशन ढाँचे से कोड में एनकोदे करें:
+Manual steps टूटते हैं। Orchestration frameworks का उपयोग करके अपनी pipeline को code में encode करें:
 
-| टूल | किसके लिए बेस्ट | मुख्य ताक़त |
-|------|-----------------|------------|
-| **कुबेफ़लोव पिपेलिनेस** | कुबेरनेटेस-नटिवे ML | मौजूदा K8s क्लस्टर पर स्केल होता है |
-| **अपचे ऐरफ़लोव** | जटिल DAG सचेदुलिङ | मटुरे इकोसिस्टम, विदे अपनाना |
-| **परेफ़ेकट** | आधुनिक Python वर्कफ़्लो | पयथोनिक API, एक्सकेललेनट एररोर हैंडलिंग |
-| **ZenML** | MLOps अमूर्तन | Stack-अगनोसटिक, कोई भी टूल पलुग करें |
+| Tool | Best For | Key Strength |
+|------|----------|-------------|
+| **Kubeflow Pipelines** | Kubernetes-native ML | मौजूदा K8s clusters पर स्केल करता है |
+| **Apache Airflow** | Complex DAG scheduling | परिपक्व ecosystem, व्यापक अपनापन |
+| **Prefect** | Modern Python workflows | Pythonic API, उत्कृष्ट error handling |
+| **ZenML** | MLOps abstraction | Stack-agnostic, कोई भी tool plug करें |
 
-<ThinkAboutIt>आपकी पाइपलाइन रात में दोबारा ट्रेन होती है लेकिन डेटा घंटेवार बदलता है। दोबारा ट्रेनिङ फ़रेक्वेनकय देकिदे करते वक़्त आप कौन से टरदे-ऑफ़ वेइघ करेंगे - लागत, सटलेनेस, इन्फ़्रास्ट्रक्चर जटिलता?</ThinkAboutIt>
+<ThinkAboutIt>आपके पास ऐसी pipeline है जो हर रात retrain करती है, लेकिन आपका डेटा हर घंटे बदलता है। Retraining frequency तय करते समय आप किन trade-offs को तौलेंगे: cost, staleness, infrastructure complexity?</ThinkAboutIt>
 
-## 🌐 मॉडल सेरविङ और डिप्लॉयमेंट
+## 🌐 Model Serving और Deployment
 
-आपके मॉडल को एक API चाहिए। दो प्रमुख पैटर्न:
+आपके model को API चाहिए। दो प्रमुख patterns हैं:
 
-**REST API** - सरल, HTTP-बसेद, मध्यम थ्रूपुट के लिए बढ़िया:
+**REST API** - सरल, HTTP-आधारित, moderate throughput के लिए अच्छा:
 ```python
 # FastAPI model server
 from fastapi import FastAPI
@@ -128,40 +128,40 @@ async def predict(features: dict):
     return {"prediction": int(prediction[0])}
 ```
 
-**gRPC** - बाइनरी प्रोटोकॉल, REST से 2-10× तेज़, आंतरिक माइक्रोसर्विसेज़ और उच्च-थ्रूपुट स्थितियाँ के लिए उपयुक्त।
+**gRPC** - binary protocol, REST से 2-10× तेज़, internal microservices और high-throughput scenarios के लिए आदर्श।
 
-### कैनरी डिप्लॉयमेंटस
+### Canary Deployments
 
-कभी भी 100% ट्रैफ़िक नए मॉडल पर मत भेजें। **कैनरी रिलीज़** इस्तेमाल करें: 5% → 25% → 50% → 100% रूट करें, हर चरण पर एरर दरें मॉनिटर करें। मेट्रिक्स गिरावट हों तो तुरंत रोलबैक करें।
+कभी भी 100% traffic सीधे नए model को न भेजें। **Canary releases** इस्तेमाल करें: 5% → 25% → 50% → 100% route करें और हर चरण पर error rates मॉनिटर करें। Metrics खराब हों, तो तुरंत रोल बैक करें।
 
-<Quiz question="ML मॉडल के लिए कैनरी डिप्लॉयमेंटस का PRIMARY फ़ायदा क्या है?" options="ये मॉडल ट्रेनिंग समय कम करते हैं|ये मेट्रिक गिरावट पर औटोमटिक रोलबैक के साथ गरदुअल रोलआउट अनुमति करते हैं|ये A/B परीक्षण से मॉडल सटीकता बेहतर करते हैं|ये मॉडल वेरसिओनिङ की ज़रूरत ख़त्म कर देते हैं" answer="1" explanation="कैनरी डिप्लॉयमेंटस ब्लास्ट रदिउस लिमिट करते हैं। अगर नया मॉडल ख़राब प्रदर्शन करे, तो सिर्फ़ एक छोटा प्रतिशत यूज़र अफ़फ़ेकटेद होते हैं, और विदेर दमगे से पहले रोलबैक कर सकते हैं।" />
+<Quiz question="ML models के लिए canary deployments का PRIMARY लाभ क्या है?" options="वे model training time घटाते हैं|वे metric degradation पर automatic rollback के साथ gradual rollout की अनुमति देते हैं|वे A/B testing के माध्यम से model accuracy सुधारते हैं|वे model versioning की ज़रूरत खत्म करते हैं" answer="1" explanation="Canary deployments blast radius सीमित करते हैं। अगर नया model खराब प्रदर्शन करता है, तो केवल कम प्रतिशत users प्रभावित होते हैं और आप व्यापक नुकसान से पहले roll back कर सकते हैं।" />
 
-## 📊 मोनिटोरिङ और फ़ीडबैक लूप
+## 📊 Monitoring और Feedback Loop
 
-डिप्लॉयमेंट समापन लिने नहीं है - ये शुरुआती गुन है। मोनिटोर करें:
+Deployment अंतिम रेखा नहीं है, यह शुरुआत की गोली है। इन चीज़ों को मॉनिटर करें:
 
-- **डेटा दरिफ़ट** - इनपुट डिस्ट्रिब्यूशनस ट्रेनिंग डेटा से शिफ़ट हो रही हैं
-- **कोनकेपट दरिफ़ट** - फ़ीचर और लक्षित के बीच संबंध बदल रहा है
-- **प्रदर्शन गिरावट** - सटीकता/latency मेट्रिक्स गिर रहे हैं
+- **Data drift** - input distributions का training data से बदलना
+- **Concept drift** - features और target के बीच संबंध का बदलना
+- **Performance degradation** - accuracy/latency metrics का गिरना
 
-**स्पष्ट रूप से AI**, **व्हाइल लूप**, और **अरिज़े** जैसे टूल्स दरिफ़ट डैशबोर्ड प्रदान करते हैं। जब दरिफ़ट थ्रेशहोल्ड से ज़्यादा हो, फ़रेश प्रोडक्शन डेटा से औटोमटिक दोबारा ट्रेनिङ ट्रिगर करें - फ़ीडबैक लूप बंद करें।
+**Evidently AI**, **WhyLabs** और **Arize** जैसे tools drift dashboards देते हैं। जब drift thresholds से ऊपर जाए, तो ताज़ा production data के साथ automatic retraining trigger करें, और feedback loop बंद करें।
 
-<Quiz question="एक धोखाधड़ी पहचान मॉडल की परेकिसिओन तीन महीने में 95% से 78% गिर जाती है, लेकिन इनपुट फ़ीचर डिस्ट्रिब्यूशनस नहीं बदलीं। ये किस प्रकार का दरिफ़ट है?" options="डेटा दरिफ़ट|कोनकेपट दरिफ़ट|मॉडल दरिफ़ट|फ़ीचर दरिफ़ट" answer="1" explanation="जब इनपुट डिस्ट्रिब्यूशनस Stable रहें लेकिन प्रदर्शन गिरावट हो, तो फ़ीचर और लक्षित के बीच उनदेरलयिङ संबंध बदल गया है - ये कोनकेपट दरिफ़ट है। धोखेबाज़ ने अपने रणनीतियाँ विकसित किए, लेकिन डेटा का शपे वही दिखता है।" />
+<Quiz question="Fraud detection model की precision तीन महीनों में 95% से 78% हो जाती है, लेकिन input feature distributions नहीं बदले हैं। यह किस प्रकार का drift है?" options="Data drift|Concept drift|Model drift|Feature drift" answer="1" explanation="जब input distributions स्थिर रहें लेकिन performance घटे, तो features और target के बीच underlying relationship बदल चुका है। यही concept drift है। Fraudsters ने अपनी tactics बदल लीं, लेकिन data shape वैसी ही दिखती है।" />
 
-<ThinkAboutIt>आपकी निगरानी शुक्रवार शाम को महत्वपूर्ण दरिफ़ट देटेकट करती है। क्या आप औटोमटिक रेटरैन ट्रिगर करेंगे, सोमवार की मनुअल समीक्षा का इंतज़ार करेंगे, या पिछली मॉडल वर्शन पर रोलल बक करेंगे? कौन से कारक आपके निर्णय को प्रभावित करेंगे?</ThinkAboutIt>
+<ThinkAboutIt>आपकी monitoring शुक्रवार शाम को significant drift detect करती है। क्या आप automatic retrain trigger करेंगे, Monday manual review का इंतज़ार करेंगे, या पिछले model version पर रोल बैक करेंगे? कौन-से कारक आपके निर्णय को प्रभावित करेंगे?</ThinkAboutIt>
 
-## 🎯 मुख्य सीख
+## 🎯 मुख्य बातें
 
-- **सब कुछ** वर्शन करें: कोड, डेटा, मॉडल, और पाइपलाइन कॉन्फ़िग
-- फ़ीचर इंजीनियरिंग आर्किटेक्चर चङेस से ज़्यादा ROI देलिवेर करती है
-- पिपेलिनेस को कोड में एनकोदे करें - मनुअल चरण तकनीकी देबट हैं
-- कैनरी रिलीज़ से तैनात करें और लगातार मॉनिटर करें
-- फ़ीडबैक लूप (प्रोडक्शन डेटा → रेटरैनिङ) वह है जो डेमो को प्रोडक्शन सिस्टम से अलग करता है
+- **हर चीज़** version करें: code, data, models और pipeline configs
+- Feature engineering, architecture changes से ज़्यादा ROI देती है
+- Pipelines को code के रूप में encode करें, manual steps technical debt हैं
+- Canary releases के साथ डिप्लॉय करें और लगातार मॉनिटर करें
+- Feedback loop (production data → retraining) ही demos को production systems से अलग करता है
 
 ---
 
-## 📚 और पढ़ें
+## 📚 आगे पढ़ें
 
-- [मदे के साथ ML - MLOps कोर्स](https://madewithml.com/) - पूरे लाइफ़साइकल को कोवेर करने वाला व्यापक, मुफ़्त MLOps कुररिकुलुम
-- [देसिगनिङ मशीन लर्निंग सिस्टम by Chip Huyen](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/) - प्रोडक्शन ML सिस्टम डिज़ाइन पर देफ़िनिटिवे बूक
-- [MLflow दस्तावेज़ीकरण](https://mlflow.org/docs/latest/index.html) - एक्सपेरिमेनट टरकिङ और मॉडल रजिस्ट्री के लिए ओफ़फ़िकिअल गुइदेस
+- [Made With ML - MLOps Course](https://madewithml.com/) - पूरे lifecycle को कवर करने वाला व्यापक, मुफ़्त MLOps curriculum
+- [Designing Machine Learning Systems by Chip Huyen](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/) - Production ML system design पर definitive book
+- [MLflow Documentation](https://mlflow.org/docs/latest/index.html) - Experiment tracking और model registry के लिए official guides
